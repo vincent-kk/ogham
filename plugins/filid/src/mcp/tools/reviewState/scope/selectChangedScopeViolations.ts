@@ -8,8 +8,7 @@ function intersectsFile(
   violation: ReviewScopeViolation,
   file: ReviewScopeFile,
 ): boolean {
-  const isAncestor =
-    violation.path === '.' || file.path.startsWith(`${violation.path}/`);
+  const isAncestor = file.path.startsWith(`${violation.path}/`);
   return (
     violation.path === file.path || isAncestor || violation.path === file.owner
   );

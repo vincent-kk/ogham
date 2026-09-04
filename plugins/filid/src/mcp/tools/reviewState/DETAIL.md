@@ -5,6 +5,9 @@
 - `prepare`, `checkpoint`, `scope`, `seal`, `cleanup`, `assess` 여섯 action만 지원한다.
 - `scope`는 prepared state의 committed changed-file roster를 A/M/D·role·owner·churn과 함께 만들고 `fileHashes` key 집합과 일치하는지 확인한다. state가 없으면 `missing`, source hash가 다르거나 Git name-status 경로 집합이 `state.fileHashes` key 집합과 다르거나 sealed state이면 `stale`로 중단한다.
 - `scope`는 한 snapshot에서 변경 파일·그 조상 디렉터리·owner와 교차하는 structure/verification 위반만 유지하고 `(path, rule, message)`로 중복 제거한 뒤 정렬 순서대로 `FCA-NNN`을 부여한다. 같은 key에서는 `error` severity가 이기며, `info` 행은 후보가 아닌 informational 관측으로 남긴다.
+- project-root(`.`) 위반은 ancestor matching으로는 교차하지 않는다. 변경 파일의 owner가 root fractal(`.`)이면 owner 일치로 범위 안에 남는다.
+- `statuses.verification`과 `statuses.structure` 계산에 쓰는 verification 입력은 verification 파일 경로가 변경 경로와 같거나, 변경 파일과 같은 owner fractal에 속하거나, 해당 owner 아래에 변경 경로가 있을 때만 포함한다. graph certainty는 project-wide 결과를 유지한다.
+- verification 파일만 범위 밖에서 `indeterminate`일 때 `statuses.verification`은 영향받지 않는다. graph certainty와 non-finding diagnostic은 project-wide라 범위 밖 원인으로도 두 status를 `indeterminate`로 만들 수 있다.
 - `scope`는 working tree를 `clean | documents-only | generated-only | source-dirty` 중 하나로 관측할 뿐 판정하지 않고, canonical `evidence.md`에 frontmatter와 Changed Scope·Candidates·Informational·Out-of-scope Observations·Diagnostics 다섯 섹션을 atomic하게 기록한다. Out-of-scope Observations는 `(source, rule, severity)`별 count만 싣고, Diagnostics는 finding 행이 아닌 tool·adapter·snapshot 진단만 싣는다.
 - `assess`는 merge-track이 재개할 지점을 정하는 데 필요한 **관측 사실**만 반환한다: dirty 경로 분류, entry stage, 해석된 base ref, unpushed commit 수. 판정하지 않으며 상태 파일을 읽거나 쓰지 않는다.
 - dirty 경로 분류는 `structure.generatedPaths` config를 근거로 한다. `INTENT.md`/`DETAIL.md`는 document, 선언된 생성 경로에 걸리면 generated, 나머지는 source다. 첫 일치가 이긴다.
@@ -59,6 +62,9 @@
 - prepared state가 없으면 `missing`, 재계산한 source hash가 다르거나 Git name-status 경로 집합이 `state.fileHashes` key 집합과 다르면 `stale`다.
 - roster는 A/M/D·role·owner·churn을 싣고 `fileHashes` key 집합과 같다.
 - 변경 범위와 교차하는 위반만 `(path, rule, message)`로 중복 제거한 `FCA-NNN` 후보가 되며 ID는 정렬 순서다.
+- project-root(`.`) 위반은 ancestor matching으로는 교차하지 않는다. 변경 파일의 owner가 root fractal(`.`)이면 owner 일치로 범위 안에 남는다.
+- `statuses.verification`과 `statuses.structure`의 verification 입력은 같은 경로, 같은 owner fractal, 또는 해당 owner 아래의 변경 경로로 변경 범위와 교차하는 verification 파일만 반영하며 graph certainty는 project-wide다.
+- verification 파일만 범위 밖에서 `indeterminate`일 때 `statuses.verification`은 영향받지 않는다. graph certainty와 non-finding diagnostic은 project-wide라 범위 밖 원인으로도 두 status를 `indeterminate`로 만들 수 있다.
 - working tree가 더러우면 `clean | documents-only | generated-only | source-dirty` 중 하나로 관측만 한다.
 - `evidence.md`는 frontmatter와 Changed Scope·Candidates·Informational·Out-of-scope Observations·Diagnostics 다섯 섹션을 가지며, 범위 밖 행은 규칙별 count로 축약되고 finding diagnostic은 중복 기록되지 않는다.
 

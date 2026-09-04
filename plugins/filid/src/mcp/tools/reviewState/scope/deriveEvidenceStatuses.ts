@@ -1,5 +1,8 @@
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
-import type { ProjectSnapshot } from '../../../../types/fractal.js';
+import type {
+  AnalysisCertainty,
+  ProjectSnapshot,
+} from '../../../../types/fractal.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import { isFindingDiagnostic } from '../../utils/isFindingDiagnostic.js';
 import { resolveFractalScanCertainty } from '../../utils/resolveFractalScanCertainty.js';
@@ -17,6 +20,7 @@ function isConclusive(status: ReviewEvidenceStatuses['structure']): boolean {
  * @param diagnostics Snapshot diagnostics attached to the tool result.
  * @param structureViolationCount Retained changed-scope structure row count.
  * @param verificationViolationCount Retained changed-scope verification row count.
+ * @param scopedVerificationCertainty Verification certainty within changed scope.
  * @returns Structure and verification statuses plus aggregate completeness.
  */
 export function deriveEvidenceStatuses(
@@ -24,14 +28,19 @@ export function deriveEvidenceStatuses(
   diagnostics: readonly ToolDiagnostic[],
   structureViolationCount: number,
   verificationViolationCount: number,
+  scopedVerificationCertainty: AnalysisCertainty,
 ): ReviewEvidenceStatuses {
   const mutableDiagnostics = [...diagnostics];
   const structure = resolveFractalScanStatus(
-    resolveFractalScanCertainty(snapshot, mutableDiagnostics),
+    resolveFractalScanCertainty(
+      snapshot,
+      mutableDiagnostics,
+      scopedVerificationCertainty,
+    ),
     structureViolationCount,
   );
   const verification = resolveVerificationScanStatus(
-    snapshot.verification.certainty,
+    scopedVerificationCertainty,
     verificationViolationCount,
     mutableDiagnostics.filter((diagnostic) => !isFindingDiagnostic(diagnostic)),
   );

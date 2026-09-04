@@ -15,6 +15,7 @@ import {
 import { RULE_SCOPES } from '../../../../constants/ruleScopes.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { loadConfig, validateStructure } from '../../../../core/index.js';
+import { aggregateCertainty } from '../../../../core/verification/index.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
 import { isFindingDiagnostic } from '../../utils/isFindingDiagnostic.js';
 import { selectVerificationEvidence } from '../../utils/selectVerificationEvidence.js';
@@ -27,6 +28,7 @@ import { classifyChangedFile } from '../scope/classifyChangedFile.js';
 import { deriveEvidenceStatuses } from '../scope/deriveEvidenceStatuses.js';
 import { readChangedFileRoster } from '../scope/readChangedFileRoster.js';
 import { renderEvidenceMarkdown } from '../scope/renderEvidenceMarkdown.js';
+import { selectChangedScopeVerificationFiles } from '../scope/selectChangedScopeVerificationFiles.js';
 import { selectChangedScopeViolations } from '../scope/selectChangedScopeViolations.js';
 import { haveSameReviewPaths } from '../scope/utils/haveSameReviewPaths.js';
 import { toProjectRelativePath } from '../scope/utils/toProjectRelativePath.js';
@@ -171,6 +173,13 @@ export async function scopeReviewState(
       },
     ),
   );
+  const scopedVerificationCertainty = aggregateCertainty(
+    selectChangedScopeVerificationFiles(
+      context.snapshot.verification.files,
+      files,
+      input.projectRoot,
+    ),
+  );
   const structureReport = validateStructure(context.snapshot, context.rules, {
     maxDepth: context.maxDepth,
   });
@@ -216,6 +225,7 @@ export async function scopeReviewState(
     context.diagnostics,
     retainedStructureCount,
     retainedVerificationCount,
+    scopedVerificationCertainty,
   );
   const evidenceDiagnostics = context.diagnostics
     .filter((diagnostic) => !isFindingDiagnostic(diagnostic))

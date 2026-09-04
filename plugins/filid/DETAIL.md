@@ -79,6 +79,7 @@
 
 ## History
 
+- 2026-09-04 — `review_state scope`가 project-relative root `.` 위반을 변경 범위 ancestor matching에서 제외하고, verification certainty는 변경 범위와 교차하는 verification 파일에서만 계산하되 graph certainty는 project-wide로 유지하도록 수정했다.
 - 2026-09-04 — `review_state scope`가 committed 변경 범위의 roster·FCA 후보·working-tree 관측과 canonical `evidence.md`를 한 snapshot에서 만들도록 책임을 옮겼다. 리뷰 프롬프트는 그룹별 판단과 독립 검증에만 집중한다.
 - 2026-09-04 — cross-review를 파일별 단일 리뷰 패스와 효율 모델 독립 검증으로 전환했다. 변경 범위의 코드 품질 판정을 소유하되 전역 규칙 엔진은 소유하지 않으며, 단계 간 관점 필드를 Category로 치환했다.
 - 2026-08-31 — repository-level 관리 파일 때문에 FCA owner가 있는 변경까지 PR이 막히지 않도록 config-declared와 existing ownerless 경로를 명시적 non-FCA 문서 범위로 분리했다. 삭제 경로는 자동 제외하지 않아 document drift를 숨기지 않는다.

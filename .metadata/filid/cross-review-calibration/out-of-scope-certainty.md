@@ -106,7 +106,7 @@ These keep the base tree internally consistent, so nothing here is a seeded viol
 
 `calib/run-g` changes exactly one file — `src/slugify/slugify.ts`, the clean update from `clean-change.md`. Changed scope is that file and its owning fractal `src/slugify`. Nothing under `src/tokenize/` is touched.
 
-`run-g` must end `APPROVED`, with every changed checklist entry reviewed, verification complete, and no gap recorded.
+`run-g` must end `APPROVED`, with every changed checklist entry reviewed, verification complete, and no gap recorded. The scoped review state must report `candidateCount: 0`, `outOfScopeCount: 5`, `statuses.structure: ok`, `statuses.verification: ok`, and `evidenceComplete: true`.
 
 ## What This Fixture Regresses
 
@@ -117,15 +117,16 @@ The project-wide `indeterminate` is real, and every source contributing to it si
 | `src/tokenize/` — untouched   | `Out-of-scope observations`; state unaffected |
 | `src/slugify/` — changed      | in scope, judged normally                     |
 
-`structure_validate` over this tree reports exactly four rows, and all four belong under `Out-of-scope observations`:
+`structure_validate` over this tree reports exactly four rows. `verification_scan` reports the same tokenize test-record row once more, so the scoped review state contains five `Out-of-scope observations`:
 
-| Rule                     | Attributed path                       | Sourced from   |
-| ------------------------ | ------------------------------------- | -------------- |
-| `test-record-case-cap`   | `src/tokenize/tests/tokenize.test.ts` | `src/tokenize` |
-| `spec-document-case-cap` | project root                          | `src/tokenize` |
-| `spec-fragmentation`     | project root                          | `src/tokenize` |
-| `spec-contract-link`     | project root                          | `src/tokenize` |
+| Evidence source      | Rule                     | Attributed path                       | Sourced from   |
+| -------------------- | ------------------------ | ------------------------------------- | -------------- |
+| `structure_validate` | `test-record-case-cap`   | `src/tokenize/tests/tokenize.test.ts` | `src/tokenize` |
+| `structure_validate` | `spec-document-case-cap` | project root                          | `src/tokenize` |
+| `structure_validate` | `spec-fragmentation`     | project root                          | `src/tokenize` |
+| `structure_validate` | `spec-contract-link`     | project root                          | `src/tokenize` |
+| `verification_scan`  | `test-record-case-cap`   | `src/tokenize/tests/tokenize.test.ts` | `src/tokenize` |
 
-The last three are the sharp part. They are project-granularity rules, so the adapter attributes them to the **project root** — an ancestor of the changed file — while every fact behind them comes from `src/tokenize/`. Scope is decided by where the certainty was sourced, not by the path the row happens to carry; judging by the attributed path alone would pull the root in and make a clean change unjudgeable. This is the shape that produced the original defect report's third structure gap.
+The duplicate test row remains two observations because it arrives independently from the structure and verification evidence sources. The last three structure rows are the sharp part. They are project-granularity rules, so the adapter attributes them to the **project root** — an ancestor of the changed file — while every fact behind them comes from `src/tokenize/`. Scope is decided by where the certainty was sourced, not by the path the row happens to carry; judging by the attributed path alone would pull the root in and make a clean change unjudgeable. This is the shape that produced the original defect report's third structure gap.
 
-An `INCONCLUSIVE` result on `run-g` means a reviewer promoted a project-wide aggregate into its own `gaps` and set `state: INDETERMINATE` from evidence it was never asked to judge. A `REQUEST_CHANGES` result means the out-of-scope row became a candidate and verification confirmed it. This fixture isolates source-based scope from candidate verification.
+An `INCONCLUSIVE` result on `run-g` means a reviewer promoted a project-wide aggregate into its own `gaps` and set `state: INDETERMINATE` from evidence it was never asked to judge. A `REQUEST_CHANGES` result means an out-of-scope row became a candidate and verification confirmed it. With all five rows excluded from changed scope, both evidence statuses remain `ok`, evidence is complete, and the verdict is `APPROVED`. This fixture isolates source-based scope from candidate verification.

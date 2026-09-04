@@ -39,4 +39,28 @@ describe('selectChangedScopeViolations', () => {
     expect(result.retained).toHaveLength(retained ? 1 : 0);
     expect(result.outOfScope).toHaveLength(retained ? 0 : 1);
   });
+
+  it('matches a project-root violation only through owner equality', () => {
+    const rootViolation = violation('.');
+    const rootOwnedFile: ReviewScopeFile = {
+      path: 'root-value.ts',
+      change: 'M',
+      role: 'source',
+      owner: '.',
+      insertions: 1,
+      deletions: 0,
+    };
+
+    expect(
+      selectChangedScopeViolations([rootViolation], [rootOwnedFile]),
+    ).toEqual({
+      retained: [rootViolation],
+      outOfScope: [],
+    });
+
+    expect(selectChangedScopeViolations([rootViolation], FILES)).toEqual({
+      retained: [],
+      outOfScope: [rootViolation],
+    });
+  });
 });

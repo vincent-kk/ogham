@@ -11,14 +11,15 @@ import { isFindingDiagnostic } from './isFindingDiagnostic.js';
  * Resolve whether a fractal scan has usable evidence for every measured axis.
  * @param snapshot Snapshot whose graph and verification certainty are measured.
  * @param diagnostics Snapshot and config diagnostics attached to the envelope.
+ * @param verificationCertainty Verification certainty for the requested scope.
  * @returns The aggregate certainty after excluding diagnostics that restate findings.
  */
 export function resolveFractalScanCertainty(
   snapshot: ProjectSnapshot,
   diagnostics: ToolDiagnostic[],
+  verificationCertainty: AnalysisCertainty = snapshot.verification.certainty,
 ): AnalysisCertainty {
   const graphCertainty = snapshot.dependencyGraph.certainty;
-  const verificationCertainty = snapshot.verification.certainty;
   if (
     graphCertainty === ANALYSIS_CERTAINTIES.UNSUPPORTED &&
     verificationCertainty === ANALYSIS_CERTAINTIES.UNSUPPORTED
