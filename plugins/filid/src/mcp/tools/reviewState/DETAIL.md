@@ -23,7 +23,7 @@
 - `validate`는 review·verify JSON의 구조와 배정 범위를 검사하는 유일한 지점이다. 문제는 pass로 바꾸지 않으며, review finding의 위치를 committed source에서 확정하고 round를 결정적으로 병합한다.
 - `seal`은 complete review validation과 결합된 verify validation의 hash가 현재 artifact와 모두 일치하는 group만 신뢰한다. reviewer skip, gap, 누락·변조·미완 validation은 `INCONCLUSIVE` 근거로 남긴다. worktree가 이미 documents-only 또는 source-dirty이면 reviewer 실행을 건너뛰는 경로를 지원하기 위해 `OPINIONS_MISSING`을 반환하지 않고, 병합 opinion이 전혀 없어도 같은 fold를 끝까지 실행해 봉인된 `INCONCLUSIVE`를 만든다.
 - verdict는 trusted opinion과 verification의 결정적 fold로만 계산한다. 렌더링이 끝난 뒤 state verdict와 sealed phase를 기록하며 이미 sealed인 state는 다시 렌더링하지 않는다.
-- `checkpoint`는 state와 group별 artifact 존재를 읽기만 한다. `assess`는 dirty 경로, entry stage, base ref와 unpushed commit 수를 관측만 하고 state를 읽거나 쓰지 않는다. `cleanup`은 literal `confirm: true` 뒤 해당 branch directory만 지운다.
+- `checkpoint`는 state와 group별 artifact 존재를 읽기만 한다. `assess`는 dirty 경로, entry stage, base ref와 unpushed commit 수를 관측만 하고 state를 읽거나 쓰지 않는다. 재검증 보고서 frontmatter의 유일한 유효 전체 `head_sha`가 관측한 현재 Git HEAD와 일치하고, 기록된 `verdict`가 `PASS`, `FAIL`, `INCONCLUSIVE` 중 하나일 때만 완료 근거로 사용한다. `cleanup`은 literal `confirm: true` 뒤 해당 branch directory만 지운다.
 
 ## API Contracts
 
@@ -52,12 +52,13 @@
 - seal은 validation hash가 없는 group을 `review rounds incomplete`, `artifact not validated`, `artifact modified after validation`, `verifier decided a superseded opinion` 중 해당 이유와 함께 unresolved evidence로 취급한다. opinion schema를 다시 검사하지 않는다. reviewable unit이 있는데 병합 opinion이 하나도 없으면 `review-opinions-missing`이지만, documents-only 또는 source-dirty worktree는 그 자체가 결정적인 inconclusive 근거이므로 누락 opinion도 unresolved evidence로 fold하고 봉인한다.
 - checklist는 prepare skip reason을 `skipped`, 모든 unit이 reviewed이면 `reviewed`, reviewer skip·missing opinion·pending unit이면 `pending`으로 정규화한다. reviewer skip reason은 unresolved evidence에도 남긴다.
 - fold는 evidence incomplete, documents-only/source-dirty worktree, trusted group artifact 부재, pending checklist, opinion gap, verifier opinion의 `INDETERMINATE` state, severity와 무관한 candidate의 indeterminate decision을 순서대로 `INCONCLUSIVE`로 만든다. 그 뒤 confirmed candidate가 있으면 `REQUEST_CHANGES`, 아니면 `APPROVED`다.
-- `review-report.md` 형식은 이 문서가 소유한다. schema 7 frontmatter 뒤 Scope, Evidence Status, Coverage, Verification Log, Confirmed Findings, Refuted Candidates, Unresolved Evidence, Final Verdict를 순서대로 렌더링하고 confirmed path에 확정 line을 붙인다.
+- `review-report.md` 형식은 스킬이 독립적으로 실행할 수 있도록 `skills/cross-review/report-formats.md`에서 정의한다. 구현은 schema 7 frontmatter 뒤 Scope, Evidence Status, Coverage, Verification Log, Confirmed Findings, Refuted Candidates, Unresolved Evidence, Final Verdict를 순서대로 렌더링하고 confirmed path에 확정 line을 붙인다.
 - `fix-requests.md`는 `REQUEST_CHANGES`일 때만 seal이 렌더링한다. 항목은 `FIX-001`부터이며 canonical 여덟 필드 `Severity`, `Category`, `Path`, `Rule`, `Claim`, `Evidence`, `Consequence`, `Recommended Action`의 세부 블록은 `skills/cross-review/templates.md`의 fix-request 절을 정본으로 참조한다.
-- `pr-comment.md` 형식은 이 문서가 소유한다. `## Code Review Governance — <verdict>` 표, 세 개의 details block과 report pointer를 렌더링한다.
+- `pr-comment.md` 형식은 스킬이 독립적으로 실행할 수 있도록 `skills/cross-review/report-formats.md`에서 정의한다. 구현은 `## Code Review Governance — <verdict>` 표, 세 개의 details block과 report pointer를 렌더링한다.
 - seal summary는 verdict·file coverage·decision count를, data는 report path, nullable fix-request path, PR comment path와 session path를 싣는다. session checklist block도 같은 fold 결과로 통째로 교체한다.
 - checkpoint는 state의 effort·groups와 top-level 및 group별 diff·brief·opinion·verify 존재를 반환한다.
 - `assess` summary는 `entryStage`, `worktreeDisposition`, `baseRef`, `unpushedCommits`, `dirtyPathCount`를 싣고 data의 assessment가 경로 목록을 담는다. 값은 관측 사실이며 중단 지시가 아니다.
+- `assess`의 완료 근거는 report template의 평평한 `key: scalar` frontmatter 안의 단일 `head_sha`와 `verdict`다. 전체 Git SHA-1 또는 SHA-256의 소문자 hex와 `PASS | FAIL | INCONCLUSIVE` 중 하나인 판정을 요구한다. 본문, 누락, 중복·모호한 키, 불완전한 frontmatter나 축약 SHA는 근거가 아니다. HEAD를 관측할 수 없거나 값이 다르거나 유효한 판정이 없으면 justifications → fix requests → PR → pr-create 순서로 재개한다.
 - phase는 `prepared | sealed`이고 lifecycle disposition은 `fresh | resumable | cached | stale | missing | validated | sealed | cleaned`이다.
 - payload 생성 시 diagnostic 생략은 module-scope readonly empty collection을 재사용한다.
 
@@ -112,8 +113,10 @@
 
 ### AC-review-assess — 관측 사실만
 
-- 같은 worktree와 config는 같은 dirty classification과 entry stage를 반환하며 state를 만들거나 고치지 않는다.
-- generated-path 설정이 없으면 non-document dirty path를 source로 보고, entry stage는 canonical artifact 존재 우선순위를 따른다.
+- 같은 worktree·config·현재 HEAD·보고서 근거는 같은 dirty classification과 entry stage를 반환하며 state를 읽거나 만들거나 고치지 않고 Git도 읽기 전용으로 관측한다.
+- generated-path 설정이 없으면 non-document dirty path를 source로 본다. 현재 HEAD와 일치하는 유효 `head_sha`와 인정된 `verdict`가 함께 있을 때만 complete를 만들며, 오래되거나 없거나 불완전한 보고서는 justifications → fix requests → PR → pr-create 우선순위를 유지한다.
+- LF와 CRLF frontmatter를 읽고 본문의 `head_sha`는 무시한다. 중복·모호한 head metadata는 현재 HEAD와 같은 값이 섞여 있어도 완료 근거가 아니다.
+- `verdict` 누락과 `PASS | FAIL | INCONCLUSIVE` 밖의 값은 현재 HEAD와 일치해도 재개한다. 세 가지 유효한 판정은 모두 기존 complete 동작을 유지한다.
 
 ### AC-review-cleanup — Scoped deletion
 
@@ -121,4 +124,4 @@
 
 ## Last Updated
 
-2026-09-05 — 동일 source hash의 effort 변경 재개, review-scoped 설정 오류, 빈 hunk range와 typed rule·opinion 검증 계약을 현재 구현에 맞췄다.
+2026-09-05 — assess의 완료 근거에 현재 HEAD와의 일치 및 인정된 재검증 판정을 요구하고 불완전한 보고서의 재개 우선순위를 명시했다.

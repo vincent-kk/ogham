@@ -144,10 +144,12 @@ A `structure` category item that names a target path is a placement item. Route 
 
 The two skill rows never receive the brief above — its Bounds clause forbids exactly what those skills exist to do. Each takes its own documented input:
 
-| Route                | Receives                                                                                                                                                              |
-| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/filid:restructure` | a placement request — the item's source path, plus any target, consumers, or intent the fix request names                                                             |
-| `/filid:enrich-docs` | the owning fractal path only. It has no parameter for a per-item action and re-derives its edit plan from snapshot evidence — the same call shape `pull-request` uses |
+| Route                | Receives                                                                                                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/filid:restructure` | a placement request — the item's source path, plus any target, consumers, or intent the fix request names                                                                                              |
+| `/filid:enrich-docs` | the owning fractal path with `--include-detail`. It has no parameter for a per-item action and re-derives its INTENT/DETAIL edit plan from snapshot evidence — the same call shape `pull-request` uses |
+
+When this invocation received `--auto`, append `--auto-approve` to both child skills; for interactive invocations, omit `--auto-approve`. Automatic approval remains limited to each child's displayed, validated plan and does not resolve an unknown placement decision or authorize a wider scope.
 
 Turning a free-text Recommended Action into `restructure`'s placement-request shape is a judgment call for the invoking agent; state the mapping you chose in the terminal output.
 

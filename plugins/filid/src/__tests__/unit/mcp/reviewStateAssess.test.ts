@@ -121,7 +121,7 @@ describe('parseGitStatusPaths — NUL-delimited porcelain', () => {
 });
 
 describe('resolveEntryStage — priority order is the contract', () => {
-  it('reports complete when a verdict was recorded', () => {
+  it('reports complete when a verdict was recorded for the current HEAD', () => {
     expect(
       resolveEntryStage({
         ...NO_ENTRY_POINT_EVIDENCE,

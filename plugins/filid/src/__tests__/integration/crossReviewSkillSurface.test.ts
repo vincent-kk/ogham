@@ -17,6 +17,7 @@ const calibrationRoot = join(
 const requiredFiles = [
   'SKILL.md',
   'templates.md',
+  'report-formats.md',
   'reviewers/reviewer.md',
   'reviewers/verifier.md',
   'rules/default.md',
@@ -112,7 +113,7 @@ describe('cross-review v7 skill surface', () => {
     expect(allText).not.toContain('Condition (evaluate in order)');
     expect(templates).not.toContain('Code Review Governance');
     expect(templates).toContain(
-      'rendered by `review_state` seal; format is owned by `src/mcp/tools/reviewState/DETAIL.md`',
+      'formats are defined in [report-formats.md](./report-formats.md)',
     );
   });
 

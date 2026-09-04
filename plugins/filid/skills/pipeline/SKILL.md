@@ -63,9 +63,11 @@ One call answers the review directory, the entry point, the base ref and the pus
 
 Honour `--from STAGE` when given. Otherwise `summary.entryStage` **is** the entry — the priority order behind it is `reference.md` §1. Do not re-derive it from file listings.
 
+`complete` requires a revalidation report whose unambiguous full `head_sha` matches the current Git HEAD and whose recorded `verdict` is `PASS`, `FAIL` or `INCONCLUSIVE`. A stale, missing or malformed report follows the remaining resume priorities; file existence alone never closes the cycle.
+
 | `entryStage`                       | Action                                        |
 | ---------------------------------- | --------------------------------------------- |
-| `complete`                         | Report the recorded verdict and END           |
+| `complete`                         | Report this HEAD's recorded verdict and END   |
 | `revalidate`                       | Push first when `summary.unpushedCommits` > 0 |
 | `resolve` · `review` · `pr-create` | Enter that stage                              |
 

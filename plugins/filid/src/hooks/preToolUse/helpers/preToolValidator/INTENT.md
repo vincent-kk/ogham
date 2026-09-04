@@ -7,6 +7,7 @@ Write/Edit가 INTENT.md 또는 DETAIL.md를 수정할 때 현재 문서 계약�
 ## Conventions
 
 - INTENT line limit은 canonical validation constant에서 import한다 (모듈 재선언 금지 — 단일 원천).
+- Write/Edit는 host filesystem의 물리 target으로 문서 여부를 판정하고 마지막 symlink도 따라간다.
 - INTENT.md — Write: `validateIntentMd` (`error` 블록, `warning` continue + 메시지). Edit: `old_string`→`new_string` 교체 시뮬레이션 후 projected > 50줄이면 블록; 시뮬레이션 불가 시 `new_string` 20줄 초과만 경고
 - DETAIL.md — Write: `oldContent` 제공 시 `validateDetailMd` append-only 검사
 - Delete — parent는 host filesystem 기준으로 canonicalize하되 terminal entry를 보존하고, 그 basename이 INTENT.md/DETAIL.md이면 content 투영 없이 즉시 차단

@@ -4,6 +4,7 @@
 
 - 완전한 `apply_patch`의 모든 논리 Write/Edit/Delete operation을 입력 순서대로 기존 per-operation 파이프라인에 보낸다.
 - 각 operation은 방문 전달을 먼저 실행하고 owner INTENT.md 경로와 읽기 지시를 additional context로 싣되 본문은 싣지 않는다. 방문 전달 자체는 permission을 결정하지 않으며 문서 검증과 구조 가드는 이어서 실행한다.
+- 선택적 방문 전달이나 캐시 단계가 실패하면 해당 context만 생략한다. 문서 validator와 구조 가드는 계속 실행하며 그 단계의 오류를 방문 실패로 취급하지 않는다.
 - batch loop는 앞선 deny에도 모든 후속 operation을 실행하며, 하나라도 deny면 전체 물리 호출을 deny한다.
 - Write/Edit/Delete는 방문 통과 후 문서 gate를 거치고 Write/Edit은 이어서 구조 가드를 실행한다.
 - Delete도 owner 방문 상태를 갱신하며 host가 INTENT.md/DETAIL.md와 같은 파일로 해석하는 대상 삭제는 명시적 사유로 deny한다.
@@ -17,7 +18,7 @@
 
 - `handlePreToolUse(input): Promise<HookOutput>` — 한 operation의 방문, 문서 검증, 구조 가드를 staged pipeline으로 실행한다.
 - `handlePreToolUseBatch(result): Promise<HookOutput>` — shared normalizer의 성공 batch는 전부 순서대로 실행하고 실패 variant는 원래 cwd의 FCA opt-in에 따라 결정한다.
-- INTENT.md/DETAIL.md의 기존 내용이 필요한 검증은 현재 host filesystem에서 best-effort로 읽는다.
+- Write/Edit 문서 판정과 DETAIL.md 이전 내용 읽기는 현재 host filesystem의 물리 target을 기준으로 하며, 기존 내용은 best-effort로 읽는다. Delete는 마지막 symlink entry를 보존한다.
 - 방문 context와 validator·structure guard 결과를 함께 병합하며, permission은 후자의 판단만 반영한다.
 - batch 결과의 reason과 non-empty additional context는 operation 순서로 결합하며 permission은 deny-wins다.
 - 일반 파일의 ambiguous/stale Move는 Filid 내부 입력의 `codexPatch.projection: 'approximate'`로만 표시한다. shared provenance는 host-neutral 사실만 소유하고 Filid의 검사 상태를 싣지 않는다.
@@ -29,6 +30,7 @@
 - 모든 Read/Write/Edit/Delete 방문은 동일한 `processVisit(input)` 계약을 사용한다.
 - 최초 mutation도 포인터 context를 주입한 같은 호출에서 문서 검증과 구조 가드까지 진행한다.
 - 방문 전달은 어느 stage도 short-circuit하지 않고 다음 batch operation도 입력 순서대로 실행한다.
+- 방문 캐시 예외가 발생해도 Read는 context 없이 통과하고 mutation의 문서 deny와 구조 경고는 유지된다.
 
 ### AC-pre-tool-batch — ordered deny-wins 집계
 
@@ -43,6 +45,9 @@
 ### AC-pre-tool-document-gate — 일관된 문서 계약
 
 - spike 이름의 branch에서도 50줄 초과 INTENT.md와 append-only DETAIL.md는 동일하게 deny된다.
+- Write/Edit의 실제 대상이 보호 문서이면 case alias와 symlink alias에도 같은 문서 gate를 적용한다. DETAIL.md Write는 그 실제 대상의 이전 내용으로 append-only 여부를 검사한다.
+- dangling symlink를 통한 Write가 새 INTENT.md를 만드는 경우에도 물리 target의 문서 gate를 적용한다. INTENT.md라는 link 이름이 새 일반 파일을 가리키면 그 일반 파일로 판정한다.
+- inexact Move destination의 실제 대상이 보호 문서이면 alias 이름과 무관하게 exact content를 요구한다.
 - host-canonical parent 아래의 INTENT.md 또는 DETAIL.md terminal entry를 Delete하는 operation은 보호 문서 삭제 사유로 deny된다.
 - legacy criteria ledger는 일반 파일처럼 통과하며 hook 전용 deny나 audit을 만들지 않는다.
 
@@ -61,4 +66,4 @@
 
 ## Last Updated
 
-2026-08-28 — 방문 전달의 일회성 mutation deny를 제거하고 포인터 context 주입과 후속 validator·structure guard 실행을 한 호출로 결합했다.
+2026-09-05 — 물리 target 기준 문서 gate와 선택적 방문 캐시 실패의 격리를 명시했다.

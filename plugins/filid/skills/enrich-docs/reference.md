@@ -60,7 +60,7 @@ Classify the result:
 
 ```text
 score >= min-quality    RICH
-0 < score < min-quality SPARSE
+0 <= score < min-quality SPARSE
 document absent         MISSING
 ```
 

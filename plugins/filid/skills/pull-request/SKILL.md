@@ -70,7 +70,7 @@ Skipped entirely when `--skip-enrich` is passed.
    Read `data.results`, or the artifact results when inline `data` is absent, and preserve changed-path order. A `resolved: true` item contributes its `result.summary.ownerFractalPath`, including a target under a config-excluded directory name; keep its diagnostics visible without discarding the resolved owner. For `resolved: false`, classify the path as existing ownerless non-FCA only when every diagnostic code is `context-target-unresolved` and `git cat-file -e HEAD:<path>` succeeds. Read `structure.additionalExcludedDirectories` from `.filid/config.json` to label that ownerless result as config-declared when a project-relative directory segment exactly matches; otherwise label it structural ownerless. A failed result for a path absent from `HEAD` — including a deleted or renamed source — or any other diagnostic stops the run. Collect distinct owners from the resolved items. This is the audit scope — **do not enrich the whole tree.** PR scope and FCA document scope must match.
 
 3. Report every config-declared and structural ownerless non-FCA path with its reason, and carry a count summary into the PR body's Architecture section. These paths stay in Stage 3's PR change analysis; only FCA document sync excludes them. When the owner list is empty, do not invoke enrich-docs and set document sync to `no-change`.
-4. Otherwise invoke `Skill("filid:enrich-docs", "<owner fractal paths>")`. Append `--auto-approve` **exactly when this skill received it** — never by inferring that a pipeline is running. An orchestrator that wants unattended document sync passes the flag; without it, enrich-docs keeps its own approval step and a standalone run stays interactive.
+4. Otherwise invoke `Skill("filid:enrich-docs", "<owner fractal paths> --include-detail")` so the audit covers both INTENT.md and DETAIL.md. Append `--auto-approve` **exactly when this skill received it** — never by inferring that a pipeline is running. An orchestrator that wants unattended document sync passes the flag; without it, enrich-docs keeps its own approval step and a standalone run stays interactive.
 5. On enrich-docs failure, print the BLOCKED message (`reference.md` §1) and exit. `--skip-enrich` bypasses this stage.
 6. If `git status --porcelain` now reports changes, stage **only** `INTENT.md` / `DETAIL.md` paths and commit:
 
@@ -92,6 +92,8 @@ Use `--base` when given. Otherwise resolve in the order documented in `reference
 4. The PR title is English. The body follows the `[filid:lang]` language; technical terms, identifiers, and paths stay in their original form.
 
 ## Stage 4 — PR Publication
+
+Refresh remote state after Stage 1's document commit: run `git rev-parse --verify -q refs/remotes/origin/<BRANCH>` and, when it resolves, `git rev-list --count origin/<BRANCH>..HEAD`. Set `UNPUSHED = true` when the remote branch is missing or the count is positive; otherwise set `UNPUSHED = false`. Use this current value for both `--push` and `--no-push` below.
 
 1. `UNPUSHED = true` and `--push` on (the default): run `git push -u origin <BRANCH>` first — a PR opened from a stale remote head would review commits the branch no longer matches. `UNPUSHED = true` and `--push` off (`--no-push`): skip `gh` entirely, save the body as in step 5, and print the §1 unpushed-branch message. `UNPUSHED = false`: continue.
 2. `gh pr view` decides create versus update.

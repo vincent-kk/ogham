@@ -8,7 +8,7 @@
 - Filid의 cross-review는 `review_state prepare`가 변경 roster·FCA 후보를 선별·청킹·그룹화하고 규칙·diff·brief를 물질화하며, 그룹별 actor가 JSON opinion과 verification을 쓴다. `validate`가 이를 검사하고 `seal`이 검증된 hash만 결정적으로 fold·렌더링한다. 코드는 수정하지 않는다.
 - `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `fractal_inspect` `resolve` 결과의 `data.results[].summary.chainPaths` 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
 - `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 중단한다.
-- `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하며, 원격 branch가 뒤처졌으면 기본적으로 push한 뒤 게시한다. `--no-push`와 publication 실패는 branch별로 저장된 body를 남겨 복구할 수 있어야 한다.
+- `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하며, 문서 commit 이후 원격 branch와 현재 HEAD를 다시 비교해 뒤처졌으면 기본적으로 push한 뒤 게시한다. `--no-push`와 publication 실패는 branch별로 저장된 body를 남겨 복구할 수 있어야 한다.
 - Filid의 resolve는 confirmed fix 전체를 한 decision sheet에 모아 Severity/Category와 독립적인 적용 추천을 표시하고, 명백하거나 영향이 작은 수정은 기본 선택한 채 논쟁적인 결정만 전면에 둔다.
 - spec-document는 파일당 15 cases, test-record는 파일당 32 cases를 허용하고 두 역할 사이의 promotion 관계를 만들지 않는다.
 - core, policy와 MCP DTO는 언어·확장자·진입점 이름·테스트 프레임워크 호출 문법을 알지 않으며 등록된 어댑터가 생태계 사실을 제공한다.
@@ -21,13 +21,13 @@
 - 공개 MCP 도구는 `project_setup`, `fractal_inspect`, `restructure`, `review_state`의 4개다.
 - `fractal_inspect`의 `resolve` action은 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
-- merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3, review report와 PR comment는 `src/mcp/tools/reviewState/DETAIL.md`, fix request의 여덟 필드 블록은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
+- merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3, review report와 PR comment는 `skills/cross-review/report-formats.md`, fix request의 여덟 필드 블록은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 스킬 실행에 필요한 형식은 스킬 폴더 안에 두며 플러그인 내부 INTENT/DETAIL을 색인하지 않는다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
 - cross-review의 resumable·cached 산출물은 `review_schema: 7`과 state schema 2를 선언한다. 이전 marker·state는 현재 결과로 반환하지 않고 fresh prepare로 재생성한다.
 - fix request는 검증 가능한 원 claim을 포함하며, resolve가 만든 accepted FIX ID는 revalidate에서 해당 canonical request의 Severity, Category, Path, Rule, Claim, Evidence, Consequence, Recommended Action과 정확히 결합된다.
 - interactive resolve는 항목별 질문을 반복하지 않는다. 전체 sheet 뒤 한 batch decision round에서 추천안 일괄 적용, 전체 적용, ID별 적용·논의·warning 생략·근거 있는 거부를 받고, 논의가 남으면 미결 항목만 다시 묶는다. `--auto`도 같은 sheet와 원래 추천을 보여 주되 decision만 전부 자동 선택하고 질문하지 않는다.
-- `cross-review`와 `revalidate`는 브랜치에 pull request가 있을 때 판정을 PR 코멘트로 남긴다. PR이 없으면 남기지 않으며, 코멘트 부재는 실패가 아니다. 코멘트 형식은 각각 `src/mcp/tools/reviewState/DETAIL.md`와 `skills/revalidate/reference.md` §4가 정의한다 — 판정표는 접힘 밖, 본문은 접힘 안, 호스트 코멘트 크기 상한 안에 들어가고, 같은 표제의 기존 코멘트는 새로 달지 않고 갱신한다.
+- `cross-review`와 `revalidate`는 브랜치에 pull request가 있을 때 판정을 PR 코멘트로 남긴다. PR이 없으면 남기지 않으며, 코멘트 부재는 실패가 아니다. 코멘트 형식은 각각 `skills/cross-review/report-formats.md`와 `skills/revalidate/reference.md` §4가 정의한다 — 판정표는 접힘 밖, 본문은 접힘 안, 호스트 코멘트 크기 상한 안에 들어가고, 같은 표제의 기존 코멘트는 새로 달지 않고 갱신한다.
 - 단계 간 중간 산출물은 `.filid/review/<branch>/`에 파일로 남기고 다음 단계와 서브에이전트에는 **경로만** 전달한다. 대형 변경에서 컨텍스트가 터지지 않게 하는 장치이며 이 파일들은 커밋하지 않는다.
-- 모든 큰 MCP 결과는 16 KiB inline 예산의 공통 envelope를 거쳐 검증 가능한 임시 artifact로 전달한다.
+- 모든 큰 MCP 결과는 16 KiB inline 예산의 공통 envelope를 거쳐 검증 가능한 임시 artifact로 전달한다. 스킬은 inline data가 없으면 artifact의 JSON data를 읽고, 누락·읽기 실패를 빈 성공 결과로 해석하지 않는다.
 - managed rule 문서의 host target 선택과 동기화는 `@ogham/agent-artifacts`에 위임하며 Filid owner 주소 밖의 사용자 내용을 보존한다.
 - 설정 schema 2.0은 adapter mode와 enabled IDs, rule overrides, 언어 중립 구조 옵션을 정의한다. v1은 메모리에서 변환하고 명시적 저장 전까지 원본을 쓰지 않는다.
 - PR 문서 audit 범위는 모든 변경을 한 `fractal_inspect` `resolve` batch로 해석한다. `resolved:true` owner는 config-excluded 이름 아래에서도 유지하고, `resolved:false`인 `context-target-unresolved`는 target이 현재 `HEAD`에 존재할 때만 ownerless non-FCA다. `structure.additionalExcludedDirectories`는 그 ownerless 이유를 명시하며, 그 밖의 실패는 범위를 축소하지 않는다.
@@ -57,12 +57,25 @@
 - PR이 있는 브랜치에서 `cross-review`와 `revalidate`는 판정을 코멘트로 남기고, PR이 없으면 남기지 않으며 어느 쪽도 스킬을 실패시키지 않는다.
 - 코멘트는 판정표를 접힘 밖에 두고 나머지를 접어 호스트 크기 상한 안에 들어가며, 재실행은 브랜치당 코멘트를 하나로 유지한다.
 - 코멘트 실패나 부재가 판정 자체를 바꾸지 않는다.
+- cached cross-review도 기존 seal로 현재 source와 canonical 게시 경로를 확인한 뒤 코멘트 전달을 재시도한다. reviewer round는 다시 실행하지 않는다.
 
 ### AC-root-pr-document-scope — PR 문서 동기화 범위
 
 - 현재 `HEAD`에 존재하는 ownerless 경로는 non-FCA로 보고되며, config-excluded 이름은 그 이유를 보강한다. config-excluded 이름 아래라도 `fractal_inspect` `resolve` 결과에 owner가 있으면 문서 동기화 대상이다.
 - `HEAD`에 없는 unresolved 경로와 `context-target-unresolved` 이외의 실패는 non-FCA로 바뀌지 않고 PR 생성을 중단한다.
 - non-FCA 경로도 PR의 Code/Architecture 분석에서는 유지되며 owner가 하나도 없으면 document sync는 `no-change`다.
+- PR 문서 동기화와 resolve의 문서 수정 위임은 INTENT와 DETAIL을 모두 평가한다.
+- 게시 단계는 문서 commit 이후 push 필요 여부를 다시 계산하며 `--no-push`도 갱신된 결과를 따른다.
+
+### AC-root-document-quality — 빠짐없는 문서 품질 분류
+
+- 존재하는 문서는 0점 이상 임계값 미만이면 SPARSE, 임계값 이상이면 RICH다. 문서가 없을 때만 MISSING이다.
+- SPARSE와 MISSING은 편집 계획 대상으로 남으며 RICH는 편집하지 않는다.
+
+### AC-root-pipeline-freshness — 현재 커밋의 재검증 결과
+
+- pipeline은 재검증 보고서에 유효한 `PASS | FAIL | INCONCLUSIVE` 판정이 있고 `head_sha`가 현재 HEAD와 일치할 때만 완료 결과를 재사용한다.
+- 보고서가 낡거나 불완전하면 기존 justification·fix request·PR 근거의 우선순위로 재개하며, 관측 과정은 review state를 변경하지 않는다.
 
 ### AC-root-revalidate-scope — 항목별 재검증 범위
 
@@ -77,6 +90,7 @@
 - interactive 입력은 한 batch에 모든 apply, discuss, warning skip, reason-bearing reject를 담는다. error는 skip할 수 없고 논의·부적합 입력은 항목별이 아니라 미결 집합 전체로 다시 묻는다.
 - baseline과 correction 위임 전에 모든 warning skip/reject 사유를 완전한 Context/Decision/Consequences로 검증한다. 그 이후 decision은 다시 열지 않으며 rejection 단계는 검증된 ADR을 직렬화만 한다.
 - `--auto`는 원래 Recommendation과 이유를 보존해 표시하고 모든 Decision을 자동 적용으로 선택한 뒤 prompt 없이 진행한다.
+- 자동 resolve의 하위 문서·배치 스킬에는 `--auto-approve`를 전달한다. 대화형 resolve는 해당 플래그를 전달하지 않으며, 자동 승인도 범위를 넓히거나 미결 구조 결정을 대신하지 않는다.
 
 ## History
 

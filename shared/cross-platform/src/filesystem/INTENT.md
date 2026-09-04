@@ -5,7 +5,7 @@
 ## Conventions
 
 - "없음"만 `null`, `[]`, `false`로 낮추고 권한/형식 오류는 throw한다.
-- host가 실제로 해석하는 target 경로는 가장 가까운 기존 ancestor의 real path와 suffix를 결합하며, unlink 판정은 terminal directory entry를 보존한다.
+- host가 실제로 해석하는 target 경로는 referent가 없는 symlink도 따라가 가장 가까운 기존 ancestor의 real path와 suffix를 결합하며, unlink 판정은 terminal directory entry를 보존한다.
 - 공개 함수와 내부 보조 함수 모두 파일당 하나만 선언한다.
 - 외부 소비자는 패키지 루트만 쓰고, 같은 패키지 subtree는 소유한 concrete 구현을 직접 import할 수 있다.
 - hook 격리는 `sideEffects: false` tree-shaking과 emitted byte·output forbidden-pattern guard로 검증한다.

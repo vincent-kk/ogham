@@ -99,7 +99,7 @@ This value is written to `justifications.md` as `resolve_commit_sha`. `revalidat
 Then hand the accepted items out, routing each by the table in `reference.md` §5 and dispatching them together:
 
 - main-agent items get a delegation brief in the §5 format, applied directly in this turn;
-- when another skill owns the correction, invoke it with the input that skill actually takes — a placement request for `/filid:restructure`, the owning fractal path for `/filid:enrich-docs`. Neither receives the brief.
+- when another skill owns the correction, invoke it with the input that skill actually takes — a placement request for `/filid:restructure`, the owning fractal path and `--include-detail` for `/filid:enrich-docs`. Neither receives the brief. With `--auto`, append `--auto-approve` to both child skills as specified in §5; interactive invocations omit it.
 
 This skill states **what must change and where**. It does not choose the edit, and it never edits a file itself.
 
