@@ -12,7 +12,7 @@
 | `run-b` | `low-only-change.md` | 3 | `REQUEST_CHANGES` | clean change에 더한 canonical warning 하나가 actionable 상태로 남음 |
 | `run-c` | `seeded-change.md` | 4 | `REQUEST_CHANGES` | clean change에 의도적으로 심은 rule 두 개와 `tests/` fractal 승격에서 파생된 candidate 네 개 |
 | `run-d` | `contract-change.md` | 3 | `REQUEST_CHANGES` | clean change에 더한 public entry와 DETAIL API 불일치 |
-| `run-f` | `genuine-gap.md` | 3 | `INCONCLUSIVE` | clean change의 spec update를 대체한 변경 파일 증거 누락이 verdict를 보류함 |
+| `run-f` | `genuine-gap.md` | 3 | `INCONCLUSIVE` | 동적 parameter table의 indeterminate case count가 canonical evidence를 미완료로 만들어 verdict를 보류함 |
 | `run-g` | `out-of-scope-certainty.md` | 2 | `APPROVED` | clean change 밖 도구 간 중복을 포함한 범위 밖 certainty 5행이 verdict에 닿지 않음 |
 | `run-h` | `seeded-bug.md` | 2 | `REQUEST_CHANGES` | clean change의 구현을 대체한 empty-input boundary bug 하나를 독립 확인함 |
 

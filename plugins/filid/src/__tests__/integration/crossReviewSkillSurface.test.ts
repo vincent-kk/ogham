@@ -31,6 +31,10 @@ const reviewer =
   documents.find(({ path }) => path === 'reviewers/reviewer.md')?.content ?? '';
 const verifier =
   documents.find(({ path }) => path === 'reviewers/verifier.md')?.content ?? '';
+const genuineGap = readFileSync(
+  join(calibrationRoot, 'genuine-gap.md'),
+  'utf8',
+);
 
 describe('cross-review v6 skill surface', () => {
   it('declares the v6 frontmatter version', () => {
@@ -102,7 +106,9 @@ describe('cross-review v6 skill surface', () => {
   it('defines the ordered verdict table exactly once', () => {
     const allText = documents.map(({ content }) => content).join('\n');
     expect(
-      allText.match(/\| Condition \(evaluate in order\) \| Verdict \|/g),
+      allText.match(
+        /\|\s*Condition \(evaluate in order\)\s*\|\s*Verdict\s*\|/g,
+      ),
     ).toHaveLength(1);
   });
 
@@ -140,6 +146,13 @@ describe('cross-review v6 skill surface', () => {
     expect(skill.match(/sonnet/g)).toHaveLength(1);
     expect(verifier).not.toContain('## Spawn');
     expect(verifier).not.toContain('sonnet');
+  });
+
+  it('uses indeterminate verification evidence for the genuine-gap fixture', () => {
+    expect(genuineGap).toContain('it.each(loadRows())');
+    expect(genuineGap).toContain('expect(slugify(input)).toBe(expected);');
+    expect(genuineGap).toContain('`verification_status: indeterminate`');
+    expect(genuineGap).not.toContain('resolves no verification role');
   });
 
   it('bounds actor reads and reports publication status in terminal output', () => {

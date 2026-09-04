@@ -15,26 +15,42 @@ This is the `run-b` seed and produces the canonical `zero-peer-file` warning.
 Overwrite `src/slugify/tests/slugify.spec.ts`:
 
 ```typescript
-export const SEPARATOR_INPUTS = ['Hello World', '--Hello--'];
+import { describe, expect, it } from 'vitest';
+
+import { slugify } from '../slugify.js';
+
+function loadRows(): Array<[string, string]> {
+  return [
+    ['Hello World', 'hello-world'],
+    ['--Hello--', 'hello'],
+    ['a'.repeat(63) + ' bcd', 'a'.repeat(63)],
+  ];
+}
+
+describe('slugify', () => {
+  it.each(loadRows())('normalizes %s', (input, expected) => {
+    expect(slugify(input)).toBe(expected);
+  });
+});
 ```
 
-This overwrite replaces the spec case added by the `run-a` clean change.
+This overwrite preserves the three behaviors covered by the `run-a` clean change but moves the rows behind a dynamic table.
 
-The file keeps its `.spec` suffix but holds no case. The adapter reads the content, resolves no verification role, and therefore contributes no evidence row at all — the changed verification document is absent from every evidence table. Nothing was measured about it, so nothing can be judged about it.
+The adapter recognizes the file as a `spec-document`, but `it.each(loadRows())` is not statically enumerable. Its case count is therefore `indeterminate`, changed scope reports `verification_status: indeterminate`, and `evidence_complete` is false. The file remains in the changed-file roster as `verification`; the missing evidence is its semantic case count, not its existence or role.
 
 `run-f` must end `INCONCLUSIVE`.
 
 ## What This Fixture Regresses
 
-This fixture is the sole calibration path where a reviewer records missing evidence for a changed file. It proves that the normal `gaps → INCONCLUSIVE` path remains active even when the same run also contains a confirmed finding.
+This fixture is the sole calibration path where canonical verification evidence is indeterminate for a changed file. It proves that the normal incomplete-evidence → `INCONCLUSIVE` path remains active even when the same run also contains a confirmed finding.
 
 The two seeds are chosen to sit at the same address on one axis and differ on the other:
 
-| Item                            | Owning fractal | Rule                         |
-| ------------------------------- | -------------- | ---------------------------- |
-| Confirmed finding on `notes.md` | `src/slugify`  | `zero-peer-file`             |
-| Gap on `tests/slugify.spec.ts`  | `src/slugify`  | verification role unresolved |
+| Item                            | Owning fractal | Rule                             |
+| ------------------------------- | -------------- | -------------------------------- |
+| Confirmed finding on `notes.md` | `src/slugify`  | `zero-peer-file`                 |
+| Gap on `tests/slugify.spec.ts`  | `src/slugify`  | dynamic case count indeterminate |
 
-The confirmed finding does not supply the missing verification-role evidence. The gap therefore remains unresolved and the verdict is `INCONCLUSIVE` despite a confirmed finding being present.
+The confirmed finding does not supply the missing semantic-count evidence. The gap therefore remains unresolved and the verdict is `INCONCLUSIVE` despite a confirmed finding being present.
 
-A `REQUEST_CHANGES` result on `run-f` means the changed-file evidence gap was suppressed merely because the run also carried a confirmed finding. That regression would silently retire `INCONCLUSIVE` for partially unreviewable changes.
+A `REQUEST_CHANGES` result on `run-f` means indeterminate canonical evidence was suppressed merely because the run also carried a confirmed finding. That regression would silently retire `INCONCLUSIVE` for partially unreviewable changes.

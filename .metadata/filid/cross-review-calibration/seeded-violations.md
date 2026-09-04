@@ -27,9 +27,9 @@ A gap is expected missing evidence, not a defect in the fixture. This is the onl
 
 | ID | Run | Category | Path | Rule | Affects verdict |
 | --- | --- | --- | --- | --- | --- |
-| GF-1 | run-f | verification | `src/slugify/tests/slugify.spec.ts` | verification role unresolved | yes |
+| GF-1 | run-f | verification | `src/slugify/tests/slugify.spec.ts` | dynamic case count indeterminate | yes |
 
-FF-1 and GF-1 share the owning fractal `src/slugify` but describe different facts. The missing verification evidence keeps `run-f` `INCONCLUSIVE` even though FF-1 is confirmed.
+FF-1 and GF-1 share the owning fractal `src/slugify` but describe different facts. The indeterminate semantic case count keeps `run-f` `INCONCLUSIVE` even though FF-1 is confirmed.
 
 ## Guard Rails
 
