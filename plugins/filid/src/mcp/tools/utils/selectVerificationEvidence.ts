@@ -4,14 +4,25 @@ import type {
   VerificationFileAnalysis,
   VerificationProjectAnalysis,
   VerificationViolation,
-} from '../../../../types/verification.js';
+} from '../../../types/verification.js';
 
+/** Verification analyses and unresolved requested paths selected for one scan. */
 export interface VerificationEvidenceSelection {
+  /** Verification files that match the requested scope. */
   files: VerificationFileAnalysis[];
+  /** Verification violations that match the requested scope. */
   violations: VerificationViolation[];
+  /** Requested paths that have no verification analysis. */
   missingPaths: string[];
 }
 
+/**
+ * Select verification evidence for an optional path list.
+ * @param projectRoot Absolute root used to resolve requested paths.
+ * @param analysis Project verification analysis to filter.
+ * @param filePaths Optional project-relative or absolute paths to retain.
+ * @returns Matching verification files and violations plus unresolved paths.
+ */
 export function selectVerificationEvidence(
   projectRoot: string,
   analysis: VerificationProjectAnalysis,

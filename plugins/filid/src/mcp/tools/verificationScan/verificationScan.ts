@@ -6,11 +6,11 @@ import type {
 } from '../../../types/report.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
 import { createToolSnapshot } from '../utils/createToolSnapshot.js';
+import { resolveVerificationScanStatus } from '../utils/resolveVerificationScanStatus.js';
+import { selectVerificationEvidence } from '../utils/selectVerificationEvidence.js';
 
 import { buildVerificationDiagnostics } from './utils/buildVerificationDiagnostics.js';
 import { buildVerificationScanSummary } from './utils/buildVerificationScanSummary.js';
-import { resolveVerificationScanStatus } from './utils/resolveVerificationScanStatus.js';
-import { selectVerificationEvidence } from './utils/selectVerificationEvidence.js';
 
 export interface VerificationScanInput {
   path: string;

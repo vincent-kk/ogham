@@ -4,7 +4,7 @@
 
 ```markdown
 ---
-review_schema: 5
+review_schema: 6
 branch: <branch>
 base_ref: <base ref>
 source_hash: <prepared source hash>
@@ -12,69 +12,103 @@ review_directory: <absolute path returned by review_state>
 changed_files_count: <n>
 created_at: <ISO 8601>
 ---
-
 ## Change Context
-
-<concise summary of the pull-request body or BASE_REF..HEAD commit subjects and bodies>
-
-## Changed Files
-
-| Path | Change | Owning Fractal |
-| --- | --- | --- |
-
+<concise pull-request or commit-history summary>
 ## Review Checklist
-
-| Path | Status | Group | Rules | Result | Reason |
+| Path | Change | Group | Rules | Result | Reason |
 | --- | --- | --- | --- | --- | --- |
 ```
 
-The checklist contains every changed `(path, status)` entry. Start reviewable rows as `pending`; close every row as `reviewed` or `skipped` before report generation. A mechanical reviewer-failure artifact uses `result: unavailable`, but its matching checklist rows remain `pending` and force `INCONCLUSIVE`.
+Include every `(path, change)` once. Begin reviewable rows as `pending`; finish each as `reviewed` or `skipped`, with a concrete reason for every skip.
 
-## Evidence Artifacts
+## `opinions/review-NN.md`
 
-Use the exact layouts in `phases/evidence.md` for `verification.md` and `structure-check.md`. Both files carry matching source and snapshot hashes.
+```yaml
+---
+group: <NN>
+state: COMPLETE | INDETERMINATE
+source_hash: <review-state source hash>
+files:
+  - path: <project-relative path>
+    change: A | M | D
+    result: reviewed | skipped
+    reason: <required when skipped>
+findings:
+  - id: R<NN>-<NNN>
+    severity: error | warning
+    category: bug | security | performance | maintainability | test | documentation | contract | structure | verification
+    path: <project-relative path>
+    lines: <start>-<end> | unknown
+    rule: <USR-NNN | rule item id | repository rule | DETAIL requirement>
+    message: <falsifiable defect statement>
+    evidence: <file:line or canonical evidence row>
+    consequence: <what fails or degrades>
+    recommended_action: <bounded correction>
+checked:
+  - <path or evidence section>
+gaps:
+  - path: <assigned project-relative path>
+    rule: <rule>
+    detail: <evidence that could not be obtained>
+---
+## Risk Plan
+<optional file-by-file risks when group churn exceeds 200 lines>
+```
 
-## Review Artifacts
+Every assigned file appears once. A normal evidence gap keeps its file `reviewed`, sets state to `INDETERMINATE`, and names that file under `gaps`; narrative text cannot add findings absent from frontmatter.
 
-Each `opinions/review-NN.md` uses the Review Contract in `contracts.md`. Its frontmatter accounts for every file assigned to that group, including `unavailable` rows in a mechanical reviewer-failure artifact.
+## `opinions/verify-NN.md`
 
-## Verification Artifacts
+```yaml
+---
+group: <NN>
+state: COMPLETE | INDETERMINATE
+source_hash: <review-state source hash>
+decisions:
+  - finding_id: <R<NN>-<NNN> | FCA-<NNN>
+    verdict: CONFIRMED | REFUTED | INDETERMINATE
+    evidence: <file:line or canonical evidence row>
+    reason: <one falsifiable sentence>
+observations:
+  - path: <project-relative path>
+    detail: <new concern noticed while verifying; verdict-neutral>
+checked: [<paths and evidence sections>]
+---
+```
 
-Each `opinions/verify-NN.md` uses the Verification Contract in `contracts.md`. Together they decide every deduplicated candidate exactly once. When there are no candidates, `opinions/verify-01.md` contains a valid empty decision set.
+Include exactly one decision for every assigned ID and none for unknown IDs. `decisions` omit category; join it from the candidate by `finding_id` when rendering the report.
 
 ## `review-report.md`
 
 ```markdown
 ---
-review_schema: 5
+review_schema: 6
 verdict: APPROVED | REQUEST_CHANGES | INCONCLUSIVE
 branch: <branch>
 base_ref: <base ref>
 source_hash: <prepared source hash>
-snapshot_hash: <shared snapshot hash or unavailable>
+snapshot_hash: <scope snapshot hash>
 files_total: <integer>
 files_reviewed: <integer>
 files_skipped: <integer>
 generated_at: <ISO 8601>
 ---
-
 # Cross-Review — <branch>
-
 ## Scope
-
-<changed files and owning fractals>
-
+<changed files and owners>
 ## Evidence Status
-
-| Evidence | Status | Hash | Diagnostics |
-| --- | --- | --- | --- |
-| Snapshot | <status> | <hash> | <summary> |
-| Structure | <status> | <hash> | <summary> |
-| Verification | <status> | <hash> | <summary> |
+| Field | Value |
+| --- | --- |
+| source_hash | <evidence.md value> |
+| snapshot_hash | <evidence.md value> |
+| evidence_complete | <evidence.md value> |
+| structure_status | <evidence.md value> |
+| verification_status | <evidence.md value> |
+| worktree | <evidence.md value> |
 
 ## Coverage
 
-| Path | Status | Group | Result | Reason |
+| Path | Change | Group | Result | Reason |
 | --- | --- | --- | --- | --- |
 
 ## Verification Log
@@ -99,20 +133,14 @@ generated_at: <ISO 8601>
 
 ## Final Verdict
 
-**<VERDICT>** — <one sentence derived from contracts.md>.
+**<VERDICT>** — <one sentence justified by the ordered verdict table>.
 ```
 
-Derive `files_total`, `files_reviewed`, and `files_skipped` from the checklist. In the Verification Log, obtain `Category` by joining each decision to its candidate through `finding_id`; verification decisions do not duplicate that field.
-
-`Unresolved Evidence` includes reviewer gaps, `INDETERMINATE` candidate decisions, verifier observations, and unavailable evidence. Set `Affects Verdict` from the ordered Verdict Derivation. A verifier observation and an `INDETERMINATE` warning are verdict-neutral. Write `none` under the heading when there are no unresolved rows.
-
-If either canonical evidence file records `evidence_complete: false`, report that sentinel under Evidence Status and derive `INCONCLUSIVE` even when its tables contain no finding rows.
-
-For `INCONCLUSIVE`, keep every section, name the missing or inconsistent evidence, and do not present unresolved rows as findings.
+Derive counts from the checklist. Include gaps, `INDETERMINATE` decisions, observations, and unavailable artifacts under Unresolved Evidence; write `none` when empty. Keep every section for `INCONCLUSIVE` and never present unresolved rows as findings.
 
 ## `fix-requests.md`
 
-Write this file only when the verdict is `REQUEST_CHANGES`. It contains confirmed findings only:
+Write only for `REQUEST_CHANGES`, with confirmed findings numbered from `FIX-001`:
 
 ```markdown
 # Fix Requests — <branch>
@@ -129,13 +157,11 @@ Write this file only when the verdict is `REQUEST_CHANGES`. It contains confirme
 - **Recommended Action**: <bounded correction>
 ```
 
-`Claim` is the confirmed candidate's `message` verbatim. Preserve every field from that candidate; `resolve` and `revalidate` use the FIX ID to carry this canonical payload across stages.
-
-Cross-review never edits project files and never embeds an automatic patch.
+Copy `Claim` from the confirmed candidate's `message` verbatim and preserve its other fields. Cross-review never embeds a patch.
 
 ## PR Comment
 
-Post only when the branch has a pull request. The verdict table stays **outside** collapsible sections so the result reads without expansion; bulky evidence stays folded.
+Post only when the branch has a pull request. Keep the verdict table outside collapsible sections.
 
 ```markdown
 ## Code Review Governance — <verdict>
@@ -171,12 +197,7 @@ Post only when the branch has a pull request. The verdict table stays **outside*
 > Full report: `<REVIEW_DIR>/review-report.md`
 ```
 
-Rules:
-
-- Strip raw report frontmatter from bodies copied into a `<details>` block; the table above already carries those fields.
-- Omit a `<details>` block whose content would be empty, except `Confirmed findings`, which is always present so a reader sees a zero count rather than a missing section.
-- Keep the comment within the host's size limit. When it would exceed the limit, keep the table and Confirmed Findings block, replace the remainder with the report pointer, and state that the rest was truncated.
-- A comment carrying the `## Code Review Governance` heading is this skill's own. Update that comment in place rather than adding a second one, so a rerun leaves one comment per branch.
+Strip copied frontmatter. Omit empty detail blocks except Confirmed findings. If the host limit would be exceeded, retain the verdict table and Confirmed findings, replace the rest with the report pointer, and state that it was truncated. Update this skill's existing `## Code Review Governance` comment rather than adding another.
 
 ## Terminal Output
 
@@ -186,4 +207,4 @@ After a successful seal, emit exactly:
 Review verdict: APPROVED
 ```
 
-or the corresponding `REQUEST_CHANGES` / `INCONCLUSIVE` value. Before seal, no terminal verdict marker is valid.
+Substitute `REQUEST_CHANGES` or `INCONCLUSIVE` when applicable. Before seal, no terminal verdict marker is valid.

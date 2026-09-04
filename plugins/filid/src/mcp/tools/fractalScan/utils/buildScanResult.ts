@@ -9,13 +9,13 @@ import type {
   ToolDiagnostic,
   ToolPayload,
 } from '../../../../types/toolEnvelope.js';
+import { resolveFractalScanCertainty } from '../../utils/resolveFractalScanCertainty.js';
+import { resolveFractalScanStatus } from '../../utils/resolveFractalScanStatus.js';
 import { scopeDiagnosticsToPaths } from '../../utils/scopeDiagnosticsToPaths.js';
 
 import { buildFractalScanFullData } from './buildFractalScanFullData.js';
 import { buildFractalScanPathsData } from './buildFractalScanPathsData.js';
 import { buildFractalScanSummary } from './buildFractalScanSummary.js';
-import { resolveFractalScanCertainty } from './resolveFractalScanCertainty.js';
-import { resolveFractalScanStatus } from './resolveFractalScanStatus.js';
 
 /**
  * Assemble the scan payload for one detail level.

@@ -33,7 +33,7 @@
 
 | #   | 문서                                          | 설명                                                                                       |
 | --- | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| 01  | [ARCHITECTURE.md](./01-ARCHITECTURE.md)       | 전체 구조 & 설계 철학 — FCA-AI 이론 매핑, 레이어, 디렉터리 구조, ADR 12개, 0.8.x 제거 목록 |
+| 01  | [ARCHITECTURE.md](./01-ARCHITECTURE.md)       | 전체 구조 & 설계 철학 — FCA-AI 이론 매핑, 레이어, 디렉터리 구조, ADR 14개, 0.8.x 제거 목록 |
 | 02  | [BLUEPRINT.md](./02-BLUEPRINT.md)             | 모듈별 기술 청사진 — 13개 도메인의 목적, 알고리즘, 입출력, 의존 방향                       |
 | 03  | [LIFECYCLE.md](./03-LIFECYCLE.md)             | 라이프사이클 & 워크플로우 — 스킬 12개, merge-track 5단계, Hook 이벤트 타임라인             |
 | 04  | [USAGE.md](./04-USAGE.md)                     | 설치, 설정, 사용 방법 — 빌드, config v2, 스킬·MCP 사용법, 트러블슈팅                       |
@@ -93,7 +93,7 @@
 | 내장 규칙      | **15개** ([07-RULES-REFERENCE](./07-RULES-REFERENCE.md#내장-규칙-15개))                                                                                     |
 | 배포 규칙 문서 | **4개** (fractal-boundaries, module-documents, verification-records, code-placement — 모두 required)                                                        |
 | 스킬           | **12개** — setup, scan, context-query, guide, enrich-docs, restructure, migrate + merge-track 5(pull-request, cross-review, resolve, revalidate, pipeline)  |
-| 에이전트       | **0개** (cross-review는 고정 정의 없이 변경 그룹 reviewer와 독립 verifier를 실행)                                                                           |
+| 에이전트       | **0개** (cross-review는 `review_state(scope)` 증거로 변경 그룹 reviewer와 효율 모델 verifier를 실행)                                                        |
 | Hook 이벤트    | **3개** — SessionStart, UserPromptSubmit, PreToolUse(Read\|Write\|Edit)                                                                                     |
 | Hook 브리지    | 4개 (setup.mjs, user-prompt-submit.mjs, pre-tool-use.mjs, run-agy.mjs)                                                                                      |
 | 번들 크기      | 498,413 B (MCP 416,185 + 훅 3개 48,560 + settings UI 30,263 + 러너)                                                                                         |

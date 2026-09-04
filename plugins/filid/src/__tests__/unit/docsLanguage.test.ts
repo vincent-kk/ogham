@@ -18,8 +18,7 @@ const INTENT_CAP_DESCRIPTION = /INTENT\.md at 50 lines or fewer/;
 const DETAIL_APPEND_DESCRIPTION = /append-only DETAIL\.md/;
 
 const GUIDE_SCOPE = [
-  'skills/cross-review/phases/evidence.md',
-  'skills/cross-review/contracts.md',
+  'skills/cross-review/SKILL.md',
   'skills/cross-review/templates.md',
   'src/constants/hookContext.ts',
 ];

@@ -99,7 +99,7 @@ Produces a read-only placement plan — `sourcePath → targetPath`, the basis f
 /filid:cross-review --base origin/main
 ```
 
-Each committed file is reviewed against layered built-in and repository rules, while FCA tool findings join the same candidate set. Every candidate finding is independently verified as `CONFIRMED | REFUTED | INDETERMINATE`; only confirmed findings affect fix requests. The verdict is `APPROVED | REQUEST_CHANGES | INCONCLUSIVE` and covers the committed change, not defects outside that scope.
+`review_state(scope)` first records the committed-file roster and changed-scope FCA evidence. Each file is then reviewed against layered rules, and an efficient-model verifier independently checks every candidate as `CONFIRMED | REFUTED | INDETERMINATE`. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
 
 ### Migrate legacy document names
 
@@ -135,7 +135,7 @@ A blocked write explains its reason and denies only that one tool call — your 
 | `/filid:guide`         | Explain the current tree, classifications, and placement rules            |
 | `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval       |
 | `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions |
-| `/filid:cross-review`  | File-by-file change review with independently verified findings           |
+| `/filid:cross-review`  | Review a committed change file by file against layered rules and changed-scope FCA evidence, then independently verify every candidate with an efficient model |
 | `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                  |
 | `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR               |
 | `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications      |
@@ -182,7 +182,7 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 | `restructure_plan`   | Decide placement; returns a plan artifact          |
 | `structure_validate` | Validate a project, or a plan's pre/postconditions |
 | `verification_scan`  | Judge spec-document / test-record contracts        |
-| `review_state`       | cross-review bookkeeping                           |
+| `review_state`       | cross-review state, changed-scope roster, and FCA evidence |
 
 Every tool returns the same envelope. Results stay small: anything over 16 KiB is written to a content-addressed artifact and referenced by path and SHA-256.
 

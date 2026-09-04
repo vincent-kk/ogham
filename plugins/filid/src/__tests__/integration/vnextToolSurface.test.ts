@@ -118,6 +118,21 @@ describe('Filid 1.0 MCP tool surface', () => {
     }
   });
 
+  it('advertises the review_state scope action', async () => {
+    const connection = await connectTestClient();
+    try {
+      const tools = await connection.client.listTools();
+      const schema = tools.tools.find(
+        ({ name }) => name === McpToolName.REVIEW_STATE,
+      )?.inputSchema;
+      expect(schema).toMatchObject({
+        properties: { action: { enum: expect.arrayContaining(['scope']) } },
+      });
+    } finally {
+      await connection.close();
+    }
+  });
+
   it('describes every advertised input field of every tool', async () => {
     const connection = await connectTestClient();
     try {

@@ -96,5 +96,6 @@ export const MCP_TOOL_DESCRIPTIONS = {
   RESTRUCTURE_PLAN: 'Create a persisted read-only structure placement plan.',
   STRUCTURE_VALIDATE: 'Validate project structure or plan conditions.',
   VERIFICATION_SCAN: 'Evaluate verification document policy evidence.',
-  REVIEW_STATE: 'Manage cross-review artifact lifecycle state.',
+  REVIEW_STATE:
+    'Manage cross-review artifact lifecycle state and collect changed-scope FCA evidence.',
 } as const;

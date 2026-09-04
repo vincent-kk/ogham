@@ -8,4 +8,6 @@ export type {
   ReviewStatePhase,
   ReviewStateRecord,
   ReviewStateSummary,
+  ReviewScopeCandidate,
+  ReviewScopeFile,
 } from './state/reviewStateTypes.js';

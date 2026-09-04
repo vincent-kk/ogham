@@ -99,7 +99,7 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 /filid:cross-review --base origin/main
 ```
 
-커밋된 각 파일을 내장 규칙과 저장소 규칙의 계층형 체크리스트로 리뷰하고, FCA 도구 finding도 같은 후보 집합에 합칩니다. 모든 후보 finding은 `CONFIRMED | REFUTED | INDETERMINATE`로 독립 검증하며, 확인된 finding만 fix request에 반영합니다. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이고 커밋된 변경 범위만 판정합니다.
+먼저 `review_state(scope)`가 커밋 변경 파일 roster와 changed-scope FCA 증거를 기록합니다. 이어 각 파일을 계층형 규칙으로 리뷰하고, 효율 모델 verifier가 모든 후보를 `CONFIRMED | REFUTED | INDETERMINATE`로 독립 검증합니다. 확인된 finding만 fix request에 반영하며 verdict는 커밋된 변경 범위만 판정합니다.
 
 ### legacy 문서명 이관
 
@@ -135,7 +135,7 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 | `/filid:guide`         | 현재 트리·분류·배치 규칙 설명                      |
 | `/filid:enrich-docs`   | 스냅샷 증거 기반 INTENT/DETAIL 개선 (승인 후 편집) |
 | `/filid:restructure`   | 읽기 전용 계획 → 승인 → 외부 실행 → 사후조건 검증  |
-| `/filid:cross-review`  | 파일별 변경 리뷰와 finding 독립 검증               |
+| `/filid:cross-review`  | 커밋 변경을 파일별 계층 규칙·changed-scope FCA 증거로 리뷰하고 효율 모델로 모든 후보를 독립 검증 |
 | `/filid:migrate`       | legacy CLAUDE.md / SPEC.md 이름 이관               |
 | `/filid:pull-request`  | 문서 동기화 후 구조화된 GitHub PR 생성             |
 | `/filid:resolve`       | fix request 수용·거부 결정, 위임, 정당화 기록      |
@@ -182,7 +182,7 @@ filid가 실제로 만들 수 있는 증거에 각각 대응하는 내장 규칙
 | `restructure_plan`   | 배치 결정, plan artifact 반환           |
 | `structure_validate` | 프로젝트 또는 계획의 사전·사후조건 검증 |
 | `verification_scan`  | spec-document / test-record 계약 판정   |
-| `review_state`       | cross-review bookkeeping                |
+| `review_state`       | cross-review 상태·변경 roster·FCA 증거   |
 
 모든 도구가 동일한 envelope를 사용합니다. 반환은 작게 유지되며, 16 KiB를 넘으면 content-addressed artifact로 저장하고 경로와 SHA-256으로 참조합니다.
 

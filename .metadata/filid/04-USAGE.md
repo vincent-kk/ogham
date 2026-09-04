@@ -452,7 +452,7 @@ summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `
 }
 ```
 
-`prepare | checkpoint | seal | cleanup`. `cleanup`은 리터럴 `confirm: true`를 요구한다.
+`prepare | checkpoint | scope | seal | cleanup | assess`. `scope`는 prepared state에서 커밋 변경 roster와 changed-scope FCA 후보를 모아 canonical `evidence.md`를 쓴다. `cleanup`은 리터럴 `confirm: true`를 요구한다.
 
 ---
 

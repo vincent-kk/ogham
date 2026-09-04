@@ -2,15 +2,16 @@
 
 ## Purpose
 
-committed diff content hash, branch-scoped review artifact lifecycle과 merge-track 재개 지점의 관측만 관리한다. review 판단, committee 선택, 코드 수정과 PR 동작은 소유하지 않는다.
+committed diff content hash, branch-scoped review artifact lifecycle, 변경 범위 FCA 증거 수집과 merge-track 재개 지점의 관측만 관리한다. review 판단, committee 선택, 코드 수정과 PR 동작은 소유하지 않는다.
 
 ## Structure
 
-- `reviewState.ts` — prepare/checkpoint/seal/cleanup/assess action dispatch
-- `handlers/` — 다섯 action의 flat effect boundary
+- `reviewState.ts` — prepare/checkpoint/scope/seal/cleanup/assess action dispatch
+- `handlers/` — 여섯 action의 flat effect boundary
 - `hash/` — git evidence와 deterministic content hash organ
 - `state/` — portable review path와 state JSON organ
 - `assess/` — dirty 경로 분류, entry stage와 base ref 해석의 순수 함수 organ
+- `scope/` — changed-file roster와 변경 범위 증거 정규화의 순수 함수 organ
 - `index.ts` — named handler export
 
 ## Conventions

@@ -8,6 +8,12 @@ import {
 import { normalizeReviewBranch } from './normalizeReviewBranch.js';
 import type { ReviewStatePaths } from './reviewStateTypes.js';
 
+/**
+ * Resolve contained canonical artifact paths for one branch review.
+ * @param projectRoot Absolute project root that owns the review directory.
+ * @param branchName Unnormalized branch key used for review isolation.
+ * @returns Canonical review root, branch directory, state, report, and evidence paths.
+ */
 export function resolveReviewStatePaths(
   projectRoot: string,
   branchName: string,
@@ -32,6 +38,10 @@ export function resolveReviewStatePaths(
     reportPath: resolveContainedPath(
       reviewDirectory,
       REVIEW_STATE_FILE_NAMES.REPORT,
+    ),
+    evidencePath: resolveContainedPath(
+      reviewDirectory,
+      REVIEW_STATE_FILE_NAMES.EVIDENCE,
     ),
   };
 }

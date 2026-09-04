@@ -238,6 +238,10 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
+    action: z.literal(REVIEW_STATE_ACTIONS.SCOPE),
+  }),
+  z.object({
+    ...REVIEW_STATE_COMMON_SCHEMA,
     action: z.literal(REVIEW_STATE_ACTIONS.SEAL),
     baseRef: z.string().min(1).optional(),
   }),
@@ -260,6 +264,7 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .nativeEnum(REVIEW_STATE_ACTIONS)
     .describe(
       'prepare opens or resumes a run; checkpoint re-checks source identity; ' +
+        'scope collects changed-scope FCA evidence into evidence.md; ' +
         'seal finalizes the verdict; cleanup deletes this branch state; ' +
         'assess reports where the merge-track cycle resumes and how the dirty ' +
         'worktree classifies, without reading or writing review state.',

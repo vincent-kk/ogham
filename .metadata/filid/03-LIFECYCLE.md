@@ -244,41 +244,36 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 **트리거**: 커밋된 변경 또는 PR, `/filid:cross-review [PR URL]`
 
 ```
-Step 1 — Resolve Source, Prepare State, and Capture Change Context
-├── 브랜치/PR 해석, base ref 결정
+Step 1 — Prepare
+├── 브랜치·PR과 base ref를 해석하고 현재 사용자 요구를 USR-NNN으로 고정
 ├── review_state(prepare) → fresh | resumable | cached
-│     · 같은 hash의 prepared state + review_schema: 5 → resumable (이어서)
-│     · 같은 hash의 sealed state + schema 5 report → cached (재사용)
-│     · schema marker 없음/불일치 → 한 번 force-fresh
-│     · force: true → 캐시 무시하고 fresh
-└── PR 본문 또는 commit log의 변경 배경을 session.md에 고정
+├── schema 또는 source identity가 맞지 않으면 한 번만 force-fresh
+└── fresh 또는 유효한 resumable state만 다음 단계로 전달
 
-Step 2 — Build Scope, Rules, and Evidence
-├── 변경 파일마다 (path, status) checklist 작성
-├── 생성물·binary·삭제·vendor 제외는 사유와 함께 skipped 처리
-├── 현재 사용자 요구를 USR-NNN으로 고정하고 내장·저장소 규칙과 병합
-├── owning fractal과 churn으로 bounded review group 구성
-└── FCA snapshot 증거와 source/snapshot hash gate 수집
+Step 2 — Scope
+├── review_state({ action: "scope", projectRoot, branchName })를 한 번 호출
+├── 커밋 변경 roster의 status·owner·role·churn과 working-tree disposition 수집
+├── 변경 범위의 구조·검증 위반을 FCA-NNN 후보로 정규화
+└── canonical evidence.md와 session.md checklist를 준비
 
-Step 3 — Review Groups  (최대 8개 병렬)
-├── 각 그룹 reviewer가 파일별 diff 전체와 필요한 호출자·테스트를 읽음
-├── 큰 변경은 코드보다 먼저 Risk Plan 작성
-├── 규칙 checklist 뒤 계획 없는 free sweep 수행
-└── 모든 파일을 reviewed | skipped + reason으로 마감; in-scope gap은 INCONCLUSIVE
+Step 3 — Group and Review  (최대 8개 병렬)
+├── owner와 churn으로 bounded group을 만들고 각 그룹에 reviewer 한 명 배정
+├── reviewer가 파일별 diff·호출자·테스트와 계층형 규칙을 판단
+└── 모든 roster 행을 reviewed | skipped + reason으로 마감
 
-Step 4 — Verify Every Candidate
-├── reviewer finding과 FCA finding 행을 path + rule로 중복 제거
-├── 경로별 후보와 같은 USR-NNN catalog로 효율 등급 verifier를 병렬 실행
+Step 4 — Verify
+├── 각 그룹에 효율 등급 verifier 한 명을 배정
+├── reviewer finding과 해당 FCA-NNN 후보를 독립적으로 재현
 └── 후보마다 CONFIRMED | REFUTED | INDETERMINATE 하나를 기록
 
-Step 5 — Checkpoint, Report, and Seal
-├── review_state(checkpoint) → artifact 목록과 report 경로
-├── coverage와 verification log를 review-report.md에 기록
-├── verdict: APPROVED | REQUEST_CHANGES | INCONCLUSIVE
-└── review_state(seal) → prepared hash와 report가 있을 때만 sealed
+Step 5 — Verdict and Seal
+├── review_state(checkpoint)로 source identity와 필수 artifact를 재확인
+├── coverage·verification 결과로 APPROVED | REQUEST_CHANGES | INCONCLUSIVE 판정
+├── review-report.md와 필요한 fix-requests.md를 기록
+└── review_state(seal)이 성공한 verdict만 terminal 결과로 인정
 
-Step 6 — Publish to Pull Request
-└── PR이 있으면 기존 verdict 코멘트를 갱신하고, 없으면 게시하지 않음
+Step 6 — Publish
+└── PR이 있으면 canonical verdict 코멘트를 갱신하고, 없으면 게시하지 않음
 ```
 
 ### cross-review 입력과 규칙
@@ -287,12 +282,9 @@ Step 6 — Publish to Pull Request
 - 변경 파일별 전체 diff, 현재 파일, 필요한 호출자와 테스트
 - 내장 `default`·`tests`·`documents`·`fca` 규칙과 저장소의 적용 규칙
 - 변경된 프랙탈의 INTENT.md와 DETAIL.md 계약
-- node classification과 owner
-- entry point surface와 외부 import boundary
-- dependency DAG와 cycle
+- `review_state(scope)`가 만든 owner·role·churn roster와 canonical `evidence.md`
+- 변경 범위의 entry point·외부 import boundary·DAG·verification 후보
 - LCA placement 및 승인된 restructure plan 사후조건
-- spec-document 15, test-record 32
-- spec fragmentation과 DETAIL acceptance group link
 - `unsupported` / `indeterminate` 진단
 
 verdict는 이 입력으로 확인한 커밋 변경 범위에만 적용된다. 범위 밖에서 발견한 새 우려는 기록할 수 있지만 verdict에는 영향을 주지 않는다.
@@ -312,17 +304,17 @@ verdict는 이 입력으로 확인한 커밋 변경 범위에만 적용된다. �
 ### review state 수명주기
 
 ```
-prepare ──→ (작업) ──→ checkpoint ──→ seal ──→ cleanup
-   │                       │
-   │                       ├─ missing   : state 없음
-   │                       ├─ stale     : hash 불일치
-   │                       ├─ resumable : matching prepared
-   │                       └─ cached    : matching sealed + report
-   │
+prepare ──→ scope ──→ (판단) ──→ checkpoint ──→ seal ──→ cleanup
+   │          │                        │
+   │          │                        ├─ missing   : state 없음
+   │          │                        ├─ stale     : hash 불일치
+   │          │                        ├─ resumable : matching prepared
+   │          │                        └─ cached    : matching sealed + report
+   │          └─ scoped : roster + evidence.md
    └─ force: true → 캐시 무시
 ```
 
-`stale`과 `missing`은 `ok` status가 아니다. 메시지 파싱 없이 안정적인 disposition과 diagnostics로 판정할 수 있다. `cleanup`은 리터럴 `confirm: true` 뒤에 해당 브랜치 디렉터리만 제거한다.
+`stale`과 `missing`은 `ok` status가 아니다. 메시지 파싱 없이 안정적인 disposition과 diagnostics로 판정할 수 있다. `assess`는 working tree를 독립적으로 관측하고, `scope`는 같은 disposition을 증거 payload에 포함한다. `cleanup`은 리터럴 `confirm: true` 뒤에 해당 브랜치 디렉터리만 제거한다.
 
 ---
 

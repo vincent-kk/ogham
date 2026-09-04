@@ -340,7 +340,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 
 ### ADR-13 — cross-review는 단일 리뷰 패스와 독립 검증을 분리한다
 
-**상태**: 채택 (ADR-10 대체, ADR-08 범위 조정)
+**상태**: 대체됨 (ADR-14가 대체, ADR-10 대체, ADR-08 범위 조정)
 
 변경 파일은 적용 규칙과 churn에 따라 그룹화하고, 각 그룹의 reviewer가 내장 체크리스트와 저장소 규칙을 함께 적용해 모든 파일을 `reviewed | skipped`로 마감한다. 현재 사용자 요구는 안정적인 `USR-NNN` ID를 가진 동일한 host-authoritative catalog로 reviewer와 verifier에 전달한다. reviewer finding과 FCA 도구 행은 `path + rule`로 중복 제거한 후보가 되며, 독립 verifier가 코드에서 각 후보를 재현해 `CONFIRMED | REFUTED | INDETERMINATE`로 판정한다. 고정 역할별 의견 파일과 합의 장치는 제거하되 FCA 증거 수집, `review_state` 생명주기, 보고서·PR 코멘트 표면은 유지한다.
 
@@ -348,7 +348,17 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 
 **트레이드오프**: cross-review의 판정 범위가 FCA 계약에서 변경 파일의 일반 결함까지 넓어진다. 대신 저장소 전역 규칙 엔진은 여전히 소유하지 않고, 변경 범위 밖 관찰은 verdict에 영향을 주지 않으며, 검증자가 확인한 finding만 fix request가 된다.
 
-**파급**: ADR-10의 역할 구성을 대체하고 ADR-08의 비소유 경계를 전역 규칙 엔진으로 좁힌다. finding의 단계 간 필드는 `Perspective` 대신 `Category`를 사용한다. v5 `session.md`와 `review-report.md`는 `review_schema: 5`로 이전 cache를 무효화하고, fix request의 Claim을 포함한 원 finding은 canonical FIX ID로 resolve에서 revalidate까지 이어진다. 비-FCA category의 revalidate는 이 payload를 받은 verifier의 재검증 결과를 따른다.
+**파급**: ADR-10의 역할 구성을 대체하고 ADR-08의 비소유 경계를 전역 규칙 엔진으로 좁힌다. finding의 단계 간 필드는 `Perspective` 대신 `Category`를 사용한다. v5 `session.md`와 `review-report.md`는 schema marker로 이전 cache를 무효화하고, fix request의 Claim을 포함한 원 finding은 canonical FIX ID로 resolve에서 revalidate까지 이어진다. 비-FCA category의 revalidate는 이 payload를 받은 verifier의 재검증 결과를 따른다.
+
+### ADR-14 — cross-review v6 — `review_state scope`가 변경 범위 증거를 소유한다
+
+**상태**: 채택 (ADR-13 대체)
+
+**결정**: prepared state 뒤에 `review_state(scope)`를 호출한다. 서버는 한 snapshot에서 커밋 변경 파일의 status·owner·role·churn, working-tree disposition, 변경 범위와 교차하는 구조·검증 위반을 수집하고 `FCA-NNN` 후보로 정규화해 canonical `evidence.md`를 쓴다. 스킬은 파일별 규칙 판단, 그룹 구성, verifier 배정, verdict와 게시만 맡는다.
+
+**근거**: v5는 서버가 이미 가진 snapshot 자료를 여러 MCP 호출과 긴 산문 절차로 다시 조립하고, 같은 산출물 형식을 여러 문서와 정규식 테스트에 중복했다. 결정론적 증거 수집을 in-process action으로 옮기면 FCA 검증을 유지하면서 hash 대조·owner 귀속·후보 정규화의 재현성을 높이고 프롬프트를 판단에 집중시킨다.
+
+**결과**: MCP 도구 수는 9개로 유지되고 `review_state`는 여섯 action이 된다. 변경 그룹마다 reviewer 한 명과 효율 모델 verifier 한 명이 디스크의 opinion과 `evidence.md`를 읽으며, 하류가 소비하는 report·fix request·verdict 형식은 유지된다. 절차 산문 고정 테스트는 `scope` 순수 함수·handler 단위 테스트와 작은 스킬 표면 테스트로 대체된다.
 
 ---
 
@@ -375,7 +385,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 | AC-15 | Seiri가 설치되지 않아도 filid는 모든 자체 기능을 수행한다                                                                                                                                        | 위 소유권 경계표                                    |
 | AC-16 | `@ast-grep/napi`, 전역 npm 탐색, `fast-glob` 없이 build가 성공한다                                                                                                                               | ADR-01 · ADR-09                                     |
 | AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없다                                                                                                                                         | [07](./07-RULES-REFERENCE.md)                       |
-| AC-18 | cross-review finding은 `file:line` 또는 canonical 증거 행을 인용하고, verifier가 `CONFIRMED`한 finding만 fix request가 되며 구조 수정은 exact plan을 쓴다                                    | ADR-13 · [03](./03-LIFECYCLE.md)                    |
+| AC-18 | cross-review finding은 `file:line` 또는 canonical 증거 행을 인용하고, verifier가 `CONFIRMED`한 finding만 fix request가 되며 구조 수정은 exact plan을 쓴다                                    | ADR-14 · [03](./03-LIFECYCLE.md)                    |
 | AC-19 | MCP 도구는 정확히 9개, 사용자 스킬은 정확히 12개                                                                                                                                                 | [08](./08-API-SURFACE.md) · [03](./03-LIFECYCLE.md) |
 | AC-20 | core·policy·DTO에는 특정 생태계의 확장자·테스트 호출 리터럴이 없다                                                                                                                               | ADR-02                                              |
 | AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않는다                                                                                                                   | [03](./03-LIFECYCLE.md)                             |

@@ -1,6 +1,6 @@
 # FCA Review Rules
 
-Apply these rules when an assigned file has an owning fractal. Use `structure-check.md` and `verification.md` rows as primary evidence and cite the exact canonical row before source interpretation. Map `documents` and `entry-points` evidence to `contract`, `nodes`, `boundaries`, and `dag` evidence to `structure`, and verification evidence to `verification`. Read project documents directly only for current-contract questions that the tools cannot measure.
+Apply these rules when an assigned file has an owning fractal. Use `evidence.md` rows as primary evidence and cite the exact canonical row before source interpretation. Map `documents` and `entry-points` evidence to `contract`, `nodes`, `boundaries`, and `dag` evidence to `structure`, and verification evidence to `verification`. Read project documents directly only for current-contract questions that the tools cannot measure.
 
 ## Contract
 

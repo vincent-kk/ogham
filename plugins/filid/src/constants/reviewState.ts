@@ -32,6 +32,8 @@ export const REVIEW_STATE_GIT = {
 
 export const REVIEW_STATE_GIT_ARGUMENTS = {
   DIFF_COMMITTED_PATHS: ['--name-only', '-z', '--no-renames'],
+  DIFF_COMMITTED_STATUS: ['--name-status', '-z', '--no-renames'],
+  DIFF_COMMITTED_NUMSTAT: ['--numstat', '-z', '--no-renames'],
   HEAD_TREE: ['-rz', '--full-tree'],
   STATUS_PORCELAIN: ['status', '--porcelain', '-z'],
   UPSTREAM_COUNT: ['rev-list', '--count', '@{upstream}..HEAD'],
@@ -42,6 +44,7 @@ export const REVIEW_STATE_GIT_ARGUMENTS = {
 export const REVIEW_STATE_ACTIONS = {
   PREPARE: 'prepare',
   CHECKPOINT: 'checkpoint',
+  SCOPE: 'scope',
   SEAL: 'seal',
   CLEANUP: 'cleanup',
   ASSESS: 'assess',
@@ -101,6 +104,7 @@ export const REVIEW_STATE_DISPOSITIONS = {
   CACHED: 'cached',
   STALE: 'stale',
   MISSING: 'missing',
+  SCOPED: 'scoped',
   SEALED: 'sealed',
   CLEANED: 'cleaned',
 } as const;
@@ -114,6 +118,7 @@ export const REVIEW_STATE_DIRECTORY_NAMES = {
 export const REVIEW_STATE_FILE_NAMES = {
   STATE: 'review-state.json',
   REPORT: 'review-report.md',
+  EVIDENCE: 'evidence.md',
   SESSION: 'session.md',
   VERIFICATION: 'verification.md',
   VERIFICATION_METRICS_PARTIAL: 'verification.metrics-half.partial.md',
@@ -127,6 +132,7 @@ export const REVIEW_STATE_FILE_NAMES = {
 export const REVIEW_STATE_STALE_ARTIFACT_FILE_NAMES = [
   REVIEW_STATE_FILE_NAMES.REPORT,
   REVIEW_STATE_FILE_NAMES.SESSION,
+  REVIEW_STATE_FILE_NAMES.EVIDENCE,
   REVIEW_STATE_FILE_NAMES.VERIFICATION,
   REVIEW_STATE_FILE_NAMES.VERIFICATION_METRICS_PARTIAL,
   REVIEW_STATE_FILE_NAMES.VERIFICATION_STRUCTURE_PARTIAL,
@@ -141,6 +147,7 @@ export const REVIEW_STATE_STALE_ARTIFACT_DIRECTORY_NAMES = [
 export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   STATE_MISSING: 'review-state-missing',
   SOURCE_HASH_STALE: 'review-source-hash-stale',
+  STATE_SEALED: 'review-state-sealed',
   REPORT_MISSING: 'review-report-missing',
 } as const;
 
@@ -148,12 +155,19 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   STATE_MISSING: 'No prepared review state exists for this branch.',
   SOURCE_HASH_STALE:
     'Committed source content no longer matches the prepared review state.',
+  STATE_SEALED: 'A sealed review state cannot be scoped again.',
   REPORT_MISSING: 'The canonical review report is missing.',
 } as const;
 
+/** Schema version rendered in canonical cross-review evidence. */
+export const REVIEW_EVIDENCE_SCHEMA_VERSION = 6 as const;
+
+/** Maximum dirty paths returned inline by the scope action. */
+export const REVIEW_SCOPE_DIRTY_PATH_LIMIT = 20;
+
 export const REVIEW_STATE_ERROR_MESSAGES = {
   INPUT_OBJECT_REQUIRED: 'review_state input must be an object',
-  ACTION_INVALID: 'action must be prepare, checkpoint, seal, or cleanup',
+  ACTION_INVALID: 'action must be prepare, checkpoint, scope, seal, or cleanup',
   PROJECT_ROOT_REQUIRED: 'projectRoot is required',
   BRANCH_NAME_REQUIRED: 'branchName is required',
   BASE_REF_REQUIRED: 'baseRef is required for prepare',

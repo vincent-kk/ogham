@@ -10,6 +10,7 @@ import { assessReviewState } from './handlers/assessReviewState.js';
 import { cleanupReviewState } from './handlers/cleanupReviewState.js';
 import { prepareReviewState } from './handlers/prepareReviewState.js';
 import { readReviewCheckpoint } from './handlers/readReviewCheckpoint.js';
+import { scopeReviewState } from './handlers/scopeReviewState.js';
 import { sealReviewState } from './handlers/sealReviewState.js';
 import type {
   ReviewStateInput,
@@ -54,6 +55,8 @@ export async function handleReviewState(
         ...input,
         action: REVIEW_STATE_ACTIONS.CHECKPOINT,
       });
+    case REVIEW_STATE_ACTIONS.SCOPE:
+      return scopeReviewState(input);
     case REVIEW_STATE_ACTIONS.SEAL:
       return sealReviewState({
         ...input,
