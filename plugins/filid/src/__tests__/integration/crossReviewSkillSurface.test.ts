@@ -111,11 +111,14 @@ describe('cross-review v6 skill surface', () => {
   });
 
   it('limits each role to its group rows in canonical evidence', () => {
-    const instruction =
-      'Read only the `evidence.md` frontmatter and the `## Changed Scope` and `## Candidates` rows whose `Path` belongs to your group; skip every other section.';
+    const groupRows = 'rows whose `Path` belongs to your group; skip every other section.';
 
-    expect(reviewer).toContain(instruction);
-    expect(verifier).toContain(instruction);
+    expect(reviewer).toContain(
+      `Read only the \`evidence.md\` frontmatter and the \`## Changed Scope\`, \`## Candidates\`, and \`## Informational\` ${groupRows}`,
+    );
+    expect(verifier).toContain(
+      `Read only the \`evidence.md\` frontmatter and the \`## Changed Scope\` and \`## Candidates\` ${groupRows}`,
+    );
   });
 
   it('stops every unrecognized scope response without a verdict', () => {
