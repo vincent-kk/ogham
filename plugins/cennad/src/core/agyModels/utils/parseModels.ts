@@ -1,3 +1,4 @@
+import { canonicalizeAgyModelName } from '../../../utils/canonicalizeAgyModelName.js';
 import { isRecord } from '../../../utils/isRecord.js';
 
 const ANSI_PATTERN = new RegExp(
@@ -29,7 +30,8 @@ export function parseModels(stdout: string): string[] {
       if (isRecord(entry) && typeof entry.name === 'string') return entry.name;
       return '';
     })
-    .filter((name) => name.trim().length > 0);
+    .map(canonicalizeAgyModelName)
+    .filter((name) => name.length > 0);
 
   return Array.from(new Set(names));
 }
@@ -47,7 +49,7 @@ function parsePlainText(text: string): string[] {
       continue;
     }
     if (/^[-=*#+]/.test(line)) continue;
-    names.push(line);
+    names.push(canonicalizeAgyModelName(line));
   }
-  return Array.from(new Set(names));
+  return Array.from(new Set(names.filter((name) => name.length > 0)));
 }

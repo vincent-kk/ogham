@@ -83,6 +83,19 @@ describe('resolveAntigravityModel', () => {
     );
   });
 
+  it('uses the canonical slug from a tab-separated legacy config value', () => {
+    const map: AntigravityModelMap = {
+      apex: {
+        model: 'gemini-3.8-flash-high\tGemini 3.8 Flash (High)',
+      },
+      high: { model: 'x' },
+      mid: { model: 'x' },
+      low: { model: 'x' },
+    };
+
+    expect(resolveAntigravityModel('apex', map)).toBe('gemini-3.8-flash-high');
+  });
+
   it('leaves an already-complete display name alone', () => {
     const map: AntigravityModelMap = {
       apex: { model: 'Gemini 3.1 Pro (High)', effort: 'Low' },

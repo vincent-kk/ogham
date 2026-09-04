@@ -34,6 +34,17 @@ describe('parseModels', () => {
     expect(parseModels(stdout)).toEqual(['model-x', 'model-y', 'model-z']);
   });
 
+  it('uses canonical slugs from agy 1.1.25 tab-separated catalog rows', () => {
+    const stdout = [
+      'gemini-3.8-flash-high\tGemini 3.8 Flash (High)',
+      'claude-sonnet-4-6\tClaude Sonnet 4.6 (Thinking)',
+    ].join('\n');
+    expect(parseModels(stdout)).toEqual([
+      'gemini-3.8-flash-high',
+      'claude-sonnet-4-6',
+    ]);
+  });
+
   it('extracts table-row cells and drops separator/decorative lines', () => {
     const stdout = [
       '+------------------+',
@@ -85,7 +96,7 @@ describe('parseModels', () => {
     expect(parseModels(stdout)).toEqual(['valid-model', 'object-model']);
   });
 
-  it('preserves model names verbatim without normalization', () => {
+  it('preserves a non-tabbed display name verbatim', () => {
     const stdout = JSON.stringify(['Gemini 2.0 Flash Experimental']);
     expect(parseModels(stdout)).toEqual(['Gemini 2.0 Flash Experimental']);
   });

@@ -6,12 +6,13 @@ import {
   AgyModelsCacheSchema,
 } from '../../../types/index.js';
 import { isFileNotFound } from '../../../utils/isFileNotFound.js';
+import { parseModels } from '../utils/parseModels.js';
 
 import { refreshModels } from './refreshModels.js';
 
 const TTL_MS = 60 * 60 * 1000; // 1 hour
 
-// Returns currently available Antigravity model full-names. Serves a fresh
+// Returns currently available Antigravity canonical model slugs. Serves a fresh
 // cache within TTL, otherwise re-runs `agy models`; on refresh failure falls
 // back to a stale cache, then to an empty list. Never throws.
 export async function getAvailableModels(): Promise<string[]> {
@@ -28,7 +29,12 @@ async function readCache(): Promise<AgyModelsCache | null> {
   try {
     const text = await readFile(AGY_MODELS_CACHE_PATH, 'utf8');
     const parsed = AgyModelsCacheSchema.safeParse(JSON.parse(text));
-    return parsed.success ? parsed.data : null;
+    return parsed.success
+      ? {
+          ...parsed.data,
+          models: parseModels(JSON.stringify(parsed.data.models)),
+        }
+      : null;
   } catch (err) {
     if (isFileNotFound(err)) return null;
     return null;

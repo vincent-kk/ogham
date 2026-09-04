@@ -70,6 +70,17 @@ describe('getAvailableModels — fresh cache within TTL', () => {
     }
   });
 
+  it('normalizes tab-separated rows already stored in a fresh cache', async () => {
+    await seedCache(
+      ['gemini-3.8-flash-high\tGemini 3.8 Flash (High)'],
+      Date.now(),
+    );
+
+    const models = await getAvailableModels();
+
+    expect(models).toEqual(['gemini-3.8-flash-high']);
+  });
+
   it('never throws even when called with no cache and no agy binary', async () => {
     const savedPath = process.env.PATH;
     process.env.PATH = '/nonexistent';
