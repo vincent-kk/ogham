@@ -67,7 +67,7 @@ export function judgeCheckOutcome(
     verdict: {
       kind: 'unmet',
       reason: withKnownExit(
-        `EXPECT "${gate.expect}" not in output`,
+        'expected success marker not found in output',
         outcome.exit,
       ),
       regressed,

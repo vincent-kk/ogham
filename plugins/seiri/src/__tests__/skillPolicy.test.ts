@@ -145,6 +145,19 @@ describe('skill invocation policy', () => {
     );
   });
 
+  // filid:contract AC-workflow-entry-validity
+  it('keeps real workflow entry paths valid', () => {
+    expect(readSkill('scaffold-pr').body).toContain(
+      'Options alone are not a purpose.',
+    );
+    expect(readSkill('implement').body).toContain(
+      "a new symbol's absence is the expected pre-change failure",
+    );
+    expect(readSkill('trace-cause').body).toContain(
+      "Use the reported symptom's reproduction command",
+    );
+  });
+
   // filid:contract AC-planning-method-selection
   it('selects a planning method before falling back and preserves its shape', () => {
     const writePlan = readSkill('write-plan').body;

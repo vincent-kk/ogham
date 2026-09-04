@@ -16,7 +16,7 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 **1. Write the check first.** Before any implementation, express what this change should make true as a check that can fail, using this repository's designated verification means. One behaviour, named for it.
 
-**2. Watch it fail for the change's own reason.** Not a typo, not a missing import. A check that passes before the change exists is testing something else — rewrite it until you have seen the right failure.
+**2. Watch it fail for the change's own reason.** Not a typo, not an unrelated missing import. When the change introduces a new symbol, a new symbol's absence is the expected pre-change failure; otherwise a missing import is a setup error. A check that passes before the change exists is testing something else — rewrite it until you have seen the right failure.
 
 **3. Write the minimum that passes.** No options nobody asked for, no improving neighbours on the way through.
 

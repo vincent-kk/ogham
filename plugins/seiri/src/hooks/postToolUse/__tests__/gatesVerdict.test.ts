@@ -109,7 +109,7 @@ describe('PostToolUse gate verdicts', () => {
     });
 
     expect(output.hookSpecificOutput?.additionalContext).toContain(
-      'unmet — EXPECT "8/8 passed" not in output',
+      'unmet — expected success marker not found in output',
     );
     expect(readFileSync(path, 'utf8')).toBe(LEDGER);
   });
@@ -149,7 +149,7 @@ describe('PostToolUse gate verdicts', () => {
     });
 
     expect(output.hookSpecificOutput?.additionalContext).toContain(
-      'unmet — EXPECT "8/8 passed" not in output (exit 1)',
+      'unmet — expected success marker not found in output (exit 1)',
     );
   });
 
@@ -323,7 +323,7 @@ describe('PostToolUse gate verdicts', () => {
       processToolOutcome(input).hookSpecificOutput?.additionalContext ?? '';
 
     expect(line).toContain(
-      'unmet — EXPECT "8/8 passed" not in output (exit 1)',
+      'unmet — expected success marker not found in output (exit 1)',
     );
     expect(line).toContain('trace-cause');
     expect(line).not.toContain('\n');

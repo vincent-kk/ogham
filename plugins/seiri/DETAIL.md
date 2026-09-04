@@ -27,6 +27,8 @@
 - `off` 는 skills-only 기본값이다. 스킬은 설치·호출 가능한 채로 남지만 모든 훅 processor가 규칙·세션 상태 접근 전에 빠져나오고, entry는 stdout/stderr를 비운다. 정적 manifest 호출과 프로세스 cold start 자체는 남는다.
 - 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트된다. 배포된 규칙이 없는 프로젝트는 `standard` 이상에서 선출 줄만 받고, `advisory` 는 SessionStart 상태만 허용하며 `off` 는 배포 여부와 무관하게 아무것도 받지 않는다.
 - 어떤 실패든 processor에서 `{ continue: true }` 로 귀결되고 주입하지 않는다. 의미 있는 `additionalContext`가 없으면 entry가 stdout을 쓰지 않는다. 훅이 세션을 막거나 no-op 응답을 남길 수 없어야 한다.
+- 훅의 `additionalContext`는 저장소가 제공한 값을 실패 사유에 그대로 반사하지 않는다. 게이트 불일치는 `EXPECT` 원문 없이 고정 사유로 보고하고, 잘못된 intervention 경고도 거부된 원값을 포함하지 않는다.
+- 활성 훅의 외부 timeout은 stdin fail-open deadline보다 길어야 한다. 닫히지 않은 stdin을 비운 뒤 파싱·출력·종료할 여유를 남긴다.
 - PostToolUse 와 PostToolUseFailure 는 `Bash` 와 `Skill` 만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `off` 와 `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다. 작업 원장의 CHECK 와 일치하는 Bash 결과는 EXPECT 로 판정해 원장에 증거를 기록하고 정확히 한 줄의 게이트 판정을 주입한다.
 - `Skill` 로드는 관측만 한다: seiri 워크플로우면 마지막 상태를 `.seiri/session-signals.json` 에 기록하고 아무것도 주입하지 않는다. 체인 밖 스킬(다른 플러그인, 호출형 게이트)은 상태를 남기지 않는다. 상태는 로드마다 재무장되고 다음 턴이 한 번만 소비한다.
 - SubagentStart 는 같은 자세를 압축 형태로 다시 주입한다. 최대 두 줄, `off` 와 `advisory` 에서는 전혀 주입하지 않는다. `off` 는 규칙 상태도 읽지 않는다. 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트되므로, 배포 0건인 `standard` 이상 프로젝트의 서브에이전트는 선출 줄 하나만 받는다.
@@ -53,6 +55,9 @@
 - `review-plan` 은 선택된 planning method와 공통 불변조건의 검토 게이트다. 사용자 요청·저장소 지침에서 method 출처를 독립 확인하고 선택된 방법의 고유 구조를 기준으로 삼으며, 선택된 방법이 없을 때만 Seiri 기본법을 적용한다. 계획의 현재 상태 주장은 도구로 접지하되 제안 상태의 부재는 정상이고 계획의 명령은 읽어서 확인할 뿐 실행하지 않는다. 트리아지를 한 줄로 선언하고(무언 스킵 금지), challenge 트리거(광역 변경·비가역 단계·이 세션이 쓰지 않은 계획)가 켜지면 위임/진행을 정확히 한 번 묻는다 — 위임은 request-review 규격 인계물을 만들고 턴을 끝낸다. 판정(cleared·grounded-only·rework-required)은 선택된 방법의 review 위치에, 그런 위치가 없으면 계획 문서에 기록한다. challenge 없이 cleared 없음, 재작업은 1회에 바뀐 주장의 scoped recheck 만.
 - 게이트 원장은 write-plan → review-plan → execute → verify → request-review → finish 를 가로지르는 횡단 관심사이며, 포맷 정본은 `skills/execute/references/gates-format.md` 다.
 - scaffold-pr 는 작업 시작 게이트다: 브랜치·빈 커밋·Draft PR 만 만들고 소스 파일은 건드리지 않는다(이슈·티켓 연동 없음). git·gh 시퀀스는 동봉 `scaffold-pr.mjs` 가 결정적으로 수행하고(셸 미사용 argv spawn — 크로스플랫폼), LLM 은 브랜치·제목·본문 결정과 JSON 결과의 안정 실패 코드 해석만 맡는다. finish 가 닫는 브랜치 수명의 반대쪽 끝을 연다.
+- scaffold-pr 의 옵션은 목적이 아니다. 목적 없이 `--base`·`--ready` 같은 옵션만 주어지면 목적 선택을 한 번 묻고, 옵션은 그 선택과 함께 실행 인자로 보존한다.
+- implement 에서 missing import/export는 새 심볼의 부재 자체가 변경 전 상태일 때만 올바른 red 증거다. 이미 있어야 하는 심볼의 부재나 경로 오타는 계속 setup failure로 다룬다.
+- trace-cause 는 보고된 증상을 실제로 재현하는 명령을 기준선으로 삼는다. 지정 verification이 그 증상을 재현할 때는 그것을 쓰고, 그렇지 않으면 증상 전용 명령을 쓰며 수정 전후에 같은 재현 명령을 다시 실행한다.
 - 문서를 쓰는 스킬의 정본은 `src/constants/skillPolicy.ts`의 `DOCUMENT_WRITING_SKILLS`(architect·clarify-request·review-plan·write-plan)다 — 파티션이 아니라 횡단 축이며, 각 이름은 위 파티션 중 정확히 하나에도 속한다. 구성원은 세션 응답 언어 정본 문장을 본문에 그대로 담는다: 문서는 세션 응답 언어(하니스가 응답에 설정한 언어, 없으면 응답이 이미 쓰는 언어)로 쓰고, 기계가 읽는 토큰·식별자·경로·코드·명령은 원문을 유지한다. `skillPolicy.test.ts`가 문장을 바이트 단위로 검사한다. 원장은 `gates-format.md`의 언어 규칙이 덮고, HTML 설명 스킬은 지정된 독자를, PR 제목·본문과 리뷰 인계물은 저장소 관례를 따르므로 목록에 넣지 않는다. seiri 는 언어를 저장하지 않는다 — 하니스 설정이 정본이고 사본은 드리프트한다.
 
 ## API Contracts
@@ -132,6 +137,17 @@
 - 계획이 모듈 경계·의존 방향·공개 소유권 또는 계약·장기 코드 배치를 선택하면 실제 계획과 같은 디렉터리에 `adr.md` 를 쓴다. 이 문서만으로 맥락·결정·이유·검토한 대안·주요 영향을 파악할 수 있어야 하며 실행 단계는 계획에 남긴다. 구조적 판단이 없으면 `adr.md` 를 만들지 않는다.
 - `review-plan` 은 method 출처를 사용자 요청·저장소 지침에서 다시 확인하고 선택된 방법과 공통 불변조건을 검토한다. `/seiri:execute` 가 수행할 계획만 검증 단계를 고정 포맷의 게이트 원장으로 적응한다.
 
+### AC-workflow-entry-validity — 실제 진입 경로를 잃지 않는 워크플로우
+
+- scaffold-pr 는 옵션-only 호출을 목적 입력으로 오인하지 않고 목적을 한 번 결정한 뒤 옵션을 보존한다.
+- implement 는 새 심볼을 추가하는 변경에서 그 심볼의 부재를 유효한 변경 전 실패로 허용하되, 일반적인 missing import는 허용하지 않는다.
+- trace-cause 는 테스트·CLI·UI·runtime 중 보고된 증상을 재현하는 명령을 기준선으로 삼고 같은 명령으로 수정 전후를 비교한다.
+
+### AC-hook-input-confinement — 저장소 입력은 컨텍스트 명령이 아니다
+
+- 미충족 게이트의 훅 판정 줄에는 `EXPECT` 원문이 없고, 잘못된 intervention 경고에는 거부된 원값이 없다.
+- stdin fail-open deadline은 이를 사용하는 모든 활성 훅의 외부 timeout보다 짧다.
+
 ### AC-explain-explanation — 개념·관계 중심 시각 설명
 
 - 완전한 산출물은 실행 환경이 선택한 저장소 밖의 쓰기 가능한 임시 저장 위치나 스크래치패드에 기록한 `single self-contained HTML` 한 개다. 대화는 한 문장 방향 요약과 경로만 건네며 별도의 Markdown 보고서를 만들지 않는다.
@@ -165,6 +181,7 @@
 
 ## History
 
+- 2026-09-05 — 플러그인 검증에서 발견된 워크플로우 진입 손실과 저장소 원문 반사·timeout 경합을 바로잡기로 했다. 새 심볼·증상 전용 재현·옵션-only 호출의 실제 경로를 계약에 포함하고, 프로젝트 입력은 훅 컨텍스트에 재출력하지 않으며 stdin fail-open 뒤 종료 여유를 보장한다.
 - 2026-09-03 — `intervention: off`를 skills-only 기본값으로 추가했다. 스킬은 명시 호출할 수 있게 유지하면서 훅의 강제 체이닝·상태 변경을 모두 먼저 건너뛰고, 의미 없는 `{ continue: true }` wire 응답도 stdout에 남기지 않기 위해서다. 기존 저장 값은 그대로 명시적 opt-in으로 존중한다.
 - 2026-09-01 — mental-model 스킬을 explain 으로 개명하고, 중심 원리를 세워 연역·공격하는 방법을 제거했다. 연결된 자료를 따라가 정확히 이해한 뒤 개념-관계 지도를 뼈대로 가르치는 방식이 하나의 원리 방어보다 설명력을 높인다는 판단에서다. 편집 스타일은 동봉 `reference.md` 가 계속 소유한다.
 - 2026-09-01 — mental-model 아티클의 편집 스타일 정본을 스킬 동봉 `reference.md` 로 분리했다. toss.tech 아티클 10편 조사에서 도출한 문제 선행 서사·용어 도입·코드 샌드위치·도해 배치 규칙을 SKILL.md 4KB 예산 밖에서 상세화해, 참조 링크 없이도 같은 편집 스타일로 아티클을 쓰게 하기 위해서다.
@@ -189,4 +206,4 @@
 
 ## Last Updated
 
-2026-09-03 — skills-only `off` 다이얼과 wire-level hook skip 계약을 추가했다.
+2026-09-05 — 워크플로우 진입 유효성과 저장소 입력의 훅 컨텍스트 격리 계약을 추가했다.

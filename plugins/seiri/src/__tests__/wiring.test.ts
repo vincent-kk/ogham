@@ -47,6 +47,21 @@ describe('wiring', () => {
       expect(hooksJson).toContain(`"matcher": "${tool}"`);
   });
 
+  it('leaves time for stdin fail-open before every active hook timeout', () => {
+    const source = read('src', 'hooks', 'shared', 'readStdin.ts');
+    const defaultMatch = source.match(/readStdin\(timeoutMs = (\d+)\)/);
+    expect(defaultMatch).not.toBeNull();
+    const stdinTimeoutMs = Number(defaultMatch?.[1]);
+    const manifest = JSON.parse(read('hooks', 'hooks.json')) as {
+      hooks: Record<string, Array<{ hooks: Array<{ timeout: number }> }>>;
+    };
+
+    for (const groups of Object.values(manifest.hooks))
+      for (const group of groups)
+        for (const hook of group.hooks)
+          expect(hook.timeout * 1000).toBeGreaterThan(stdinTimeoutMs);
+  });
+
   it('keeps dormant hooks out of hooks.json until re-measurement', () => {
     const hooksJson = read('hooks', 'hooks.json');
     for (const name of DORMANT_HOOKS)

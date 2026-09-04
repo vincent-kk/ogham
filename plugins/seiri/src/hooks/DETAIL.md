@@ -4,6 +4,7 @@
 
 - 훅 5종 중 **어느 것도 차단하지 않고 어느 것도 규칙 본문을 나르지 않는다.** 규칙 파일은 하니스가 이미 로드하므로, 훅이 나르는 것은 파일이 스스로 말할 수 없는 것뿐이다.
 - 어떤 실패에도 세션을 막지 않는다 — 최상위 try/catch 가 `{ continue: true }` 로 빠져나오고, 실패는 `logHookFailure` 로 기록한다. 조용한 실패는 없다.
+- stdin fail-open deadline은 활성 훅의 외부 timeout보다 짧다. stdin을 닫은 뒤 파싱·출력·정상 종료할 시간을 외부 deadline 안에 남긴다.
 - built-in `off`에서는 모든 processor가 규칙·세션 상태보다 다이얼을 먼저 읽고 즉시 빠져나온다. 스킬 설치·명시 호출은 영향을 받지 않는다.
 - processor의 no-op은 `{ continue: true }`지만 entry는 의미 있는 `additionalContext`가 있을 때만 JSON을 쓴다. 그래서 `off`, 관측-only Skill, 평상시 Bash, fail-open 경로의 stdout은 비어 있다.
 - 훅 도달 코드는 **플러그인 내부 배럴을 import 하지 않는다.** concrete 파일만 쓰며, 번들 byte cap 과 출력 패턴 검사가 재유입을 막는다. 공유 패키지는 `sideEffects: false` 덕에 루트 import 가 출력에 0바이트로 shake 되므로 예외다.
@@ -52,6 +53,14 @@
 
 - SessionStart·UserPromptSubmit·SubagentStart는 Codex 추가 필드의 유무와 무관하게 같은 상태에서 같은 `hookEventName`과 `additionalContext`를 반환한다.
 
+### AC-hooks-deadline-headroom — fail-open 종료 여유
+
+- stdin fail-open deadline은 이를 사용하는 모든 활성 훅의 외부 timeout보다 짧다.
+
+## History
+
+- 2026-09-05 — stdin fail-open과 외부 훅 timeout 사이에 종료 여유를 추가했다. 같은 deadline이면 타이머가 입력을 놓은 뒤에도 호스트가 파싱·출력 전에 프로세스를 죽일 수 있기 때문이다.
+
 ## Last Updated
 
-2026-09-03 — `off` 조기 게이트와 wire-level no-op skip 계약을 추가했다.
+2026-09-05 — stdin fail-open 뒤 파싱·출력·종료 시간을 보장했다.

@@ -14,13 +14,13 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 ## Workflow
 
-**1. Reproduce first.** Run this repo's designated verification command, capture the failure to a scratch file outside the repo, and quote it — re-running a suite to grep it differently pays twice. Without a reproduction there is nothing to verify a fix against; say so rather than guess.
+**1. Reproduce first.** Use the reported symptom's reproduction command; use this repo's designated verification command when it reproduces that symptom. Capture the failure to a scratch file outside the repo, and quote it — re-running a suite to grep it differently pays twice. Without a reproduction there is nothing to verify a fix against; say so rather than guess.
 
 **2. Separate where it appeared from where it lives.** The failing line is evidence, not the answer. Trace backward through the values that reached it to where state first went wrong.
 
 **3. Confirm the cause before fixing.** Make the smallest change that would break if your explanation were wrong, and check it. An explanation that predicts nothing is a story.
 
-**4. Fix, then prove it.** Run the same command, and confirm the test could have failed: it must fail against pre-fix code, for the bug's own reason. A test that passes with and without the change certifies the bug as handled.
+**4. Fix, then prove it.** Run the same reproduction command, and confirm the check could have failed: it must fail against pre-fix code, for the bug's own reason. A check that passes with and without the change certifies the bug as handled.
 
 ## Rules
 

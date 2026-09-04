@@ -45,7 +45,7 @@ export function readDialFile(path: string): DialFileResult {
   if (!isInterventionLevel(intervention))
     return {
       intervention: null,
-      reason: `unknown intervention level: ${JSON.stringify(intervention)}`,
+      reason: 'unknown intervention level',
     };
 
   return { intervention };

@@ -25,7 +25,7 @@ node "${CLAUDE_PLUGIN_ROOT}/skills/scaffold-pr/scripts/scaffold-pr.mjs" --check
 
 The reply is one JSON line: repo root, resolved base, dirty files — or a stable failure code (`GIT_MISSING`, `NOT_A_REPO`, `GH_MISSING`, `GH_UNAUTHENTICATED`, `BASE_RESOLVE_FAILED`). Failures stop here, reported plainly. Dirty files: name them, ask whether to continue — the scaffold call then carries `--allow-dirty`; never stash or commit them.
 
-**2. Ask the purpose — once.** Arguments are the answer; without them, one AskUserQuestion: "Generate with defaults (Recommended)" · feature · fix · chore, plus free text via Other. From that single input derive commit type, branch `<type>/<slug>` (lowercase ASCII, hyphens; translate non-ASCII purposes; no-input default `chore/scaffold-<n>`), PR title, and body.
+**2. Ask the purpose — once.** A non-option purpose argument is the answer. Options alone are not a purpose. Without a purpose, use one AskUserQuestion: "Generate with defaults (Recommended)" · feature · fix · chore, plus free text via Other. Preserve supplied options, then from that single purpose input derive commit type, branch `<type>/<slug>` (lowercase ASCII, hyphens; translate non-ASCII purposes; no-input default `chore/scaffold-<n>`), PR title, and body.
 
 **3. Write the body only when it has content.** Fill `.github/PULL_REQUEST_TEMPLATE.md` when the repository has one, Write it to a scratch file, and pass `--body-file`. Omit the flag to get the script's built-in placeholder body.
 

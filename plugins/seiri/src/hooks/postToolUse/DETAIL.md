@@ -7,7 +7,7 @@
 - **다이얼이 먼저다.** off 는 모든 상태 접근 전에 skip하고, advisory 는 원장·세션 상태를 건드리기 전에 빠져나온다.
 - `Skill` 로드는 관측만 한다 — 마지막 워크플로우 상태만 기록하고 무주입으로 빠진다. 말하는 건 다음 턴의 몫이다.
 - Bash 페이로드를 먼저 `{ text, exit?, interrupted? }`로 정규화한다. `interrupted === true`면 원장 판정과 실패 카운트를 모두 생략한다.
-- 게이트는 이벤트 이름이나 exit가 아니라 출력 텍스트의 EXPECT 매치로만 판정한다. EXPECT 없음은 `unjudgeable`, 빈 출력은 `unmet — no output`, 불일치는 `unmet`이며 알려진 nonzero exit는 이유와 증거에만 붙는다.
+- 게이트는 이벤트 이름이나 exit가 아니라 출력 텍스트의 EXPECT 매치로만 판정한다. EXPECT 없음은 `unjudgeable`, 빈 출력은 `unmet — no output`, 불일치는 고정 사유의 `unmet`이며 알려진 nonzero exit는 이유와 증거에만 붙는다. 불일치 판정 줄은 저장소가 쓴 EXPECT 원문을 복제하지 않는다.
 - 이미 met인 증거가 다시 met이 아니면 체크를 되돌리고 `pending (regressed)`를 기록한다. `agent_id`가 있는 증거는 짧은 표지를 남기며, 이후 드라이버 증명이 그 표지를 지운다.
 - CHECK와 무관한 Bash는 기존 실패 연쇄를 따른다. CHECK 실패가 임계에 닿으면 별도 줄 대신 판정 줄 하나에 trace-cause 힌트를 합친다.
 - 실패 연쇄는 명시적 failure 이벤트, 알려진 exit, CHECK 판정 순으로 실패 여부를 정한다. 앞의 두 근거가 없으면 `unmet`은 실패, 하나 이상의 판정이 모두 `met`이면 성공이며, 판정 불가능하면 카운터를 건드리지 않는다. 출력 내용에서 별도 실패 패턴을 추측하지 않는다.
@@ -50,6 +50,7 @@
 - standard 이상에서 CHECK와 일치한 호출은 원장 변경 여부와 관계없이 정확히 한 판정 줄을 받는다.
 - 여러 작업과 실패 연쇄 힌트도 그 한 줄에 합친다.
 - 같은 출력 텍스트와 EXPECT는 Claude 객체·실패 error·Codex 문자열 어느 형태에서도 같은 판정과 원장 바이트를 만든다.
+- 불일치 판정 줄에는 EXPECT 원문이 포함되지 않는다.
 
 ### AC-gates-evidence-provenance — 증거 출처
 
@@ -60,6 +61,10 @@
 
 - advisory 에서는 작업 원장을 읽거나 쓰지 않고, 판정 줄도 주입하지 않는다.
 
+## History
+
+- 2026-09-05 — unmet 판정 줄에서 EXPECT 원문을 제거했다. 프로젝트가 작성한 임의 문자열을 훅 `additionalContext`로 되돌려 보내지 않으면서 판정 결과는 유지하기 위해서다.
+
 ## Last Updated
 
-2026-09-03 — `off` 조기 skip과 no-op wire 침묵을 추가했다.
+2026-09-05 — unmet 판정 줄에서 저장소 EXPECT 원문을 제거했다.
