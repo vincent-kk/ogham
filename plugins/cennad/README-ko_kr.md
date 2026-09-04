@@ -96,7 +96,7 @@ cennad 는 절대 설치하거나 대신 로그인하지 않습니다. 인증이
 /crosscheck --tier high -- "이 RFC 를 코드·리서치·추론 관점에서 리뷰해줘"
 ```
 
-여러 모델 패밀리의 독립적 second opinion 이 가치 있을 때 사용하세요 (아키텍처 결정, 스펙/PR 리뷰). 동일 프롬프트가 활성화된 provider(codex, antigravity, claude) 전체에 병렬 전달되며, 비활성 provider 는 제외됩니다. 2개 이상 활성 시 응답은 Agreed / Conflicting / Final direction / Action checklist 4개 섹션으로 합성되고, 1개만 활성 시 해당 provider 응답을 그대로 제시합니다. 응답이 권고를 바꿀 만큼 엇갈리면 crosscheck 는 수렴 라운드를 1회 수행합니다 — 각 측에 상대 입장을 보여준 뒤 재합성하며, 건너뛰려면 `--no-converge`. crosscheck 는 사용자 `--continue` 를 받지 않으니, 한쪽을 직접 더 진행하려면 `/codex --continue`, `/antigravity --continue`, `/claude --continue` 를 사용하세요.
+여러 모델 패밀리의 독립적 second opinion 이 가치 있을 때 사용하세요 (아키텍처 결정, 스펙/PR 리뷰). 동일 프롬프트가 활성화된 provider(codex, antigravity, claude) 전체에 병렬 전달되며, 비활성 provider 는 제외됩니다. 2개 이상 활성 시 응답은 Agreed / Conflicting / Final direction / Action checklist 4개 섹션으로 합성되고, 1개만 활성 시 provider 결과가 도착하기 전에 host가 독립 답안을 고정한 뒤 두 관점을 합성합니다. 응답이 권고를 바꿀 만큼 엇갈리면 crosscheck 는 수렴 라운드를 1회 수행합니다 — 각 측에 상대 입장을 보여준 뒤 재합성하며, 건너뛰려면 `--no-converge`. crosscheck 는 사용자 `--continue` 를 받지 않으니, 한쪽을 직접 더 진행하려면 `/codex --continue`, `/antigravity --continue`, `/claude --continue` 를 사용하세요.
 
 ---
 

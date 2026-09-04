@@ -47,11 +47,18 @@
 - Codex가 읽는 생성 provider 스킬 3종은 `spawn_agent` target 보관, `wait_agent` mailbox 대기, returned sender와 target 대조를 지시하며 끝난 parent turn의 자동 재개를 기대하지 않는다.
 - 두 호스트 모두 같은 courier prompt, fallback, report relay, stop, tier 계약을 공유한다.
 
+### AC-skill-prompt-budget — 행동 보존형 prompt 축약
+
+- provider source prompt는 각각 380단어 이하, crosscheck entrypoint와 조건부 reference 묶음은 900단어 이하, 네 스킬과 두 reference의 합계는 2,000단어 이하를 유지한다.
+- Codex 생성 provider prompt는 각각 480단어 이하를 유지한다.
+- budget 축약은 공개 skill/argument surface, provider lifecycle, resume·tier·relay·stop, crosscheck participant·failure·convergence 계약을 제거하지 않는다.
+
 ## History
 
+- 2026-09-04 — 반복 rationale를 규범형 상태 계약으로 압축하고 source/generated prompt budget을 추가했다. 공개 위임 절차는 유지하면서 매 호출 context 비용과 문서 drift를 줄이기 위함이다.
 - 2026-09-04 — Claude의 completion notification과 Codex의 explicit child join을 한 source의 host-marked lifecycle로 분리했다. Codex에서 parent turn이 먼저 끝나 courier 결과 relay가 유실되는 문제를 막으면서 Claude 동작은 유지하기 위함이다.
 - 2026-08-04 — crosscheck 를 courier 미경유로 바꿨다. crosscheck 는 정교화 없이 참여자당 1콜만 쓰므로 courier 가 더할 판단이 없고, 호스트가 2분을 넘긴 MCP 호출을 background task 로 옮기므로 비블로킹도 courier 없이 성립한다.
 
 ## Last Updated
 
-2026-09-04 — provider 스킬의 Claude notification/Codex explicit join 계약을 추가했다.
+2026-09-04 — 행동 보존형 skill prompt budget과 축약 계약을 추가했다.

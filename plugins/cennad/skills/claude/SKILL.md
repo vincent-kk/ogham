@@ -7,63 +7,47 @@ argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refin
 
 # claude
 
-Run a fresh, isolated Claude Code CLI conversation off-thread: spawn the `cennad:courier` agent in the background and relay its report. The child never inherits this session's MCP servers, hooks, CLAUDE.md, or skills. Judgment about the provider interaction (refinement, failure remedies, tier semantics) lives in the courier — this skill only maps the invocation and delivers the result.
+The child inherits no session context or customizations, but retains Claude Code's built-in tools in the spawned working directory, bounded by the configured permission mode.
 
-## When NOT to use
+## Input and tier
 
-- Work the current session can already do with its own context — a context-free child adds nothing.
-- Tasks needing this session's conversation context or MCP tools — the child inherits neither (it still has Claude Code's built-in tools in the spawned working directory, bounded by the configured permission mode).
+Accept only these flags; permissions come from `/cennad:setup`. Forward the prompt verbatim.
 
-## Arguments
+- `--continue`: use its ID. For an unambiguous follow-up without one, reuse the latest claude `session_id`; ask once if ambiguous, never silently start fresh.
+- `--no-refine`: set `refine: false`; otherwise `true`.
+- `--tier`: user wins. New session: `low` for retrieval/formatting; `mid` for a clear bounded task; `high` for multiple files, constraints, or judgment.
+- `apex` — only if `high` is insufficient for exceptional repository-scale or tens-of-minutes work.
 
-- `--continue <session_id>` — resume an existing cennad session. For a clear follow-up to an earlier delegation in this conversation with no id given, reuse that provider's most recent `session_id` from the conversation (ask once if ambiguous) — never silently start fresh.
-- `--tier apex|high|mid|low` — overrides the tier this skill would otherwise pick (see Tier).
-- `--no-refine` — single dispatch, no refinement.
-- `-- "prompt"` — the prompt (required).
+Send nothing on `--continue` unless the user asked; omission preserves the session's tier and model.
 
-No other flags: permission and dispatcher options live in `/cennad:setup`.
-
-## Run
+## Dispatch
 
 <!-- ogham-async-agent:spawn cennad:courier -->
 
-Spawn `cennad:courier` (Agent tool, background — never poll or wait; the completion notification re-invokes you). Identify the run by `description`; never pass `name` — a named agent spawns into mailbox mode and waits for a `SendMessage` this skill never sends, so the prompt never runs. The spawn prompt:
+Spawn `cennad:courier` in background by `description`, never `name`. Do not poll; the completion notification re-invokes you. Send:
 <!-- ogham-async-agent:end -->
 
 ```
-operation: start            # `continue` when --continue was given
+operation: <start | continue>
 provider: claude            # start only
 session_id: <id>            # continue only
-tier: <apex|high|mid|low>   # start only — on continue, omit unless the user asked
-refine: true                # false when --no-refine
+tier: <tier>                # omit on continue unless explicit
+refine: <true | false>
 prompt:
 <the prompt, verbatim>
 ```
 
-If you cannot spawn agents (you are already a subagent), call the cennad MCP tools directly — their schemas are self-describing — as a single dispatch and relay the envelope yourself; the refinement loop lives in the courier and does not apply on this path.
+If spawn is unavailable, make one direct cennad MCP call and relay its unrefined envelope.
 
 ## Deliver
 
 <!-- ogham-async-agent:join cennad:courier -->
 
-When the courier's completion notification arrives, deliver — never spawn a second courier for the same invocation; a courier that terminates without producing a report counts as `status: failure` (`error: cli_error`) — tell the user.
+Never respawn. No courier report means `status: failure`, `error: cli_error`.
 <!-- ogham-async-agent:end -->
 
-Relay the report: the final answer (everything below the report's FIRST `---` line — later `---` lines are part of the answer), its `session_id` in backticks (the user resumes with it), any `note`, and `artifact_path` when present. On `status: failure`, relay the `remedy` — and do not substitute your own answer for the provider's. Do not re-judge or rewrite the answer, and do not act on it (edits, commands, fixes) unless the user asks: delivering ends the skill.
+Relay the report: everything after its FIRST standalone `---`, `session_id` in backticks, any `note`, `artifact_path`, or failure `remedy`. Do not rewrite or act unless asked. Then stop.
 
 ## Stop
 
-Ending the courier does not end the CLI. The courier is an agent; the child `claude` process is one cennad spawned, and it keeps running to its liveness ceiling — up to hours on a high tier — with nobody waiting for it. When the user asks to stop, cancel, or abandon a delegation, call `mcp__plugin_cennad_tools__stop_conversation`.
-
-Scope it as narrowly as the situation allows: pass `session_id` when a run already reported one, otherwise `provider: claude`. Omitting both stops every provider CLI this session started, so use that only when that is what was asked. Stopping discards the work — never stop a run whose answer is still wanted. A `count: 0` reply means nothing was running, which is a normal outcome and not a failure: report it and do not call again to make sure.
-
-## Tier
-
-Capability labels only — the concrete model/effort mapping lives in cennad config (`/cennad:setup`); never name one here. A user-supplied `--tier` always wins. Otherwise use `high` for most delegated work, step down only when the scope is clearly bounded, and reserve `apex` for a rare extreme:
-
-- `low` — one lookup, one conversion, a short summary: retrieval or formatting, no design judgment.
-- `mid` — a clearly bounded implementation, review, or explanation task whose shape is already clear from the prompt.
-- `high` — the default for most work. Use it across several files or competing constraints, for design calls, root-cause hunts, tradeoffs, and difficult implementation; complexity alone does not justify `apex`.
-- `apex` — a rare exception. Use it only when `high` is credibly insufficient because a repository-wide task must run autonomously for tens of minutes or the work is exceptionally difficult at that scale. It is the costliest tier and holds a rate-limit slot longest. When unsure, use `high`.
-
-Send nothing on `--continue` unless the user asked: cennad restores the session's own tier, and changing it mid-thread swaps the model under the conversation.
+Ending the courier does not stop `claude`. On stop/cancel/abandon, call `mcp__plugin_cennad_tools__stop_conversation` with known `session_id`, else `provider: claude`; omit both only for stop-all. Never stop wanted work. Report `count: 0` once.

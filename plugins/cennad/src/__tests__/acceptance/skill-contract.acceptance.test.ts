@@ -4,6 +4,11 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 const PLUGIN_DIR = join(import.meta.dirname, '..', '..', '..');
+const PROVIDERS = ['antigravity', 'codex', 'claude'] as const;
+const SOURCE_WORD_LIMIT = 380;
+const GENERATED_WORD_LIMIT = 480;
+const CROSSCHECK_WORD_LIMIT = 900;
+const TARGET_WORD_LIMIT = 2_000;
 
 function rawDoc(...segments: string[]): string {
   return readFileSync(join(PLUGIN_DIR, ...segments), 'utf8');
@@ -16,6 +21,18 @@ function readDoc(...segments: string[]): string {
 
 function readSkill(provider: string): string {
   return readDoc('skills', provider, 'SKILL.md');
+}
+
+function wordCount(content: string): number {
+  return content.trim().split(/\s+/).length;
+}
+
+function crosscheckDocs(): string[] {
+  return [
+    rawDoc('skills', 'crosscheck', 'SKILL.md'),
+    rawDoc('skills', 'crosscheck', 'references', 'convergence.md'),
+    rawDoc('skills', 'crosscheck', 'references', 'failure.md'),
+  ];
 }
 
 // Only the frontmatter `tools:` grants decide whether the subagent can actually
@@ -67,7 +84,7 @@ describe('[acceptance] cennad delegation contracts', () => {
     expect(courier).toContain('best successful answer so far');
   });
 
-  it.each(['antigravity', 'codex', 'claude'])(
+  it.each(PROVIDERS)(
     'keeps %s a thin dispatch mapper over the courier',
     (provider) => {
       const skill = readSkill(provider);
@@ -97,5 +114,79 @@ describe('[acceptance] cennad delegation contracts', () => {
     expect(skill).toContain('bounded by the configured permission mode');
     expect(skill).not.toMatch(/no shared context or tool access/i);
     expect(skill).not.toMatch(/the child cannot see them/i);
+  });
+
+  it('preserves the crosscheck participant, failure, and convergence states', () => {
+    const skill = readDoc('skills', 'crosscheck', 'SKILL.md');
+    const failure = readDoc(
+      'skills',
+      'crosscheck',
+      'references',
+      'failure.md',
+    );
+    const convergence = readDoc(
+      'skills',
+      'crosscheck',
+      'references',
+      'convergence.md',
+    );
+
+    expect(skill).toContain('Active providers:');
+    expect(skill).toContain('Auto-routing:');
+    expect(skill).toContain('2+ enabled');
+    expect(skill).toContain('Exactly 1 enabled');
+    expect(skill).toContain('0 enabled');
+    expect(skill).toContain('SAME prompt');
+    expect(skill).toContain('## Agreed');
+    expect(skill).toContain('## Conflicting');
+    expect(skill).toContain('## Final direction');
+    expect(skill).toContain('## Action checklist');
+    expect(failure).toContain('2+ usable viewpoints');
+    expect(failure).toContain('Exactly 1 usable viewpoint');
+    expect(failure).toContain('0 usable viewpoints');
+    expect(convergence).toContain('Run ONE convergence round');
+    expect(convergence).toContain('Continue ONLY');
+    expect(convergence).toContain('false (sycophantic) convergence');
+  });
+
+  it('keeps provider skill prompts within the source budget', () => {
+    for (const provider of PROVIDERS) {
+      expect(wordCount(rawDoc('skills', provider, 'SKILL.md'))).toBeLessThanOrEqual(
+        SOURCE_WORD_LIMIT,
+      );
+    }
+  });
+
+  it('keeps generated Codex variants within the prompt budget', () => {
+    for (const provider of PROVIDERS) {
+      expect(
+        wordCount(
+          rawDoc('.codex-plugin', 'skills', provider, 'SKILL.md'),
+        ),
+      ).toBeLessThanOrEqual(GENERATED_WORD_LIMIT);
+    }
+  });
+
+  it('keeps crosscheck and the requested skill set within prompt budgets', () => {
+    const providerDocs = PROVIDERS.map((provider) =>
+      rawDoc('skills', provider, 'SKILL.md'),
+    );
+    const crosscheck = crosscheckDocs();
+
+    expect(wordCount(crosscheck.join('\n'))).toBeLessThanOrEqual(
+      CROSSCHECK_WORD_LIMIT,
+    );
+    expect(wordCount([...providerDocs, ...crosscheck].join('\n'))).toBeLessThanOrEqual(
+      TARGET_WORD_LIMIT,
+    );
+  });
+
+  it('documents the one-provider crosscheck as two independent viewpoints', () => {
+    expect(readDoc('README.md')).toContain(
+      'the host commits an independent answer before the provider result arrives',
+    );
+    expect(readDoc('README-ko_kr.md')).toContain(
+      'provider 결과가 도착하기 전에 host가 독립 답안을 고정',
+    );
   });
 });
