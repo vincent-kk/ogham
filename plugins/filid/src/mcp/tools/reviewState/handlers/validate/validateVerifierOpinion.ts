@@ -6,11 +6,16 @@ import {
   REVIEW_VALIDATE_KINDS,
 } from '../../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
+import { planNextHandoffs } from '../../handoff/planNextHandoffs.js';
+import { readReviewGroupArtifactStatus } from '../../handoff/readReviewGroupArtifactStatus.js';
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
+import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { checkVerifyOpinion } from '../../opinion/checkVerifyOpinion.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import { parseVerifyOpinion } from '../../opinion/parseVerifyOpinion.js';
+import { splitVerifierAssignment } from '../../opinion/splitVerifierAssignment.js';
 import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
+import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import type {
   ReviewValidatePayload,
   ReviewValidationProblem,
@@ -18,7 +23,6 @@ import type {
 import { writeReviewState } from '../../state/writeReviewState.js';
 
 import { createValidatePayload } from './createValidatePayload.js';
-import { resolveReviewArtifactPath } from './resolveReviewArtifactPath.js';
 import type { ValidateOpinionContext } from './validationHandlerTypes.js';
 
 /**
@@ -40,16 +44,32 @@ export function validateVerifierOpinion(
   )
     throw new Error(`validated review opinion changed for group ${group.id}`);
   const reviewParsed = parseReviewOpinion(opinionBytes);
-  if (reviewParsed.opinion === null)
+  if (
+    reviewParsed.opinion === null ||
+    !checkReviewOpinion(
+      reviewParsed.opinion,
+      {
+        group: group.id,
+        round: reviewValidation.round,
+        sourceHash: state.sourceHash,
+        units: group.units,
+      },
+      [],
+    )
+  )
     throw new Error(`validated review opinion is invalid for ${group.id}`);
-  const decisionIds = [
-    ...reviewParsed.opinion.findings.map((finding) => finding.id),
-    ...group.candidateIds,
-  ];
+  const decisionIds = splitVerifierAssignment(
+    reviewParsed.opinion.findings,
+  ).assigned.map((finding) => finding.id);
   const verifyPath = resolveReviewArtifactPath(paths, group.verifyPath);
   const verifyBytes = readUtf8FileIfExistsSync(verifyPath);
   if (verifyBytes === null)
     return createValidatePayload({
+      handoff: planNextHandoffs({
+        state,
+        paths,
+        statuses: readReviewGroupArtifactStatus(state, paths),
+      }),
       action: input.action,
       paths,
       status: TOOL_STATUSES.INDETERMINATE,
@@ -90,6 +110,11 @@ export function validateVerifierOpinion(
     opinion = parsed.opinion;
   if (opinion === null)
     return createValidatePayload({
+      handoff: planNextHandoffs({
+        state,
+        paths,
+        statuses: readReviewGroupArtifactStatus(state, paths),
+      }),
       action: input.action,
       paths,
       status: TOOL_STATUSES.OK,
@@ -132,6 +157,11 @@ export function validateVerifierOpinion(
   };
   writeReviewState(paths.statePath, updatedState);
   return createValidatePayload({
+    handoff: planNextHandoffs({
+      state: updatedState,
+      paths,
+      statuses: readReviewGroupArtifactStatus(updatedState, paths),
+    }),
     action: input.action,
     paths,
     status: TOOL_STATUSES.OK,

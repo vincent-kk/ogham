@@ -221,8 +221,10 @@ export type ReviewStateInput =
   | {
       action: typeof REVIEW_STATE_ACTIONS.PREPARE;
       projectRoot: string;
-      branchName: string;
-      baseRef: string;
+      branchName?: string;
+      baseRef?: string;
+      /** Optional untrusted change summary overriding generated Git context. */
+      changeContext?: string;
       force?: boolean;
       /** Optional reviewer effort overriding repository configuration. */
       effort?: ReviewEffort;
@@ -232,14 +234,14 @@ export type ReviewStateInput =
         | typeof REVIEW_STATE_ACTIONS.CHECKPOINT
         | typeof REVIEW_STATE_ACTIONS.SEAL;
       projectRoot: string;
-      branchName: string;
+      branchName?: string;
       baseRef?: string;
     }
   | {
       /** Validation operation selected on the single review-state tool. */
       action: typeof REVIEW_STATE_ACTIONS.VALIDATE;
       projectRoot: string;
-      branchName: string;
+      branchName?: string;
       /** Opinion kind whose contract must be checked. */
       kind: ValueOf<typeof REVIEW_VALIDATE_KINDS>;
       /** At-least-two-digit prepared group identifier. */
@@ -250,15 +252,44 @@ export type ReviewStateInput =
   | {
       action: typeof REVIEW_STATE_ACTIONS.CLEANUP;
       projectRoot: string;
-      branchName: string;
+      branchName?: string;
       confirm: true;
     }
   | {
       action: typeof REVIEW_STATE_ACTIONS.ASSESS;
       projectRoot: string;
-      branchName: string;
+      branchName?: string;
       baseRef?: string;
     };
+
+/** Action inputs after the dispatcher resolves the Git root and source branch. */
+export type ResolvedReviewStateInput = ReviewStateInput & {
+  branchName: string;
+};
+
+/** One runnable actor assignment, containing only canonical absolute paths. */
+export interface ReviewHandoff {
+  /** Actor whose opinion is required next. */
+  kind: 'review' | 'verify';
+  /** Prepared group receiving the assignment. */
+  group: string;
+  /** One-based reviewer round; absent for verifier work. */
+  round?: number;
+  /** Absolute actor brief path. */
+  briefPath: string;
+  /** Absolute opinion output path. */
+  outputPath: string;
+  /** Merged opinion for review round 2 or later, otherwise null. */
+  priorOpinionPath: string | null;
+}
+
+/** Pure orchestration result derived after artifact effects finish. */
+export interface ReviewHandoffPlan {
+  /** Currently runnable actor assignments in group order. */
+  next: ReviewHandoff[];
+  /** Whether all groups have trusted completed artifacts or worktree blocks review. */
+  sealReady: boolean;
+}
 
 /** Persisted identity and lifecycle state for one branch review. */
 export interface ReviewStateRecord {
@@ -416,7 +447,13 @@ export interface ReviewPrepareSummary {
 }
 
 /** Exact bounded data returned by the prepare action. */
-export interface ReviewPrepareData {
+export interface ReviewPrepareData extends ReviewHandoffPlan {
+  /** Git toplevel containing the requested project path. */
+  projectRoot: string;
+  /** Original source branch name, before artifact-key normalization. */
+  branchName: string;
+  /** Verified base reference selected by prepare. */
+  baseRef: string;
   /** Absolute branch-scoped review directory. */
   reviewDirectory: string;
   /** Absolute canonical state path. */
@@ -475,7 +512,9 @@ interface ReviewReviewerValidateSummary {
 }
 
 /** Exact paths and problems returned by reviewer-opinion validation. */
-interface ReviewReviewerValidateData {
+interface ReviewReviewerValidateData extends ReviewHandoffPlan {
+  /** Whether independent verification is required after this completed review. */
+  verifierRequired: boolean;
   /** Opinion contract problems, empty after successful validation. */
   problems: ReviewValidationProblem[];
   /** Canonical merged reviewer opinion path for review validation. */
@@ -507,7 +546,7 @@ interface ReviewVerifierValidateSummary {
 }
 
 /** Exact path and problems returned by verifier-opinion validation. */
-interface ReviewVerifierValidateData {
+interface ReviewVerifierValidateData extends ReviewHandoffPlan {
   /** Opinion contract problems, empty after successful validation. */
   problems: ReviewValidationProblem[];
   /** Canonical verifier opinion path for verify validation. */
@@ -598,6 +637,10 @@ export interface ReviewCheckpointArtifacts {
 
 /** Action-specific review_state data carried inline or in an artifact. */
 export interface ReviewStateData {
+  /** Read-only checkpoint assignments observed without recovery. */
+  next?: ReviewHandoff[];
+  /** Checkpoint readiness observed from the current artifact bytes. */
+  sealReady?: boolean;
   /** Absent for `assess`. */
   disposition?: ReviewStateDisposition;
   reviewDirectory: string;
@@ -705,6 +748,8 @@ export interface ReviewHeadTreeEntry {
 
 /** Inputs for constructing a lifecycle failure or checkpoint payload. */
 export interface CreateReviewStatePayloadInput {
+  /** Optional checkpoint plan computed after reading artifact trust. */
+  handoff?: ReviewHandoffPlan;
   action: ReviewStateAction;
   disposition: ReviewStateDisposition;
   paths: ReviewStatePaths;

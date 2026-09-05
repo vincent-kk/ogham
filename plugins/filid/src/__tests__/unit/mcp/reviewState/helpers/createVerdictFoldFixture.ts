@@ -4,9 +4,9 @@ import type { foldReviewVerdict } from '../../../../../mcp/tools/reviewState/ver
 type FoldReviewVerdictInput = Parameters<typeof foldReviewVerdict>[0];
 
 /**
- * Build a complete trusted fold input whose sole candidate is refuted.
+ * Build a trusted fold input with one canonical FCA candidate and no actor decisions.
  *
- * @returns A deterministic input that reaches the APPROVED fallback row.
+ * @returns Complete evidence whose candidate is confirmed by the deterministic fold.
  */
 export function createVerdictFoldFixture(): FoldReviewVerdictInput {
   return {
@@ -108,14 +108,7 @@ export function createVerdictFoldFixture(): FoldReviewVerdictInput {
           group: '01',
           state: 'COMPLETE',
           sourceHash: 'source-hash',
-          decisions: [
-            {
-              findingId: 'FCA-001',
-              verdict: 'REFUTED',
-              evidence: 'src/a.ts stays within its owner.',
-              reason: 'The candidate does not reproduce.',
-            },
-          ],
+          decisions: [],
           observations: [],
           checked: ['src/a.ts', 'FCA-001'],
         },

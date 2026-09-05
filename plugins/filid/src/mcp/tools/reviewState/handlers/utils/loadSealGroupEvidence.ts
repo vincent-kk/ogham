@@ -3,13 +3,13 @@ import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
 import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
+import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 import type { ReviewStatePaths } from '../../state/reviewStateTypes.js';
 import type {
   ReviewTrustIssue,
   SealGroupEvidence,
 } from '../../verdict/reviewVerdictTypes.js';
-import { resolveReviewArtifactPath } from '../validate/resolveReviewArtifactPath.js';
 
 /**
  * Load only group opinions whose complete hash handoff remains intact.

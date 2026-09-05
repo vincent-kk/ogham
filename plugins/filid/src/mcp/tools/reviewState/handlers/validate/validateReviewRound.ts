@@ -11,13 +11,22 @@ import {
   REVIEW_VALIDATE_KINDS,
 } from '../../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
+import { resolvePluginRoot } from '../../../../../core/infra/index.js';
 import { renderOpinionSkeleton } from '../../brief/renderOpinionSkeleton.js';
 import { renderVerifyBrief } from '../../brief/renderVerifyBrief.js';
+import { readInlineReviewDiffs } from '../../diff/readInlineReviewDiffs.js';
+import { planNextHandoffs } from '../../handoff/planNextHandoffs.js';
+import { readReviewGroupArtifactStatus } from '../../handoff/readReviewGroupArtifactStatus.js';
+import { writeAutoVerifyOpinion } from '../../handoff/utils/writeAutoVerifyOpinion.js';
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
 import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { mergeReviewRounds } from '../../opinion/mergeReviewRounds.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
+import { splitVerifierAssignment } from '../../opinion/splitVerifierAssignment.js';
+import { loadActorMethods } from '../../rules/loadActorMethods.js';
+import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
+import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 import type {
   ReviewValidatePayload,
   ReviewValidationProblem,
@@ -26,7 +35,6 @@ import { writeReviewState } from '../../state/writeReviewState.js';
 
 import { createValidatePayload } from './createValidatePayload.js';
 import { locateReviewFindings } from './locateReviewFindings.js';
-import { resolveReviewArtifactPath } from './resolveReviewArtifactPath.js';
 import { rebuildPriorReviewOpinion } from './utils/rebuildPriorReviewOpinion.js';
 import type { ValidateOpinionContext } from './validationHandlerTypes.js';
 
@@ -101,6 +109,11 @@ export async function validateReviewRound(
   const content = readUtf8FileIfExistsSync(roundPath);
   if (content === null)
     return createValidatePayload({
+      handoff: planNextHandoffs({
+        state,
+        paths,
+        statuses: readReviewGroupArtifactStatus(state, paths),
+      }),
       action: input.action,
       paths,
       status: TOOL_STATUSES.INDETERMINATE,
@@ -109,6 +122,7 @@ export async function validateReviewRound(
       problems: [],
       round,
       ok: false,
+      verifierRequired: false,
       problemCount: 0,
       findings: 0,
       newFindings: 0,
@@ -144,6 +158,11 @@ export async function validateReviewRound(
     checkedOpinion = parsed.opinion;
   if (checkedOpinion === null)
     return createValidatePayload({
+      handoff: planNextHandoffs({
+        state,
+        paths,
+        statuses: readReviewGroupArtifactStatus(state, paths),
+      }),
       action: input.action,
       paths,
       status: TOOL_STATUSES.OK,
@@ -152,6 +171,7 @@ export async function validateReviewRound(
       problems,
       round,
       ok: false,
+      verifierRequired: false,
       problemCount: problems.length,
       findings: parsed.opinion?.findings.length ?? 0,
       newFindings: 0,
@@ -176,9 +196,8 @@ export async function validateReviewRound(
   )}${REVIEW_STATE_JSON_TRAILING_NEWLINE}`;
   const nextRound =
     round < group.rounds && merged.newFindings > 0 ? round + 1 : null;
-  const candidates = state.scope.candidates.filter((candidate) =>
-    group.candidateIds.includes(candidate.id),
-  );
+  const { assigned } = splitVerifierAssignment(merged.opinion.findings);
+  const verifierRequired = nextRound === null && assigned.length > 0;
   writeFileAtomicallySync(opinionPath, mergedBytes);
   if (nextRound !== null)
     writeFileAtomicallySync(
@@ -191,33 +210,44 @@ export async function validateReviewRound(
   writeFileAtomicallySync(
     verifyBriefPath,
     renderVerifyBrief({
+      verifierMethod: loadActorMethods(resolvePluginRoot()).verifier,
+      diffs: readInlineReviewDiffs(paths, group),
       group,
       files: state.scope.files,
-      findings: merged.opinion.findings,
-      candidates,
+      findings: assigned,
       sourceHash: state.sourceHash,
     }),
   );
+  let updatedGroup: ReviewGroup = {
+    ...group,
+    validated: {
+      review: {
+        round,
+        sha256: computeReviewArtifactHash(mergedBytes),
+        complete: nextRound === null,
+      },
+      verify: null,
+    },
+  };
+  if (nextRound === null && assigned.length === 0)
+    updatedGroup = writeAutoVerifyOpinion(
+      paths,
+      updatedGroup,
+      state.sourceHash,
+    );
   const updatedState = {
     ...state,
     groups: state.groups.map((candidateGroup) =>
-      candidateGroup.id === group.id
-        ? {
-            ...candidateGroup,
-            validated: {
-              review: {
-                round,
-                sha256: computeReviewArtifactHash(mergedBytes),
-                complete: nextRound === null,
-              },
-              verify: null,
-            },
-          }
-        : candidateGroup,
+      candidateGroup.id === group.id ? updatedGroup : candidateGroup,
     ),
   };
   writeReviewState(paths.statePath, updatedState);
   return createValidatePayload({
+    handoff: planNextHandoffs({
+      state: updatedState,
+      paths,
+      statuses: readReviewGroupArtifactStatus(updatedState, paths),
+    }),
     action: input.action,
     paths,
     status: TOOL_STATUSES.OK,
@@ -226,6 +256,7 @@ export async function validateReviewRound(
     problems: [],
     round,
     ok: true,
+    verifierRequired,
     problemCount: 0,
     findings: merged.opinion.findings.length,
     newFindings: merged.newFindings,

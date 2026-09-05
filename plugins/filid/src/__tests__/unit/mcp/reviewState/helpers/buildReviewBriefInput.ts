@@ -6,6 +6,9 @@ import type { RenderReviewBriefInput } from '../../../../../mcp/tools/reviewStat
  */
 export function buildReviewBriefInput(): RenderReviewBriefInput {
   return {
+    reviewerMethod: '# File Group Reviewer\n\nKeep this method verbatim.\n',
+    changeContext: 'Fix the changed value.',
+    diffs: [],
     group: {
       id: '01',
       units: [

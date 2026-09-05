@@ -10,8 +10,12 @@ import {
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { buildReviewGroups } from '../group/buildReviewGroups.js';
+import { planNextHandoffs } from '../handoff/planNextHandoffs.js';
+import { readReviewGroupArtifactStatus } from '../handoff/readReviewGroupArtifactStatus.js';
+import { recoverReviewGroups } from '../handoff/recoverReviewGroups.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { collectChangedScopeEvidence } from '../scope/collectChangedScopeEvidence.js';
+import { readChangeContext } from '../scope/readChangeContext.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { clearStaleReviewArtifacts } from '../state/clearStaleReviewArtifacts.js';
 import { hasCompletePreparedArtifacts } from '../state/hasCompletePreparedArtifacts.js';
@@ -20,8 +24,8 @@ import { readReviewState } from '../state/readReviewState.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import { reviewReportExists } from '../state/reviewReportExists.js';
 import type {
+  ResolvedReviewStateInput,
   ReviewPreparePayload,
-  ReviewStateInput,
   ReviewStateRecord,
 } from '../state/reviewStateTypes.js';
 import { writeReviewState } from '../state/writeReviewState.js';
@@ -33,6 +37,7 @@ import { collectRenderedReviewUnits } from './utils/collectRenderedReviewUnits.j
 import { createPreparedReviewPayload } from './utils/createPreparedReviewPayload.js';
 import { hasAllReviewBriefs } from './utils/hasAllReviewBriefs.js';
 import { loadPrepareReviewRules } from './utils/loadPrepareReviewRules.js';
+import { resolvePrepareBaseRef } from './utils/resolvePrepareBaseRef.js';
 import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
 import { resolvePreparedReviewFiles } from './utils/resolvePreparedReviewFiles.js';
 import { retainReviewGroupValidations } from './utils/retainReviewGroupValidations.js';
@@ -41,7 +46,7 @@ import { writePreparedReviewArtifacts } from './utils/writePreparedReviewArtifac
 
 /** Prepare input narrowed from the public review-state action union. */
 type PrepareInput = Extract<
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   { action: typeof REVIEW_STATE_ACTIONS.PREPARE }
 >;
 
@@ -56,10 +61,8 @@ export async function prepareReviewState(
   const paths = resolveReviewStatePaths(input.projectRoot, input.branchName);
   assertReviewStatePaths(paths);
   const settings = resolvePrepareSettings(input);
-  const source = await computeReviewSourceHash(
-    input.projectRoot,
-    input.baseRef,
-  );
+  const baseRef = await resolvePrepareBaseRef(input.projectRoot, input.baseRef);
+  const source = await computeReviewSourceHash(input.projectRoot, baseRef);
   const restored = readReviewState(paths.statePath);
   const existing = restored && !('kind' in restored) ? restored : null;
   const sameIdentity =
@@ -77,6 +80,12 @@ export async function prepareReviewState(
       status: TOOL_STATUSES.OK,
       state: existing,
       concurrency: settings.concurrency,
+      diagnostics: [],
+      handoff: planNextHandoffs({
+        state: existing,
+        paths,
+        statuses: readReviewGroupArtifactStatus(existing, paths),
+      }),
     });
 
   const canResume =
@@ -87,23 +96,40 @@ export async function prepareReviewState(
     canResume &&
     !effortChanged &&
     hasCompletePreparedArtifacts(paths, existing)
-  )
+  ) {
+    const state = await recoverReviewGroups(
+      existing,
+      paths,
+      settings.pluginRoot,
+    );
     return createPreparedReviewPayload({
       action: input.action,
       disposition: REVIEW_STATE_DISPOSITIONS.RESUMABLE,
       paths,
       status: TOOL_STATUSES.OK,
-      state: existing,
+      state,
       concurrency: settings.concurrency,
+      diagnostics: [],
+      handoff: planNextHandoffs({
+        state,
+        paths,
+        statuses: readReviewGroupArtifactStatus(state, paths),
+      }),
     });
+  }
 
   if (canResume && existsSync(paths.evidencePath)) {
     const presence = readReviewArtifactPresence(paths, existing);
-    const activeRules =
+    const loadedRules =
       !effortChanged && hasAllReviewBriefs(paths, existing)
-        ? []
-        : loadPrepareReviewRules(input.projectRoot, settings.pluginRoot)
-            .activeRules;
+        ? null
+        : loadPrepareReviewRules(input.projectRoot, settings.pluginRoot);
+    const context = await readChangeContext({
+      projectRoot: input.projectRoot,
+      baseCommit: existing.baseCommit,
+      files: existing.scope.files,
+      changeContext: input.changeContext,
+    });
     const renderedUnits = presence.diffs
       ? []
       : await collectRenderedReviewUnits({
@@ -118,13 +144,15 @@ export async function prepareReviewState(
       ? retuneReviewGroups(existing.groups, settings.rounds)
       : existing.groups;
     const groups = writePreparedReviewArtifacts({
+      actorMethods: loadedRules?.actorMethods ?? null,
+      changeContext: context.changeContext,
       paths,
       groups: preparedGroups,
       previousGroups: existing.groups,
       renderedUnits,
       files: existing.scope.files,
       candidates: existing.scope.candidates,
-      activeRules,
+      activeRules: loadedRules?.activeRules ?? [],
       sourceHash: existing.sourceHash,
       baseRef: existing.baseRef,
       branchName: existing.branchName,
@@ -135,10 +163,11 @@ export async function prepareReviewState(
       rewriteReviewBriefs: effortChanged,
       rewriteSession: effortChanged,
     });
-    const state = effortChanged
-      ? { ...existing, effort: settings.effort, groups }
-      : existing;
-    if (effortChanged) writeReviewState(paths.statePath, state);
+    const state = await recoverReviewGroups(
+      { ...existing, effort: settings.effort, groups },
+      paths,
+      settings.pluginRoot,
+    );
     return createPreparedReviewPayload({
       action: input.action,
       disposition: REVIEW_STATE_DISPOSITIONS.RESUMABLE,
@@ -146,6 +175,12 @@ export async function prepareReviewState(
       status: TOOL_STATUSES.OK,
       state,
       concurrency: settings.concurrency,
+      diagnostics: context.diagnostics,
+      handoff: planNextHandoffs({
+        state,
+        paths,
+        statuses: readReviewGroupArtifactStatus(state, paths),
+      }),
     });
   }
 
@@ -169,10 +204,8 @@ export async function prepareReviewState(
     lockfiles: settings.lockfiles,
     createdAt,
   });
-  const { rules, overrides, activeRules } = loadPrepareReviewRules(
-    input.projectRoot,
-    settings.pluginRoot,
-  );
+  const { rules, overrides, activeRules, actorMethods } =
+    loadPrepareReviewRules(input.projectRoot, settings.pluginRoot);
   let files = resolvePreparedReviewFiles({
     projectRoot: input.projectRoot,
     files: collected.files,
@@ -195,8 +228,16 @@ export async function prepareReviewState(
     planChurnLimit: settings.planChurnLimit,
   });
   files = applyMissingTestRules({ files, groups, activeRules });
+  const context = await readChangeContext({
+    projectRoot: input.projectRoot,
+    baseCommit: source.baseCommit,
+    files,
+    changeContext: input.changeContext,
+  });
   if (canResume) groups = retainReviewGroupValidations(groups, existing.groups);
   groups = writePreparedReviewArtifacts({
+    actorMethods,
+    changeContext: context.changeContext,
     paths,
     groups,
     previousGroups: canResume ? existing.groups : [],
@@ -205,7 +246,7 @@ export async function prepareReviewState(
     candidates: collected.candidates,
     activeRules,
     sourceHash: source.sourceHash,
-    baseRef: input.baseRef,
+    baseRef,
     branchName: input.branchName,
     effort: settings.effort,
     createdAt,
@@ -213,12 +254,12 @@ export async function prepareReviewState(
     preserveOpinions: canResume,
   });
 
-  const state: ReviewStateRecord = {
+  let state: ReviewStateRecord = {
     schemaVersion: REVIEW_STATE_SCHEMA_VERSION,
     projectRoot: input.projectRoot,
     branchName: input.branchName,
     normalizedBranch: paths.normalizedBranch,
-    baseRef: input.baseRef,
+    baseRef,
     baseCommit: source.baseCommit,
     sourceHash: source.sourceHash,
     fileHashes: source.fileHashes,
@@ -240,14 +281,21 @@ export async function prepareReviewState(
     },
     verdict: null,
   };
-  writeReviewState(paths.statePath, state);
+  if (canResume)
+    state = await recoverReviewGroups(state, paths, settings.pluginRoot);
+  else writeReviewState(paths.statePath, state);
   return createPreparedReviewPayload({
     action: input.action,
     disposition,
     paths,
     status: TOOL_STATUSES.OK,
     state,
-    diagnostics: collected.diagnostics,
+    diagnostics: [...collected.diagnostics, ...context.diagnostics],
     concurrency: settings.concurrency,
+    handoff: planNextHandoffs({
+      state,
+      paths,
+      statuses: readReviewGroupArtifactStatus(state, paths),
+    }),
   });
 }

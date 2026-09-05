@@ -59,7 +59,7 @@ const genuineGap = readFileSync(
 
 describe('cross-review v7 skill surface', () => {
   it('declares the v7 frontmatter and orchestration schema', () => {
-    expect(skill).toContain("version: '7.0.0'");
+    expect(skill).toContain("version: '7.1.0'");
     expect(skill).toContain('review_schema: 7');
     expect(skill).toContain('--effort low|medium|high');
   });
@@ -138,7 +138,6 @@ describe('cross-review v7 skill surface', () => {
     expect(verifier.indexOf('## Re-verification Mode')).toBeLessThan(
       verifier.indexOf('## Deliverable'),
     );
-    expect(verifier).toContain('inDiff: false');
   });
 
   it('keeps the verifier model hint only once in orchestration prose', () => {
@@ -164,18 +163,20 @@ describe('cross-review v7 skill surface', () => {
     );
     expect(reviewer).toContain('added or modified lines');
     expect(reviewer).toContain('type checker or linter');
+    expect(reviewer).toContain('done: <output path>');
+    expect(verifier).toContain('done: <output path>');
   });
 
   it('describes validation retries and authoritative concurrency', () => {
     expect(skill).toContain('summary.concurrency');
-    expect(skill).toContain('data.groups[].validated.review.complete');
-    expect(skill).toContain('validated.review.round + 1');
-    expect(skill).toContain(
-      'repeat `validate({ kind: "review", group, round: validated.review.round })` before Step 4',
-    );
+    expect(skill).toContain('data.next');
+    expect(skill).toContain('data.sealReady');
+    expect(skill).toContain('exhausted');
     expect(skill).toContain('validate({ kind: "review", group, round })');
     expect(skill).toContain('validate({ kind: "verify", group })');
     expect(skill).toContain('respawn once');
+    expect(skill).toContain('completion notification');
+    expect(skill).toContain('do not poll');
   });
 
   it('uses indeterminate verification evidence for the genuine-gap fixture', () => {
@@ -186,7 +187,7 @@ describe('cross-review v7 skill surface', () => {
   });
 
   it('keeps actor and orchestration documents within their line budgets', () => {
-    expect(skill.split('\n').length - 1).toBeLessThanOrEqual(170);
+    expect(skill.split('\n').length - 1).toBeLessThanOrEqual(120);
     expect(templates.split('\n').length - 1).toBeLessThanOrEqual(110);
     expect(reviewer.split('\n').length - 1).toBeLessThanOrEqual(60);
     expect(verifier.split('\n').length - 1).toBeLessThanOrEqual(80);

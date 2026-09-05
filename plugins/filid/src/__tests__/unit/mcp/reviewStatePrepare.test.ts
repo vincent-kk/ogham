@@ -22,6 +22,7 @@ import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 import { readPreparedReviewState } from './reviewState/helpers/readPreparedReviewState.js';
 import { readReviewStateFixtureJson } from './reviewState/helpers/readReviewStateFixtureJson.js';
 import { resolveReviewArtifactFromDirectory } from './reviewState/helpers/resolveReviewArtifactFromDirectory.js';
+import { writeReviewActorMethods } from './reviewState/helpers/writeReviewActorMethods.js';
 import { writeReviewRulePluginFile } from './reviewState/helpers/writeReviewRulePluginFile.js';
 
 /** Temporary repository exercised by the prepare contract tests. */
@@ -67,6 +68,7 @@ beforeEach(() => {
   originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   fixturePluginRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-plugin-'));
   process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
+  writeReviewActorMethods(fixturePluginRoot);
   writeReviewRulePluginFile(
     fixturePluginRoot,
     'skills/cross-review/rules/rules.json',
@@ -192,6 +194,11 @@ describe('review_state prepare v7', () => {
     );
     expect(Object.keys(result.data).sort()).toEqual(
       [
+        'projectRoot',
+        'branchName',
+        'baseRef',
+        'next',
+        'sealReady',
         'candidates',
         'dirtyPaths',
         'evidencePath',
@@ -306,7 +313,7 @@ describe('review_state prepare v7', () => {
     expect(session).toContain('deleted path');
   });
 
-  it('restores a prepared state and writes only missing artifacts', async () => {
+  it('restores missing artifacts while preserving existing opinions and semantic state', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -341,7 +348,9 @@ describe('review_state prepare v7', () => {
     expect(readUtf8FileIfExistsSync(opinionPath)).toBe('{"sentinel":true}\n');
     expect(existsSync(missingDiff)).toBe(true);
     expect(existsSync(resumed.data.sessionPath ?? '')).toBe(true);
-    expect(readUtf8FileIfExistsSync(prepared.data.statePath)).toBe(stateBefore);
+    expect(
+      JSON.parse(readUtf8FileIfExistsSync(prepared.data.statePath)!),
+    ).toEqual(JSON.parse(stateBefore!));
   });
 
   it('restores complete prepared artifacts without reopening rule sources', async () => {
@@ -541,6 +550,8 @@ describe('review_state prepare v7', () => {
       verdict: 'APPROVED',
     });
     expect(cached.data.groups).toEqual(prepared.data.groups);
+    expect(cached.data.next).toEqual([]);
+    expect(cached.data.sealReady).toBe(true);
     expect(readUtf8FileIfExistsSync(prepared.data.sessionPath ?? '')).toBe(
       'session sentinel\n',
     );
@@ -633,7 +644,10 @@ describe('review_state prepare v7', () => {
         rounds: 0,
         validated: {
           review: expect.objectContaining({ round: 0, complete: true }),
-          verify: null,
+          verify: expect.objectContaining({
+            sha256: expect.any(String),
+            reviewSha256: expect.any(String),
+          }),
         },
       }),
     ]);

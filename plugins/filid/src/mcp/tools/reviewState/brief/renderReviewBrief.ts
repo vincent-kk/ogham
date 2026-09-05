@@ -3,6 +3,8 @@ import { renderMarkdownTable } from '../scope/utils/renderMarkdownTable.js';
 import type { ReviewHunk, ReviewUnit } from '../state/reviewGroupTypes.js';
 
 import type { RenderReviewBriefInput } from './reviewBriefTypes.js';
+import { renderBriefDiffs } from './utils/renderBriefDiffs.js';
+import { renderChangeContext } from './utils/renderChangeContext.js';
 import { renderReviewOpinionExample } from './utils/renderReviewOpinionExample.js';
 
 /**
@@ -61,19 +63,22 @@ export function renderReviewBrief(
       ];
     }),
   );
-  const priorOpinions = input.group.dependsOn.length
-    ? input.group.dependsOn
-        .map((id) => `- opinions/review-${id}.json`)
-        .join('\n')
+  const priorGroups = input.group.dependsOn;
+  const priorOpinions = priorGroups.length
+    ? priorGroups.map((id) => `- opinions/review-${id}.json`).join('\n')
     : 'none';
-  const rosterTable = renderMarkdownTable(
-    ['Path', 'Change', 'Role'],
-    input.files.map((file) => [
-      escapeMarkdownCell(file.path),
-      file.change,
-      file.role,
-    ]),
-  );
+  const groupPaths = new Set(input.group.units.map(({ path }) => path));
+  const otherFiles = input.files.filter(({ path }) => !groupPaths.has(path));
+  const rosterTable = otherFiles.length
+    ? renderMarkdownTable(
+        ['Path', 'Change', 'Role'],
+        otherFiles.map((file) => [
+          escapeMarkdownCell(file.path),
+          file.change,
+          file.role,
+        ]),
+      )
+    : 'none';
   const candidatesTable = renderMarkdownTable(
     [
       'ID',
@@ -120,9 +125,19 @@ export function renderReviewBrief(
     `output: ${outputPath}`,
     '---',
     '',
+    input.reviewerMethod,
+    '',
+    '## Change Context',
+    '',
+    renderChangeContext(input.changeContext),
+    '',
     '## Files',
     '',
     filesTable,
+    '',
+    '## Diffs',
+    '',
+    renderBriefDiffs(input.diffs),
     '',
     '## Prior Opinions',
     '',

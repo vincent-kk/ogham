@@ -3,7 +3,7 @@ import {
   resolveContainedPath,
 } from '@ogham/cross-platform';
 
-import type { ReviewStatePaths } from '../../state/reviewStateTypes.js';
+import type { ReviewStatePaths } from './reviewStateTypes.js';
 
 /**
  * Resolve and guard a state-owned review artifact path.

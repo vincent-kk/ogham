@@ -81,7 +81,7 @@ export interface ReviewChecklistResult {
   filesSkipped: number;
 }
 
-/** Reviewer or FCA candidate joined to its verifier disposition. */
+/** Reviewer or FCA candidate joined to its independent or canonical disposition. */
 export interface JoinedReviewDecision {
   /** Stable reviewer or FCA candidate identifier. */
   id: string;
@@ -99,11 +99,11 @@ export interface JoinedReviewDecision {
   rule: string;
   /** Original falsifiable candidate claim. */
   message: string;
-  /** Trusted verifier disposition, or synthesized indeterminacy. */
+  /** Trusted independent or deterministic disposition, or synthesized indeterminacy. */
   verdict: VerifyDecisionVerdict;
-  /** Concrete verifier evidence, empty when a decision is missing. */
+  /** Independent or canonical evidence, empty when a decision is missing. */
   decisionEvidence: string;
-  /** Verifier reasoning, or `missing decision` when synthesized. */
+  /** Independent or deterministic reasoning, or `missing decision` when synthesized. */
   decisionReason: string;
   /** Original reviewer evidence, or null for FCA candidates. */
   findingEvidence: string | null;
@@ -113,7 +113,7 @@ export interface JoinedReviewDecision {
   recommendedAction: string | null;
 }
 
-/** Result of joining every trusted and FCA candidate to verifier decisions. */
+/** Result of joining every trusted claim to independent and canonical decisions. */
 export interface ReviewDecisionJoinResult {
   /** All joined decisions in deterministic group and candidate order. */
   decisions: JoinedReviewDecision[];
@@ -123,7 +123,7 @@ export interface ReviewDecisionJoinResult {
   refuted: JoinedReviewDecision[];
   /** Explicit or synthesized indeterminate decisions in joined order. */
   indeterminate: JoinedReviewDecision[];
-  /** Missing-decision evidence that must remain visible. */
+  /** Missing or conflicting decision coverage that must remain visible. */
   unresolved: ReviewUnresolvedEvidence[];
 }
 
@@ -191,10 +191,10 @@ export interface ReviewSealSummary {
   filesReviewed: number;
   /** Number of roster rows skipped during prepare. */
   filesSkipped: number;
-  /** Number of verifier decisions confirming a candidate. */
+  /** Number of independent or canonical decisions confirming a candidate. */
   confirmed: number;
-  /** Number of verifier decisions refuting a candidate. */
+  /** Number of independent or canonical decisions refuting a candidate. */
   refuted: number;
-  /** Number of verifier decisions left indeterminate. */
+  /** Number of candidate decisions left indeterminate. */
   indeterminate: number;
 }

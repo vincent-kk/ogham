@@ -17,7 +17,11 @@ export function foldReviewVerdict(
   input: FoldReviewVerdictInput,
 ): ReviewVerdictFold {
   const coverage = buildChecklist(input.files, input.groups);
-  const joined = joinDecisions(input.groups, input.candidates);
+  const joined = joinDecisions(
+    input.groups,
+    input.candidates,
+    input.evidence.snapshotHash,
+  );
   const unresolved: ReviewUnresolvedEvidence[] = [
     ...coverage.unresolved,
     ...joined.unresolved,
@@ -101,6 +105,8 @@ export function foldReviewVerdict(
     hasGap ||
     hasIndeterminateVerifier
   )
+    verdict = 'INCONCLUSIVE';
+  else if (joined.unresolved.some(({ affectsVerdict }) => affectsVerdict))
     verdict = 'INCONCLUSIVE';
   else if (joined.indeterminate.length > 0) verdict = 'INCONCLUSIVE';
   else if (joined.confirmed.length > 0) verdict = 'REQUEST_CHANGES';

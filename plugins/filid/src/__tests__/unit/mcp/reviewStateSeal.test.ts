@@ -25,6 +25,7 @@ import {
 import { prepareReviewStateSealFixture } from './reviewState/helpers/prepareReviewStateSealFixture.js';
 import { readPersistedReviewState } from './reviewState/helpers/readPersistedReviewState.js';
 import { sealReviewStateFixtureAndAssert } from './reviewState/helpers/sealReviewStateFixtureAndAssert.js';
+import { validateAutoReviewStateSealGroup } from './reviewState/helpers/validateAutoReviewStateSealGroup.js';
 import { validateReviewStateSealGroup } from './reviewState/helpers/validateReviewStateSealGroup.js';
 
 /** Temporary repository and plugin root used by the active case. */
@@ -225,48 +226,41 @@ describe('review_state seal v7', () => {
     });
   });
 
-  it('makes a reviewer opinion modified after validation inconclusive', async () => {
+  it.each(['opinionPath', 'verifyPath'] as const)(
+    'makes auto-verify session %s tampering inconclusive',
+    async (artifact) => {
+      const state = await prepareReviewStateSealFixture(fixture);
+      const group = state.groups[0];
+      const validated = await validateAutoReviewStateSealGroup(fixture, state);
+      const opinionPath = reviewArtifactPath(
+        fixture.projectRoot,
+        validated,
+        group[artifact],
+      );
+      writeFileAtomicallySync(
+        opinionPath,
+        `${readUtf8FileIfExistsSync(opinionPath) ?? ''}\n`,
+      );
+
+      const sealed = await sealReviewStateFixtureAndAssert(fixture, validated, {
+        verdict: 'INCONCLUSIVE',
+        filesReviewed: 0,
+        filesSkipped: 1,
+        confirmed: 0,
+        refuted: 0,
+        indeterminate: 0,
+        hasFixRequests: false,
+      });
+      expect(readUtf8FileIfExistsSync(sealed.data.reportPath ?? '')).toContain(
+        'artifact modified after validation',
+      );
+    },
+  );
+
+  it('rejects auto-verify bound to a superseded merged review hash', async () => {
     const state = await prepareReviewStateSealFixture(fixture);
     const group = state.groups[0];
-    const validated = await validateReviewStateSealGroup({
-      fixture,
-      state,
-      opinion: buildReviewOpinion(state, group),
-      decisions: [],
-    });
-    const opinionPath = reviewArtifactPath(
-      fixture.projectRoot,
-      validated,
-      group.opinionPath,
-    );
-    writeFileAtomicallySync(
-      opinionPath,
-      `${readUtf8FileIfExistsSync(opinionPath) ?? ''}\n`,
-    );
-
-    const sealed = await sealReviewStateFixtureAndAssert(fixture, validated, {
-      verdict: 'INCONCLUSIVE',
-      filesReviewed: 0,
-      filesSkipped: 1,
-      confirmed: 0,
-      refuted: 0,
-      indeterminate: 0,
-      hasFixRequests: false,
-    });
-    expect(readUtf8FileIfExistsSync(sealed.data.reportPath ?? '')).toContain(
-      'artifact modified after validation',
-    );
-  });
-
-  it('rejects a verifier bound to a superseded merged review hash', async () => {
-    const state = await prepareReviewStateSealFixture(fixture);
-    const group = state.groups[0];
-    const validated = await validateReviewStateSealGroup({
-      fixture,
-      state,
-      opinion: buildReviewOpinion(state, group),
-      decisions: [],
-    });
+    const validated = await validateAutoReviewStateSealGroup(fixture, state);
     const opinionPath = reviewArtifactPath(
       fixture.projectRoot,
       validated,
@@ -326,6 +320,8 @@ describe('review_state seal v7', () => {
 
   it('seals incomplete review rounds as INCONCLUSIVE evidence', async () => {
     const state = await prepareReviewStateSealFixture(fixture, 'medium');
+    const autoVerified = await validateAutoReviewStateSealGroup(fixture, state);
+    expect(autoVerified.groups[0]!.validated.verify).not.toBeNull();
     const group = state.groups[0];
     const opinion = buildReviewOpinion(state, group);
     opinion.findings = [buildReviewStateSealFinding(group.id)];
@@ -346,11 +342,19 @@ describe('review_state seal v7', () => {
       round: 1,
     });
     expect(reviewed.summary).toMatchObject({ ok: true, nextRound: 2 });
+    expect(reviewed.data).toMatchObject({
+      verifierRequired: false,
+      sealReady: false,
+    });
+    expect(reviewed.data.next).toContainEqual(
+      expect.objectContaining({ kind: 'review', group: group.id, round: 2 }),
+    );
     const reviewedState = readPersistedReviewState(
       fixture.projectRoot,
       state.normalizedBranch,
     );
     expect(reviewedState.groups[0].validated.review?.complete).toBe(false);
+    expect(reviewedState.groups[0].validated.verify).toBeNull();
 
     const sealed = await sealReviewStateFixtureAndAssert(
       fixture,

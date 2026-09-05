@@ -73,7 +73,7 @@ function prepareState(effort?: ReviewEffort): Promise<ReviewStateRecord> {
  */
 function artifactPath(state: ReviewStateRecord, relativePath: string): string {
   return resolveReviewStateFixtureArtifact(
-    projectRoot,
+    state.projectRoot,
     state.normalizedBranch,
     relativePath,
   );
@@ -242,7 +242,14 @@ describe('review_state validate v7', () => {
     expect(result.status).toBe('indeterminate');
     expect(result.summary.disposition).toBe('validated');
     expect(Object.keys(result.data).sort()).toEqual(
-      ['opinionPath', 'problems', 'verifyBriefPath'].sort(),
+      [
+        'next',
+        'sealReady',
+        'opinionPath',
+        'problems',
+        'verifyBriefPath',
+        'verifierRequired',
+      ].sort(),
     );
     if (!('opinionPath' in result.data))
       throw new Error('review validation response omitted opinionPath');
@@ -274,6 +281,8 @@ describe('review_state validate v7', () => {
       round: 1,
     });
 
+    rmSync(artifactPath(state, group.verifyPath));
+
     const result = await handleReviewState({
       action: 'validate',
       projectRoot,
@@ -285,7 +294,7 @@ describe('review_state validate v7', () => {
     expect(result.status).toBe('indeterminate');
     expect(result.summary.disposition).toBe('validated');
     expect(Object.keys(result.data).sort()).toEqual(
-      ['problems', 'verifyPath'].sort(),
+      ['next', 'sealReady', 'problems', 'verifyPath'].sort(),
     );
     expect(result.diagnostics).toContainEqual(
       expect.objectContaining({
@@ -496,6 +505,11 @@ describe('review_state validate v7', () => {
     });
 
     expect(result.summary).toMatchObject({ ok: true, nextRound: null });
+    expect(result.data).toMatchObject({
+      verifierRequired: false,
+      next: [],
+      sealReady: true,
+    });
     expect(Object.keys(result.summary).sort()).toEqual(
       [
         'action',
@@ -511,7 +525,14 @@ describe('review_state validate v7', () => {
       ].sort(),
     );
     expect(Object.keys(result.data).sort()).toEqual(
-      ['opinionPath', 'problems', 'verifyBriefPath'].sort(),
+      [
+        'next',
+        'sealReady',
+        'opinionPath',
+        'problems',
+        'verifyBriefPath',
+        'verifierRequired',
+      ].sort(),
     );
     expect(
       readPersistedReviewState(projectRoot, state.normalizedBranch).groups[0]
@@ -842,7 +863,7 @@ describe('review_state validate v7', () => {
     ).toBeNull();
   });
 
-  it('validates candidate-only verifier decisions while forbidding review rounds', async () => {
+  it('rejects FCA actor decisions and accepts empty auto-verify while forbidding review rounds', async () => {
     writeReviewStateFixtureFile(
       projectRoot,
       '.filid/config.json',
@@ -894,9 +915,27 @@ describe('review_state validate v7', () => {
       group: group.id,
     });
 
-    expect(result.summary).toMatchObject({
-      ok: true,
-      indeterminate: group.candidateIds.length,
+    expect(result.summary).toMatchObject({ ok: false });
+    expect(result.data.problems).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ code: 'decision-unknown' }),
+      ]),
+    );
+    expect(result.data.sealReady).toBe(false);
+    writeReviewStateFixtureJson(
+      projectRoot,
+      state,
+      group.verifyPath,
+      buildVerifyOpinion(state, group.id, []),
+    );
+    const empty = await handleReviewState({
+      action: 'validate',
+      projectRoot,
+      branchName: BRANCH,
+      kind: 'verify',
+      group: group.id,
     });
+    expect(empty.summary).toMatchObject({ ok: true, indeterminate: 0 });
+    expect(empty.data).toMatchObject({ next: [], sealReady: true });
   });
 });

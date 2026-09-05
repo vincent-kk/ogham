@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { foldReviewVerdict } from '../../../../mcp/tools/reviewState/verdict/foldReviewVerdict.js';
 
+import { buildVerdictReviewFinding } from './helpers/buildVerdictReviewFinding.js';
 import { createVerdictFoldFixture } from './helpers/createVerdictFoldFixture.js';
 
 /** Fold input inferred from the pure verdict boundary. */
@@ -16,14 +17,96 @@ type ReviewOpinion = NonNullable<SealGroupEvidence['review']>;
 /** Reviewer finding carried by a validated opinion. */
 type ReviewFinding = ReviewOpinion['findings'][number];
 
-/** FCA candidate carried by the fold input. */
-type ReviewCandidate = FoldReviewVerdictInput['candidates'][number];
-
 describe('foldReviewVerdict', () => {
+  it('confirms assigned FCA candidates from canonical snapshot evidence', () => {
+    const input = createVerdictFoldFixture();
+    input.groups[0]!.verify!.decisions = [];
+    const before = JSON.stringify(input);
+    const result = foldReviewVerdict(input);
+    expect(result.verdict).toBe('REQUEST_CHANGES');
+    expect(result.confirmed).toContainEqual(
+      expect.objectContaining({
+        id: 'FCA-001',
+        verdict: 'CONFIRMED',
+        decisionEvidence: 'evidence.md#FCA-001',
+        decisionReason:
+          'canonical structure evidence measured on snapshot snapshot-hash',
+      }),
+    );
+    expect(JSON.stringify(input)).toBe(before);
+  });
+
+  it('refutes outside findings with all assigned hunk ranges and rejects verifier overrides', () => {
+    const input = createVerdictFoldFixture();
+    const group = input.groups[0]!;
+    group.verify!.decisions = [];
+    group.review!.findings = [
+      buildVerdictReviewFinding({ lines: 'unknown', inDiff: false }),
+    ];
+    group.group.units[0]!.hunks.push({
+      oldStart: 10,
+      oldEnd: 11,
+      newStart: 10,
+      newEnd: 12,
+    });
+    expect(foldReviewVerdict(input).refuted).toContainEqual(
+      expect.objectContaining({
+        id: 'R01-001',
+        verdict: 'REFUTED',
+        decisionEvidence: 'src/a.ts:1-4, 10-12',
+        decisionReason: 'finding lies outside the changed hunks',
+      }),
+    );
+    group.verify!.decisions = [
+      {
+        findingId: 'R01-001',
+        verdict: 'CONFIRMED',
+        evidence: 'src/a.ts:7',
+        reason: 'An actor tried to override the deterministic result.',
+      },
+    ];
+    const invalid = foldReviewVerdict(input);
+    expect(invalid.verdict).toBe('INCONCLUSIVE');
+    expect(invalid.unresolved).toContainEqual(
+      expect.objectContaining({
+        detail: 'decision coverage mismatch',
+        affectsVerdict: true,
+      }),
+    );
+  });
+
+  it.each(['missing', 'duplicate', 'unassigned', 'deterministic'] as const)(
+    'rejects %s decision coverage before a confirmed finding',
+    (fault) => {
+      const input = createVerdictFoldFixture();
+      const group = input.groups[0]!;
+      group.review!.findings = [buildVerdictReviewFinding()];
+      const decision = {
+        findingId: 'R01-001',
+        verdict: 'CONFIRMED' as const,
+        evidence: 'src/a.ts:7',
+        reason: 'The defect reproduces.',
+      };
+      group.verify!.decisions = fault === 'missing' ? [] : [decision];
+      if (fault === 'duplicate') group.verify!.decisions.push({ ...decision });
+      if (fault === 'unassigned')
+        group.verify!.decisions.push({ ...decision, findingId: 'R99-001' });
+      if (fault === 'deterministic')
+        group.verify!.decisions.push({ ...decision, findingId: 'FCA-001' });
+      const result = foldReviewVerdict(input);
+      expect(result.verdict).toBe('INCONCLUSIVE');
+      expect(result.unresolved).toContainEqual(
+        expect.objectContaining({
+          detail: 'decision coverage mismatch',
+          affectsVerdict: true,
+        }),
+      );
+    },
+  );
+
   it('applies incomplete evidence before a confirmed candidate without dropping roster rows', () => {
     const input = createVerdictFoldFixture();
     input.evidence.evidenceComplete = false;
-    input.groups[0]!.verify!.decisions[0]!.verdict = 'CONFIRMED';
 
     const result = foldReviewVerdict(input);
 
@@ -43,7 +126,6 @@ describe('foldReviewVerdict', () => {
         detail: 'Dependency evidence is unavailable.',
       },
     ];
-    input.groups[0]!.verify!.decisions[0]!.verdict = 'CONFIRMED';
 
     const result = foldReviewVerdict(input);
 
@@ -62,26 +144,30 @@ describe('foldReviewVerdict', () => {
 
   it('applies error indeterminacy before confirmation and synthesizes missing decisions', () => {
     const input = createVerdictFoldFixture();
-    const missingCandidate: ReviewCandidate = {
-      ...input.candidates[0]!,
-      id: 'FCA-002',
-      severity: 'warning',
-      message: 'A second candidate needs an explicit decision.',
-    };
-    input.candidates = [...input.candidates, missingCandidate];
-    input.groups[0]!.group.candidateIds = ['FCA-001', 'FCA-002'];
-    input.groups[0]!.verify!.decisions[0]!.verdict = 'INDETERMINATE';
+    input.groups[0]!.review!.findings = [
+      buildVerdictReviewFinding(),
+      buildVerdictReviewFinding({ id: 'R01-002' }),
+    ];
+    input.groups[0]!.verify!.decisions = [
+      {
+        findingId: 'R01-001',
+        verdict: 'INDETERMINATE',
+        evidence: 'src/a.ts:7',
+        reason: 'Cannot reproduce independently.',
+      },
+    ];
 
     const result = foldReviewVerdict(input);
 
     expect(result.verdict).toBe('INCONCLUSIVE');
     expect(result.decisions.map(({ id }) => id)).toEqual([
+      'R01-001',
+      'R01-002',
       'FCA-001',
-      'FCA-002',
     ]);
     expect(result.indeterminate).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ id: 'FCA-002', verdict: 'INDETERMINATE' }),
+        expect.objectContaining({ id: 'R01-002', verdict: 'INDETERMINATE' }),
       ]),
     );
     expect(result.unresolved).toEqual(
@@ -127,6 +213,11 @@ describe('foldReviewVerdict', () => {
         origin: 'review',
         verdict: 'CONFIRMED',
       }),
+      expect.objectContaining({
+        id: 'FCA-001',
+        origin: 'fca',
+        verdict: 'CONFIRMED',
+      }),
     ]);
     expect(result.decisions.map(({ id }) => id)).toEqual([
       'R01-001',
@@ -134,12 +225,24 @@ describe('foldReviewVerdict', () => {
     ]);
   });
 
-  it('approves when every candidate is refuted and coverage is complete', () => {
-    const result = foldReviewVerdict(createVerdictFoldFixture());
+  it('approves when assigned reviewer findings are refuted and coverage is complete', () => {
+    const input = createVerdictFoldFixture();
+    input.candidates = [];
+    input.groups[0]!.group.candidateIds = [];
+    input.groups[0]!.review!.findings = [buildVerdictReviewFinding()];
+    input.groups[0]!.verify!.decisions = [
+      {
+        findingId: 'R01-001',
+        verdict: 'REFUTED',
+        evidence: 'src/a.ts:7',
+        reason: 'The claim does not reproduce.',
+      },
+    ];
+    const result = foldReviewVerdict(input);
 
     expect(result.verdict).toBe('APPROVED');
     expect(result.refuted).toEqual([
-      expect.objectContaining({ id: 'FCA-001', verdict: 'REFUTED' }),
+      expect.objectContaining({ id: 'R01-001', verdict: 'REFUTED' }),
     ]);
     expect(result.filesTotal).toBe(2);
     expect(result.filesReviewed).toBe(1);
@@ -156,6 +259,9 @@ describe('foldReviewVerdict', () => {
   it('keeps an indeterminate verifier opinion inconclusive after refuted decisions', () => {
     const input = createVerdictFoldFixture();
     input.groups[0]!.verify!.state = 'INDETERMINATE';
+    input.groups[0]!.review!.findings = [
+      buildVerdictReviewFinding({ inDiff: false, lines: 'unknown' }),
+    ];
 
     const result = foldReviewVerdict(input);
 
@@ -216,6 +322,9 @@ describe('foldReviewVerdict', () => {
     expect(
       result.unresolved.every(({ affectsVerdict }) => affectsVerdict),
     ).toBe(true);
+    expect(result.unresolved).not.toContainEqual(
+      expect.objectContaining({ detail: 'decision coverage mismatch' }),
+    );
   });
 
   it('collapses every chunk of one path into exactly one roster row', () => {

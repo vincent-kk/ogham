@@ -143,7 +143,18 @@ export const WORKTREE_DISPOSITIONS = {
 export const REVIEW_BASE_REF_CANDIDATES = [
   'origin/main',
   'origin/master',
+  'main',
+  'master',
 ] as const;
+
+/** Maximum combined UTF-8 diff bytes embedded in one actor brief. */
+export const REVIEW_BRIEF_INLINE_DIFF_LIMIT = 16384;
+
+/** Maximum characters of sanitized change context rendered in artifacts. */
+export const REVIEW_CHANGE_CONTEXT_LIMIT = 8000;
+
+/** Maximum non-merge commit subjects included in generated change context. */
+export const REVIEW_CHANGE_CONTEXT_LOG_LIMIT = 30;
 
 /** Segment wildcard in `structure.generatedPaths`; matches exactly one segment. */
 export const GENERATED_PATH_WILDCARD = '*';
@@ -199,6 +210,8 @@ export const REVIEW_STATE_FILE_NAMES = {
   JUSTIFICATIONS: 'justifications.md',
   RE_VALIDATE: 're-validate.md',
   RULE_MAP: 'rules.json',
+  REVIEWER_METHOD: 'reviewers/reviewer.md',
+  VERIFIER_METHOD: 'reviewers/verifier.md',
   REPOSITORY_RULES: '.filid/review-rules.json',
 } as const;
 
@@ -224,6 +237,10 @@ export const REVIEW_STATE_STALE_ARTIFACT_DIRECTORY_NAMES = [
 
 /** Stable machine-readable diagnostic codes returned by review-state handlers. */
 export const REVIEW_STATE_DIAGNOSTIC_CODES = {
+  BRANCH_UNRESOLVED: 'review-branch-unresolved',
+  BASE_REF_UNRESOLVED: 'review-base-ref-unresolved',
+  CHANGE_CONTEXT_TRUNCATED: 'review-change-context-truncated',
+  ACTOR_METHOD_MISSING: 'review-actor-method-missing',
   STATE_MISSING: 'review-state-missing',
   SOURCE_HASH_STALE: 'review-source-hash-stale',
   STATE_SEALED: 'review-state-sealed',
@@ -257,14 +274,21 @@ export const REVIEW_EVIDENCE_SCHEMA_VERSION = 7 as const;
 /** Maximum dirty paths returned inline by the scope action. */
 export const REVIEW_SCOPE_DIRTY_PATH_LIMIT = 20;
 
+/** Exact unresolved-evidence marker for incomplete or conflicting decision sets. */
+export const REVIEW_DECISION_COVERAGE_MISMATCH = 'decision coverage mismatch';
+
 /** Stable input and internal error messages for the review-state boundary. */
 export const REVIEW_STATE_ERROR_MESSAGES = {
+  /** Reject non-string caller context before preparing artifacts. */
+  CHANGE_CONTEXT_INVALID: 'changeContext must be a string',
+  /** Brief rendering requires the canonical reviewer and verifier methods. */
+  ACTOR_METHODS_REQUIRED:
+    'Actor methods are required to render a review brief.',
   INPUT_OBJECT_REQUIRED: 'review_state input must be an object',
   ACTION_INVALID:
     'action must be prepare, checkpoint, validate, seal, cleanup, or assess',
   PROJECT_ROOT_REQUIRED: 'projectRoot is required',
   BRANCH_NAME_REQUIRED: 'branchName is required',
-  BASE_REF_REQUIRED: 'baseRef is required for prepare',
   CLEANUP_CONFIRM_REQUIRED: 'confirm must be true for cleanup',
   BRANCH_NAME_INVALID:
     'branchName must be a non-empty, non-traversal branch identifier',

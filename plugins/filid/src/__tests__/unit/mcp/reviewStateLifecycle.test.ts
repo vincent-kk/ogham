@@ -107,7 +107,7 @@ describe('review_state lifecycle', () => {
     const state = readPreparedReviewState(result);
     expect(state).toMatchObject({
       schemaVersion: REVIEW_STATE_SCHEMA_VERSION,
-      projectRoot,
+      projectRoot: git(['rev-parse', '--show-toplevel']),
       branchName: 'feature/lifecycle',
       baseRef: 'main',
       phase: REVIEW_STATE_PHASES.PREPARED,

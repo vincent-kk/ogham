@@ -22,10 +22,11 @@ import type { ReviewRenderInput } from '../render/reviewRenderTypes.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
 import { readReviewState } from '../state/readReviewState.js';
+import { resolveReviewArtifactPath } from '../state/resolveReviewArtifactPath.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import type {
+  ResolvedReviewStateInput,
   ReviewSealPayload,
-  ReviewStateInput,
   ReviewStatePayload,
   ReviewStateRecord,
 } from '../state/reviewStateTypes.js';
@@ -35,11 +36,10 @@ import { foldReviewVerdict } from '../verdict/foldReviewVerdict.js';
 import { createSealedReviewPayload } from './utils/createSealedReviewPayload.js';
 import { loadSealGroupEvidence } from './utils/loadSealGroupEvidence.js';
 import { readSealedReviewSummary } from './utils/readSealedReviewSummary.js';
-import { resolveReviewArtifactPath } from './validate/resolveReviewArtifactPath.js';
 
 /** Shared state-reading input shape accepted by checkpoint and seal. */
 type CheckpointOrSealInput = Extract<
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   Record<
     'action',
     typeof REVIEW_STATE_ACTIONS.CHECKPOINT | typeof REVIEW_STATE_ACTIONS.SEAL

@@ -7,6 +7,7 @@ import type {
   ToolStatus,
 } from '../../../../../types/toolEnvelope.js';
 import type {
+  ReviewHandoffPlan,
   ReviewPreparePayload,
   ReviewStatePaths,
   ReviewStateRecord,
@@ -14,6 +15,8 @@ import type {
 
 /** Values needed to project one prepare response without lifecycle-only fields. */
 interface CreatePreparedReviewPayloadInput {
+  /** Plan computed from artifact trust after every prepare effect completes. */
+  handoff: ReviewHandoffPlan;
   /** Selected prepare action. */
   action: typeof REVIEW_STATE_ACTIONS.PREPARE;
   /** Whether the state was created, resumed, or restored from cache. */
@@ -67,6 +70,11 @@ export function createPreparedReviewPayload(
       ...(input.state.verdict === null ? {} : { verdict: input.state.verdict }),
     },
     data: {
+      projectRoot: input.paths.projectRoot,
+      branchName: input.state.branchName,
+      baseRef: input.state.baseRef,
+      next: input.handoff.next,
+      sealReady: input.handoff.sealReady,
       reviewDirectory: input.paths.reviewDirectory,
       statePath: input.paths.statePath,
       evidencePath: input.paths.evidencePath,

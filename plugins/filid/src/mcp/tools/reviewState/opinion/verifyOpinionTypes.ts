@@ -4,11 +4,11 @@ export type VerifyOpinionState = 'COMPLETE' | 'INDETERMINATE';
 /** Verdict assigned to one reviewer or FCA candidate. */
 export type VerifyDecisionVerdict = 'CONFIRMED' | 'REFUTED' | 'INDETERMINATE';
 
-/** One verifier decision for a required reviewer or FCA candidate. */
+/** Independent or deterministic decision for one reviewer or FCA candidate. */
 export interface VerifyDecision {
   /** Reviewer or FCA candidate identifier being decided. */
   findingId: string;
-  /** Verifier disposition for the candidate. */
+  /** Independent or canonical disposition for the candidate. */
   verdict: VerifyDecisionVerdict;
   /** Concrete repository evidence supporting the disposition. */
   evidence: string;

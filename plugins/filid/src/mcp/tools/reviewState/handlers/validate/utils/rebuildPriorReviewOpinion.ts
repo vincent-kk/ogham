@@ -4,6 +4,7 @@ import { checkReviewOpinion } from '../../../opinion/checkReviewOpinion.js';
 import { mergeReviewRounds } from '../../../opinion/mergeReviewRounds.js';
 import { parseReviewOpinion } from '../../../opinion/parseReviewOpinion.js';
 import type { ReviewOpinion } from '../../../opinion/reviewOpinionTypes.js';
+import { resolveReviewArtifactPath } from '../../../state/resolveReviewArtifactPath.js';
 import type { ReviewGroup } from '../../../state/reviewGroupTypes.js';
 import type {
   ReviewStatePaths,
@@ -11,7 +12,6 @@ import type {
   ReviewValidationProblem,
 } from '../../../state/reviewStateTypes.js';
 import { locateReviewFindings } from '../locateReviewFindings.js';
-import { resolveReviewArtifactPath } from '../resolveReviewArtifactPath.js';
 
 /** Inputs needed to reconstruct the canonical opinion before one reviewer round. */
 interface RebuildPriorReviewOpinionInput {

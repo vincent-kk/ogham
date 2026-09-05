@@ -3,16 +3,18 @@ import type { RenderVerifyBriefInput } from '../../../../../mcp/tools/reviewStat
 import { buildReviewBriefInput } from './buildReviewBriefInput.js';
 
 /**
- * Build a verifier-brief fixture with reviewer and FCA decision targets.
+ * Build a verifier-brief fixture with assigned and deterministically refuted findings.
  * @returns Complete deterministic verifier-brief input.
  */
 export function buildVerifyBriefInput(): RenderVerifyBriefInput {
   const review = buildReviewBriefInput();
   return {
+    verifierMethod:
+      '# Verifier\n\n## Re-verification Mode\n\nResume-only method.\n\n## Deliverable\n\nWrite independent decisions.\n',
+    diffs: [],
     group: review.group,
     files: review.files,
     sourceHash: review.sourceHash,
-    candidates: review.candidates,
     findings: [
       {
         id: 'R01-001',
@@ -26,6 +28,7 @@ export function buildVerifyBriefInput(): RenderVerifyBriefInput {
         evidence: 'src/a.ts:5',
         consequence: 'Valid input is rejected.',
         existingCode: 'return false;',
+        recommendedAction: 'Return the accepted value.',
       },
       {
         id: 'R01-002',
@@ -39,6 +42,7 @@ export function buildVerifyBriefInput(): RenderVerifyBriefInput {
         evidence: 'No test reaches the boundary input.',
         consequence: 'A regression can pass unnoticed.',
         existingCode: 'if (value === limit) return;',
+        recommendedAction: 'Cover the boundary.',
       },
     ],
   };

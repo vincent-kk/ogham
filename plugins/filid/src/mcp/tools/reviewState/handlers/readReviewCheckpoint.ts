@@ -6,6 +6,8 @@ import {
   REVIEW_STATE_PHASES,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { planNextHandoffs } from '../handoff/planNextHandoffs.js';
+import { readReviewGroupArtifactStatus } from '../handoff/readReviewGroupArtifactStatus.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
@@ -14,13 +16,13 @@ import { readReviewState } from '../state/readReviewState.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import { reviewReportExists } from '../state/reviewReportExists.js';
 import type {
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
 /** Shared state-reading input shape accepted by checkpoint and seal. */
 type CheckpointOrSealInput = Extract<
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   Record<
     'action',
     typeof REVIEW_STATE_ACTIONS.CHECKPOINT | typeof REVIEW_STATE_ACTIONS.SEAL
@@ -49,6 +51,7 @@ export async function readReviewCheckpoint(
       disposition: REVIEW_STATE_DISPOSITIONS.MISSING,
       paths,
       status: TOOL_STATUSES.INDETERMINATE,
+      handoff: { next: [], sealReady: false },
       diagnostics: [
         {
           code: schemaMismatch
@@ -64,6 +67,11 @@ export async function readReviewCheckpoint(
   }
   const state = restored;
   const artifacts = readReviewArtifactPresence(paths, state);
+  const handoff = planNextHandoffs({
+    state,
+    paths,
+    statuses: readReviewGroupArtifactStatus(state, paths),
+  });
 
   const source = await computeReviewSourceHash(
     input.projectRoot,
@@ -77,6 +85,7 @@ export async function readReviewCheckpoint(
       status: TOOL_STATUSES.INDETERMINATE,
       state,
       artifacts,
+      handoff,
       diagnostics: [
         {
           code: REVIEW_STATE_DIAGNOSTIC_CODES.SOURCE_HASH_STALE,
@@ -97,6 +106,7 @@ export async function readReviewCheckpoint(
       status: TOOL_STATUSES.INDETERMINATE,
       state,
       artifacts,
+      handoff,
       diagnostics: [
         {
           code: REVIEW_STATE_DIAGNOSTIC_CODES.REPORT_MISSING,
@@ -116,5 +126,6 @@ export async function readReviewCheckpoint(
     status: TOOL_STATUSES.OK,
     state,
     artifacts,
+    handoff,
   });
 }

@@ -20,12 +20,12 @@ import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import { reviewReportExists } from '../state/reviewReportExists.js';
 import type {
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
 type AssessInput = Extract<
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   { action: typeof REVIEW_STATE_ACTIONS.ASSESS }
 > & {
   /** Whether a pull request exists; the caller owns PR lookups, not this tool. */

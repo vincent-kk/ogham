@@ -36,6 +36,8 @@ export function createValidatePayload(
         nextRound: input.nextRound,
       },
       data: {
+        ...input.handoff,
+        verifierRequired: input.verifierRequired,
         problems: [...input.problems],
         opinionPath: input.opinionPath,
         verifyBriefPath: input.verifyBriefPath,
@@ -57,6 +59,7 @@ export function createValidatePayload(
       indeterminate: input.indeterminate,
     },
     data: {
+      ...input.handoff,
       problems: [...input.problems],
       verifyPath: input.verifyPath,
     },

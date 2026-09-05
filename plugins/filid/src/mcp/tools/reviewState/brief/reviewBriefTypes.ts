@@ -1,3 +1,5 @@
+import type { RenderedReviewUnit } from '../diff/reviewUnitDiffTypes.js';
+import type { ReviewFinding } from '../opinion/reviewOpinionTypes.js';
 import type { ReviewGroup } from '../state/reviewGroupTypes.js';
 import type {
   ReviewScopeCandidate,
@@ -14,6 +16,12 @@ export interface ReviewRuleBody {
 
 /** Explicit inputs needed to render one deterministic reviewer brief. */
 export interface RenderReviewBriefInput {
+  /** Verbatim canonical reviewer method loaded at the effect boundary. */
+  reviewerMethod: string;
+  /** Bounded untrusted change summary prepared from caller text or Git. */
+  changeContext: string;
+  /** Materialized group diffs, or null when their combined bytes exceed the budget. */
+  diffs: readonly RenderedReviewUnit[] | null;
   /** Group whose units and dependencies the reviewer receives. */
   group: ReviewGroup;
   /** Full prepared roster used to enrich group-unit rows. */
@@ -32,6 +40,8 @@ export interface RenderReviewBriefInput {
 
 /** Explicit inputs needed to render the cross-review orchestration session. */
 export interface RenderSessionMarkdownInput {
+  /** Bounded untrusted change summary supplied by prepare. */
+  changeContext: string;
   /** Source branch under review. */
   branchName: string;
   /** Base reference used for the committed diff. */
@@ -50,42 +60,18 @@ export interface RenderSessionMarkdownInput {
   groups: readonly ReviewGroup[];
 }
 
-/** Located reviewer finding rendered as a verifier decision target. */
-export interface VerifyBriefFinding {
-  /** Stable reviewer finding identifier. */
-  id: string;
-  /** Review category selected by the reviewer. */
-  category: string;
-  /** Review severity selected by the reviewer. */
-  severity: string;
-  /** Project-relative finding path. */
-  path: string;
-  /** Resolved inclusive line range or `unknown`. */
-  lines: string;
-  /** Whether the resolved range intersects this group's diff. */
-  inDiff: boolean;
-  /** Rule identifier supporting the finding. */
-  rule: string;
-  /** Falsifiable defect statement. */
-  message: string;
-  /** Concrete evidence locator. */
-  evidence: string;
-  /** Consequence if the finding remains. */
-  consequence: string;
-  /** Exact existing code used for independent location. */
-  existingCode: string;
-}
-
 /** Explicit inputs needed to render one verifier handoff brief. */
 export interface RenderVerifyBriefInput {
-  /** Group whose review and FCA claims require decisions. */
+  /** Canonical verifier method whose Deliverable section begins normal review. */
+  verifierMethod: string;
+  /** Materialized group diffs, or null when their combined bytes exceed the budget. */
+  diffs: readonly RenderedReviewUnit[] | null;
+  /** Group whose assigned reviewer findings require decisions. */
   group: ReviewGroup;
   /** Full roster used to enrich the group's file rows. */
   files: readonly ReviewScopeFile[];
   /** Located reviewer findings requiring verification. */
-  findings: readonly VerifyBriefFinding[];
-  /** FCA candidates assigned to the group. */
-  candidates: readonly ReviewScopeCandidate[];
+  findings: readonly ReviewFinding[];
   /** Immutable committed-source identity. */
   sourceHash: string;
 }

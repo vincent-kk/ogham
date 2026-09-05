@@ -36,9 +36,11 @@ Do not write `opinions/verify-NN.md`, any normal cross-review artifact, or any p
 
 Write valid JSON only to `opinions/verify-NN.json` at the `output` path named by the supplied verifier brief. Start from a parseable `INDETERMINATE` skeleton, replace it with the complete decision set, and write no other artifact or project file. An empty assignment produces `state: "COMPLETE"` and `decisions: []`.
 
+Your final message is exactly one line: `done: <output path>`. Report nothing else; the opinion file is the deliverable.
+
 ## Inputs
 
-- the absolute verifier brief path
+- the absolute verifier brief path; the brief is self-contained with the method, assigned evidence, and diffs (or their paths)
 - the same distinct host-authoritative current-user block and `USR-NNN` mapping supplied to the reviewer
 - the exact output path
 
@@ -53,9 +55,7 @@ For each candidate, in order:
 3. Use `REFUTED` only when the cited code is absent or a current code or canonical evidence line literally contradicts the claim.
 4. Never refute memory safety, concurrency, declaration-to-wiring consistency, behavior or compatibility changes, or public-contract violations without that literal contradiction.
 5. Use `INDETERMINATE` when obtainable evidence neither reproduces nor contradicts the claim.
-6. Confirm an FCA candidate when its canonical row exists and its path, rule scope, and mapped category agree; otherwise apply the same narrow refutation rules.
-7. Cite the independently inspected line or row and give one falsifiable reason.
-8. When the brief marks `inDiff: false` and the rule is neither `USR-` nor `FCA-`, refute with the hunk ranges as evidence.
+6. Cite the independently inspected line or row and give one falsifiable reason.
 
 ## Constraints
 

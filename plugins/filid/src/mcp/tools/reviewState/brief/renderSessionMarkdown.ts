@@ -3,6 +3,7 @@ import { escapeMarkdownCell } from '../scope/utils/escapeMarkdownCell.js';
 import { renderMarkdownTable } from '../scope/utils/renderMarkdownTable.js';
 
 import type { RenderSessionMarkdownInput } from './reviewBriefTypes.js';
+import { renderChangeContext } from './utils/renderChangeContext.js';
 
 /**
  * Return every creation-ordered group containing a unit for one path.
@@ -52,7 +53,7 @@ export function renderSessionMarkdown(
     '',
     '## Change Context',
     '',
-    '<!-- pending: orchestrator writes the pull-request or commit summary here -->',
+    renderChangeContext(input.changeContext),
     '',
     '## Review Checklist',
     '',

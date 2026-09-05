@@ -24,6 +24,7 @@ export function createReviewStatePayload({
   state,
   concurrency,
   artifacts,
+  handoff,
 }: CreateReviewStatePayloadInput): ReviewStatePayload {
   const artifactPaths = listReviewArtifacts(paths.reviewDirectory);
   const reportPath = reviewReportExists(paths.reportPath)
@@ -78,6 +79,7 @@ export function createReviewStatePayload({
           }
         : {}),
       ...(artifacts === undefined ? {} : { artifacts }),
+      ...(handoff === undefined ? {} : handoff),
     },
     diagnostics: [...diagnostics],
   };

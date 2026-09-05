@@ -80,6 +80,8 @@ generated_at: <timestamp>
 
 An empty evidence table may render a `None` row. Findings retain their confirmed evidence; the orchestrator does not rewrite claims or add fixes during rendering.
 
+At seal, the Verification Log records FCA candidates as `CONFIRMED` with `evidence.md#<id>` and `canonical structure evidence measured on snapshot <snapshotHash>`, and deterministically refuted findings outside the changed hunks as `REFUTED` with assigned hunk ranges and `finding lies outside the changed hunks`.
+
 ## PR comment
 
 `pr-comment.md` summarizes the same sealed review. Use `## Code Review Governance` to find the existing comment for an update. Keep all three disclosure blocks, including empty ones; the unresolved block contains only evidence that affects the verdict.

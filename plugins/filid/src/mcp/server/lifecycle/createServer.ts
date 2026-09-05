@@ -283,14 +283,18 @@ const REVIEW_STATE_COMMON_SCHEMA = {
   branchName: z
     .string()
     .min(1)
-    .describe('Branch the review state is keyed by.'),
+    .optional()
+    .describe(
+      'Branch the review state is keyed by; defaults to the current Git branch.',
+    ),
 };
 
 const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
     action: z.literal(REVIEW_STATE_ACTIONS.PREPARE),
-    baseRef: z.string().min(1),
+    baseRef: z.string().min(1).optional(),
+    changeContext: z.string().optional(),
     force: z.boolean().optional(),
     effort: z.enum(['low', 'medium', 'high']).optional(),
   }),
@@ -346,7 +350,15 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .string()
     .min(1)
     .optional()
-    .describe('Comparison base ref. Required by prepare.'),
+    .describe(
+      'Comparison base ref; prepare resolves remote HEAD, remote defaults, then local main or master when omitted.',
+    ),
+  changeContext: z
+    .string()
+    .optional()
+    .describe(
+      'prepare only: untrusted change summary; defaults to commit subjects and diff totals.',
+    ),
   force: z
     .boolean()
     .optional()

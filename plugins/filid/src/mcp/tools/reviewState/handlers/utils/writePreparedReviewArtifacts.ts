@@ -3,19 +3,20 @@ import { existsSync } from 'node:fs';
 import {
   assertNoSymlinkDescendantsSync,
   ensureDirectorySync,
-  readUtf8FileIfExistsSync,
   resolveContainedPath,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
-import { REVIEW_OPINION_SCHEMA_VERSION } from '../../../../../constants/reviewState.js';
+import { REVIEW_STATE_ERROR_MESSAGES } from '../../../../../constants/reviewState.js';
 import { renderOpinionSkeleton } from '../../brief/renderOpinionSkeleton.js';
 import { renderReviewBrief } from '../../brief/renderReviewBrief.js';
 import { renderSessionMarkdown } from '../../brief/renderSessionMarkdown.js';
 import { renderVerifyBrief } from '../../brief/renderVerifyBrief.js';
 import { materializeUnitDiffs } from '../../diff/materializeUnitDiffs.js';
+import { readInlineReviewDiffs } from '../../diff/readInlineReviewDiffs.js';
 import type { RenderedReviewUnit } from '../../diff/reviewUnitDiffTypes.js';
-import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
+import { writeAutoVerifyOpinion } from '../../handoff/utils/writeAutoVerifyOpinion.js';
+import { writeCandidateOnlyReviewOpinion } from '../../handoff/utils/writeCandidateOnlyReviewOpinion.js';
 import type { LoadedReviewRule } from '../../rules/reviewRuleTypes.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 import type {
@@ -27,6 +28,10 @@ import type {
 
 /** All state-independent values needed to write prepare's derived artifacts. */
 interface WritePreparedReviewArtifactsInput {
+  /** Verbatim actor methods, needed only when a brief must be rendered. */
+  actorMethods: { reviewer: string; verifier: string } | null;
+  /** Sanitized untrusted summary for the session and reviewer brief. */
+  changeContext: string;
   /** Canonical branch-scoped artifact paths. */
   paths: ReviewStatePaths;
   /** Groups awaiting final diff paths and artifact output. */
@@ -137,68 +142,31 @@ export function writePreparedReviewArtifacts(
       return candidate;
     });
     if (group.rounds === 0) {
-      if (group.units.length !== 0)
-        throw new Error(
-          `Candidate-only review group ${group.id} contains units`,
-        );
-      const opinion = `${JSON.stringify(
-        {
-          schema: REVIEW_OPINION_SCHEMA_VERSION,
-          group: group.id,
-          round: 0,
-          state: 'COMPLETE',
-          sourceHash: input.sourceHash,
-          files: [],
-          findings: [],
-          checked: group.candidateIds,
-          gaps: [],
-          riskPlan: null,
-        },
-        null,
-        2,
-      )}\n`;
-      const opinionPath = artifactPath(input.paths, group.opinionPath);
-      let persistedOpinion = readUtf8FileIfExistsSync(opinionPath);
-      if (!input.preserveOpinions || persistedOpinion === null) {
-        writeFileAtomicallySync(opinionPath, opinion);
-        persistedOpinion = opinion;
-      }
-      const sha256 = computeReviewArtifactHash(persistedOpinion);
-      const expectedOpinion = persistedOpinion === opinion;
-      const retainedOpinion =
-        group.validated.review?.complete === true &&
-        group.validated.review.round === 0 &&
-        group.validated.review.sha256 === sha256;
-      const verifyPath = artifactPath(input.paths, group.verifyPath);
-      const persistedVerify = readUtf8FileIfExistsSync(verifyPath);
-      const priorVerify = group.validated.verify;
-      const retainedVerify =
-        retainedOpinion &&
-        persistedVerify !== null &&
-        priorVerify?.reviewSha256 === sha256 &&
-        priorVerify.sha256 === computeReviewArtifactHash(persistedVerify);
+      const prepared = writeCandidateOnlyReviewOpinion(
+        input.paths,
+        group,
+        input.sourceHash,
+        input.preserveOpinions,
+      );
       const verifyBriefPath = artifactPath(input.paths, group.verifyBriefPath);
-      if (!input.onlyMissingArtifacts || !existsSync(verifyBriefPath))
+      if (!input.onlyMissingArtifacts || !existsSync(verifyBriefPath)) {
+        if (!input.actorMethods)
+          throw new Error(REVIEW_STATE_ERROR_MESSAGES.ACTOR_METHODS_REQUIRED);
         writeFileAtomicallySync(
           verifyBriefPath,
           renderVerifyBrief({
+            verifierMethod: input.actorMethods.verifier,
+            diffs: [],
             group,
             files: input.files,
             findings: [],
-            candidates,
             sourceHash: input.sourceHash,
           }),
         );
-      return {
-        ...group,
-        validated: {
-          review:
-            expectedOpinion || retainedOpinion
-              ? { round: 0, sha256, complete: true }
-              : null,
-          verify: retainedVerify && priorVerify ? { ...priorVerify } : null,
-        },
-      };
+      }
+      return prepared.validated.review && !prepared.validated.verify
+        ? writeAutoVerifyOpinion(input.paths, prepared, input.sourceHash)
+        : prepared;
     }
 
     const reviewRound = resolvePreparedReviewRound(
@@ -211,6 +179,8 @@ export function writePreparedReviewArtifacts(
       !input.onlyMissingArtifacts ||
       !existsSync(briefPath)
     ) {
+      if (!input.actorMethods)
+        throw new Error(REVIEW_STATE_ERROR_MESSAGES.ACTOR_METHODS_REQUIRED);
       const groupFiles = group.units.map((unit) => {
         const file = filesByPath.get(unit.path);
         if (!file)
@@ -231,6 +201,9 @@ export function writePreparedReviewArtifacts(
         briefPath,
         renderReviewBrief(
           {
+            reviewerMethod: input.actorMethods.reviewer,
+            changeContext: input.changeContext,
+            diffs: readInlineReviewDiffs(input.paths, group),
             group,
             files: input.files,
             candidates,
@@ -249,7 +222,10 @@ export function writePreparedReviewArtifacts(
         ? group.skeletonPath
         : `opinions/review-${group.id}.r${String(reviewRound)}.json`,
     );
-    if (!input.preserveOpinions || !existsSync(skeletonPath))
+    if (
+      !input.preserveOpinions ||
+      (!group.validated.review && !existsSync(skeletonPath))
+    )
       writeFileAtomicallySync(
         skeletonPath,
         renderOpinionSkeleton(group, input.sourceHash, reviewRound),
@@ -265,6 +241,7 @@ export function writePreparedReviewArtifacts(
     writeFileAtomicallySync(
       input.paths.sessionPath,
       renderSessionMarkdown({
+        changeContext: input.changeContext,
         branchName: input.branchName,
         baseRef: input.baseRef,
         sourceHash: input.sourceHash,

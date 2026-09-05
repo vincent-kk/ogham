@@ -1,31 +1,65 @@
+import { REVIEW_DECISION_COVERAGE_MISMATCH } from '../../../../constants/reviewState.js';
 import type { ReviewScopeCandidate } from '../state/reviewStateTypes.js';
 
+import { buildDeterministicDecisions } from './buildDeterministicDecisions.js';
 import type {
   JoinedReviewDecision,
   ReviewDecisionJoinResult,
   SealGroupEvidence,
 } from './reviewVerdictTypes.js';
+import { hasExactDecisionCoverage } from './utils/hasExactDecisionCoverage.js';
 
 /**
- * Join trusted reviewer findings and every FCA candidate to verifier decisions.
+ * Join trusted independent and canonical decisions with exact assignment coverage.
  *
  * @param groups Prepared groups with trusted reviewer and verifier artifacts.
  * @param candidates Complete FCA candidate roster in evidence order.
+ * @param snapshotHash Identity of the structural evidence confirming FCA candidates.
  * @returns Deterministically joined and partitioned decisions without omissions.
  */
 export function joinDecisions(
   groups: readonly SealGroupEvidence[],
   candidates: readonly ReviewScopeCandidate[],
+  snapshotHash: string,
 ): ReviewDecisionJoinResult {
   const decisions: JoinedReviewDecision[] = [];
   const unresolved: ReviewDecisionJoinResult['unresolved'] = [];
   const joinedCandidateIds = new Set<string>();
+  const expectedIds = candidates.map(({ id }) => id);
+  const decisionIds: string[] = [];
 
   for (const evidence of groups) {
     const review = evidence.issues.length === 0 ? evidence.review : null;
     const verify = evidence.issues.length === 0 ? evidence.verify : null;
+    const deterministic =
+      review !== null && verify !== null
+        ? buildDeterministicDecisions(
+            evidence.group,
+            review.findings,
+            candidates,
+            snapshotHash,
+          )
+        : [];
+    const combined = [...deterministic, ...(verify?.decisions ?? [])];
+    const findingIds = (review?.findings ?? []).map(({ id }) => id);
+    expectedIds.push(...findingIds);
+    decisionIds.push(...combined.map(({ findingId }) => findingId));
+    if (
+      evidence.issues.length === 0 &&
+      !hasExactDecisionCoverage(
+        [...evidence.group.candidateIds, ...findingIds],
+        combined.map(({ findingId }) => findingId),
+      )
+    )
+      unresolved.push({
+        source: `verification ${evidence.group.id}`,
+        path: evidence.group.verifyPath,
+        rule: 'decision coverage',
+        detail: REVIEW_DECISION_COVERAGE_MISMATCH,
+        affectsVerdict: true,
+      });
     for (const finding of review?.findings ?? []) {
-      const decision = verify?.decisions.find(
+      const decision = combined.find(
         ({ findingId }) => findingId === finding.id,
       );
       decisions.push({
@@ -57,7 +91,7 @@ export function joinDecisions(
     for (const candidate of candidates) {
       if (!evidence.group.candidateIds.includes(candidate.id)) continue;
       joinedCandidateIds.add(candidate.id);
-      const decision = verify?.decisions.find(
+      const decision = combined.find(
         ({ findingId }) => findingId === candidate.id,
       );
       decisions.push({
@@ -114,6 +148,17 @@ export function joinDecisions(
     });
   }
 
+  if (
+    groups.every((evidence) => evidence.issues.length === 0) &&
+    !hasExactDecisionCoverage(expectedIds, decisionIds)
+  )
+    unresolved.push({
+      source: 'verification',
+      path: 'evidence.md',
+      rule: 'decision coverage',
+      detail: REVIEW_DECISION_COVERAGE_MISMATCH,
+      affectsVerdict: true,
+    });
   return {
     decisions,
     confirmed: decisions.filter(({ verdict }) => verdict === 'CONFIRMED'),

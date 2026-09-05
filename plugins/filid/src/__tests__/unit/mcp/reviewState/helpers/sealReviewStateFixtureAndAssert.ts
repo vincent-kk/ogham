@@ -53,7 +53,7 @@ export async function sealReviewStateFixtureAndAssert(
   expected: ExpectedReviewStateSeal,
 ): Promise<ReviewSealPayload | ReviewStatePayload> {
   const reviewDirectory = resolveContainedPath(
-    fixture.projectRoot,
+    state.projectRoot,
     '.filid/review',
     state.normalizedBranch,
   );

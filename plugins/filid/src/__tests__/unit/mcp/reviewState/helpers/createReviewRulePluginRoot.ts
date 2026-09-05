@@ -8,6 +8,8 @@ import {
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
+import { writeReviewActorMethods } from './writeReviewActorMethods.js';
+
 /**
  * Create a temporary plugin root containing the minimal valid review rule map.
  *
@@ -31,5 +33,6 @@ export function createReviewRulePluginRoot(): string {
     resolveContainedPath(rulesDirectory, 'default.md'),
     '# Default review rule\n',
   );
+  writeReviewActorMethods(pluginRoot);
   return pluginRoot;
 }

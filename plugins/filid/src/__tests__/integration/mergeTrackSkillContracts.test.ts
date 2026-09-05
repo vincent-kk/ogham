@@ -94,11 +94,14 @@ describe('merge-track skill recovery contracts', () => {
   it('recovers cached publication through sealing without another review round', () => {
     const cached = crossReview
       .split('\n')
-      .find((line) => line.startsWith('| `cached`'));
+      .find((line) => line.includes('summary.disposition: cached'));
+    const seal = crossReview.indexOf('## Step 4 — Seal');
+    const publish = crossReview.indexOf('## Step 5 — Publish');
 
-    expect(cached).toContain('Step 5');
-    expect(cached).toContain('Step 6');
+    expect(cached).toMatch(/cached`, go to Step 4; otherwise go to Step 3/u);
+    expect(seal).toBeGreaterThanOrEqual(0);
+    expect(publish).toBeGreaterThan(seal);
     expect(cached).not.toContain('then stop');
-    expect(cached).toMatch(/without[^.]*review/iu);
+    expect(crossReview.slice(seal, publish)).toContain('action: "seal"');
   });
 });

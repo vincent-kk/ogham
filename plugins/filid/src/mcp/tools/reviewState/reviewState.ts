@@ -3,8 +3,10 @@ import { requireAbsoluteRoot } from '@ogham/cross-platform';
 import {
   REVIEW_STATE_ACTIONS,
   REVIEW_STATE_ACTION_VALUES,
+  REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_ERROR_MESSAGES,
 } from '../../../constants/reviewState.js';
+import { ToolDiagnosticError } from '../../errors/toolDiagnosticError.js';
 
 import { assessReviewState } from './handlers/assessReviewState.js';
 import { cleanupReviewState } from './handlers/cleanupReviewState.js';
@@ -12,7 +14,9 @@ import { prepareReviewState } from './handlers/prepareReviewState.js';
 import { readReviewCheckpoint } from './handlers/readReviewCheckpoint.js';
 import { sealReviewState } from './handlers/sealReviewState.js';
 import { validateReviewOpinion } from './handlers/validateReviewOpinion.js';
+import { executeReviewGit } from './hash/executeReviewGit.js';
 import type {
+  ResolvedReviewStateInput,
   ReviewStateInput,
   ReviewStateResult,
   ReviewStateResultFor,
@@ -52,18 +56,38 @@ export async function handleReviewState(
     throw new Error(REVIEW_STATE_ERROR_MESSAGES.ACTION_INVALID);
   if (typeof candidate.projectRoot !== 'string' || !candidate.projectRoot)
     throw new Error(REVIEW_STATE_ERROR_MESSAGES.PROJECT_ROOT_REQUIRED);
-  if (typeof candidate.branchName !== 'string')
+  if (
+    candidate.branchName !== undefined &&
+    typeof candidate.branchName !== 'string'
+  )
     throw new Error(REVIEW_STATE_ERROR_MESSAGES.BRANCH_NAME_REQUIRED);
-
+  const projectRoot = (
+    await executeReviewGit(requireAbsoluteRoot(candidate.projectRoot), [
+      'rev-parse',
+      '--show-toplevel',
+    ])
+  ).trim();
+  const branchName =
+    candidate.branchName ??
+    (await executeReviewGit(projectRoot, ['branch', '--show-current'])).trim();
+  if (candidate.branchName === undefined && !branchName)
+    throw new ToolDiagnosticError(
+      REVIEW_STATE_DIAGNOSTIC_CODES.BRANCH_UNRESOLVED,
+      'The current Git branch could not be resolved. Supply branchName for a detached HEAD.',
+    );
   const input = {
     ...candidate,
-    projectRoot: requireAbsoluteRoot(candidate.projectRoot),
-  } as ReviewStateInput;
+    projectRoot,
+    branchName,
+  } as ResolvedReviewStateInput;
 
   switch (input.action) {
     case REVIEW_STATE_ACTIONS.PREPARE:
-      if (!input.baseRef)
-        throw new Error(REVIEW_STATE_ERROR_MESSAGES.BASE_REF_REQUIRED);
+      if (
+        input.changeContext !== undefined &&
+        typeof input.changeContext !== 'string'
+      )
+        throw new Error(REVIEW_STATE_ERROR_MESSAGES.CHANGE_CONTEXT_INVALID);
       return prepareReviewState(input);
     case REVIEW_STATE_ACTIONS.CHECKPOINT:
       return readReviewCheckpoint({

@@ -8,7 +8,8 @@ import type {
 } from '../../../../../types/toolEnvelope.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 import type {
-  ReviewStateInput,
+  ResolvedReviewStateInput,
+  ReviewHandoffPlan,
   ReviewStatePaths,
   ReviewStateRecord,
   ReviewValidationProblem,
@@ -16,7 +17,7 @@ import type {
 
 /** Validate input narrowed from the public review-state action union. */
 export type ValidateReviewInput = Extract<
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   Record<'action', typeof REVIEW_STATE_ACTIONS.VALIDATE>
 >;
 
@@ -34,6 +35,8 @@ export interface ValidateOpinionContext {
 
 /** Fields shared by both exact validation response projections. */
 interface CreateValidatePayloadBaseInput {
+  /** Plan observed after validation's writes, or against unchanged state on failure. */
+  handoff: ReviewHandoffPlan;
   /** Selected public action. */
   action: typeof REVIEW_STATE_ACTIONS.VALIDATE;
   /** Canonical contained artifact paths for the branch. */
@@ -50,6 +53,8 @@ interface CreateValidatePayloadBaseInput {
 
 /** Complete projector input for a reviewer-opinion validation response. */
 interface CreateReviewerValidatePayloadInput extends CreateValidatePayloadBaseInput {
+  /** Whether this completed reviewer round requires an independent verifier. */
+  verifierRequired: boolean;
   /** Reviewer-opinion response discriminator. */
   kind: typeof REVIEW_VALIDATE_KINDS.REVIEW;
   /** One-based reviewer round that was checked. */
