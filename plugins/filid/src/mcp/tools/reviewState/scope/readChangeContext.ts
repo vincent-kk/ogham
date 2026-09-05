@@ -7,10 +7,13 @@ import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import { executeReviewGit } from '../hash/executeReviewGit.js';
 import type { ReviewChangedFile } from '../state/reviewStateTypes.js';
 
+import { parseHandoffBlock } from './parseHandoffBlock.js';
+import type { ReviewHandoffSeed } from './reviewHandoffSeedSchema.js';
+
 /**
  * Read commit context or sanitize caller text for untrusted artifact rendering.
  * @param input Absolute Git root, merge base, numstat roster, and optional text.
- * @returns Bounded context and a warning if the sanitized text was truncated.
+ * @returns Bounded context, validated handoff claims, and nonfatal parsing or truncation diagnostics.
  * @throws When Git cannot supply the requested committed change context.
  */
 export async function readChangeContext(input: {
@@ -25,11 +28,20 @@ export async function readChangeContext(input: {
 }): Promise<{
   /** Sanitized untrusted context bounded by the shared character limit. */
   changeContext: string;
-  /** Nonfatal diagnostics describing any context truncation. */
+  /** Validated caller claims extracted before context truncation, or null for Git context. */
+  handoff: ReviewHandoffSeed | null;
+  /** Nonfatal diagnostics describing invalid handoff data or context truncation. */
   diagnostics: ToolDiagnostic[];
 }> {
   let context = input.changeContext;
-  if (context === undefined) {
+  let handoff: ReviewHandoffSeed | null = null;
+  const diagnostics: ToolDiagnostic[] = [];
+  if (context !== undefined) {
+    const parsed = parseHandoffBlock(context);
+    context = parsed.remainder;
+    handoff = parsed.handoff;
+    diagnostics.push(...parsed.diagnostics);
+  } else {
     const log = await executeReviewGit(input.projectRoot, [
       'log',
       '--no-merges',
@@ -49,16 +61,14 @@ export async function readChangeContext(input: {
   const sanitized = context
     .replace(/\r\n?/g, '\n')
     .replace(/[^\P{Cc}\n\t]/gu, '');
+  if (sanitized.length > REVIEW_CHANGE_CONTEXT_LIMIT)
+    diagnostics.push({
+      code: REVIEW_STATE_DIAGNOSTIC_CODES.CHANGE_CONTEXT_TRUNCATED,
+      message: `Change context was truncated to ${REVIEW_CHANGE_CONTEXT_LIMIT} characters.`,
+    });
   return {
     changeContext: sanitized.slice(0, REVIEW_CHANGE_CONTEXT_LIMIT),
-    diagnostics:
-      sanitized.length > REVIEW_CHANGE_CONTEXT_LIMIT
-        ? [
-            {
-              code: REVIEW_STATE_DIAGNOSTIC_CODES.CHANGE_CONTEXT_TRUNCATED,
-              message: `Change context was truncated to ${REVIEW_CHANGE_CONTEXT_LIMIT} characters.`,
-            },
-          ]
-        : [],
+    handoff,
+    diagnostics,
   };
 }

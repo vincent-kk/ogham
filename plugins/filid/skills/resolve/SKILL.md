@@ -3,7 +3,7 @@ name: resolve
 user-invocable: true
 description: 'Present all cross-review fix requests as one batched decision sheet, delegate accepted corrections, record rejections, then gate and commit. Use after cross-review returns REQUEST_CHANGES.'
 argument-hint: '[--auto] [--base REF]'
-version: '1.0.0'
+version: '1.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -99,7 +99,7 @@ This value is written to `justifications.md` as `resolve_commit_sha`. `revalidat
 Then hand the accepted items out, routing each by the table in `reference.md` §5 and dispatching them together:
 
 - main-agent items get a delegation brief in the §5 format, applied directly in this turn;
-- when another skill owns the correction, invoke it with the input that skill actually takes — a placement request for `/filid:restructure`, the owning fractal path and `--include-detail` for `/filid:enrich-docs`. Neither receives the brief. With `--auto`, append `--auto-approve` to both child skills as specified in §5; interactive invocations omit it.
+- when another skill owns the correction, invoke it with the input that skill actually takes — a placement request for `/filid:restructure`, the fix request's document path (or the owning fractal path) with `--include-detail --repair` for `/filid:enrich-docs`. Neither receives the brief. With `--auto`, append `--auto-approve` to both child skills as specified in §5; interactive invocations omit it.
 
 This skill states **what must change and where**. It does not choose the edit, and it never edits a file itself.
 
@@ -131,6 +131,8 @@ Write `REVIEW_DIR/justifications.md` from the template in `reference.md` §1, wi
 4. With no accepted items, skip the typecheck and the commit entirely.
 
 ## Step 8 — Hand off
+
+For each delegated document correction, print the delegated document path together with its FIX ID in the terminal output.
 
 ```text
 Resolve: accepted <n>, rejected <m>, unapplied <k>

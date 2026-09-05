@@ -1,5 +1,6 @@
 import type { RenderedReviewUnit } from '../diff/reviewUnitDiffTypes.js';
 import type { ReviewFinding } from '../opinion/reviewOpinionTypes.js';
+import type { ReviewHandoffSeed } from '../scope/reviewHandoffSeedSchema.js';
 import type { ReviewGroup } from '../state/reviewGroupTypes.js';
 import type {
   ReviewScopeCandidate,
@@ -20,6 +21,8 @@ export interface RenderReviewBriefInput {
   reviewerMethod: string;
   /** Bounded untrusted change summary prepared from caller text or Git. */
   changeContext: string;
+  /** Validated untrusted Stage 1 claims, included only when a handoff block was parsed. */
+  handoff?: ReviewHandoffSeed | null;
   /** Materialized group diffs, or null when their combined bytes exceed the budget. */
   diffs: readonly RenderedReviewUnit[] | null;
   /** Group whose units and dependencies the reviewer receives. */

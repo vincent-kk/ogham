@@ -4,6 +4,7 @@
 
 - `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess` 여섯 action만 지원한다.
 - `prepare`는 merge-base와 committed changed-file blob으로 source hash를 계산하고 변경 roster·FCA 증거·review group을 한 snapshot에서 만든다. 모든 canonical artifact를 먼저 쓴 뒤 `ReviewStateRecord` v2를 마지막에 한 번 atomic 저장한다.
+- `prepare`는 `changeContext` 안의 `<!-- filid:handoff v1 -->` 블록을 절단 전에 추출해 zod 스키마로 검증하고, 각 review brief에 `## FCA Handoff` 섹션으로 그룹별 행을 싣는다. 블록은 canonical evidence가 아니라 검증할 주장이며 상태 레코드에 저장되지 않는다.
 - roster는 NUL-safe Git name-status와 numstat에서 A/M/D·owner·churn·binary를 보존하고 `fileHashes` key 집합과 정확히 일치해야 한다. 다르면 축소하지 않고 internal error다.
 - FCA 후보는 같은 snapshot에서 변경 path·그 ancestor·owner와 교차하는 structure/verification finding만 `(path, rule, message)`로 중복 제거하고 정렬해 `FCA-NNN`을 부여한다. 같은 key는 error severity가 이기며 info는 informational 관측으로 남는다.
 - project-root finding은 ancestor만으로 교차하지 않고 root owner가 같은 때만 포함한다. verification status에는 같은 path·owner 또는 owner 아래 변경과 교차하는 verification file만 반영하지만 graph certainty와 non-finding diagnostic은 project-wide다.
@@ -31,7 +32,8 @@
 
 - 모든 action의 projectRoot는 저장소 안의 절대 경로이며 Git toplevel로 정규화한다. branchName은 선택 입력으로, 문자열이면 기존 branch 검증을 적용하고 생략하면 Git 현재 branch를 해석한다. detached HEAD의 빈 branch는 `review-branch-unresolved` error다. directory key는 원래 branch 문자열을 정규화하고 응답 branchName은 원래 문자열을 보존한다.
 - prepare input은 `{ action: "prepare", projectRoot, branchName?, baseRef?, force?, effort?, changeContext? }`이다. 명시 baseRef는 그 ref만 검증하고 실패 시 `review-base-ref-unresolved` error다. 생략하면 remote HEAD → remote candidate → local main·master 순서로 해석하며 전부 없으면 같은 error다. effort는 input → `config.review.effort` → `medium` 순서이고 concurrency는 `config.review.concurrency` → 기본 상수 순서다.
-- changeContext는 제어문자를 제거하고 8000자로 제한하며 초과 시 `review-change-context-truncated` warning을 반환한다. 생략하면 baseCommit..HEAD의 non-merge commit hash·subject 최대 30줄과 numstat 합계 한 줄로 생성한다. session·brief는 이를 untrusted 저장소 데이터로 표시한다.
+- changeContext는 handoff 추출 후 남은 본문의 제어문자를 제거하고 8000자로 제한하며 초과 시 `review-change-context-truncated` warning을 반환한다. 생략하면 baseCommit..HEAD의 non-merge commit hash·subject 최대 30줄과 numstat 합계 한 줄로 생성한다. session·brief는 이를 untrusted 저장소 데이터로 표시한다.
+- handoff 스키마는 `scope/reviewHandoffSeedSchema.ts`가 정본이며 `skills/pull-request/reference.md` §7은 같은 계약의 writer 서술이다. 상한은 항목 40, note 120자, path 400자, ruleId 80자, scope 200개, snapshotHash 128자 또는 null이다. 잘못된 블록은 진단 `review-handoff-invalid` 하나로 보고되고 본문에 텍스트로 남는다. handoff는 brief를 새로 쓸 때만 반영되며 같은 source hash의 기존 brief는 `--force` 없이 갱신되지 않는다.
 - cached 및 artifact가 완전한 resumable 분기는 기존 session·brief를 재사용하므로 changeContext를 읽지 않고 diagnostics를 빈 배열로 반환한다.
 - validate input은 `{ action: "validate", projectRoot, branchName?, kind, group, round? }`이다. review kind는 범위 안의 round가 필수이고 verify kind는 round를 금지한다. group은 `^\d{2,}$`이며 state에 존재해야 한다.
 - seal input은 `{ action: "seal", projectRoot, branchName?, baseRef? }`이고, state·matching hash·session을 요구한다.
@@ -46,7 +48,7 @@
 - prepare는 resumable 복구 → state 저장 → `readReviewGroupArtifactStatus` → `planNextHandoffs` → payload 순서다. fresh/cached도 artifact 기록을 끝낸 뒤 read → plan을 거친다. validate는 opinion 검증·병합·auto-verify·validation 기록 → state 저장 → 모든 group read → plan → payload이며 복구하지 않는다. checkpoint는 read → plan → payload만 수행하고 저장·복구하지 않는다.
 - 순수 handoff 계획은 state·paths·statuses만 입력받는다. review missing/invalid는 필요한 review round, trusted 미완료 review는 다음 round, trusted 완료 review와 missing/invalid verify는 assignedCount가 양수일 때 verify를 반환한다. dependsOn이 끝나지 않은 group은 제외한다. sealReady는 모든 group의 complete review·verify가 trusted일 때 true이며 documents-only/source-dirty는 항상 `{ next: [], sealReady: true }`다. 이미 sealed인 세션도 같은 값을 반환하므로 cached prepare는 액터를 다시 배정하지 않는다. cross-review는 prepare·validate의 next를 실행하고 다른 merge-track 스킬은 checkpoint의 next를 재개 관측에만 쓴다.
 - built-in rule map은 schema version 1과 `{ id, always?, match?, when?, file }` entry를 가진다. repository override는 `{ rules: [{ id, match?, always?, file, replaces? }] }`이고 override file은 project-relative path다.
-- group diff는 `diffs/<group>/<ordinal>-<basename>[.<k>-of-<n>].diff`로 materialize한다. review brief frontmatter는 group·rounds·plan-required·dependency·source hash·base ref·output을, 본문은 reviewer method verbatim, Change Context, Files, Diffs, Prior Opinions, Other Changed Files(group 밖 roster만, 없으면 none), FCA Candidates, Repository Rules, Rules, Output Contract 순서다.
+- group diff는 `diffs/<group>/<ordinal>-<basename>[.<k>-of-<n>].diff`로 materialize한다. review brief frontmatter는 group·rounds·plan-required·dependency·source hash·base ref·output을, 본문은 reviewer method verbatim, Change Context, FCA Handoff(유효한 블록이 있을 때만), Files, Diffs, Prior Opinions, Other Changed Files(group 밖 roster만, 없으면 none), FCA Candidates, Repository Rules, Rules, Output Contract 순서다.
 - review brief의 Prior Opinions는 dependsOn group만 열거한다. 현재 group의 이전 병합 opinion 경로는 handoff의 priorOpinionPath가 전달한다.
 - actor method는 pluginRoot의 cross-review skill 아래 reviewer·verifier 문서를 rule map과 같은 containment·symlink 검사로 읽고 부재 시 `review-actor-method-missing` error를 반환한다. review·verify의 Diffs는 group diff 합계가 16384바이트 이하면 unit path별 fenced diff를 인라인하고, 초과하면 `see Diff Path column`만 쓴다. 이 예산은 diff에만 적용하며 전체 brief 크기 상한이 아니다.
 - session frontmatter는 schema·branch·base ref·source hash·review directory·changed-file count·effort·created-at을 가진다. prepare가 채운 Change Context와 모든 roster path의 status·reason·group checklist를 함께 쓴다.
@@ -85,6 +87,17 @@
 - prepared state는 같은 source hash이면 effort와 무관하게 누락 artifact부터 resume하고 기존 opinion을 덮어쓰지 않는다. effort 변경은 group round와 review brief를 갱신하고 부족한 round의 review validation을 incomplete로 낮춘다. sealed state는 matching hash와 report가 있어야 cached이며 cached summary는 state verdict를 복원한다.
 - crash로 state가 없거나 schema v1이면 stale canonical artifact를 지운 fresh prepare가 되고 malformed v2는 error로 드러난다.
 - evidence와 session frontmatter는 review schema 7을 선언하고 session checklist에 모든 `(path, change)`를 한 번씩 보존한다.
+
+### AC-review-handoff — handoff 블록 파싱
+
+- 유효한 handoff 블록은 각 review brief의 `## FCA Handoff` 섹션에 그룹 필터된 행으로 나타나며 남은 본문에서는 블록이 제거된다.
+- 블록이 없으면 `## FCA Handoff` 섹션이 없다.
+- 무효 블록은 `review-handoff-invalid` 진단 하나를 내고 섹션을 만들지 않으며 개행 정규화 후 본문 원문을 유지한다.
+- 8000자를 넘는 본문 끝의 블록도 절단 전에 파싱되며 절단 진단은 남은 본문을 기준으로 한다.
+- CRLF 본문과 LF 본문의 파싱 결과가 같다.
+- `snapshotHash: null`인 블록은 유효하다.
+- verifier brief는 바뀌지 않는다.
+- handoff는 brief를 새로 쓰거나 다시 쓸 때만 반영되며 같은 source hash의 기존 brief를 갱신하려면 `--force`가 필요하다.
 
 ### AC-review-select — roster 전체 보존
 
@@ -147,4 +160,4 @@
 
 ## Last Updated
 
-2026-09-05 — rounds 0 복구, validation 재생 예외, assigned-only 검증과 결정론 fold의 정확한 decision 커버리지 계약.
+2026-09-05

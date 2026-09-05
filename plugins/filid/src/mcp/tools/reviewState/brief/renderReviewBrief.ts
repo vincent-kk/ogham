@@ -5,6 +5,7 @@ import type { ReviewHunk, ReviewUnit } from '../state/reviewGroupTypes.js';
 import type { RenderReviewBriefInput } from './reviewBriefTypes.js';
 import { renderBriefDiffs } from './utils/renderBriefDiffs.js';
 import { renderChangeContext } from './utils/renderChangeContext.js';
+import { renderHandoffSection } from './utils/renderHandoffSection.js';
 import { renderReviewOpinionExample } from './utils/renderReviewOpinionExample.js';
 
 /**
@@ -131,6 +132,14 @@ export function renderReviewBrief(
     '',
     renderChangeContext(input.changeContext),
     '',
+    ...(input.handoff
+      ? [
+          renderHandoffSection(input.handoff, [
+            ...new Set(input.group.units.map((unit) => unit.path)),
+          ]),
+          '',
+        ]
+      : []),
     '## Files',
     '',
     filesTable,

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { computeReviewArtifactHash } from '../../../../mcp/tools/reviewState/hash/computeReviewArtifactHash.js';
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
+import { REVIEW_HANDOFF_SEED_SCHEMA } from '../../../../mcp/tools/reviewState/scope/reviewHandoffSeedSchema.js';
 
 import {
   type ReviewStateSealFixture,
@@ -28,6 +29,87 @@ afterEach(() => {
 });
 
 describe('prepareReviewState optional inputs', () => {
+  it('carries valid changeContext handoff claims only into newly written review briefs', async () => {
+    const handoff = REVIEW_HANDOFF_SEED_SCHEMA.parse({
+      schema: 1,
+      snapshotHash: 'snapshot-hash',
+      scope: ['.'],
+      documentSync: 'committed',
+      repaired: 0,
+      recorded: [
+        {
+          class: 'code-change',
+          ruleId: 'boundary-import',
+          path: '.',
+          severity: 'warning',
+          certainty: 'exact',
+          note: 'Confirm this prepared claim against the tree.',
+        },
+      ],
+      truncated: 0,
+    });
+    const request = {
+      action: 'prepare' as const,
+      projectRoot: fixture.projectRoot,
+      changeContext: `Human summary\n<!-- filid:handoff v1\n${JSON.stringify(handoff)}\n-->`,
+    };
+    const prepared = await handleReviewState(request);
+    expect(prepared.data.groups.length).toBeGreaterThan(0);
+    expect(prepared.diagnostics).not.toContainEqual(
+      expect.objectContaining({ code: 'review-handoff-invalid' }),
+    );
+    for (const group of prepared.data.groups) {
+      const path = portableJoin(prepared.data.reviewDirectory, group.briefPath);
+      const brief = readFileSync(path, 'utf8');
+      expect(brief).toContain('\n## FCA Handoff\n');
+      expect(brief).toContain(handoff.recorded[0]!.note);
+      expect(brief).not.toContain('<!-- filid:handoff v1');
+      rmSync(path);
+    }
+    const session = readFileSync(prepared.data.sessionPath, 'utf8');
+    expect(session).toContain('Human summary');
+    expect(session).not.toContain('## FCA Handoff');
+    expect(session).not.toContain('<!-- filid:handoff v1');
+    expect(
+      JSON.parse(readFileSync(prepared.data.statePath, 'utf8')),
+    ).not.toHaveProperty('handoff');
+    const resumed = await handleReviewState(request);
+    expect(resumed.summary.disposition).toBe('resumable');
+    expect(resumed.diagnostics).not.toContainEqual(
+      expect.objectContaining({ code: 'review-handoff-invalid' }),
+    );
+    for (const group of resumed.data.groups)
+      expect(
+        readFileSync(
+          portableJoin(resumed.data.reviewDirectory, group.briefPath),
+          'utf8',
+        ),
+      ).toContain('\n## FCA Handoff\n');
+    const changedRequest = {
+      ...request,
+      changeContext: request.changeContext.replace(
+        handoff.recorded[0]!.note,
+        'Confirm the updated claim against the tree.',
+      ),
+    };
+    const unchanged = await handleReviewState(changedRequest);
+    for (const group of unchanged.data.groups)
+      expect(
+        readFileSync(
+          portableJoin(unchanged.data.reviewDirectory, group.briefPath),
+          'utf8',
+        ),
+      ).toContain(handoff.recorded[0]!.note);
+    const forced = await handleReviewState({ ...changedRequest, force: true });
+    for (const group of forced.data.groups)
+      expect(
+        readFileSync(
+          portableJoin(forced.data.reviewDirectory, group.briefPath),
+          'utf8',
+        ),
+      ).toContain('Confirm the updated claim against the tree.');
+  });
+
   it('normalizes a nested projectRoot and resolves branchName and local main, including checkpoint', async () => {
     const result = await handleReviewState({
       action: 'prepare',

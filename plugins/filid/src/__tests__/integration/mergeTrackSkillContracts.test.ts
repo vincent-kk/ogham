@@ -4,6 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
+import { parseHandoffBlock } from '../../mcp/tools/reviewState/scope/parseHandoffBlock.js';
+import { REVIEW_HANDOFF_SEED_SCHEMA } from '../../mcp/tools/reviewState/scope/reviewHandoffSeedSchema.js';
+
 /** Canonical instruction root exercised by the skill loader. */
 const skillsRoot = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -12,6 +15,16 @@ const skillsRoot = join(
 /** PR workflow whose publication must include its own document commit. */
 const pullRequest = readFileSync(
   join(skillsRoot, 'pull-request/SKILL.md'),
+  'utf8',
+);
+/** PR body and handoff writer format consumed by cross-review. */
+const pullRequestReference = readFileSync(
+  join(skillsRoot, 'pull-request/reference.md'),
+  'utf8',
+);
+/** Merge-track continuation contract for document synchronization outcomes. */
+const pipelineReference = readFileSync(
+  join(skillsRoot, 'pipeline/reference.md'),
   'utf8',
 );
 /** Child-skill invocation contract used after resolve decisions are final. */
@@ -27,6 +40,21 @@ const enrichment = readFileSync(
 /** Cross-review orchestrator consuming bounded MCP envelopes. */
 const crossReview = readFileSync(
   join(skillsRoot, 'cross-review/SKILL.md'),
+  'utf8',
+);
+/** FCA review rules for confirming handoff claims against evidence. */
+const fcaRules = readFileSync(
+  join(skillsRoot, 'cross-review/rules/fca.md'),
+  'utf8',
+);
+/** Document review rules for boundary drafts and contract placement. */
+const documentRules = readFileSync(
+  join(skillsRoot, 'cross-review/rules/documents.md'),
+  'utf8',
+);
+/** Reviewer method governing how handoff claims enter the review. */
+const reviewerMethod = readFileSync(
+  join(skillsRoot, 'cross-review/reviewers/reviewer.md'),
   'utf8',
 );
 
@@ -103,5 +131,92 @@ describe('merge-track skill recovery contracts', () => {
     expect(publish).toBeGreaterThan(seal);
     expect(cached).not.toContain('then stop');
     expect(crossReview.slice(seal, publish)).toContain('action: "seal"');
+  });
+
+  it('never ends document sync with a blocking exit', () => {
+    expect(pullRequest).not.toContain('BLOCKED');
+    expect(pullRequestReference).not.toContain('BLOCKED');
+    expect(pullRequest.split('## Invariants')[1]).toContain(
+      'Document sync never blocks PR creation.',
+    );
+  });
+
+  it('carries unrepaired findings in a handoff section and machine block', () => {
+    expect(pullRequestReference).toContain('## FCA Handoff');
+    expect(pullRequestReference).toContain('<!-- filid:handoff v1');
+    expect(pullRequest.split('## Terminal Output')[1]).toMatch(/^Handoff: /mu);
+  });
+
+  it('forwards repair mode to enrich-docs', () => {
+    const invocation = pullRequest.match(
+      /Skill\("filid:enrich-docs", "([^"]+)"\)/u,
+    );
+    const tokens = invocation?.[1].split(/\s+/u);
+
+    expect(tokens).toContain('--repair');
+    expect(tokens).toContain('--include-detail');
+    expect(enrichment).toMatch(/^kind: sparse \| missing \| repair$/mu);
+  });
+
+  it('keeps the pipeline moving past every document sync outcome', () => {
+    const outcome = pipelineReference
+      .split('\n')
+      .find(
+        (line) =>
+          line.split('|')[1]?.trim() ===
+          'Document sync failed, declined or partial',
+      );
+
+    expect(outcome?.split('|')[2]?.trim()).toMatch(/^Continue\b/u);
+    expect(pipelineReference).not.toMatch(
+      /Document sync blocked[^\n]*\|\s*Stop/u,
+    );
+    expect(pipelineReference).toContain('FCA Handoff');
+  });
+
+  it('reviews handoff rows as claims and drafts for sufficiency', () => {
+    const route = resolveReference
+      .split('\n')
+      .find((line) => line.startsWith('| `/filid:enrich-docs`'));
+
+    expect(fcaRules).toMatch(/^- \*\*FCA-13 — Handoff claims\*\*/mu);
+    expect(fcaRules).toContain('never a finding by itself');
+    expect(documentRules).toMatch(
+      /^- \*\*DOC-7 — INTENT budget and DETAIL split\*\*/mu,
+    );
+    expect(reviewerMethod).toContain('## FCA Handoff');
+    expect(route).toContain('--repair');
+  });
+
+  it('keeps the handoff writer format parseable by the reader schema', () => {
+    const lines = pullRequestReference.split('\n');
+    const examples: unknown[] = [];
+
+    for (const [index, line] of lines.entries()) {
+      if (line.trim() !== '<!-- filid:handoff v1') continue;
+
+      const parsed: unknown = JSON.parse(lines[index + 1]);
+      const block = lines.slice(index, index + 3).join('\n');
+      const { handoff, diagnostics } = parseHandoffBlock(block);
+
+      expect(REVIEW_HANDOFF_SEED_SCHEMA.safeParse(parsed).success).toBe(true);
+      expect(handoff).not.toBeNull();
+      expect(diagnostics).toHaveLength(0);
+      expect(handoff).toEqual(parsed);
+      examples.push(parsed);
+    }
+
+    const count = examples.length;
+
+    expect(count).toBe(2);
+    expect(examples).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          snapshotHash: null,
+          documentSync: 'failed',
+        }),
+        expect.objectContaining({ documentSync: 'committed' }),
+      ]),
+    );
   });
 });

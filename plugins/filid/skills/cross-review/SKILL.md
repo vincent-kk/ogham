@@ -3,7 +3,7 @@ name: cross-review
 user-invocable: true
 description: 'Review a committed change through deterministic preparation, bounded reviewer rounds, independent verification, and a sealed verdict. Use after a branch has a PR, before resolve.'
 argument-hint: '[--base REF] [--effort low|medium|high] [--force] [--cleanup]'
-version: '7.1.0'
+version: '7.2.0'
 complexity: complex
 plugin: filid
 ---
@@ -17,6 +17,7 @@ Run this skill as one continuous operation. Keep intermediate artifacts on disk;
 - `templates.md` owns actor opinion contracts, the canonical fix-request block, and terminal output.
 - [report-formats.md](./report-formats.md) defines the sealed verdict and rendered report formats.
 - Prepare embeds `reviewers/reviewer.md` and `reviewers/verifier.md` in the briefs; the orchestrator neither opens these files nor passes their paths.
+- `rules/fca.md` FCA-13 and `rules/documents.md` DOC-6–DOC-8 judge Stage 1 document drafts and the PR body's handoff. `review_state prepare` parses the PR body's handoff machine block (the HTML comment marker defined in `pull-request/reference.md` §7) into each review brief's `## FCA Handoff` section; the block is read when a brief is written, so a body edited after prepare reaches briefs only through `--force`.
 
 ## Step 0 — Load the tool
 

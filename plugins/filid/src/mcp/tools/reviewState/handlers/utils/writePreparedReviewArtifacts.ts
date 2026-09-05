@@ -18,6 +18,7 @@ import type { RenderedReviewUnit } from '../../diff/reviewUnitDiffTypes.js';
 import { writeAutoVerifyOpinion } from '../../handoff/utils/writeAutoVerifyOpinion.js';
 import { writeCandidateOnlyReviewOpinion } from '../../handoff/utils/writeCandidateOnlyReviewOpinion.js';
 import type { LoadedReviewRule } from '../../rules/reviewRuleTypes.js';
+import type { ReviewHandoffSeed } from '../../scope/reviewHandoffSeedSchema.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 import type {
   ReviewEffort,
@@ -32,6 +33,8 @@ interface WritePreparedReviewArtifactsInput {
   actorMethods: { reviewer: string; verifier: string } | null;
   /** Sanitized untrusted summary for the session and reviewer brief. */
   changeContext: string;
+  /** Validated untrusted claims rendered only when a reviewer brief is written. */
+  handoff: ReviewHandoffSeed | null;
   /** Canonical branch-scoped artifact paths. */
   paths: ReviewStatePaths;
   /** Groups awaiting final diff paths and artifact output. */
@@ -203,6 +206,7 @@ export function writePreparedReviewArtifacts(
           {
             reviewerMethod: input.actorMethods.reviewer,
             changeContext: input.changeContext,
+            handoff: input.handoff,
             diffs: readInlineReviewDiffs(input.paths, group),
             group,
             files: input.files,

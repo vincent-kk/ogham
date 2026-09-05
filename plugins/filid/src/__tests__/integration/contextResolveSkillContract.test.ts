@@ -10,7 +10,6 @@ const skillPaths = [
   'skills/context-query/reference.md',
   'skills/enrich-docs/SKILL.md',
   'skills/enrich-docs/reference.md',
-  'skills/enrich-docs/tables.md',
   'skills/revalidate/SKILL.md',
   'skills/revalidate/reference.md',
   'skills/pull-request/SKILL.md',

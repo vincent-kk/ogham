@@ -156,6 +156,37 @@ export const REVIEW_CHANGE_CONTEXT_LIMIT = 8000;
 /** Maximum non-merge commit subjects included in generated change context. */
 export const REVIEW_CHANGE_CONTEXT_LOG_LIMIT = 30;
 
+/** HTML comment marker identifying the untrusted Stage 1 handoff payload. */
+export const REVIEW_HANDOFF_MARKER = 'filid:handoff v1';
+
+/** Schema version accepted for Stage 1 handoff payloads. */
+export const REVIEW_HANDOFF_SCHEMA_VERSION = 1;
+
+/** Maximum recorded claims accepted in one handoff payload. */
+export const REVIEW_HANDOFF_MAX_ENTRIES = 40;
+
+/** Maximum characters retained in one handoff claim's note. */
+export const REVIEW_HANDOFF_NOTE_LIMIT = 120;
+
+/** Claim classes emitted by the Stage 1 handoff writer. */
+export const REVIEW_HANDOFF_CLASSES = [
+  'code-change',
+  'config-decision',
+  'indeterminate',
+  'needs-rework',
+  'unresolved-path',
+  'document-sync',
+] as const;
+
+/** Document synchronization outcomes accepted from the handoff writer. */
+export const REVIEW_HANDOFF_DOCUMENT_SYNC_STATES = [
+  'committed',
+  'no-change',
+  'skipped',
+  'declined',
+  'failed',
+] as const;
+
 /** Segment wildcard in `structure.generatedPaths`; matches exactly one segment. */
 export const GENERATED_PATH_WILDCARD = '*';
 
@@ -240,6 +271,8 @@ export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   BRANCH_UNRESOLVED: 'review-branch-unresolved',
   BASE_REF_UNRESOLVED: 'review-base-ref-unresolved',
   CHANGE_CONTEXT_TRUNCATED: 'review-change-context-truncated',
+  /** Invalid JSON or schema in the first handoff block. */
+  HANDOFF_INVALID: 'review-handoff-invalid',
   ACTOR_METHOD_MISSING: 'review-actor-method-missing',
   STATE_MISSING: 'review-state-missing',
   SOURCE_HASH_STALE: 'review-source-hash-stale',

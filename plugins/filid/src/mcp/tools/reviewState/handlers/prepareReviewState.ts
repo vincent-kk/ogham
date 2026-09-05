@@ -146,6 +146,7 @@ export async function prepareReviewState(
     const groups = writePreparedReviewArtifacts({
       actorMethods: loadedRules?.actorMethods ?? null,
       changeContext: context.changeContext,
+      handoff: context.handoff,
       paths,
       groups: preparedGroups,
       previousGroups: existing.groups,
@@ -238,6 +239,7 @@ export async function prepareReviewState(
   groups = writePreparedReviewArtifacts({
     actorMethods,
     changeContext: context.changeContext,
+    handoff: context.handoff,
     paths,
     groups,
     previousGroups: canResume ? existing.groups : [],

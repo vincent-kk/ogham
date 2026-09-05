@@ -1,66 +1,66 @@
 ---
 name: enrich-docs
 user-invocable: true
-description: 'Audit and improve INTENT.md and DETAIL.md from snapshot-backed evidence, with approval before LLM edits and structural validation after. Use when module documents are missing, boilerplate, or stale.'
-argument-hint: '[path] [--depth N] [--min-quality 0-100] [--dry-run] [--auto-approve] [--include-detail]'
-version: '1.1.0'
+description: 'Audit, enrich, and repair INTENT.md and DETAIL.md from document evidence, with approval before edits and validation after. Use for missing, sparse, or stale module documents, including merge-track preparation and review refinement.'
+argument-hint: '[path] [--depth N] [--min-quality 0-100] [--dry-run] [--auto-approve] [--include-detail] [--repair]'
+version: '2.0.0'
 complexity: complex
 plugin: filid
 ---
 
 # enrich-docs — Evidence-backed Contract Enrichment
 
-Audit documentation quality under a target path, present a bounded edit plan, obtain approval, let the LLM edit only that plan, and validate the result.
+Improve only INTENT.md/DETAIL.md, without changing source code, under one contract for `pull-request` Stage 1 foundation work, `resolve` refinement, and standalone audits. Execute as Tier-2b: continue after tool returns in the same turn, pausing only at the approval gate.
 
-## Resource Index
+## Contract
 
-| File                                                        | Purpose                                           |
-| ----------------------------------------------------------- | ------------------------------------------------- |
-| [reference.md](./reference.md)                              | Evidence, approval, edit, and validation contract |
-| [tables.md](./tables.md)                                    | Tool and option lookup                            |
-| [examples.md](./examples.md)                                | Invocation and report examples                    |
-| [.shared/intent-template.md](../.shared/intent-template.md) | INTENT.md heading set, cap, and rules             |
-| [.shared/detail-template.md](../.shared/detail-template.md) | DETAIL.md required sections and acceptance groups |
+| Option | Default | Meaning |
+| --- | --- | --- |
+| `path` | cwd | Directory to audit or an INTENT.md/DETAIL.md file to refine |
+| `--depth` | configured `structure.maxDepth`, otherwise `10` | Maps to `maxDepth`, a rule threshold, not a traversal limit |
+| `--min-quality` | `70` | RICH/SPARSE threshold, integer 0–100 |
+| `--dry-run` | off | Show the plan without writes |
+| `--auto-approve` | off | Authorize the displayed bounded plan |
+| `--include-detail` | off | Audit DETAIL.md and draft it when missing |
+| `--repair` | off | Plan document findings regardless of quality score |
 
-## When to Use
+Report project path, snapshot hash, classifications, approval mode, before/after line counts, rewritten sections, evidence paths, per-document validation, and reverted items; then `Repaired: <n>`, `Relocated: <n>`, `Needs rework: <k>`, `Deferred: <m>` in that order, deferred rows, and `Diagnostics` ([§7](./reference.md#7-report)). End with exactly one marker:
 
-- INTENT.md is missing, boilerplate, or no longer describes its module.
-- DETAIL.md does not express the current public contract.
-- Documentation needs stronger evidence before `context-query` or `cross-review`.
+- `Enrich-docs complete: <N> files enriched`
+- `Enrich-docs dry-run complete`
+- `Enrich-docs skipped: all RICH`
+- `Enrich-docs cancelled`
+- `Enrich-docs failed: <reason>`
 
-This skill changes documents only. It does not move source files or alter public code.
+Invariants:
+
+- No document writes before approval; unapproved files remain unchanged.
+- RICH content is editable only with `--repair`, within finding-named ranges.
+- Plan one item per SPARSE or MISSING document and per REPAIR candidate; coalesce findings for the same document.
+- Never add derivable file, export, or dependency inventories or their counts.
+- INTENT.md keeps the English anchors, all three boundary tiers, and the 50-line cap.
+- Evidence explicitly marked `indeterminate` or `unsupported` is not a pass or an edit basis; deterministic document findings need no certainty field.
+- Failures apply per document, or per relocation pair; other approved documents continue.
+- Do not move source files or change code.
 
 ## Workflow
 
-### 1. Build snapshot evidence
+1. **Gather evidence.** Call `scan` with `detail: "full"`; candidate nodes' `documentEvidence.findings` supply repair input, and the envelope `status` is not an edit gate. Recover artifacts and retry failed owners as [§1](./reference.md#1-tool-calls-and-evidence) specifies.
 
-Call `fractal_inspect` with `action: "scan"` and `detail: "paths"` for the target. Use returned node paths and classifications as the candidate inventory. Stop on `indeterminate` or `unsupported` status; do not interpret them as a clean audit. `violations` proceeds — its findings are the work.
+2. **Resolve context.** Call one `fractal_inspect` `resolve` batch with ordered candidate requests. Read only the resolved document chain, target, entry point, and bounded implementation evidence in [§1](./reference.md#1-tool-calls-and-evidence).
 
-### 2. Resolve minimal context
+3. **Classify and plan.** Apply RICH/SPARSE/MISSING and REPAIR rules, including missing DETAIL.md, from [§2](./reference.md#2-classification). Show sections, findings, evidence, and any predicted INTENT-to-DETAIL relocation in the [§3 plan](./reference.md#3-plan-items).
 
-Call one `fractal_inspect` `resolve` batch with one ordered request per candidate. Map each candidate to `data.results[index]`, reading the artifact when `data` is absent. Read only each resolved result's owner-to-root INTENT/DETAIL references, nearest DETAIL, target document, entry point, and a bounded set of implementation files. Exclude organ nodes and report failed result diagnostics without guessing.
+4. **Obtain approval.** Display the complete plan and apply `approve`, `modify`, `cancel`, or the invocation flags at [§4](./reference.md#4-approval). A widened relocation plan is displayed before writes even with `--auto-approve`.
 
-### 3. Audit and plan
+5. **Edit the approved scope.** Apply the templates, finding-specific repair ranges, and relocation rules in [§5](./reference.md#5-editing). Capture pre-edit content and preserve every approved contract clause.
 
-Classify documents as RICH, SPARSE, or MISSING using the rubric in [reference.md](./reference.md). RICH documents remain untouched. Every proposed edit lists its sections and the exact evidence paths that support it.
+6. **Validate and report.** Perform direct checks, then `validate` with `scopes: ["documents", "nodes"]`, judging each edited document by its own findings and reverting affected items under [§6](./reference.md#6-validation). Continue the remaining documents and emit the [§7 report](./reference.md#7-report).
 
-### 4. Obtain approval
+## Stop conditions
 
-Show the complete plan before any LLM edit. `--dry-run` ends here without writes. Otherwise require approval unless `--auto-approve` supplied prior authorization for the displayed bounded plan. A modified plan is shown again.
+- Approval `cancel`: emit `Enrich-docs cancelled`; this marker means approval was declined.
+- No candidates because all documents are RICH and no repair item exists: emit `Enrich-docs skipped: all RICH`.
+- A scan or validation failure leaves no document evaluable after owner-path retries: emit `Enrich-docs failed: <reason>`.
 
-### 5. Edit approved documents
-
-The LLM edits only approved INTENT.md/DETAIL.md targets using the captured context. INTENT.md keeps the required English headings and 50-line cap; body language follows the `fractal_inspect` `resolve` result. DETAIL.md is restructured as the current contract rather than appended to.
-
-### 6. Validate and report
-
-Check document anchors and line counts directly, then call `fractal_inspect` with `action: "validate"` and `documents` and `nodes` scopes. Revert an edited file when its validation is non-`ok` or produces a relevant finding. Report evidence, before/after counts, and validation outcomes.
-
-## Non-negotiable Rules
-
-- Snapshot and context paths are the source of truth for edit scope.
-- No LLM document write occurs before approval.
-- RICH and unapproved files are never rewritten.
-- INTENT.md stays within 50 lines with all three boundary tiers.
-- Derivable content (file, export, or dependency inventories) is never written into documents.
-- Diagnostic or non-exact evidence stays visible; it is not a pass.
+Otherwise hold only unevaluable documents, retain their diagnostics, and continue.
