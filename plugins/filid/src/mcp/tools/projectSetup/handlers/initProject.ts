@@ -1,6 +1,6 @@
 import { projectRoot } from '@ogham/cross-platform';
 
-import { PROJECT_SETUP_ACTIONS } from '../../../../constants/mcpContracts.js';
+import type { PROJECT_SETUP_ACTIONS } from '../../../../constants/mcpContracts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 import { handleProjectInit } from '../projectInit/index.js';

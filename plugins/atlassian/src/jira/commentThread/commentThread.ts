@@ -85,7 +85,7 @@ export async function readCommentThread(
     params.start_at !== undefined || params.max_results !== undefined;
   let allCommentsComplete = false;
   let comments;
-  if (singlePage) {
+  if (singlePage)
     comments = (
       await fetchCommentPage(
         ctx,
@@ -96,7 +96,7 @@ export async function readCommentThread(
         params.expand,
       )
     ).comments;
-  } else {
+   else {
     const all = await fetchAllComments(ctx, deps.request, issue, params.expand);
     comments = all.comments;
     allCommentsComplete = all.complete;

@@ -150,21 +150,21 @@ describe('[acceptance] cennad delegation contracts', () => {
   });
 
   it('keeps provider skill prompts within the source budget', () => {
-    for (const provider of PROVIDERS) {
+    for (const provider of PROVIDERS)
       expect(wordCount(rawDoc('skills', provider, 'SKILL.md'))).toBeLessThanOrEqual(
         SOURCE_WORD_LIMIT,
       );
-    }
+
   });
 
   it('keeps generated Codex variants within the prompt budget', () => {
-    for (const provider of PROVIDERS) {
+    for (const provider of PROVIDERS)
       expect(
         wordCount(
           rawDoc('.codex-plugin', 'skills', provider, 'SKILL.md'),
         ),
       ).toBeLessThanOrEqual(GENERATED_WORD_LIMIT);
-    }
+
   });
 
   it('keeps crosscheck and the requested skill set within prompt budgets', () => {
