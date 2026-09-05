@@ -2,7 +2,7 @@
 
 ## Purpose
 
-세션 시작 시 4단계 초기화를 수행한다: (1) 캐시 디렉토리 생성 + 로거 경로 설정, (2) `source ∈ {compact, clear}`면 세션 epoch 리셋(`removeSessionFiles` + delivered/turn — 컨텍스트 소실에 맞춰 전달 기록·guide·fmap·포인터 마커를 재무장; `resume`/`startup`은 비대상), (3) INTENT.md 자동 탐지로 `.filid/` 마커 생성, (4) 만료 세션·stale 캐시 정리. `.claude/rules/`는 절대 건드리지 않음 — 규칙 배포는 `/filid:setup` 스킬 전담.
+세션 시작 시 4단계 초기화를 수행한다: (1) 캐시 디렉토리 생성 + 로거 경로 설정, (2) `source ∈ {compact, clear}`면 세션 epoch 리셋(`removeSessionFiles` + delivered/turn — 컨텍스트 소실에 맞춰 전달 기록·guide·fmap·포인터 마커를 재무장; `resume`/`startup`은 비대상), (3) INTENT.md 자동 탐지로 `.filid/` 마커 생성, (4) 만료 세션·stale 캐시 정리. `.claude/rules/`는 절대 건드리지 않음 — 규칙 배포는 filid setup 스킬 전담.
 
 ## Structure
 
@@ -42,8 +42,5 @@
 
 ## Dependencies
 
-- `@ogham/cross-platform`
-- `../../core/infra/cacheManager/` (`getCacheDir`, `removeSessionFiles`, prune 게이트/실행기 일체)
-- `../../lib/logger.js` (`createLogger`, `setLogDir`)
-- `../../constants/scanDefaults.js` (`SCAN_SKIP_DIRS`), `../../constants/documentFiles.js` (`INTENT_MD`)
-- `../shared/`, `../../types/hooks.js`
+- 캐시 디렉터리·세션 파일·prune 게이트는 `../../core/infra/cacheManager/` 한 곳에서만 온다.
+- 로거·스캔 상수·문서 파일명·훅 타입과 cross-platform 유틸은 상위 계층 공개 경계로만 접근한다.

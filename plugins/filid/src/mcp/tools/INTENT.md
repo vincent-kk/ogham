@@ -41,4 +41,4 @@ Filid 1.0의 setup/inspection/restructure/review 동작을 정확히 4개 독립
 
 ## Dependencies
 
-- `../../core/`, `../../adapters/`, `../../types/`, `../../constants/`
+- core 판단·adapter·타입·상수 계층에만 의존하며, 형제 tool fractal에는 의존하지 않는다.

@@ -4,11 +4,8 @@
 
 ## Structure
 
-| Path                                | Role                                                                 |
-| ----------------------------------- | -------------------------------------------------------------------- |
-| `webServer.ts` (+`index.ts` barrel) | `startSettingsServer` — closure lifecycle + settle waiter 레지스트리 |
-| `routing/`                          | `routes.ts` (guard + 경로 디스패치), `routeContext.ts`               |
-| `handlers/`                         | GET `/` (상태 주입), POST `/save` (config+rule docs 영속), `/close`  |
+- `webServer.ts` 와 그 배럴은 closure lifecycle과 settle waiter 레지스트리만 소유한다 — 모듈 전역 상태를 두지 않기 위한 형태다.
+- 요청 가드와 경로 디스패치는 `routing/` 이, 상태 주입·저장·닫기 처리는 handlers organ이 맡는다.
 
 ## Conventions
 

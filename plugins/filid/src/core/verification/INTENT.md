@@ -6,11 +6,8 @@ adapter가 분석한 실행 가능 검증 문서를 spec-document와 test-record
 
 ## Structure
 
-- `analyzer/` organ — adapter 분석을 project-level 결과로 조합
-- `policy/` organ — 15/32 cap, certainty와 fragmentation 판정
-- `contracts/` organ — owner DETAIL acceptance group 연결 해석
-- `__tests__/` organ — verification policy contract specs
-- `index.ts` — named public boundary
+- PASS/FAIL 판정은 `policy/`만 소유한다 — 다른 organ은 adapter 결과 조합과 owner DETAIL group 해석까지만 하고 판정을 만들지 않는다.
+- 공개 경계는 `index.ts` 하나이며, cap과 certainty 상수는 그 밖으로 나가지 않는다.
 
 ## Conventions
 

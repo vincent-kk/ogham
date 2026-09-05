@@ -6,10 +6,8 @@ Filid 1.0의 4개 action-dispatched 도구를 등록하고 공통 artifact envel
 
 ## Structure
 
-- `lifecycle/` organ — `createServer`(고정 tool registry 조립), `startServer`, `bootSweep`, `registerShutdown`, `cleanupOwnSessionCache`
-- `envelope/` organ — `toolResult` / `toolError` / `wrapHandler`, envelope와 오류 경계
-- `utils/` organ — `deferInputValidation`
-- executable entry는 `serverEntry/`이며 이 디렉터리의 `index.ts`가 아니다.
+- 도구 registry 조립과 process lifecycle은 `lifecycle/` 하나가 소유하고, 나머지 organ은 envelope·오류 경계와 입력 검증 지연만 맡는다.
+- 이름 함정: executable entry는 이 디렉터리의 배럴이 아니라 형제 fractal serverEntry다.
 
 ## Boundaries
 

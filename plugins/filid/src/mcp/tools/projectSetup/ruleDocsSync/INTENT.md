@@ -6,10 +6,8 @@
 
 ## Structure
 
-- `ruleDocsSync.ts` — `handleRuleDocsSync`의 입력 경계와 action 분기
-- `utils/normalizeSelections.ts` · `utils/normalizeResync.ts` — 방어적 입력 정규화 organ
-- `utils/validateResyncIds.ts` — manifest 대조 후 미지 id를 skipped로 분리
-- `index.ts` — `handleRuleDocsSync`와 입출력 타입만 노출하는 배럴
+- 입력 경계와 action 분기는 `ruleDocsSync.ts` 가 소유하고, `utils/` organ은 방어적 입력 정규화와 manifest 대조만 맡는다.
+- 배럴은 `handleRuleDocsSync` 와 입출력 타입만 노출한다.
 
 ## Conventions
 

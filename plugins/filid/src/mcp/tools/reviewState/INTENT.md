@@ -6,16 +6,8 @@ committed diff hash와 branch-scoped artifact lifecycle을 기준으로 변경 �
 
 ## Structure
 
-- `reviewState.ts`·`handlers/` — prepare/checkpoint/validate/seal/cleanup/assess dispatch와 effect boundary
-- `hash/`·`state/` — Git evidence, deterministic hash, portable path와 state JSON
-- `assess/`·`scope/` — 재개 사실 관측과 changed-scope evidence 수집
-- `select/`·`rules/` — review 대상 선별과 built-in·repository 규칙 해석
-- `chunk/`·`group/` — bounded review unit과 deterministic dependency group 생성
-- `diff/`·`brief/` — group별 diff와 reviewer·verifier brief 물질화
-- `opinion/` — review·verify JSON 검증, finding 위치 확정과 round 병합
-- `handoff/` organ — artifact 신뢰 관측과 prepare 복구를 순수 handoff 계획에서 분리
-- `render/`·`verdict/` — canonical 산출물 렌더링과 순수 verdict fold
-- `index.ts` — named handler export
+- effect 경계는 `handlers/` 하나이며 나머지 organ은 순수 계산이다 — Git evidence와 state, 재개 관측, 선별·청킹·그룹화, diff·brief 물질화, opinion 검증, verdict fold, 렌더링이 한 단계씩 이어진다.
+- `handoff/` organ은 artifact 신뢰 관측을 순수 handoff 계획에서 분리한다 — prepare 복구 경로가 계획 계산을 오염시키지 않게 하려는 분할이다.
 
 ## Conventions
 

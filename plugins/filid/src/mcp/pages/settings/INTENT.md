@@ -4,15 +4,12 @@
 
 ## Structure
 
-| Path             | Role                                                                |
-| ---------------- | ------------------------------------------------------------------- |
-| `index.html`     | 폼 마크업 + 상태 주입 슬롯 (`__FILID_STATE__`)                      |
-| `styles/`        | `styles.css` — cennad 설정 페이지 디자인 언어 (다크 OLED 단색 토큰) |
-| `scripts/app.js` | 상태 prefill·동적 렌더·검증·`/save`·`/close` POST                   |
+- `index.html` 이 폼 마크업과 상태 주입 슬롯 `__FILID_STATE__` 를 가진다 — 서버는 이 슬롯 하나로만 상태를 넘긴다.
+- 스타일은 cennad 설정 페이지의 디자인 언어(다크 OLED 단색 토큰)를 따르고, `scripts/app.js` 가 prefill·동적 렌더·검증·저장 POST 를 전담한다.
 
 ## Conventions
 
-- 디자인은 cennad `pages/settings` 를 따른다 — `shell/masthead/section` 골격, 헤어라인 섹션 구분, 전면 모노스페이스, 흰색 primary 버튼, 하단 actions + aria-live status
+- 디자인은 cennad `pages/settings` 를 따른다 — shell·masthead·section 골격, 헤어라인 섹션 구분, 전면 모노스페이스, 흰색 primary 버튼, 하단 actions + aria-live status
 - 의존성 없는 vanilla JS, SVG 아이콘만 (이모지 금지)
 - 서버 발급 토큰을 `location.search` 에서 읽어 모든 POST 에 `?token=` 부착
 - rule doc 체크박스는 `deployed` pre-check, drift 는 `[UPDATE]` 배지 + 재동기 체크, 대상은 공유 manager 의 `displayTarget`

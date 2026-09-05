@@ -6,12 +6,9 @@
 
 ## Structure
 
-| Path           | Role                                                                 |
-| -------------- | -------------------------------------------------------------------- |
-| `server/`      | 4개 도구 등록, envelope 직렬화와 process lifecycle                   |
-| `serverEntry/` | build가 호출하는 MCP executable entry                                |
-| `tools/`       | project/rule/settings/scan/context/plan/validate/review              |
-| `pages/`       | `project_setup`의 `settings` action이 제공하는 generated settings UI |
+- 4개 도구 fractal은 `tools/` 아래로 모이고, 등록·envelope 직렬화·process lifecycle은 그 위 계층이 소유한다.
+- 이름 함정: MCP executable entry는 서버 조립 디렉터리가 아니라 별도의 serverEntry child다.
+- 브라우저에 서빙되는 정적 페이지도 이 계층 안에 살지만 TypeScript 소스를 import 하지 않는다.
 
 ## Conventions
 

@@ -43,4 +43,4 @@ Claude Code의 SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·Pre
 
 ## Dependencies
 
-- `../core/`, `../lib/logger.js`, `../constants/`, `../types/hooks.js`
+- 판단·로깅·상수·훅 타입은 모두 상위 src 계층에서 받는다 — 훅은 FCA 판단을 자체 구현하지 않는다.

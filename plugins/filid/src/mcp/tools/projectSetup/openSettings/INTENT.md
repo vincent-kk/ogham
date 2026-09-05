@@ -4,13 +4,8 @@
 
 ## Structure
 
-| Path              | Role                                                                                |
-| ----------------- | ----------------------------------------------------------------------------------- |
-| `openSettings.ts` | `handleOpenSettings` — 서버 재사용/기동 + `awaitSettled` 대기                       |
-| `types/`          | organ — `settingsTypes.ts` (상태·저장 페이로드·settle 타입 + zod)                   |
-| `utils/`          | `loadSettingsHtml` (public/settings.html 로드), `buildSettingsState`, `persistSave` |
-| `webServer/`      | HTTP 서버 sub-fractal (barrel `index.ts`), token/CSRF 가드, settle waiter           |
-| `index.ts`        | barrel                                                                              |
+- HTTP 서버는 child fractal `webServer/` 가 소유하고, 이 노드는 서버 재사용 판단과 bounded long-poll 대기만 가진다.
+- 나머지 organ은 상태·저장 페이로드·settle 타입과 HTML 로드·상태 조립·영속 helper를 나눠 가진다.
 
 ## Conventions
 
