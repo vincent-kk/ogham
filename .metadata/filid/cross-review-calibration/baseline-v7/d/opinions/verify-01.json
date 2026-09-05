@@ -1,0 +1,26 @@
+{
+  "schema": 7,
+  "group": "01",
+  "state": "COMPLETE",
+  "sourceHash": "6502d5f00aa93648260ec975a5d646e80cde1442052ddf3aa1278a05414e2f25",
+  "decisions": [
+    {
+      "findingId": "R01-001",
+      "verdict": "CONFIRMED",
+      "evidence": "src/slugify/DETAIL.md:10 states '`toSlug(input: string): string` is exported from `index.ts`'; src/slugify/index.ts:1 reads 'export { slugify } from './slugify.js';' with no `toSlug` symbol; src/slugify/slugify.ts:3 defines only `export function slugify(input: string): string`; src/slugify/tests/slugify.spec.ts:3 imports `slugify`, not `toSlug`.",
+      "reason": "DETAIL.md documents a `toSlug` export from index.ts that literally does not exist in index.ts or slugify.ts, so the documented public contract is unimplemented."
+    },
+    {
+      "findingId": "R01-002",
+      "verdict": "CONFIRMED",
+      "evidence": "src/slugify/DETAIL.md:6 now reads only 'Export the new `toSlug` operation.' with no mention of trimming or length limits; DETAIL.md:16-17 (Acceptance Criteria, unchanged) still require 'edge separators are trimmed' and 'Output never exceeds 64 characters'; src/slugify/slugify.ts:1 defines `MAX_SLUG_LENGTH = 64` and lines 7-8 trim edge separators via `.replace(/^-+|-+$/g, '')` and `.replace(/-+$/, '')`.",
+      "reason": "The Requirements section no longer mentions edge-trimming or the 64-character limit even though both remain implemented in slugify.ts and mandated by the unchanged Acceptance Criteria, so Requirements no longer reflects the enforced contract."
+    }
+  ],
+  "observations": [],
+  "checked": [
+    "src/slugify/DETAIL.md",
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts"
+  ]
+}

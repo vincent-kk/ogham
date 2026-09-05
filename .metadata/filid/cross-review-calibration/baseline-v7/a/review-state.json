@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 2,
+  "projectRoot": "<PROJECT_ROOT>",
+  "branchName": "calib/a",
+  "normalizedBranch": "calib-a-c98afdd0ff38676fff4e33b1b8c5723f6752001f2322ee73dfb2c661eead98fa",
+  "baseRef": "main",
+  "baseCommit": "437495b33e93f009c6eec4bc65d5c1d453972aa0",
+  "sourceHash": "db79d49214d51aa5c97d329ce4a35006d8fb67f460dce4e774d1f0185c82ba23",
+  "fileHashes": {
+    "src/slugify/slugify.ts": "02d358d22e3059a3726cb01aa39f767f789344b9",
+    "src/slugify/tests/slugify.spec.ts": "639793c49af6b9537fb506692b99a3ad90615e41"
+  },
+  "phase": "sealed",
+  "preparedAt": "2026-09-04T19:40:14.756Z",
+  "effort": "medium",
+  "groups": [
+    {
+      "id": "01",
+      "units": [
+        {
+          "path": "src/slugify/slugify.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 5,
+              "oldEnd": 9,
+              "newStart": 5,
+              "newEnd": 9
+            }
+          ],
+          "diffPath": "diffs/01/01-slugify.ts.diff"
+        },
+        {
+          "path": "src/slugify/tests/slugify.spec.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 4,
+          "hunks": [
+            {
+              "oldStart": 10,
+              "oldEnd": 13,
+              "newStart": 10,
+              "newEnd": 17
+            }
+          ],
+          "diffPath": "diffs/01/02-slugify.spec.ts.diff"
+        }
+      ],
+      "churn": 6,
+      "planRequired": false,
+      "dependsOn": [],
+      "candidateIds": [],
+      "briefPath": "briefs/review-01.md",
+      "skeletonPath": "opinions/review-01.r1.json",
+      "opinionPath": "opinions/review-01.json",
+      "verifyBriefPath": "briefs/verify-01.md",
+      "verifyPath": "opinions/verify-01.json",
+      "rounds": 2,
+      "validated": {
+        "review": {
+          "round": 1,
+          "sha256": "d01b974d5d9c816386cb69e8e0c425520b71767098a9d387d7e7a42245ffa066",
+          "complete": true
+        },
+        "verify": {
+          "sha256": "57cfe9870c4ac3ad301ef74ca5c9bcf0018ba9e758af85281ebbbcf8fe513d08",
+          "reviewSha256": "d01b974d5d9c816386cb69e8e0c425520b71767098a9d387d7e7a42245ffa066"
+        }
+      }
+    }
+  ],
+  "scope": {
+    "snapshotHash": "33028d6ad16c93858e31d2325ce3dd9719ecbfbbf764fa155c99f62ee4b8b75b",
+    "evidenceComplete": true,
+    "worktree": "clean",
+    "dirtyPaths": [],
+    "statuses": {
+      "structure": "ok",
+      "verification": "ok"
+    },
+    "files": [
+      {
+        "path": "src/slugify/slugify.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/tests/slugify.spec.ts",
+        "change": "M",
+        "insertions": 4,
+        "deletions": 0,
+        "binary": false,
+        "role": "verification",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "tests",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      }
+    ],
+    "candidates": [],
+    "informational": [],
+    "outOfScopeCount": 0,
+    "infoCount": 0
+  },
+  "verdict": "APPROVED",
+  "sealedAt": "2026-09-04T19:41:58.541Z"
+}

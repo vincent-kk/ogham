@@ -47,6 +47,12 @@ answer key에 없는 candidate를 올바르게 refute한 것은 false positive�
 
 완전한 pass의 기대 count는 false positive `0`, false negative `0`, unjustified inconclusive `0`, suppressed gap `0`, coverage miss `0`이다.
 
+## baseline-v7
+
+`baseline-v7/<run>/`은 출처 커밋 `279b912b`에서 실행한 v7 r1의 a·b·c·d·f·g·h 산출물을 보존한다. G6의 결정론 fold replay가 이 기준선의 verdict와 Confirmed·Verification Log ID 집합을 비교한다.
+
+state·evidence·report의 스크래치 projectRoot 접두는 `<PROJECT_ROOT>`로 치환한다. `opinions/*.json`은 validation hash 결합을 유지하도록 원본 바이트 그대로 보존하며, 각 run의 manifest는 sourceRun·sourceCommit·placeholder를 기록한다. 실행 환경에 종속된 session·brief·diff는 보존하지 않는다.
+
 ## Regression Ledger
 
 | Date       | Runner             | FP  | FN  | Unjustified Inconclusive | Suppressed Gaps | Coverage Misses | Verdicts a/b/c/d/f/g/h                                                                                     | Notes |

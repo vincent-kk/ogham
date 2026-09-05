@@ -1,0 +1,57 @@
+{
+  "schema": 7,
+  "group": "01",
+  "round": 1,
+  "state": "COMPLETE",
+  "sourceHash": "9ff71d83433b305f8a797dcbe6b4b317ce0deef0c2f005737183484ac995ae6a",
+  "files": [
+    {
+      "path": "src/slugify/slugify.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/tests/slugify.spec.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "R01-001",
+      "severity": "error",
+      "category": "bug",
+      "path": "src/slugify/slugify.ts",
+      "existingCode": "  return truncated[0].toLowerCase() + truncated.slice(1);",
+      "lines": "8-9",
+      "rule": "DEF-1",
+      "message": "Truncating `normalized` to MAX_SLUG_LENGTH can leave a trailing separator character at the cut point, and the changed return statement no longer strips it; only the first character is touched.",
+      "evidence": "src/slugify/slugify.ts:8-9; reachable via src/slugify/tests/slugify.spec.ts:14-16 (`slugify(`${'a'.repeat(63)} b`)` normalizes to 63 'a' + '-' + 'b', slices to 63 'a' + '-', and the new line returns that 64-char string unchanged instead of the expected `'a'.repeat(63)`).",
+      "consequence": "slugify() returns a slug with a dangling trailing hyphen whenever truncation lands exactly on a separator boundary; the added test 'trims separators exposed by truncation' fails against this implementation because the actual result ('a' x63 + '-') does not equal the expected 'a'.repeat(63).",
+      "recommendedAction": "After slicing to MAX_SLUG_LENGTH, strip a trailing separator introduced by the cut, e.g. `return truncated.replace(/-+$/, '')` (composed with any needed first-character handling), and rerun the new test to confirm it passes."
+    },
+    {
+      "id": "R01-002",
+      "severity": "error",
+      "category": "bug",
+      "path": "src/slugify/slugify.ts",
+      "existingCode": "  return truncated[0].toLowerCase() + truncated.slice(1);",
+      "lines": "8-9",
+      "rule": "DEF-3",
+      "message": "`truncated[0]` is dereferenced with `.toLowerCase()` before checking whether `truncated` is empty.",
+      "evidence": "src/slugify/slugify.ts:8-9",
+      "consequence": "For any input whose normalized slug is empty (e.g. `''`, `'---'`, or a purely-whitespace/punctuation string), `truncated` is `''`, so `truncated[0]` is `undefined` and `undefined.toLowerCase()` throws `TypeError: Cannot read properties of undefined (reading 'toLowerCase')`. Previously this same class of input returned `''` without error.",
+      "recommendedAction": "Guard the empty case before indexing, e.g. `return truncated.length === 0 ? truncated : truncated[0].toLowerCase() + truncated.slice(1);`."
+    }
+  ],
+  "checked": [
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts"
+  ],
+  "gaps": [],
+  "riskPlan": null
+}
