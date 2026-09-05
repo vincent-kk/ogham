@@ -4,7 +4,7 @@ A Claude Code plugin that keeps a codebase's module boundaries and contract docu
 
 As a codebase grows, AI agents lose context, documents drift from code, and directory structures lose their shape. filid answers exactly that, and only that, through **Fractal Context Architecture (FCA-AI)**: it owns `INTENT.md` and `DETAIL.md`, checks the fractal/organ structure and its dependency DAG, decides where a shared unit belongs, and reviews a change against that evidence.
 
-It is deliberately not a general code-quality tool. Naming, function size, cyclomatic complexity, cohesion metrics, test quality and coverage belong elsewhere — filid reports what it can prove about structure and contracts, and says `indeterminate` instead of guessing.
+filid is deliberately not a repository-wide code-quality rule engine. Outside the committed-change scope of cross-review, naming, function size, cyclomatic complexity, cohesion metrics, test quality, and coverage belong elsewhere. Within that scope, cross-review judges defects, security, performance, maintainability, tests, documentation, and FCA evidence; uncertain evidence remains explicit instead of becoming a guess.
 
 ---
 
@@ -37,9 +37,9 @@ claude --plugin-dir ./plugins/filid
 
 Building produces:
 
-- `bridge/mcp-server.cjs` — MCP server (9 tools)
+- `bridge/mcp-server.cjs` — MCP server (4 tools)
 - `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 3 hook scripts
-- `public/settings.html` — the settings UI served by `open_settings`
+- `public/settings.html` — the settings UI served by `project_setup` action `settings`
 
 There is no native dependency and no global module lookup: the plugin installs and runs with only the MCP SDK and Zod at runtime.
 
@@ -99,7 +99,7 @@ Produces a read-only placement plan — `sourcePath → targetPath`, the basis f
 /filid:cross-review --base origin/main
 ```
 
-Three independent perspectives — contract, structure, verification — review the committed change in parallel, then an adversarial arbiter rules every blocking finding `CONFIRMED | REFUTED | INDETERMINATE`. Refuted findings drop out of the verdict but stay in the arbitration log. The verdict is `APPROVED | REQUEST_CHANGES | INCONCLUSIVE` and is explicitly scoped to FCA — it is not a security, product, or UX review.
+`review_state(prepare)` records the committed-file roster and FCA evidence, then deterministically selects, chunks, groups, and materializes bounded diffs and briefs. Reviewers write JSON opinion rounds against layered rules; `validate` checks and merges them before an efficient-model verifier independently decides every candidate as `CONFIRMED | REFUTED | INDETERMINATE`. `seal` trusts only validated hashes, folds the verdict, and renders the report, fix requests, and PR comment. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
 
 ### Migrate legacy document names
 
@@ -127,20 +127,20 @@ A blocked write explains its reason and denies only that one tool call — your 
 
 ## Skills Reference
 
-| Skill                  | What it does                                                              |
-| ---------------------- | ------------------------------------------------------------------------- |
-| `/filid:setup`         | Initialize config and rule documents; propose missing INTENT/DETAIL       |
-| `/filid:scan`          | The single full-project FCA audit                                         |
-| `/filid:context-query` | Resolve a path to its owner fractal and minimal document chain            |
-| `/filid:guide`         | Explain the current tree, classifications, and placement rules            |
-| `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval       |
-| `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions |
-| `/filid:cross-review`  | Three-perspective FCA review with adversarial arbitration                 |
-| `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                  |
-| `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR               |
-| `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications      |
-| `/filid:revalidate`    | Re-measure the correction delta and issue the final PASS or FAIL          |
-| `/filid:pipeline`      | Run the whole merge-track cycle end to end, with resume support           |
+| Skill                  | What it does                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/filid:setup`         | Initialize config and rule documents; propose missing INTENT/DETAIL                                                                                            |
+| `/filid:scan`          | The single full-project FCA audit                                                                                                                              |
+| `/filid:context-query` | Resolve a path to its owner fractal and minimal document chain                                                                                                 |
+| `/filid:guide`         | Explain the current tree, classifications, and placement rules                                                                                                 |
+| `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval                                                                                            |
+| `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions                                                                                      |
+| `/filid:cross-review`  | Review a committed change file by file against layered rules and changed-scope FCA evidence, then independently verify every candidate with an efficient model |
+| `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                                                                                                       |
+| `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR                                                                                                    |
+| `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications                                                                                           |
+| `/filid:revalidate`    | Re-measure the correction delta and issue the final PASS or FAIL                                                                                               |
+| `/filid:pipeline`      | Run the whole merge-track cycle end to end, with resume support                                                                                                |
 
 ---
 
@@ -172,17 +172,12 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 
 ## MCP Tools
 
-| Tool                 | Role                                               |
-| -------------------- | -------------------------------------------------- |
-| `project_init`       | Initialize FCA in a project                        |
-| `rule_docs_sync`     | Sync the managed rule documents                    |
-| `open_settings`      | Open the settings UI                               |
-| `fractal_scan`       | Inspect the snapshot tree                          |
-| `context_resolve`    | Batch owner/document chains from one snapshot      |
-| `restructure_plan`   | Decide placement; returns a plan artifact          |
-| `structure_validate` | Validate a project, or a plan's pre/postconditions |
-| `verification_scan`  | Judge spec-document / test-record contracts        |
-| `review_state`       | cross-review bookkeeping                           |
+| Tool              | Actions                                                            | Role                                                   |
+| ----------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
+| `project_setup`   | `init`, `rules-status`, `rules-manifest`, `rules-sync`, `settings` | Initialize FCA, manage rules, or open settings         |
+| `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                      | Inspect FCA structure, tests, and owner chains         |
+| `restructure`     | `plan`, `precondition`, `postcondition`                            | Plan placement and validate external execution         |
+| `review_state`    | `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`   | Prepare, validate, fold, and render cross-review state |
 
 Every tool returns the same envelope. Results stay small: anything over 16 KiB is written to a content-addressed artifact and referenced by path and SHA-256.
 

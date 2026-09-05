@@ -34,14 +34,14 @@ describe('toolResult — compact JSON output', () => {
   });
 
   it('should emit JSON without indentation by default', () => {
-    const result = toolResult(McpToolName.FRACTAL_SCAN, SIMPLE_PAYLOAD);
+    const result = toolResult(McpToolName.FRACTAL_INSPECT, SIMPLE_PAYLOAD);
     expect(result.content[0].text).toBe(
       '{"status":"ok","summary":{"count":1},"data":{"value":1},"diagnostics":[]}',
     );
   });
 
   it('should still convert Map → object via the compact serializer', () => {
-    const result = toolResult(McpToolName.FRACTAL_SCAN, MAP_PAYLOAD);
+    const result = toolResult(McpToolName.FRACTAL_INSPECT, MAP_PAYLOAD);
     expect(JSON.parse(result.content[0].text).data).toEqual({
       m: { k: 'v' },
     });
@@ -49,7 +49,7 @@ describe('toolResult — compact JSON output', () => {
 
   it('stays compact when the legacy pretty environment flag is set', () => {
     process.env.FILID_PRETTY_JSON = '1';
-    const result = toolResult(McpToolName.FRACTAL_SCAN, SIMPLE_PAYLOAD);
+    const result = toolResult(McpToolName.FRACTAL_INSPECT, SIMPLE_PAYLOAD);
     expect(result.content[0].text).not.toContain('\n');
   });
 });

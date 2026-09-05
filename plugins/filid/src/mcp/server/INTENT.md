@@ -1,16 +1,13 @@
-# server — 9-tool MCP assembly
+# server — 4-tool MCP assembly
 
 ## Purpose
 
-Filid 1.0의 9개 도구를 등록하고 공통 artifact envelope, stdio transport와 cache lifecycle을 조립한다.
+Filid 1.0의 4개 action-dispatched 도구를 등록하고 공통 artifact envelope, stdio transport와 cache lifecycle을 조립한다.
 
 ## Structure
 
-- `lifecycle/` organ — `createServer`(고정 tool registry 조립), `startServer`, `bootSweep`, `registerShutdown`, `cleanupOwnSessionCache`
-- `envelope/` organ — `toolResult` / `toolError` / `wrapHandler`, envelope와 오류 경계
-- `handlers/` organ — legacy-compatible tool 결과를 공통 payload로 변환
-- `utils/` organ — `deferInputValidation`
-- executable entry는 `serverEntry/`이며 이 디렉터리의 `index.ts`가 아니다.
+- 도구 registry 조립과 process lifecycle은 `lifecycle/` 하나가 소유하고, 나머지 organ은 envelope·오류 경계와 입력 검증 지연만 맡는다.
+- 이름 함정: executable entry는 이 디렉터리의 배럴이 아니라 형제 fractal serverEntry다.
 
 ## Boundaries
 
@@ -22,7 +19,7 @@ Filid 1.0의 9개 도구를 등록하고 공통 artifact envelope, stdio transpo
 
 ### Ask first
 
-- tool registry, envelope schema·budget 또는 lifecycle 정책 변경
+- 4-tool registry, action schema, envelope budget 또는 lifecycle 정책 변경
 - 새로운 persistent state 도입
 
 ### Never do

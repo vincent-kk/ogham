@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 2,
+  "projectRoot": "<PROJECT_ROOT>",
+  "branchName": "calib/d",
+  "normalizedBranch": "calib-d-48c900f3134234f0f4c0515c7cbe4d5fd417c57cf040d81b098045be50832684",
+  "baseRef": "main",
+  "baseCommit": "b28911323d4345c0279c4c4c34cb873aa027e458",
+  "sourceHash": "6502d5f00aa93648260ec975a5d646e80cde1442052ddf3aa1278a05414e2f25",
+  "fileHashes": {
+    "src/slugify/DETAIL.md": "2cf413c359969c4749df667160a0aae10c3dff2d",
+    "src/slugify/slugify.ts": "02d358d22e3059a3726cb01aa39f767f789344b9",
+    "src/slugify/tests/slugify.spec.ts": "639793c49af6b9537fb506692b99a3ad90615e41"
+  },
+  "phase": "sealed",
+  "preparedAt": "2026-09-04T19:56:18.247Z",
+  "effort": "medium",
+  "groups": [
+    {
+      "id": "01",
+      "units": [
+        {
+          "path": "src/slugify/DETAIL.md",
+          "change": "M",
+          "chunk": null,
+          "churn": 5,
+          "hunks": [
+            {
+              "oldStart": 3,
+              "oldEnd": 14,
+              "newStart": 3,
+              "newEnd": 13
+            }
+          ],
+          "diffPath": "diffs/01/01-DETAIL.md.diff"
+        },
+        {
+          "path": "src/slugify/slugify.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 5,
+              "oldEnd": 9,
+              "newStart": 5,
+              "newEnd": 9
+            }
+          ],
+          "diffPath": "diffs/01/02-slugify.ts.diff"
+        },
+        {
+          "path": "src/slugify/tests/slugify.spec.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 4,
+          "hunks": [
+            {
+              "oldStart": 10,
+              "oldEnd": 13,
+              "newStart": 10,
+              "newEnd": 17
+            }
+          ],
+          "diffPath": "diffs/01/03-slugify.spec.ts.diff"
+        }
+      ],
+      "churn": 11,
+      "planRequired": false,
+      "dependsOn": [],
+      "candidateIds": [],
+      "briefPath": "briefs/review-01.md",
+      "skeletonPath": "opinions/review-01.r1.json",
+      "opinionPath": "opinions/review-01.json",
+      "verifyBriefPath": "briefs/verify-01.md",
+      "verifyPath": "opinions/verify-01.json",
+      "rounds": 2,
+      "validated": {
+        "review": {
+          "round": 2,
+          "sha256": "e25ff1a6ca72796d76a4ad964e165e0b273151123a43ee138e2d5c15c1ca3300",
+          "complete": true
+        },
+        "verify": {
+          "sha256": "06436fc228d4c9a608eac50a258e1bcc784a0865ef11d0c1f24f1c74e8337981",
+          "reviewSha256": "e25ff1a6ca72796d76a4ad964e165e0b273151123a43ee138e2d5c15c1ca3300"
+        }
+      }
+    }
+  ],
+  "scope": {
+    "snapshotHash": "8a68c189252929b79eb3c7ed93888a3e1163d95d1f70d51841e190bb6cc13389",
+    "evidenceComplete": true,
+    "worktree": "clean",
+    "dirtyPaths": [],
+    "statuses": {
+      "structure": "ok",
+      "verification": "ok"
+    },
+    "files": [
+      {
+        "path": "src/slugify/DETAIL.md",
+        "change": "M",
+        "insertions": 2,
+        "deletions": 3,
+        "binary": false,
+        "role": "document",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "documents",
+          "fca"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/slugify.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/tests/slugify.spec.ts",
+        "change": "M",
+        "insertions": 4,
+        "deletions": 0,
+        "binary": false,
+        "role": "verification",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "tests",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      }
+    ],
+    "candidates": [],
+    "informational": [],
+    "outOfScopeCount": 0,
+    "infoCount": 0
+  },
+  "verdict": "REQUEST_CHANGES",
+  "sealedAt": "2026-09-04T20:02:09.190Z"
+}

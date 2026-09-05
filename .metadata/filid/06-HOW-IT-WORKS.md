@@ -249,7 +249,7 @@ DependencyGraph { nodePaths, edges, cycles, certainty }
 - 그래프를 만들 수 없는 파일이 cycle 결론에 영향을 줄 수 있으면 **전체 결과가 `indeterminate`** 다. 일부만 확실할 때 확실한 척하지 않는다.
 - 외부 package reference는 unresolved local evidence로 제외된다. 이것이 초기 어댑터의 계약이며, core가 생태계 해석을 하지 않는 이유다.
 
-`buildDependencyGraph(nodePaths, references, certainty, { organPaths })`는 owned-organ 참조를 **edge로는 보존하되 cycle adjacency에서만 뺀다.** 자식 fractal이 부모 소유 organ을 참조하면 organ이 부모로 승격되면서 `부모 → 자식 → 부모` 왕복이 생기는데, 이는 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure_plan`이 incoming edge로 소비자를 계산하기 때문이다 — 지우면 LCA 배치가 내부 소비자에 눈이 먼다.
+`buildDependencyGraph(nodePaths, references, certainty, { organPaths })`는 owned-organ 참조를 **edge로는 보존하되 cycle adjacency에서만 뺀다.** 자식 fractal이 부모 소유 organ을 참조하면 organ이 부모로 승격되면서 `부모 → 자식 → 부모` 왕복이 생기는데, 이는 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure`의 `plan` action이 incoming edge로 소비자를 계산하기 때문이다 — 지우면 LCA 배치가 내부 소비자에 눈이 먼다.
 
 ### 경계 판정
 
@@ -305,7 +305,7 @@ LCA 확정
 
 ### 읽기 전용 계획과 사후조건
 
-`restructure_plan`은 프로젝트 파일을 쓰거나 옮기지 않는다. 임시 artifact 저장만 한다. 실행은 외부 도구가 한다.
+`restructure`의 `plan` action은 프로젝트 파일을 쓰거나 옮기지 않는다. 임시 artifact 저장만 한다. 실행은 외부 도구가 한다.
 
 ```
 계획 생성 (read-only)
@@ -362,15 +362,10 @@ server/createServer()
     │
     ├── tools/list → 정확히 9개
     └── registerTool(name, schema, wrapHandler(name, exactSchema, handler))
-            ├── project_init        → handleProjectInitTool
-            ├── rule_docs_sync      → handleRuleDocsSyncTool
-            ├── open_settings       → handleOpenSettingsTool
-            ├── fractal_scan        → handleFractalScan
-            ├── context_resolve     → handleContextResolve
-            ├── restructure_plan    → handleRestructurePlan
-            ├── structure_validate  → handleStructureValidate
-            ├── verification_scan   → handleVerificationScan
-            └── review_state        → handleReviewState
+            ├── project_setup       → handleProjectSetup (5 actions)
+            ├── fractal_inspect     → handleFractalInspect (4 actions)
+            ├── restructure         → handleRestructure (3 actions)
+            └── review_state        → handleReviewState (6 actions)
 ```
 
 `wrapHandler`는 SDK에 광고하는 input schema를 object 형태로 유지하면서, 내부에서 exact schema 검증을 수행한다. parse failure까지 공통 `toolError` envelope로 바뀌므로 호출자는 예외 형태를 두 가지로 나눠 처리하지 않아도 된다.
@@ -397,7 +392,7 @@ ToolPayload { projectRoot, status, summary, data?, diagnostics, persistence? }
 ```
 
 - artifact와 인라인 텍스트는 **같은 serializer**를 쓴다. byte 계산과 SHA-256 입력이 모두 그 직렬화 결과 기준이다.
-- `persistence: always`인 restructure plan은 크기와 무관하게 artifact를 남기고 인라인 `data`는 생략한다. `structure_validate`는 그 artifact의 `data`에서 canonical plan을 읽는다.
+- `persistence: always`인 restructure plan은 크기와 무관하게 artifact를 남기고 인라인 `data`는 생략한다. `restructure`의 precondition/postcondition action은 그 artifact의 `data`에서 canonical plan을 읽는다.
 - artifact는 임시 자료이며 장기 원장이 아니다. 사라졌으면 snapshot을 다시 만들고 계획을 재생성한다.
 
 ### status
@@ -406,7 +401,7 @@ ToolPayload { projectRoot, status, summary, data?, diagnostics, persistence? }
 type ToolStatus = "ok" | "violations" | "indeterminate" | "unsupported";
 ```
 
-`indeterminate`와 `unsupported`는 `ok`가 아니다. 예를 들어 rule 문서의 plugin root를 해석하지 못한 `rule_docs_sync`는 `ok`가 아니라 `unsupported`와 안정적 diagnostic을 반환한다.
+`indeterminate`와 `unsupported`는 `ok`가 아니다. 예를 들어 rule 문서의 plugin root를 해석하지 못한 `project_setup` rules action은 `ok`가 아니라 `unsupported`와 안정적 diagnostic을 반환한다.
 
 ---
 

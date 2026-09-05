@@ -3,7 +3,7 @@
  * Inline src/mcp/pages/settings/{index.html, styles/styles.css, scripts/app.js}
  * into a single minified HTML file and emit public/settings.html.
  *
- * The page is served at runtime by mcp/tools/openSettings by reading this file
+ * The page is served at runtime by mcp/tools/projectSetup/openSettings by reading this file
  * from disk (shipped via package.json:files) — it is NOT inlined into the MCP
  * bundle, keeping bridge/mcp-server.cjs small.
  */

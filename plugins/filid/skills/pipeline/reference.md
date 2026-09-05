@@ -4,15 +4,17 @@
 
 `review_state({action: "assess"})` performs the detection and returns `summary.entryStage`. This table documents what it decides; it is not a probe sequence to run by hand. The **first** matching row wins.
 
-| Priority | Probe                                 | `entryStage` |
-| -------- | ------------------------------------- | ------------ |
-| 1        | `REVIEW_DIR/re-validate.md` exists    | `complete`   |
-| 2        | `REVIEW_DIR/justifications.md` exists | `revalidate` |
-| 3        | `REVIEW_DIR/fix-requests.md` exists   | `resolve`    |
-| 4        | `hasPullRequest` was passed as true   | `review`     |
-| 5        | none of the above                     | `pr-create`  |
+| Priority | Probe                                   | `entryStage` |
+| -------- | --------------------------------------- | ------------ |
+| 1        | Current-HEAD report has a valid verdict | `complete`   |
+| 2        | `REVIEW_DIR/justifications.md` exists   | `revalidate` |
+| 3        | `REVIEW_DIR/fix-requests.md` exists     | `resolve`    |
+| 4        | `hasPullRequest` was passed as true     | `review`     |
+| 5        | none of the above                       | `pr-create`  |
 
-`complete` reports the recorded verdict and ends. Re-running a closed cycle requires `--from=review --force`.
+`REVIEW_DIR/re-validate.md` uses closed, flat `key: scalar` frontmatter. Its unique `head_sha` must be an unquoted full lowercase Git SHA-1 or SHA-256; LF and CRLF are accepted. Its unique `verdict` must be exactly `PASS`, `FAIL` or `INCONCLUSIVE`. Body text, missing or duplicate keys, an unrecognized or placeholder verdict, malformed frontmatter, abbreviated SHAs, a different HEAD or an unobservable HEAD cannot satisfy priority 1. Continue with priorities 2–5 in those cases.
+
+`complete` reports the verdict recorded for the current HEAD and ends. Re-running that closed cycle requires `--from=review --force`.
 
 Push state is a separate fact, not a stage: `summary.unpushedCommits` counts commits ahead of the upstream and is `null` when the branch has no upstream — never pushed. At the `revalidate` entry, push when that count is above zero or null.
 
@@ -33,8 +35,10 @@ Push state is a separate fact, not a stage: `summary.unpushedCommits` counts com
 | -------------------------- | ------------------------------------------------------------- |
 | Dirty **source** worktree  | Stop. Report the abort message verbatim.                      |
 | Dirty generated paths only | Continue — `pr-create` classifies them and never stages them. |
-| Document sync blocked      | Stop. Documents are the PR's precondition.                    |
+| Document sync failed, declined or partial | Continue — `pr-create` records the outcome and the unrepaired findings in the PR body's `FCA Handoff`; `review` reads the body as change context. |
 | `gh` unauthenticated       | Continue — the body is saved locally; report the path.        |
+
+With `--no-push`, only a saved body exists, so `review` has no PR to start from and the cycle ends there — a publication-option ending, not a document-sync one.
 
 Generated paths are the ones declared in `structure.generatedPaths`; the classification table is `pull-request/reference.md` §5. A build artifact left in the tree is not a reason to stop a cycle that has not started.
 

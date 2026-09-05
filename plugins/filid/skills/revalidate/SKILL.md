@@ -3,7 +3,7 @@ name: revalidate
 user-invocable: true
 description: 'Re-measure the post-correction delta against the recorded resolve baseline, judge every rejection justification, and issue the final PASS or FAIL. Use after resolve corrections are committed.'
 argument-hint: '[--base REF]'
-version: '1.0.0'
+version: '1.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -33,7 +33,9 @@ mcp__plugin_filid_tools__review_state({
 
 Use `data.reviewDirectory` as `REVIEW_DIR`; never derive a directory name. `missing` aborts. `stale` is expected here — corrections moved the source — and is not an error at this stage.
 
-Read `REVIEW_DIR/justifications.md`. Its absence means `resolve` never ran; report that and end. Take `resolve_commit_sha` from the frontmatter.
+Read both `REVIEW_DIR/justifications.md` and `REVIEW_DIR/fix-requests.md`. The absence of `justifications.md` means `resolve` never ran; report that and end. Take `resolve_commit_sha` from the `justifications.md` frontmatter.
+
+Parse every canonical FIX ID under `## Accepted`, then parse the canonical fix-request blocks and their Severity, Category, Path, Rule, Claim, Evidence, Consequence, and Recommended Action fields. Join each accepted FIX ID to exactly one canonical fix request to reconstruct the complete original finding payload. An accepted ID that is missing, duplicated in either artifact, matches zero or multiple requests, or has any required field missing is `inconclusive`. Do not re-measure that item, and in particular do not spawn a non-FCA verifier for it.
 
 ## Step 2 — Extract the delta
 
@@ -41,27 +43,30 @@ Read `REVIEW_DIR/justifications.md`. Its absence means `resolve` never ran; repo
 git diff --name-only <resolve_commit_sha>..HEAD
 ```
 
-An empty delta with accepted items present is a finding, not a pass: it means nothing was applied. Record every accepted item as `unapplied` and continue to Step 4 so the rejections are still judged.
+An empty delta with accepted items present is a finding, not a pass: it means nothing was applied. Record every successfully joined accepted item as `unapplied`; retain any Step 1 join failure as `inconclusive`. Continue to Step 4 so the rejections are still judged.
 
 ## Step 3 — Re-measure the accepted items
 
-For each accepted item, re-run the measurement that produced the original finding, scoped to the item's owning fractal:
+For each accepted item whose Step 1 join succeeded, re-run the measurement that produced the original finding, scoped to the item's owning fractal:
 
-| Perspective    | Re-measurement                                                                  |
-| -------------- | ------------------------------------------------------------------------------- |
-| `contract`     | `structure_validate` with `scopes: ["documents"]`                               |
-| `structure`    | `structure_validate` with `scopes: ["nodes","entry-points","boundaries","dag"]` |
-| `verification` | `verification_scan`, plus `structure_validate` `scopes: ["verification"]`       |
+| Category                                                                        | Re-measurement                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `contract`                                                                      | `fractal_inspect` `validate` with `scopes: ["documents"]`                                                                                                                                                                                                                          |
+| `structure`                                                                     | `fractal_inspect` `validate` with `scopes: ["nodes","entry-points","boundaries","dag"]`                                                                                                                                                                                            |
+| `verification`                                                                  | `fractal_inspect` `verification`, plus its `validate` action with `scopes: ["verification"]`                                                                                                                                                                                       |
+| `bug`, `security`, `performance`, `maintainability`, `test`, or `documentation` | Spawn `../cross-review/reviewers/verifier.md` in re-verification mode with the joined complete original finding payload and `git diff <resolve_commit_sha>..HEAD -- <path>`; `CONFIRMED` means `resolved`, `REFUTED` means `unresolved`, and `INDETERMINATE` means `inconclusive`. |
+
+MCP re-measurement applies only to FCA categories.
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "validate",
   path: <current eligible fractal path — never PROJECT_ROOT>,
-  mode: "project",
   scopes: [...]
 })
 ```
 
-Resolve all accepted item paths first with one context_resolve batch and read `context_resolve.data.results`, or the artifact results when inline `data` is absent. Map results by their stable index. A failed result makes that item `inconclusive`; for each resolved result, start at `result.summary.ownerFractalPath` and retry the remaining `result.summary.chainPaths` ancestors only when required evidence lies outside the current scan root. The detailed selection and finding-identity rules are in `reference.md` §1.
+Resolve all accepted item paths first with one `fractal_inspect` `resolve` batch and read its `data.results`, or the artifact results when inline `data` is absent. Map results by their stable index. A failed result makes that item `inconclusive`; for each resolved result, start at `result.summary.ownerFractalPath` and retry the remaining `result.summary.chainPaths` ancestors only when required evidence lies outside the current scan root. The detailed selection and finding-identity rules are in `reference.md` §1.
 
 Read the findings from the returned result or, when the payload exceeds the inline envelope budget, from its artifact. Reading an absent inline `data` as "the finding is gone" is how this step produces a false `resolved`.
 

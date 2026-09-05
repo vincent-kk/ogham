@@ -16,24 +16,15 @@ const reference = readFileSync(
 
 function toolCalls(document: string, toolName: string): string[] {
   const marker = `mcp__plugin_filid_tools__${toolName}({`;
-  const calls: string[] = [];
-  let cursor = 0;
-
-  while (cursor < document.length) {
-    const start = document.indexOf(marker, cursor);
-    if (start < 0) break;
-    const end = document.indexOf('```', start);
-    if (end < 0) break;
-    calls.push(document.slice(start, end));
-    cursor = end + 3;
-  }
-
-  return calls;
+  return document
+    .split(marker)
+    .slice(1)
+    .map((remainder) => marker + remainder.slice(0, remainder.indexOf('```')));
 }
 
 describe('revalidate measurement scope contract', () => {
   it('widens uncertain evidence without hiding an exact surviving finding', () => {
-    expect(skill).toContain('context_resolve.data.results');
+    expect(skill).toContain('`fractal_inspect` `resolve` batch');
     expect(reference).toMatch(
       /result\.summary\.ownerFractalPath[^\n]+first scope/i,
     );
@@ -62,20 +53,26 @@ describe('revalidate measurement scope contract', () => {
     for (const line of aggregateLines)
       expect(line).toMatch(/never|not a search/i);
 
-    const contextResolveCalls = toolCalls(reference, 'context_resolve');
+    const contextResolveCalls = toolCalls(reference, 'fractal_inspect').filter(
+      (call) => /action:\s*"resolve"/.test(call),
+    );
     expect(contextResolveCalls.length).toBeGreaterThan(0);
     expect(contextResolveCalls).toEqual(
       expect.arrayContaining([
         expect.stringMatching(/path:\s*PROJECT_ROOT,[\s\S]+requests:\s*\[/),
       ]),
     );
+    for (const call of contextResolveCalls)
+      expect(call).toMatch(/action:\s*"resolve"/);
 
     const structureValidateCalls = [
-      ...toolCalls(skill, 'structure_validate'),
-      ...toolCalls(reference, 'structure_validate'),
-    ];
+      ...toolCalls(skill, 'fractal_inspect'),
+      ...toolCalls(reference, 'fractal_inspect'),
+    ].filter((call) => /action:\s*"validate"/.test(call));
     expect(structureValidateCalls.length).toBeGreaterThan(0);
-    for (const call of structureValidateCalls)
+    for (const call of structureValidateCalls) {
+      expect(call).toMatch(/action:\s*"validate"/);
       expect(call).not.toMatch(/path:\s*PROJECT_ROOT/);
+    }
   });
 });

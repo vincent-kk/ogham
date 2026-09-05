@@ -1,15 +1,13 @@
+/** Canonical names registered by the Filid MCP server. */
 export const McpToolName = {
-  PROJECT_INIT: 'project_init',
-  RULE_DOCS_SYNC: 'rule_docs_sync',
-  OPEN_SETTINGS: 'open_settings',
-  FRACTAL_SCAN: 'fractal_scan',
-  CONTEXT_RESOLVE: 'context_resolve',
-  RESTRUCTURE_PLAN: 'restructure_plan',
-  STRUCTURE_VALIDATE: 'structure_validate',
-  VERIFICATION_SCAN: 'verification_scan',
+  PROJECT_SETUP: 'project_setup',
+  FRACTAL_INSPECT: 'fractal_inspect',
+  RESTRUCTURE: 'restructure',
   REVIEW_STATE: 'review_state',
 } as const;
 
+/** One registered Filid MCP tool name. */
 export type McpToolName = (typeof McpToolName)[keyof typeof McpToolName];
 
+/** Ordered values of the canonical Filid MCP tool-name record. */
 export const MCP_TOOL_NAMES = Object.values(McpToolName) as McpToolName[];

@@ -4,7 +4,7 @@ import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js'
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import { TOOL_STATUSES } from '../../../constants/toolEnvelope.js';
-import { handleContextResolve } from '../../../mcp/tools/contextResolve/index.js';
+import { handleContextResolve } from '../../../mcp/tools/fractalInspect/contextResolve/index.js';
 import type { ToolSnapshotContext } from '../../../mcp/tools/utils/createToolSnapshot.js';
 import { createToolSnapshot } from '../../../mcp/tools/utils/createToolSnapshot.js';
 import type { FractalNode, ProjectSnapshot } from '../../../types/fractal.js';
@@ -122,7 +122,7 @@ function mockSnapshotContext(diagnostics: ToolDiagnostic[]): void {
   mockedCreateToolSnapshot.mockResolvedValue(context);
 }
 
-describe('context_resolve shared-snapshot batch', () => {
+describe('fractal_inspect resolve shared-snapshot batch', () => {
   beforeEach(() => {
     mockedCreateToolSnapshot.mockReset();
   });

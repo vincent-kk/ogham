@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 2,
+  "projectRoot": "<PROJECT_ROOT>",
+  "branchName": "calib/c",
+  "normalizedBranch": "calib-c-ce110a3b07bcea6add2dec85a0bef05bcd2e05fab370d710bf6f25f9dda3ef71",
+  "baseRef": "main",
+  "baseCommit": "b28911323d4345c0279c4c4c34cb873aa027e458",
+  "sourceHash": "d0011d64309a4f128668891c2e82e34586ba9096996601439286916d3045b2b6",
+  "fileHashes": {
+    "src/index.ts": "16d77636705074bff577af66b3ef8c1e5891fbab",
+    "src/slugify/slugify.ts": "02d358d22e3059a3726cb01aa39f767f789344b9",
+    "src/slugify/tests/INTENT.md": "70f70cdb8447aea6a2776a638e747e678fa2b5b1",
+    "src/slugify/tests/slugify.spec.ts": "639793c49af6b9537fb506692b99a3ad90615e41"
+  },
+  "phase": "sealed",
+  "preparedAt": "2026-09-04T20:03:24.631Z",
+  "effort": "medium",
+  "groups": [
+    {
+      "id": "01",
+      "units": [
+        {
+          "path": "src/index.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 1,
+              "oldEnd": 1,
+              "newStart": 1,
+              "newEnd": 1
+            }
+          ],
+          "diffPath": "diffs/01/01-index.ts.diff"
+        },
+        {
+          "path": "src/slugify/slugify.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 5,
+              "oldEnd": 9,
+              "newStart": 5,
+              "newEnd": 9
+            }
+          ],
+          "diffPath": "diffs/01/02-slugify.ts.diff"
+        },
+        {
+          "path": "src/slugify/tests/INTENT.md",
+          "change": "A",
+          "chunk": null,
+          "churn": 3,
+          "hunks": [
+            {
+              "oldStart": 0,
+              "oldEnd": -1,
+              "newStart": 1,
+              "newEnd": 3
+            }
+          ],
+          "diffPath": "diffs/01/03-INTENT.md.diff"
+        },
+        {
+          "path": "src/slugify/tests/slugify.spec.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 4,
+          "hunks": [
+            {
+              "oldStart": 10,
+              "oldEnd": 13,
+              "newStart": 10,
+              "newEnd": 17
+            }
+          ],
+          "diffPath": "diffs/01/04-slugify.spec.ts.diff"
+        }
+      ],
+      "churn": 11,
+      "planRequired": false,
+      "dependsOn": [],
+      "candidateIds": [
+        "FCA-001",
+        "FCA-002",
+        "FCA-003",
+        "FCA-004",
+        "FCA-005",
+        "FCA-006"
+      ],
+      "briefPath": "briefs/review-01.md",
+      "skeletonPath": "opinions/review-01.r1.json",
+      "opinionPath": "opinions/review-01.json",
+      "verifyBriefPath": "briefs/verify-01.md",
+      "verifyPath": "opinions/verify-01.json",
+      "rounds": 2,
+      "validated": {
+        "review": {
+          "round": 1,
+          "sha256": "4b1020c4f92b88185c8c622f7e7a0ec3020b8571f7dfc967bc25389b574254c9",
+          "complete": true
+        },
+        "verify": {
+          "sha256": "4ddf6625153f2f0561fd94ed8154316b8db38493f15be2e38d4c52e61c18c983",
+          "reviewSha256": "4b1020c4f92b88185c8c622f7e7a0ec3020b8571f7dfc967bc25389b574254c9"
+        }
+      }
+    }
+  ],
+  "scope": {
+    "snapshotHash": "a426e391d912325a0343e4638379e97e7f6272440da02c4f11a9eee6fee2fca7",
+    "evidenceComplete": true,
+    "worktree": "clean",
+    "dirtyPaths": [],
+    "statuses": {
+      "structure": "violations",
+      "verification": "ok"
+    },
+    "files": [
+      {
+        "path": "src/index.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": "src",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/slugify.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/tests/INTENT.md",
+        "change": "A",
+        "insertions": 3,
+        "deletions": 0,
+        "binary": false,
+        "role": "document",
+        "owner": "src/slugify/tests",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "documents",
+          "fca"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/tests/slugify.spec.ts",
+        "change": "M",
+        "insertions": 4,
+        "deletions": 0,
+        "binary": false,
+        "role": "verification",
+        "owner": "src/slugify/tests",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "tests",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      }
+    ],
+    "candidates": [
+      {
+        "id": "FCA-001",
+        "source": "structure",
+        "scope": "boundaries",
+        "category": "structure",
+        "severity": "error",
+        "path": "src/index.ts",
+        "rule": "external-import-boundary",
+        "message": "Import \"./slugify/slugify.js\" bypasses the target module boundary."
+      },
+      {
+        "id": "FCA-002",
+        "source": "structure",
+        "scope": "documents",
+        "category": "contract",
+        "severity": "error",
+        "path": "src/slugify/tests",
+        "rule": "detail-document-contract",
+        "message": "DETAIL.md is required for fractal node <PROJECT_ROOT>/src/slugify/tests."
+      },
+      {
+        "id": "FCA-003",
+        "source": "structure",
+        "scope": "entry-points",
+        "category": "contract",
+        "severity": "warning",
+        "path": "src/slugify/tests",
+        "rule": "module-entry-point",
+        "message": "Fractal module \"tests\" does not have an adapter-reported entry point."
+      },
+      {
+        "id": "FCA-004",
+        "source": "structure",
+        "scope": "nodes",
+        "category": "structure",
+        "severity": "warning",
+        "path": "src/slugify/tests",
+        "rule": "organ-no-intentmd",
+        "message": "Organ-named directory \"tests\" became a fractal through INTENT.md alone. Organ nodes do not own standalone documentation."
+      },
+      {
+        "id": "FCA-005",
+        "source": "structure",
+        "scope": "nodes",
+        "category": "structure",
+        "severity": "warning",
+        "path": "src/slugify/tests",
+        "rule": "zero-peer-file",
+        "message": "Fractal root \"tests\" contains peer file \"slugify.spec.ts\" not in any allowed category. Promote it to a sub-fractal directory."
+      },
+      {
+        "id": "FCA-006",
+        "source": "structure",
+        "scope": "documents",
+        "category": "contract",
+        "severity": "warning",
+        "path": "src/slugify/tests/INTENT.md",
+        "rule": "intent-document-contract",
+        "message": "INTENT.md is missing 3-tier boundary sections: Always do, Ask first, Never do"
+      }
+    ],
+    "informational": [],
+    "outOfScopeCount": 0,
+    "infoCount": 0
+  },
+  "verdict": "REQUEST_CHANGES",
+  "sealedAt": "2026-09-04T20:07:42.352Z"
+}

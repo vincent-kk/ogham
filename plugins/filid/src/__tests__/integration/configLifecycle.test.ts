@@ -20,7 +20,7 @@ import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { SNAPSHOT_TOOL_DIAGNOSTIC_CODES } from '../../constants/mcpContracts.js';
-import { handleStructureValidate } from '../../mcp/tools/structureValidate/index.js';
+import { handleStructureValidate } from '../../mcp/tools/fractalInspect/structureValidate/index.js';
 import type {
   StructureValidateData,
   ValidationReport,

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "rules": [
+    { "id": "default", "always": true, "file": "default.md" },
+    { "id": "tests", "when": "role:verification", "file": "tests.md" },
+    { "id": "documents", "when": "role:document", "file": "documents.md" },
+    { "id": "fca", "when": "owner", "file": "fca.md" },
+    {
+      "id": "ecmascript",
+      "match": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.mts",
+        "**/*.cts",
+        "**/*.js",
+        "**/*.jsx",
+        "**/*.mjs",
+        "**/*.cjs"
+      ],
+      "file": "lang/ecmascript.md"
+    },
+    {
+      "id": "workflows",
+      "match": [".github/workflows/*.yml", ".github/workflows/*.yaml"],
+      "file": "lang/workflows.md"
+    },
+    {
+      "id": "manifests",
+      "match": [
+        "**/package.json",
+        "**/tsconfig*.json",
+        "**/pnpm-workspace.yaml",
+        "**/.npmrc"
+      ],
+      "file": "lang/manifests.md"
+    },
+    {
+      "id": "shell",
+      "match": ["**/*.sh", "**/*.bash", "**/*.zsh", "**/*.mjs"],
+      "file": "lang/shell.md"
+    }
+  ]
+}

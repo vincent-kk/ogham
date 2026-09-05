@@ -1,22 +1,21 @@
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { STRUCTURE_VALIDATION_MODES } from '../../constants/mcpContracts.js';
+import {
+  FRACTAL_INSPECT_ACTIONS,
+  PROJECT_SETUP_ACTIONS,
+  RESTRUCTURE_ACTIONS,
+} from '../../constants/mcpContracts.js';
 import { MCP_TOOL_NAMES, McpToolName } from '../../constants/mcpToolNames.js';
 import { TOOL_INPUT_DIAGNOSTIC_CODE } from '../../constants/toolEnvelope.js';
 import { createServer } from '../../mcp/server/lifecycle/createServer.js';
 
+import { connectTestClient } from './helpers/connectTestClient.js';
+
 const EXPECTED_TOOL_NAMES = [
-  'project_init',
-  'rule_docs_sync',
-  'open_settings',
-  'fractal_scan',
-  'context_resolve',
-  'restructure_plan',
-  'structure_validate',
-  'verification_scan',
+  'project_setup',
+  'fractal_inspect',
+  'restructure',
   'review_state',
 ] as const;
 
@@ -38,6 +37,7 @@ const REMOVED_TOOL_NAMES = [
 ] as const;
 
 const PROJECT_INIT_INPUT = {
+  action: PROJECT_SETUP_ACTIONS.INIT,
   path: '/project',
   adapterIds: ['ecmascript'],
 };
@@ -45,38 +45,15 @@ const INVALID_PROJECT_INIT_INPUT = {
   ...PROJECT_INIT_INPUT,
   adapterIds: [],
 };
-const MCP_TEST_CLIENT_INFO = {
-  name: 'filid-tool-surface-test',
-  version: '0.0.0',
-};
-
-interface ConnectedTestClient {
-  client: Client;
-  close: () => Promise<void>;
-}
-
+/**
+ * Collects the tool names registered while constructing the MCP server.
+ *
+ * @returns Tool names in registration order.
+ */
 function collectRegisteredToolNames(): string[] {
   const registerTool = vi.spyOn(McpServer.prototype, 'registerTool');
   createServer();
   return registerTool.mock.calls.map(([name]) => name);
-}
-
-async function connectTestClient(): Promise<ConnectedTestClient> {
-  const [clientTransport, serverTransport] =
-    InMemoryTransport.createLinkedPair();
-  const server = createServer();
-  const client = new Client(MCP_TEST_CLIENT_INFO);
-  await Promise.all([
-    server.connect(serverTransport),
-    client.connect(clientTransport),
-  ]);
-  return {
-    client,
-    close: async () => {
-      await client.close();
-      await server.close();
-    },
-  };
 }
 
 afterEach(() => {
@@ -84,7 +61,7 @@ afterEach(() => {
 });
 
 describe('Filid 1.0 MCP tool surface', () => {
-  it('registers exactly the nine independently specified tool names', () => {
+  it('registers exactly the four action-dispatched tool names', () => {
     const registered = collectRegisteredToolNames();
     expect(new Set(registered)).toEqual(new Set(EXPECTED_TOOL_NAMES));
     expect(registered).toHaveLength(EXPECTED_TOOL_NAMES.length);
@@ -118,6 +95,36 @@ describe('Filid 1.0 MCP tool surface', () => {
     }
   });
 
+  it('advertises the review_state v7 action fields', async () => {
+    const connection = await connectTestClient();
+    try {
+      const tools = await connection.client.listTools();
+      const schema = tools.tools.find(
+        ({ name }) => name === McpToolName.REVIEW_STATE,
+      )?.inputSchema;
+      expect(schema).toMatchObject({
+        properties: {
+          action: {
+            enum: [
+              'prepare',
+              'checkpoint',
+              'validate',
+              'seal',
+              'cleanup',
+              'assess',
+            ],
+          },
+          effort: { enum: ['low', 'medium', 'high'] },
+          kind: { enum: ['review', 'verify'] },
+          group: { type: 'string' },
+          round: { type: 'integer', minimum: 1 },
+        },
+      });
+    } finally {
+      await connection.close();
+    }
+  });
+
   it('describes every advertised input field of every tool', async () => {
     const connection = await connectTestClient();
     try {
@@ -143,38 +150,22 @@ describe('Filid 1.0 MCP tool surface', () => {
     }
   });
 
-  it('advertises planPath as required in structure plan modes', async () => {
+  it('advertises the project-setup action union and optional shared path', async () => {
     const connection = await connectTestClient();
     try {
       const tools = await connection.client.listTools();
       const schema = tools.tools.find(
-        ({ name }) => name === McpToolName.STRUCTURE_VALIDATE,
+        ({ name }) => name === McpToolName.PROJECT_SETUP,
       )?.inputSchema;
       expect(schema).toMatchObject({
+        required: ['action'],
         properties: {
-          mode: {
-            enum: Object.values(STRUCTURE_VALIDATION_MODES),
+          action: {
+            enum: Object.values(PROJECT_SETUP_ACTIONS),
           },
-          planPath: {
-            type: 'string',
-          },
-        },
-      });
-    } finally {
-      await connection.close();
-    }
-  });
-
-  it('advertises a non-empty project adapter selection', async () => {
-    const connection = await connectTestClient();
-    try {
-      const tools = await connection.client.listTools();
-      const schema = tools.tools.find(
-        ({ name }) => name === McpToolName.PROJECT_INIT,
-      )?.inputSchema;
-      expect(schema).toMatchObject({
-        properties: {
+          path: { type: 'string' },
           adapterIds: {
+            type: 'array',
             minItems: 1,
           },
         },
@@ -184,16 +175,19 @@ describe('Filid 1.0 MCP tool surface', () => {
     }
   });
 
-  it('advertises context resolution as a non-empty request batch', async () => {
+  it('advertises inspection actions and non-empty resolve requests', async () => {
     const connection = await connectTestClient();
     try {
       const tools = await connection.client.listTools();
       const schema = tools.tools.find(
-        ({ name }) => name === McpToolName.CONTEXT_RESOLVE,
+        ({ name }) => name === McpToolName.FRACTAL_INSPECT,
       )?.inputSchema;
       expect(schema).toMatchObject({
-        required: ['path', 'requests'],
+        required: ['action', 'path'],
         properties: {
+          action: { enum: Object.values(FRACTAL_INSPECT_ACTIONS) },
+          path: { type: 'string' },
+          detail: { enum: ['summary', 'paths', 'full', 'files'] },
           requests: {
             type: 'array',
             minItems: 1,
@@ -215,11 +209,34 @@ describe('Filid 1.0 MCP tool surface', () => {
     }
   });
 
+  it('advertises restructure actions and the optional plan path', async () => {
+    const connection = await connectTestClient();
+    try {
+      const tools = await connection.client.listTools();
+      const schema = tools.tools.find(
+        ({ name }) => name === McpToolName.RESTRUCTURE,
+      )?.inputSchema;
+      expect(schema).toMatchObject({
+        required: ['action', 'path'],
+        properties: {
+          action: { enum: Object.values(RESTRUCTURE_ACTIONS) },
+          path: { type: 'string' },
+          requests: {
+            type: 'array',
+          },
+          planPath: { type: 'string' },
+        },
+      });
+    } finally {
+      await connection.close();
+    }
+  });
+
   it('returns invalid project input as a structured Filid error', async () => {
     const connection = await connectTestClient();
     try {
       const result = await connection.client.callTool({
-        name: McpToolName.PROJECT_INIT,
+        name: McpToolName.PROJECT_SETUP,
         arguments: INVALID_PROJECT_INIT_INPUT,
       });
       const resultContent = result.content;
@@ -250,11 +267,75 @@ describe('Filid 1.0 MCP tool surface', () => {
     const connection = await connectTestClient();
     try {
       const result = await connection.client.callTool({
-        name: McpToolName.CONTEXT_RESOLVE,
+        name: McpToolName.FRACTAL_INSPECT,
         arguments: {
+          action: FRACTAL_INSPECT_ACTIONS.RESOLVE,
           path: '/project',
           requests: [{ targetPath: '/project/source.unit' }],
           targetPath: '/project/source.unit',
+        },
+      });
+      const resultContent = result.content;
+      expect(Array.isArray(resultContent)).toBe(true);
+      if (!Array.isArray(resultContent))
+        throw new Error('expected content array');
+      const content: unknown = resultContent[0];
+      expect(result.isError).toBe(true);
+      expect(content).toMatchObject({ type: 'text' });
+      if (
+        !content ||
+        typeof content !== 'object' ||
+        !('text' in content) ||
+        typeof content.text !== 'string'
+      )
+        throw new Error('expected text content');
+      expect(JSON.parse(content.text)).toMatchObject({
+        diagnostics: [{ code: TOOL_INPUT_DIAGNOSTIC_CODE }],
+      });
+    } finally {
+      await connection.close();
+    }
+  });
+
+  it('requires planPath for restructure validation actions', async () => {
+    const connection = await connectTestClient();
+    try {
+      const result = await connection.client.callTool({
+        name: McpToolName.RESTRUCTURE,
+        arguments: {
+          action: RESTRUCTURE_ACTIONS.PRECONDITION,
+          path: '/project',
+        },
+      });
+      const resultContent = result.content;
+      expect(Array.isArray(resultContent)).toBe(true);
+      if (!Array.isArray(resultContent))
+        throw new Error('expected content array');
+      const content: unknown = resultContent[0];
+      expect(result.isError).toBe(true);
+      expect(content).toMatchObject({ type: 'text' });
+      if (
+        !content ||
+        typeof content !== 'object' ||
+        !('text' in content) ||
+        typeof content.text !== 'string'
+      )
+        throw new Error('expected text content');
+      expect(JSON.parse(content.text)).toMatchObject({
+        diagnostics: [{ code: TOOL_INPUT_DIAGNOSTIC_CODE }],
+      });
+    } finally {
+      await connection.close();
+    }
+  });
+
+  it('requires path for project-setup rule synchronization', async () => {
+    const connection = await connectTestClient();
+    try {
+      const result = await connection.client.callTool({
+        name: McpToolName.PROJECT_SETUP,
+        arguments: {
+          action: PROJECT_SETUP_ACTIONS.RULES_SYNC,
         },
       });
       const resultContent = result.content;

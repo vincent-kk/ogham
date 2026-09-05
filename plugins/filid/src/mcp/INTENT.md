@@ -2,16 +2,13 @@
 
 ## Purpose
 
-언어 중립 core를 9개의 작은 MCP 도구로 노출한다. 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다.
+언어 중립 core를 4개의 action-dispatched MCP 도구로 노출한다. 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다.
 
 ## Structure
 
-| Path           | Role                                                    |
-| -------------- | ------------------------------------------------------- |
-| `server/`      | 9개 도구 등록, envelope 직렬화와 process lifecycle      |
-| `serverEntry/` | build가 호출하는 MCP executable entry                   |
-| `tools/`       | project/rule/settings/scan/context/plan/validate/review |
-| `pages/`       | `open_settings`가 제공하는 generated settings UI        |
+- 4개 도구 fractal은 `tools/` 아래로 모이고, 등록·envelope 직렬화·process lifecycle은 그 위 계층이 소유한다.
+- 이름 함정: MCP executable entry는 서버 조립 디렉터리가 아니라 별도의 serverEntry child다.
+- 브라우저에 서빙되는 정적 페이지도 이 계층 안에 살지만 TypeScript 소스를 import 하지 않는다.
 
 ## Conventions
 
@@ -29,7 +26,7 @@
 
 ### Ask first
 
-- 9개 도구 목록, 입력 schema 또는 envelope budget 변경
+- 4개 도구 목록, action/input schema 또는 envelope budget 변경
 - 프로젝트 파일을 쓰는 새 동작 추가
 
 ### Never do

@@ -11,8 +11,8 @@
 
 ## API Contracts
 
-- MCP 도구 9개: `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`.
-- `context_resolve`는 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
+- MCP 도구 4개: `project_setup`, `fractal_inspect`, `restructure`, `review_state`.
+- `fractal_inspect`의 `resolve` action은 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
 - 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
 - 소스 루트 entry point의 공개 surface는 생성된 `VERSION` 하나다.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
@@ -26,7 +26,7 @@
 
 ### AC-src-surface — 1.0 표면
 
-- MCP 도구가 정확히 9개 등록된다.
+- MCP 도구가 정확히 4개 등록된다.
 - 소스 루트 entry point가 `VERSION`만 named export하고 npm manifest에는 library export가 없다.
 
 ### AC-src-generated — 생성물 불가침
@@ -43,8 +43,9 @@
 
 ## History
 
+- 2026-09-05 — setup, inspection과 restructure lifecycle을 action-dispatched 도구로 병합해 MCP 표면을 4개로 줄였다.
 - 2026-08-28 — 대규모 변경의 반복 snapshot 비용을 없애기 위해 `context_resolve` 공개 DTO를 array-first batch로 바꿨다.
 
 ## Last Updated
 
-2026-08-28 — npm 공개 API와 분리된 소스 FCA entry point의 단일 named export를 명시했다.
+2026-09-05 — 4-tool MCP 표면과 resolve action batch 계약을 명시했다.

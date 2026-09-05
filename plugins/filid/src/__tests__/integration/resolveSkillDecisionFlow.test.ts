@@ -110,7 +110,7 @@ describe('resolve skill batch decision flow', () => {
       .filter((label): label is string => label !== undefined);
 
     expect(reference).toContain(
-      '| Default | ID | Severity | Perspective | Recommendation | Path |',
+      '| Default | ID | Severity | Category | Recommendation | Path |',
     );
     expect(reference).toContain(
       'Consequence: <specific broken contract or boundary>',

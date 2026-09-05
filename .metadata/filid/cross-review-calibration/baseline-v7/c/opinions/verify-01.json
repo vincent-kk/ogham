@@ -1,0 +1,56 @@
+{
+  "schema": 7,
+  "group": "01",
+  "state": "COMPLETE",
+  "sourceHash": "d0011d64309a4f128668891c2e82e34586ba9096996601439286916d3045b2b6",
+  "decisions": [
+    {
+      "findingId": "FCA-001",
+      "verdict": "CONFIRMED",
+      "evidence": "src/index.ts:1 imports './slugify/slugify.js' directly; src/slugify/index.ts:1 is slugify's entry point re-exporting slugify from './slugify.js'. Per checkExternalImportBoundary (plugins/filid/src/core/rules/ruleEngine/utils/checkExternalImportBoundary.ts:100-129), sourceNode=src, targetNode=slugify, sameOwner=false, targetIsEntryPoint=false (resolved path is slugify.ts, not index.ts) => externalInternalImport=true, producing the exact violation text.",
+      "reason": "src/index.ts reaches slugify.ts directly instead of through src/slugify/index.ts, which literally satisfies the externalInternalImport branch that emits 'bypasses the target module boundary'."
+    },
+    {
+      "findingId": "FCA-002",
+      "verdict": "CONFIRMED",
+      "evidence": "ls src/slugify/tests shows only INTENT.md and slugify.spec.ts, no DETAIL.md. classifyNode (organClassifier.ts:85) returns 'fractal' for any directory with INTENT.md before the organ-name check, so tests is type=fractal. checkDocumentContract (checkDocumentContract.ts:40-54) fires when node.type==='fractal' and !hasDetailMd and no prior findings, emitting 'is missing its detail contract document'.",
+      "reason": "tests is classified fractal solely by INTENT.md's presence and has no DETAIL.md on disk, which is exactly the condition checkDocumentContract('detail') checks before emitting a violation."
+    },
+    {
+      "findingId": "FCA-003",
+      "verdict": "CONFIRMED",
+      "evidence": "ls src/slugify/tests confirms no index.ts or any entry-point file exists. checkModuleEntryPoint (checkModuleEntryPoint.ts:6-16) fires when node.type is fractal/hybrid and node.entryPoints.length===0, producing the message verbatim: 'Fractal module \"tests\" does not have an adapter-reported entry point.'",
+      "reason": "The tests directory contains no file an adapter could report as an entry point, matching the zero-entry-points precondition of checkModuleEntryPoint exactly."
+    },
+    {
+      "findingId": "FCA-004",
+      "verdict": "CONFIRMED",
+      "evidence": "organNames.ts:13-20 lists 'tests' in TEST_ORGAN_NAMES (part of KNOWN_ORGAN_DIR_NAMES). checkOrganNoIntentMd (checkOrganNoIntentmd.ts:21-40) fires when node.type==='fractal', node.hasIntentMd, node.name is a known organ name, !node.hasDetailMd, and no module-kind entry point — all four hold for src/slugify/tests (INTENT.md present, DETAIL.md absent, no entry points at all), reproducing the message verbatim.",
+      "reason": "'tests' is a built-in organ name that was promoted to fractal by INTENT.md alone with no DETAIL.md and no module entry point, which is the exact silent-promotion condition checkOrganNoIntentMd reports."
+    },
+    {
+      "findingId": "FCA-005",
+      "verdict": "CONFIRMED",
+      "evidence": "checkZeroPeerFile (checkZeroPeerFile.ts:19-68) builds an allowed set of INTENT.md, DETAIL.md, entry-point basenames, eponymous file, and framework/config-allowed files. src/slugify/tests has no entry points, no eponymous 'tests.ts', and no framework/config allowances observed; its only non-INTENT.md peer file is slugify.spec.ts, which is not in the allowed set, so it is returned as a disallowed peer with the exact message.",
+      "reason": "slugify.spec.ts is a peer file in the fractal-classified tests directory that matches none of checkZeroPeerFile's allowed categories, directly reproducing the reported violation."
+    },
+    {
+      "findingId": "FCA-006",
+      "verdict": "CONFIRMED",
+      "evidence": "src/slugify/tests/INTENT.md content is only '# tests' plus 'Independent documentation inside a test organ.' — no '## Boundaries' section and no 'Always do' / 'Ask first' / 'Never do' subsections, unlike src/INTENT.md and src/slugify/INTENT.md which both contain all three subsections under '## Boundaries'.",
+      "reason": "The tests INTENT.md literally lacks the Always do / Ask first / Never do subsections that the sibling INTENT.md files in this same change demonstrate as the expected 3-tier boundary contract shape."
+    }
+  ],
+  "observations": [],
+  "checked": [
+    "src/index.ts",
+    "src/slugify/slugify.ts",
+    "src/slugify/index.ts",
+    "src/slugify/INTENT.md",
+    "src/slugify/DETAIL.md",
+    "src/INTENT.md",
+    "src/DETAIL.md",
+    "src/slugify/tests/INTENT.md",
+    "src/slugify/tests/slugify.spec.ts"
+  ]
+}

@@ -44,7 +44,7 @@ export const SKIP_PATTERNS = [
 ];
 
 /**
- * Serialized fractal_scan payload budget. Larger results are written to
+ * Serialized `fractal_inspect` scan payload budget. Larger results are written to
  * `{cacheDir}/scan-report.json` and replaced by a path + summary envelope,
  * keeping every response within the MCP tool-result cap.
  */

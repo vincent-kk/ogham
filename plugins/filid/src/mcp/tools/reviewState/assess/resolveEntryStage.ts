@@ -3,7 +3,7 @@ import type { ReviewEntryStage } from '../state/reviewStateTypes.js';
 
 /** File and PR facts the resume point is read from. */
 export interface EntryStageEvidence {
-  /** A recorded verdict closes the cycle. */
+  /** A recognized revalidation verdict names the observed current HEAD. */
   hasReValidate: boolean;
   /** Corrections were decided and recorded. */
   hasJustifications: boolean;
@@ -19,7 +19,7 @@ export interface EntryStageEvidence {
 /**
  * Decide where a merge-track cycle resumes. The order is the contract: the
  * first matching condition wins, later ones are not evaluated.
- * @param evidence Observed review-directory and PR facts.
+ * @param evidence Review-directory and PR facts with report freshness already checked.
  * @returns The stage to enter.
  */
 export function resolveEntryStage(

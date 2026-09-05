@@ -13,7 +13,7 @@ import { type Page, expect, test } from '@playwright/test';
 
 import { BUILTIN_RULE_IDS } from '../src/constants/builtinRuleIds.js';
 import type { FilidConfig } from '../src/core/infra/configLoader/loaders/configSchemas.js';
-import { handleOpenSettings } from '../src/mcp/tools/openSettings/index.js';
+import { handleOpenSettings } from '../src/mcp/tools/projectSetup/openSettings/index.js';
 
 // The tool must not spawn real browser tabs, and rule-doc management needs the
 // plugin root (manifest + templates) that the MCP host normally injects.

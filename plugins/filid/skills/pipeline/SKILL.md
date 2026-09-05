@@ -3,7 +3,7 @@ name: pipeline
 user-invocable: true
 description: 'Run the full merge-track cycle — pull-request, cross-review, resolve, revalidate — as one continuous operation with resume support. Use to take a branch from changes to a final review verdict.'
 argument-hint: '[--from STAGE] [--base REF] [--draft] [--skip-enrich] [--force] [--title TITLE] [--push|--no-push]'
-version: '1.0.0'
+version: '1.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -63,9 +63,11 @@ One call answers the review directory, the entry point, the base ref and the pus
 
 Honour `--from STAGE` when given. Otherwise `summary.entryStage` **is** the entry — the priority order behind it is `reference.md` §1. Do not re-derive it from file listings.
 
+`complete` requires a revalidation report whose unambiguous full `head_sha` matches the current Git HEAD and whose recorded `verdict` is `PASS`, `FAIL` or `INCONCLUSIVE`. A stale, missing or malformed report follows the remaining resume priorities; file existence alone never closes the cycle.
+
 | `entryStage`                       | Action                                        |
 | ---------------------------------- | --------------------------------------------- |
-| `complete`                         | Report the recorded verdict and END           |
+| `complete`                         | Report this HEAD's recorded verdict and END   |
 | `revalidate`                       | Push first when `summary.unpushedCommits` > 0 |
 | `resolve` · `review` · `pr-create` | Enter that stage                              |
 
@@ -81,7 +83,7 @@ Stage outcomes that stop the pipeline:
 
 | Stage        | Stop condition                                                                                              |
 | ------------ | ----------------------------------------------------------------------------------------------------------- |
-| `pr-create`  | Any Stage 0 abort, or blocked document sync. A dirty generated path is not an abort — see `reference.md` §3 |
+| `pr-create`  | Any Stage 0 abort. Document sync never stops the cycle — its findings ride in the PR body's `FCA Handoff`, which `review` reads as change context. A dirty generated path is not an abort — see `reference.md` §3 |
 | `review`     | Verdict `INCONCLUSIVE` — evidence could not settle it                                                       |
 | `review`     | Verdict `APPROVED` — nothing to resolve; report and END                                                     |
 | `resolve`    | Typecheck failure under `--auto`                                                                            |

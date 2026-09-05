@@ -34,7 +34,7 @@ export function clearOrganCache(): void {
  * Performance: Uses readdirSync for the target dir and each child dir.
  * For a directory with N subdirs, this makes N+1 sync filesystem calls.
  * Acceptable for hook usage where directories are few; for large trees,
- * prefer fractal_scan MCP tool results instead.
+ * prefer `fractal_inspect` action `scan` results instead.
  */
 export function isOrganByStructure(dirPath: string): boolean {
   try {

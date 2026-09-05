@@ -7,7 +7,7 @@
 - 기존 파일 권한은 보존한다. `fileMode` 를 명시하지 않으면 기존 파일의 mode(하위 9비트)를 그대로 다시 쓰고, 명시하면 그 값이 이긴다.
 - 잠금 실패는 예외가 아니라 결과다. timeout 에 도달하면 operation 을 실행하지 않고 `acquired: false` 를 반환한다.
 - symlink 검사는 신뢰한 root 자체를 허용하고 그 아래 존재하는 symlink segment 만 거부한다. root 밖으로 나가는 target 도 거부하며, 아직 존재하지 않는 경로는 통과다.
-- target canonicalization은 가장 가까운 기존 ancestor를 `realpath`로 해석하고 suffix를 다시 붙인다. `preserveTerminalEntry`는 terminal basename을 suffix로 먼저 분리해 unlink 위치를 보존한다. ENOENT만 fallback을 허용하며 다른 filesystem 오류는 보존한다.
+- target canonicalization은 가장 가까운 기존 ancestor를 `realpath`로 해석하고 suffix를 다시 붙인다. 기존 symlink의 referent가 없어도 link target을 따라가며, 순환 link의 native `ELOOP`는 전파한다. `preserveTerminalEntry`는 terminal basename을 suffix로 먼저 분리해 unlink 위치를 보존한다. ENOENT만 fallback을 허용하며 다른 filesystem 오류는 보존한다.
 - 공개 함수든 내부 보조 함수든 production 파일 하나에 함수 하나만 선언한다(`types/`·`__tests__/` 제외).
 - `helpers/` 는 organ 조직과 자식 fractal 이 함께 쓰는 내부 함수만 담는 이 fractal 의 organ 이다. `hasCode` 는 `read/`·`mutation/`·`safety/` 와 자식 fractal `locking/` 이 함께 쓰고, `readModeIfExists` 의 소비자 `mutation/writeFileAtomicallySync.ts` 는 `locking/` 밖에 있다. 두 함수의 소비자를 모두 담는 가장 낮은 fractal 이 `filesystem` 이라 여기 둔다 — `locking/helpers/` 에 두면 그 organ 을 소유자 밖에서 직접 읽는 소비자가 생긴다.
 - 자식 fractal 이 `helpers/` 의 concrete 파일을 직접 import 하는 것은 소유자 subtree 안이라 면책이 필요 없다.
@@ -53,7 +53,10 @@
 ### AC-target-canonicalization — host target 해석
 
 - 기존 case alias와 symlink ancestor는 실제 target spelling으로 canonicalize되고, 존재하지 않는 leaf는 canonical parent 아래에 유지된다.
+- referent가 아직 없는 terminal·ancestor symlink도 상대·절대 target과 link chain을 해석한다. 상대 target의 `..`는 symlink의 물리 parent를 기준으로 해석하며, link가 아닌 missing path의 suffix는 그대로 보존한다.
+- 입력 path와 link target은 root만 기준 경로에 고정하고 남은 component를 native lookup까지 보존한다. 따라서 `directory-alias/..`는 alias를 따라간 뒤 계산하며 Windows root-relative target은 symlink parent의 drive에 고정한다.
 - terminal symlink entry 보존 옵션은 parent alias만 해석하고 symlink basename을 유지해 unlink 대상과 같은 경로를 반환한다.
+- terminal entry 보존은 dangling symlink도 역참조하지 않으며, 기본 해석의 순환 link는 native `ELOOP` 오류를 전파한다.
 - ENOENT 이외의 realpath 오류는 조용히 lexical path로 낮추지 않는다.
 
 ### AC-lean-read-entries — 루트 공개와 hook 출력 격리
@@ -76,4 +79,4 @@
 
 ## Last Updated
 
-2026-08-23 — host-canonical target과 terminal directory-entry 보존을 공유 filesystem 계약에 추가했다.
+2026-09-05 — missing referent의 symlink target 해석과 반복 link 종료 조건을 명시했다.

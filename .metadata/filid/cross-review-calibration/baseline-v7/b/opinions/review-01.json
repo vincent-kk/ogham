@@ -1,0 +1,39 @@
+{
+  "schema": 7,
+  "group": "01",
+  "round": 1,
+  "state": "COMPLETE",
+  "sourceHash": "1b85e98f04761ff88a81e634dac64dc9f88dd28e8dbb6eab512d7ec2923b562b",
+  "files": [
+    {
+      "path": "src/slugify/notes.md",
+      "change": "A",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/slugify.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/tests/slugify.spec.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    }
+  ],
+  "findings": [],
+  "checked": [
+    "src/slugify/notes.md",
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts",
+    "FCA-001"
+  ],
+  "gaps": [],
+  "riskPlan": null
+}

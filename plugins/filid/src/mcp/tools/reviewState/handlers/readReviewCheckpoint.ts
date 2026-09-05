@@ -6,48 +6,72 @@ import {
   REVIEW_STATE_PHASES,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { planNextHandoffs } from '../handoff/planNextHandoffs.js';
+import { readReviewGroupArtifactStatus } from '../handoff/readReviewGroupArtifactStatus.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
+import { readReviewArtifactPresence } from '../state/readReviewArtifactPresence.js';
 import { readReviewState } from '../state/readReviewState.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import { reviewReportExists } from '../state/reviewReportExists.js';
 import type {
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
+/** Shared state-reading input shape accepted by checkpoint and seal. */
 type CheckpointOrSealInput = Extract<
-  ReviewStateInput,
-  {
-    action:
-      typeof REVIEW_STATE_ACTIONS.CHECKPOINT | typeof REVIEW_STATE_ACTIONS.SEAL;
-  }
+  ResolvedReviewStateInput,
+  Record<
+    'action',
+    typeof REVIEW_STATE_ACTIONS.CHECKPOINT | typeof REVIEW_STATE_ACTIONS.SEAL
+  >
 >;
-type CheckpointInput = CheckpointOrSealInput & {
-  action: typeof REVIEW_STATE_ACTIONS.CHECKPOINT;
-};
+/** Checkpoint-specific narrowing used by the read-only handler. */
+type CheckpointInput = CheckpointOrSealInput &
+  Record<'action', typeof REVIEW_STATE_ACTIONS.CHECKPOINT>;
 
+/**
+ * Read current branch review state and resume-relevant artifact presence.
+ *
+ * @param input Validated checkpoint request for one branch review.
+ * @returns Read-only lifecycle payload with state and artifact presence facts.
+ */
 export async function readReviewCheckpoint(
   input: CheckpointInput,
 ): Promise<ReviewStatePayload> {
   const paths = resolveReviewStatePaths(input.projectRoot, input.branchName);
   assertReviewStatePaths(paths);
-  const state = readReviewState(paths.statePath);
-  if (!state)
+  const restored = readReviewState(paths.statePath);
+  if (restored === null || 'kind' in restored) {
+    const schemaMismatch = restored !== null;
     return createReviewStatePayload({
       action: input.action,
       disposition: REVIEW_STATE_DISPOSITIONS.MISSING,
       paths,
       status: TOOL_STATUSES.INDETERMINATE,
+      handoff: { next: [], sealReady: false },
       diagnostics: [
         {
-          code: REVIEW_STATE_DIAGNOSTIC_CODES.STATE_MISSING,
-          message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_MISSING,
+          code: schemaMismatch
+            ? REVIEW_STATE_DIAGNOSTIC_CODES.STATE_SCHEMA_MISMATCH
+            : REVIEW_STATE_DIAGNOSTIC_CODES.STATE_MISSING,
+          message: schemaMismatch
+            ? REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_SCHEMA_MISMATCH
+            : REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_MISSING,
           path: paths.statePath,
         },
       ],
     });
+  }
+  const state = restored;
+  const artifacts = readReviewArtifactPresence(paths, state);
+  const handoff = planNextHandoffs({
+    state,
+    paths,
+    statuses: readReviewGroupArtifactStatus(state, paths),
+  });
 
   const source = await computeReviewSourceHash(
     input.projectRoot,
@@ -60,6 +84,8 @@ export async function readReviewCheckpoint(
       paths,
       status: TOOL_STATUSES.INDETERMINATE,
       state,
+      artifacts,
+      handoff,
       diagnostics: [
         {
           code: REVIEW_STATE_DIAGNOSTIC_CODES.SOURCE_HASH_STALE,
@@ -79,6 +105,8 @@ export async function readReviewCheckpoint(
       paths,
       status: TOOL_STATUSES.INDETERMINATE,
       state,
+      artifacts,
+      handoff,
       diagnostics: [
         {
           code: REVIEW_STATE_DIAGNOSTIC_CODES.REPORT_MISSING,
@@ -97,5 +125,7 @@ export async function readReviewCheckpoint(
     paths,
     status: TOOL_STATUSES.OK,
     state,
+    artifacts,
+    handoff,
   });
 }

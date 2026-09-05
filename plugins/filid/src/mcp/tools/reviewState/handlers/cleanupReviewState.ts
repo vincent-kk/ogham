@@ -10,12 +10,12 @@ import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import type {
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
 type CleanupInput = Extract<
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   { action: typeof REVIEW_STATE_ACTIONS.CLEANUP }
 >;
 

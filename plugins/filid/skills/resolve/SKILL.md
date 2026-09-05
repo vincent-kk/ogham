@@ -3,7 +3,7 @@ name: resolve
 user-invocable: true
 description: 'Present all cross-review fix requests as one batched decision sheet, delegate accepted corrections, record rejections, then gate and commit. Use after cross-review returns REQUEST_CHANGES.'
 argument-hint: '[--auto] [--base REF]'
-version: '1.0.0'
+version: '1.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -44,11 +44,11 @@ Use `data.reviewDirectory` as `REVIEW_DIR`; **never derive a directory name.**
 
 ## Step 2 — Read the fix requests
 
-Parse each `## FIX-NNN:` block from `fix-requests.md`. Every block carries Severity, Perspective, Path, Rule, Evidence, Consequence, and Recommended Action (schema in `../cross-review/templates.md`, which produced the file).
+Parse the canonical FIX ID from each `## FIX-NNN:` heading in `fix-requests.md`, together with the complete original finding fields: Severity, Category, Path, Rule, Claim, Evidence, Consequence, and Recommended Action (schema in `../cross-review/templates.md`, which produced the file).
 
-Do not invent items and do not merge two findings into one decision.
+Do not invent items, renumber a FIX ID, or merge two findings into one decision. Preserve the canonical FIX ID through the decision sheet and the item heading under `justifications.md`'s `## Accepted` section so revalidate can join it back to exactly one original fix request.
 
-Classify each item with the recommendation rubric in `reference.md` §3. Keep Severity and Perspective as finding facts; neither determines Recommendation by itself. Record Recommendation, Default, and a one-sentence recommendation reason for every item. Perform this classification under `--auto` too, because the sheet must preserve which corrections were originally contentious.
+Classify each item with the recommendation rubric in `reference.md` §3. Keep Severity and Category as finding facts; neither determines Recommendation by itself. Record Recommendation, Default, and a one-sentence recommendation reason for every item. Perform this classification under `--auto` too, because the sheet must preserve which corrections were originally contentious.
 
 <!-- resolve:all-fixes-ready -->
 
@@ -99,7 +99,7 @@ This value is written to `justifications.md` as `resolve_commit_sha`. `revalidat
 Then hand the accepted items out, routing each by the table in `reference.md` §5 and dispatching them together:
 
 - main-agent items get a delegation brief in the §5 format, applied directly in this turn;
-- when another skill owns the correction, invoke it with the input that skill actually takes — a placement request for `/filid:restructure`, the owning fractal path for `/filid:enrich-docs`. Neither receives the brief.
+- when another skill owns the correction, invoke it with the input that skill actually takes — a placement request for `/filid:restructure`, the fix request's document path (or the owning fractal path) with `--include-detail --repair` for `/filid:enrich-docs`. Neither receives the brief. With `--auto`, append `--auto-approve` to both child skills as specified in §5; interactive invocations omit it.
 
 This skill states **what must change and where**. It does not choose the edit, and it never edits a file itself.
 
@@ -119,7 +119,7 @@ There is no separate debt ledger in 1.0. `justifications.md` is the record, and 
 
 ## Step 6 — Write `justifications.md`
 
-Write `REVIEW_DIR/justifications.md` from the template in `reference.md` §1, with frontmatter `resolve_commit_sha: <base_sha>` — the Step 4 value, **not** current `HEAD`. After the Step 7 commit `HEAD` moves, and the delta must contain only the correction changes.
+Write `REVIEW_DIR/justifications.md` from the template in `reference.md` §1, with frontmatter `resolve_commit_sha: <base_sha>` — the Step 4 value, **not** current `HEAD`. Copy each accepted item's canonical FIX ID unchanged into that item's heading under `## Accepted`; that ID is revalidate's join key into `fix-requests.md`. After the Step 7 commit `HEAD` moves, and the delta must contain only the correction changes.
 
 ## Step 7 — Gate and commit
 
@@ -131,6 +131,8 @@ Write `REVIEW_DIR/justifications.md` from the template in `reference.md` §1, wi
 4. With no accepted items, skip the typecheck and the commit entirely.
 
 ## Step 8 — Hand off
+
+For each delegated document correction, print the delegated document path together with its FIX ID in the terminal output.
 
 ```text
 Resolve: accepted <n>, rejected <m>, unapplied <k>

@@ -4,22 +4,22 @@ MCP 서버가 로컬 HTTP 로 서빙하는 브라우저 페이지의 프런트�
 
 ## Structure
 
-| Path        | Role                                                       |
-| ----------- | ---------------------------------------------------------- |
-| `settings/` | `.filid/config.json` + rule docs 편집 폼 (`open_settings`) |
-| `index.ts`  | barrel (`export {}` — 정적 자산 모음, 런타임 export 없음)  |
+| Path        | Role                                                                           |
+| ----------- | ------------------------------------------------------------------------------ |
+| `settings/` | `.filid/config.json` + rule docs 편집 폼 (`project_setup`의 `settings` action) |
+| `index.ts`  | barrel (`export {}` — 정적 자산 모음, 런타임 export 없음)                      |
 
 ## Conventions
 
-- 순수 정적 파일 (HTML/CSS/JS) — 서버 코드는 `src/mcp/tools/openSettings/` 에만 위치
-- 빌드 시 `scripts/buildSettingsHtml.mjs` 가 페이지별 단일 HTML 로 인라인 번들 (`public/`)
+- 순수 정적 파일 (HTML/CSS/JS) — 서버 코드는 `src/mcp/tools/projectSetup/openSettings/` 에만 위치
+- 빌드가 페이지별 단일 HTML 로 인라인 번들해 `public/` 에 넣는다 — 커밋되는 생성물이라 손편집하지 않는다
 - 페이지는 TypeScript 소스를 import 하지 않는 독립 스크립트
 
 ## Boundaries
 
 ### Always do
 
-- 새 페이지 추가 시 `settings/` 와 동일한 구조 (`index.html` + `scripts/` + `styles/`) 준수
+- 새 페이지 추가 시 `settings/` 와 동일한 골격 (마크업 파일 + 스크립트 디렉터리 + 스타일 디렉터리) 준수
 
 ### Ask first
 

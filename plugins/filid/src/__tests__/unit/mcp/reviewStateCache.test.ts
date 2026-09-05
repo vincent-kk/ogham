@@ -1,6 +1,7 @@
 import { mkdtempSync, rmSync } from 'node:fs';
 
 import {
+  ensureDirectorySync,
   portableJoin,
   readUtf8FileIfExistsSync,
   resolveContainedPath,
@@ -19,8 +20,26 @@ import {
 } from '../../../constants/reviewState.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 
+import { createReviewRulePluginRoot } from './reviewState/helpers/createReviewRulePluginRoot.js';
+import { readPreparedReviewState } from './reviewState/helpers/readPreparedReviewState.js';
+import { validatePreparedReviewState } from './reviewState/helpers/validatePreparedReviewState.js';
+
+/** Temporary repository exercised by cache-semantic tests. */
 let projectRoot: string;
 
+/** Temporary plugin root containing the minimal review-rule map. */
+let fixturePluginRoot: string;
+
+/** Host plugin-root value restored after each test. */
+let originalPluginRoot: string | undefined;
+
+/**
+ * Runs a Git command against the temporary cache-semantics repository.
+ *
+ * @param args - Git arguments excluding the executable name.
+ * @returns The command's standard output without trailing line breaks.
+ * @throws When Git cannot start or exits unsuccessfully.
+ */
 function git(args: readonly string[]): string {
   const result = spawnCliSync('git', args, { cwd: projectRoot });
   if (result.code !== 0 || result.spawnError)
@@ -28,6 +47,13 @@ function git(args: readonly string[]): string {
   return result.stdout.trimEnd();
 }
 
+/**
+ * Replaces the tracked fixture content and commits it.
+ *
+ * @param content - Complete content to persist in the tracked fixture file.
+ * @param message - Commit message used for the fixture revision.
+ * @returns Nothing.
+ */
 function commitFile(content: string, message: string): void {
   writeFileAtomicallySync(
     resolveContainedPath(projectRoot, 'tracked'),
@@ -38,6 +64,9 @@ function commitFile(content: string, message: string): void {
 }
 
 beforeEach(() => {
+  originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
+  fixturePluginRoot = createReviewRulePluginRoot();
+  process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
   projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-cache-'));
   git(['init', '-b', 'main']);
   git(['config', 'user.email', 'filid@example.test']);
@@ -49,6 +78,9 @@ beforeEach(() => {
 
 afterEach(() => {
   rmSync(projectRoot, { recursive: true, force: true });
+  rmSync(fixturePluginRoot, { recursive: true, force: true });
+  if (originalPluginRoot === undefined) delete process.env.CLAUDE_PLUGIN_ROOT;
+  else process.env.CLAUDE_PLUGIN_ROOT = originalPluginRoot;
 });
 
 describe('review_state cache semantics', () => {
@@ -69,7 +101,9 @@ describe('review_state cache semantics', () => {
     expect(second.summary.disposition).toBe(
       REVIEW_STATE_DISPOSITIONS.RESUMABLE,
     );
-    expect(second.data?.state).toEqual(first.data?.state);
+    expect(readPreparedReviewState(second)).toEqual(
+      readPreparedReviewState(first),
+    );
   });
 
   it('uses a sealed matching state only when its report exists', async () => {
@@ -79,13 +113,13 @@ describe('review_state cache semantics', () => {
       branchName: 'feature/cache',
       baseRef: 'main',
     });
-    writeFileAtomicallySync(
-      resolveContainedPath(
-        prepared.data?.reviewDirectory ?? '',
-        REVIEW_STATE_FILE_NAMES.REPORT,
-      ),
-      '# Review\n',
-    );
+    await validatePreparedReviewState({
+      projectRoot,
+      pluginRoot: fixturePluginRoot,
+      branchName: 'feature/cache',
+      originalPluginRoot,
+      state: readPreparedReviewState(prepared),
+    });
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
       projectRoot,
@@ -100,7 +134,9 @@ describe('review_state cache semantics', () => {
     });
 
     expect(cached.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.CACHED);
-    expect(cached.data.state!.phase).toBe(REVIEW_STATE_PHASES.SEALED);
+    expect(readPreparedReviewState(cached).phase).toBe(
+      REVIEW_STATE_PHASES.SEALED,
+    );
   });
 
   it('re-prepares a sealed state whose report was removed', async () => {
@@ -114,7 +150,13 @@ describe('review_state cache semantics', () => {
       prepared.data?.reviewDirectory ?? '',
       REVIEW_STATE_FILE_NAMES.REPORT,
     );
-    writeFileAtomicallySync(reportPath, '# Review\n');
+    await validatePreparedReviewState({
+      projectRoot,
+      pluginRoot: fixturePluginRoot,
+      branchName: 'feature/cache',
+      originalPluginRoot,
+      state: readPreparedReviewState(prepared),
+    });
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
       projectRoot,
@@ -130,7 +172,9 @@ describe('review_state cache semantics', () => {
     });
 
     expect(refreshed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
-    expect(refreshed.data.state!.phase).toBe(REVIEW_STATE_PHASES.PREPARED);
+    expect(readPreparedReviewState(refreshed).phase).toBe(
+      REVIEW_STATE_PHASES.PREPARED,
+    );
   });
 
   it('force prepare invalidates the sealed report before another seal', async () => {
@@ -144,7 +188,13 @@ describe('review_state cache semantics', () => {
       prepared.data.reviewDirectory,
       REVIEW_STATE_FILE_NAMES.REPORT,
     );
-    writeFileAtomicallySync(reportPath, '# Old review\n');
+    await validatePreparedReviewState({
+      projectRoot,
+      pluginRoot: fixturePluginRoot,
+      branchName: 'feature/cache',
+      originalPluginRoot,
+      state: readPreparedReviewState(prepared),
+    });
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
       projectRoot,
@@ -185,7 +235,7 @@ describe('review_state cache semantics', () => {
     );
     expect(immediateSeal.diagnostics).toContainEqual(
       expect.objectContaining({
-        code: REVIEW_STATE_DIAGNOSTIC_CODES.REPORT_MISSING,
+        code: REVIEW_STATE_DIAGNOSTIC_CODES.OPINIONS_MISSING,
       }),
     );
   });
@@ -201,7 +251,13 @@ describe('review_state cache semantics', () => {
       prepared.data.reviewDirectory,
       REVIEW_STATE_FILE_NAMES.REPORT,
     );
-    writeFileAtomicallySync(reportPath, '# Old review\n');
+    await validatePreparedReviewState({
+      projectRoot,
+      pluginRoot: fixturePluginRoot,
+      branchName: 'feature/cache',
+      originalPluginRoot,
+      state: readPreparedReviewState(prepared),
+    });
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
       projectRoot,
@@ -264,7 +320,9 @@ describe('review_state cache semantics', () => {
     expect(checkpoint.summary.disposition).toBe(
       REVIEW_STATE_DISPOSITIONS.RESUMABLE,
     );
-    expect(checkpoint.data?.state?.baseRef).toBe(prepared.data.state!.baseRef);
+    expect(checkpoint.data?.state?.baseRef).toBe(
+      readPreparedReviewState(prepared).baseRef,
+    );
   });
 
   it('marks a checkpoint stale after committed content changes', async () => {
@@ -304,7 +362,13 @@ describe('review_state cache semantics', () => {
       prepared.data?.reviewDirectory ?? '',
       REVIEW_STATE_FILE_NAMES.REPORT,
     );
-    writeFileAtomicallySync(reportPath, '# Review\n');
+    await validatePreparedReviewState({
+      projectRoot,
+      pluginRoot: fixturePluginRoot,
+      branchName: 'feature/cache',
+      originalPluginRoot,
+      state: readPreparedReviewState(prepared),
+    });
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
       projectRoot,
@@ -344,8 +408,8 @@ describe('review_state cache semantics', () => {
     });
 
     expect(slash.data?.reviewDirectory).not.toBe(dashes.data?.reviewDirectory);
-    expect(slash.data.state!.normalizedBranch).not.toBe(
-      dashes.data.state!.normalizedBranch,
+    expect(readPreparedReviewState(slash).normalizedBranch).not.toBe(
+      readPreparedReviewState(dashes).normalizedBranch,
     );
     expect(
       readUtf8FileIfExistsSync(slash.data?.statePath ?? ''),
@@ -399,5 +463,68 @@ describe('review_state cache semantics', () => {
         ),
       ]),
     );
+  });
+
+  it('reports bounded top-level and creation-ordered group artifact presence', async () => {
+    ensureDirectorySync(resolveContainedPath(projectRoot, '.filid'));
+    writeFileAtomicallySync(
+      resolveContainedPath(projectRoot, '.filid/config.json'),
+      `${JSON.stringify({
+        version: '2.0',
+        language: 'English',
+        adapters: { mode: 'auto', enabled: [] },
+        rules: {},
+        structure: { generatedPaths: ['.filid/config.json'] },
+        review: { effort: 'low', groupFileLimit: 1 },
+      })}\n`,
+    );
+    writeFileAtomicallySync(
+      resolveContainedPath(projectRoot, 'other'),
+      'second changed source\n',
+    );
+    git(['add', '--all']);
+    git(['commit', '-m', 'create two review groups']);
+    const prepared = await handleReviewState({
+      action: REVIEW_STATE_ACTIONS.PREPARE,
+      projectRoot,
+      branchName: 'feature/cache',
+      baseRef: 'main',
+    });
+    const groups = readPreparedReviewState(prepared).groups;
+    expect(groups).toHaveLength(2);
+    const reviewDirectory = prepared.data.reviewDirectory;
+    rmSync(resolveContainedPath(reviewDirectory, groups[0].units[0].diffPath), {
+      force: true,
+    });
+    rmSync(resolveContainedPath(reviewDirectory, groups[1].briefPath), {
+      force: true,
+    });
+    writeFileAtomicallySync(
+      resolveContainedPath(reviewDirectory, groups[0].opinionPath),
+      '{}\n',
+    );
+    writeFileAtomicallySync(
+      resolveContainedPath(reviewDirectory, groups[1].verifyPath),
+      '{}\n',
+    );
+
+    const checkpoint = await handleReviewState({
+      action: REVIEW_STATE_ACTIONS.CHECKPOINT,
+      projectRoot,
+      branchName: 'feature/cache',
+    });
+
+    expect(checkpoint.summary.effort).toBe('low');
+    expect(checkpoint.data.groups).toEqual(
+      readPreparedReviewState(prepared).groups,
+    );
+    expect(checkpoint.data.artifacts).toEqual({
+      briefs: false,
+      diffs: false,
+      groups: [
+        { id: groups[0].id, opinion: true, verify: false },
+        { id: groups[1].id, opinion: false, verify: true },
+      ],
+    });
   });
 });

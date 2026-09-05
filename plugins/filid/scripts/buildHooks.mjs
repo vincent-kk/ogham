@@ -71,7 +71,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   Output fingerprints reject cross-spawn/which even when the
 //                   byte cap still fits.
 // Caps sized for the merged bundle set (Codex read-tracking hooks + settings/
-// open_settings). #87 routed cwd hashing through portableResolve, pulled into the
+// project_setup settings action). #87 routed cwd hashing through portableResolve, pulled into the
 // pre-tool-use path via cacheManager. Still Node builtins only — FORBIDDEN_PATTERNS
 // below is the real isolation guard, not these caps.
 const SESSION_START_HOOK_BYTES = 48 * KILO_BYTE;

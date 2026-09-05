@@ -27,7 +27,7 @@
 ```
 ┌──────────────┐  ┌───────────────┐  ┌──────────┐  ┌──────────────┐
 │ pull-request │─→│ cross-review  │─→│ resolve  │─→│ revalidate   │
-│ 문서 동기화   │  │ 3관점 + 판정   │  │ 결정·위임 │  │ 재측정·판정   │
+│ 문서 동기화   │  │ 파일 리뷰·검증 │  │ 결정·위임 │  │ 재측정·판정   │
 │ + PR 생성    │  │ fix-requests  │  │ justif.  │  │ PASS/FAIL    │
 └──────────────┘  └───────────────┘  └──────────┘  └──────────────┘
         └────────────────── pipeline (--auto 연속 실행) ──────────────┘
@@ -37,7 +37,7 @@
 
 #### resolve decision sheet
 
-`resolve`는 confirmed fix를 하나씩 묻지 않는다. 의사결정 전에 `fix-requests.md` 전체를 파싱하고, severity나 perspective와 별개로 correction을 추천한다.
+`resolve`는 confirmed fix를 하나씩 묻지 않는다. 의사결정 전에 `fix-requests.md` 전체를 파싱하고, `Severity`와 `Category`라는 finding 사실과 별개로 correction을 추천한다.
 
 ```
 모든 FIX block 파싱
@@ -72,6 +72,8 @@ baseline capture → accepted correction 일괄 위임 → 검증된 ADR 직렬�
 
 `--auto`도 전체 sheet를 먼저 출력한다. 원래 Recommendation과 그 이유는 그대로 두고 Decision만 모든 행 `[x] Apply (auto-selected)`로 바꾸며, prompt 없이 baseline과 delegation으로 진행한다. 따라서 pipeline에서도 무엇이 원래 논쟁적이었는지는 보이지만 실행은 멈추지 않는다.
 
+`fix-requests.md`의 각 block은 Claim을 포함한 원 finding payload를 보존한다. resolve는 canonical FIX ID를 accepted heading에 유지하고, revalidate는 그 ID로 두 artifact를 exactly-one join한다. join이 누락·중복되거나 필드가 부족하면 비-FCA verifier를 실행하지 않고 해당 항목을 `inconclusive`로 둔다.
+
 ### 1.0에서 제거된 스킬
 
 | 스킬               | 제거 사유                                                                                                                                  |
@@ -82,7 +84,7 @@ baseline capture → accepted correction 일괄 위임 → 검증된 ADR 직렬�
 | `harvest`          | acceptance 원장을 DETAIL.md 하나로 통일했으므로(ADR-05) `.filid/criteria.md`에 claim을 수확해 넣을 대상이 없다.                            |
 | `sync`             | 한 스킬이 구조 이동과 문서 갱신을 동시에 하면 어느 쪽이 실패했는지 구분되지 않는다. 구조는 `restructure`, 문서는 `enrich-docs`로 분리했다. |
 | `update`           | 코드 변경 뒤 문서·테스트를 자동 재작성하는 workflow다. 승인 지점이 없어 "무엇이 왜 바뀌었는지"가 남지 않는다. `enrich-docs`가 대체한다.    |
-| `config-wizard`    | config 관리는 `project_init`(생성)과 `open_settings`(조회·수정) 두 MCP 도구가 이미 소유한다.                                               |
+| `config-wizard`    | config 관리는 `project_setup`의 `init`(생성)과 `settings`(조회·수정) action이 이미 소유한다.                                               |
 
 merge-track 네 스킬은 한때 제거 대상이었으나 되살렸다. 다만 모두 제거된 도구(`review_manage`, `debt_manage`, `ast_analyze`, `test_metrics`)와 `code-surgeon` 에이전트에 걸려 있었으므로 **원본 복원이 아니라 9개 도구 표면 위로 재작성**됐다.
 
@@ -102,20 +104,20 @@ merge-track 네 스킬은 한때 제거 대상이었으나 되살렸다. 다만 
 **트리거**: 최초 1회, 또는 `/filid:setup [path]`
 
 ```
-1. project_init(path, language, adapterIds)
+1. project_setup({ action: 'init', path, language, adapterIds })
    → .filid/config.json (schema 2.0) 생성
    → 이미 있으면 덮어쓰지 않는다
        │
        ▼
-2. rule_docs_sync(sync)
+2. project_setup({ action: 'rules-sync', path, selections, resync })
    → managed FCA rule 문서 배포 (templates/rules/ 원본 기준)
        │
        ▼
-3. fractal_scan(path)
+3. fractal_inspect({ action: 'scan', path })
    → snapshot 기반 트리 확인
        │
        ▼
-4. structure_validate(path, scopes: [documents])
+4. fractal_inspect({ action: 'validate', path, scopes: [documents] })
    → 문서 경계 검증
        │
        ▼
@@ -134,10 +136,10 @@ config 저장은 사용자가 승인할 때만 디스크에 기록된다. v1 con
 전체 감사의 **유일한** 진입점이다. 한 snapshot에 대해 모든 scope를 평가한다.
 
 ```
-fractal_scan(path)              → 트리와 분류
+fractal_inspect({ action: 'scan', path }) → 트리와 분류
        │
        ▼
-structure_validate(path, mode: 'project')
+fractal_inspect({ action: 'validate', path })
        ├─ documents      → INTENT 50줄·3-tier, DETAIL 섹션·AC group
        ├─ nodes          → organ-no-intentmd, max-depth, zero-peer-file
        ├─ entry-points   → module-entry-point, entry-point-surface
@@ -146,7 +148,7 @@ structure_validate(path, mode: 'project')
        └─ verification   → 15/32 cap, fragmentation, contract link
        │
        ▼
-verification_scan(path)         → spec/test 역할별 요약
+fractal_inspect({ action: 'verification', path }) → spec/test 역할별 요약
        │
        ▼
 위반 요약 + certainty 보고
@@ -163,7 +165,7 @@ verification_scan(path)         → spec/test 역할별 요약
 **트리거**: 수시, `/filid:context-query <path 또는 질문>`
 
 ```
-context_resolve(path, requests: [{ targetPath }])
+fractal_inspect({ action: 'resolve', path, requests: [{ targetPath }] })
        │
        ▼
 data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
@@ -198,7 +200,7 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 3. LLM이 INTENT.md / DETAIL.md 편집
        │
        ▼
-4. structure_validate(scopes: [documents])로 사후 검증
+4. fractal_inspect({ action: 'validate', path, scopes: [documents] })로 사후 검증
 ```
 
 승인 없이 문서를 고치지 않는다.
@@ -209,13 +211,13 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 
 ```
 1. 읽기 전용 계획 생성
-   restructure_plan({ path, requests: [{ sourcePath, consumerPaths?, contractIntent? }] })
+   restructure({ action: 'plan', path, requests: [{ sourcePath, consumerPaths?, contractIntent? }] })
    → 항상 plan artifact를 남긴다 (persistence: always)
    → 프로젝트 트리는 변경되지 않는다
        │
        ▼
 2. 사전조건 검증
-   structure_validate(mode: 'plan-precondition', planPath)
+   restructure({ action: 'precondition', path, planPath })
    → snapshot hash 일치, unresolved decision 없음
        │
        ▼
@@ -228,7 +230,7 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
        │
        ▼
 5. 사후조건 검증
-   structure_validate(mode: 'plan-postcondition', planPath)
+   restructure({ action: 'postcondition', path, planPath })
    → source 부재, target 존재, node type, 필수 문서, 진입점,
      import rewrite/boundary, DAG, graph certainty
 ```
@@ -237,76 +239,87 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 
 ---
 
-## cross-review — FCA 증거 기반 다관점 리뷰
+## cross-review — 파일별 변경 리뷰와 독립 검증
 
 **트리거**: 커밋된 변경 또는 PR, `/filid:cross-review [PR URL]`
 
 ```
-Step 1 — Resolve Source and Prepare State
-├── 브랜치/PR 해석, base ref 결정
-├── review_state(prepare) → fresh | resumable | cached
-│     · 같은 hash의 prepared state → resumable (이어서)
-│     · 같은 hash의 sealed state + report → cached (재사용)
-│     · force: true → 캐시 무시하고 fresh
-└── 출력: review state record
+Step 1 — Prepare
+├── 브랜치·PR과 base ref를 해석하고 현재 사용자 요구를 USR-NNN으로 고정
+├── review_state({ action: "prepare", ..., effort }) → fresh | resumable | cached
+├── resumable이면 checkpoint의 산출물 존재 정보로 첫 누락 지점부터 재개
+├── schema 또는 source identity가 맞지 않으면 한 번만 force-fresh
+└── roster·FCA evidence·group·diff·brief·JSON 뼈대·session을 결정적으로 준비
 
-Step 2 — Collect Snapshot Evidence
-├── 변경 프랙탈의 snapshot 증거만 수집
-└── 읽는 증거는 아래 목록으로 제한된다
+Step 2 — Context
+├── prepare의 data.files와 data.groups를 권위 있는 roster로 사용
+├── PR 본문 또는 base 이후 commit log 요약으로 session.md의 pending 문구를 교체
+└── worktree가 documents-only 또는 source-dirty이면 Step 5로 이동
 
-Step 3 — Run Three Independent Perspectives  (병렬, 단일 라운드)
-├── contract     — INTENT/DETAIL/acceptance/public surface
-├── structure    — classification/boundary/DAG/LCA/placement
-└── verification — role/case count/fragmentation/link/certainty
+Step 3 — Review  (최대 summary.concurrency개 병렬)
+├── rounds: 0은 건너뛰고 dependsOn이 끝난 group부터 reviewer를 배정
+├── 생성된 review brief와 USR-NNN을 읽어 opinions/review-NN.r<k>.json을 작성
+├── review_state({ action: "validate", kind: "review", group, round })로 검사·병합
+└── newFindings가 0이면 종료하고, 아니면 effort가 허용하는 다음 round를 실행
 
-Step 4 — Adversarial Arbitration
-├── 모든 blocking finding을 CONFIRMED | PLAUSIBLE | REFUTED로 판정
-└── REFUTED는 verdict에서 제거하되 arbitration log에 남긴다
+Step 4 — Verify
+├── 각 group의 briefs/verify-NN.md로 효율 등급 verifier 한 명을 배정
+├── merged opinions/review-NN.json의 finding과 FCA-NNN 후보를 독립적으로 재현
+├── 후보마다 CONFIRMED | REFUTED | INDETERMINATE를 opinions/verify-NN.json에 기록
+└── review_state({ action: "validate", kind: "verify", group })로 검사
 
-Step 5 — Checkpoint, Report, and Seal
-├── review_state(checkpoint) → artifact 목록과 report 경로
-├── verdict: APPROVED | REQUEST_CHANGES | INCONCLUSIVE
-├── review_state(seal) → prepared hash와 report가 있을 때만 sealed
-└── (--scope=pr 요청 시에만) PR 코멘트
+Step 5 — Verdict and Seal
+├── review_state({ action: "seal", projectRoot, branchName }) 호출
+├── source identity와 validate가 기록한 artifact hash를 재확인
+├── coverage·verification을 APPROVED | REQUEST_CHANGES | INCONCLUSIVE로 fold
+└── review-report.md·필요한 fix-requests.md·pr-comment.md·session checklist를 렌더링
+
+Step 6 — Publish
+└── PR이 있으면 canonical verdict 코멘트를 갱신하고, 없으면 게시하지 않음
 ```
 
-### cross-review가 읽는 증거
+### cross-review 입력과 규칙
 
+- PR 본문 또는 base 이후 commit log에서 고정한 변경 배경
+- 변경 파일별 전체 diff, 현재 파일, 필요한 호출자와 테스트
+- 내장 `default`·`tests`·`documents`·`fca` 규칙과 저장소의 적용 규칙
 - 변경된 프랙탈의 INTENT.md와 DETAIL.md 계약
-- node classification과 owner
-- entry point surface와 외부 import boundary
-- dependency DAG와 cycle
+- `review_state(prepare)`가 만든 owner·role·churn roster, group, canonical `evidence.md`
+- 생성된 review·verify brief가 가리키는 bounded diff·규칙·후보
+- 변경 범위의 entry point·외부 import boundary·DAG·verification 후보
 - LCA placement 및 승인된 restructure plan 사후조건
-- spec-document 15, test-record 32
-- spec fragmentation과 DETAIL acceptance group link
 - `unsupported` / `indeterminate` 진단
 
-이 밖의 것은 읽지 않는다. 그래서 verdict 제목과 본문에 **FCA scope**를 명시한다.
+오케스트레이터는 diff·source·rule·opinion 본문을 열지 않고 경로만 전달한다. verdict는 이 입력으로 확인한 커밋 변경 범위에만 적용된다. 범위 밖에서 발견한 새 우려는 기록할 수 있지만 verdict에는 영향을 주지 않는다.
 
 ### verdict 규칙
 
-| 상황                                                  | verdict           |
-| ----------------------------------------------------- | ----------------- |
-| 명확한 위반                                           | `REQUEST_CHANGES` |
-| evidence가 `indeterminate`이고 merge 안전성 판정 불가 | `INCONCLUSIVE`    |
-| 위반 없음                                             | `APPROVED`        |
+state 부재나 source hash 불일치는 seal 실패로 중단하며 terminal verdict를 만들지 않는다.
 
-cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure_plan`이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
+| 상황                                                                 | verdict           |
+| -------------------------------------------------------------------- | ----------------- |
+| evidence 불완전, documents-only/source-dirty, 신뢰 가능한 group 부재 | `INCONCLUSIVE`    |
+| checklist 미마감 또는 변경 파일을 가리키는 reviewer gap              | `INCONCLUSIVE`    |
+| 후보가 `INDETERMINATE`                                               | `INCONCLUSIVE`    |
+| `CONFIRMED` 후보가 하나 이상                                         | `REQUEST_CHANGES` |
+| 모든 후보가 `REFUTED`이거나 후보 없음                                | `APPROVED`        |
+
+`INDETERMINATE`는 unresolved evidence로 기록하며 pass로 바꾸지 않는다. cross-review는 **코드를 고치거나 이동하지 않는다.** 구조 finding은 `restructure`의 `plan` action이 반환한 Current/Target/Type/Basis/LCA를 그대로 인용한다.
 
 ### review state 수명주기
 
 ```
-prepare ──→ (작업) ──→ checkpoint ──→ seal ──→ cleanup
-   │                       │
-   │                       ├─ missing   : state 없음
-   │                       ├─ stale     : hash 불일치
-   │                       ├─ resumable : matching prepared
-   │                       └─ cached    : matching sealed + report
+prepare ──→ (review → validate)* ──→ verify → validate ──→ seal ──→ cleanup
    │
+   ├─ fresh     : 새 roster·group·artifact
+   ├─ resumable : checkpoint → 첫 누락 artifact부터 재개
+   ├─ cached    : matching sealed + report, 저장된 verdict 반환
    └─ force: true → 캐시 무시
+
+assess ──→ working tree를 독립적으로 관측
 ```
 
-`stale`과 `missing`은 `ok` status가 아니다. 메시지 파싱 없이 안정적인 disposition과 diagnostics로 판정할 수 있다. `cleanup`은 리터럴 `confirm: true` 뒤에 해당 브랜치 디렉터리만 제거한다.
+`stale`과 `missing`은 `ok` status가 아니다. 메시지 파싱 없이 안정적인 disposition과 diagnostics로 판정할 수 있다. `assess`는 working tree를 독립적으로 관측하고, `prepare`는 같은 disposition을 증거 payload에 포함한다. `cleanup`은 리터럴 `confirm: true` 뒤에 해당 브랜치 디렉터리만 제거한다.
 
 ---
 
@@ -318,7 +331,7 @@ prepare ──→ (작업) ──→ checkpoint ──→ seal ──→ cleanup
 1. 대상 탐색
 2. **dry-run 우선** — 무엇이 바뀌는지 먼저 보여준다
 3. 이식 가능한 스크립트로 실행
-4. structure_validate로 사후 검증
+4. `fractal_inspect`의 `validate` action으로 사후 검증
 ```
 
 legacy `.filid/criteria.md`는 이 스킬의 대상이 아니다. 자동 변환하지 않고 `legacy-criteria-ledger` finding으로 보고되며, 이관 시점은 사용자가 정한다.
