@@ -1,0 +1,44 @@
+{
+  "schema": 7,
+  "group": "01",
+  "round": 1,
+  "state": "COMPLETE",
+  "sourceHash": "1f95261bd25404a0f647eec2cd891ce4a1b5daadf2fa4f912ff1671ecc16f029",
+  "files": [
+    {
+      "path": "src/slugify/slugify.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/tests/slugify.spec.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "R01-001",
+      "severity": "error",
+      "category": "bug",
+      "path": "src/slugify/slugify.ts",
+      "existingCode": "return truncated[0].toLowerCase() + truncated.slice(1);",
+      "lines": "unknown",
+      "rule": "DEF-3",
+      "message": "When `normalized` is empty (e.g. input is `''`, or consists only of characters stripped by the separator/trim replaces such as `'---'` or `'!!!'`), `truncated` is `''` and `truncated[0]` is `undefined`. Calling `.toLowerCase()` on `undefined` throws a TypeError.",
+      "evidence": "src/slugify/slugify.ts:9",
+      "consequence": "slugify('') or slugify('---') now throws `TypeError: Cannot read properties of undefined (reading 'toLowerCase')` at runtime instead of returning '' as before this change, crashing any caller that previously relied on an empty-string result for non-alphanumeric input.",
+      "recommendedAction": "Guard the empty case before indexing, e.g. `return truncated.length === 0 ? truncated : truncated[0].toLowerCase() + truncated.slice(1);`, or reorder so the case transform only runs on a non-empty string."
+    }
+  ],
+  "checked": [
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts"
+  ],
+  "gaps": [],
+  "riskPlan": null
+}
