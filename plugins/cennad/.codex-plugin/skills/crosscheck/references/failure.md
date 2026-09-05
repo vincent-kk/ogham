@@ -6,15 +6,15 @@ The entrypoint loads this after any failed or unusable envelope. A **usable view
 
 Derive one remedy per failed entry:
 
-| Condition | Remedy |
-| --- | --- |
-| `auth` | Reauthenticate: codex `codex login`; antigravity or claude run that CLI and finish its login flow. Then retry. |
-| `disabled` | Enable it in `/cennad:setup`, then retry. |
-| `rate_limit` / `budget_exhausted` | Pause and retry, or use another provider skill. |
-| `timeout` | Suggest a higher tier or narrower task; `error.message` names the limit. Never suggest a plain retry. |
-| `cancelled` | Work was deliberately discarded; re-run only if still wanted. |
-| `network` / `cli_error` / `unknown` | Relay `error.message` verbatim. |
-| Empty success | “The provider returned an empty response — retry, or continue the session.” |
+| Condition                           | Remedy                                                                                                         |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `auth`                              | Reauthenticate: codex `codex login`; antigravity or claude run that CLI and finish its login flow. Then retry. |
+| `disabled`                          | Enable it in `/cennad:setup`, then retry.                                                                      |
+| `rate_limit` / `budget_exhausted`   | Pause and retry, or use another provider skill.                                                                |
+| `timeout`                           | Suggest a higher tier or narrower task; `error.message` names the limit. Never suggest a plain retry.          |
+| `cancelled`                         | Work was deliberately discarded; re-run only if still wanted.                                                  |
+| `network` / `cli_error` / `unknown` | Relay `error.message` verbatim.                                                                                |
+| Empty success                       | “The provider returned an empty response — retry, or continue the session.”                                    |
 
 ## Synthesis policy
 
