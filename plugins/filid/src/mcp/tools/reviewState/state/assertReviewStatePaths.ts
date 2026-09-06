@@ -12,6 +12,7 @@ export function assertReviewStatePaths(paths: ReviewStatePaths): void {
   assertNoSymlinkDescendantsSync(paths.reviewRoot, paths.reviewDirectory);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.statePath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.reportPath);
+  assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.blockersPath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.evidencePath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.sessionPath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.prCommentPath);

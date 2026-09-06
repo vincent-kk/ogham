@@ -17,6 +17,7 @@ import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { renderChecklistBlock } from '../render/renderChecklistBlock.js';
 import { renderFixRequests } from '../render/renderFixRequests.js';
 import { renderPrComment } from '../render/renderPrComment.js';
+import { renderReviewBlockers } from '../render/renderReviewBlockers.js';
 import { renderReviewReport } from '../render/renderReviewReport.js';
 import type { ReviewRenderInput } from '../render/reviewRenderTypes.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
@@ -36,6 +37,7 @@ import { foldReviewVerdict } from '../verdict/foldReviewVerdict.js';
 
 import { createSealedReviewPayload } from './utils/createSealedReviewPayload.js';
 import { loadSealGroupEvidence } from './utils/loadSealGroupEvidence.js';
+import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
 import { readSealedReviewSummary } from './utils/readSealedReviewSummary.js';
 
 /** Shared state-reading input shape accepted by checkpoint and seal. */
@@ -125,11 +127,22 @@ export async function sealReviewState(
           },
         ],
       });
+    const blockers = readSealedReviewBlockers(paths, state);
+    if (blockers.diagnostic)
+      return createReviewStatePayload({
+        action: input.action,
+        disposition: REVIEW_STATE_DISPOSITIONS.STALE,
+        paths,
+        status: TOOL_STATUSES.INDETERMINATE,
+        state,
+        diagnostics: [blockers.diagnostic],
+      });
     return createSealedReviewPayload({
       input,
       paths,
       summary,
       hasFixRequests: summary.verdict === 'REQUEST_CHANGES',
+      blockersPath: blockers.blockersPath,
     });
   }
 
@@ -219,6 +232,7 @@ export async function sealReviewState(
     fold,
   };
   const report = renderReviewReport(renderInput);
+  const blockers = renderReviewBlockers(renderInput);
   const fixRequests = renderFixRequests(renderInput);
   const prComment = renderPrComment(renderInput);
   const updatedSession = renderChecklistBlock(session, fold.checklist);
@@ -230,6 +244,8 @@ export async function sealReviewState(
   };
 
   writeFileAtomicallySync(paths.reportPath, report);
+  if (blockers === null) removeFileIfExistsSync(paths.blockersPath);
+  else writeFileAtomicallySync(paths.blockersPath, blockers);
   if (fixRequests === null) removeFileIfExistsSync(paths.fixRequestsPath);
   else writeFileAtomicallySync(paths.fixRequestsPath, fixRequests);
   writeFileAtomicallySync(paths.prCommentPath, prComment);
@@ -248,5 +264,6 @@ export async function sealReviewState(
       indeterminate: fold.indeterminate.length,
     },
     hasFixRequests: fixRequests !== null,
+    blockersPath: blockers === null ? null : paths.blockersPath,
   });
 }

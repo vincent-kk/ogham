@@ -636,6 +636,8 @@ export interface ReviewSealResponseSummary {
 export interface ReviewSealData {
   /** Absolute canonical review report path. */
   reportPath: string;
+  /** Absolute blocker report path for new INCONCLUSIVE seals, otherwise null. */
+  blockersPath: string | null;
   /** Absolute fix-request path, or null when no fixes were rendered. */
   fixRequestsPath: string | null;
   /** Absolute canonical pull-request comment path. */
@@ -753,6 +755,8 @@ export interface ReviewStatePaths {
   reviewDirectory: string;
   statePath: string;
   reportPath: string;
+  /** Canonical review blocker artifact path. */
+  blockersPath: string;
   evidencePath: string;
   /** Canonical orchestration session artifact path. */
   sessionPath: string;

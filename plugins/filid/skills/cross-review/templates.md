@@ -47,7 +47,7 @@ For round 1, write the path named by the review brief's `output` field. For roun
 }
 ```
 
-`chunk` is a string such as `"2/3"` or `null`. Use `COMPLETE` or `INDETERMINATE`; an indeterminate opinion has at least one gap. Include every assigned unit exactly once. `lines` is provisional because `validate` resolves it from `existingCode`. Categories are `bug`, `security`, `performance`, `maintainability`, `test`, `documentation`, `contract`, `structure`, and `verification`. For reviewable COMPLETE opinions, `checked` must be nonempty and every `checked` entry must be nonblank. `riskPlan` must be nonblank when `plan_required` is true or `risk_reasons` is nonempty. INDETERMINATE with a genuine gap permits empty `checked` and null `riskPlan`; provided blank strings are always invalid.
+`chunk` is a string such as `"2/3"` or `null`. Use `COMPLETE` or `INDETERMINATE`; an indeterminate opinion has at least one gap. Include every assigned unit exactly once. `lines` is provisional because `validate` resolves it from `existingCode`. Categories are `bug`, `security`, `performance`, `maintainability`, `test`, `documentation`, `contract`, `structure`, and `verification`. For reviewable COMPLETE opinions, `checked` must be nonempty and every `checked` entry must be nonblank. `riskPlan` must be nonblank when `plan_required` is true or `risk_reasons` is nonempty. INDETERMINATE with a genuine gap permits empty `checked` and null `riskPlan`; provided blank strings are always invalid. A gap may add `resolution: {question, evidenceNeeded, nextAction, doneWhen, suggestedOwner, humanReason?}`: question is 1–240 characters, evidenceNeeded has 1–5 entries of 1–300 characters, nextAction and doneWhen are 1–600 characters, suggestedOwner is `agent`, `human`, or `unknown`, and humanReason is 1–400 characters and required for `human`.
 
 ## Verifier opinion JSON
 
@@ -74,7 +74,7 @@ Write the path named by the verifier brief's `output` field with this schema:
 }
 ```
 
-Include exactly one decision for every ID in `## Decisions Required`, no unknown ID, and one of `CONFIRMED`, `REFUTED`, or `INDETERMINATE`. Observations never affect the verdict.
+Include exactly one decision for every ID in `## Decisions Required`, no unknown ID, and one of `CONFIRMED`, `REFUTED`, or `INDETERMINATE`. Observations never affect the verdict. Only an INDETERMINATE decision or opinion may add the same optional `resolution` object described for reviewer gaps; it proposes evidence and an owner but grants no authority.
 
 ## `fix-requests.md`
 
@@ -102,8 +102,9 @@ Copy `Claim` from the confirmed candidate's `message` verbatim and preserve its 
 After a successful seal, emit exactly:
 
 ```text
-Review verdict: APPROVED
+Review verdict: INCONCLUSIVE
 pr-comment: none
+review-blockers: <returned path>
 ```
 
-Substitute `REQUEST_CHANGES` or `INCONCLUSIVE` when applicable. Substitute `posted`, `unavailable`, or `failed: <reason>` for `none` after publication. Before seal, no terminal verdict marker is valid.
+For `APPROVED` and `REQUEST_CHANGES`, omit the `review-blockers` line. For `INCONCLUSIVE`, use the successful seal's `data.blockersPath`, or `unavailable (legacy)` only for a current-policy cached seal that returned null. Substitute `posted`, `unavailable`, or `failed: <reason>` for `none` after publication. Before seal, no terminal verdict marker is valid.

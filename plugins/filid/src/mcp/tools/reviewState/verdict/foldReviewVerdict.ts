@@ -1,3 +1,4 @@
+import { buildReviewBlockers } from './blockers/buildReviewBlockers.js';
 import { buildChecklist } from './buildChecklist.js';
 import { joinDecisions } from './joinDecisions.js';
 import type {
@@ -114,6 +115,7 @@ export function foldReviewVerdict(
 
   return {
     verdict,
+    blockers: buildReviewBlockers(input, coverage, joined, verdict),
     checklist: coverage.checklist,
     decisions: joined.decisions,
     confirmed: joined.confirmed,

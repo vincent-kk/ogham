@@ -31,7 +31,7 @@ export function buildChecklist(
       )
       .map(({ group }) => group.id);
 
-    if (file.skipReason !== null) {
+    if (file.skipReason !== null && file.skipReason.trim() !== '') {
       checklist.push({
         path: file.path,
         change: file.change,

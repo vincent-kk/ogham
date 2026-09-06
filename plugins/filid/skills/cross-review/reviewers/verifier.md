@@ -54,7 +54,7 @@ For each candidate, in order:
 2. Independently reproduce the failure or degradation from code, callers, consumers, evidence, and the authoritative user requirement when the rule is `USR-NNN`. The reviewer's conclusion is not proof.
 3. Use `REFUTED` only when the cited code is absent or a current code or canonical evidence line literally contradicts the claim.
 4. Never refute memory safety, concurrency, declaration-to-wiring consistency, behavior or compatibility changes, or public-contract violations without that literal contradiction.
-5. Use `INDETERMINATE` when obtainable evidence neither reproduces nor contradicts the claim.
+5. Use `INDETERMINATE` when obtainable evidence neither reproduces nor contradicts the claim. An INDETERMINATE decision or whole opinion may add resolution advice with `question`, `evidenceNeeded`, `nextAction`, `doneWhen`, `suggestedOwner` (`agent`, `human`, or `unknown`), and `humanReason` when the suggestion is human; it is a proposal, not an assignment.
 6. Cite the independently inspected line or row and give one falsifiable reason.
 
 ## Constraints

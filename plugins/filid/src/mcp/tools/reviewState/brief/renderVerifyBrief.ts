@@ -111,6 +111,7 @@ export function renderVerifyBrief(input: RenderVerifyBriefInput): string {
     '- `state` must be `COMPLETE` or `INDETERMINATE`.',
     '- The `decisions` array must contain every ID in Decisions Required exactly once and no other ID.',
     '- `verdict` must be `CONFIRMED`, `REFUTED`, or `INDETERMINATE`.',
+    '- resolution?: {question, evidenceNeeded, nextAction, doneWhen, suggestedOwner, humanReason?} is allowed only with an INDETERMINATE decision or opinion. Use the reviewer bounds; humanReason is required for human. It proposes a route, not authority.',
     '- Every decision requires non-empty independent `evidence` and a falsifiable `reason`.',
     '- Each observation requires a non-empty `path` and `detail`.',
     '',

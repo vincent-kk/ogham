@@ -1,3 +1,5 @@
+import type { ReviewResolutionAdvice } from './reviewResolutionAdvice.js';
+
 /** Completion state asserted by a reviewer opinion. */
 export type ReviewOpinionState = 'COMPLETE' | 'INDETERMINATE';
 
@@ -69,6 +71,8 @@ export interface ReviewOpinionGap {
   rule: string;
   /** Concrete evidence that could not be obtained. */
   detail: string;
+  /** Optional actor proposal for obtaining a conclusive answer to this gap. */
+  resolution?: ReviewResolutionAdvice;
 }
 
 /** Validated reviewer opinion for one group and round. */

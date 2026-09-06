@@ -67,12 +67,12 @@ interface ToolResultEnvelope<Summary, Data> {
 
 ## MCP 도구 4개
 
-| 도구              | action                                                           | 기본 반환                      |
-| ----------------- | ---------------------------------------------------------------- | ------------------------------ |
-| `project_setup`   | init/rules-status/rules-manifest/rules-sync/settings              | config·rules·settings 요약     |
-| `fractal_inspect` | scan/validate/verification/resolve                                | FCA inspection 결과            |
-| `restructure`     | plan/precondition/postcondition                                  | plan 또는 validation 결과      |
-| `review_state`    | prepare/checkpoint/validate/seal/cleanup/assess                   | review artifact 상태           |
+| 도구              | action                                               | 기본 반환                  |
+| ----------------- | ---------------------------------------------------- | -------------------------- |
+| `project_setup`   | init/rules-status/rules-manifest/rules-sync/settings | config·rules·settings 요약 |
+| `fractal_inspect` | scan/validate/verification/resolve                   | FCA inspection 결과        |
+| `restructure`     | plan/precondition/postcondition                      | plan 또는 validation 결과  |
+| `review_state`    | prepare/checkpoint/validate/seal/cleanup/assess      | review artifact 상태       |
 
 ### fractal_inspect — scan
 
@@ -234,6 +234,8 @@ prepare의 `effort?: auto | low | medium | high`는 config보다 우선한다. f
 
 prepare summary에는 effective `effort`와 optional `effortMode`, `effortReason`, `autoLowEffortGroupThreshold`, `reviewableGroups`, `maxReviewerHandoffs`가 실린다. reason은 `fixed | auto-standard | auto-large | legacy-resume`이며 최대 handoff는 group rounds의 합(verify·retry 제외)이다. state v2는 effective effort와 optional 선택 metadata 및 validationPolicyVersion을 보존한다. fresh 정책 버전은 1이다. 같은 prepared identity의 effective effort 변경은 최초 validate 전에도 `review-effort-locked`, 구형·미지원 정책 재사용은 `review-validation-policy-outdated`로 차단한다. 두 MCP 오류는 verdict·handoff를 내보내지 않는다. 같은 effective effort의 metadata 변경은 재개되며 현재 정책의 sealed cache는 다시 열지 않는다. threshold와 effort는 project/user config 양쪽에서 제어할 수 있다.
 
+seal의 `ReviewSealData`는 `reportPath`, nullable `blockersPath`, nullable `fixRequestsPath`, `prCommentPath`, `sessionPath`를 반환한다. 새 INCONCLUSIVE 결과는 report marker와 source/snapshot/branch/verdict가 결합된 `review-blockers.md`를 만들며, 사람 판단 요청·증거 보강·분류 필요를 일반 finding과 분리한다. 현재 정책이지만 marker가 없는 legacy seal은 `blockersPath: null`로 보존한다. marker가 있는 sidecar의 유실·불일치는 `review-blockers-missing` 또는 `review-blockers-invalid`로 멈추며 자동 force하지 않는다.
+
 ```typescript
 type ReviewStateInput =
   | {
@@ -261,7 +263,8 @@ type ReviewStateDisposition =
   "fresh" | "resumable" | "cached" | "stale" | "missing" | "sealed" | "cleaned";
 
 interface ReviewStateRecord {
-  schemaVersion: 1;
+  schemaVersion: 2;
+  validationPolicyVersion?: number;
   projectRoot: string;
   branchName: string;
   normalizedBranch: string;
@@ -272,6 +275,14 @@ interface ReviewStateRecord {
   phase: ReviewStatePhase;
   preparedAt: string;
   sealedAt?: string;
+}
+
+interface ReviewSealData {
+  reportPath: string;
+  blockersPath: string | null;
+  fixRequestsPath: string | null;
+  prCommentPath: string;
+  sessionPath: string;
 }
 ```
 
@@ -289,21 +300,21 @@ status / manifest에서 plugin root를 해석하지 못한 경우는 `ok`가 아
 
 ## 1.0에서 제거된 도구
 
-| 현행 도구                             | 결론                                           |
-| ------------------------------------- | ---------------------------------------------- |
-| `ast_analyze`                         | 제거 — 일반 코드 품질/AST 분석                 |
-| `ast_grep_search`, `ast_grep_replace` | 제거 — 범용 LLM/검색 도구 영역                 |
-| `fractal_navigate`                    | `fractal_inspect`의 scan + resolve로 대체      |
-| `doc_compress`                        | 제거 — 입력 content가 토큰을 절약하지 않음     |
+| 현행 도구                             | 결론                                             |
+| ------------------------------------- | ------------------------------------------------ |
+| `ast_analyze`                         | 제거 — 일반 코드 품질/AST 분석                   |
+| `ast_grep_search`, `ast_grep_replace` | 제거 — 범용 LLM/검색 도구 영역                   |
+| `fractal_navigate`                    | `fractal_inspect`의 scan + resolve로 대체        |
+| `doc_compress`                        | 제거 — 입력 content가 토큰을 절약하지 않음       |
 | `test_metrics`                        | `fractal_inspect`의 verification으로 의미 재설계 |
-| `drift_detect`                        | `restructure`의 plan으로 대체                  |
-| `lca_resolve`                         | MCP에서 제거, core의 multi-consumer LCA로 흡수 |
-| `rule_query`                          | `fractal_inspect`의 validate와 rule 문서로 대체 |
-| `config_patch_validate`               | settings / project-init 내부 검증으로 흡수     |
-| `coverage_verify`                     | 제거 — 테스트 품질은 Seiri 영역                |
-| `debt_manage`                         | 제거 — FCA core가 아닌 별도 debt workflow      |
-| `cache_manage`                        | 제거 — 내부 infra로만 유지                     |
-| `review_manage`                       | 축소 후 `review_state`로 대체                  |
+| `drift_detect`                        | `restructure`의 plan으로 대체                    |
+| `lca_resolve`                         | MCP에서 제거, core의 multi-consumer LCA로 흡수   |
+| `rule_query`                          | `fractal_inspect`의 validate와 rule 문서로 대체  |
+| `config_patch_validate`               | settings / project-init 내부 검증으로 흡수       |
+| `coverage_verify`                     | 제거 — 테스트 품질은 Seiri 영역                  |
+| `debt_manage`                         | 제거 — FCA core가 아닌 별도 debt workflow        |
+| `cache_manage`                        | 제거 — 내부 infra로만 유지                       |
+| `review_manage`                       | 축소 후 `review_state`로 대체                    |
 
 ---
 

@@ -24,6 +24,7 @@ export function joinDecisions(
 ): ReviewDecisionJoinResult {
   const decisions: JoinedReviewDecision[] = [];
   const unresolved: ReviewDecisionJoinResult['unresolved'] = [];
+  const coverageIssues: ReviewDecisionJoinResult['coverageIssues'] = [];
   const joinedCandidateIds = new Set<string>();
   const expectedIds = candidates.map(({ id }) => id);
   const decisionIds: string[] = [];
@@ -50,7 +51,13 @@ export function joinDecisions(
         [...evidence.group.candidateIds, ...findingIds],
         combined.map(({ findingId }) => findingId),
       )
-    )
+    ) {
+      coverageIssues.push({
+        groupId: evidence.group.id,
+        artifactPath: evidence.group.verifyPath,
+        expectedIds: [...evidence.group.candidateIds, ...findingIds],
+        actualIds: combined.map(({ findingId }) => findingId),
+      });
       unresolved.push({
         source: `verification ${evidence.group.id}`,
         path: evidence.group.verifyPath,
@@ -58,6 +65,7 @@ export function joinDecisions(
         detail: REVIEW_DECISION_COVERAGE_MISMATCH,
         affectsVerdict: true,
       });
+    }
     for (const finding of review?.findings ?? []) {
       const decision = combined.find(
         ({ findingId }) => findingId === finding.id,
@@ -151,7 +159,13 @@ export function joinDecisions(
   if (
     groups.every((evidence) => evidence.issues.length === 0) &&
     !hasExactDecisionCoverage(expectedIds, decisionIds)
-  )
+  ) {
+    coverageIssues.push({
+      groupId: null,
+      artifactPath: 'evidence.md',
+      expectedIds,
+      actualIds: decisionIds,
+    });
     unresolved.push({
       source: 'verification',
       path: 'evidence.md',
@@ -159,7 +173,9 @@ export function joinDecisions(
       detail: REVIEW_DECISION_COVERAGE_MISMATCH,
       affectsVerdict: true,
     });
+  }
   return {
+    coverageIssues,
     decisions,
     confirmed: decisions.filter(({ verdict }) => verdict === 'CONFIRMED'),
     refuted: decisions.filter(({ verdict }) => verdict === 'REFUTED'),

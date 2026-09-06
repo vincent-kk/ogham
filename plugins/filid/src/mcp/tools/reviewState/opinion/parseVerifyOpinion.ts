@@ -5,6 +5,7 @@ import type {
   UncheckedVerifyOpinion,
 } from './uncheckedOpinionTypes.js';
 import { renderSchemaIssue } from './utils/renderSchemaIssue.js';
+import { REVIEW_RESOLUTION_SCHEMA } from './utils/reviewResolutionSchema.js';
 
 /** Structural schema for one untrusted verifier decision. */
 const VERIFY_DECISION_SCHEMA = z
@@ -13,6 +14,7 @@ const VERIFY_DECISION_SCHEMA = z
     verdict: z.string(),
     evidence: z.string(),
     reason: z.string(),
+    resolution: REVIEW_RESOLUTION_SCHEMA.optional(),
   })
   .strict();
 
@@ -34,6 +36,7 @@ const VERIFY_OPINION_SCHEMA = z
     decisions: z.array(VERIFY_DECISION_SCHEMA),
     observations: z.array(VERIFY_OBSERVATION_SCHEMA),
     checked: z.array(z.string()),
+    resolution: REVIEW_RESOLUTION_SCHEMA.optional(),
   })
   .strict();
 

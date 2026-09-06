@@ -2,7 +2,7 @@
 
 ## Purpose
 
-committed diff hash와 branch-scoped artifact lifecycle을 기준으로 변경 범위 증거를 수집하고, reviewable unit을 선별·청킹·그룹화하며, branch·base·change context 해석, 규칙 해석, diff·brief 물질화, opinion 검증, 결정적 verdict fold와 보고서 렌더링, merge-track 재개 관측을 관리한다.
+committed diff hash와 branch-scoped artifact lifecycle을 기준으로 변경 범위 증거를 수집하고, reviewable unit을 선별·청킹·그룹화하며, branch·base·change context 해석, 규칙 해석, diff·brief 물질화, opinion 검증, 결정적 verdict fold와 보고서 렌더링, 판정 보류 원인·해소 안내의 분리, merge-track 재개 관측을 관리한다.
 
 ## Structure
 

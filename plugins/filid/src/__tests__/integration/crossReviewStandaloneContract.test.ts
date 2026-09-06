@@ -6,6 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 import { renderPrComment } from '../../mcp/tools/reviewState/render/renderPrComment.js';
 import { renderReviewReport } from '../../mcp/tools/reviewState/render/renderReviewReport.js';
+import { buildBlockerRenderInput } from '../unit/mcp/reviewState/helpers/buildBlockerRenderInput.js';
 import { buildReviewRenderInput } from '../unit/mcp/reviewState/helpers/buildReviewRenderInput.js';
 
 /** Canonical skill assets shipped independently of implementation documents. */
@@ -41,9 +42,14 @@ describe('cross-review standalone output contract', () => {
       'utf8',
     );
     const rendered = renderReviewReport(buildReviewRenderInput());
+    const inconclusive = renderReviewReport(buildBlockerRenderInput());
     const skeleton = contract.match(/```markdown\n([\s\S]*?)\n```/u)?.[1] ?? '';
+    const skeletonHeadings = skeleton.match(/^## .+$/gmu) ?? [];
 
-    expect(skeleton.match(/^## .+$/gmu)).toEqual(rendered.match(/^## .+$/gmu));
+    expect(skeletonHeadings).toEqual(inconclusive.match(/^## .+$/gmu));
+    expect(
+      skeletonHeadings.filter((heading) => heading !== '## Review blockers'),
+    ).toEqual(rendered.match(/^## .+$/gmu));
     const keys = rendered
       .split('---')[1]
       .trim()

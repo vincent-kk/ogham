@@ -1,5 +1,9 @@
+import { REVIEW_STATE_FILE_NAMES } from '../../../../constants/reviewState.js';
+
 import type { ReviewRenderInput } from './reviewRenderTypes.js';
+import { renderBlockerSummary } from './utils/renderBlockerSummary.js';
 import { renderConfirmedFindingsTable } from './utils/renderConfirmedFindingsTable.js';
+import { renderCoverageSummary } from './utils/renderCoverageSummary.js';
 import { renderCoverageTable } from './utils/renderCoverageTable.js';
 import { renderRefutedCandidatesTable } from './utils/renderRefutedCandidatesTable.js';
 import { renderScopeTable } from './utils/renderScopeTable.js';
@@ -34,6 +38,9 @@ export function renderReviewReport(input: ReviewRenderInput): string {
     '---',
     'review_schema: 7',
     `verdict: ${input.fold.verdict}`,
+    ...(input.fold.verdict === 'INCONCLUSIVE'
+      ? [`blockers_report: ${REVIEW_STATE_FILE_NAMES.BLOCKERS}`]
+      : []),
     `branch: ${input.branchName}`,
     `base_ref: ${input.baseRef}`,
     `source_hash: ${input.evidence.sourceHash}`,
@@ -46,6 +53,9 @@ export function renderReviewReport(input: ReviewRenderInput): string {
     '',
     `# Cross-Review — ${input.branchName}`,
     '',
+    ...(input.fold.verdict === 'INCONCLUSIVE'
+      ? [renderBlockerSummary(input, 'report'), '']
+      : []),
     '## Scope',
     '',
     renderScopeTable(input.files),
@@ -55,6 +65,8 @@ export function renderReviewReport(input: ReviewRenderInput): string {
     evidenceStatus,
     '',
     '## Coverage',
+    '',
+    renderCoverageSummary(input.fold.checklist),
     '',
     renderCoverageTable(input.fold.checklist),
     '',

@@ -48,10 +48,24 @@ export function checkVerifyOpinion(
     });
 
   const requiredCounts = new Map<string, number>();
+  if (opinion.resolution !== undefined && opinion.state !== 'INDETERMINATE')
+    problems.push({
+      code: 'enum-invalid',
+      detail: 'Resolution advice requires an indeterminate verifier opinion.',
+    });
   for (const findingId of options.decisionIds)
     requiredCounts.set(findingId, (requiredCounts.get(findingId) ?? 0) + 1);
   const matchedCounts = new Map<string, number>();
   for (const decision of opinion.decisions) {
+    if (
+      decision.resolution !== undefined &&
+      decision.verdict !== 'INDETERMINATE'
+    )
+      problems.push({
+        code: 'enum-invalid',
+        findingId: decision.findingId,
+        detail: 'Resolution advice requires an indeterminate decision.',
+      });
     const required = requiredCounts.get(decision.findingId) ?? 0;
     const matched = matchedCounts.get(decision.findingId) ?? 0;
     if (matched >= required)

@@ -124,6 +124,7 @@ export function buildReviewRenderInput(): ReviewRenderInput {
     ],
     fold: {
       verdict: 'REQUEST_CHANGES',
+      blockers: [],
       checklist: [
         {
           path: 'src/a.ts',

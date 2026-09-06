@@ -5,6 +5,7 @@ import type {
   UncheckedReviewOpinion,
 } from './uncheckedOpinionTypes.js';
 import { renderSchemaIssue } from './utils/renderSchemaIssue.js';
+import { REVIEW_RESOLUTION_SCHEMA } from './utils/reviewResolutionSchema.js';
 
 /** Structural schema for one reported review unit. */
 const REVIEW_FILE_SCHEMA = z
@@ -41,6 +42,7 @@ const REVIEW_GAP_SCHEMA = z
     path: z.string(),
     rule: z.string(),
     detail: z.string(),
+    resolution: REVIEW_RESOLUTION_SCHEMA.optional(),
   })
   .strict();
 

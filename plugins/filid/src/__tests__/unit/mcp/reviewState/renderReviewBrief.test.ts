@@ -297,5 +297,9 @@ describe('renderReviewBrief', () => {
     expect(output).toContain('non-empty reason for skipped');
     expect(output).toContain('| src/b.ts | M | source | src | 2/3 |');
     expect(output).toContain('Text must be non-empty');
+    expect(output).toContain(
+      'resolution?: {question,evidenceNeeded,nextAction,doneWhen,suggestedOwner,humanReason?}',
+    );
+    expect(output).toContain('humanReason required for human');
   });
 });

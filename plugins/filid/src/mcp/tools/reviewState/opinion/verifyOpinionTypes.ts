@@ -1,3 +1,5 @@
+import type { ReviewResolutionAdvice } from './reviewResolutionAdvice.js';
+
 /** Completion state asserted by a verifier opinion. */
 export type VerifyOpinionState = 'COMPLETE' | 'INDETERMINATE';
 
@@ -14,6 +16,8 @@ export interface VerifyDecision {
   evidence: string;
   /** Falsifiable explanation for the disposition. */
   reason: string;
+  /** Optional resolution proposal, valid only for an indeterminate decision. */
+  resolution?: ReviewResolutionAdvice;
 }
 
 /** Verdict-neutral concern recorded outside the candidate set. */
@@ -40,4 +44,6 @@ export interface VerifyOpinion {
   observations: VerifyObservation[];
   /** Stable paths and identifiers checked by the verifier. */
   checked: string[];
+  /** Optional resolution proposal, valid only for an indeterminate opinion. */
+  resolution?: ReviewResolutionAdvice;
 }

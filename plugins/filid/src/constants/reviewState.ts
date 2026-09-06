@@ -242,6 +242,7 @@ export const REVIEW_STATE_DIRECTORY_NAMES = {
 export const REVIEW_STATE_FILE_NAMES = {
   STATE: 'review-state.json',
   REPORT: 'review-report.md',
+  BLOCKERS: 'review-blockers.md',
   PR_COMMENT: 'pr-comment.md',
   EVIDENCE: 'evidence.md',
   SESSION: 'session.md',
@@ -261,6 +262,7 @@ export const REVIEW_STATE_FILE_NAMES = {
 /** Files removed before a fresh review state is prepared. */
 export const REVIEW_STATE_STALE_ARTIFACT_FILE_NAMES = [
   REVIEW_STATE_FILE_NAMES.REPORT,
+  REVIEW_STATE_FILE_NAMES.BLOCKERS,
   REVIEW_STATE_FILE_NAMES.PR_COMMENT,
   REVIEW_STATE_FILE_NAMES.SESSION,
   REVIEW_STATE_FILE_NAMES.EVIDENCE,
@@ -296,6 +298,10 @@ export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   SOURCE_HASH_STALE: 'review-source-hash-stale',
   STATE_SEALED: 'review-state-sealed',
   REPORT_MISSING: 'review-report-missing',
+  /** A marked sealed review has lost its canonical blocker report. */
+  BLOCKERS_MISSING: 'review-blockers-missing',
+  /** A marked blocker report does not match its sealed review identity. */
+  BLOCKERS_INVALID: 'review-blockers-invalid',
   STATE_SCHEMA_MISMATCH: 'review-state-schema-mismatch',
   RULE_PATH_ESCAPE: 'review-rule-path-escape',
   OPINIONS_MISSING: 'review-opinions-missing',
@@ -311,6 +317,9 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
     'Committed source content no longer matches the prepared review state.',
   STATE_SEALED: 'A sealed review state cannot be scoped again.',
   REPORT_MISSING: 'The canonical review report is missing.',
+  BLOCKERS_MISSING: 'The canonical review blocker report is missing.',
+  BLOCKERS_INVALID:
+    'The canonical review blocker report does not match its sealed review.',
   STATE_SCHEMA_MISMATCH: 'The review state uses an unsupported schema version.',
   RULE_PATH_ESCAPE: 'A repository review rule escapes the project root.',
   OPINIONS_MISSING: 'No merged review opinions exist for this review state.',

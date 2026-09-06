@@ -69,6 +69,10 @@ export async function sealReviewStateFixtureAndAssert(
     reviewDirectory,
     REVIEW_STATE_FILE_NAMES.FIX_REQUESTS,
   );
+  const blockersPath = resolveContainedPath(
+    reviewDirectory,
+    REVIEW_STATE_FILE_NAMES.BLOCKERS,
+  );
   const prCommentPath = resolveContainedPath(
     reviewDirectory,
     REVIEW_STATE_FILE_NAMES.PR_COMMENT,
@@ -116,12 +120,19 @@ export async function sealReviewStateFixtureAndAssert(
   );
   expect(sealed.data).toMatchObject({
     reportPath,
+    blockersPath: expected.verdict === 'INCONCLUSIVE' ? blockersPath : null,
     fixRequestsPath: expected.hasFixRequests ? fixRequestsPath : null,
     prCommentPath,
     sessionPath,
   });
   expect(Object.keys(sealed.data).sort()).toEqual(
-    ['fixRequestsPath', 'prCommentPath', 'reportPath', 'sessionPath'].sort(),
+    [
+      'blockersPath',
+      'fixRequestsPath',
+      'prCommentPath',
+      'reportPath',
+      'sessionPath',
+    ].sort(),
   );
   const report = readUtf8FileIfExistsSync(reportPath);
   const prComment = readUtf8FileIfExistsSync(prCommentPath);
@@ -136,6 +147,9 @@ export async function sealReviewStateFixtureAndAssert(
   expect(readUtf8FileIfExistsSync(fixRequestsPath) !== null).toBe(
     expected.hasFixRequests,
   );
+  expect(readUtf8FileIfExistsSync(blockersPath) !== null).toBe(
+    expected.verdict === 'INCONCLUSIVE',
+  );
   const persisted = JSON.parse(
     readUtf8FileIfExistsSync(statePath) ?? '{}',
   ) as ReviewStateRecord;
@@ -147,6 +161,10 @@ export async function sealReviewStateFixtureAndAssert(
   expect(statSync(reportPath, { bigint: true }).mtimeNs).toBeLessThanOrEqual(
     stateMtime,
   );
+  if (expected.verdict === 'INCONCLUSIVE')
+    expect(
+      statSync(blockersPath, { bigint: true }).mtimeNs,
+    ).toBeLessThanOrEqual(stateMtime);
   expect(statSync(prCommentPath, { bigint: true }).mtimeNs).toBeLessThanOrEqual(
     stateMtime,
   );

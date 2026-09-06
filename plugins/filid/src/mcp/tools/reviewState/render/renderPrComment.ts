@@ -3,7 +3,9 @@ import { normalize, portableJoin } from '@ogham/cross-platform';
 import { REVIEW_STATE_FILE_NAMES } from '../../../../constants/reviewState.js';
 
 import type { ReviewRenderInput } from './reviewRenderTypes.js';
+import { renderBlockerSummary } from './utils/renderBlockerSummary.js';
 import { renderConfirmedFindingsTable } from './utils/renderConfirmedFindingsTable.js';
+import { renderCoverageSummary } from './utils/renderCoverageSummary.js';
 import { renderCoverageTable } from './utils/renderCoverageTable.js';
 import { renderUnresolvedEvidenceTable } from './utils/renderUnresolvedEvidenceTable.js';
 import { renderVerificationLogTable } from './utils/renderVerificationLogTable.js';
@@ -29,6 +31,9 @@ export function renderPrComment(input: ReviewRenderInput): string {
   return [
     `## Code Review Governance — ${input.fold.verdict}`,
     '',
+    ...(input.fold.verdict === 'INCONCLUSIVE'
+      ? [renderBlockerSummary(input, 'comment'), '']
+      : []),
     '| Field | Value |',
     '| --- | --- |',
     `| Verdict | ${input.fold.verdict} |`,
@@ -48,6 +53,8 @@ export function renderPrComment(input: ReviewRenderInput): string {
     '<details><summary>Coverage and verification log</summary>',
     '',
     '### Coverage',
+    '',
+    renderCoverageSummary(input.fold.checklist),
     '',
     renderCoverageTable(input.fold.checklist),
     '',

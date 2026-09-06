@@ -34,7 +34,7 @@ Use `## FCA Handoff` rows only as claims to confirm under FCA-13; a row you cann
 5. Turn every applicable inline and repository rule into a falsifiable question.
 6. Open only the callers, consumers, source, or tests needed to answer a question, and inspect the whole assigned group.
 7. For every finding, copy `existingCode` verbatim from the post-change file and cite specific evidence, a reachable consequence, and a bounded action.
-8. COMPLETE requires nonempty `checked`, with nonblank inspected paths/IDs. If evidence is unavailable, use INDETERMINATE with `gaps`; empty `checked` and null `riskPlan` are allowed.
+8. COMPLETE needs nonblank `checked`; INDETERMINATE needs `gaps`, may add `suggestedOwner` advice, and allows empty `checked`/null `riskPlan`.
 9. In round 2 or later, complete the independent diff and failure-path inspection before opening the merged prior opinion. Then compare against it and remove duplicate findings; a clean prior opinion is not evidence that the group is safe.
 10. Before writing, confirm `schema`, `group`, `round`, `sourceHash` and assigned `(path, change, chunk)` identities.
 

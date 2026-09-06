@@ -21,6 +21,8 @@ import type {
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
+import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
+
 /** Shared state-reading input shape accepted by checkpoint and seal. */
 type CheckpointOrSealInput = Extract<
   ResolvedReviewStateInput,
@@ -117,6 +119,21 @@ export async function readReviewCheckpoint(
         },
       ],
     });
+
+  if (state.phase === REVIEW_STATE_PHASES.SEALED) {
+    const blockers = readSealedReviewBlockers(paths, state);
+    if (blockers.diagnostic)
+      return createReviewStatePayload({
+        action: input.action,
+        disposition: REVIEW_STATE_DISPOSITIONS.STALE,
+        paths,
+        status: TOOL_STATUSES.INDETERMINATE,
+        state,
+        artifacts,
+        handoff,
+        diagnostics: [blockers.diagnostic],
+      });
+  }
 
   return createReviewStatePayload({
     action: input.action,

@@ -11,6 +11,7 @@ import {
   REVIEW_VALIDATION_POLICY_VERSION,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 import { assessReviewGroupRisk } from '../group/assessReviewGroupRisk.js';
 import { buildReviewGroups } from '../group/buildReviewGroups.js';
 import { planNextHandoffs } from '../handoff/planNextHandoffs.js';
@@ -43,6 +44,7 @@ import { collectRenderedReviewUnits } from './utils/collectRenderedReviewUnits.j
 import { createPreparedReviewPayload } from './utils/createPreparedReviewPayload.js';
 import { hasAllReviewBriefs } from './utils/hasAllReviewBriefs.js';
 import { loadPrepareReviewRules } from './utils/loadPrepareReviewRules.js';
+import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
 import { resolvePrepareBaseRef } from './utils/resolvePrepareBaseRef.js';
 import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
 import { resolvePreparedReviewFiles } from './utils/resolvePreparedReviewFiles.js';
@@ -82,7 +84,13 @@ export async function prepareReviewState(
     sameIdentity &&
     existing.phase === REVIEW_STATE_PHASES.SEALED &&
     reviewReportExists(paths.reportPath)
-  )
+  ) {
+    const blockers = readSealedReviewBlockers(paths, existing);
+    if (blockers.diagnostic)
+      throw new ToolDiagnosticError(
+        blockers.diagnostic.code,
+        blockers.diagnostic.message,
+      );
     return createPreparedReviewPayload({
       action: input.action,
       disposition: REVIEW_STATE_DISPOSITIONS.CACHED,
@@ -97,6 +105,7 @@ export async function prepareReviewState(
         statuses: readReviewGroupArtifactStatus(existing, paths),
       }),
     });
+  }
 
   const canResume =
     sameIdentity && existing.phase === REVIEW_STATE_PHASES.PREPARED;

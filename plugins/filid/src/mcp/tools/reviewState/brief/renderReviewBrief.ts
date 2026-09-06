@@ -162,11 +162,12 @@ export function renderReviewBrief(
     '',
     '## Output Contract',
     '',
-    'Read the prewritten JSON skeleton at the handoff output path. Preserve keys and identity; complete assigned units once, without extras. Write JSON only.',
-    '- result: reviewed|skipped (non-empty reason for skipped); retain chunk ("k/n" or null).',
-    '- state: COMPLETE|INDETERMINATE; INDETERMINATE requires gaps [{path, rule, detail}], all non-empty.',
-    `- findings: [{id: R${input.group.id}-NNN, severity: error|warning, category: bug|security|performance|maintainability|test|documentation|contract|structure|verification, path, existingCode, lines, rule, message, evidence, consequence, recommendedAction}]. Text must be non-empty; path must be assigned. lines may be "unknown"; validation locates committed code.`,
-    '- checked: nonblank inspected paths/IDs, required for COMPLETE; riskPlan: string|null, required as specified in Method. Use [] for no findings/gaps.',
+    'Use the prewritten JSON skeleton at `output`; keep identity, cover each unit once, no extra keys; JSON only.',
+    '- files: result=reviewed|skipped (non-empty reason for skipped); retain chunk ("k/n" or null).',
+    '- state=COMPLETE|INDETERMINATE; gaps need non-empty path/rule/detail.',
+    '- gap resolution?: {question,evidenceNeeded,nextAction,doneWhen,suggestedOwner,humanReason?}; caps 240/5x300/600/600/400; owner=agent|human|unknown; humanReason required for human; advice only.',
+    `- findings: [{id:R${input.group.id}-NNN,severity:error|warning,category:bug|security|performance|maintainability|test|documentation|contract|structure|verification,path,existingCode,lines,rule,message,evidence,consequence,recommendedAction}]; Text must be non-empty; path assigned; lines from existingCode or "unknown".`,
+    '- nonblank checked required for COMPLETE; riskPlan:string|null per Method; [] for no findings/gaps.',
     '',
   ].join('\n');
 }

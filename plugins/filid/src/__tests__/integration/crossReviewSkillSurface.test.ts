@@ -42,6 +42,9 @@ const skill = documents.find(({ path }) => path === 'SKILL.md')?.content ?? '';
 /** Canonical actor-output templates under test. */
 const templates =
   documents.find(({ path }) => path === 'templates.md')?.content ?? '';
+/** Sealed report and sidecar format contract under test. */
+const reportFormats =
+  documents.find(({ path }) => path === 'report-formats.md')?.content ?? '';
 /** Reviewer role instructions under test. */
 const reviewer =
   documents.find(({ path }) => path === 'reviewers/reviewer.md')?.content ?? '';
@@ -59,7 +62,7 @@ const genuineGap = readFileSync(
 
 describe('cross-review v7 skill surface', () => {
   it('declares the v7 frontmatter and orchestration schema', () => {
-    expect(skill).toContain("version: '7.6.0'");
+    expect(skill).toContain("version: '7.7.0'");
     expect(skill).toContain('review_schema: 7');
     expect(skill).toContain('--effort auto|low|medium|high');
   });
@@ -198,14 +201,27 @@ describe('cross-review v7 skill surface', () => {
   it('stops policy failures without automatic restart or a terminal verdict', () => {
     expect(skill).toContain('review-effort-locked');
     expect(skill).toContain('review-validation-policy-outdated');
+    expect(skill).toContain('review-blockers-missing');
+    expect(skill).toContain('review-blockers-invalid');
     expect(skill).toContain('Never auto-force these errors');
     expect(skill).toContain('all prior actors have finished');
     expect(skill).toContain('no merged opinion exists');
     expect(skill).toContain('effective effort is frozen at preparation');
   });
 
+  it('routes INCONCLUSIVE readers to the separate trusted blocker report', () => {
+    expect(skill).toContain('data.blockersPath');
+    expect(templates).toContain('review-blockers: <returned path>');
+    expect(reportFormats).toContain('blockers_report: review-blockers.md');
+    expect(reportFormats).toContain('blockers_schema: 1');
+    expect(reportFormats).toContain('Human decision requests');
+    expect(reportFormats).toContain('Evidence recovery');
+    expect(reviewer).toContain('suggestedOwner');
+    expect(verifier).toContain('suggestedOwner');
+  });
+
   it('requires inspection evidence for completion while preserving genuine gaps', () => {
-    expect(reviewer).toContain('COMPLETE requires nonempty `checked`');
+    expect(reviewer).toContain('COMPLETE needs nonblank `checked`');
     expect(templates).toContain('every `checked` entry must be nonblank');
     expect(templates).toContain('INDETERMINATE');
     expect(templates).toContain('`riskPlan`');

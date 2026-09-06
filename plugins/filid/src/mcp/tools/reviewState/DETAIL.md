@@ -32,6 +32,7 @@
 - `validate`는 review·verify JSON의 구조와 배정 범위를 검사하는 유일한 지점이다. 문제는 pass로 바꾸지 않으며, review finding의 위치를 committed source에서 확정하고 round를 결정적으로 병합한다.
 - `seal`은 complete review validation과 결합된 verify validation의 hash가 현재 artifact와 모두 일치하는 group만 신뢰한다. reviewer skip, gap, 누락·변조·미완 validation은 `INCONCLUSIVE` 근거로 남긴다. worktree가 이미 documents-only 또는 source-dirty이면 reviewer 실행을 건너뛰는 경로를 지원하기 위해 `OPINIONS_MISSING`을 반환하지 않고, 병합 opinion이 전혀 없어도 같은 fold를 끝까지 실행해 봉인된 `INCONCLUSIVE`를 만든다.
 - verdict는 trusted opinion·verification과 canonical evidence의 결정론 decision을 합친 fold로 계산한다. 렌더링이 끝난 뒤 state verdict와 sealed phase를 기록하며 이미 sealed인 state는 다시 렌더링하지 않는다.
+- 판정 보류 원인과 해소 안내는 일반 finding·coverage와 분리한다. 같은 fold의 typed blocker를 별도 보고서와 report/comment 선두에서 표현하며 새 actor를 실행하거나 판정 정책·재시도·권한을 바꾸지 않는다. 담당 제안은 사람 판단 요청·증거 보강·분류 필요로 구분하며 배정이나 승인이 아니다.
 - `checkpoint`는 state와 group별 artifact 존재·신뢰를 읽고 handoff를 관측만 한다. `assess`는 dirty 경로, entry stage, base ref와 unpushed commit 수를 관측만 하고 state를 읽거나 쓰지 않는다. 재검증 보고서 frontmatter의 유일한 유효 전체 `head_sha`가 관측한 현재 Git HEAD와 일치하고, 기록된 `verdict`가 `PASS`, `FAIL`, `INCONCLUSIVE` 중 하나일 때만 완료 근거로 사용한다. `cleanup`은 literal `confirm: true` 뒤 해당 branch directory만 지운다.
 
 ## API Contracts
@@ -74,14 +75,17 @@
 - verify opinion은 schema 7, group, state, sourceHash, decision, observation, checked를 가진 JSON이다. decision은 verify brief의 모든 ID와 정확히 일치하며 verdict는 `CONFIRMED | REFUTED | INDETERMINATE`, evidence와 reason은 비어 있지 않다.
 - verify는 complete review validation 뒤에만 실행한다. 성공하면 verify file hash와 현재 review hash를 함께 기록하고, summary에 confirmed·refuted·indeterminate count, data에 problem과 verify path, next·sealReady를 싣는다.
 - seal은 validation hash가 없는 group을 `review rounds incomplete`, `artifact not validated`, `artifact modified after validation`, `verifier decided a superseded opinion` 중 해당 이유와 함께 unresolved evidence로 취급한다. hash가 일치해도 merged review opinion의 schema·identity·배정 unit·완료 기록을 같은 group policy로 다시 검사하고 실패한 group은 신뢰하지 않는다. reviewable unit이 있는데 병합 opinion이 하나도 없으면 `review-opinions-missing`이지만, documents-only 또는 source-dirty worktree는 그 자체가 결정적인 inconclusive 근거이므로 누락 opinion도 unresolved evidence로 fold하고 봉인한다.
-- checklist는 prepare skip reason을 `skipped`, 모든 unit이 reviewed이면 `reviewed`, reviewer skip·missing opinion·pending unit이면 `pending`으로 정규화한다. reviewer skip reason은 unresolved evidence에도 남긴다.
+- checklist는 trim 후 비어 있지 않은 prepare skip reason만 `skipped`, 모든 unit이 reviewed이면 `reviewed`, reviewer skip·missing opinion·pending unit이면 `pending`으로 정규화한다. reviewer skip reason은 unresolved evidence에도 남긴다. 전체 파일 수는 유지하며 표시용 대상 수는 reviewed+pending이다. 대상이 없으면 비율은 N/A이며 정상 제외는 verdict-neutral이다.
+- coverage 요약은 대상·완료·pending·제외·전체 및 제외 사유별 수와 정렬된 대표 경로 최대 3개를 보여 준다. 전체 경로와 원래 사유는 기존 표에 보존한다.
 - fold는 evidence incomplete, documents-only/source-dirty worktree, trusted group artifact 부재, pending checklist, opinion gap, verifier opinion의 `INDETERMINATE` state, 결정론 decision 합류와 ID 커버리지 검사, severity와 무관한 candidate의 indeterminate decision을 순서대로 `INCONCLUSIVE`로 만든다. 그 뒤 confirmed candidate가 있으면 `REQUEST_CHANGES`, 아니면 `APPROVED`다.
 - 결정론 fold는 배정 FCA candidate를 CONFIRMED(evidence `evidence.md#<id>`, reason `canonical structure evidence measured on snapshot <snapshotHash>`), deterministicRefuted finding을 REFUTED(evidence는 배정 unit hunk 범위 `<path>:<newStart>-<newEnd>[, ...]`, reason `finding lies outside the changed hunks`)로 합류시킨다. decision ID 집합은 candidate ID ∪ merged finding ID와 각 한 번씩 일치해야 한다. 누락·중복·미배정 ID 또는 verify가 결정론 대상을 판정하면 unresolved evidence `decision coverage mismatch`로 INCONCLUSIVE다. auto-verify도 기존 complete·review hash·verify hash·reviewSha256 검사를 통과해야 하며 report 형식은 유지한다.
 - `review-report.md` 형식은 스킬이 독립적으로 실행할 수 있도록 `skills/cross-review/report-formats.md`에서 정의한다. 구현은 schema 7 frontmatter 뒤 Scope, Evidence Status, Coverage, Verification Log, Confirmed Findings, Refuted Candidates, Unresolved Evidence, Final Verdict를 순서대로 렌더링하고 confirmed path에 확정 line을 붙인다.
 - 이 계약 이전에 기록된 verify opinion은 재검증해야 한다(결정론 대상 ID 거부).
 - `fix-requests.md`는 `REQUEST_CHANGES`일 때만 seal이 렌더링한다. 항목은 `FIX-001`부터이며 canonical 여덟 필드 `Severity`, `Category`, `Path`, `Rule`, `Claim`, `Evidence`, `Consequence`, `Recommended Action`의 세부 블록은 `skills/cross-review/templates.md`의 fix-request 절을 정본으로 참조한다.
 - `pr-comment.md` 형식은 스킬이 독립적으로 실행할 수 있도록 `skills/cross-review/report-formats.md`에서 정의한다. 구현은 `## Code Review Governance — <verdict>` 표, 세 개의 details block과 report pointer를 렌더링한다. report pointer는 host와 입력 path flavor에 관계없이 `/` separator로 표시하고 Windows drive·UNC root는 보존한다.
-- seal summary는 verdict·file coverage·decision count를, data는 report path, nullable fix-request path, PR comment path와 session path를 싣는다. session checklist block도 같은 fold 결과로 통째로 교체한다.
+- seal summary는 verdict·file coverage·decision count를, data는 report path, nullable fix-request path, PR comment path, session path와 nullable blockersPath를 싣는다. session checklist block도 같은 fold 결과로 통째로 교체한다.
+- optional resolution은 reviewer gap, INDETERMINATE verifier decision/opinion에 question·evidenceNeeded·nextAction·doneWhen·suggestedOwner(agent/human/unknown)와 optional humanReason을 담는다. trim 후 질문 1–240자, 행동·해소 조건 각각 1–600자, 증거 1–5개(각 1–300자), 사람 판단 사유 1–400자이며 human일 때 사유가 필수다. legacy schema-7의 필드 부재는 허용하되 담당을 미상으로 표시한다. 후속 round의 동일 gap resolution만 최신 제공값으로 보강하고 gap 누적·state 정책은 유지한다.
+- 새 INCONCLUSIVE seal은 `review-blockers.md`에 blockers_schema 1과 source/snapshot/branch/verdict identity를 기록하고 report에 canonical blockers_report marker를 추가한다. current-policy legacy report는 blockersPath=null이며 소급 생성하지 않는다. marker가 있는 sidecar의 부재·무효는 `review-blockers-missing`·`review-blockers-invalid` 진단으로 멈춘다. prepare는 ToolDiagnosticError, checkpoint/seal은 stale 응답을 사용하며 자동 force하지 않는다. 구형 validation policy 거부가 이 호환성보다 우선한다.
 - checkpoint는 state의 effort·groups와 top-level 및 group별 diff·brief·opinion·verify 존재, next·sealReady를 반환한다.
 - `assess` summary는 `entryStage`, `worktreeDisposition`, `baseRef`, `unpushedCommits`, `dirtyPathCount`를 싣고 data의 assessment가 경로 목록을 담는다. 값은 관측 사실이며 중단 지시가 아니다.
 - `assess`의 완료 근거는 report template의 평평한 `key: scalar` frontmatter 안의 단일 `head_sha`와 `verdict`다. 전체 Git SHA-1 또는 SHA-256의 소문자 hex와 `PASS | FAIL | INCONCLUSIVE` 중 하나인 판정을 요구한다. 본문, 누락, 중복·모호한 키, 불완전한 frontmatter나 축약 SHA는 근거가 아니다. HEAD를 관측할 수 없거나 값이 다르거나 유효한 판정이 없으면 justifications → fix requests → PR → pr-create 순서로 재개한다.
@@ -158,6 +162,14 @@
 - 현재 검증 정책·opinion 의미 검증·complete·review hash·verify hash·review/verify 결합 중 하나라도 깨진 group은 trusted input이 아니며 이유가 unresolved evidence에 남는다.
 - pending coverage, evidence gap, verifier-level indeterminate와 severity와 무관한 indeterminate decision은 confirmed finding보다 먼저 `INCONCLUSIVE`를 만든다. 모든 증거가 complete일 때 confirmed가 있으면 `REQUEST_CHANGES`, 없으면 `APPROVED`다.
 - report, optional fix request, PR comment와 session checklist가 같은 fold 결과를 표현한 뒤에만 state가 sealed 되고 verdict가 저장된다.
+
+### AC-review-blockers — 분리된 보류 원인과 해소 안내
+
+- evidence incomplete·dirty worktree·pending·artifact trust·review gap·verifier state·decision indeterminacy/coverage를 빠짐없이 수집하며 기존 판정 우선순위와 finding 집합은 유지한다. 정상 제외·확정·반증·중립 관측은 blocker가 아니다.
+- 결정적 BLK ID와 정확한 원인별 중복 제거는 모든 출처를 보존한다. 동일 path의 다른 규칙을 합치지 않으며, 독립 출처의 상충하는 해소 제안은 분류 필요로 남긴다.
+- 별도 보고서에는 전 항목의 질문·현재 모르는 것·필요 증거·다음 행동·담당 제안·해소 조건·원본 참조가 있다. report/comment 앞부분은 같은 ID의 최대 5개 요약과 잔여 수·전체 위치를 표시한다. missing metadata를 구체적인 해결책으로 꾸미지 않는다.
+- actor 설명은 비실행 데이터로 escape하고 canonical artifact/anchor만 탐색 링크로 만든다. 사람 확인이나 안내문 편집만으로 판정을 해제하지 않으며 필요한 새 근거의 검증으로 재판정한다.
+- 새 artifact에도 containment·symlink guard·stale cleanup을 적용하고 산출물을 모두 쓴 뒤 state를 마지막에 기록한다. cached 호출은 바이트를 보존하며 sidecar 유실을 자동 재준비로 숨기지 않는다.
 
 ### AC-review-assess — 관측 사실만
 

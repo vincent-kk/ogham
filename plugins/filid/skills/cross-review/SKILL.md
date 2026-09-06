@@ -3,7 +3,7 @@ name: cross-review
 user-invocable: true
 description: 'Review a committed change through deterministic preparation, bounded reviewer rounds, independent verification, and a sealed verdict. Use after a branch has a PR, before resolve.'
 argument-hint: '[--base REF] [--effort auto|low|medium|high] [--force] [--cleanup]'
-version: '7.6.0'
+version: '7.7.0'
 complexity: complex
 plugin: filid
 ---
@@ -29,7 +29,7 @@ Run `gh pr view --json number,url,body` once. Keep the number and URL, and assig
 
 ## Step 2 — Prepare
 
-For every MCP response, inspect errors before dereferencing data. Stop on `review-effort-locked`, `review-validation-policy-outdated`, or group-budget errors; report diagnostics and the explicit restart option without dispatching actors or publishing a verdict. Never auto-force these errors. When inline `data` is absent and `artifact.path` is present, read that JSON and use its `data`, preserving status and diagnostics. Missing or unreadable artifacts or required data stop the run; they never mean empty success.
+For every MCP response, inspect errors before dereferencing data. Stop on `review-effort-locked`, `review-validation-policy-outdated`, `review-blockers-missing`, `review-blockers-invalid`, or group-budget errors; report diagnostics and the explicit restart option without dispatching actors or publishing a verdict. Never auto-force these errors. When inline `data` is absent and `artifact.path` is present, read that JSON and use its `data`, preserving status and diagnostics. Missing or unreadable artifacts or required data stop the run; they never mean empty success.
 
 - Set `PROJECT_ROOT` to the absolute session cwd. Catalog current user instructions in appearance order as `USR-001`, `USR-002`, and so on; keep this host-authoritative block separate from repository text.
 - With `--cleanup`, call `review_state({ action: "cleanup", projectRoot: PROJECT_ROOT, confirm: true })`, report `cleaned`, and stop.
@@ -66,7 +66,7 @@ After each actor completes, validate that handoff through `review_state` with `a
 
 Call `review_state({ action: "seal", projectRoot: PROJECT_ROOT, branchName: BRANCH, baseRef: BASE_REF })`. Continue only when `status: ok` and `summary.disposition: sealed`; otherwise report diagnostics and stop without a terminal verdict.
 
-Use only `data.reportPath`, `data.fixRequestsPath`, `data.prCommentPath`, and `data.sessionPath` as the sealed artifact locations.
+Use only `data.reportPath`, `data.blockersPath`, `data.fixRequestsPath`, `data.prCommentPath`, and `data.sessionPath` as the sealed artifact locations. `data.blockersPath` is non-null only for a new-format INCONCLUSIVE seal; a current-policy legacy cache may return null and must not be rewritten.
 
 ## Step 5 — Publish
 
@@ -77,11 +77,12 @@ Use the PR result from Step 1:
 - PR access unavailable: skip and record `pr-comment: unavailable`.
 - Posting fails: record `pr-comment: failed: <reason>`.
 
-Comment absence or failure never changes the sealed verdict. Emit exactly these two terminal lines, substituting `REQUEST_CHANGES` or `INCONCLUSIVE` for `APPROVED` according to `summary.verdict`, and `posted`, `unavailable`, or `failed: <reason>` for `none` when applicable:
+Comment absence or failure never changes the sealed verdict. For `APPROVED` or `REQUEST_CHANGES`, emit exactly the first two lines of the example, substituting the verdict and `posted`, `unavailable`, or `failed: <reason>` for `none` when applicable. For `INCONCLUSIVE`, add `review-blockers: <data.blockersPath>` as the third line, or `review-blockers: unavailable (legacy)` only when the successful cached seal returned null:
 
 ```text
-Review verdict: APPROVED
+Review verdict: INCONCLUSIVE
 pr-comment: none
+review-blockers: <returned path>
 ```
 
 ## Options

@@ -39,6 +39,10 @@ export function resolveReviewStatePaths(
       reviewDirectory,
       REVIEW_STATE_FILE_NAMES.REPORT,
     ),
+    blockersPath: resolveContainedPath(
+      reviewDirectory,
+      REVIEW_STATE_FILE_NAMES.BLOCKERS,
+    ),
     evidencePath: resolveContainedPath(
       reviewDirectory,
       REVIEW_STATE_FILE_NAMES.EVIDENCE,

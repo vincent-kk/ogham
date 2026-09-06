@@ -3,6 +3,7 @@ import type {
   ReviewFindingCategory,
   ReviewOpinion,
 } from '../opinion/reviewOpinionTypes.js';
+import type { ReviewResolutionAdvice } from '../opinion/reviewResolutionAdvice.js';
 import type {
   VerifyDecisionVerdict,
   VerifyOpinion,
@@ -125,6 +126,87 @@ export interface ReviewDecisionJoinResult {
   indeterminate: JoinedReviewDecision[];
   /** Missing or conflicting decision coverage that must remain visible. */
   unresolved: ReviewUnresolvedEvidence[];
+  /** Typed exact-set failures used without interpreting human-readable diagnostics. */
+  coverageIssues: ReviewDecisionCoverageIssue[];
+}
+
+/** Exact expected and observed identities at a failed decision-set boundary. */
+export interface ReviewDecisionCoverageIssue {
+  /** Group identity, or null for the global candidate/finding set. */
+  groupId: string | null;
+  /** Canonical evidence or verifier artifact carrying this set. */
+  artifactPath: string;
+  /** Required identities, including duplicates that themselves violate the contract. */
+  expectedIds: string[];
+  /** Observed independent and deterministic decision identities. */
+  actualIds: string[];
+}
+
+/** Typed source condition responsible for an inconclusive verdict. */
+export type ReviewBlockerKind =
+  | 'analysis-incomplete'
+  | 'dirty-worktree'
+  | 'coverage-pending'
+  | 'artifact-trust'
+  | 'review-gap'
+  | 'verifier-indeterminate'
+  | 'decision-indeterminate'
+  | 'decision-coverage'
+  | 'unclassified';
+
+/** Exact scope of a blocker; null explicitly denotes a non-applicable identity. */
+export interface ReviewBlockerScope {
+  /** Affected repository path, when known. */
+  path: string | null;
+  /** Owning group, or null when global or shared by multiple groups. */
+  groupId: string | null;
+  /** Candidate or finding whose disposition is blocked. */
+  findingId: string | null;
+  /** Rule requiring the missing evidence. */
+  rule: string | null;
+}
+
+/** Canonical source reference generated from trusted state rather than actor advice. */
+export interface ReviewBlockerSource {
+  /** Review-directory-relative artifact location. */
+  artifactPath: string;
+  /** JSON pointer to existing evidence or its containing collection. */
+  pointer?: string;
+  /** Stable Markdown section or candidate anchor, when applicable. */
+  anchor?: string;
+}
+
+/** One typed cause before exact deduplication, routing, and stable ID assignment. */
+export interface ReviewBlockerCause {
+  /** Source condition, never inferred by matching display text. */
+  kind: ReviewBlockerKind;
+  /** Scope copied from the evidence producing the cause. */
+  scope: ReviewBlockerScope;
+  /** Unmodified factual gap or deterministic diagnostic. */
+  detail: string;
+  /** Every canonical source supporting this occurrence. */
+  sources: ReviewBlockerSource[];
+  /** Optional validated actor or deterministic evidence-recovery proposal. */
+  resolution?: ReviewResolutionAdvice;
+  /** Provenance of provided advice; absent when advice is unavailable. */
+  adviceSource?: 'actor' | 'deterministic';
+}
+
+/** A separately identifiable question and resolution route for one sealed review. */
+export interface ReviewBlocker extends Omit<
+  ReviewBlockerCause,
+  'resolution' | 'adviceSource'
+> {
+  /** Deterministic identifier shared by all outputs of this review. */
+  id: string;
+  /** Human attention category, not execution authority. */
+  attention: 'human-decision' | 'evidence-recovery' | 'triage';
+  /** Validated proposal or explicitly labelled missing/conflicting-advice fallback. */
+  resolution: ReviewResolutionAdvice;
+  /** Whether the proposal came from an actor, typed recovery, or a fallback. */
+  adviceSource: 'actor' | 'deterministic' | 'missing' | 'conflict';
+  /** All distinct competing proposals when independent sources disagree. */
+  alternativeResolutions: ReviewResolutionAdvice[];
 }
 
 /** Immutable evidence identity and completeness fields consumed by the fold. */
@@ -161,6 +243,8 @@ export interface FoldReviewVerdictInput {
 export interface ReviewVerdictFold {
   /** Final ordered-table verdict. */
   verdict: ReviewVerdict;
+  /** Verdict-blocking questions separated from decisions and neutral observations. */
+  blockers: ReviewBlocker[];
   /** Complete normalized roster coverage. */
   checklist: ReviewChecklistEntry[];
   /** Every reviewer and FCA candidate joined to a decision. */
