@@ -29,15 +29,15 @@ ABANDON: G2 <reason — only when abandoning a gate>
 
 ## Ledger rules
 
-| Rule                               | Contract                                                                                                                                  |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Checkbox = claim; EVIDENCE = proof | A checked box with `EVIDENCE: pending` is UNMET.                                                                                          |
-| Verdict                            | The EXPECT match inside the observed output decides. A runnable gate without EXPECT is never met on any host — an exit code is not proof. |
-| ABANDON                            | Counts as resolved, remains separately visible, and always carries a reason.                                                              |
-| Evidence cap                       | Store the EXPECT-matching line plus the last non-empty line, at most 200 characters including any suffix.                                 |
-| ID                                 | Use globally unique `G<n>` IDs; `##` headings only group gates.                                                                           |
-| Plan                               | `Plan:` is a ledger-relative path for people; tools do not interpret it.                                                                  |
-| Literal fields                     | Wrap CHECK and EXPECT values in a Markdown code span. Matching edge runs are wrapper syntax; values without them remain compatible.       |
+| Rule                               | Contract                                                                                                                                                                                    |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Checkbox = claim; EVIDENCE = proof | A checked box with `EVIDENCE: pending` is UNMET.                                                                                                                                            |
+| Verdict                            | The EXPECT match inside the observed output decides. A runnable gate without EXPECT is never met on any host — an exit code is not proof.                                                   |
+| ABANDON                            | Counts as resolved, remains separately visible, and always carries a reason.                                                                                                                |
+| Evidence cap                       | Store the EXPECT-matching line plus the last non-empty line, at most 200 characters including any suffix.                                                                                   |
+| ID                                 | Use globally unique `G<n>` IDs; `##` headings only group gates.                                                                                                                             |
+| Plan                               | `Plan:` is a ledger-relative path for people; tools do not interpret it.                                                                                                                    |
+| Literal fields                     | Wrap CHECK and EXPECT values in a Markdown code span. Matching edge runs are wrapper syntax; values without them remain compatible.                                                         |
 | Matching                           | EXPECT is a trimmed, case-sensitive literal substring of one output line. Slashes, metacharacters, and flags have no special meaning. No regex mode or legacy-ledger migration is provided. |
 
 ## Authoring rules

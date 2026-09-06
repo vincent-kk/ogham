@@ -52,11 +52,11 @@ After artifact recovery, apply this failure rule: When a `scan` or `validate` ca
 
 Score INTENT.md on four independent 25-point axes:
 
-| Axis | Evidence |
-| --- | --- |
-| Purpose | A concrete ownership claim — what this fractal owns and what it refuses |
-| Conventions | Concrete module-specific decision rules |
-| Boundaries | Non-boilerplate Always/Ask/Never clauses |
+| Axis          | Evidence                                                                                   |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| Purpose       | A concrete ownership claim — what this fractal owns and what it refuses                    |
+| Conventions   | Concrete module-specific decision rules                                                    |
+| Boundaries    | Non-boilerplate Always/Ask/Never clauses                                                   |
 | Non-derivable | Only content tools cannot print — decisions, reasons, name traps; an inventory scores zero |
 
 ```text
@@ -114,17 +114,17 @@ INTENT.md follows the English anchors, three boundary tiers, and cap in [`../.sh
 
 For a `repair` item the writer removes what the finding names and nothing else: a derivable enumeration goes, a sentence that carries a reason beside its path stays, a stale token is removed or replaced with the existing path the surrounding evidence names, and a conditional section (`Structure`, `Dependencies`) emptied by the removal loses its heading.
 
-| Document rule | Edit range and action | Deferral |
-| --- | --- | --- |
-| `derivable-content`, `derivable-structure` | Named section: remove enumeration tokens without reasons, preserve reason-bearing sentences, and remove an emptied conditional heading. | None |
-| `stale-path` | Named section: remove the message's backticked token only if absent from the current tree and unmatched by `structure.generatedPaths`, or replace it with an existing path supported by the same paragraph. | A token matching `structure.generatedPaths`: `config-decision`; no edit |
-| `line-limit` | Whole INTENT.md: one compression retry, then the paired relocation below. | Still over the cap after relocation: `needs-rework` |
-| `missing-boundaries` | Missing tiers under `## Boundaries` named by the message: fill template anchors from evidence. | None |
-| `missing-field` — `Boundary exemption "<targetPath>" has no reason` | The quoted exemption entry: leave its Reason unfilled. | Always `config-decision` |
-| `missing-field` — acceptance heading/line error or absent groups | The message's heading/line or `## Acceptance Criteria`: normalize to `### <id> — <title>`; add an absent group skeleton only with support from spec-document contract markers or existing requirements. | Missing supporting evidence: `needs-rework` |
-| `missing-section` | Missing required DETAIL section: fill the template section from evidence. | None |
-| `duplicate-id` | Duplicated acceptance group: suffix the second and subsequent IDs named by the message to make them unique. | Choosing the canonical group requires judgment: `needs-rework`; no edit |
-| `missing-document` | Whole document: follow the MISSING draft process; `document: detail` means a DETAIL draft. | None |
+| Document rule                                                       | Edit range and action                                                                                                                                                                                       | Deferral                                                                |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `derivable-content`, `derivable-structure`                          | Named section: remove enumeration tokens without reasons, preserve reason-bearing sentences, and remove an emptied conditional heading.                                                                     | None                                                                    |
+| `stale-path`                                                        | Named section: remove the message's backticked token only if absent from the current tree and unmatched by `structure.generatedPaths`, or replace it with an existing path supported by the same paragraph. | A token matching `structure.generatedPaths`: `config-decision`; no edit |
+| `line-limit`                                                        | Whole INTENT.md: one compression retry, then the paired relocation below.                                                                                                                                   | Still over the cap after relocation: `needs-rework`                     |
+| `missing-boundaries`                                                | Missing tiers under `## Boundaries` named by the message: fill template anchors from evidence.                                                                                                              | None                                                                    |
+| `missing-field` — `Boundary exemption "<targetPath>" has no reason` | The quoted exemption entry: leave its Reason unfilled.                                                                                                                                                      | Always `config-decision`                                                |
+| `missing-field` — acceptance heading/line error or absent groups    | The message's heading/line or `## Acceptance Criteria`: normalize to `### <id> — <title>`; add an absent group skeleton only with support from spec-document contract markers or existing requirements.     | Missing supporting evidence: `needs-rework`                             |
+| `missing-section`                                                   | Missing required DETAIL section: fill the template section from evidence.                                                                                                                                   | None                                                                    |
+| `duplicate-id`                                                      | Duplicated acceptance group: suffix the second and subsequent IDs named by the message to make them unique.                                                                                                 | Choosing the canonical group requires judgment: `needs-rework`; no edit |
+| `missing-document`                                                  | Whole document: follow the MISSING draft process; `document: detail` means a DETAIL draft.                                                                                                                  | None                                                                    |
 
 `append-only` is not generated by scan. Any document rule absent from this table is left unchanged and recorded as `needs-rework`.
 

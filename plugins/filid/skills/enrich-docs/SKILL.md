@@ -14,15 +14,15 @@ Improve only INTENT.md/DETAIL.md, without changing source code, under one contra
 
 ## Contract
 
-| Option | Default | Meaning |
-| --- | --- | --- |
-| `path` | cwd | Directory to audit or an INTENT.md/DETAIL.md file to refine |
-| `--depth` | configured `structure.maxDepth`, otherwise `10` | Maps to `maxDepth`, a rule threshold, not a traversal limit |
-| `--min-quality` | `70` | RICH/SPARSE threshold, integer 0–100 |
-| `--dry-run` | off | Show the plan without writes |
-| `--auto-approve` | off | Authorize the displayed bounded plan |
-| `--include-detail` | off | Audit DETAIL.md and draft it when missing |
-| `--repair` | off | Plan document findings regardless of quality score |
+| Option             | Default                                         | Meaning                                                     |
+| ------------------ | ----------------------------------------------- | ----------------------------------------------------------- |
+| `path`             | cwd                                             | Directory to audit or an INTENT.md/DETAIL.md file to refine |
+| `--depth`          | configured `structure.maxDepth`, otherwise `10` | Maps to `maxDepth`, a rule threshold, not a traversal limit |
+| `--min-quality`    | `70`                                            | RICH/SPARSE threshold, integer 0–100                        |
+| `--dry-run`        | off                                             | Show the plan without writes                                |
+| `--auto-approve`   | off                                             | Authorize the displayed bounded plan                        |
+| `--include-detail` | off                                             | Audit DETAIL.md and draft it when missing                   |
+| `--repair`         | off                                             | Plan document findings regardless of quality score          |
 
 Report project path, snapshot hash, classifications, approval mode, before/after line counts, rewritten sections, evidence paths, per-document validation, and reverted items; then `Repaired: <n>`, `Relocated: <n>`, `Needs rework: <k>`, `Deferred: <m>` in that order, deferred rows, and `Diagnostics` ([§7](./reference.md#7-report)). End with exactly one marker:
 

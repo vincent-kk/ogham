@@ -118,8 +118,8 @@ Stage 1 narrows only the FCA document audit, never the PR change list. Send ever
 | -------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `fractal_inspect` `resolve` returns `resolved: true`                                                           | FCA-owned                  | Keep `result.summary.ownerFractalPath`; a target under a config-excluded directory name is still FCA-owned through its enclosing fractal. |
 | `resolved: false`, every diagnostic is `context-target-unresolved`, and `git cat-file -e HEAD:<path>` succeeds | existing ownerless non-FCA | Report the path and ownerless evidence; use a matching `structure.additionalExcludedDirectories` segment as the config-declared reason.   |
-| The target is absent from `HEAD`, including a deleted or renamed source                                        | unresolved                 | Resolve the nearest ancestor directory present in `HEAD`; when none resolves, record `unresolved-path` (§7) and continue.                  |
-| Any other failed diagnostic                                                                                    | unresolved                 | Record the diagnostic verbatim as `unresolved-path` (§7) and continue.                                                                     |
+| The target is absent from `HEAD`, including a deleted or renamed source                                        | unresolved                 | Resolve the nearest ancestor directory present in `HEAD`; when none resolves, record `unresolved-path` (§7) and continue.                 |
+| Any other failed diagnostic                                                                                    | unresolved                 | Record the diagnostic verbatim as `unresolved-path` (§7) and continue.                                                                    |
 
 `additionalExcludedDirectories` entries are directory names, not paths or globs. Compare complete project-relative directory segments; never match the basename or a partial segment. The config match is a reason, not an ownership override, and is consulted only after `resolved: false`. Config-declared and structural ownerless paths are listed in terminal progress and summarized by count in the PR Architecture section. They remain in the Code/Test analysis because non-FCA is a document-ownership verdict, not a request to hide the change.
 
@@ -131,15 +131,15 @@ The handoff carries the findings left after Stage 1's document work and its fina
 
 Apply certainty first: every finding with `certainty: indeterminate` or `unsupported` belongs to `indeterminate`. When certainty is absent and the message contains `indeterminate`, use that class too; current `test-record-case-cap` findings can have this shape. Otherwise retain absent certainty as `"certainty":"unstated"` in the machine block and classify by rule.
 
-| Class | Evidence | Treatment |
-| --- | --- | --- |
-| `repaired` | The enrich-docs report's `Repaired: n` | Include repairs in the Stage 1 document commit; report a count only, with no individual table or machine rows |
-| `needs-rework` | A document reverted by enrich-docs | Record it |
-| `config-decision` | `stale-path` naming a `structure.generatedPaths` token; `organ-no-intentmd`; a Boundary Exemption with an empty Reason (`missing-field`) | Record for a human or configuration decision |
-| `code-change` | `circular-dependency`, `external-import-boundary`, `pure-function-isolation`, `max-depth`, `zero-peer-file`, `module-entry-point`, `entry-point-surface`; `test-record-case-cap` and `spec-*` with `exact` certainty | Record for review |
-| `indeterminate` | Any finding with `indeterminate` or `unsupported` certainty; scan-level diagnostics; `Verification evidence is indeterminate.` | Record the evidence gap |
-| `unresolved-path` | A Stage 1 step 2 resolution failure that cannot become non-FCA | Record the path and diagnostic |
-| `document-sync` | Enrich-docs cancellation (`declined`), tool failure or missing ending marker (`failed`), `--skip-enrich` (`skipped`), resolve-batch or document-commit failure; final validation or artifact-read failure (`ruleId: handoff-validate`) | Record the diagnostic verbatim and continue to Stage 2 |
+| Class             | Evidence                                                                                                                                                                                                                               | Treatment                                                                                                     |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `repaired`        | The enrich-docs report's `Repaired: n`                                                                                                                                                                                                 | Include repairs in the Stage 1 document commit; report a count only, with no individual table or machine rows |
+| `needs-rework`    | A document reverted by enrich-docs                                                                                                                                                                                                     | Record it                                                                                                     |
+| `config-decision` | `stale-path` naming a `structure.generatedPaths` token; `organ-no-intentmd`; a Boundary Exemption with an empty Reason (`missing-field`)                                                                                               | Record for a human or configuration decision                                                                  |
+| `code-change`     | `circular-dependency`, `external-import-boundary`, `pure-function-isolation`, `max-depth`, `zero-peer-file`, `module-entry-point`, `entry-point-surface`; `test-record-case-cap` and `spec-*` with `exact` certainty                   | Record for review                                                                                             |
+| `indeterminate`   | Any finding with `indeterminate` or `unsupported` certainty; scan-level diagnostics; `Verification evidence is indeterminate.`                                                                                                         | Record the evidence gap                                                                                       |
+| `unresolved-path` | A Stage 1 step 2 resolution failure that cannot become non-FCA                                                                                                                                                                         | Record the path and diagnostic                                                                                |
+| `document-sync`   | Enrich-docs cancellation (`declined`), tool failure or missing ending marker (`failed`), `--skip-enrich` (`skipped`), resolve-batch or document-commit failure; final validation or artifact-read failure (`ruleId: handoff-validate`) | Record the diagnostic verbatim and continue to Stage 2                                                        |
 
 Default classification for findings outside the table: a remaining `documents` scope finding is `needs-rework`; a `verification` scope finding with no certainty and no `indeterminate` in its message is `code-change`, reflecting an actual cap violation. Any other unknown `ruleId` is `code-change` with `unclassified:` prefixed to its note.
 
@@ -173,10 +173,10 @@ Normal handoff — document sync committed three repairs, with two findings carr
 
 Counts: 1 code-change, 0 config-decision, 1 indeterminate, 0 needs-rework, 0 unresolved-path, 0 document-sync.
 
-| Class | Rule | Path | Certainty | Note |
-| --- | --- | --- | --- | --- |
-| code-change | circular-dependency | plugins/filid/src | exact | plugins/filid/src → plugins/filid/src/mcp/server → plugins/filid/src |
-| indeterminate | test-record-case-cap | plugins/filid/src/__tests__/unit/mcp/reviewState/readReviewState.test.ts | indeterminate | parameterized case at offset 6203 uses a dynamic table; case count &gt; 32 is indeterminate |
+| Class         | Rule                 | Path                                                                     | Certainty     | Note                                                                                        |
+| ------------- | -------------------- | ------------------------------------------------------------------------ | ------------- | ------------------------------------------------------------------------------------------- |
+| code-change   | circular-dependency  | plugins/filid/src                                                        | exact         | plugins/filid/src → plugins/filid/src/mcp/server → plugins/filid/src                        |
+| indeterminate | test-record-case-cap | plugins/filid/src/**tests**/unit/mcp/reviewState/readReviewState.test.ts | indeterminate | parameterized case at offset 6203 uses a dynamic table; case count &gt; 32 is indeterminate |
 
 </details>
 
@@ -195,9 +195,9 @@ Failed final validation — the artifact could not be read, so publication carri
 
 Counts: 0 code-change, 0 config-decision, 0 indeterminate, 0 needs-rework, 0 unresolved-path, 1 document-sync.
 
-| Class | Rule | Path | Certainty | Note |
-| --- | --- | --- | --- | --- |
-| document-sync | handoff-validate | . | unstated | artifact-read-failed: cannot read /tmp/filid-validate.json (read count &lt; 1) |
+| Class         | Rule             | Path | Certainty | Note                                                                           |
+| ------------- | ---------------- | ---- | --------- | ------------------------------------------------------------------------------ |
+| document-sync | handoff-validate | .    | unstated  | artifact-read-failed: cannot read /tmp/filid-validate.json (read count &lt; 1) |
 
 </details>
 

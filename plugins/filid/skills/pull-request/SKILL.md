@@ -77,13 +77,13 @@ At entry, initialize the handoff with `recorded: []`, `repaired: 0`, and `docume
 4. When owners exist and `--skip-enrich` is absent, invoke `Skill("filid:enrich-docs", "<owner fractal paths> --include-detail --repair")` so the audit covers both INTENT.md and DETAIL.md. Append `--auto-approve` **exactly when this skill received it** — never by inferring that a pipeline is running. An orchestrator that wants unattended document sync passes the flag; without it, enrich-docs keeps its own approval step and a standalone run stays interactive.
 5. Read the enrich-docs report when step 4 ran. Nothing here exits:
 
-   | enrich-docs outcome | `Document sync` | Handoff |
-   | --- | --- | --- |
-   | `Enrich-docs complete` | `committed` when step 6 committed, otherwise `no-change` | `Repaired: n` becomes the repaired count; each `Needs rework` document and each `deferred:` line becomes an entry |
-   | `Enrich-docs skipped: all RICH` | `committed` when step 6 committed, otherwise `no-change` | none |
-   | `Enrich-docs cancelled` | `declined` | one `document-sync` entry: approval declined |
-   | `Enrich-docs failed: <reason>` | `failed` | one `document-sync` entry carrying `<reason>` verbatim |
-   | any other ending — unreadable artifact, missing marker | `failed` | one `document-sync` entry with the diagnostic verbatim |
+   | enrich-docs outcome                                    | `Document sync`                                          | Handoff                                                                                                           |
+   | ------------------------------------------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+   | `Enrich-docs complete`                                 | `committed` when step 6 committed, otherwise `no-change` | `Repaired: n` becomes the repaired count; each `Needs rework` document and each `deferred:` line becomes an entry |
+   | `Enrich-docs skipped: all RICH`                        | `committed` when step 6 committed, otherwise `no-change` | none                                                                                                              |
+   | `Enrich-docs cancelled`                                | `declined`                                               | one `document-sync` entry: approval declined                                                                      |
+   | `Enrich-docs failed: <reason>`                         | `failed`                                                 | one `document-sync` entry carrying `<reason>` verbatim                                                            |
+   | any other ending — unreadable artifact, missing marker | `failed`                                                 | one `document-sync` entry with the diagnostic verbatim                                                            |
 
    Resolve competing `Document sync` outcomes with this precedence: `failed` > `declined` > `skipped` > `committed` > `no-change`.
 
@@ -130,7 +130,7 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 | Option           | Type   | Default | Effect                                                                                                              |
 | ---------------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
 | `--base REF`     | string | auto    | Base branch for the diff and the PR                                                                                 |
-| `--skip-enrich`  | flag   | off     | Skip the enrich-docs call in Stage 1; scope resolution and the handoff still run                                     |
+| `--skip-enrich`  | flag   | off     | Skip the enrich-docs call in Stage 1; scope resolution and the handoff still run                                    |
 | `--auto-approve` | flag   | off     | Forwarded to `enrich-docs`, which then writes without asking                                                        |
 | `--draft`        | flag   | off     | Create the PR as a draft                                                                                            |
 | `--title TITLE`  | string | auto    | PR title; generated when omitted                                                                                    |
