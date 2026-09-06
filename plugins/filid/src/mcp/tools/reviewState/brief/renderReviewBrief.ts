@@ -27,7 +27,7 @@ function renderNewRanges(hunks: readonly ReviewHunk[]): string {
 }
 
 /**
- * Render one deterministic reviewer brief with the full roster kept visible.
+ * Render one reviewer brief while keeping the full roster in the shared checklist.
  * @param input Group, roster, candidates, and resolved rule bodies.
  * @param round One-based reviewer round whose opinion path the brief targets.
  * @returns Reviewer Markdown containing the exact v7 output contract.
@@ -70,15 +70,8 @@ export function renderReviewBrief(
     : 'none';
   const groupPaths = new Set(input.group.units.map(({ path }) => path));
   const otherFiles = input.files.filter(({ path }) => !groupPaths.has(path));
-  const rosterTable = otherFiles.length
-    ? renderMarkdownTable(
-        ['Path', 'Change', 'Role'],
-        otherFiles.map((file) => [
-          escapeMarkdownCell(file.path),
-          file.change,
-          file.role,
-        ]),
-      )
+  const rosterSummary = otherFiles.length
+    ? `${otherFiles.length} other changed files. Search ../session.md (Review Checklist) only for a specific caller or consumer lookup; do not read the full roster.`
     : 'none';
   const candidatesTable = renderMarkdownTable(
     [
@@ -154,7 +147,7 @@ export function renderReviewBrief(
     '',
     '## Other Changed Files',
     '',
-    rosterTable,
+    rosterSummary,
     '',
     '## FCA Candidates',
     '',

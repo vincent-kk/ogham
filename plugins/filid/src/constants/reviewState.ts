@@ -62,11 +62,14 @@ export const REVIEW_EFFORT_ROUNDS = {
 /** Effort used when neither the request nor configuration chooses one. */
 export const REVIEW_DEFAULT_EFFORT = 'medium';
 
-/** Maximum review units grouped together by default. */
+/** Minimum file cap used by automatic review-group sizing. */
 export const REVIEW_GROUP_FILE_LIMIT = 10;
 
+/** Maximum file cap for automatic sizing of low-churn changes. */
+export const REVIEW_GROUP_ADAPTIVE_FILE_LIMIT = 32;
+
 /** Maximum total churn in one group and one chunk by default. */
-export const REVIEW_GROUP_CHURN_LIMIT = 800;
+export const REVIEW_GROUP_CHURN_LIMIT = 1024;
 
 /** File-count threshold for the single-group shortcut. */
 export const REVIEW_SMALL_GROUP_FILE_LIMIT = 4;
@@ -268,6 +271,8 @@ export const REVIEW_STATE_STALE_ARTIFACT_DIRECTORY_NAMES = [
 
 /** Stable machine-readable diagnostic codes returned by review-state handlers. */
 export const REVIEW_STATE_DIAGNOSTIC_CODES = {
+  /** Configured actor-group budget would be exceeded by this review. */
+  GROUP_BUDGET_EXCEEDED: 'review-group-budget-exceeded',
   BRANCH_UNRESOLVED: 'review-branch-unresolved',
   BASE_REF_UNRESOLVED: 'review-base-ref-unresolved',
   CHANGE_CONTEXT_TRUNCATED: 'review-change-context-truncated',

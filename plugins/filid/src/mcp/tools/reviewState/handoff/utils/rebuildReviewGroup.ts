@@ -68,6 +68,7 @@ export async function rebuildReviewGroup(
         state: replayed,
         paths,
         group: current,
+        replayThroughRound: group.validated.review!.round,
       });
       if (!result.summary.ok)
         throw new ToolDiagnosticError(

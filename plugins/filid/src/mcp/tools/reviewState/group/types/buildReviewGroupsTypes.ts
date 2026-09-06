@@ -14,8 +14,8 @@ export interface BuildReviewGroupsOptions {
   candidates: readonly ReviewScopeCandidate[];
   /** Review rounds assigned to every nonempty review group. */
   rounds: number;
-  /** Maximum number of review units in a normal group. */
-  groupFileLimit: number;
+  /** Explicit file cap; omission selects automatic sizing from change density. */
+  groupFileLimit?: number;
   /** Maximum combined changed-line churn in a group. */
   groupChurnLimit: number;
   /** Whole-file churn threshold that requires a reviewer plan. */

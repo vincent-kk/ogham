@@ -217,7 +217,9 @@ describe('renderReviewBrief', () => {
     const roster = output
       .split('## Other Changed Files\n')[1]!
       .split('## FCA Candidates')[0]!;
-    expect(roster).toContain('public/generated.js');
+    expect(roster).toContain('1 other changed files');
+    expect(roster).toContain('../session.md');
+    expect(roster).not.toContain('public/generated.js');
     expect(roster).not.toContain('src/a.ts');
     expect(roster).not.toContain('src/b.ts');
   });

@@ -59,7 +59,7 @@ const genuineGap = readFileSync(
 
 describe('cross-review v7 skill surface', () => {
   it('declares the v7 frontmatter and orchestration schema', () => {
-    expect(skill).toContain("version: '7.2.0'");
+    expect(skill).toContain("version: '7.3.0'");
     expect(skill).toContain('review_schema: 7');
     expect(skill).toContain('--effort low|medium|high');
   });
@@ -140,7 +140,8 @@ describe('cross-review v7 skill surface', () => {
     );
   });
 
-  it('keeps the verifier model hint only once in orchestration prose', () => {
+  it('uses one efficient-model hint for both actor roles in orchestration prose', () => {
+    expect(skill).toContain('For every review and verify handoff');
     expect(skill.match(/sonnet/g)).toHaveLength(1);
     expect(verifier).not.toContain('## Spawn');
     expect(verifier).not.toContain('sonnet');

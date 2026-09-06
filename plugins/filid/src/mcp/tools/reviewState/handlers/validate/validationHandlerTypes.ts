@@ -31,6 +31,8 @@ export interface ValidateOpinionContext {
   state: ReviewStateRecord;
   /** Prepared group selected by the request. */
   group: ReviewGroup;
+  /** Previously validated prefix to replay without applying new-work stop conditions. */
+  replayThroughRound?: number;
 }
 
 /** Fields shared by both exact validation response projections. */

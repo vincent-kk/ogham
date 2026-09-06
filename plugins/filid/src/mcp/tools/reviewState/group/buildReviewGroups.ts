@@ -6,6 +6,7 @@ import type { ReviewGroup, ReviewUnit } from '../state/reviewGroupTypes.js';
 
 import { assignCandidatesToGroups } from './assignCandidatesToGroups.js';
 import type { BuildReviewGroupsOptions } from './types/buildReviewGroupsTypes.js';
+import { resolveReviewGroupFileLimit } from './utils/resolveReviewGroupFileLimit.js';
 import { resolveReviewGroupStem } from './utils/resolveReviewGroupStem.js';
 
 /**
@@ -28,15 +29,10 @@ function formatGroupId(index: number): string {
 export function buildReviewGroups(
   input: BuildReviewGroupsOptions,
 ): ReviewGroup[] {
-  const {
-    units,
-    files,
-    candidates,
-    rounds,
-    groupFileLimit,
-    groupChurnLimit,
-    planChurnLimit,
-  } = input;
+  const { units, files, candidates, rounds, groupChurnLimit, planChurnLimit } =
+    input;
+  const groupFileLimit =
+    input.groupFileLimit ?? resolveReviewGroupFileLimit(units, groupChurnLimit);
   if (!Number.isInteger(groupFileLimit) || groupFileLimit <= 0)
     throw new Error('group file limit must be a positive integer');
 

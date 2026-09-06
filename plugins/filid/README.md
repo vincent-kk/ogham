@@ -99,7 +99,22 @@ Produces a read-only placement plan — `sourcePath → targetPath`, the basis f
 /filid:cross-review --base origin/main
 ```
 
-`review_state(prepare)` records the committed-file roster and FCA evidence, then deterministically selects, chunks, groups, and materializes bounded diffs and briefs. Reviewers write JSON opinion rounds against layered rules; `validate` checks and merges them before an efficient-model verifier independently decides every candidate as `CONFIRMED | REFUTED | INDETERMINATE`. `seal` trusts only validated hashes, folds the verdict, and renders the report, fix requests, and PR comment. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
+`review_state(prepare)` records the committed-file roster and FCA evidence, then deterministically selects, chunks, groups, and materializes bounded diffs and briefs. Both reviewers and verifiers use the host's efficient model tier when available. Reviewers write JSON opinions against layered rules; `validate` merges them and requests another review only when its effort policy requires it. A verifier independently decides assigned findings as `CONFIRMED | REFUTED | INDETERMINATE`. `seal` trusts only validated hashes, folds the verdict, and renders the report, fix requests, and PR comment. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
+
+The default group budget is **1,024 changed lines**. The file cap adapts to change density within 10–32 files; explicitly setting `review.groupFileLimit` selects a fixed cap. The full changed-file checklist stays in the shared session instead of being copied into every brief. Default `medium` permits a second review only for a new error requiring verification; `low` uses one review, and explicit `high` can follow new warnings for up to three rounds. These effort levels do not select model tiers.
+
+An optional project or user configuration can stop oversized reviews before any actor is dispatched:
+
+```json
+{
+  "review": {
+    "groupChurnLimit": 1024,
+    "maxGroups": 48
+  }
+}
+```
+
+`maxGroups` counts reviewable groups, not concurrent actors or total follow-up calls. Exceeding it reports `review-group-budget-exceeded`; no files are silently skipped. Omit it for unrestricted group counts. Existing prepared groups keep their identities; use `--force` to apply changed grouping limits. Lowering `concurrency` changes scheduling, not the total work.
 
 ### Migrate legacy document names
 

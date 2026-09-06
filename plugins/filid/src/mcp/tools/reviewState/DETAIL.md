@@ -17,12 +17,13 @@
 - review glob의 `**/` 접두는 root 파일에도 맞추지만 generated-path matcher의 segment-prefix 계약은 바꾸지 않는다. repository rule file은 project root 안의 non-symlink target이어야 한다.
 - 파일 churn이 `groupChurnLimit` 이하면 unit 하나다. 초과하면 hunk 경계에서 누적하고, 단일 oversized hunk만 old/new line을 추적하며 줄 단위로 나눠 모든 unit을 churn 상한 안에 둔다.
 - unit은 owner(null은 마지막)·path 순서로 그룹화한다. 작은 변경 shortcut도 file·churn 설정 상한으로 clamp하고, chunked file의 unit은 순차 dependency를 가진 별도 group이 된다. ID는 `01`부터 상한 없이 두 자리 이상 zero-padding한다.
-- effort는 low·medium·high를 각각 1·2·3 round로 정하고 기본값은 medium이다. file·churn·plan·concurrency 기본값은 각각 10·800·50·8이며 작은 변경 shortcut의 상수 threshold는 file 4·churn 200이다.
+- effort는 low·medium·high를 각각 최대 1·2·3 round로 정하고 기본값은 medium이다. churn·plan·concurrency 기본값은 각각 1024·50·8이며 작은 변경 shortcut의 상수 threshold는 file 4·churn 200이다. 명시한 groupFileLimit은 고정 상한이다. 생략하면 unchunked unit의 count를 `max(1, ceil(totalChurn / groupChurnLimit))`로 나눈 올림값을 10~32 사이로 clamp해 파일 상한을 정한다. 모든 group과 chunk는 churn 상한을 지킨다.
+- 선택 `review.maxGroups`를 넘는 reviewable group은 fresh·resumable prepare에서 오류로 거부하고 handoff를 반환하지 않는다. candidate-only group은 액터 비용이 없어 세지 않는다. sealed cache에는 적용하지 않는다. 기존 group 구성과 검증 identity는 resume에서 보존하므로 그룹 크기 설정을 바꾸려면 `--force`가 필요하다.
 - `planRequired`는 unit chunk 크기가 아니라 원본 파일 churn으로 결정한다. FCA candidate는 path 일치, owner 일치, `01` 순서에서 가장 작은 한 group에만 배정한다.
 - reviewable unit 없이 candidate만 있으면 rounds 0의 `01` group과 complete empty merged opinion, review validation hash, verify brief, 빈 COMPLETE auto-verify opinion과 reviewSha256으로 결합된 verify validation을 만든다. 둘 다 없으면 group도 없다.
 - rounds 0의 병합 opinion이 trusted가 아니면(validation 누락 포함) canonical 빈 병합 opinion과 review validation을 다시 쓰고 verify 결합을 재관측해 필요하면 auto-verify를 복구한다. 최초 준비와 복구는 같은 빈 opinion 작성 함수를 사용한다.
-- 순차 raw round 재검증은 raw 파일과 기존 verify 파일 바이트를 보존한다. 재검증 내부의 auto-verify가 기존 관측 내용을 덮어쓰지 않으며, 원래 verify 바이트를 복원한 뒤 현재 reviewSha256 결합을 재관측한다.
-- group 확정 뒤 각 unit의 diff를 ordinal이 붙은 고유 경로에 쓰고 review brief, round-1 opinion skeleton과 session을 만든다. brief는 group 파일, prior opinion, 전체 roster, candidate, repository rule path, 적용된 rule body와 JSON output contract를 담는다.
+- 순차 raw round 재검증은 raw 파일과 기존 verify 파일 바이트를 보존한다. 이미 검증된 마지막 round까지는 현재 후속 round 정책과 무관하게 재생해 기존 finding을 보존한다. 마지막 재생 뒤 새 round가 필요한지는 현재 정책으로 판단한다. 재검증 내부의 auto-verify가 기존 관측 내용을 덮어쓰지 않으며, 원래 verify 바이트를 복원한 뒤 현재 reviewSha256 결합을 재관측한다.
+- group 확정 뒤 각 unit의 diff를 ordinal이 붙은 고유 경로에 쓰고 review brief, round-1 opinion skeleton과 session을 만든다. brief는 group 파일, prior opinion, 외부 roster 개수와 공통 checklist 참조, candidate, repository rule path, 적용된 rule body와 JSON output contract를 담는다. 전체 roster는 session checklist에 보존하며 각 brief에 복사하지 않는다.
 - `validate`는 review·verify JSON의 구조와 배정 범위를 검사하는 유일한 지점이다. 문제는 pass로 바꾸지 않으며, review finding의 위치를 committed source에서 확정하고 round를 결정적으로 병합한다.
 - `seal`은 complete review validation과 결합된 verify validation의 hash가 현재 artifact와 모두 일치하는 group만 신뢰한다. reviewer skip, gap, 누락·변조·미완 validation은 `INCONCLUSIVE` 근거로 남긴다. worktree가 이미 documents-only 또는 source-dirty이면 reviewer 실행을 건너뛰는 경로를 지원하기 위해 `OPINIONS_MISSING`을 반환하지 않고, 병합 opinion이 전혀 없어도 같은 fold를 끝까지 실행해 봉인된 `INCONCLUSIVE`를 만든다.
 - verdict는 trusted opinion·verification과 canonical evidence의 결정론 decision을 합친 fold로 계산한다. 렌더링이 끝난 뒤 state verdict와 sealed phase를 기록하며 이미 sealed인 state는 다시 렌더링하지 않는다.
@@ -48,7 +49,7 @@
 - prepare는 resumable 복구 → state 저장 → `readReviewGroupArtifactStatus` → `planNextHandoffs` → payload 순서다. fresh/cached도 artifact 기록을 끝낸 뒤 read → plan을 거친다. validate는 opinion 검증·병합·auto-verify·validation 기록 → state 저장 → 모든 group read → plan → payload이며 복구하지 않는다. checkpoint는 read → plan → payload만 수행하고 저장·복구하지 않는다.
 - 순수 handoff 계획은 state·paths·statuses만 입력받는다. review missing/invalid는 필요한 review round, trusted 미완료 review는 다음 round, trusted 완료 review와 missing/invalid verify는 assignedCount가 양수일 때 verify를 반환한다. dependsOn이 끝나지 않은 group은 제외한다. sealReady는 모든 group의 complete review·verify가 trusted일 때 true이며 documents-only/source-dirty는 항상 `{ next: [], sealReady: true }`다. 이미 sealed인 세션도 같은 값을 반환하므로 cached prepare는 액터를 다시 배정하지 않는다. cross-review는 prepare·validate의 next를 실행하고 다른 merge-track 스킬은 checkpoint의 next를 재개 관측에만 쓴다.
 - built-in rule map은 schema version 1과 `{ id, always?, match?, when?, file }` entry를 가진다. repository override는 `{ rules: [{ id, match?, always?, file, replaces? }] }`이고 override file은 project-relative path다.
-- group diff는 `diffs/<group>/<ordinal>-<basename>[.<k>-of-<n>].diff`로 materialize한다. review brief frontmatter는 group·rounds·plan-required·dependency·source hash·base ref·output을, 본문은 reviewer method verbatim, Change Context, FCA Handoff(유효한 블록이 있을 때만), Files, Diffs, Prior Opinions, Other Changed Files(group 밖 roster만, 없으면 none), FCA Candidates, Repository Rules, Rules, Output Contract 순서다.
+- group diff는 `diffs/<group>/<ordinal>-<basename>[.<k>-of-<n>].diff`로 materialize한다. review brief frontmatter는 group·rounds·plan-required·dependency·source hash·base ref·output을, 본문은 reviewer method verbatim, Change Context, FCA Handoff(유효한 블록이 있을 때만), Files, Diffs, Prior Opinions, Other Changed Files(group 밖 파일 개수와 session checklist 참조만, 없으면 none), FCA Candidates, Repository Rules, Rules, Output Contract 순서다.
 - review brief의 Prior Opinions는 dependsOn group만 열거한다. 현재 group의 이전 병합 opinion 경로는 handoff의 priorOpinionPath가 전달한다.
 - actor method는 pluginRoot의 cross-review skill 아래 reviewer·verifier 문서를 rule map과 같은 containment·symlink 검사로 읽고 부재 시 `review-actor-method-missing` error를 반환한다. review·verify의 Diffs는 group diff 합계가 16384바이트 이하면 unit path별 fenced diff를 인라인하고, 초과하면 `see Diff Path column`만 쓴다. 이 예산은 diff에만 적용하며 전체 brief 크기 상한이 아니다.
 - session frontmatter는 schema·branch·base ref·source hash·review directory·changed-file count·effort·created-at을 가진다. prepare가 채운 Change Context와 모든 roster path의 status·reason·group checklist를 함께 쓴다.
@@ -58,7 +59,7 @@
 - finding line은 먼저 배정 unit의 hunk에서, 다음으로 HEAD file 전체에서 trim 단위로 `existingCode`를 찾는다. 유일한 위치만 `start-end`와 `inDiff`를 기록하고 나머지는 `unknown`, false다.
 - round 1은 merged opinion을 만들고 이후 round는 `(path, lines, rule, existingCode)`로 deduplicate한 뒤 ID를 다시 순번화한다. files·checked·gaps는 합집합, state는 어느 입력이든 indeterminate이면 indeterminate, round는 최대값이다. 새 finding이 없으면 어느 round에서든 종료한다.
 - review validate summary는 disposition `validated`, kind·group·round·ok·problem/findings/new-findings count·next round를 싣고 data는 problem 목록, merged opinion path와 verify brief path, next·sealReady·verifierRequired를 싣는다. 성공한 merged opinion의 hash와 complete 여부를 state에 쓰고 기존 verify validation은 지운다.
-- review validate는 다음 round가 필요할 때만 배정 unit 전체가 pending인 skeleton을 만들고, 마지막 round 또는 new finding 0이면 complete를 기록한다. rounds 0 group에 review validate를 호출하면 error다.
+- review validate는 다음 round가 필요할 때만 배정 unit 전체가 pending인 skeleton을 만든다. medium은 신규 assigned error가 있을 때만, 명시 high는 신규 assigned finding이 있을 때만 남은 round를 사용한다. warning-only medium, 결정론 refuted-only, 새 finding 0 또는 마지막 round는 complete다. rounds 0 group에 review validate를 호출하면 error다.
 - `splitVerifierAssignment`는 inDiff가 false이고 rule이 USR-·FCA- 어느 접두도 아닌 finding을 deterministicRefuted로, 나머지를 assigned로 분리한다. lines unknown도 같은 분류를 따른다. brief 렌더·verify validate·seal fold는 같은 순수 함수를 쓴다.
 - verify brief는 group·source hash·output frontmatter, verifier method의 Deliverable부터 끝까지 verbatim, Files, Diffs, assigned finding만의 Decisions Required, Output Contract를 가진다. Re-verification Mode와 Prior Verifier Guidance 절은 포함하지 않으며 FCA candidate ID 행도 넣지 않는다. FCA-1 rule을 인용한 reviewer finding은 assigned에 남는다.
 - 마지막 review round에서 assigned가 비면 빈 COMPLETE verify JSON(decisions·observations는 빈 배열, checked는 group unit path)을 직접 쓰고 verifierRequired는 false다. 동일 바이트 hash를 validated.verify.sha256, 병합 opinion hash를 reviewSha256에 기록하고 state를 마지막에 저장한다. rounds 0 group도 prepare에서 같은 auto-verify를 기록한다.
@@ -113,6 +114,9 @@
 
 ### AC-review-group — 결정적 그룹과 candidate 귀속
 
+- 명시 파일 상한을 보존하고 생략하면 변경 밀도에 따른 10~32 자동 상한을 사용한다. 모든 unit을 정확히 한 번 배정하며 설정된 churn 상한을 넘지 않는다.
+- maxGroups를 넘는 fresh·resumable 준비는 배정 전에 오류로 끝나며, roster 누락이나 일부 그룹 성공으로 예산을 맞추지 않는다.
+- 외부 roster가 늘어도 reviewer brief에는 개수와 공통 checklist 참조만 남아 입력 크기가 목록 길이에 비례해 증가하지 않는다.
 - 작은 변경 shortcut은 unit count와 total churn 모두 configured cap과 상수 threshold 중 작은 값 이하여야 한다.
 - 일반 grouping은 owner·path·stem 인접성을 보존하며 file·churn cap 전에 끊고, chunked file의 group은 바로 앞 chunk에만 의존한다.
 - group ID는 `01`, `02`, …, `99`, `100`처럼 상한 없이 증가하고 `planRequired`는 원본 file churn으로 계산한다.
@@ -129,6 +133,7 @@
 
 - 배정 file 집합, result, finding ID·enum·path·필수 text와 indeterminate gap을 전부 검사하고 하나라도 불명확하면 pass로 만들지 않는다.
 - round merge는 distinct unknown-line finding을 `existingCode`로 구분하고 새 finding이 없는 즉시 다음 round를 만들지 않는다.
+- medium에서 경고나 결정론 refuted finding만 추가되면 다음 리뷰 없이 필요한 독립 verifier로 진행한다. 신규 assigned error와 명시 high의 신규 assigned warning은 남은 round를 사용할 수 있다.
 - review 성공은 merged hash·round·complete를 기록하고 verify validation을 무효화한다. verify 성공은 file hash와 그 review hash를 함께 기록한다.
 - verify decision은 splitVerifierAssignment의 assigned finding ID를 빠짐없이 정확히 한 번 판정한다. assigned가 비면 마지막 round는 auto-verify를 기록한다.
 
@@ -160,4 +165,4 @@
 
 ## Last Updated
 
-2026-09-05
+2026-09-06

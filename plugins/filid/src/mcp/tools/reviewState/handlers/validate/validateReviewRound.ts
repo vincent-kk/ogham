@@ -194,8 +194,17 @@ export async function validateReviewRound(
     null,
     REVIEW_STATE_JSON_INDENT,
   )}${REVIEW_STATE_JSON_TRAILING_NEWLINE}`;
+  const { assigned: newlyAssigned } = splitVerifierAssignment(
+    merged.addedFindings,
+  );
   const nextRound =
-    round < group.rounds && merged.newFindings > 0 ? round + 1 : null;
+    round < (context.replayThroughRound ?? 0) ||
+    (round < group.rounds &&
+      newlyAssigned.some(
+        (finding) => state.effort === 'high' || finding.severity === 'error',
+      ))
+      ? round + 1
+      : null;
   const { assigned } = splitVerifierAssignment(merged.opinion.findings);
   const verifierRequired = nextRound === null && assigned.length > 0;
   writeFileAtomicallySync(opinionPath, mergedBytes);

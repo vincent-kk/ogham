@@ -6,6 +6,7 @@
 - Filid는 FCA 노드, 어댑터가 보고한 진입점, 외부 import 경계와 실제 의존 DAG를 검사한다.
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
 - Filid의 cross-review는 `review_state prepare`가 변경 roster·FCA 후보를 선별·청킹·그룹화하고 규칙·diff·brief를 물질화하며, 그룹별 actor가 JSON opinion과 verification을 쓴다. `validate`가 이를 검사하고 `seal`이 검증된 hash만 결정적으로 fold·렌더링한다. 코드는 수정하지 않는다.
+- cross-review는 reviewer와 verifier 모두 효율 모델을 기본으로 선택한다. 기본 1024줄 상한과 변경 밀도별 자동 파일 상한으로 그룹을 구성하고, 선택한 전체 그룹 예산을 배정 전에 검사하며, 전체 roster를 각 actor brief에 반복하지 않는다. 기본 medium의 후속 리뷰는 신규 assigned error가 있을 때만 실행한다.
 - `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `fractal_inspect` `resolve` 결과의 `data.results[].summary.chainPaths` 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
 - `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 PR 본문의 `FCA Handoff`에 `unresolved-path`로 기록하고 계속한다.
 - `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하며, 문서 commit 이후 원격 branch와 현재 HEAD를 다시 비교해 뒤처졌으면 기본적으로 push한 뒤 게시한다. `--no-push`와 publication 실패는 branch별로 저장된 body를 남겨 복구할 수 있어야 한다.
@@ -107,6 +108,7 @@
 
 ## History
 
+- 2026-09-06 — 대형 PR에서 작은 파일 분할과 roster 반복이 액터·입력 비용을 확대해, 효율 모델 기본값·조건부 후속 리뷰·자동 그룹 크기·선택 그룹 예산·공통 checklist 참조를 도입했다.
 - 2026-09-05 — `pull-request`의 문서 동기화 BLOCKED 종료를 제거하고 자기복구·handoff 기록으로 바꿨다. 테스트 파일 하나의 indeterminate certainty가 규칙 네 개와 스캔 status를 거쳐 PR 생성 전체를 막았기 때문이며, 고칠 수 없는 finding은 PR 본문에 실려 review의 입력이 된다.
 - 2026-09-05 — 같은 lifecycle의 기능을 action으로 묶어 상시 schema 비용을 줄이고 도구 이름을 일관되게 만들기 위해 공개 MCP 표면을 9개에서 4개로 병합했다.
 - 2026-09-04 — cross-review의 선별·청킹·그룹·규칙 해석·diff/brief 생성·JSON 검증·verdict fold·렌더링을 단일 `review_state` lifecycle로 옮겼다. orchestrator가 대형 diff와 opinion 본문을 열지 않아도 재개 가능하고, seal이 검증 후 변조된 판단을 신뢰하지 않게 하기 위한 결정이다.
@@ -121,4 +123,4 @@
 
 ## Last Updated
 
-2026-09-05
+2026-09-06

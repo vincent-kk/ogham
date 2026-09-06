@@ -11,6 +11,8 @@ interface MergeReviewRoundsResult {
   opinion: ReviewOpinion;
   /** Number of finding keys introduced by the current round. */
   newFindings: number;
+  /** Newly introduced claims, before IDs are reassigned for the merged opinion. */
+  addedFindings: readonly ReviewFinding[];
 }
 
 /**
@@ -28,6 +30,7 @@ export function mergeReviewRounds(
     return {
       opinion: current,
       newFindings: current.findings.length,
+      addedFindings: current.findings,
     };
 
   const findings: ReviewFinding[] = [];
@@ -45,7 +48,7 @@ export function mergeReviewRounds(
     }
   }
 
-  let newFindings = 0;
+  const addedFindings: ReviewFinding[] = [];
   for (const finding of current.findings) {
     const key = JSON.stringify([
       finding.path,
@@ -56,7 +59,7 @@ export function mergeReviewRounds(
     if (!findingKeys.has(key)) {
       findingKeys.add(key);
       findings.push({ ...finding });
-      newFindings += 1;
+      addedFindings.push(finding);
     }
   }
 
@@ -97,5 +100,5 @@ export function mergeReviewRounds(
     gaps: [...gaps.values()],
     riskPlan: prior?.riskPlan ?? current.riskPlan,
   };
-  return { opinion, newFindings };
+  return { opinion, newFindings: addedFindings.length, addedFindings };
 }

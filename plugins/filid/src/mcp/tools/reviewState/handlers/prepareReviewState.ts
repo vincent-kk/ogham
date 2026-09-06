@@ -32,6 +32,7 @@ import { writeReviewState } from '../state/writeReviewState.js';
 
 import { applyMissingTestRules } from './utils/applyMissingTestRules.js';
 import { assertRenderedUnitsMatchGroups } from './utils/assertRenderedUnitsMatchGroups.js';
+import { assertReviewGroupBudget } from './utils/assertReviewGroupBudget.js';
 import { clearRecomputedReviewArtifacts } from './utils/clearRecomputedReviewArtifacts.js';
 import { collectRenderedReviewUnits } from './utils/collectRenderedReviewUnits.js';
 import { createPreparedReviewPayload } from './utils/createPreparedReviewPayload.js';
@@ -90,6 +91,7 @@ export async function prepareReviewState(
 
   const canResume =
     sameIdentity && existing.phase === REVIEW_STATE_PHASES.PREPARED;
+  if (canResume) assertReviewGroupBudget(existing.groups, settings.maxGroups);
   const effortChanged = canResume && existing.effort !== settings.effort;
 
   if (
@@ -229,6 +231,7 @@ export async function prepareReviewState(
     planChurnLimit: settings.planChurnLimit,
   });
   files = applyMissingTestRules({ files, groups, activeRules });
+  assertReviewGroupBudget(groups, settings.maxGroups);
   const context = await readChangeContext({
     projectRoot: input.projectRoot,
     baseCommit: source.baseCommit,

@@ -60,6 +60,7 @@ const ReviewConfigSchema = z
     effort: z.enum(['low', 'medium', 'high']).optional(),
     groupChurnLimit: z.number().int().positive().optional(),
     groupFileLimit: z.number().int().positive().optional(),
+    maxGroups: z.number().int().positive().optional(),
     planChurnLimit: z.number().int().positive().optional(),
     concurrency: z.number().int().positive().optional(),
     lockfiles: z.array(z.string().min(1)).optional(),
