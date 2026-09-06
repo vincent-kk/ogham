@@ -10,6 +10,7 @@ import { planNextHandoffs } from '../handoff/planNextHandoffs.js';
 import { readReviewGroupArtifactStatus } from '../handoff/readReviewGroupArtifactStatus.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
+import { assertReviewValidationPolicy } from '../state/assertReviewValidationPolicy.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
 import { readReviewArtifactPresence } from '../state/readReviewArtifactPresence.js';
 import { readReviewState } from '../state/readReviewState.js';
@@ -66,6 +67,7 @@ export async function readReviewCheckpoint(
     });
   }
   const state = restored;
+  assertReviewValidationPolicy(state);
   const artifacts = readReviewArtifactPresence(paths, state);
   const handoff = planNextHandoffs({
     state,

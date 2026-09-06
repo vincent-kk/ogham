@@ -62,6 +62,7 @@ export async function rebuildPriorReviewOpinion(
           round: priorRound,
           sourceHash: input.state.sourceHash,
           units: input.group.units,
+          policy: input.group,
         },
         problems,
       )

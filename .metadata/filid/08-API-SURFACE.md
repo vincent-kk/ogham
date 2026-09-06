@@ -232,7 +232,7 @@ summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `
 
 prepare의 `effort?: auto | low | medium | high`는 config보다 우선한다. fresh 기본 auto는 reviewable group이 `review.autoLowEffortGroupThreshold`(기본 16) 이상이면 low, 미만이면 medium을 선택한다. `review.maxGroups` 기본 64, `review.concurrency` 기본 8이며 상한 초과는 actor 배정 전 오류다. group 구성은 effort와 독립적이다.
 
-prepare summary에는 effective `effort`와 optional `effortMode`, `effortReason`, `autoLowEffortGroupThreshold`, `reviewableGroups`, `maxReviewerHandoffs`가 실린다. reason은 `fixed | auto-standard | auto-large | legacy-resume`이며 최대 handoff는 group rounds의 합(verify·retry 제외)이다. state v2는 effective effort와 optional 선택 metadata를 보존한다. legacy 묵시적 재개는 저장 effort를 유지하고 explicit auto는 재판정하며 sealed cache는 다시 열지 않는다. threshold와 effort는 project/user config 양쪽에서 제어할 수 있다.
+prepare summary에는 effective `effort`와 optional `effortMode`, `effortReason`, `autoLowEffortGroupThreshold`, `reviewableGroups`, `maxReviewerHandoffs`가 실린다. reason은 `fixed | auto-standard | auto-large | legacy-resume`이며 최대 handoff는 group rounds의 합(verify·retry 제외)이다. state v2는 effective effort와 optional 선택 metadata 및 validationPolicyVersion을 보존한다. fresh 정책 버전은 1이다. 같은 prepared identity의 effective effort 변경은 최초 validate 전에도 `review-effort-locked`, 구형·미지원 정책 재사용은 `review-validation-policy-outdated`로 차단한다. 두 MCP 오류는 verdict·handoff를 내보내지 않는다. 같은 effective effort의 metadata 변경은 재개되며 현재 정책의 sealed cache는 다시 열지 않는다. threshold와 effort는 project/user config 양쪽에서 제어할 수 있다.
 
 ```typescript
 type ReviewStateInput =

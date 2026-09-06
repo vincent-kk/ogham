@@ -166,7 +166,7 @@ export function renderReviewBrief(
     '- result: reviewed|skipped (non-empty reason for skipped); retain chunk ("k/n" or null).',
     '- state: COMPLETE|INDETERMINATE; INDETERMINATE requires gaps [{path, rule, detail}], all non-empty.',
     `- findings: [{id: R${input.group.id}-NNN, severity: error|warning, category: bug|security|performance|maintainability|test|documentation|contract|structure|verification, path, existingCode, lines, rule, message, evidence, consequence, recommendedAction}]. Text must be non-empty; path must be assigned. lines may be "unknown"; validation locates committed code.`,
-    '- checked: inspected paths/IDs; riskPlan: string|null; use [] for no findings/gaps.',
+    '- checked: nonblank inspected paths/IDs, required for COMPLETE; riskPlan: string|null, required as specified in Method. Use [] for no findings/gaps.',
     '',
   ].join('\n');
 }

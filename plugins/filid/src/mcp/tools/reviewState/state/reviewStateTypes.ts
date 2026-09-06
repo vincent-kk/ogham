@@ -73,6 +73,8 @@ export type ReviewValidationProblemCode =
   | 'field-empty'
   | 'path-unassigned'
   | 'gap-required'
+  | 'checked-invalid'
+  | 'risk-plan-required'
   | 'decision-missing'
   | 'decision-unknown';
 
@@ -318,6 +320,8 @@ export interface ReviewHandoffPlan {
 export interface ReviewStateRecord extends ReviewEffortMetadata {
   /** Persisted record schema version. */
   schemaVersion: typeof REVIEW_STATE_SCHEMA_VERSION;
+  /** Trust policy of fresh validation; absent in unsupported legacy records. */
+  validationPolicyVersion?: number;
   /** Absolute project root owning the review. */
   projectRoot: string;
   /** Original branch name supplied by the caller. */

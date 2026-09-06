@@ -1,3 +1,6 @@
+import { readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
@@ -9,6 +12,10 @@ import {
 import { MCP_TOOL_NAMES, McpToolName } from '../../constants/mcpToolNames.js';
 import { TOOL_INPUT_DIAGNOSTIC_CODE } from '../../constants/toolEnvelope.js';
 import { createServer } from '../../mcp/server/lifecycle/createServer.js';
+import { handleReviewState } from '../../mcp/tools/reviewState/index.js';
+import { buildReviewOpinion } from '../unit/mcp/reviewState/helpers/buildReviewOpinion.js';
+import { createReviewStateSealFixture } from '../unit/mcp/reviewState/helpers/createReviewStateSealFixture.js';
+import { readPreparedReviewState } from '../unit/mcp/reviewState/helpers/readPreparedReviewState.js';
 
 import { connectTestClient } from './helpers/connectTestClient.js';
 
@@ -61,6 +68,82 @@ afterEach(() => {
 });
 
 describe('Filid 1.0 MCP tool surface', () => {
+  it.each([
+    'review-effort-locked',
+    'review-validation-policy-outdated',
+  ] as const)(
+    'returns %s without handoffs or a cached verdict in the MCP envelope',
+    async (code) => {
+      const fixture = createReviewStateSealFixture();
+      const connection = await connectTestClient();
+      try {
+        const prepared = await handleReviewState({
+          action: 'prepare',
+          projectRoot: fixture.projectRoot,
+          effort: 'medium',
+        });
+        if (code === 'review-validation-policy-outdated') {
+          const state = readPreparedReviewState(prepared);
+          const group = state.groups[0]!;
+          writeFileSync(
+            join(prepared.data.reviewDirectory, group.skeletonPath),
+            JSON.stringify(buildReviewOpinion(state, group)),
+          );
+          await handleReviewState({
+            action: 'validate',
+            projectRoot: fixture.projectRoot,
+            kind: 'review',
+            group: group.id,
+            round: 1,
+          });
+          const sealed = await handleReviewState({
+            action: 'seal',
+            projectRoot: fixture.projectRoot,
+          });
+          expect(sealed.summary.verdict).toBe('APPROVED');
+          const oldState = readPreparedReviewState(prepared);
+          delete oldState.validationPolicyVersion;
+          writeFileSync(prepared.data.statePath, JSON.stringify(oldState));
+        }
+        const stateBytes = readFileSync(prepared.data.statePath, 'utf8');
+        const result = await connection.client.callTool({
+          name: McpToolName.REVIEW_STATE,
+          arguments: {
+            action: 'prepare',
+            projectRoot: fixture.projectRoot,
+            effort: 'low',
+          },
+        });
+        expect(result.isError).toBe(true);
+        const content: unknown = Array.isArray(result.content)
+          ? result.content[0]
+          : null;
+        if (
+          !content ||
+          typeof content !== 'object' ||
+          !('text' in content) ||
+          typeof content.text !== 'string'
+        )
+          throw new Error('Expected text error envelope');
+        const envelope = JSON.parse(content.text);
+        expect(envelope).toMatchObject({
+          status: 'unsupported',
+          diagnostics: [{ code }],
+        });
+        expect(envelope.data).toBeUndefined();
+        expect(envelope.summary?.verdict).toBeUndefined();
+        expect(readFileSync(prepared.data.statePath, 'utf8')).toBe(stateBytes);
+      } finally {
+        await connection.close();
+        rmSync(fixture.projectRoot, { recursive: true, force: true });
+        rmSync(fixture.pluginRoot, { recursive: true, force: true });
+        if (fixture.originalPluginRoot === undefined)
+          delete process.env.CLAUDE_PLUGIN_ROOT;
+        else process.env.CLAUDE_PLUGIN_ROOT = fixture.originalPluginRoot;
+      }
+    },
+  );
+
   it('registers exactly the four action-dispatched tool names', () => {
     const registered = collectRegisteredToolNames();
     expect(new Set(registered)).toEqual(new Set(EXPECTED_TOOL_NAMES));

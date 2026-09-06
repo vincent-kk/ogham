@@ -117,6 +117,7 @@ export async function recoverReviewGroups(
               round: group.validated.review.round,
               sourceHash: state.sourceHash,
               units: group.units,
+              policy: group,
             },
             [],
           )

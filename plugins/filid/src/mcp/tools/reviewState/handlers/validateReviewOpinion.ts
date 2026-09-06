@@ -8,6 +8,7 @@ import {
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
+import { assertReviewValidationPolicy } from '../state/assertReviewValidationPolicy.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
 import { readReviewState } from '../state/readReviewState.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
@@ -65,6 +66,7 @@ export async function validateReviewOpinion(
     };
   }
 
+  assertReviewValidationPolicy(restored);
   const source = await computeReviewSourceHash(
     input.projectRoot,
     restored.baseRef,

@@ -59,7 +59,7 @@ const genuineGap = readFileSync(
 
 describe('cross-review v7 skill surface', () => {
   it('declares the v7 frontmatter and orchestration schema', () => {
-    expect(skill).toContain("version: '7.5.0'");
+    expect(skill).toContain("version: '7.6.0'");
     expect(skill).toContain('review_schema: 7');
     expect(skill).toContain('--effort auto|low|medium|high');
   });
@@ -193,6 +193,22 @@ describe('cross-review v7 skill surface', () => {
     expect(genuineGap).toContain('expect(slugify(input)).toBe(expected);');
     expect(genuineGap).toContain('`verification_status: indeterminate`');
     expect(genuineGap).not.toContain('resolves no verification role');
+  });
+
+  it('stops policy failures without automatic restart or a terminal verdict', () => {
+    expect(skill).toContain('review-effort-locked');
+    expect(skill).toContain('review-validation-policy-outdated');
+    expect(skill).toContain('Never auto-force these errors');
+    expect(skill).toContain('all prior actors have finished');
+    expect(skill).toContain('no merged opinion exists');
+    expect(skill).toContain('effective effort is frozen at preparation');
+  });
+
+  it('requires inspection evidence for completion while preserving genuine gaps', () => {
+    expect(reviewer).toContain('COMPLETE requires nonempty `checked`');
+    expect(templates).toContain('every `checked` entry must be nonblank');
+    expect(templates).toContain('INDETERMINATE');
+    expect(templates).toContain('`riskPlan`');
   });
 
   it('keeps actor and orchestration documents within their line budgets', () => {

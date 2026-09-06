@@ -4,6 +4,8 @@
 
 ## Verdict
 
+Only a successful seal returns a terminal verdict. Policy errors return diagnostics without a verdict. If every merged opinion is missing for reviewable groups, seal stops without a verdict; the documents-only/source-dirty path may still seal INCONCLUSIVE from worktree evidence.
+
 Use the returned `summary.verdict`. Incomplete or untrusted evidence, a dirty worktree, pending coverage, reviewer gaps, or an indeterminate verifier or decision produce `INCONCLUSIVE`. Otherwise, confirmed findings produce `REQUEST_CHANGES`; with none, the result is `APPROVED`. Informational observations do not change the verdict. Never replace missing evidence with an approval or calculate a competing verdict in prose.
 
 ## Review report

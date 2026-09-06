@@ -243,7 +243,7 @@ data.results[0] → { summary: { ownerFractalPath, chainPaths[owner → root],
 
 기본값은 effort `auto`, 동시성 8, reviewable group 상한 64다. auto는 그룹 구성을 유지한 채 16개 이상에서 low(최대 1회), 미만에서 medium(최대 2회)을 선택한다. `review.autoLowEffortGroupThreshold`로 경계를 바꾸며 명시 `--effort` → project/user config → 기본값 순서다. 그룹 상한을 넘으면 부분 검토 없이 배정 전에 중단한다.
 
-prepare 뒤 mode·effective effort·reason·reviewableGroups·maxReviewerHandoffs를 한 번 보고한다. legacy prepared state는 묵시적 기본값만으로 재실행하지 않으며 명시 auto로 전환할 수 있다. metadata만 바뀌면 session과 state만 갱신하고, sealed cache는 정책 변경으로 다시 열지 않는다.
+prepare 뒤 mode·effective effort·reason·reviewableGroups·maxReviewerHandoffs를 한 번 보고한다. 같은 prepared identity의 effective effort는 최초 prepare부터 고정하며 변경 요청은 `review-effort-locked`로 중단한다. 같은 effective effort의 metadata만 바뀌면 session과 state만 갱신한다. 구형·미지원 validationPolicyVersion은 `review-validation-policy-outdated`로 차단하며 자동 force하지 않는다. 현재 정책의 sealed cache는 effort 변경으로 다시 열지 않는다.
 
 **트리거**: 커밋된 변경 또는 PR, `/filid:cross-review [PR URL]`
 

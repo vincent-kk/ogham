@@ -192,5 +192,28 @@ export function checkReviewOpinion(
       detail: 'A present risk plan must not be blank.',
     });
 
+  const completeReview =
+    options.units.length > 0 && opinion.state === 'COMPLETE';
+  if (
+    opinion.checked.some((entry) => entry.trim() === '') ||
+    (completeReview && opinion.checked.length === 0)
+  )
+    problems.push({
+      code: 'checked-invalid',
+      detail:
+        'Complete reviews must record inspected evidence; checked entries must not be blank.',
+    });
+  if (
+    completeReview &&
+    (options.policy.planRequired ||
+      (options.policy.riskReasons?.length ?? 0) > 0) &&
+    opinion.riskPlan === null
+  )
+    problems.push({
+      code: 'risk-plan-required',
+      detail:
+        'This prepared group requires a risk plan before claiming completion.',
+    });
+
   return problems.length === 0;
 }

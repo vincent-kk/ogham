@@ -4,7 +4,6 @@ import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { REVIEW_STATE_ACTIONS } from '../../../constants/reviewState.js';
-import { renderOpinionSkeleton } from '../../../mcp/tools/reviewState/brief/renderOpinionSkeleton.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 
 import { buildReviewOpinion } from './reviewState/helpers/buildReviewOpinion.js';
@@ -33,7 +32,7 @@ afterEach(() => {
 });
 
 describe('review_state prepare effort skeleton', () => {
-  it('creates the next skeleton when raised effort reopens a complete review', async () => {
+  it('rejects raised effort without creating a next-round skeleton', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
@@ -66,43 +65,45 @@ describe('review_state prepare effort skeleton', () => {
     );
     const opinionBefore = readUtf8FileIfExistsSync(opinionPath);
 
+    await expect(
+      handleReviewState({
+        action: REVIEW_STATE_ACTIONS.PREPARE,
+        projectRoot: fixture.projectRoot,
+        branchName: fixture.branchName,
+        baseRef: 'main',
+        effort: 'high',
+      }),
+    ).rejects.toMatchObject({ code: 'review-effort-locked' });
     const resumed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
-      branchName: fixture.branchName,
-      baseRef: 'main',
-      effort: 'high',
+      effort: 'medium',
     });
 
-    const highState = readPreparedReviewState(resumed);
-    const highGroup = highState.groups[0];
-    if (!highGroup) throw new Error('Expected one resumed review group');
+    const resumedState = readPreparedReviewState(resumed);
+    const resumedGroup = resumedState.groups[0];
+    if (!resumedGroup) throw new Error('Expected one resumed review group');
     const roundTwoPath = resolveReviewStateFixtureArtifact(
       fixture.projectRoot,
-      highState.normalizedBranch,
-      roundReviewOpinionPath(highGroup.id, 2),
+      resumedState.normalizedBranch,
+      roundReviewOpinionPath(resumedGroup.id, 2),
     );
     const briefPath = resolveReviewStateFixtureArtifact(
       fixture.projectRoot,
-      highState.normalizedBranch,
-      highGroup.briefPath,
+      resumedState.normalizedBranch,
+      resumedGroup.briefPath,
     );
 
-    expect(readUtf8FileIfExistsSync(roundTwoPath)).toBe(
-      renderOpinionSkeleton(highGroup, highState.sourceHash, 2),
-    );
+    expect(readUtf8FileIfExistsSync(roundTwoPath)).toBeNull();
     expect(readUtf8FileIfExistsSync(opinionPath)).toBe(opinionBefore);
-    const highBrief = readUtf8FileIfExistsSync(briefPath);
-    expect(highBrief).toContain('rounds: 3');
-    expect(JSON.parse(readUtf8FileIfExistsSync(roundTwoPath)!)).toMatchObject({
-      round: 2,
-    });
-    expect(highBrief).toContain(
-      `output: ${roundReviewOpinionPath(highGroup.id, 2)}`,
+    const resumedBrief = readUtf8FileIfExistsSync(briefPath);
+    expect(resumedBrief).toContain('rounds: 2');
+    expect(resumedBrief).toContain(
+      `output: ${roundReviewOpinionPath(resumedGroup.id, 1)}`,
     );
   });
 
-  it('does not create a skeleton when lower effort keeps a review complete', async () => {
+  it('rejects lower effort without changing the completed review skeleton', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
@@ -143,23 +144,30 @@ describe('review_state prepare effort skeleton', () => {
       `output: ${roundReviewOpinionPath(highGroup.id, 1)}`,
     );
 
+    await expect(
+      handleReviewState({
+        action: REVIEW_STATE_ACTIONS.PREPARE,
+        projectRoot: fixture.projectRoot,
+        branchName: fixture.branchName,
+        baseRef: 'main',
+        effort: 'low',
+      }),
+    ).rejects.toMatchObject({ code: 'review-effort-locked' });
     const resumed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
-      branchName: fixture.branchName,
-      baseRef: 'main',
-      effort: 'low',
+      effort: 'high',
     });
 
-    const lowState = readPreparedReviewState(resumed);
-    const lowGroup = lowState.groups[0];
-    if (!lowGroup) throw new Error('Expected one resumed review group');
-    const lowBrief = readUtf8FileIfExistsSync(briefPath);
+    const resumedState = readPreparedReviewState(resumed);
+    const resumedGroup = resumedState.groups[0];
+    if (!resumedGroup) throw new Error('Expected one resumed review group');
+    const resumedBrief = readUtf8FileIfExistsSync(briefPath);
     expect(readUtf8FileIfExistsSync(roundTwoPath)).toBeNull();
-    expect(lowGroup.validated.review?.complete).toBe(true);
-    expect(lowBrief).toContain('rounds: 1');
-    expect(lowBrief).toContain(
-      `output: ${roundReviewOpinionPath(lowGroup.id, 1)}`,
+    expect(resumedGroup.validated.review?.complete).toBe(true);
+    expect(resumedBrief).toContain('rounds: 3');
+    expect(resumedBrief).toContain(
+      `output: ${roundReviewOpinionPath(resumedGroup.id, 1)}`,
     );
   });
 });

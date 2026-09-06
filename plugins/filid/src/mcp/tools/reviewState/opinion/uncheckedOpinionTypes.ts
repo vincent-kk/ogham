@@ -1,4 +1,4 @@
-import type { ReviewUnit } from '../state/reviewGroupTypes.js';
+import type { ReviewGroup, ReviewUnit } from '../state/reviewGroupTypes.js';
 import type { ReviewValidationProblem } from '../state/reviewStateTypes.js';
 
 import type {
@@ -89,6 +89,8 @@ export type OpinionParseResult<T> =
 
 /** Expected identity and unit roster for reviewer validation. */
 export interface CheckReviewOpinionOptions {
+  /** Prepared requirements; never inferred from the actor's own opinion. */
+  policy: Pick<ReviewGroup, 'planRequired' | 'riskReasons'>;
   /** Prepared review group identifier. */
   group: string;
   /** One-based review round being validated. */

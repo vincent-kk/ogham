@@ -20,6 +20,7 @@ import { renderPrComment } from '../render/renderPrComment.js';
 import { renderReviewReport } from '../render/renderReviewReport.js';
 import type { ReviewRenderInput } from '../render/reviewRenderTypes.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
+import { assertReviewValidationPolicy } from '../state/assertReviewValidationPolicy.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
 import { readReviewState } from '../state/readReviewState.js';
 import { resolveReviewArtifactPath } from '../state/resolveReviewArtifactPath.js';
@@ -83,6 +84,7 @@ export async function sealReviewState(
     });
   }
   const state = restored;
+  assertReviewValidationPolicy(state);
   const source = await computeReviewSourceHash(
     input.projectRoot,
     input.baseRef ?? state.baseRef,
@@ -180,7 +182,11 @@ export async function sealReviewState(
       ],
     });
 
-  const groupEvidence = loadSealGroupEvidence(paths, state.groups);
+  const groupEvidence = loadSealGroupEvidence(
+    paths,
+    state.groups,
+    state.sourceHash,
+  );
   const fold = foldReviewVerdict({
     evidence: {
       sourceHash: state.sourceHash,

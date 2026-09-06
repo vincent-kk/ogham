@@ -93,7 +93,7 @@ describe('prepare automatic review cost', () => {
     });
   });
 
-  it('takes configured effort before the default and accepts explicit auto', async () => {
+  it('takes configured effort before the default and accepts explicit auto on a fresh run', async () => {
     configureReviewGroups(fixture.projectRoot, 1, {
       effort: 'high',
       autoLowEffortGroupThreshold: 1,
@@ -110,6 +110,7 @@ describe('prepare automatic review cost', () => {
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       effort: 'auto',
+      force: true,
     });
     expect(auto.summary).toMatchObject({
       effort: 'low',

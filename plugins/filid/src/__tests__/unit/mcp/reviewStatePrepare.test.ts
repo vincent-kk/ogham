@@ -593,7 +593,7 @@ describe('review_state prepare v7', () => {
     );
   });
 
-  it('resumes a matching source when effort changes', async () => {
+  it('rejects effort changes and resumes with the prepared effort', async () => {
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -602,19 +602,28 @@ describe('review_state prepare v7', () => {
       effort: 'low',
     });
 
+    await expect(
+      handleReviewState({
+        action: REVIEW_STATE_ACTIONS.PREPARE,
+        projectRoot,
+        branchName: BRANCH,
+        baseRef: 'main',
+        effort: 'high',
+      }),
+    ).rejects.toMatchObject({ code: 'review-effort-locked' });
     const changed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
       baseRef: 'main',
-      effort: 'high',
+      effort: 'low',
     });
 
     expect(changed.summary).toMatchObject({
       disposition: REVIEW_STATE_DISPOSITIONS.RESUMABLE,
-      effort: 'high',
+      effort: 'low',
     });
-    expect(changed.data.groups?.[0]?.rounds).toBe(3);
+    expect(changed.data.groups?.[0]?.rounds).toBe(1);
   });
 
   it('materializes a completed candidate-only group for skipped changes', async () => {

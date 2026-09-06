@@ -20,16 +20,17 @@ export function retainReviewGroupValidations(
     const validated = previous?.validated;
     return {
       ...group,
-      ...(previous ? { riskReasons: previous.riskReasons } : {}),
+      ...(previous
+        ? {
+            riskReasons: previous.riskReasons,
+            planRequired: previous.planRequired,
+          }
+        : {}),
       validated: validated
         ? {
             review: validated.review
               ? {
                   ...validated.review,
-                  complete:
-                    validated.review.round >= group.rounds ||
-                    (validated.review.complete &&
-                      group.rounds <= previous!.rounds),
                 }
               : null,
             verify: validated.verify ? { ...validated.verify } : null,

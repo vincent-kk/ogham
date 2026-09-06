@@ -1,5 +1,8 @@
 /** Schema version for persisted review state records. */
 export const REVIEW_STATE_SCHEMA_VERSION = 2 as const;
+
+/** Validation contract required before persisted opinions may be reused. */
+export const REVIEW_VALIDATION_POLICY_VERSION = 1 as const;
 export const REVIEW_STATE_HASH_ALGORITHM = 'sha256';
 export const REVIEW_STATE_HASH_ENCODING = 'hex';
 export const REVIEW_STATE_HASH_SEPARATOR = '\0';
@@ -277,6 +280,10 @@ export const REVIEW_STATE_STALE_ARTIFACT_DIRECTORY_NAMES = [
 
 /** Stable machine-readable diagnostic codes returned by review-state handlers. */
 export const REVIEW_STATE_DIAGNOSTIC_CODES = {
+  /** A prepared assignment cannot change its effective review effort. */
+  EFFORT_LOCKED: 'review-effort-locked',
+  /** Persisted validation belongs to an unsupported trust policy. */
+  VALIDATION_POLICY_OUTDATED: 'review-validation-policy-outdated',
   /** Configured actor-group budget would be exceeded by this review. */
   GROUP_BUDGET_EXCEEDED: 'review-group-budget-exceeded',
   BRANCH_UNRESOLVED: 'review-branch-unresolved',

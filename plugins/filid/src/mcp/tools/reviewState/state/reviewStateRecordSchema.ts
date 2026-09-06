@@ -161,6 +161,7 @@ const ReviewScopeSchema = z
 export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
   .object({
     schemaVersion: z.literal(REVIEW_STATE_SCHEMA_VERSION),
+    validationPolicyVersion: z.number().int().positive().optional(),
     projectRoot: z.string(),
     branchName: z.string(),
     normalizedBranch: z.string(),

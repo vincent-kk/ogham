@@ -12,7 +12,7 @@ fresh 기본값은 `effort: auto`, `autoLowEffortGroupThreshold: 16`, `maxGroups
 
 모든 group의 첫 리뷰와 diff 독해가 기본 비용이다. low의 위험 group은 첫 회부터 strong, 일반 group과 finding별 독립 verifier는 efficient다. 반복 JSON 예시는 미리 쓴 reviewer skeleton과 짧은 계약으로 대체하며, verifier는 brief 안의 최소 JSON shape를 사용한다. 규칙·diff·source 추적·validation은 보존한다. `maxReviewerHandoffs`는 group rounds의 합으로 verifier·재시도·추가 source 읽기를 제외한다.
 
-legacy prepared session의 묵시적 재개는 저장된 effort를 보존하고, auto 재개는 threshold를 다시 평가한다. 같은 effective effort의 metadata 변경은 유효 brief·opinion을 다시 읽는 actor 작업을 만들지 않으며 sealed cache는 유지한다. 실제 token·cached input·output·시간·비용과 blind finding/gap 정확도는 함께 측정해야 한다. brief bytes 감소만으로 전체 token 절감이나 동일 탐지율을 주장하지 않는다.
+prepared session의 effective effort는 최초 배정부터 고정한다. auto 재개에서 threshold 변경이 다른 effort를 만들면 기존 작업을 보존하고 오류로 중단한다. 검증 정책이 오래된 기록도 자동 재검토하지 않으며 명시 force만 새 비용을 발생시킨다. 같은 effective effort의 metadata 변경은 유효 brief·opinion을 다시 읽는 actor 작업을 만들지 않으며 sealed cache는 유지한다. 실제 token·cached input·output·시간·비용과 blind finding/gap 정확도는 함께 측정해야 한다. brief bytes 감소만으로 전체 token 절감이나 동일 탐지율을 주장하지 않는다.
 
 ## Hook 오버헤드
 

@@ -11,7 +11,7 @@
 - `evidence.md`는 schema 7 frontmatter와 Changed Scope, Candidates, Informational, Out-of-scope Observations, Diagnostics를 atomic하게 기록한다. 범위 밖 finding은 source·rule·severity별 count로만 남기고 finding diagnostic은 중복 기록하지 않는다.
 - prepare는 dirty path를 `clean | documents-only | generated-only | source-dirty`로 관측하되 판정하지 않는다. documents-only와 source-dirty도 artifact를 만들고 최종 fold에서 inconclusive가 된다.
 - fresh/force는 branch directory의 stale artifact를 지우고 처음부터 만든다. 같은 hash의 prepared state는 resumable이고 같은 hash의 sealed state와 report가 함께 있을 때만 cached다. schema v1은 prepare에서 fresh로 재생성하고, 다른 action에서는 `missing`과 `review-state-schema-mismatch` 진단으로 처리한다.
-- resumable에서 `evidence.md`와 완전한 state가 있으면 선별·청킹·그룹화를 되살리고 누락 artifact를 복구한다. effort 변경은 group round와 review brief를 갱신하고 부족한 review round의 complete를 false로 낮추며 기존 opinion을 보존한다. evidence가 없으면 범위 산출부터 다시 만든다. `recoverReviewGroups`는 병합 opinion 누락·hash 불일치 시 raw round r1…rK가 모두 있으면 round 1부터 K까지 순차 재검증해 병합 opinion을 재구성한다. 같은 바이트로 복원되면 기존 verify의 reviewSha256 결합을 유지하고, 달라지면 verify invalid 복구가 이를 지운다. raw round가 하나라도 없으면 review·verify validation을 지우고 병합 opinion을 삭제하며 r1 skeleton을 다시 쓴다. stale rN 파일은 이후 round 진행이 덮어쓴다. validate의 직전 round validation 순서 검사는 유지한다. 미완료 review는 다음 round skeleton을, 완료 review는 배정 finding이 없으면 auto-verify를, 있으면 누락 verify brief를 만든다. verify 파일·hash·reviewSha256 결합이 깨지면 verify validation을 지우고 같은 복구를 적용한다. 복구와 state 저장을 끝낸 뒤 artifact를 재관측한다.
+- resumable에서 `evidence.md`와 완전한 state가 있으면 선별·청킹·그룹화를 되살리고 누락 artifact를 복구한다. effective effort는 최초 prepare부터 고정하며, 누락 artifact 복구에서도 기존 round 상한과 미완료 검토를 보존한다. evidence가 없으면 범위 산출부터 다시 만든다. `recoverReviewGroups`는 병합 opinion 누락·hash 불일치 시 raw round r1…rK가 모두 있으면 round 1부터 K까지 순차 재검증해 병합 opinion을 재구성한다. 같은 바이트로 복원되면 기존 verify의 reviewSha256 결합을 유지하고, 달라지면 verify invalid 복구가 이를 지운다. raw round가 하나라도 없으면 review·verify validation을 지우고 병합 opinion을 삭제하며 r1 skeleton을 다시 쓴다. stale rN 파일은 이후 round 진행이 덮어쓴다. validate의 직전 round validation 순서 검사는 유지한다. 미완료 review는 다음 round skeleton을, 완료 review는 배정 finding이 없으면 auto-verify를, 있으면 누락 verify brief를 만든다. verify 파일·hash·reviewSha256 결합이 깨지면 verify validation을 지우고 같은 복구를 적용한다. 복구와 state 저장을 끝낸 뒤 artifact를 재관측한다.
 - 파일 role은 generated → deleted source → binary → lockfile → document → verification → source 순서로 결정한다. generated·deleted·binary·lockfile만 skip reason을 가지며 모든 roster 항목은 session에 남는다.
 - review 규칙은 plugin rule map의 `always`, glob `match`, role·owner `when`을 선언 순서대로 적용한다. repository override는 additive이고 `replaces`로 built-in ID를 제거할 수 있으며, 인라인 rule body와 읽어야 할 repository rule path를 구분한다.
 - review glob의 `**/` 접두는 root 파일에도 맞추지만 generated-path matcher의 segment-prefix 계약은 바꾸지 않는다. repository rule file은 project root 안의 non-symlink target이어야 한다.
@@ -19,11 +19,11 @@
 - unit은 owner(null은 마지막)·path 순서로 그룹화한다. 작은 변경 shortcut도 file·churn 설정 상한으로 clamp하고, chunked file의 unit은 순차 dependency를 가진 별도 group이 된다. ID는 `01`부터 상한 없이 두 자리 이상 zero-padding한다.
 - public effort는 auto·low·medium·high이고 fresh 기본값은 auto다. 그룹을 먼저 구성한 뒤 reviewable group이 `autoLowEffortGroupThreshold`(기본 16) 이상이면 low, 미만이면 medium을 선택한다. effective low·medium·high는 각각 최대 1·2·3 round다. churn·plan·concurrency 기본값은 각각 1024·50·8이며 작은 변경 shortcut의 상수 threshold는 file 4·churn 200이다. 명시한 groupFileLimit은 고정 상한이다. 생략하면 unchunked unit의 count를 `max(1, ceil(totalChurn / groupChurnLimit))`로 나눈 올림값을 10~32 사이로 clamp해 파일 상한을 정한다. 모든 group과 chunk는 churn 상한을 지킨다.
 - `review.maxGroups`(기본 64)를 넘는 reviewable group은 fresh·resumable prepare에서 오류로 거부하고 handoff를 반환하지 않는다. candidate-only group은 액터 비용이 없어 세지 않는다. sealed cache에는 적용하지 않는다. 기존 group 구성과 검증 identity는 resume에서 보존하므로 그룹 크기 설정을 바꾸려면 `--force`가 필요하다.
-- state의 effort는 effective 값이고 선택 metadata는 optional effortMode, effortReason(`fixed | auto-standard | auto-large | legacy-resume`), autoLowEffortGroupThreshold다. metadata 없는 legacy prepared state는 명시 effort 요청·설정 없이 재개하면 저장된 effort를 유지한다. metadata만 바뀌면 state·session만 갱신하며 effective effort가 바뀔 때만 group round·brief를 갱신한다. 유효 opinion·validation과 sealed cache는 보존한다.
+- state의 effort는 최초 prepare부터 고정된 effective 값이다. 같은 prepared identity에서 다른 effective effort는 artifact 변경 전 `review-effort-locked`로 거부한다. 같은 effective effort의 mode·threshold metadata 변경은 state·session만 갱신하고 유효 opinion·validation을 보존한다. 명시 force만 새로운 정책으로 준비하며 기존 actor가 모두 종료된 뒤 사용한다.
 - fresh prepare는 배정된 source의 보안·동시성 경로 단어, 어댑터가 보고한 공개 진입점, 배정된 external-import-boundary·circular-dependency·entry-point-surface error 후보, 선택 highRiskPaths glob을 위험 신호로 사용한다. 구분자·camel case 단어를 비교하고 각 종류의 첫 경로만 남겨 riskReasons는 최대 다섯 개다. 문서·검증·skipped 파일, churn·파일 수·owner 수만으로는 강화하지 않는다. 경로는 휴리스틱이며 신호 없음은 안전의 증거가 아니다.
 - 위험 근거는 그룹에 저장해 재개 중 다시 분류하지 않는다. 기존 riskReasons 없는 state v2도 읽으며, 위험 경로 설정·정책 변경은 새 준비 또는 명시 force에 적용한다. 완료된 기존 리뷰를 새 정책만으로 재실행하지 않는다.
 - 경로 단어 분리와 source·excerpt 줄 정규화는 각각 순수 보조 함수로 일원화한다. 고정 정규식은 모듈 상수로 재사용하며 약어·camel case·숫자 경계, 줄바꿈·공백·빈 토큰과 반복 호출 결과를 유지한다. 입력별 동적 정규식은 공유하지 않는다.
-- 같은 group을 재계산할 때 조기 완료를 보존한다. effort를 낮춰 이미 검증한 round가 새 한도에 도달하면 완료로 바꾸고 추가 reviewer를 배정하지 않는다. 명시적으로 round 한도를 높인 경우에만 보존된 조기 완료를 다시 열 수 있다.
+- 같은 group을 복구할 때 원래 round 상한과 조기 완료를 보존한다. 재개는 round 상한을 바꾸거나 미완료 검토를 완료로 승격하지 않는다.
 - `planRequired`는 unit chunk 크기가 아니라 원본 파일 churn으로 결정한다. FCA candidate는 path 일치, owner 일치, `01` 순서에서 가장 작은 한 group에만 배정한다.
 - reviewable unit 없이 candidate만 있으면 rounds 0의 `01` group과 complete empty merged opinion, review validation hash, verify brief, 빈 COMPLETE auto-verify opinion과 reviewSha256으로 결합된 verify validation을 만든다. 둘 다 없으면 group도 없다.
 - rounds 0의 병합 opinion이 trusted가 아니면(validation 누락 포함) canonical 빈 병합 opinion과 review validation을 다시 쓰고 verify 결합을 재관측해 필요하면 auto-verify를 복구한다. 최초 준비와 복구는 같은 빈 opinion 작성 함수를 사용한다.
@@ -43,7 +43,7 @@
 - cached 및 artifact가 완전한 resumable 분기는 기존 session·brief를 재사용하므로 changeContext를 읽지 않고 diagnostics를 빈 배열로 반환한다.
 - validate input은 `{ action: "validate", projectRoot, branchName?, kind, group, round? }`이다. review kind는 범위 안의 round가 필수이고 verify kind는 round를 금지한다. group은 `^\d{2,}$`이며 state에 존재해야 한다.
 - seal input은 `{ action: "seal", projectRoot, branchName?, baseRef? }`이고, state·matching hash·session을 요구한다.
-- state v2는 root·branch·base, source/file hash, phase와 timestamp 외에 `effort`, `groups`, prepare의 전체 `scope` snapshot, nullable `verdict`를 가진다. group은 unit·churn·dependency·candidate·artifact path·round와 review/verify validation hash를 보존한다.
+- state v2는 root·branch·base, source/file hash, phase와 timestamp 외에 `effort`, `groups`, prepare의 전체 `scope` snapshot, nullable `verdict`와 optional 양의 정수 `validationPolicyVersion`을 가진다. fresh state의 정책 버전은 1이며, 누락 또는 미지원 버전의 같은-identity 재사용은 artifact 변경 전 stable diagnostic으로 차단한다. group은 unit·churn·dependency·candidate·artifact path·round와 review/verify validation hash를 보존한다.
 - scope file은 path·change·insertions·deletions·binary에 role·owner·nullable skip reason·rule ID·repository rule path를 더한다. unit은 nullable chunk index/total, churn, old/new hunk range와 review-directory-relative diff path를 가진다.
 - group의 review validation은 nullable `{ round, sha256, complete }`, verify validation은 nullable `{ sha256, reviewSha256 }`다. state verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE | null`이다.
 - state 파일이 없으면 `missing`, schema version이 2가 아니면 schema mismatch, v2 구조가 malformed이거나 group ID에서 유도한 canonical artifact path와 다르면 `STATE_INVALID` error다. prepare만 schema mismatch를 fresh로 낮춘다.
@@ -73,7 +73,7 @@
 - 마지막 review round에서 assigned가 비면 빈 COMPLETE verify JSON(decisions·observations는 빈 배열, checked는 group unit path)을 직접 쓰고 verifierRequired는 false다. 동일 바이트 hash를 validated.verify.sha256, 병합 opinion hash를 reviewSha256에 기록하고 state를 마지막에 저장한다. rounds 0 group도 prepare에서 같은 auto-verify를 기록한다.
 - verify opinion은 schema 7, group, state, sourceHash, decision, observation, checked를 가진 JSON이다. decision은 verify brief의 모든 ID와 정확히 일치하며 verdict는 `CONFIRMED | REFUTED | INDETERMINATE`, evidence와 reason은 비어 있지 않다.
 - verify는 complete review validation 뒤에만 실행한다. 성공하면 verify file hash와 현재 review hash를 함께 기록하고, summary에 confirmed·refuted·indeterminate count, data에 problem과 verify path, next·sealReady를 싣는다.
-- seal은 validation hash가 없는 group을 `review rounds incomplete`, `artifact not validated`, `artifact modified after validation`, `verifier decided a superseded opinion` 중 해당 이유와 함께 unresolved evidence로 취급한다. opinion schema를 다시 검사하지 않는다. reviewable unit이 있는데 병합 opinion이 하나도 없으면 `review-opinions-missing`이지만, documents-only 또는 source-dirty worktree는 그 자체가 결정적인 inconclusive 근거이므로 누락 opinion도 unresolved evidence로 fold하고 봉인한다.
+- seal은 validation hash가 없는 group을 `review rounds incomplete`, `artifact not validated`, `artifact modified after validation`, `verifier decided a superseded opinion` 중 해당 이유와 함께 unresolved evidence로 취급한다. hash가 일치해도 merged review opinion의 schema·identity·배정 unit·완료 기록을 같은 group policy로 다시 검사하고 실패한 group은 신뢰하지 않는다. reviewable unit이 있는데 병합 opinion이 하나도 없으면 `review-opinions-missing`이지만, documents-only 또는 source-dirty worktree는 그 자체가 결정적인 inconclusive 근거이므로 누락 opinion도 unresolved evidence로 fold하고 봉인한다.
 - checklist는 prepare skip reason을 `skipped`, 모든 unit이 reviewed이면 `reviewed`, reviewer skip·missing opinion·pending unit이면 `pending`으로 정규화한다. reviewer skip reason은 unresolved evidence에도 남긴다.
 - fold는 evidence incomplete, documents-only/source-dirty worktree, trusted group artifact 부재, pending checklist, opinion gap, verifier opinion의 `INDETERMINATE` state, 결정론 decision 합류와 ID 커버리지 검사, severity와 무관한 candidate의 indeterminate decision을 순서대로 `INCONCLUSIVE`로 만든다. 그 뒤 confirmed candidate가 있으면 `REQUEST_CHANGES`, 아니면 `APPROVED`다.
 - 결정론 fold는 배정 FCA candidate를 CONFIRMED(evidence `evidence.md#<id>`, reason `canonical structure evidence measured on snapshot <snapshotHash>`), deterministicRefuted finding을 REFUTED(evidence는 배정 unit hunk 범위 `<path>:<newStart>-<newEnd>[, ...]`, reason `finding lies outside the changed hunks`)로 합류시킨다. decision ID 집합은 candidate ID ∪ merged finding ID와 각 한 번씩 일치해야 한다. 누락·중복·미배정 ID 또는 verify가 결정론 대상을 판정하면 unresolved evidence `decision coverage mismatch`로 INCONCLUSIVE다. auto-verify도 기존 complete·review hash·verify hash·reviewSha256 검사를 통과해야 하며 report 형식은 유지한다.
@@ -93,7 +93,7 @@
 ### AC-review-prepare — 결정적 준비와 재개
 
 - 같은 committed content와 effort에서 roster, snapshot hash, group과 artifact path가 결정적이며 state는 모든 prepare artifact 뒤 마지막에 한 번만 나타난다.
-- prepared state는 같은 source hash이면 effort와 무관하게 누락 artifact부터 resume하고 기존 opinion을 덮어쓰지 않는다. effort 변경은 group round와 review brief를 갱신하고 부족한 round의 review validation을 incomplete로 낮춘다. sealed state는 matching hash와 report가 있어야 cached이며 cached summary는 state verdict를 복원한다.
+- 현재 검증 정책의 prepared state는 같은 source hash와 effective effort에서 누락 artifact를 복구하고 기존 opinion을 보존한다. effective effort 변경은 최초 validate 이전도 거부한다. 현재 정책의 sealed state는 matching hash와 report가 있어야 cached다.
 - crash로 state가 없거나 schema v1이면 stale canonical artifact를 지운 fresh prepare가 되고 malformed v2는 error로 드러난다.
 - evidence와 session frontmatter는 review schema 7을 선언하고 session checklist에 모든 `(path, change)`를 한 번씩 보존한다.
 
@@ -145,10 +145,17 @@
 - review 성공은 merged hash·round·complete를 기록하고 verify validation을 무효화한다. verify 성공은 file hash와 그 review hash를 함께 기록한다.
 - verify decision은 splitVerifierAssignment의 assigned finding ID를 빠짐없이 정확히 한 번 판정한다. assigned가 비면 마지막 round는 auto-verify를 기록한다.
 
+### AC-review-quality — 검증 정책과 완료 근거
+
+- fresh state는 `validationPolicyVersion: 1`을 기록한다. 같은 identity의 구형·미지원 정책을 prepare, checkpoint, validate, seal에서 재사용하면 `review-validation-policy-outdated` error만 반환하고 verdict·handoff를 노출하거나 artifact를 변경하지 않는다. 자동 force하지 않으며 cleanup과 새 source/명시 force의 fresh 준비는 유지한다.
+- reviewable COMPLETE는 공백 아닌 checked 항목과, planRequired 또는 riskReasons가 있을 때 공백 아닌 riskPlan을 요구한다. INDETERMINATE는 genuine gap이 있으면 빈 checked/null riskPlan을 허용하며 candidate-only 자동 opinion도 최소 기록 조건에서 제외한다. 제공된 공백 문자열은 허용하지 않는다.
+- raw round·prior 재구성·artifact trust·recovery·verifier 선행 검사·seal이 동일한 authoritative group policy로 검사한다. 이전 round의 기록으로 현재 raw round 누락을 덮지 않는다.
+- 필드 검증은 기록 존재만 확인하며 실제 모델 tier나 독해·탐지 품질을 인증하지 않는다.
+
 ### AC-review-seal — 신뢰 가능한 fold와 canonical rendering
 
 - current hash와 session이 없으면 seal하지 않고, reviewable unit이 있는데 merged opinion이 하나도 없으면 `review-opinions-missing`으로 indeterminate다. 단, documents-only 또는 source-dirty worktree는 reviewer를 실행하지 않는 경로이므로 누락 group evidence를 포함해 `INCONCLUSIVE`로 봉인한다.
-- complete·review hash·verify hash·review/verify 결합 중 하나라도 깨진 group은 trusted input이 아니며 이유가 unresolved evidence에 남는다.
+- 현재 검증 정책·opinion 의미 검증·complete·review hash·verify hash·review/verify 결합 중 하나라도 깨진 group은 trusted input이 아니며 이유가 unresolved evidence에 남는다.
 - pending coverage, evidence gap, verifier-level indeterminate와 severity와 무관한 indeterminate decision은 confirmed finding보다 먼저 `INCONCLUSIVE`를 만든다. 모든 증거가 complete일 때 confirmed가 있으면 `REQUEST_CHANGES`, 없으면 `APPROVED`다.
 - report, optional fix request, PR comment와 session checklist가 같은 fold 결과를 표현한 뒤에만 state가 sealed 되고 verdict가 저장된다.
 

@@ -53,6 +53,7 @@ export function validateVerifierOpinion(
         round: reviewValidation.round,
         sourceHash: state.sourceHash,
         units: group.units,
+        policy: group,
       },
       [],
     )

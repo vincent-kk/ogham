@@ -30,6 +30,9 @@ export function buildReviewOpinion(
     findings: [],
     checked: group.units.map((unit) => unit.path),
     gaps: [],
-    riskPlan: null,
+    riskPlan:
+      group.planRequired || (group.riskReasons?.length ?? 0) > 0
+        ? 'Check the prepared risk against the changed code and its callers.'
+        : null,
   };
 }

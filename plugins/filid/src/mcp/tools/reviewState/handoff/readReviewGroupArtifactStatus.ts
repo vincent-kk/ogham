@@ -58,6 +58,7 @@ export function readReviewGroupArtifactStatus(
             round: validation.round,
             sourceHash: state.sourceHash,
             units: group.units,
+            policy: group,
           },
           [],
         )

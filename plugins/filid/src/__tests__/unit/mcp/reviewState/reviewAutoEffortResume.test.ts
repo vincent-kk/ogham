@@ -53,10 +53,18 @@ describe('automatic effort resume', () => {
           maxReviewerHandoffs: 3,
         });
       }
+      await expect(
+        handleReviewState({
+          action: 'prepare',
+          projectRoot: fixture.projectRoot,
+          effort: 'auto',
+        }),
+      ).rejects.toMatchObject({ code: 'review-effort-locked' });
       const auto = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'auto',
+        force: true,
       });
       expect(auto.summary).toMatchObject({
         effort: 'medium',
@@ -137,7 +145,7 @@ describe('automatic effort resume', () => {
     }
   });
 
-  it('retunes auto thresholds without changing group identity or validated opinions', async () => {
+  it('rejects threshold changes that would drop a pending strong review', async () => {
     configureReviewGroups(fixture.projectRoot, 1, {
       highRiskPaths: ['src/value.ts'],
       autoLowEffortGroupThreshold: 2,
@@ -167,22 +175,30 @@ describe('automatic effort resume', () => {
     configureReviewGroups(fixture.projectRoot, 1, {
       autoLowEffortGroupThreshold: 1,
     });
+    await expect(
+      handleReviewState({
+        action: 'prepare',
+        projectRoot: fixture.projectRoot,
+      }),
+    ).rejects.toMatchObject({ code: 'review-effort-locked' });
     const resumed = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
+      effort: 'medium',
     });
     expect(resumed.summary).toMatchObject({
-      effort: 'low',
-      effortReason: 'auto-large',
+      effort: 'medium',
     });
     expect(resumed.data.groups[0]).toMatchObject({
       id: group.id,
       units: group.units,
-      rounds: 1,
+      rounds: 2,
       riskReasons: group.riskReasons,
-      validated: { review: { round: 1, complete: true } },
+      validated: { review: { round: 1, complete: false } },
     });
-    expect(resumed.data.next).toEqual([]);
+    expect(resumed.data.next).toMatchObject([
+      { kind: 'review', modelTier: 'strong', round: 2 },
+    ]);
     expect(
       readFileSync(
         join(prepared.data.reviewDirectory, group.opinionPath),

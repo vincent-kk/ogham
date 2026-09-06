@@ -1,6 +1,8 @@
 import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
+import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
+import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
 import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
@@ -16,11 +18,13 @@ import type {
  *
  * @param paths Canonical contained paths for the branch review.
  * @param groups Prepared groups in deterministic creation order.
+ * @param sourceHash Prepared committed-source identity required by every opinion.
  * @returns Groups paired with trusted parsed artifacts and every trust failure.
  */
 export function loadSealGroupEvidence(
   paths: ReviewStatePaths,
   groups: readonly ReviewGroup[],
+  sourceHash: string,
 ): SealGroupEvidence[] {
   return groups.map((group) => {
     const issueSet = new Set<ReviewTrustIssue>();
@@ -58,7 +62,23 @@ export function loadSealGroupEvidence(
     let verify: VerifyOpinion | null = null;
     if (issueSet.size === 0 && reviewBytes !== null && verifyBytes !== null)
       try {
-        review = JSON.parse(reviewBytes) as ReviewOpinion;
+        const parsed = parseReviewOpinion(reviewBytes);
+        if (
+          !parsed.opinion ||
+          !checkReviewOpinion(
+            parsed.opinion,
+            {
+              group: group.id,
+              round: reviewValidation!.round,
+              sourceHash,
+              units: group.units,
+              policy: group,
+            },
+            [],
+          )
+        )
+          issueSet.add('artifact not validated');
+        else review = parsed.opinion;
         verify = JSON.parse(verifyBytes) as VerifyOpinion;
       } catch {
         issueSet.add('artifact not validated');

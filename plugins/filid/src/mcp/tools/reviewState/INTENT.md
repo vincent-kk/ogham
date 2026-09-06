@@ -24,7 +24,7 @@ committed diff hash와 branch-scoped artifact lifecycle을 기준으로 변경 �
 - 모든 unit과 group에 설정된 file·churn 상한을 적용하고 roster 항목을 빠뜨리지 않는다.
 - prepare에서 설정된 전체 review group 예산을 초과하면 액터 handoff를 내보내지 않는다.
 - 그룹 위험 근거와 모델 티어를 명시하며 위험 신호 부재를 안전 판정으로 바꾸지 않는다.
-- validate가 기록한 complete·artifact hash·review hash 결합을 seal의 신뢰 근거로 삼는다.
+- 최초 prepare의 effective effort를 고정하고 현재 검증 정책·완료 기록·artifact hash·review hash 결합을 seal의 신뢰 근거로 삼는다.
 - state I/O, artifact path, repository rule path와 cleanup에 project containment와 symlink guard를 요구한다.
 - cleanup에 literal `confirm: true`를 요구한다.
 

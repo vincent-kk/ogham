@@ -88,6 +88,7 @@ export async function validateReviewRound(
             round: round - 1,
             sourceHash: state.sourceHash,
             units: group.units,
+            policy: group,
           },
           priorProblems,
         )
@@ -151,6 +152,7 @@ export async function validateReviewRound(
         round,
         sourceHash: state.sourceHash,
         units: group.units,
+        policy: group,
       },
       problems,
     )

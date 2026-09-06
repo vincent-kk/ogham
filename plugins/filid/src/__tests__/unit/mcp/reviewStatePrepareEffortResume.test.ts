@@ -32,7 +32,7 @@ afterEach(() => {
 });
 
 describe('review_state prepare effort resume', () => {
-  it('preserves opinions and retunes rounds for the same source', async () => {
+  it('preserves opinions and rounds after rejecting an effort change', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
@@ -65,31 +65,38 @@ describe('review_state prepare effort resume', () => {
     );
     const opinionBefore = readUtf8FileIfExistsSync(opinionPath);
 
+    await expect(
+      handleReviewState({
+        action: REVIEW_STATE_ACTIONS.PREPARE,
+        projectRoot: fixture.projectRoot,
+        branchName: fixture.branchName,
+        baseRef: 'main',
+        effort: 'high',
+      }),
+    ).rejects.toMatchObject({ code: 'review-effort-locked' });
     const resumed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
-      branchName: fixture.branchName,
-      baseRef: 'main',
-      effort: 'high',
+      effort: 'medium',
     });
 
-    const highState = readPreparedReviewState(resumed);
+    const resumedState = readPreparedReviewState(resumed);
     expect(resumed.summary.disposition).toBe('resumable');
-    expect(highState.effort).toBe('high');
-    expect(highState.groups[0]?.rounds).toBe(3);
+    expect(resumedState.effort).toBe('medium');
+    expect(resumedState.groups[0]?.rounds).toBe(2);
     expect(readUtf8FileIfExistsSync(opinionPath)).toBe(opinionBefore);
-    expect(highState.groups[0]?.validated.review).toMatchObject({
+    expect(resumedState.groups[0]?.validated.review).toMatchObject({
       round: 1,
-      complete: false,
+      complete: true,
     });
     expect(
       readUtf8FileIfExistsSync(
         resolveReviewStateFixtureArtifact(
           fixture.projectRoot,
-          highState.normalizedBranch,
-          highState.groups[0]?.briefPath ?? '',
+          resumedState.normalizedBranch,
+          resumedState.groups[0]?.briefPath ?? '',
         ),
       ),
-    ).toContain('rounds: 3');
+    ).toContain('rounds: 2');
   });
 });

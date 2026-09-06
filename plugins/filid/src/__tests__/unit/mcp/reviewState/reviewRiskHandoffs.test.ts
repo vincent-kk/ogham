@@ -179,7 +179,7 @@ describe('risk-sensitive review handoffs', () => {
     { initial: 'medium', reduced: 'low', completedRound: 1 },
     { initial: 'high', reduced: 'medium', completedRound: 2 },
   ] as const)(
-    'closes pending work when effort is reduced from $initial to $reduced',
+    'preserves pending work when effort reduction from $initial to $reduced is rejected',
     async ({ initial, reduced, completedRound }) => {
       writeReviewStateFixtureFile(
         fixture.projectRoot,
@@ -227,26 +227,29 @@ describe('risk-sensitive review handoffs', () => {
         portableJoin(prepared.data.reviewDirectory, group.opinionPath),
         'utf8',
       );
+      await expect(
+        handleReviewState({
+          action: 'prepare',
+          projectRoot: fixture.projectRoot,
+          effort: reduced,
+        }),
+      ).rejects.toMatchObject({ code: 'review-effort-locked' });
       const resumed = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
-        effort: reduced,
+        effort: initial,
       });
-      expect(resumed.data.groups[0]!.rounds).toBe(completedRound);
+      expect(resumed.data.groups[0]!.rounds).toBe(completedRound + 1);
       expect(resumed.data.groups[0]!.validated.review).toMatchObject({
         round: completedRound,
-        complete: true,
+        complete: false,
       });
       expect(
         resumed.data.next.map((handoff) => ({
           kind: handoff.kind,
           modelTier: handoff.modelTier,
         })),
-      ).toEqual(
-        completedRound === 1
-          ? []
-          : [{ kind: 'verify', modelTier: 'efficient' }],
-      );
+      ).toEqual([{ kind: 'review', modelTier: 'strong' }]);
       expect(
         readFileSync(
           portableJoin(prepared.data.reviewDirectory, group.opinionPath),

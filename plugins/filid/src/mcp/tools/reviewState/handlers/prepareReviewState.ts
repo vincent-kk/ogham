@@ -8,6 +8,7 @@ import {
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_PHASES,
   REVIEW_STATE_SCHEMA_VERSION,
+  REVIEW_VALIDATION_POLICY_VERSION,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { assessReviewGroupRisk } from '../group/assessReviewGroupRisk.js';
@@ -19,6 +20,7 @@ import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { collectChangedScopeEvidence } from '../scope/collectChangedScopeEvidence.js';
 import { readChangeContext } from '../scope/readChangeContext.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
+import { assertReviewValidationPolicy } from '../state/assertReviewValidationPolicy.js';
 import { clearStaleReviewArtifacts } from '../state/clearStaleReviewArtifacts.js';
 import { hasCompletePreparedArtifacts } from '../state/hasCompletePreparedArtifacts.js';
 import { readReviewArtifactPresence } from '../state/readReviewArtifactPresence.js';
@@ -33,6 +35,7 @@ import type {
 import { writeReviewState } from '../state/writeReviewState.js';
 
 import { applyMissingTestRules } from './utils/applyMissingTestRules.js';
+import { assertPreparedEffortUnchanged } from './utils/assertPreparedEffortUnchanged.js';
 import { assertRenderedUnitsMatchGroups } from './utils/assertRenderedUnitsMatchGroups.js';
 import { assertReviewGroupBudget } from './utils/assertReviewGroupBudget.js';
 import { clearRecomputedReviewArtifacts } from './utils/clearRecomputedReviewArtifacts.js';
@@ -73,6 +76,8 @@ export async function prepareReviewState(
   const sameIdentity =
     !input.force && existing?.sourceHash === source.sourceHash;
 
+  if (sameIdentity) assertReviewValidationPolicy(existing);
+
   if (
     sameIdentity &&
     existing.phase === REVIEW_STATE_PHASES.SEALED &&
@@ -107,7 +112,7 @@ export async function prepareReviewState(
     settings.autoLowEffortGroupThreshold,
   );
   if (preserveLegacy) policy.effortReason = 'legacy-resume';
-  const effortChanged = canResume && existing.effort !== policy.effort;
+  if (canResume) assertPreparedEffortUnchanged(existing, policy.effort);
   const metadataChanged =
     canResume &&
     (existing.effortMode !== policy.effortMode ||
@@ -115,11 +120,7 @@ export async function prepareReviewState(
       existing.autoLowEffortGroupThreshold !==
         policy.autoLowEffortGroupThreshold);
 
-  if (
-    canResume &&
-    !effortChanged &&
-    hasCompletePreparedArtifacts(paths, existing)
-  ) {
+  if (canResume && hasCompletePreparedArtifacts(paths, existing)) {
     const selected = { ...existing, ...policy };
     if (metadataChanged) writeReviewSessionPolicy(paths.sessionPath, selected);
     const state = await recoverReviewGroups(
@@ -145,10 +146,9 @@ export async function prepareReviewState(
 
   if (canResume && existsSync(paths.evidencePath)) {
     const presence = readReviewArtifactPresence(paths, existing);
-    const loadedRules =
-      !effortChanged && hasAllReviewBriefs(paths, existing)
-        ? null
-        : loadPrepareReviewRules(input.projectRoot, settings.pluginRoot);
+    const loadedRules = hasAllReviewBriefs(paths, existing)
+      ? null
+      : loadPrepareReviewRules(input.projectRoot, settings.pluginRoot);
     const context = await readChangeContext({
       projectRoot: input.projectRoot,
       baseCommit: existing.baseCommit,
@@ -165,15 +165,12 @@ export async function prepareReviewState(
         });
     if (!presence.diffs)
       assertRenderedUnitsMatchGroups(renderedUnits, existing.groups);
-    const preparedGroups = effortChanged
-      ? retuneReviewGroups(existing.groups, REVIEW_EFFORT_ROUNDS[policy.effort])
-      : existing.groups;
     const groups = writePreparedReviewArtifacts({
       actorMethods: loadedRules?.actorMethods ?? null,
       changeContext: context.changeContext,
       handoff: context.handoff,
       paths,
-      groups: preparedGroups,
+      groups: existing.groups,
       previousGroups: existing.groups,
       renderedUnits,
       files: existing.scope.files,
@@ -186,12 +183,11 @@ export async function prepareReviewState(
       createdAt: existing.preparedAt,
       onlyMissingArtifacts: true,
       preserveOpinions: true,
-      rewriteReviewBriefs: effortChanged,
-      rewriteSession: effortChanged,
+      rewriteReviewBriefs: false,
+      rewriteSession: false,
     });
     const selected = { ...existing, ...policy, groups };
-    if (metadataChanged && !effortChanged)
-      writeReviewSessionPolicy(paths.sessionPath, selected);
+    if (metadataChanged) writeReviewSessionPolicy(paths.sessionPath, selected);
     const state = await recoverReviewGroups(
       selected,
       paths,
@@ -258,12 +254,12 @@ export async function prepareReviewState(
   });
   files = applyMissingTestRules({ files, groups, activeRules });
   assertReviewGroupBudget(groups, settings.maxGroups);
-  policy = selectReviewEffort(
-    preserveLegacy ? existing.effort : settings.effortMode,
-    groups.filter((group) => group.rounds > 0).length,
-    settings.autoLowEffortGroupThreshold,
-  );
-  if (preserveLegacy) policy.effortReason = 'legacy-resume';
+  if (!canResume)
+    policy = selectReviewEffort(
+      settings.effortMode,
+      groups.filter((group) => group.rounds > 0).length,
+      settings.autoLowEffortGroupThreshold,
+    );
   groups = retuneReviewGroups(groups, REVIEW_EFFORT_ROUNDS[policy.effort]);
   groups = groups.map((group) => ({
     ...group,
@@ -303,6 +299,7 @@ export async function prepareReviewState(
 
   let state: ReviewStateRecord = {
     schemaVersion: REVIEW_STATE_SCHEMA_VERSION,
+    validationPolicyVersion: REVIEW_VALIDATION_POLICY_VERSION,
     projectRoot: input.projectRoot,
     branchName: input.branchName,
     normalizedBranch: paths.normalizedBranch,

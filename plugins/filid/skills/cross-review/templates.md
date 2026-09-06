@@ -47,7 +47,7 @@ For round 1, write the path named by the review brief's `output` field. For roun
 }
 ```
 
-`chunk` is a string such as `"2/3"` or `null`. Use `COMPLETE` or `INDETERMINATE`; an indeterminate opinion has at least one gap. Include every assigned unit exactly once. `lines` is provisional because `validate` resolves it from `existingCode`. Categories are `bug`, `security`, `performance`, `maintainability`, `test`, `documentation`, `contract`, `structure`, and `verification`.
+`chunk` is a string such as `"2/3"` or `null`. Use `COMPLETE` or `INDETERMINATE`; an indeterminate opinion has at least one gap. Include every assigned unit exactly once. `lines` is provisional because `validate` resolves it from `existingCode`. Categories are `bug`, `security`, `performance`, `maintainability`, `test`, `documentation`, `contract`, `structure`, and `verification`. For reviewable COMPLETE opinions, `checked` must be nonempty and every `checked` entry must be nonblank. `riskPlan` must be nonblank when `plan_required` is true or `risk_reasons` is nonempty. INDETERMINATE with a genuine gap permits empty `checked` and null `riskPlan`; provided blank strings are always invalid.
 
 ## Verifier opinion JSON
 

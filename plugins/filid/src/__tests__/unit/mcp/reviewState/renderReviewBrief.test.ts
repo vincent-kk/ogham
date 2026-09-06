@@ -262,6 +262,9 @@ describe('renderReviewBrief', () => {
       renderOpinionSkeleton(input.group, input.sourceHash),
     );
     skeleton.state = 'COMPLETE';
+    skeleton.checked = input.group.units.map((unit) => unit.path);
+    if (input.group.planRequired || (input.group.riskReasons?.length ?? 0) > 0)
+      skeleton.riskPlan = 'Inspect the prepared risk and its callers.';
     for (const file of skeleton.files) file.result = 'reviewed';
     const contract = JSON.stringify(skeleton);
     const parsed = parseReviewOpinion(contract);
@@ -277,6 +280,7 @@ describe('renderReviewBrief', () => {
           round: 1,
           sourceHash: input.sourceHash,
           units: input.group.units,
+          policy: input.group,
         },
         problems,
       ),
