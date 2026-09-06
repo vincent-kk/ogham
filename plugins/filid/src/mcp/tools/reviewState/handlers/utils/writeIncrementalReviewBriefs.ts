@@ -3,13 +3,15 @@ import {
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
-import { CONTEXT_MARKER } from '../../brief/utils/renderChangeContext.js';
 import { executeReviewGit } from '../../hash/executeReviewGit.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import type {
   ReviewStatePaths,
   ReviewStateRecord,
 } from '../../state/reviewStateTypes.js';
+
+/** Presentation separator before replaceable incremental review context. */
+const INCREMENTAL_CONTEXT_SEPARATOR = '\n<!-- filid:incremental-context -->\n';
 
 /**
  * Supply explicit review requirements, the latest committed delta and unresolved claims.
@@ -30,6 +32,14 @@ export async function writeIncrementalReviewBriefs(
     const path = resolveReviewArtifactPath(paths, group.briefPath);
     const original = readUtf8FileIfExistsSync(path);
     if (original === null) throw new Error('review brief is missing');
+    if (group.coreBriefByteLength === undefined)
+      throw new Error('review brief core byte length is missing');
+    const originalBytes = Buffer.from(original, 'utf8');
+    if (originalBytes.byteLength < group.coreBriefByteLength)
+      throw new Error('review brief is shorter than its core byte length');
+    const coreBrief = originalBytes
+      .subarray(0, group.coreBriefByteLength)
+      .toString('utf8');
     const delta = previousCommit
       ? await executeReviewGit(state.projectRoot, [
           'diff',
@@ -68,8 +78,8 @@ export async function writeIncrementalReviewBriefs(
       .join('\n');
     writeFileAtomicallySync(
       path,
-      original.split(CONTEXT_MARKER)[0] +
-        (supplemental ? CONTEXT_MARKER + supplemental : ''),
+      coreBrief +
+        (supplemental ? INCREMENTAL_CONTEXT_SEPARATOR + supplemental : ''),
     );
   }
 }

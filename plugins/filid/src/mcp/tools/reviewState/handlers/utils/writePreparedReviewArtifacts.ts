@@ -154,6 +154,7 @@ export function writePreparedReviewArtifacts(
 
     const reviewRound = 1;
     const briefPath = artifactPath(input.paths, group.briefPath);
+    let prepared = group;
     if (
       input.rewriteReviewBriefs ||
       !input.onlyMissingArtifacts ||
@@ -177,25 +178,27 @@ export function writePreparedReviewArtifacts(
         if (!rule) throw new Error(`Review rule body is missing for "${id}".`);
         return { id, body: rule.body };
       });
-      writeFileAtomicallySync(
-        briefPath,
-        renderReviewBrief(
-          {
-            reviewerMethod: input.actorMethods.reviewer,
-            changeContext: input.changeContext,
-            handoff: input.handoff,
-            diffs: readInlineReviewDiffs(input.paths, group),
-            group,
-            files: input.files,
-            candidates,
-            repositoryRules,
-            rules: ruleBodies,
-            sourceHash: input.sourceHash,
-            baseRef: input.baseRef,
-          },
-          reviewRound,
-        ),
+      const brief = renderReviewBrief(
+        {
+          reviewerMethod: input.actorMethods.reviewer,
+          changeContext: input.changeContext,
+          handoff: input.handoff,
+          diffs: readInlineReviewDiffs(input.paths, group),
+          group,
+          files: input.files,
+          candidates,
+          repositoryRules,
+          rules: ruleBodies,
+          sourceHash: input.sourceHash,
+          baseRef: input.baseRef,
+        },
+        reviewRound,
       );
+      writeFileAtomicallySync(briefPath, brief);
+      prepared = {
+        ...group,
+        coreBriefByteLength: Buffer.byteLength(brief, 'utf8'),
+      };
     }
     const skeletonPath = artifactPath(input.paths, group.skeletonPath);
     if (
@@ -206,7 +209,7 @@ export function writePreparedReviewArtifacts(
         skeletonPath,
         renderOpinionSkeleton(group, input.sourceHash, reviewRound),
       );
-    return group;
+    return prepared;
   });
 
   if (

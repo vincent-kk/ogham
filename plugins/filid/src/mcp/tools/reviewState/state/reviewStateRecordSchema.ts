@@ -80,6 +80,7 @@ const ReviewGroupSchema = z
     dependsOn: z.array(z.string()),
     candidateIds: z.array(z.string()),
     briefPath: z.string(),
+    coreBriefByteLength: z.number().int().positive().optional(),
     skeletonPath: z.string(),
     opinionPath: z.string(),
     verifyBriefPath: z.string(),

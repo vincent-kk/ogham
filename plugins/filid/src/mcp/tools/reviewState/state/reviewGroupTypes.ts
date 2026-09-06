@@ -69,6 +69,8 @@ export interface ReviewGroup {
   candidateIds: string[];
   /** Review-directory-relative reviewer brief path. */
   briefPath: string;
+  /** UTF-8 byte length of the rendered brief before incremental context. */
+  coreBriefByteLength?: number;
   /** Review-directory-relative first-round skeleton path. */
   skeletonPath: string;
   /** Review-directory-relative merged reviewer opinion path. */
