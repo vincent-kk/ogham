@@ -83,13 +83,13 @@ export function collectPriorReviewFindings(
     for (const finding of [
       ...(group.group.priorFindings ?? []),
       ...(review?.findings ?? []),
-    ]) {
+    ])
       if (!refuted.has(finding.id))
         findings.set(finding.id, {
           ...finding,
           path: renames.get(finding.path) ?? finding.path,
         });
-    }
+
   }
   return [...findings.values()];
 }
