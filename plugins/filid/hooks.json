@@ -7,6 +7,10 @@
           {
             "type": "command",
             "command": "node bridge/run-agy.mjs PreToolUse bridge/pre-tool-use.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node bridge/run-agy.mjs PreToolUse bridge/guard-review-actor.mjs"
           }
         ]
       }

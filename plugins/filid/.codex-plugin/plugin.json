@@ -16,7 +16,7 @@
     "context-architecture",
     "structure"
   ],
-  "skills": "./skills/",
+  "skills": "./.codex-plugin/skills/",
   "hooks": "./.codex-plugin/hooks.json",
   "mcpServers": {
     "filid": {
