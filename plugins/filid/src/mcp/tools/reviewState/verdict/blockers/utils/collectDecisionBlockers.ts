@@ -96,7 +96,7 @@ export function collectDecisionBlockers(
           sources: [...sources, proposal.source],
         });
   }
-  for (const issue of joined.coverageIssues) {
+  for (const issue of joined.coverageIssues)
     for (const id of new Set([...issue.expectedIds, ...issue.actualIds])) {
       const expected = issue.expectedIds.filter((value) => value === id).length;
       const actual = issue.actualIds.filter((value) => value === id).length;
@@ -138,6 +138,6 @@ export function collectDecisionBlockers(
         },
       });
     }
-  }
+
   return causes;
 }
