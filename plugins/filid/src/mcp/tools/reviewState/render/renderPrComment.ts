@@ -1,4 +1,4 @@
-import { portableJoin } from '@ogham/cross-platform';
+import { normalize, portableJoin } from '@ogham/cross-platform';
 
 import { REVIEW_STATE_FILE_NAMES } from '../../../../constants/reviewState.js';
 
@@ -22,9 +22,8 @@ export function renderPrComment(input: ReviewRenderInput): string {
   const affectsVerdict = input.fold.unresolved.filter(
     (entry) => entry.affectsVerdict,
   );
-  const reportPath = portableJoin(
-    input.reviewDirectory,
-    REVIEW_STATE_FILE_NAMES.REPORT,
+  const reportPath = normalize(
+    portableJoin(input.reviewDirectory, REVIEW_STATE_FILE_NAMES.REPORT),
   );
 
   return [

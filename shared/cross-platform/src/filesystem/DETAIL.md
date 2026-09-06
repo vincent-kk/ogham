@@ -54,7 +54,7 @@
 
 - 기존 case alias와 symlink ancestor는 실제 target spelling으로 canonicalize되고, 존재하지 않는 leaf는 canonical parent 아래에 유지된다.
 - referent가 아직 없는 terminal·ancestor symlink도 상대·절대 target과 link chain을 해석한다. 상대 target의 `..`는 symlink의 물리 parent를 기준으로 해석하며, link가 아닌 missing path의 suffix는 그대로 보존한다.
-- 입력 path와 link target은 root만 기준 경로에 고정하고 남은 component를 native lookup까지 보존한다. 따라서 `directory-alias/..`는 alias를 따라간 뒤 계산하며 Windows root-relative target은 symlink parent의 drive에 고정한다.
+- 입력 path와 link target은 root만 기준 경로에 고정하고 남은 component를 native lookup까지 보존한다. `directory-alias/..`의 해석 순서는 실제 host filesystem을 따른다. POSIX는 alias를 따라간 뒤 parent를 계산하지만 Windows는 lexical parent를 먼저 해석할 수 있으므로, missing target의 결과도 생성 후 native `realpath`와 같아야 한다. Windows root-relative target은 symlink parent의 drive에 고정한다.
 - terminal symlink entry 보존 옵션은 parent alias만 해석하고 symlink basename을 유지해 unlink 대상과 같은 경로를 반환한다.
 - terminal entry 보존은 dangling symlink도 역참조하지 않으며, 기본 해석의 순환 link는 native `ELOOP` 오류를 전파한다.
 - ENOENT 이외의 realpath 오류는 조용히 lexical path로 낮추지 않는다.
@@ -79,4 +79,4 @@
 
 ## Last Updated
 
-2026-09-05 — missing referent의 symlink target 해석과 반복 link 종료 조건을 명시했다.
+2026-09-06

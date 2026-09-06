@@ -123,7 +123,7 @@ describe("canonical targets with missing referents", () => {
   });
 
   it.each(["link target", "input path"])(
-    "resolves a directory alias before parent traversal in the %s",
+    "matches native parent traversal through a directory alias in the %s",
     (inputKind) => {
       const physical = join(root, "physical");
       const nested = join(physical, "nested");
@@ -144,12 +144,10 @@ describe("canonical targets with missing referents", () => {
       const draft = join(root, "draft.md");
       createSymlink(unresolved, draft, "file", skipUnsupported);
       const input = inputKind === "link target" ? draft : unresolved;
-      const actualTarget = join(realpathSync.native(physical), "INTENT.md");
-
       const canonical = canonicalizeTargetPathSync(root, input);
-      writeFileSync(draft, "created through the physical target");
+      writeFileSync(draft, "created through the host-resolved target");
+      const actualTarget = realpathSync.native(draft);
 
-      expect(realpathSync.native(draft)).toBe(actualTarget);
       expect(canonical).toBe(actualTarget);
     },
   );
