@@ -214,7 +214,10 @@ export async function validateReviewRound(
   )
     ? round + 1
     : null;
-  const { assigned } = splitVerifierAssignment(merged.opinion.findings);
+  const assigned = [
+    ...splitVerifierAssignment(merged.opinion.findings).assigned,
+    ...(group.priorFindings ?? []),
+  ];
   const verifierRequired = nextRound === null && assigned.length > 0;
   writeFileAtomicallySync(opinionPath, mergedBytes);
   if (nextRound !== null)

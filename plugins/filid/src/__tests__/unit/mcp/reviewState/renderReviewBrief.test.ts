@@ -81,19 +81,13 @@ describe('renderReviewBrief', () => {
     expect(section).toContain(
       '| code-change | exact-path | src/a.ts | exact | Inspect \\| tree before raising. |',
     );
-    for (const rule of [
-      'ancestor-path',
-      'descendant-path',
-      'root-path',
-      'sync-outside',
-      'unresolved-outside',
-    ])
+    for (const rule of ['ancestor-path', 'descendant-path', 'root-path'])
       expect(section).toContain(`| ${rule} |`);
     expect(
       section.split('\n').filter((line) => line.startsWith('|')),
-    ).toHaveLength(8);
+    ).toHaveLength(6);
     expect(section).toContain(
-      "2 more rows name paths outside this group's files.",
+      "4 more rows name paths outside this group's files.",
     );
     expect(section).not.toContain('outside-prefix');
     expect(section).not.toContain('outside-ancestor-prefix');
@@ -136,6 +130,8 @@ describe('renderReviewBrief', () => {
     '$name',
     ({ snapshotHash, sanitizedHash, ruleId, path, note, expectedRow }) => {
       const input = buildReviewBriefInput();
+      input.group.units[0]!.path = path;
+      input.files[0]!.path = path;
       const seed = {
         schema: 1,
         snapshotHash,

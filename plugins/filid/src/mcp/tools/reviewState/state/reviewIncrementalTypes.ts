@@ -14,15 +14,15 @@ export interface ReviewInputAssignment {
 export interface ReviewInputSnapshot {
   /** Unique assigned path/chunk pairs. */
   assignment: readonly ReviewInputAssignment[];
-  /** Base/head contents and modes, full files, hunks and diff bytes. */
+  /** Committed HEAD content and mode, source role, and review eligibility. */
   sourceHash: string;
   /** Applicable rule IDs, bodies and repository rule discovery. */
   rulesHash: string;
   /** Candidate and claim projections actually supplied to this group. */
   evidenceHash: string;
-  /** Complete observed context, including negative searches; null is unknown. */
+  /** Explicit user review requirements; null denotes incompatible legacy input. */
   contextHash: string | null;
-  /** Actor methods, effective effort, risk and validation policy. */
+  /** Reviewer/verifier methods, effective effort and validation policy. */
   policyHash: string;
 }
 
@@ -36,29 +36,12 @@ export interface ReviewInputManifest extends ReviewInputSnapshot {
   preparedInputHash: string;
 }
 
-/** Group facts collected before making a reuse decision. */
-export interface ReviewReuseCandidate {
-  /** Display ID within this generation. */
-  id: string;
-  /** Observed inputs, or null for a legacy group without provenance. */
-  input: ReviewInputManifest | null;
-  /** Maximum reviewer rounds; zero denotes canonical bookkeeping. */
-  rounds: number;
-  /** Display IDs of prior-opinion producers in this generation. */
-  dependsOn: readonly string[];
-  /** Whether the entire reviewer/verifier artifact chain has been verified. */
-  trusted: boolean;
-  /** Whether all reviewer rounds and the verifier assignment are finished. */
-  complete: boolean;
-}
-
 /** Machine-readable reasons that prohibit carrying a previous opinion pair. */
 export type ReviewReuseReason =
   | 'source-input-changed'
   | 'rules-changed'
   | 'evidence-changed'
   | 'context-changed'
-  | 'dependency-invalidated'
   | 'composition-changed'
   | 'input-unverifiable'
   | 'artifact-untrusted'
@@ -79,6 +62,10 @@ export interface ReviewGroupReuseDecision {
 
 /** Counts describe actor work, not token prices or observed provider calls. */
 export interface ReviewReuseSummary {
+  /** Distinct files whose original validated results are retained. */
+  reusedFiles: number;
+  /** Distinct files assigned to fresh reviewer work in this generation. */
+  reviewFiles: number;
   /** Current reviewable groups whose complete opinions are carried. */
   reusedGroups: number;
   /** Current reviewable groups that matched an origin but need fresh work. */
@@ -93,34 +80,14 @@ export interface ReviewReuseSummary {
   remainingMaxReviewerHandoffs: number;
 }
 
-/** Host-authoritative instructions and the enforced actor execution boundary. */
-export interface ReviewActorContext {
-  /** Isolated requires native tool restrictions; repository is conservative fallback. */
-  mode: 'isolated' | 'repository';
-  /** Ordered USR catalog; empty explicitly means no host instructions. */
-  userInstructions: string;
-}
-
-/** Tool-observed query, including absence and zero-result searches. */
-export interface ReviewContextReceipt {
-  /** Query whose complete input scope is fingerprinted. */
-  operation: 'read' | 'search' | 'exists';
-  /** Project-relative file or subtree; dot denotes the entire tree. */
-  path: string;
-  /** Committed revision selected by the actor. */
-  revision: 'head' | 'base';
-  /** Literal search text; absent for other queries. */
-  query?: string;
-  /** Digest of the full scope, independent of pagination. */
-  digest: string;
-}
-
 /** Recipe for reobserving inputs and publishing reuse decisions. */
 export interface ReviewIncrementalState {
+  /** Committed tree used for rename matching in the following preparation. */
+  headCommit?: string;
   /** Input-observation and carry contract version. */
-  version: 1;
-  /** Host instruction and actor access contract. */
-  actorContext: ReviewActorContext;
+  version: 2;
+  /** Explicit user review requirements; empty means no additional criteria. */
+  userInstructions: string;
   /** Supplied PR text, or null for generated Git context. */
   changeContext: string | null;
   /** Resolved rule/method root observed by this server. */
@@ -135,6 +102,8 @@ export interface ReviewIncrementalState {
 
 /** Immutable origin proof for unchanged copied opinion bytes. */
 export interface ReviewOpinionOrigin {
+  /** Immediate origin paths mapped to retained current paths. */
+  paths?: Record<string, string>;
   /** Digest of this generation's origin-state.json snapshot. */
   stateHash: string;
   /** Source identity in the original opinion bytes. */

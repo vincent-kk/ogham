@@ -27,7 +27,10 @@ export function buildDeterministicDecisions(
       reason: `canonical structure evidence measured on snapshot ${snapshotHash}`,
     }));
   const refuted = splitVerifierAssignment(
-    findings,
+    findings.filter(
+      (finding) =>
+        !group.priorFindings?.some((prior) => prior.id === finding.id),
+    ),
   ).deterministicRefuted.map<VerifyDecision>((finding) => ({
     findingId: finding.id,
     verdict: 'REFUTED',

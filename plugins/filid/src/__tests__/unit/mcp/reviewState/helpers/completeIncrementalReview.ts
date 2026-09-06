@@ -1,3 +1,5 @@
+import { writeFileSync } from 'node:fs';
+
 import { handleReviewState } from '../../../../../mcp/tools/reviewState/index.js';
 import type { ReviewStatePayload } from '../../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
@@ -5,9 +7,9 @@ import { buildReviewOpinion } from './buildReviewOpinion.js';
 import { buildVerifyOpinion } from './buildVerifyOpinion.js';
 
 /**
- * Drive real broker handoffs through validation without manufacturing receipts.
- * @param projectRoot Temporary Git fixture prepared with explicit actorContext.
- * @returns The final checkpoint after every executable handoff is validated.
+ * Drive ordinary reviewer file writes through the public validation handoff.
+ * @param projectRoot Disposable prepared Git fixture.
+ * @returns Checkpoint after every executable assignment has been validated.
  * @throws On failed validation or an unexpectedly unbounded handoff loop.
  */
 export async function completeIncrementalReview(
@@ -21,24 +23,6 @@ export async function completeIncrementalReview(
     const next = checkpoint.data.next?.[0];
     if (!next) return checkpoint;
     const state = checkpoint.data.state!;
-    const request = {
-      action: 'context' as const,
-      projectRoot,
-      generationId: next.context!.generationId,
-      token: next.context!.token,
-      group: next.group,
-      kind: next.kind,
-      ...(next.round === undefined ? {} : { round: next.round }),
-    };
-    let offset: number | null = 0;
-    while (offset !== null) {
-      const page: ReviewStatePayload = await handleReviewState({
-        ...request,
-        operation: 'brief',
-        offset,
-      });
-      offset = page.data.context!.nextOffset;
-    }
     const opinion =
       next.kind === 'review'
         ? buildReviewOpinion(
@@ -47,10 +31,13 @@ export async function completeIncrementalReview(
             next.round,
           )
         : buildVerifyOpinion(state, next.group, []);
+    writeFileSync(next.outputPath, JSON.stringify(opinion));
     const result = await handleReviewState({
-      ...request,
-      operation: 'submit',
-      opinion,
+      action: 'validate',
+      projectRoot,
+      group: next.group,
+      kind: next.kind,
+      ...(next.round === undefined ? {} : { round: next.round }),
     });
     if (result.summary.ok !== true)
       throw new Error(JSON.stringify(result.data.problems));

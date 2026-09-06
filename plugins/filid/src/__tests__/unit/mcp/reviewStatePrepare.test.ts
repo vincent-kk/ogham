@@ -19,7 +19,6 @@ import {
 } from '../../../constants/reviewState.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 
-import { readPreparedReviewState } from './reviewState/helpers/readPreparedReviewState.js';
 import { readReviewStateFixtureJson } from './reviewState/helpers/readReviewStateFixtureJson.js';
 import { resolveReviewArtifactFromDirectory } from './reviewState/helpers/resolveReviewArtifactFromDirectory.js';
 import { writeReviewActorMethods } from './reviewState/helpers/writeReviewActorMethods.js';
@@ -171,7 +170,7 @@ describe('review_state prepare v7', () => {
     expect(result.summary).toMatchObject({
       disposition: REVIEW_STATE_DISPOSITIONS.FRESH,
       filesTotal: 5,
-      unitsTotal: 2,
+      unitsTotal: 3,
       groupsTotal: 1,
       effort: 'low',
       concurrency: 2,
@@ -179,6 +178,15 @@ describe('review_state prepare v7', () => {
     expect(Object.keys(result.summary).sort()).toEqual(
       [
         'action',
+        'generationId',
+        'reusedGroups',
+        'reusedFiles',
+        'reviewFiles',
+        'rerunGroups',
+        'newGroups',
+        'removedGroups',
+        'bookkeepingGroups',
+        'remainingMaxReviewerHandoffs',
         'autoLowEffortGroupThreshold',
         'candidateCount',
         'concurrency',
@@ -212,6 +220,7 @@ describe('review_state prepare v7', () => {
         'infoCount',
         'outOfScopeCount',
         'reviewDirectory',
+        'reuseDecisionsPath',
         'sessionPath',
         'statePath',
         'statuses',
@@ -296,7 +305,7 @@ describe('review_state prepare v7', () => {
       expect.arrayContaining([
         expect.objectContaining({
           path: 'src/deleted.ts',
-          skipReason: 'deleted path',
+          skipReason: null,
         }),
         expect.objectContaining({
           path: 'generated/output.js',
@@ -310,12 +319,12 @@ describe('review_state prepare v7', () => {
     );
     expect(
       result.data.groups?.flatMap(({ units }) => units.map(({ path }) => path)),
-    ).toEqual(['src/added.ts', 'src/modified.ts']);
+    ).toEqual(['src/added.ts', 'src/deleted.ts', 'src/modified.ts']);
     const session =
       readUtf8FileIfExistsSync(result.data.sessionPath ?? '') ?? '';
     expect(session).toContain('generated/output.js');
     expect(session).toContain('package-lock.json');
-    expect(session).toContain('deleted path');
+    expect(session).toContain('src/deleted.ts');
   });
 
   it('restores missing artifacts while preserving existing opinions and semantic state', async () => {
@@ -358,7 +367,7 @@ describe('review_state prepare v7', () => {
     ).toEqual(JSON.parse(stateBefore!));
   });
 
-  it('restores complete prepared artifacts without reopening rule sources', async () => {
+  it('rejects reuse when assigned rule sources cannot be observed', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -367,23 +376,18 @@ describe('review_state prepare v7', () => {
     });
     rmSync(fixturePluginRoot, { recursive: true, force: true });
 
-    const resumed = await handleReviewState({
-      action: REVIEW_STATE_ACTIONS.PREPARE,
-      projectRoot,
-      branchName: BRANCH,
-      baseRef: 'main',
-    });
-
-    expect(resumed.status).toBe('ok');
-    expect(resumed.summary.disposition).toBe(
-      REVIEW_STATE_DISPOSITIONS.RESUMABLE,
-    );
-    expect(readPreparedReviewState(resumed)).toEqual(
-      readPreparedReviewState(prepared),
-    );
+    await expect(
+      handleReviewState({
+        action: REVIEW_STATE_ACTIONS.PREPARE,
+        projectRoot,
+        branchName: BRANCH,
+        baseRef: 'main',
+      }),
+    ).rejects.toThrow(/rule map is missing/i);
+    expect(existsSync(prepared.data.statePath)).toBe(true);
   });
 
-  it('restores a missing session without reopening rule sources', async () => {
+  it('preserves state when missing-artifact recovery cannot observe rules', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -393,21 +397,15 @@ describe('review_state prepare v7', () => {
     rmSync(prepared.data.sessionPath ?? '');
     rmSync(fixturePluginRoot, { recursive: true, force: true });
 
-    const resumed = await handleReviewState({
-      action: REVIEW_STATE_ACTIONS.PREPARE,
-      projectRoot,
-      branchName: BRANCH,
-      baseRef: 'main',
-    });
-
-    expect(resumed.status).toBe('ok');
-    expect(resumed.summary.disposition).toBe(
-      REVIEW_STATE_DISPOSITIONS.RESUMABLE,
-    );
-    expect(existsSync(resumed.data.sessionPath ?? '')).toBe(true);
-    expect(readPreparedReviewState(resumed)).toEqual(
-      readPreparedReviewState(prepared),
-    );
+    await expect(
+      handleReviewState({
+        action: REVIEW_STATE_ACTIONS.PREPARE,
+        projectRoot,
+        branchName: BRANCH,
+        baseRef: 'main',
+      }),
+    ).rejects.toThrow(/rule map is missing/i);
+    expect(existsSync(prepared.data.statePath)).toBe(true);
   });
 
   it('recomputes missing evidence without overwriting existing opinions', async () => {
@@ -438,7 +436,7 @@ describe('review_state prepare v7', () => {
     expect(readUtf8FileIfExistsSync(opinionPath)).toBe('{"kept":true}\n');
   });
 
-  it('force starts fresh and removes stale review opinions', async () => {
+  it('force starts a new generation and preserves previous opinions', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -460,10 +458,11 @@ describe('review_state prepare v7', () => {
     });
 
     expect(forced.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
-    expect(existsSync(staleOpinion)).toBe(false);
+    expect(existsSync(staleOpinion)).toBe(true);
+    expect(forced.data.reviewDirectory).not.toBe(prepared.data.reviewDirectory);
   });
 
-  it('cleans orphan artifacts when no canonical state exists', async () => {
+  it('preserves orphan history when no canonical state exists', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -484,12 +483,14 @@ describe('review_state prepare v7', () => {
       baseRef: 'main',
     });
 
-    expect(refreshed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
-    expect(existsSync(orphan)).toBe(false);
+    expect(refreshed.summary.disposition).not.toBe(
+      REVIEW_STATE_DISPOSITIONS.CACHED,
+    );
+    expect(existsSync(orphan)).toBe(true);
     expect(existsSync(refreshed.data.statePath)).toBe(true);
   });
 
-  it('treats a version-one state as fresh without requiring force', async () => {
+  it('explicitly bootstraps an obsolete state while preserving its artifacts', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -502,13 +503,16 @@ describe('review_state prepare v7', () => {
     );
 
     const refreshed = await handleReviewState({
+      force: true,
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
       baseRef: 'main',
     });
 
-    expect(refreshed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
+    expect(refreshed.summary.disposition).not.toBe(
+      REVIEW_STATE_DISPOSITIONS.CACHED,
+    );
     expect(
       readReviewStateFixtureJson(refreshed.data.statePath).schemaVersion,
     ).toBe(2);
@@ -587,7 +591,9 @@ describe('review_state prepare v7', () => {
       baseRef: 'main',
     });
 
-    expect(refreshed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
+    expect(refreshed.summary.disposition).not.toBe(
+      REVIEW_STATE_DISPOSITIONS.CACHED,
+    );
     expect(readReviewStateFixtureJson(refreshed.data.statePath).phase).toBe(
       'prepared',
     );

@@ -130,7 +130,10 @@ export async function recoverReviewGroups(
           renderVerifyBrief({
             group,
             files: state.scope.files,
-            findings: parsed.opinion.findings,
+            findings: [
+              ...parsed.opinion.findings,
+              ...(group.priorFindings ?? []),
+            ],
             sourceHash: state.sourceHash,
             verifierMethod: loadActorMethods(pluginRoot).verifier,
             diffs: readInlineReviewDiffs(paths, group),

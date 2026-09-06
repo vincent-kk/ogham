@@ -8,7 +8,6 @@ import type {
   ReviewStateRecord,
 } from '../state/reviewStateTypes.js';
 
-import { computeReviewContextToken } from './computeReviewContextToken.js';
 import type { ReviewGroupArtifactStatus } from './handoffTypes.js';
 
 /**
@@ -94,26 +93,5 @@ export function planNextHandoffs(input: {
         priorOpinionPath: null,
       });
   }
-  return {
-    next: next.map((handoff) => {
-      const token = state.groups.find(
-        (group) => group.id === handoff.group,
-      )?.contextToken;
-      return state.incremental && state.generationId && token
-        ? {
-            ...handoff,
-            context: {
-              generationId: state.generationId,
-              token: computeReviewContextToken(
-                token,
-                handoff.kind,
-                handoff.round,
-              ),
-              mode: state.incremental.actorContext.mode,
-            },
-          }
-        : handoff;
-    }),
-    sealReady: complete.size === state.groups.length,
-  };
+  return { next, sealReady: complete.size === state.groups.length };
 }

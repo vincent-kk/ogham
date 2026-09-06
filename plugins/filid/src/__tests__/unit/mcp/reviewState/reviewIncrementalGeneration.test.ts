@@ -135,7 +135,12 @@ describe('incremental generation publication', () => {
     expect(() => resolveReviewGenerationPaths(paths, '../escape')).toThrow();
     symlinkSync(
       fixture.pluginRoot,
-      join(paths.reviewDirectory, 'generations'),
+      join(
+        paths.reviewRoot,
+        paths.normalizedBranch,
+        'generations',
+        'a'.repeat(32),
+      ),
       'dir',
     );
     expect(() => resolveReviewGenerationPaths(paths, 'a'.repeat(32))).toThrow();

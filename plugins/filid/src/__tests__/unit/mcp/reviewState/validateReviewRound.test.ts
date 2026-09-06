@@ -21,6 +21,7 @@ import {
 } from './helpers/createReviewStateSealFixture.js';
 import { prepareReviewStateSealFixture } from './helpers/prepareReviewStateSealFixture.js';
 import { readPersistedReviewState } from './helpers/readPersistedReviewState.js';
+import { refreshReviewFixtureInputs } from './helpers/refreshReviewFixtureInputs.js';
 
 /** Isolated Git repository and actor-method fixture for validation effects. */
 let fixture: ReviewStateSealFixture;
@@ -100,6 +101,7 @@ describe('validateReviewRound handoff', () => {
       message: 'A canonical boundary finding.',
     });
     group.candidateIds.push('FCA-001');
+    state = await refreshReviewFixtureInputs(state, paths, fixture.pluginRoot);
     writeReviewState(paths.statePath, state);
     const finding = buildReviewStateSealFinding('01');
     writeFileAtomicallySync(

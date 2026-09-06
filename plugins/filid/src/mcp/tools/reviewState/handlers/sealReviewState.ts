@@ -88,7 +88,6 @@ export async function sealReviewState(
   }
   const state = restored;
   assertReviewValidationPolicy(state);
-  await assertReviewInputsFresh(state, paths);
   const source = await computeReviewSourceHash(
     input.projectRoot,
     input.baseRef ?? state.baseRef,
@@ -109,6 +108,7 @@ export async function sealReviewState(
       ],
     });
 
+  await assertReviewInputsFresh(state, paths);
   if (state.phase === REVIEW_STATE_PHASES.SEALED) {
     const summary =
       state.verdict === null

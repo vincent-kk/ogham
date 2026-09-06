@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { isReviewInputManifestValid } from '../hash/isReviewInputManifestValid.js';
 
-/** SHA-256 and group capability encoding. */
+/** SHA-256 input and artifact identity encoding. */
 const digest = z.string().regex(/^[a-f0-9]{64}$/);
 /** Closed invalidation vocabulary persisted in decision artifacts. */
 const reason = z.enum([
@@ -10,30 +10,12 @@ const reason = z.enum([
   'rules-changed',
   'evidence-changed',
   'context-changed',
-  'dependency-invalidated',
   'composition-changed',
   'input-unverifiable',
   'artifact-untrusted',
   'policy-incompatible',
   'forced',
 ]);
-/** Host-authoritative context is distinct from untrusted PR text. */
-const actorContext = z
-  .object({
-    mode: z.enum(['isolated', 'repository']),
-    userInstructions: z.string(),
-  })
-  .strict();
-/** Query receipts are authored by the context broker. */
-const receipt = z
-  .object({
-    operation: z.enum(['read', 'search', 'exists']),
-    path: z.string().min(1),
-    revision: z.enum(['head', 'base']),
-    query: z.string().optional(),
-    digest,
-  })
-  .strict();
 /** Every manifest claim must reproduce its persisted digests. */
 const input = z
   .object({
@@ -67,6 +49,8 @@ const input = z
 /** Counts form a bounded operational summary, never a token estimate. */
 const summary = z
   .object({
+    reusedFiles: z.number().int().nonnegative(),
+    reviewFiles: z.number().int().nonnegative(),
     reusedGroups: z.number().int().nonnegative(),
     rerunGroups: z.number().int().nonnegative(),
     newGroups: z.number().int().nonnegative(),
@@ -78,16 +62,20 @@ const summary = z
 /** Related schemas share one encoding at the state and public input boundaries. */
 export const ReviewIncrementalSchemas = {
   digest,
-  actorContext,
-  receipt,
   input,
   origin: z
-    .object({ stateHash: digest, sourceHash: digest, inputHash: digest })
+    .object({
+      stateHash: digest,
+      sourceHash: digest,
+      inputHash: digest,
+      paths: z.record(z.string()).optional(),
+    })
     .strict(),
   state: z
     .object({
-      version: z.literal(1),
-      actorContext,
+      version: z.literal(2),
+      headCommit: z.string().optional(),
+      userInstructions: z.string(),
       changeContext: z.string().nullable(),
       pluginRoot: z.string().nullable(),
       environmentHash: digest,

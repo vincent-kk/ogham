@@ -1,47 +1,43 @@
 import { isReviewInputManifestValid } from '../hash/isReviewInputManifestValid.js';
 import type {
-  ReviewReuseCandidate,
+  ReviewInputManifest,
   ReviewReuseReason,
 } from '../state/reviewIncrementalTypes.js';
 
-/** Digest fields retain distinct reasons in the decision artifact. */
+/** Each changed input retains its own reason in the decision artifact. */
 const INPUT_REASONS = [
   ['sourceHash', 'source-input-changed'],
   ['rulesHash', 'rules-changed'],
   ['evidenceHash', 'evidence-changed'],
   ['contextHash', 'context-changed'],
   ['policyHash', 'policy-incompatible'],
+  ['groupKey', 'composition-changed'],
 ] as const;
 
 /**
- * Compare one unambiguous origin with current observed semantic inputs.
- * @param current Current assignment and observed input manifest.
- * @param previous Matched origin with independently checked artifact trust.
- * @returns Every direct reason to rerun, before dependency propagation.
+ * Compare one file's explicit inputs and its original artifact trust.
+ * @param current Current committed file inputs.
+ * @param previous Previous file inputs, absent for an incompatible legacy record.
+ * @param trusted Whether the original review and verification completed intact.
+ * @returns Every reason that prevents file result reuse.
  */
 export function resolveReviewReuseReasons(
-  current: ReviewReuseCandidate,
-  previous: ReviewReuseCandidate,
+  current: ReviewInputManifest,
+  previous: ReviewInputManifest | undefined,
+  trusted: boolean,
 ): ReviewReuseReason[] {
   const reasons: ReviewReuseReason[] = [];
   if (
-    !current.input ||
-    !previous.input ||
-    !isReviewInputManifestValid(current.input) ||
-    !isReviewInputManifestValid(previous.input) ||
-    current.input.contextHash === null ||
-    previous.input.contextHash === null
+    !previous ||
+    !isReviewInputManifestValid(current) ||
+    !isReviewInputManifestValid(previous) ||
+    current.contextHash === null ||
+    previous.contextHash === null
   )
     reasons.push('input-unverifiable');
-  if (!previous.trusted || !previous.complete)
-    reasons.push('artifact-untrusted');
-  if (current.input && previous.input)
+  if (!trusted) reasons.push('artifact-untrusted');
+  if (previous)
     for (const [field, reason] of INPUT_REASONS)
-      if (current.input[field] !== previous.input[field]) reasons.push(reason);
-  if (
-    current.rounds !== previous.rounds &&
-    !reasons.includes('policy-incompatible')
-  )
-    reasons.push('policy-incompatible');
+      if (current[field] !== previous[field]) reasons.push(reason);
   return reasons;
 }

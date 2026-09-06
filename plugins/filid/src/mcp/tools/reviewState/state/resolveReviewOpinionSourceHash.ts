@@ -62,6 +62,36 @@ export function resolveReviewOpinionSourceHash(
     JSON.stringify(prior.validated) !== JSON.stringify(group.validated)
   )
     return null;
+  if (group.reusedFrom.paths) {
+    const mapping = group.reusedFrom.paths;
+    if (
+      Object.entries(mapping).some(
+        ([oldPath, newPath]) =>
+          !prior.fileInputs?.[oldPath] ||
+          prior.fileInputs[oldPath].preparedInputHash !==
+            group.fileInputs?.[newPath]?.preparedInputHash,
+      ) ||
+      JSON.stringify(group.opinionUnits) !==
+        JSON.stringify(prior.opinionUnits ?? prior.units)
+    )
+      return null;
+    const expectedUnits = prior.units
+      .filter((unit) => mapping[unit.path] !== undefined)
+      .map((unit) => ({ ...unit, path: mapping[unit.path] }));
+    const expectedPaths = Object.fromEntries(
+      Object.entries(
+        prior.opinionPaths ??
+          Object.fromEntries(prior.units.map((unit) => [unit.path, unit.path])),
+      )
+        .filter(([, path]) => mapping[path] !== undefined)
+        .map(([original, path]) => [original, mapping[path]]),
+    );
+    if (
+      JSON.stringify(expectedUnits) !== JSON.stringify(group.units) ||
+      JSON.stringify(expectedPaths) !== JSON.stringify(group.opinionPaths)
+    )
+      return null;
+  }
   const originPaths = origin.generationId
     ? resolveReviewGenerationPaths(paths, origin.generationId)
     : {

@@ -22,7 +22,6 @@ import type {
 
 import type { ReviewGroup } from './reviewGroupTypes.js';
 import type {
-  ReviewActorContext,
   ReviewIncrementalState,
   ReviewReuseSummary,
 } from './reviewIncrementalTypes.js';
@@ -245,31 +244,14 @@ export interface ReviewAssessment {
 /** Discriminated inputs accepted by every review_state action. */
 export type ReviewStateInput =
   | {
-      /** Capability-scoped observed context and opinion submission. */
-      action: typeof REVIEW_STATE_ACTIONS.CONTEXT;
-      projectRoot: string;
-      branchName?: string;
-      generationId: string;
-      group: string;
-      token: string;
-      kind: 'review' | 'verify';
-      round?: number;
-      operation: 'brief' | 'read' | 'search' | 'exists' | 'submit';
-      path?: string;
-      revision?: 'head' | 'base';
-      query?: string;
-      offset?: number;
-      opinion?: unknown;
-    }
-  | {
       action: typeof REVIEW_STATE_ACTIONS.PREPARE;
       projectRoot: string;
       branchName?: string;
       baseRef?: string;
       /** Optional untrusted change summary overriding generated Git context. */
       changeContext?: string;
-      /** Explicit host context opts into observed-input incremental review. */
-      actorContext?: ReviewActorContext;
+      /** Explicit user review requirements supplied to the assigned reviewers. */
+      userInstructions?: string;
       force?: boolean;
       /** Optional reviewer effort overriding repository configuration. */
       effort?: ReviewEffortMode;
@@ -314,12 +296,6 @@ export type ResolvedReviewStateInput = ReviewStateInput & {
 
 /** One runnable actor assignment with canonical paths and explicit model routing. */
 export interface ReviewHandoff {
-  /** Capability for hosts that execute the constrained context-only actor. */
-  context?: {
-    generationId: string;
-    token: string;
-    mode: 'isolated' | 'repository';
-  };
   /** Actor whose opinion is required next. */
   kind: 'review' | 'verify';
   /** Prepared group receiving the assignment. */
@@ -718,14 +694,6 @@ export interface ReviewCheckpointArtifacts {
 
 /** Action-specific review_state data carried inline or in an artifact. */
 export interface ReviewStateData {
-  /** Bounded context response; never contains other groups or capabilities. */
-  context?: {
-    text: string;
-    offset: number;
-    total: number;
-    nextOffset: number | null;
-    receiptDigest?: string;
-  };
   /** Read-only checkpoint assignments observed without recovery. */
   next?: ReviewHandoff[];
   /** Checkpoint readiness observed from the current artifact bytes. */

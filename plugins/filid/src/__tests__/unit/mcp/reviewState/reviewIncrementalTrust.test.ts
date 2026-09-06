@@ -36,13 +36,13 @@ afterEach(() => {
  * @param mode Enforced actor boundary or conservative fallback.
  * @returns The real prepare response.
  */
-function prepare(force = false, mode: 'isolated' | 'repository' = 'isolated') {
+function prepare(force = false) {
   return handleReviewState({
     action: 'prepare',
     projectRoot: fixture.projectRoot,
     changeContext: 'Review assigned changes.',
     effort: 'low',
-    actorContext: { mode, userInstructions: '' },
+    userInstructions: '',
     force,
   });
 }
@@ -77,9 +77,11 @@ describe('incremental opinion provenance', () => {
       rerunGroups: 1,
       remainingMaxReviewerHandoffs: 1,
     });
-    expect(next.data.next.map((handoff) => handoff.group)).toEqual([
-      origin.groups[0].id,
-    ]);
+    expect(
+      next.data.groups
+        .filter((group) => !group.reusedFrom)
+        .flatMap((group) => group.units.map((unit) => unit.path)),
+    ).toEqual([target]);
     expect(
       readFileSync(
         join(next.data.reviewDirectory, origin.groups[1].opinionPath),
@@ -151,16 +153,17 @@ describe('incremental opinion provenance', () => {
     ).toBe('invalid');
   });
 
-  it('never reuses a sealed repository-mode run as observed complete context', async () => {
-    const first = await prepare(false, 'repository');
+  it('reuses a sealed ordinary run without a host execution-mode declaration', async () => {
+    const first = await prepare(false);
     await completeIncrementalReview(fixture.projectRoot);
     await handleReviewState({
       action: 'seal',
       projectRoot: fixture.projectRoot,
     });
-    const next = await prepare(false, 'repository');
+    const next = await prepare(false);
     expect(next.summary.reusedGroups).toBe(0);
-    expect(next.summary.rerunGroups).toBe(2);
-    expect(next.data.reviewDirectory).not.toBe(first.data.reviewDirectory);
+    expect(next.summary.disposition).toBe('cached');
+    expect(next.data.next).toEqual([]);
+    expect(next.data.reviewDirectory).toBe(first.data.reviewDirectory);
   });
 });

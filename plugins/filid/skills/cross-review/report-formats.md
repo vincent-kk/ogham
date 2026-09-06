@@ -55,6 +55,8 @@ generated_at: <timestamp>
 | Field                        | Value   |
 | ---------------------------- | ------- |
 | reusedGroups                 | <count> |
+| reusedFiles                  | <count> |
+| reviewFiles                  | <count> |
 | rerunGroups                  | <count> |
 | newGroups                    | <count> |
 | removedGroups                | <count> |

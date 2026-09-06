@@ -1,7 +1,7 @@
 import type { ReviewReuseSummary } from '../../state/reviewIncrementalTypes.js';
 
 /**
- * Render the six actor-work counters shared by report and session artifacts.
+ * Render file reuse and actor-work counters shared by report and session artifacts.
  * @param summary Tool-computed reuse decisions for the active generation.
  * @returns Stable Markdown table with machine-readable field names.
  */

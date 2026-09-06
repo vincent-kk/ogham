@@ -34,7 +34,7 @@ function prepare() {
     projectRoot: fixture.projectRoot,
     changeContext: 'Review assigned changes.',
     effort: 'low',
-    actorContext: { mode: 'isolated', userInstructions: '' },
+    userInstructions: '',
   });
 }
 

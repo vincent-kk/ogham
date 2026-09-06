@@ -64,15 +64,16 @@ export function readReviewGroupArtifactStatus(
             group: group.id,
             round: validation.round,
             sourceHash: opinionSourceHash,
-            units: group.units,
+            units: group.opinionUnits ?? group.units,
             policy: group,
           },
           [],
         )
       ) {
         review = 'trusted';
-        assignedCount = splitVerifierAssignment(parsed.opinion.findings)
-          .assigned.length;
+        assignedCount =
+          splitVerifierAssignment(parsed.opinion.findings).assigned.length +
+          (group.priorFindings?.length ?? 0);
       }
     }
     const verify = group.validated.verify;

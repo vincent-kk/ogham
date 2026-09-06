@@ -37,7 +37,7 @@ function prepare(userInstructions = '') {
     projectRoot: fixture.projectRoot,
     effort: 'low',
     changeContext: 'Review the assigned changes.',
-    actorContext: { mode: 'isolated', userInstructions },
+    userInstructions,
   });
 }
 
@@ -79,7 +79,7 @@ describe('incremental prepare lifecycle', () => {
     );
   });
 
-  it('rejects stale progress and records an ordinary untracked .filid file', async () => {
+  it('ignores an ordinary untracked .filid file during progress', async () => {
     writeFileSync(
       join(fixture.projectRoot, '.git/info/exclude'),
       '.filid/config.json\n.filid/review/\n',
@@ -94,13 +94,15 @@ describe('incremental prepare lifecycle', () => {
         action: 'checkpoint',
         projectRoot: fixture.projectRoot,
       }),
-    ).rejects.toThrow(/inputs changed|refresh/i);
+    ).resolves.toHaveProperty('data.state');
     const next = await prepare();
-    expect(next.data.dirtyPaths).toContain('.filid/local-note.txt');
-    expect(next.summary.worktree).toBe('source-dirty');
+    expect(next.data.files.map((file) => file.path)).not.toContain(
+      '.filid/local-note.txt',
+    );
+    expect(next.data.reviewDirectory).toBeDefined();
   });
 
-  it('rejects a dirty path added beyond the bounded response list', async () => {
+  it('ignores a dirty path added beyond the bounded response list', async () => {
     for (let index = 0; index < 20; index += 1)
       writeFileSync(
         join(
@@ -120,7 +122,7 @@ describe('incremental prepare lifecycle', () => {
         action: 'checkpoint',
         projectRoot: fixture.projectRoot,
       }),
-    ).rejects.toThrow(/inputs changed|refresh/i);
+    ).resolves.toHaveProperty('data.state');
   });
 
   it('reruns sealed groups when the canonical review rule body changes', async () => {
@@ -139,7 +141,7 @@ describe('incremental prepare lifecycle', () => {
     expect(next.data.next).toHaveLength(2);
   });
 
-  it('reruns sealed groups when the native actor contract changes', async () => {
+  it('ignores unrelated agent metadata changes', async () => {
     const actorDirectory = join(fixture.pluginRoot, 'agents');
     const bridgeDirectory = join(fixture.pluginRoot, 'bridge');
     mkdirSync(actorDirectory, { recursive: true });
@@ -158,27 +160,26 @@ describe('incremental prepare lifecycle', () => {
     });
     writeFileSync(actorPath, '# Actor version 2\n');
     const next = await prepare();
-    expect(next.summary).toMatchObject({ reusedGroups: 0, rerunGroups: 2 });
+    expect(next.summary.disposition).toBe('cached');
+    expect(next.data.next).toEqual([]);
   });
 
   it.each([
     ['canonical hook registration', 'hooks/hooks.json'],
     ['shared hook runner', 'libs/run.cjs'],
-  ])(
-    'reruns sealed groups when the %s changes',
-    async (_label, relativePath) => {
-      const runtimePath = join(fixture.pluginRoot, relativePath);
-      mkdirSync(dirname(runtimePath), { recursive: true });
-      writeFileSync(runtimePath, 'runtime version 1\n');
-      await prepare();
-      await completeIncrementalReview(fixture.projectRoot);
-      await handleReviewState({
-        action: 'seal',
-        projectRoot: fixture.projectRoot,
-      });
-      writeFileSync(runtimePath, 'runtime version 2\n');
-      const next = await prepare();
-      expect(next.summary).toMatchObject({ reusedGroups: 0, rerunGroups: 2 });
-    },
-  );
+  ])('ignores unrelated %s changes', async (_label, relativePath) => {
+    const runtimePath = join(fixture.pluginRoot, relativePath);
+    mkdirSync(dirname(runtimePath), { recursive: true });
+    writeFileSync(runtimePath, 'runtime version 1\n');
+    await prepare();
+    await completeIncrementalReview(fixture.projectRoot);
+    await handleReviewState({
+      action: 'seal',
+      projectRoot: fixture.projectRoot,
+    });
+    writeFileSync(runtimePath, 'runtime version 2\n');
+    const next = await prepare();
+    expect(next.summary.disposition).toBe('cached');
+    expect(next.data.next).toEqual([]);
+  });
 });

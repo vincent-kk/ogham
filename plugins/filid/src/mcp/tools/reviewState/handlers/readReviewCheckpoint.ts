@@ -71,7 +71,6 @@ export async function readReviewCheckpoint(
   }
   const state = restored;
   assertReviewValidationPolicy(state);
-  await assertReviewInputsFresh(state, paths);
   const artifacts = readReviewArtifactPresence(paths, state);
   const handoff = planNextHandoffs({
     state,
@@ -101,6 +100,7 @@ export async function readReviewCheckpoint(
       ],
     });
 
+  await assertReviewInputsFresh(state, paths);
   if (
     state.phase === REVIEW_STATE_PHASES.SEALED &&
     !reviewReportExists(paths.reportPath)

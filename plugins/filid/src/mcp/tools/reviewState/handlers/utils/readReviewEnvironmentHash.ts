@@ -9,7 +9,6 @@ import { findRepositoryRulePaths } from '../../rules/findRepositoryRulePaths.js'
 import type { ReviewStateRecord } from '../../state/reviewStateTypes.js';
 
 import { loadPrepareReviewRules } from './loadPrepareReviewRules.js';
-import { readReviewActorRuntimeHash } from './readReviewActorRuntimeHash.js';
 import { resolvePrepareSettings } from './resolvePrepareSettings.js';
 
 /**
@@ -39,10 +38,10 @@ export function readReviewEnvironmentHash(
   return computeReviewArtifactHash(
     JSON.stringify([
       1,
-      settings,
+      settings.generatedPaths,
+      settings.lockfiles,
       rules,
       documents,
-      readReviewActorRuntimeHash(pluginRoot),
     ]),
   );
 }

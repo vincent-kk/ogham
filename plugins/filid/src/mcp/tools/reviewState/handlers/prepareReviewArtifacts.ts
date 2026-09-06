@@ -32,6 +32,7 @@ import { reviewReportExists } from '../state/reviewReportExists.js';
 import type {
   ResolvedReviewStateInput,
   ReviewPreparePayload,
+  ReviewScopeFile,
   ReviewStatePaths,
   ReviewStateRecord,
 } from '../state/reviewStateTypes.js';
@@ -44,13 +45,13 @@ import { assertReviewGroupBudget } from './utils/assertReviewGroupBudget.js';
 import { clearRecomputedReviewArtifacts } from './utils/clearRecomputedReviewArtifacts.js';
 import { collectRenderedReviewUnits } from './utils/collectRenderedReviewUnits.js';
 import { createPreparedReviewPayload } from './utils/createPreparedReviewPayload.js';
+import { extendIncrementalReviewFiles } from './utils/extendIncrementalReviewFiles.js';
 import { hasAllReviewBriefs } from './utils/hasAllReviewBriefs.js';
 import { loadPrepareReviewRules } from './utils/loadPrepareReviewRules.js';
 import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
 import { resolvePrepareBaseRef } from './utils/resolvePrepareBaseRef.js';
 import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
 import { resolvePreparedReviewFiles } from './utils/resolvePreparedReviewFiles.js';
-import { retainReviewGroupValidations } from './utils/retainReviewGroupValidations.js';
 import { retuneReviewGroups } from './utils/retuneReviewGroups.js';
 import { selectReviewEffort } from './utils/selectReviewEffort.js';
 import { writePreparedReviewArtifacts } from './utils/writePreparedReviewArtifacts.js';
@@ -69,7 +70,15 @@ type PrepareInput = Extract<
  */
 export async function prepareReviewArtifacts(
   input: PrepareInput,
-  staging?: { paths: ReviewStatePaths; previous: ReviewStateRecord | null },
+  staging?: {
+    paths: ReviewStatePaths;
+    previous: ReviewStateRecord | null;
+    selectedPaths?: readonly string[];
+    observedFiles?: ReviewScopeFile[];
+    retainedCandidateIds?: string[];
+    unresolvedPaths?: readonly string[];
+    deferBudget?: boolean;
+  },
 ): Promise<ReviewPreparePayload> {
   const paths =
     staging?.paths ??
@@ -121,7 +130,10 @@ export async function prepareReviewArtifacts(
     (existing.effortMode === undefined ||
       existing.effortReason === 'legacy-resume');
   let policy = selectReviewEffort(
-    preserveLegacy ? existing.effort : settings.effortMode,
+    preserveLegacy ||
+      (canResume && !settings.effortExplicit && existing.effortMode !== 'auto')
+      ? existing.effort
+      : settings.effortMode,
     canResume ? existing.groups.filter((group) => group.rounds > 0).length : 0,
     settings.autoLowEffortGroupThreshold,
   );
@@ -246,29 +258,51 @@ export async function prepareReviewArtifacts(
     loadPrepareReviewRules(input.projectRoot, settings.pluginRoot);
   let files = resolvePreparedReviewFiles({
     projectRoot: input.projectRoot,
-    files: collected.files,
+    files: staging
+      ? await extendIncrementalReviewFiles(
+          input.projectRoot,
+          collected.files,
+          staging.previous,
+        )
+      : collected.files,
     rules,
     overrides,
   });
+  files = files.map((file) =>
+    staging?.unresolvedPaths?.includes(file.path)
+      ? { ...file, skipReason: null }
+      : file,
+  );
   const renderedUnits = await collectRenderedReviewUnits({
     projectRoot: input.projectRoot,
     baseCommit: source.baseCommit,
     files,
     groupChurnLimit: settings.groupChurnLimit,
+    fallbackBase: staging?.previous?.incremental?.headCommit,
   });
   let groups = buildReviewGroups({
-    units: renderedUnits.map(({ unit }) => unit),
+    units: renderedUnits
+      .map(({ unit }) => unit)
+      .filter(
+        (unit) =>
+          !staging?.selectedPaths || staging.selectedPaths.includes(unit.path),
+      ),
     files,
-    candidates: collected.candidates,
+    candidates: collected.candidates.filter(
+      (candidate) => !staging?.retainedCandidateIds?.includes(candidate.id),
+    ),
     rounds: 1,
     groupFileLimit: settings.groupFileLimit,
     groupChurnLimit: settings.groupChurnLimit,
     planChurnLimit: settings.planChurnLimit,
   });
-  files = applyMissingTestRules({ files, groups, activeRules });
+  files =
+    staging?.observedFiles ??
+    applyMissingTestRules({ files, groups, activeRules });
   if (staging?.previous)
-    groups = stabilizeReviewGroupIds(groups, files, staging.previous);
-  assertReviewGroupBudget(groups, settings.maxGroups);
+    groups = stabilizeReviewGroupIds(groups, staging.previous);
+  if (!staging?.deferBudget)
+    assertReviewGroupBudget(groups, settings.maxGroups);
   if (!canResume)
     policy = selectReviewEffort(
       settings.effortMode,
@@ -291,7 +325,7 @@ export async function prepareReviewArtifacts(
     files,
     changeContext: input.changeContext,
   });
-  if (canResume) groups = retainReviewGroupValidations(groups, existing.groups);
+  if (canResume) groups = existing.groups;
   groups = writePreparedReviewArtifacts({
     actorMethods,
     changeContext: context.changeContext,
@@ -312,6 +346,7 @@ export async function prepareReviewArtifacts(
   });
 
   let state: ReviewStateRecord = {
+    ...(canResume ? existing : {}),
     schemaVersion: REVIEW_STATE_SCHEMA_VERSION,
     validationPolicyVersion: REVIEW_VALIDATION_POLICY_VERSION,
     projectRoot: input.projectRoot,

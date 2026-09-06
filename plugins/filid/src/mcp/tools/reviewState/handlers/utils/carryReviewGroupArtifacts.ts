@@ -37,6 +37,8 @@ export function carryReviewGroupArtifacts(
     );
   }
   for (const path of [
+    origin.briefPath,
+    ...origin.units.map((unit) => unit.diffPath),
     origin.verifyBriefPath,
     ...Array.from(
       { length: origin.validated.review?.round ?? 0 },

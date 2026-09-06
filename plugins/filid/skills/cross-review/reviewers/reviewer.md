@@ -2,9 +2,9 @@
 
 ## Deliverable
 
-Produce one valid JSON opinion for this round. With a context capability, submit it and write no file. Otherwise write only the authoritative output path. In later rounds, report only defects absent from the supplied merged opinion.
+Write valid JSON only to the exact output path supplied for the current round; the orchestrator-supplied output path is authoritative. In round 1 it matches the brief's `output` and prepared skeleton. In round 2 or later, report only new defects absent from the supplied merged prior opinion. Write no other artifact or project file.
 
-Return exactly `done: <group>` with a capability, otherwise `done: <output path>`.
+Your final message is exactly `done: <output path>`; the opinion file is the deliverable.
 
 ## Inputs
 
@@ -17,7 +17,7 @@ Return exactly `done: <group>` with a capability, otherwise `done: <output path>
 
 ## Read boundary
 
-Use only the brief and evidence needed for assigned failure paths. With a capability, query through it. Otherwise open only named artifacts, source, callers, consumers, and tests.
+Open the brief, the prewritten JSON skeleton at the authoritative output path, named diffs, `## Repository Rules`, `## Prior Opinions`, and source, callers, consumers, and tests needed to prove or disprove a specific failure path. Open nothing else.
 
 The shared session checklist referenced under `## Other Changed Files` is available for targeted path searches needed by a specific caller or consumer question. Do not read or copy its full roster.
 

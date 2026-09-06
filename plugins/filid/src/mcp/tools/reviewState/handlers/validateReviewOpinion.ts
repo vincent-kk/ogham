@@ -68,7 +68,6 @@ export async function validateReviewOpinion(
   }
 
   assertReviewValidationPolicy(restored);
-  await assertReviewInputsFresh(restored, paths, input.group);
   const source = await computeReviewSourceHash(
     input.projectRoot,
     restored.baseRef,
@@ -101,6 +100,7 @@ export async function validateReviewOpinion(
       data: { ...base.data, problems: [] },
     };
   }
+  await assertReviewInputsFresh(restored, paths, input.group);
   if (restored.phase === REVIEW_STATE_PHASES.SEALED)
     throw new Error('sealed review state cannot validate opinions');
   const group = restored.groups.find(({ id }) => id === input.group);

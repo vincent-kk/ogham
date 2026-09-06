@@ -3,7 +3,6 @@ import { rmSync } from 'node:fs';
 
 import {
   readUtf8FileIfExistsSync,
-  resolveContainedPath,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -24,6 +23,7 @@ import {
 } from './reviewState/helpers/createReviewStateSealFixture.js';
 import { prepareReviewStateSealFixture } from './reviewState/helpers/prepareReviewStateSealFixture.js';
 import { readPersistedReviewState } from './reviewState/helpers/readPersistedReviewState.js';
+import { resolveReviewStateFixtureArtifact } from './reviewState/helpers/resolveReviewStateFixtureArtifact.js';
 import { sealReviewStateFixtureAndAssert } from './reviewState/helpers/sealReviewStateFixtureAndAssert.js';
 import { validateAutoReviewStateSealGroup } from './reviewState/helpers/validateAutoReviewStateSealGroup.js';
 import { validateReviewStateSealGroup } from './reviewState/helpers/validateReviewStateSealGroup.js';
@@ -44,9 +44,8 @@ function reviewArtifactPath(
   state: ReviewStateRecord,
   relativePath: string,
 ): string {
-  return resolveContainedPath(
+  return resolveReviewStateFixtureArtifact(
     projectRoot,
-    '.filid/review',
     state.normalizedBranch,
     relativePath,
   );

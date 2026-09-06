@@ -62,6 +62,7 @@ export function validateVerifierOpinion(
   const decisionIds = splitVerifierAssignment(
     reviewParsed.opinion.findings,
   ).assigned.map((finding) => finding.id);
+  decisionIds.push(...(group.priorFindings ?? []).map((finding) => finding.id));
   const verifyPath = resolveReviewArtifactPath(paths, group.verifyPath);
   const verifyBytes = readUtf8FileIfExistsSync(verifyPath);
   if (verifyBytes === null)

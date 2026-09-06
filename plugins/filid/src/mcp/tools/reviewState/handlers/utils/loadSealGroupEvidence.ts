@@ -3,6 +3,7 @@ import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
 import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
+import { projectReviewOpinion } from '../../opinion/projectReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
 import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
@@ -78,15 +79,43 @@ export function loadSealGroupEvidence(
               group: group.id,
               round: reviewValidation!.round,
               sourceHash: opinionSourceHash!,
-              units: group.units,
+              units: group.opinionUnits ?? group.units,
               policy: group,
             },
             [],
           )
         )
           issueSet.add('artifact not validated');
-        else review = parsed.opinion;
+        else
+          review = projectReviewOpinion(
+            {
+              ...parsed.opinion,
+              findings: [
+                ...parsed.opinion.findings,
+                ...(group.priorFindings ?? []),
+              ],
+            },
+            group,
+          );
         verify = JSON.parse(verifyBytes) as VerifyOpinion;
+        if (group.opinionPaths && review)
+          verify = {
+            ...verify,
+            decisions: verify.decisions.filter((decision) =>
+              review!.findings.some(
+                (finding) => finding.id === decision.findingId,
+              ),
+            ),
+            observations: verify.observations
+              .filter(
+                (observation) =>
+                  group.opinionPaths![observation.path] !== undefined,
+              )
+              .map((observation) => ({
+                ...observation,
+                path: group.opinionPaths![observation.path],
+              })),
+          };
       } catch {
         issueSet.add('artifact not validated');
       }

@@ -62,7 +62,7 @@ const genuineGap = readFileSync(
 
 describe('cross-review v7 skill surface', () => {
   it('declares the v7 frontmatter and orchestration schema', () => {
-    expect(skill).toContain("version: '7.8.0'");
+    expect(skill).toContain("version: '7.9.0'");
     expect(skill).toContain('review_schema: 7');
     expect(skill).toContain('--effort auto|low|medium|high');
   });
@@ -100,14 +100,13 @@ describe('cross-review v7 skill surface', () => {
     ).toContain('런타임 스킬 트리 밖');
   });
 
-  it('contains only the capability-scoped review persona spawn', () => {
+  it('contains no persona-spawn or internal command residue', () => {
     const allText = documents.map(({ content }) => content).join('\n');
     const internalCommands = (allText.match(/filid:[a-z]+/g) ?? []).filter(
-      (value) => value !== 'filid:lang' && value !== 'filid:review',
+      (value) => value !== 'filid:lang',
     );
 
-    expect(allText.match(/subagent_type/g)).toHaveLength(1);
-    expect(allText).toContain('subagent_type: "filid:review-actor"');
+    expect(allText).not.toContain('subagent_type');
     expect(internalCommands).toEqual([]);
   });
 
@@ -160,20 +159,20 @@ describe('cross-review v7 skill surface', () => {
   });
 
   it('makes the orchestrator path-only and gives reviewers a read boundary', () => {
-    expect(skill).toContain('capability-scoped actor');
-    expect(skill).toContain('actorContext');
-    expect(skill).toContain('action=context');
+    expect(skill).toContain(
+      'The orchestrator opens no diff, source, rule, or opinion body; it passes paths.',
+    );
     expect(reviewer).toContain('## Read boundary');
-    expect(reviewer).toContain('authoritative output path');
+    expect(reviewer).toContain(
+      'orchestrator-supplied output path is authoritative',
+    );
     expect(templates).toContain(
-      'submit this object through `operation: "submit"`',
+      'round 2 or later, use the orchestrator-supplied output path',
     );
     expect(reviewer).toContain('added or modified lines');
     expect(reviewer).toContain('type checker or linter');
     expect(reviewer).toContain('done: <output path>');
     expect(verifier).toContain('done: <output path>');
-    expect(reportFormats).toContain('### Incremental Reuse');
-    expect(reportFormats).toContain('remainingMaxReviewerHandoffs');
   });
 
   it('describes validation retries and authoritative concurrency', () => {

@@ -37,6 +37,7 @@ describe('review_state prepare state recovery', () => {
     writeFileAtomicallySync(prepared.data.statePath, '{"schemaVersion":');
 
     const recovered = await handleReviewState({
+      force: true,
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
       branchName: fixture.branchName,

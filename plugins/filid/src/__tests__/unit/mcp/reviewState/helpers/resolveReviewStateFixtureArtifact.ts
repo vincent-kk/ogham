@@ -1,4 +1,7 @@
-import { resolveContainedPath } from '@ogham/cross-platform';
+import {
+  readUtf8FileIfExistsSync,
+  resolveContainedPath,
+} from '@ogham/cross-platform';
 
 /**
  * Resolve one canonical branch-scoped artifact in a review-state fixture.
@@ -13,6 +16,22 @@ export function resolveReviewStateFixtureArtifact(
   normalizedBranch: string,
   relativePath: string,
 ): string {
+  const statePath = resolveContainedPath(
+    projectRoot,
+    '.filid/review',
+    normalizedBranch,
+    'review-state.json',
+  );
+  const state = JSON.parse(readUtf8FileIfExistsSync(statePath) ?? '{}');
+  if (relativePath !== 'review-state.json' && state.generationId)
+    return resolveContainedPath(
+      projectRoot,
+      '.filid/review',
+      normalizedBranch,
+      'generations',
+      state.generationId,
+      relativePath,
+    );
   return resolveContainedPath(
     projectRoot,
     '.filid/review',

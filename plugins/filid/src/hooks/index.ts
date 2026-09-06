@@ -3,4 +3,3 @@
 export { processSetup } from './setup/setup.js';
 export { handlePreToolUse } from './preToolUse/preToolUse.js';
 export { handleUserPromptSubmit } from './userPromptSubmit/userPromptSubmit.js';
-export { guardReviewActor } from './guardReviewActor/guardReviewActor.js';

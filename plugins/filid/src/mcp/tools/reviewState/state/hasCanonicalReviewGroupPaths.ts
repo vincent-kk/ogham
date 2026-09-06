@@ -15,7 +15,9 @@ export function hasCanonicalReviewGroupPaths(group: ReviewGroup): boolean {
   if (group.opinionPath !== `opinions/review-${id}.json`) return false;
   if (group.verifyBriefPath !== `briefs/verify-${id}.md`) return false;
   if (group.verifyPath !== `opinions/verify-${id}.json`) return false;
-  return group.units.every((unit, index) => {
+  if ((group.opinionUnits || group.opinionPaths) && !group.reusedFrom)
+    return false;
+  return (group.opinionUnits ?? group.units).every((unit, index) => {
     const chunkSuffix = unit.chunk
       ? `.${unit.chunk.index}-of-${unit.chunk.total}`
       : '';

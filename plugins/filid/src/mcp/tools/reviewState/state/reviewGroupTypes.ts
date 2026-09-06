@@ -1,5 +1,6 @@
+import type { ReviewFinding } from '../opinion/reviewOpinionTypes.js';
+
 import type {
-  ReviewContextReceipt,
   ReviewInputManifest,
   ReviewOpinionOrigin,
 } from './reviewIncrementalTypes.js';
@@ -42,22 +43,18 @@ export interface ReviewUnit {
 
 /** Deterministic reviewer assignment with artifact and validation handoff state. */
 export interface ReviewGroup {
+  /** Unresolved earlier findings requiring explicit independent decisions on this commit. */
+  priorFindings?: ReviewFinding[];
+  /** Path-neutral inputs for each assigned committed file. */
+  fileInputs?: Record<string, ReviewInputManifest>;
+  /** Original unit contract for validating unchanged opinion bytes. */
+  opinionUnits?: ReviewUnit[];
+  /** Original opinion paths mapped onto retained current paths. */
+  opinionPaths?: Record<string, string>;
   /** Observed input manifest, absent in legacy groups. */
   input?: ReviewInputManifest;
   /** Unchanged opinion provenance across generations. */
   reusedFrom?: ReviewOpinionOrigin;
-  /** Capability scoped to this group and generation. */
-  contextToken?: string;
-  /** Whether the isolated actor obtained its prepared input through the broker. */
-  contextStarted?: boolean;
-  /** Queries observed for reviewer and verifier work. */
-  contextReceipts?: ReviewContextReceipt[];
-  /** Role/round briefs actually opened through the broker. */
-  contextAssignments?: string[];
-  /** A failed observation prevents cross-generation reuse. */
-  contextUnverifiable?: boolean;
-  /** Prior groups whose opinion bytes were consumed by this actor. */
-  dependencyReceipts?: { group: string; digest: string }[];
   /** At-least-two-digit creation-order identifier. */
   id: string;
   /** Independently reviewable units assigned to this reviewer. */

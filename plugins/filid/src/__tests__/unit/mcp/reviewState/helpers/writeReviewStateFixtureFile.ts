@@ -5,6 +5,8 @@ import {
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
+import { resolveReviewStateFixtureArtifact } from './resolveReviewStateFixtureArtifact.js';
+
 /**
  * Write one project-relative file in a temporary review-state repository.
  *
@@ -18,7 +20,10 @@ export function writeReviewStateFixtureFile(
   relativePath: string,
   content: string,
 ): void {
-  const path = resolveContainedPath(projectRoot, relativePath);
+  const artifact = relativePath.match(/^\.filid\/review\/([^/]+)\/(.+)$/);
+  const path = artifact
+    ? resolveReviewStateFixtureArtifact(projectRoot, artifact[1], artifact[2])
+    : resolveContainedPath(projectRoot, relativePath);
   ensureDirectorySync(portableDirname(path));
   writeFileAtomicallySync(path, content);
 }
