@@ -4,6 +4,8 @@ import {
   scanLexicalTokens,
 } from '../structure/scanLexicalTokens.js';
 
+import { resolveConstantTable } from './constantTables/resolveConstantTable.js';
+
 interface StaticRows {
   exact: boolean;
   count: number;
@@ -12,6 +14,7 @@ interface StaticRows {
 
 const CASE_APIS = new Set(['it', 'specify', 'test']);
 const SUITE_APIS = new Set(['describe', 'suite']);
+const TABLE_APIS = new Set([...CASE_APIS, ...SUITE_APIS]);
 
 class SemanticCaseCounter {
   readonly tokens: LexicalToken[];
@@ -129,6 +132,11 @@ class SemanticCaseCounter {
     const token = this.tokens[start];
     if (!token) return { exact: false, count: 0 };
     if (token.value === '[') return this.countArrayLiteralRows(token, start);
+    if (token.kind === 'identifier') {
+      const arrayStart = resolveConstantTable(this.tokens, start, TABLE_APIS);
+      if (arrayStart !== undefined)
+        return this.countArrayLiteralRows(this.tokens[arrayStart], arrayStart);
+    }
     if (
       (token.kind === 'string' || token.kind === 'template') &&
       this.source[token.start] === '`'
@@ -141,7 +149,7 @@ class SemanticCaseCounter {
    * Count top-level elements of a `[…]` `each` table.
    * @param openToken - Opening `[` token
    * @param start - Index of `openToken`
-   * @returns Exact count, or inexact when the span is unclosed or contains a spread
+   * @returns Exact count, or inexact when the span is unclosed or spreads outer rows
    */
   private countArrayLiteralRows(
     openToken: LexicalToken,
@@ -149,19 +157,21 @@ class SemanticCaseCounter {
   ): Omit<StaticRows, 'nextIndex'> {
     const close = this.findMatching(start, '[', ']');
     if (close < 0) return { exact: false, count: 0 };
-    const raw = this.source.slice(openToken.start, this.tokens[close].end);
-    if (raw.includes('...')) return { exact: false, count: 0 };
-
     let count = 0;
     let segmentHasContent = false;
     for (let index = start + 1; index < close; index += 1) {
       const current = this.tokens[index];
-      const topLevelComma =
-        current.value === ',' &&
+      const atTableLevel =
         current.bracketDepth === openToken.bracketDepth + 1 &&
         current.parenDepth === openToken.parenDepth &&
         current.braceDepth === openToken.braceDepth;
-      if (topLevelComma) {
+      if (atTableLevel && this.source.startsWith('...', current.start))
+        return { exact: false, count: 0 };
+      if (
+        atTableLevel &&
+        current.kind === 'punctuation' &&
+        current.value === ','
+      ) {
         if (segmentHasContent) count += 1;
         segmentHasContent = false;
       } else segmentHasContent = true;
@@ -232,6 +242,7 @@ class SemanticCaseCounter {
   ): number {
     let depth = 0;
     for (let index = openIndex; index < this.tokens.length; index += 1) {
+      if (this.tokens[index].kind !== 'punctuation') continue;
       const value = this.tokens[index].value;
       if (value === openValue) depth += 1;
       else if (value === closeValue) {
