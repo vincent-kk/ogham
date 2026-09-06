@@ -6,7 +6,9 @@ import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js'
 import { checkReviewOpinion } from '../opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../opinion/parseReviewOpinion.js';
 import { splitVerifierAssignment } from '../opinion/splitVerifierAssignment.js';
+import { buildReviewOpinionCheckOptions } from '../opinion/utils/buildReviewOpinionCheckOptions.js';
 import { resolveReviewArtifactPath } from '../state/resolveReviewArtifactPath.js';
+import type { OriginStateCache } from '../state/resolveReviewOpinionSourceHash.js';
 import { resolveReviewOpinionSourceHash } from '../state/resolveReviewOpinionSourceHash.js';
 import type {
   ReviewStatePaths,
@@ -33,6 +35,7 @@ export function readReviewGroupArtifactStatus(
   const names = existsSync(opinionsDirectory)
     ? readdirSync(opinionsDirectory)
     : [];
+  const originStateCache: OriginStateCache = new Map();
   return state.groups.map((group) => {
     const reviewBytes = readUtf8FileIfExistsSync(
       resolveReviewArtifactPath(paths, group.opinionPath),
@@ -45,6 +48,8 @@ export function readReviewGroupArtifactStatus(
       paths,
       group,
       state.sourceHash,
+      0,
+      originStateCache,
     );
     let review: ReviewArtifactTrust =
       validation === null ? 'missing' : 'invalid';
@@ -60,13 +65,11 @@ export function readReviewGroupArtifactStatus(
         parsed.opinion &&
         checkReviewOpinion(
           parsed.opinion,
-          {
-            group: group.id,
-            round: validation.round,
-            sourceHash: opinionSourceHash,
-            units: group.opinionUnits ?? group.units,
-            policy: group,
-          },
+          buildReviewOpinionCheckOptions(
+            group,
+            validation.round,
+            opinionSourceHash,
+          ),
           [],
         )
       ) {

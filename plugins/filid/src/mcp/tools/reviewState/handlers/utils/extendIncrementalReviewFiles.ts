@@ -1,3 +1,4 @@
+import { REVIEW_SKIP_REASONS } from '../../../../../constants/reviewState.js';
 import { readHeadTreeEntries } from '../../hash/readHeadTreeEntries.js';
 import type {
   ReviewScopeFile,
@@ -27,7 +28,7 @@ export async function extendIncrementalReviewFiles(
     .map((file) => ({
       ...file,
       skipReason:
-        file.change === 'D' && file.skipReason === 'deleted path'
+        file.change === 'D' && file.skipReason === REVIEW_SKIP_REASONS.DELETED
           ? null
           : file.skipReason,
     }));

@@ -66,6 +66,16 @@ type PrepareInput = Extract<
 /**
  * Prepare, resume, or restore one deterministic branch-scoped review session.
  * @param input Validated prepare request with branch, base, and optional effort.
+ * @param staging Incremental-review generation context, present only when the
+ *   caller is staging scope carried over from a prior generation; `paths` and
+ *   `previous` locate that generation's artifacts and prior state,
+ *   `selectedPaths` restricts which rebuilt units enter new groups,
+ *   `retainedCandidateIds` excludes candidates the caller already retained
+ *   from the newly rebuilt candidate list, `observedFiles` replaces the
+ *   missing-test-rule file projection outright instead of recomputing it,
+ *   `unresolvedPaths` clears `skipReason` on the roster's matching files, and
+ *   `deferBudget` skips the group-budget assertion so the caller can enforce
+ *   it later.
  * @returns Complete scope and group state after every required artifact exists.
  */
 export async function prepareReviewArtifacts(

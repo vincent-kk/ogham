@@ -1,8 +1,8 @@
-import { observeReviewGroupInputs } from '../../../../../mcp/tools/reviewState/handlers/utils/observeReviewGroupInputs.js';
-import type {
-  ReviewStatePaths,
-  ReviewStateRecord,
-} from '../../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
+import {
+  observeReviewGroupInputs,
+  type ReviewStatePaths,
+  type ReviewStateRecord,
+} from '../../../../../mcp/tools/reviewState/index.js';
 
 /**
  * Rebuild fixture manifests after deliberately injecting legacy policy or canonical evidence.

@@ -1,3 +1,7 @@
+import type { z } from 'zod';
+
+import type { reason } from './reviewIncrementalSchemas.js';
+
 /** One assigned unit's composition, independent of its content and display ID. */
 export interface ReviewInputAssignment {
   /** Project-relative canonical source path. */
@@ -37,16 +41,7 @@ export interface ReviewInputManifest extends ReviewInputSnapshot {
 }
 
 /** Machine-readable reasons that prohibit carrying a previous opinion pair. */
-export type ReviewReuseReason =
-  | 'source-input-changed'
-  | 'rules-changed'
-  | 'evidence-changed'
-  | 'context-changed'
-  | 'composition-changed'
-  | 'input-unverifiable'
-  | 'artifact-untrusted'
-  | 'policy-incompatible'
-  | 'forced';
+export type ReviewReuseReason = z.infer<typeof reason>;
 
 /** One current group's provenance match and final reuse decision. */
 export interface ReviewGroupReuseDecision {

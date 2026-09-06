@@ -3,15 +3,13 @@ import {
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
+import { CONTEXT_MARKER } from '../../brief/utils/renderChangeContext.js';
 import { executeReviewGit } from '../../hash/executeReviewGit.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import type {
   ReviewStatePaths,
   ReviewStateRecord,
 } from '../../state/reviewStateTypes.js';
-
-/** Stable suffix boundary allows missing-brief recovery without duplicate context. */
-const CONTEXT_MARKER = '\n<!-- filid:incremental-context -->\n';
 
 /**
  * Supply explicit review requirements, the latest committed delta and unresolved claims.

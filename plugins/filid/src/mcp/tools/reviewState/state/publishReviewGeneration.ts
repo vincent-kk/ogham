@@ -9,6 +9,7 @@ import {
 import {
   REVIEW_STATE_JSON_INDENT,
   REVIEW_STATE_JSON_TRAILING_NEWLINE,
+  REVIEW_STATE_PHASES,
 } from '../../../../constants/reviewState.js';
 
 import { hasCompletePreparedArtifacts } from './hasCompletePreparedArtifacts.js';
@@ -18,6 +19,23 @@ import type {
   ReviewStatePaths,
   ReviewStateRecord,
 } from './reviewStateTypes.js';
+
+/**
+ * Read the generation a branch's active state currently points at.
+ * @param activeState Raw active state bytes, or null when no state file exists.
+ * @returns The recorded generation ID, or null when the bytes are absent, unparseable or invalid — a state that cannot be read never proves a prior publication.
+ */
+function readActiveGenerationId(activeState: string | null): string | null {
+  if (activeState === null) return null;
+  try {
+    return (
+      ReviewStateRecordSchema.parse(JSON.parse(activeState)).generationId ??
+      null
+    );
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Publish fully staged artifacts only if the observed active state is unchanged.
@@ -34,7 +52,7 @@ export function publishReviewGeneration(
 ): void {
   if (
     !state.generationId ||
-    state.phase !== 'prepared' ||
+    state.phase !== REVIEW_STATE_PHASES.PREPARED ||
     state.projectRoot !== paths.projectRoot
   )
     throw new Error('publication requires a prepared review generation');
@@ -57,11 +75,15 @@ export function publishReviewGeneration(
     assertNoSymlinkDescendantsSync(paths.projectRoot, path);
   const bytes = `${JSON.stringify(state, null, REVIEW_STATE_JSON_INDENT)}${REVIEW_STATE_JSON_TRAILING_NEWLINE}`;
   const result = withFileLockSync(paths.statePath, () => {
-    if (readUtf8FileIfExistsSync(paths.statePath) !== expectedState)
+    const activeState = readUtf8FileIfExistsSync(paths.statePath);
+    if (activeState !== expectedState)
       throw new Error('review state changed during generation preparation');
     if (!hasCompletePreparedArtifacts(paths, state))
       throw new Error('required review generation artifacts are missing');
-    if (readUtf8FileIfExistsSync(snapshotPath) !== null)
+    if (
+      state.generationId !== undefined &&
+      readActiveGenerationId(activeState) === state.generationId
+    )
       throw new Error('review generation was already published');
     if (expectedState !== null)
       writeFileAtomicallySync(originPath, expectedState);

@@ -5,7 +5,7 @@ import { isReviewInputManifestValid } from '../hash/isReviewInputManifestValid.j
 /** SHA-256 input and artifact identity encoding. */
 const digest = z.string().regex(/^[a-f0-9]{64}$/);
 /** Closed invalidation vocabulary persisted in decision artifacts. */
-const reason = z.enum([
+export const reason = z.enum([
   'source-input-changed',
   'rules-changed',
   'evidence-changed',

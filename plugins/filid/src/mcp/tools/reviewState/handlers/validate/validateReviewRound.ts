@@ -21,6 +21,7 @@ import { writeAutoVerifyOpinion } from '../../handoff/utils/writeAutoVerifyOpini
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
 import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { mergeReviewRounds } from '../../opinion/mergeReviewRounds.js';
+import { mergeVerifierAssignment } from '../../opinion/mergeVerifierAssignment.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
 import { splitVerifierAssignment } from '../../opinion/splitVerifierAssignment.js';
@@ -214,10 +215,10 @@ export async function validateReviewRound(
   )
     ? round + 1
     : null;
-  const assigned = [
-    ...splitVerifierAssignment(merged.opinion.findings).assigned,
-    ...(group.priorFindings ?? []),
-  ];
+  const { assigned } = mergeVerifierAssignment(
+    merged.opinion.findings,
+    group.priorFindings,
+  );
   const verifierRequired = nextRound === null && assigned.length > 0;
   writeFileAtomicallySync(opinionPath, mergedBytes);
   if (nextRound !== null)
@@ -235,7 +236,7 @@ export async function validateReviewRound(
       diffs: readInlineReviewDiffs(paths, group),
       group,
       files: state.scope.files,
-      findings: assigned,
+      findings: merged.opinion.findings,
       sourceHash: state.sourceHash,
     }),
   );

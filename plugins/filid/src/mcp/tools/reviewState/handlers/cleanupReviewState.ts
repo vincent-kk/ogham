@@ -10,7 +10,7 @@ import {
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
-import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
+import { resolveLegacyReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import type {
   ResolvedReviewStateInput,
   ReviewStatePayload,
@@ -26,7 +26,10 @@ export async function cleanupReviewState(
 ): Promise<ReviewStatePayload> {
   if (input.confirm !== true)
     throw new Error(REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED);
-  const paths = resolveReviewStatePaths(input.projectRoot, input.branchName);
+  const paths = resolveLegacyReviewStatePaths(
+    input.projectRoot,
+    input.branchName,
+  );
   assertReviewStatePaths(paths);
   rmSync(resolveContainedPath(paths.reviewRoot, paths.normalizedBranch), {
     recursive: true,

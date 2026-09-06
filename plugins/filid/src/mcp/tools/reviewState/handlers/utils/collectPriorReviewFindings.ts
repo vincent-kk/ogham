@@ -6,6 +6,7 @@ import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import { projectReviewOpinion } from '../../opinion/projectReviewOpinion.js';
 import type { ReviewFinding } from '../../opinion/reviewOpinionTypes.js';
+import { buildReviewOpinionCheckOptions } from '../../opinion/utils/buildReviewOpinionCheckOptions.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import { resolveReviewOpinionSourceHash } from '../../state/resolveReviewOpinionSourceHash.js';
 import type {
@@ -63,18 +64,15 @@ export function collectPriorReviewFindings(
           group.group.validated.review?.sha256 &&
         checkReviewOpinion(
           parsed.opinion,
-          {
-            group: group.group.id,
-            round: group.group.validated.review.round,
-            sourceHash:
-              resolveReviewOpinionSourceHash(
-                paths,
-                group.group,
-                previous.sourceHash,
-              ) ?? '',
-            units: group.group.opinionUnits ?? group.group.units,
-            policy: group.group,
-          },
+          buildReviewOpinionCheckOptions(
+            group.group,
+            group.group.validated.review.round,
+            resolveReviewOpinionSourceHash(
+              paths,
+              group.group,
+              previous.sourceHash,
+            ) ?? '',
+          ),
           [],
         )
       )
@@ -89,7 +87,6 @@ export function collectPriorReviewFindings(
           ...finding,
           path: renames.get(finding.path) ?? finding.path,
         });
-
   }
   return [...findings.values()];
 }

@@ -5,6 +5,12 @@ import {
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
+import {
+  REVIEW_STATE_JSON_INDENT,
+  REVIEW_STATE_JSON_TRAILING_NEWLINE,
+  REVIEW_STATE_PHASES,
+} from '../../../../constants/reviewState.js';
+
 import type { ReviewGroup } from './reviewGroupTypes.js';
 import { ReviewStateRecordSchema } from './reviewStateRecordSchema.js';
 import type { ReviewStateRecord } from './reviewStateTypes.js';
@@ -37,7 +43,7 @@ export function writeReviewGroupProgress(
     if (
       current.generationId !== update.generationId ||
       current.sourceHash !== update.sourceHash ||
-      current.phase !== 'prepared'
+      current.phase !== REVIEW_STATE_PHASES.PREPARED
     )
       throw new Error('review generation changed before group write');
     const found = current.groups.find((group) => group.id === expected.id);
@@ -50,7 +56,11 @@ export function writeReviewGroupProgress(
         group.id === expected.id ? changed : group,
       ),
     };
-    writeFileAtomicallySync(statePath, `${JSON.stringify(merged, null, 2)}\n`);
+    ReviewStateRecordSchema.parse(merged);
+    writeFileAtomicallySync(
+      statePath,
+      `${JSON.stringify(merged, null, REVIEW_STATE_JSON_INDENT)}${REVIEW_STATE_JSON_TRAILING_NEWLINE}`,
+    );
     return merged;
   });
   if (!result.acquired) throw new Error('review group progress lock timed out');

@@ -5,6 +5,7 @@ import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import { projectReviewOpinion } from '../../opinion/projectReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
+import { buildReviewOpinionCheckOptions } from '../../opinion/utils/buildReviewOpinionCheckOptions.js';
 import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import { resolveReviewOpinionSourceHash } from '../../state/resolveReviewOpinionSourceHash.js';
@@ -75,13 +76,11 @@ export function loadSealGroupEvidence(
           !parsed.opinion ||
           !checkReviewOpinion(
             parsed.opinion,
-            {
-              group: group.id,
-              round: reviewValidation!.round,
-              sourceHash: opinionSourceHash!,
-              units: group.opinionUnits ?? group.units,
-              policy: group,
-            },
+            buildReviewOpinionCheckOptions(
+              group,
+              reviewValidation!.round,
+              opinionSourceHash!,
+            ),
             [],
           )
         )
@@ -109,11 +108,14 @@ export function loadSealGroupEvidence(
             observations: verify.observations
               .filter(
                 (observation) =>
-                  group.opinionPaths![observation.path] !== undefined,
+                  group.opinionPaths![observation.path] !== undefined ||
+                  !group.opinionUnits?.some(
+                    (unit) => unit.path === observation.path,
+                  ),
               )
               .map((observation) => ({
                 ...observation,
-                path: group.opinionPaths![observation.path],
+                path: group.opinionPaths![observation.path] ?? observation.path,
               })),
           };
       } catch {
