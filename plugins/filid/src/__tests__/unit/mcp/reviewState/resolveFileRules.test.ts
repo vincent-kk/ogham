@@ -7,6 +7,7 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
@@ -26,7 +27,9 @@ const BUILT_IN_RULES = [
 
 describe('resolveFileRules', () => {
   it('assigns ECMAScript rules and excludes shell rules for mjs source', () => {
-    const rules = loadRuleMap(process.cwd());
+    const rules = loadRuleMap(
+      fileURLToPath(new URL('../../../../../', import.meta.url)),
+    );
     const selected = resolveFileRules({
       file: { path: 'scripts/build.mjs', role: 'source', owner: null },
       rules,
