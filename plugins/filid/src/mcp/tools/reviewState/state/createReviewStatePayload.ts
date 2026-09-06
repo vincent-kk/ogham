@@ -52,6 +52,12 @@ export function createReviewStatePayload({
             evidenceComplete: state.scope.evidenceComplete,
             worktree: state.scope.worktree,
             effort: state.effort,
+            ...(state.incremental
+              ? {
+                  ...state.incremental.summary,
+                  generationId: state.generationId,
+                }
+              : {}),
             ...(state.verdict === null ? {} : { verdict: state.verdict }),
           }
         : {}),

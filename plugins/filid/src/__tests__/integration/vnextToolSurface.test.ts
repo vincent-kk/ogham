@@ -196,6 +196,7 @@ describe('Filid 1.0 MCP tool surface', () => {
               'seal',
               'cleanup',
               'assess',
+              'context',
             ],
           },
           effort: { enum: ['auto', 'low', 'medium', 'high'] },

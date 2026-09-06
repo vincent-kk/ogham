@@ -1,4 +1,7 @@
-import { resolveContainedPath } from '@ogham/cross-platform';
+import {
+  assertNoSymlinkDescendantsSync,
+  resolveContainedPath,
+} from '@ogham/cross-platform';
 
 import {
   REVIEW_STATE_DIRECTORY_NAMES,
@@ -6,6 +9,8 @@ import {
 } from '../../../../constants/reviewState.js';
 
 import { normalizeReviewBranch } from './normalizeReviewBranch.js';
+import { readReviewState } from './readReviewState.js';
+import { resolveReviewGenerationPaths } from './resolveReviewGenerationPaths.js';
 import type { ReviewStatePaths } from './reviewStateTypes.js';
 
 /**
@@ -26,7 +31,7 @@ export function resolveReviewStatePaths(
   );
   const reviewDirectory = resolveContainedPath(reviewRoot, normalizedBranch);
 
-  return {
+  const paths: ReviewStatePaths = {
     projectRoot,
     normalizedBranch,
     reviewRoot,
@@ -72,4 +77,9 @@ export function resolveReviewStatePaths(
       REVIEW_STATE_DIRECTORY_NAMES.BRIEFS,
     ),
   };
+  assertNoSymlinkDescendantsSync(projectRoot, paths.statePath);
+  const state = readReviewState(paths.statePath);
+  return state && !('kind' in state) && state.generationId
+    ? resolveReviewGenerationPaths(paths, state.generationId)
+    : paths;
 }

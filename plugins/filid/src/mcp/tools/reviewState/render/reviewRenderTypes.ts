@@ -1,4 +1,5 @@
 import type { ToolStatus } from '../../../../types/toolEnvelope.js';
+import type { ReviewReuseSummary } from '../state/reviewIncrementalTypes.js';
 import type {
   ReviewScopeFile,
   WorktreeDisposition,
@@ -23,6 +24,8 @@ export interface ReviewRenderEvidence {
 
 /** Shared deterministic input for every seal-time Markdown renderer. */
 export interface ReviewRenderInput {
+  /** Actor work carried or remaining in this generation. */
+  reuse?: ReviewReuseSummary;
   /** Original reviewed branch name. */
   branchName: string;
   /** Base reference used to prepare the review snapshot. */

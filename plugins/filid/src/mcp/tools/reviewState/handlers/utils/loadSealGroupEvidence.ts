@@ -6,6 +6,7 @@ import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
 import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
+import { resolveReviewOpinionSourceHash } from '../../state/resolveReviewOpinionSourceHash.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 import type { ReviewStatePaths } from '../../state/reviewStateTypes.js';
 import type {
@@ -28,6 +29,12 @@ export function loadSealGroupEvidence(
 ): SealGroupEvidence[] {
   return groups.map((group) => {
     const issueSet = new Set<ReviewTrustIssue>();
+    const opinionSourceHash = resolveReviewOpinionSourceHash(
+      paths,
+      group,
+      sourceHash,
+    );
+    if (opinionSourceHash === null) issueSet.add('artifact not validated');
     const reviewValidation = group.validated.review;
     const verifyValidation = group.validated.verify;
     const reviewPath = resolveReviewArtifactPath(paths, group.opinionPath);
@@ -70,7 +77,7 @@ export function loadSealGroupEvidence(
             {
               group: group.id,
               round: reviewValidation!.round,
-              sourceHash,
+              sourceHash: opinionSourceHash!,
               units: group.units,
               policy: group,
             },

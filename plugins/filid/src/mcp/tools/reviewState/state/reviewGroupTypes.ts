@@ -1,3 +1,9 @@
+import type {
+  ReviewContextReceipt,
+  ReviewInputManifest,
+  ReviewOpinionOrigin,
+} from './reviewIncrementalTypes.js';
+
 /** Changed-line range owned by one review unit. */
 export interface ReviewHunk {
   /** First old-file line consumed by the hunk. */
@@ -36,6 +42,22 @@ export interface ReviewUnit {
 
 /** Deterministic reviewer assignment with artifact and validation handoff state. */
 export interface ReviewGroup {
+  /** Observed input manifest, absent in legacy groups. */
+  input?: ReviewInputManifest;
+  /** Unchanged opinion provenance across generations. */
+  reusedFrom?: ReviewOpinionOrigin;
+  /** Capability scoped to this group and generation. */
+  contextToken?: string;
+  /** Whether the isolated actor obtained its prepared input through the broker. */
+  contextStarted?: boolean;
+  /** Queries observed for reviewer and verifier work. */
+  contextReceipts?: ReviewContextReceipt[];
+  /** Role/round briefs actually opened through the broker. */
+  contextAssignments?: string[];
+  /** A failed observation prevents cross-generation reuse. */
+  contextUnverifiable?: boolean;
+  /** Prior groups whose opinion bytes were consumed by this actor. */
+  dependencyReceipts?: { group: string; digest: string }[];
   /** At-least-two-digit creation-order identifier. */
   id: string;
   /** Independently reviewable units assigned to this reviewer. */

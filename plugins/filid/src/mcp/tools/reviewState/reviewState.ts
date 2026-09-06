@@ -10,6 +10,7 @@ import { ToolDiagnosticError } from '../../errors/toolDiagnosticError.js';
 
 import { assessReviewState } from './handlers/assessReviewState.js';
 import { cleanupReviewState } from './handlers/cleanupReviewState.js';
+import { handleReviewContext } from './handlers/handleReviewContext.js';
 import { prepareReviewState } from './handlers/prepareReviewState.js';
 import { readReviewCheckpoint } from './handlers/readReviewCheckpoint.js';
 import { sealReviewState } from './handlers/sealReviewState.js';
@@ -82,6 +83,8 @@ export async function handleReviewState(
   } as ResolvedReviewStateInput;
 
   switch (input.action) {
+    case REVIEW_STATE_ACTIONS.CONTEXT:
+      return handleReviewContext(input);
     case REVIEW_STATE_ACTIONS.PREPARE:
       if (
         input.changeContext !== undefined &&

@@ -21,6 +21,7 @@ import type {
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
+import { assertReviewInputsFresh } from './utils/assertReviewInputsFresh.js';
 import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
 
 /** Shared state-reading input shape accepted by checkpoint and seal. */
@@ -70,6 +71,7 @@ export async function readReviewCheckpoint(
   }
   const state = restored;
   assertReviewValidationPolicy(state);
+  await assertReviewInputsFresh(state, paths);
   const artifacts = readReviewArtifactPresence(paths, state);
   const handoff = planNextHandoffs({
     state,

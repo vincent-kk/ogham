@@ -1,6 +1,8 @@
+import type { ReviewReuseSummary } from '../state/reviewIncrementalTypes.js';
 import type { ReviewChecklistEntry } from '../verdict/reviewVerdictTypes.js';
 
 import { renderCoverageTable } from './utils/renderCoverageTable.js';
+import { renderReviewReuseSummary } from './utils/renderReviewReuseSummary.js';
 
 /** Canonical checklist headings; matchAll preserves independent repeated calls. */
 const REVIEW_CHECKLIST_HEADING_PATTERN = /^## Review Checklist\s*$/gm;
@@ -16,6 +18,7 @@ const REVIEW_CHECKLIST_HEADING_PATTERN = /^## Review Checklist\s*$/gm;
 export function renderChecklistBlock(
   sessionMarkdown: string,
   checklist: readonly ReviewChecklistEntry[],
+  reuse?: ReviewReuseSummary,
 ): string {
   const headings = [
     ...sessionMarkdown.matchAll(REVIEW_CHECKLIST_HEADING_PATTERN),
@@ -27,6 +30,9 @@ export function renderChecklistBlock(
   return [
     preserved,
     '',
+    ...(reuse
+      ? ['## Incremental Reuse', '', renderReviewReuseSummary(reuse), '']
+      : []),
     '## Review Checklist',
     '',
     renderCoverageTable(checklist),

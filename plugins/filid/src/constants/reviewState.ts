@@ -53,6 +53,7 @@ export const REVIEW_STATE_ACTIONS = {
   SEAL: 'seal',
   CLEANUP: 'cleanup',
   ASSESS: 'assess',
+  CONTEXT: 'context',
 } as const;
 
 /** Review rounds assigned to each supported effort level. */
@@ -344,7 +345,7 @@ export const REVIEW_STATE_ERROR_MESSAGES = {
     'Actor methods are required to render a review brief.',
   INPUT_OBJECT_REQUIRED: 'review_state input must be an object',
   ACTION_INVALID:
-    'action must be prepare, checkpoint, validate, seal, cleanup, or assess',
+    'action must be prepare, checkpoint, validate, seal, cleanup, assess, or context',
   PROJECT_ROOT_REQUIRED: 'projectRoot is required',
   BRANCH_NAME_REQUIRED: 'branchName is required',
   CLEANUP_CONFIRM_REQUIRED: 'confirm must be true for cleanup',

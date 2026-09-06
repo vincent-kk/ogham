@@ -9,6 +9,7 @@ import {
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 
 import { hasCanonicalReviewGroupPaths } from './hasCanonicalReviewGroupPaths.js';
+import { ReviewIncrementalSchemas } from './reviewIncrementalSchemas.js';
 import type { ReviewStateRecord } from './reviewStateTypes.js';
 
 /** Strict persisted range schema for one changed hunk. */
@@ -65,6 +66,25 @@ const ReviewValidationSchema = z
 /** Strict persisted review-group schema. */
 const ReviewGroupSchema = z
   .object({
+    input: ReviewIncrementalSchemas.input.optional(),
+    reusedFrom: ReviewIncrementalSchemas.origin.optional(),
+    contextToken: ReviewIncrementalSchemas.digest.optional(),
+    contextStarted: z.boolean().optional(),
+    contextReceipts: z.array(ReviewIncrementalSchemas.receipt).optional(),
+    contextAssignments: z
+      .array(z.string().regex(/^(?:review:[1-9]\d*|verify:0)$/))
+      .optional(),
+    contextUnverifiable: z.boolean().optional(),
+    dependencyReceipts: z
+      .array(
+        z
+          .object({
+            group: z.string(),
+            digest: ReviewIncrementalSchemas.digest,
+          })
+          .strict(),
+      )
+      .optional(),
     id: z.string().regex(/^\d{2,}$/),
     units: z.array(ReviewUnitSchema),
     churn: z.number().int().nonnegative(),
@@ -143,6 +163,10 @@ const ReviewScopeSchema = z
     evidenceComplete: z.boolean(),
     worktree: z.nativeEnum(WORKTREE_DISPOSITIONS),
     dirtyPaths: z.array(z.string()),
+    dirtyPathsHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
     statuses: z
       .object({
         structure: z.nativeEnum(TOOL_STATUSES),
@@ -160,6 +184,11 @@ const ReviewScopeSchema = z
 /** Complete strict schema for the canonical review-state v2 record. */
 export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
   .object({
+    incremental: ReviewIncrementalSchemas.state.optional(),
+    generationId: z
+      .string()
+      .regex(/^[a-f0-9]{32}$/)
+      .optional(),
     schemaVersion: z.literal(REVIEW_STATE_SCHEMA_VERSION),
     validationPolicyVersion: z.number().int().positive().optional(),
     projectRoot: z.string(),
@@ -184,6 +213,16 @@ export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
   })
   .strict()
   .superRefine((state, context) => {
+    if (
+      state.incremental &&
+      (!state.generationId ||
+        state.groups.some((group) => !group.input || !group.contextToken))
+    )
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'incremental state requires generation, input manifests and group capabilities',
+      });
     if (
       state.phase === REVIEW_STATE_PHASES.PREPARED &&
       (state.verdict !== null || state.sealedAt !== undefined)

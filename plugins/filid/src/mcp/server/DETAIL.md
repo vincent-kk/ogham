@@ -15,6 +15,7 @@
 
 - 등록 도구: `project_setup`, `fractal_inspect`, `restructure`, `review_state`.
 - `review_state` prepare의 effort는 `auto | low | medium | high`를 광고하며, auto의 그룹별 선택과 기본값은 reviewState 계약이 소유한다.
+- `review_state`는 prepare의 명시적 `actorContext`와 capability 범위의 `context` action을 광고한다. context 응답은 제한된 pagination으로 inline을 유지하고 다른 그룹의 state나 capability를 노출하지 않는다.
 - `ToolResultEnvelope<Summary, Data>`는 `status`, `summary`, optional `data`, optional `artifact`, `diagnostics`를 가진다.
 - `toolResult(toolName, payload)`는 envelope를 compact MCP text content로 직렬화한다.
 - `toolError(error)`는 transport 또는 trust-boundary 실패를 `isError: true` 응답으로 변환한다. 도구 계약이 stable diagnostic code를 가진 typed error를 던지면 그 코드를 보존하고, 그 외 실행 실패만 `tool-execution-error`를 쓴다.
@@ -54,4 +55,4 @@
 
 ## Last Updated
 
-2026-09-06
+2026-09-07

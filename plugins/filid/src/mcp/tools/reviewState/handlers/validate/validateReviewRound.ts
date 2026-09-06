@@ -31,7 +31,7 @@ import type {
   ReviewValidatePayload,
   ReviewValidationProblem,
 } from '../../state/reviewStateTypes.js';
-import { writeReviewState } from '../../state/writeReviewState.js';
+import { writeReviewGroupProgress } from '../../state/writeReviewGroupProgress.js';
 
 import { createValidatePayload } from './createValidatePayload.js';
 import { locateReviewFindings } from './locateReviewFindings.js';
@@ -253,13 +253,13 @@ export async function validateReviewRound(
       updatedGroup,
       state.sourceHash,
     );
-  const updatedState = {
+  let updatedState = {
     ...state,
     groups: state.groups.map((candidateGroup) =>
       candidateGroup.id === group.id ? updatedGroup : candidateGroup,
     ),
   };
-  writeReviewState(paths.statePath, updatedState);
+  updatedState = writeReviewGroupProgress(paths.statePath, updatedState, group);
   return createValidatePayload({
     handoff: planNextHandoffs({
       state: updatedState,

@@ -20,7 +20,7 @@ import type {
   ReviewValidatePayload,
   ReviewValidationProblem,
 } from '../../state/reviewStateTypes.js';
-import { writeReviewState } from '../../state/writeReviewState.js';
+import { writeReviewGroupProgress } from '../../state/writeReviewGroupProgress.js';
 
 import { createValidatePayload } from './createValidatePayload.js';
 import type { ValidateOpinionContext } from './validationHandlerTypes.js';
@@ -139,7 +139,7 @@ export function validateVerifierOpinion(
   const indeterminate = opinion.decisions.filter(
     ({ verdict }) => verdict === 'INDETERMINATE',
   ).length;
-  const updatedState = {
+  let updatedState = {
     ...state,
     groups: state.groups.map((candidateGroup) =>
       candidateGroup.id === group.id
@@ -156,7 +156,7 @@ export function validateVerifierOpinion(
         : candidateGroup,
     ),
   };
-  writeReviewState(paths.statePath, updatedState);
+  updatedState = writeReviewGroupProgress(paths.statePath, updatedState, group);
   return createValidatePayload({
     handoff: planNextHandoffs({
       state: updatedState,

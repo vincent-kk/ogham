@@ -17,6 +17,7 @@ import type {
   ReviewValidatePayload,
 } from '../state/reviewStateTypes.js';
 
+import { assertReviewInputsFresh } from './utils/assertReviewInputsFresh.js';
 import { validateReviewRound } from './validate/validateReviewRound.js';
 import { validateVerifierOpinion } from './validate/validateVerifierOpinion.js';
 import type { ValidateReviewInput } from './validate/validationHandlerTypes.js';
@@ -67,6 +68,7 @@ export async function validateReviewOpinion(
   }
 
   assertReviewValidationPolicy(restored);
+  await assertReviewInputsFresh(restored, paths, input.group);
   const source = await computeReviewSourceHash(
     input.projectRoot,
     restored.baseRef,

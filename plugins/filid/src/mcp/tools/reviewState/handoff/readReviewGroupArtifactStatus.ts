@@ -7,6 +7,7 @@ import { checkReviewOpinion } from '../opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../opinion/parseReviewOpinion.js';
 import { splitVerifierAssignment } from '../opinion/splitVerifierAssignment.js';
 import { resolveReviewArtifactPath } from '../state/resolveReviewArtifactPath.js';
+import { resolveReviewOpinionSourceHash } from '../state/resolveReviewOpinionSourceHash.js';
 import type {
   ReviewStatePaths,
   ReviewStateRecord,
@@ -40,11 +41,17 @@ export function readReviewGroupArtifactStatus(
       resolveReviewArtifactPath(paths, group.verifyPath),
     );
     const validation = group.validated.review;
+    const opinionSourceHash = resolveReviewOpinionSourceHash(
+      paths,
+      group,
+      state.sourceHash,
+    );
     let review: ReviewArtifactTrust =
       validation === null ? 'missing' : 'invalid';
     let assignedCount: number | null = null;
     if (
       validation &&
+      opinionSourceHash !== null &&
       reviewBytes !== null &&
       computeReviewArtifactHash(reviewBytes) === validation.sha256
     ) {
@@ -56,7 +63,7 @@ export function readReviewGroupArtifactStatus(
           {
             group: group.id,
             round: validation.round,
-            sourceHash: state.sourceHash,
+            sourceHash: opinionSourceHash,
             units: group.units,
             policy: group,
           },
@@ -78,7 +85,8 @@ export function readReviewGroupArtifactStatus(
       verify:
         verify === null
           ? 'missing'
-          : verifyBytes !== null &&
+          : review === 'trusted' &&
+              verifyBytes !== null &&
               computeReviewArtifactHash(verifyBytes) === verify.sha256 &&
               verify.reviewSha256 === validation?.sha256
             ? 'trusted'

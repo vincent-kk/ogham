@@ -294,12 +294,79 @@ const REVIEW_STATE_COMMON_SCHEMA = {
     ),
 };
 
+/** Host-supplied instructions and native enforcement capability, never inferred from PR text. */
+const REVIEW_ACTOR_CONTEXT_SCHEMA = z
+  .object({
+    mode: z
+      .enum(['isolated', 'repository'])
+      .describe(
+        'isolated requires the native context-only actor guard; repository disables cross-generation reuse.',
+      ),
+    userInstructions: z
+      .string()
+      .describe(
+        'Ordered host-authoritative USR catalog; empty explicitly means none.',
+      ),
+  })
+  .strict();
+/** Fields shared by executable and advertised context schemas. */
+const REVIEW_CONTEXT_FIELDS = {
+  generationId: z
+    .string()
+    .regex(/^[a-f0-9]{32}$/)
+    .describe('context only: generation returned by prepare.'),
+  token: z
+    .string()
+    .regex(/^[a-f0-9]{64}$/)
+    .describe('context only: role/round capability from this handoff.'),
+  operation: z
+    .enum(['brief', 'read', 'search', 'exists', 'submit'])
+    .describe(
+      'context only: open paginated brief, query committed context, or submit opinion.',
+    ),
+  path: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'Context query project-relative path; dot searches the whole committed tree.',
+    ),
+  revision: z
+    .enum(['head', 'base'])
+    .optional()
+    .describe('Committed context revision; defaults to head.'),
+  query: z
+    .string()
+    .min(1)
+    .optional()
+    .describe('search only: literal text; zero results are recorded.'),
+  offset: z
+    .number()
+    .int()
+    .nonnegative()
+    .optional()
+    .describe('Continuation offset returned by the previous context page.'),
+  opinion: z
+    .record(z.unknown())
+    .optional()
+    .describe('submit only: complete review or verifier JSON object.'),
+};
+
 const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
+  z.object({
+    ...REVIEW_STATE_COMMON_SCHEMA,
+    ...REVIEW_CONTEXT_FIELDS,
+    action: z.literal(REVIEW_STATE_ACTIONS.CONTEXT),
+    kind: z.nativeEnum(REVIEW_VALIDATE_KINDS),
+    group: z.string().regex(/^\d{2,}$/),
+    round: z.number().int().positive().optional(),
+  }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
     action: z.literal(REVIEW_STATE_ACTIONS.PREPARE),
     baseRef: z.string().min(1).optional(),
     changeContext: z.string().optional(),
+    actorContext: REVIEW_ACTOR_CONTEXT_SCHEMA.optional(),
     force: z.boolean().optional(),
     effort: z
       .enum([
@@ -342,6 +409,13 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
 
 const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
   ...REVIEW_STATE_COMMON_SCHEMA,
+  ...REVIEW_CONTEXT_FIELDS,
+  generationId: REVIEW_CONTEXT_FIELDS.generationId.optional(),
+  token: REVIEW_CONTEXT_FIELDS.token.optional(),
+  operation: REVIEW_CONTEXT_FIELDS.operation.optional(),
+  actorContext: REVIEW_ACTOR_CONTEXT_SCHEMA.optional().describe(
+    'prepare only: explicit host context enables observed-input generations; legacy API callers may omit it.',
+  ),
   action: z
     .nativeEnum(REVIEW_STATE_ACTIONS)
     .describe(
@@ -349,7 +423,7 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
         'validate checks one review or verification opinion; seal folds and ' +
         'renders the verdict; cleanup deletes this branch state; ' +
         'assess reports where the merge-track cycle resumes and how the dirty ' +
-        'worktree classifies, without reading or writing review state.',
+        'worktree classifies; context mediates one capability-scoped actor.',
     ),
   hasPullRequest: z
     .boolean()
@@ -374,7 +448,9 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
   force: z
     .boolean()
     .optional()
-    .describe('prepare only: discard existing unsealed artifacts first.'),
+    .describe(
+      'prepare only: explicitly rerun every group; incremental generations preserve prior artifacts.',
+    ),
   effort: z
     .enum([
       REVIEW_DEFAULT_EFFORT,

@@ -6,6 +6,7 @@ import { renderConfirmedFindingsTable } from './utils/renderConfirmedFindingsTab
 import { renderCoverageSummary } from './utils/renderCoverageSummary.js';
 import { renderCoverageTable } from './utils/renderCoverageTable.js';
 import { renderRefutedCandidatesTable } from './utils/renderRefutedCandidatesTable.js';
+import { renderReviewReuseSummary } from './utils/renderReviewReuseSummary.js';
 import { renderScopeTable } from './utils/renderScopeTable.js';
 import { renderUnresolvedEvidenceTable } from './utils/renderUnresolvedEvidenceTable.js';
 import { renderVerificationLogTable } from './utils/renderVerificationLogTable.js';
@@ -64,6 +65,9 @@ export function renderReviewReport(input: ReviewRenderInput): string {
     '',
     evidenceStatus,
     '',
+    ...(input.reuse
+      ? ['### Incremental Reuse', '', renderReviewReuseSummary(input.reuse), '']
+      : []),
     '## Coverage',
     '',
     renderCoverageSummary(input.fold.checklist),

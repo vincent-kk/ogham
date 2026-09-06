@@ -1,4 +1,7 @@
-import { assertNoSymlinkDescendantsSync } from '@ogham/cross-platform';
+import {
+  assertNoSymlinkDescendantsSync,
+  resolveContainedPath,
+} from '@ogham/cross-platform';
 
 import type { ReviewStatePaths } from './reviewStateTypes.js';
 
@@ -10,7 +13,10 @@ import type { ReviewStatePaths } from './reviewStateTypes.js';
 export function assertReviewStatePaths(paths: ReviewStatePaths): void {
   assertNoSymlinkDescendantsSync(paths.projectRoot, paths.reviewRoot);
   assertNoSymlinkDescendantsSync(paths.reviewRoot, paths.reviewDirectory);
-  assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.statePath);
+  assertNoSymlinkDescendantsSync(
+    resolveContainedPath(paths.reviewRoot, paths.normalizedBranch),
+    paths.statePath,
+  );
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.reportPath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.blockersPath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.evidencePath);
