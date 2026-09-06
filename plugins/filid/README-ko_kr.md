@@ -2,7 +2,7 @@
 
 코드베이스의 모듈 경계와 계약 문서를 정직하게 유지하는 Claude Code 플러그인입니다.
 
-코드베이스가 커지면 AI 에이전트가 맥락을 잃고, 문서는 코드와 어긋나고, 디렉터리 구조는 형태를 잃습니다. filid는 **프랙탈 아키텍처(FCA-AI)** 로 정확히 그 문제만 다룹니다. `INTENT.md`와 `DETAIL.md`를 소유하고, fractal/organ 구조와 의존성 DAG를 검사하고, 공유 단위가 있어야 할 위치를 결정하고, 그 증거만으로 변경을 리뷰합니다.
+코드베이스가 커지면 AI 에이전트가 맥락을 잃고, 문서는 코드와 어긋나고, 디렉터리 구조는 형태를 잃습니다. filid는 **Fractal Context Architecture(FCA-AI)** 로 정확히 그 문제만 다룹니다. `INTENT.md`와 `DETAIL.md`를 소유하고, fractal/organ 구조와 의존성 DAG를 검사하고, 공유 단위가 있어야 할 위치를 결정하고, 그 증거만으로 변경을 리뷰합니다.
 
 filid는 저장소 전역 코드 품질 규칙 엔진이 아닙니다. cross-review의 커밋 변경 범위 밖에서는 이름, 함수 크기, 순환 복잡도, 응집도 지표, 테스트 품질과 커버리지를 판정하지 않습니다. 그 범위 안에서는 결함·보안·성능·유지보수·테스트·문서·FCA 증거를 함께 검토하고, 불확실한 증거는 추측하지 않고 명시적으로 남깁니다.
 
@@ -47,7 +47,7 @@ native 의존성과 전역 모듈 탐색이 없습니다. 런타임에 필요한
 
 ## 사용법
 
-filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Code에서 자연어로 호출하며, 플래그 없이 평범한 문장으로도 동작합니다.
+filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Code에서 자연어로 호출하며, 평범한 문장도 플래그만큼 동작합니다.
 
 ### 프로젝트 초기화
 
@@ -99,7 +99,46 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 /filid:cross-review --base origin/main
 ```
 
-먼저 `review_state(prepare)`가 커밋 변경 파일 roster와 FCA 증거를 기록하고 파일을 결정적으로 선별·청킹·그룹화해 bounded diff와 brief를 만듭니다. reviewer는 계층형 규칙에 따른 JSON opinion round를 쓰고, `validate`가 이를 검사·병합한 뒤 효율 모델 verifier가 모든 후보를 `CONFIRMED | REFUTED | INDETERMINATE`로 독립 판정합니다. `seal`은 검증된 hash만 신뢰해 verdict를 fold하고 보고서·fix request·PR 코멘트를 렌더링합니다. 확인된 finding만 fix request에 반영하며 verdict는 커밋된 변경 범위만 판정합니다.
+`review_state(prepare)`가 커밋 변경 파일 roster와 FCA 증거를 기록한 뒤, 결정적으로 선별·청킹·그룹화해 bounded diff와 brief를 만듭니다. 일반 1차 리뷰와 verifier는 호스트의 효율 모델 티어를 쓰고, 도구가 선택한 리뷰만 명시적으로 더 강한 티어로 보냅니다. reviewer는 계층형 규칙에 따른 JSON opinion을 쓰고, `validate`가 이를 병합한 뒤 리스크·effort 정책이 요구할 때만 추가 리뷰를 요청합니다. verifier는 할당된 finding을 `CONFIRMED | REFUTED | INDETERMINATE`로 독립 판정합니다. `seal`은 검증된 hash만 신뢰해 verdict를 fold하고 보고서·fix request·PR 코멘트를 렌더링합니다. 확인된 finding만 fix request에 반영하며, verdict는 커밋된 변경 범위를 다루고 그 밖의 결함은 다루지 않습니다.
+
+그룹 기본 예산은 **변경 1,024줄**입니다. 파일 cap은 변경 밀도에 따라 10–32개 사이에서 적응하고, `review.groupFileLimit`을 명시하면 고정 cap이 됩니다. 전체 변경 파일 체크리스트는 매 brief에 복사하지 않고 공유 세션에 둡니다.
+
+리스크 라우팅은 보안/동시성 경로 단어, 어댑터가 보고한 공개 진입점, 할당된 FCA 경계 증거, 선택적 `highRiskPaths` glob을 사용합니다. 할당된 소스 파일만 기여하며, churn·파일 수·복수 owner만으로 리스크가 올라가지 않습니다. 이는 라우팅 힌트이며, 신호가 없다고 안전이 보장되지는 않습니다. 그룹당 증거 사유는 최대 5개까지 저장하고, 별도의 triage actor는 두지 않습니다.
+
+| 리뷰 상황                                      | 모델과 후속 진행                                                                  |
+| ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| 일반 1차 리뷰                                  | 효율 모델. 완료되고 후속이 필요한 새 오류가 없으면 한 번으로 끝냄                 |
+| 리스크 표시 그룹, 실효 `medium` 또는 `high`    | 효율 1차 리뷰 후, finding이 없어도 독립적인 강한 리뷰 1회                         |
+| 리스크 표시 그룹, 실효 `low`                   | 강한 리뷰 1회                                                                     |
+| 1차 리뷰가 indeterminate이거나 새 할당 오류    | 설정된 라운드 예산 안에서 강한 후속 리뷰                                          |
+| 독립 finding verifier                          | 효율 모델                                                                         |
+
+`low`·`medium`·`high`는 reviewer 라운드를 각각 1·2·3회로 제한합니다. high는 새 warning에도 후속할 수 있으나, 리스크만으로 또는 같은 증거 공백만으로는 3라운드가 열리지 않습니다. 후속 reviewer는 이전 opinion을 읽기 전에 diff를 먼저 검사합니다. 증거 공백은 조용히 지우지 않고 병합 결과에 남깁니다.
+
+신규 리뷰의 기본값은 `auto`입니다. 리뷰 가능 그룹이 16개 이상이면 `low`, 그보다 적으면 `medium`을 선택합니다. 명시적 `--effort`가 프로젝트/사용자 `review.effort`보다 우선하고, 그것이 기본값을 덮습니다. `review.autoLowEffortGroupThreshold`로 이 경계를 바꿀 수 있고, 고정 `low|medium|high`는 auto 선택을 끕니다. 이는 Filid reviewer 라운드를 제어하며, 호스트 모델의 reasoning effort와는 별개입니다. 동시성은 **8**로 유지되고 그룹화는 바뀌지 않으며, 모든 그룹이 1차 리뷰를 받습니다.
+
+기존 프로젝트 또는 사용자 Filid 설정에 아래 `review` 조각을 추가하세요. 완전한 단독 설정이 아닙니다.
+
+```json
+{
+  "review": {
+    "groupChurnLimit": 1024,
+    "effort": "auto",
+    "autoLowEffortGroupThreshold": 16,
+    "maxGroups": 64,
+    "concurrency": 8,
+    "highRiskPaths": ["src/payments/**", "src/session/**"]
+  }
+}
+```
+
+`maxGroups` 기본값은 **64**이며, candidate-only 장부를 제외한 리뷰 가능 그룹만 셉니다. 초과하면 dispatch 전에 `review-group-budget-exceeded`를 보고하고, 파일을 조용히 건너뛰지 않습니다. 사용자가 설정한 값은 상한을 올리거나 내릴 수 있습니다. `highRiskPaths`는 내장 힌트에 더해집니다. 이미 준비된 그룹은 identity와 저장된 리스크 사유를 유지합니다. 그룹화나 리스크 설정을 바꾸려면 새로 준비하거나 `--force`를 명시하세요. 동시성은 스케줄만 바꾸고 총량은 바꾸지 않습니다.
+
+실효 effort는 같은 소스 identity에 대해 준비 시점부터 고정되며, 첫 검증 전에도 적용됩니다. 실효 effort가 바뀌면 `review-effort-locked`를 반환합니다. 저장된 effort로 재개하거나, 이전 actor가 모두 끝난 뒤 `--force`를 명시하세요. 같은 effort의 메타데이터 변경은 brief·호출자 맥락·opinion을 보존합니다. 신규 상태는 `validationPolicyVersion: 1`을 기록하고, 더 오래되었거나 지원하지 않는 정책은 이전 승인을 재사용하거나 reviewer를 자동 재시작하지 않고 `review-validation-policy-outdated`를 반환합니다. 현재 정책으로 봉인된 캐시는 닫힌 채로 둡니다. prepare는 모드, 실효 effort, 사유, 리뷰 가능 그룹 수, `maxReviewerHandoffs`(설정된 reviewer 라운드 합, 검증과 재시도 제외)를 보고합니다. 이는 호출 한도이며 토큰 예산이 아닙니다.
+
+리뷰 가능한 `COMPLETE` opinion은 `checked`에 비어 있지 않은 검사 증거가 필요하고, 준비가 계획을 요구하거나 리스크를 표시하면 비어 있지 않은 `riskPlan`도 필요합니다. 진짜 `INDETERMINATE` 공백은 그 기록을 생략할 수 있고 결론이 나지 않은 채로 남습니다. 이 검사는 기록의 존재만 확인하고, 실제 모델 티어·검사 깊이·탐지 품질은 확인하지 않습니다.
+
+reviewer brief는 미리 쓴 opinion 골격을 재사용하고, verifier brief는 짧은 인라인 JSON 형태를 유지합니다. 할당된 전체 diff, 적용 규칙, 출처 추적, 독립 finding 검증, 미해결 증거에 대한 `INCONCLUSIVE`는 그대로 필요합니다. 리뷰 라운드가 줄어들면 결함을 놓칠 수 있습니다. 결정적 커버리지 테스트와 실제 모델 보정은 품질의 서로 다른 측면을 측정합니다.
 
 ### legacy 문서명 이관
 
@@ -137,10 +176,10 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 | `/filid:restructure`   | 읽기 전용 계획 → 승인 → 외부 실행 → 사후조건 검증                                                |
 | `/filid:cross-review`  | 커밋 변경을 파일별 계층 규칙·changed-scope FCA 증거로 리뷰하고 효율 모델로 모든 후보를 독립 검증 |
 | `/filid:migrate`       | legacy CLAUDE.md / SPEC.md 이름 이관                                                             |
-| `/filid:pull-request`  | 문서 동기화 후 구조화된 GitHub PR 생성                                                           |
+| `/filid:pull-request`  | 브랜치 FCA 문서를 동기화한 뒤 구조화된 GitHub PR 생성                                           |
 | `/filid:resolve`       | fix request 수용·거부 결정, 위임, 정당화 기록                                                    |
 | `/filid:revalidate`    | 교정 delta 재측정과 최종 PASS/FAIL 판정                                                          |
-| `/filid:pipeline`      | merge-track 4단계를 한 번에 실행 (재개 지원)                                                     |
+| `/filid:pipeline`      | merge-track 전체를 처음부터 끝까지 실행 (재개 지원)                                              |
 
 ---
 
@@ -150,7 +189,7 @@ filid가 실제로 만들 수 있는 증거에 각각 대응하는 내장 규칙
 
 | 규칙                       | 검사 내용                                               |
 | -------------------------- | ------------------------------------------------------- |
-| `intent-document-contract` | INTENT.md 50줄 이하와 3-tier 경계 섹션                  |
+| `intent-document-contract` | INTENT.md 50줄 이하와 세 경계 섹션                      |
 | `detail-document-contract` | DETAIL.md 필수 섹션과 acceptance group                  |
 | `organ-no-intentmd`        | organ 디렉터리의 INTENT.md 금지                         |
 | `entry-point-surface`      | 진입점의 공개 표면을 열거할 수 있는가                   |
