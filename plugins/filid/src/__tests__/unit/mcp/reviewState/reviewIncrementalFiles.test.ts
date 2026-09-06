@@ -459,6 +459,7 @@ describe('committed file incremental review', () => {
     expect(readFileSync(repaired.data.next[0].briefPath, 'utf8')).toBe(brief);
   });
 
+  // Validating 52 real Git-backed reviews exceeds 30 seconds on Windows CI.
   it('budgets only the one changed file while retaining 51 previous file opinions', async () => {
     configureReviewGroups(fixture.projectRoot, 52);
     await complete();
@@ -485,5 +486,5 @@ describe('committed file incremental review', () => {
       rerunGroups: 1,
       remainingMaxReviewerHandoffs: 1,
     });
-  });
+  }, 120_000);
 });

@@ -51,7 +51,9 @@ describe('prepareReviewState optional inputs', () => {
       projectRoot: portableJoin(fixture.projectRoot, 'src'),
     });
     expect(result.data.branchName).toBe(fixture.branchName);
-    expect(result.data.projectRoot).toBe(realpathSync(fixture.projectRoot));
+    expect(realpathSync.native(result.data.projectRoot)).toBe(
+      realpathSync.native(fixture.projectRoot),
+    );
   });
 
   it('reports an unresolved branch on detached HEAD', async () => {
