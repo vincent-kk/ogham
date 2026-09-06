@@ -102,6 +102,7 @@ describe('readReviewGroupArtifactStatus', () => {
           'verify-tampered',
           'review-mismatch',
           'verify-missing',
+          'review-tampered',
         ].includes(scenario)
           ? 'invalid'
           : 'trusted',

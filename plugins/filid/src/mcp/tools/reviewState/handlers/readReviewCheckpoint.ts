@@ -21,6 +21,7 @@ import type {
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
+import { assertReviewInputsFresh } from './utils/assertReviewInputsFresh.js';
 import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
 
 /** Shared state-reading input shape accepted by checkpoint and seal. */
@@ -99,6 +100,7 @@ export async function readReviewCheckpoint(
       ],
     });
 
+  await assertReviewInputsFresh(state, paths);
   if (
     state.phase === REVIEW_STATE_PHASES.SEALED &&
     !reviewReportExists(paths.reportPath)

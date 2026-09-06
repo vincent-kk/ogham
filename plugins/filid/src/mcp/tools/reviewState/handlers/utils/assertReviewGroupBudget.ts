@@ -13,7 +13,9 @@ export function assertReviewGroupBudget(
   groups: readonly ReviewGroup[],
   maxGroups: number | undefined,
 ): void {
-  const count = groups.filter((group) => group.rounds > 0).length;
+  const count = groups.filter(
+    (group) => group.rounds > 0 && !group.reusedFrom,
+  ).length;
   if (maxGroups !== undefined && count > maxGroups)
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.GROUP_BUDGET_EXCEEDED,

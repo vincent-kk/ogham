@@ -46,6 +46,8 @@ Your final message is exactly one line: `done: <output path>`. Report nothing el
 
 Read the brief once, then open only the evidence it names or evidence needed to decide an assigned candidate.
 
+Earlier unresolved findings are historical claims, including on deleted or moved files. Decide each against the current committed tree and cite the change that confirms or resolves it. Do not infer resolution merely from a changed path or missing excerpt.
+
 ## Method
 
 For each candidate, in order:

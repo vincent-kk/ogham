@@ -6,6 +6,7 @@ import type {
   ToolDiagnostic,
   ToolStatus,
 } from '../../../../../types/toolEnvelope.js';
+import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import type {
   ReviewHandoffPlan,
   ReviewPreparePayload,
@@ -52,6 +53,12 @@ export function createPreparedReviewPayload(
     projectRoot: input.paths.projectRoot,
     status: input.status,
     summary: {
+      ...(input.state.incremental
+        ? {
+            ...input.state.incremental.summary,
+            generationId: input.state.generationId,
+          }
+        : {}),
       action: input.action,
       disposition: input.disposition,
       sourceHash: input.state.sourceHash,
@@ -93,6 +100,14 @@ export function createPreparedReviewPayload(
       statePath: input.paths.statePath,
       evidencePath: input.paths.evidencePath,
       sessionPath: input.paths.sessionPath,
+      ...(input.state.incremental
+        ? {
+            reuseDecisionsPath: resolveReviewArtifactPath(
+              input.paths,
+              'reuse-decisions.json',
+            ),
+          }
+        : {}),
       files: input.state.scope.files,
       groups: input.state.groups,
       candidates: input.state.scope.candidates,

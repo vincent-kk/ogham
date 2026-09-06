@@ -72,8 +72,8 @@ describe('revalidate measurement scope contract', () => {
       /action:\s*"validate"/.test(call),
     );
     expect(structureValidateCalls.length).toBeGreaterThan(0);
-    for (const call of structureValidateCalls) {
+    for (const call of structureValidateCalls)
       expect(call).not.toMatch(/path:\s*PROJECT_ROOT/);
-    }
+
   });
 });

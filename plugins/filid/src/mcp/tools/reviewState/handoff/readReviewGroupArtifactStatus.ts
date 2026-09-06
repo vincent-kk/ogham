@@ -6,7 +6,10 @@ import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js'
 import { checkReviewOpinion } from '../opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../opinion/parseReviewOpinion.js';
 import { splitVerifierAssignment } from '../opinion/splitVerifierAssignment.js';
+import { buildReviewOpinionCheckOptions } from '../opinion/utils/buildReviewOpinionCheckOptions.js';
 import { resolveReviewArtifactPath } from '../state/resolveReviewArtifactPath.js';
+import type { OriginStateCache } from '../state/resolveReviewOpinionSourceHash.js';
+import { resolveReviewOpinionSourceHash } from '../state/resolveReviewOpinionSourceHash.js';
 import type {
   ReviewStatePaths,
   ReviewStateRecord,
@@ -32,6 +35,7 @@ export function readReviewGroupArtifactStatus(
   const names = existsSync(opinionsDirectory)
     ? readdirSync(opinionsDirectory)
     : [];
+  const originStateCache: OriginStateCache = new Map();
   return state.groups.map((group) => {
     const reviewBytes = readUtf8FileIfExistsSync(
       resolveReviewArtifactPath(paths, group.opinionPath),
@@ -40,11 +44,19 @@ export function readReviewGroupArtifactStatus(
       resolveReviewArtifactPath(paths, group.verifyPath),
     );
     const validation = group.validated.review;
+    const opinionSourceHash = resolveReviewOpinionSourceHash(
+      paths,
+      group,
+      state.sourceHash,
+      0,
+      originStateCache,
+    );
     let review: ReviewArtifactTrust =
       validation === null ? 'missing' : 'invalid';
     let assignedCount: number | null = null;
     if (
       validation &&
+      opinionSourceHash !== null &&
       reviewBytes !== null &&
       computeReviewArtifactHash(reviewBytes) === validation.sha256
     ) {
@@ -53,19 +65,18 @@ export function readReviewGroupArtifactStatus(
         parsed.opinion &&
         checkReviewOpinion(
           parsed.opinion,
-          {
-            group: group.id,
-            round: validation.round,
-            sourceHash: state.sourceHash,
-            units: group.units,
-            policy: group,
-          },
+          buildReviewOpinionCheckOptions(
+            group,
+            validation.round,
+            opinionSourceHash,
+          ),
           [],
         )
       ) {
         review = 'trusted';
-        assignedCount = splitVerifierAssignment(parsed.opinion.findings)
-          .assigned.length;
+        assignedCount =
+          splitVerifierAssignment(parsed.opinion.findings).assigned.length +
+          (group.priorFindings?.length ?? 0);
       }
     }
     const verify = group.validated.verify;
@@ -78,7 +89,8 @@ export function readReviewGroupArtifactStatus(
       verify:
         verify === null
           ? 'missing'
-          : verifyBytes !== null &&
+          : review === 'trusted' &&
+              verifyBytes !== null &&
               computeReviewArtifactHash(verifyBytes) === verify.sha256 &&
               verify.reviewSha256 === validation?.sha256
             ? 'trusted'

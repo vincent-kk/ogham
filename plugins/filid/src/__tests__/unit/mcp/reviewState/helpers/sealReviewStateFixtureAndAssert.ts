@@ -13,6 +13,7 @@ import {
   REVIEW_STATE_PHASES,
 } from '../../../../../constants/reviewState.js';
 import { handleReviewState } from '../../../../../mcp/tools/reviewState/index.js';
+import { resolveReviewStatePaths } from '../../../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 import type {
   ReviewSealPayload,
   ReviewStatePayload,
@@ -52,14 +53,9 @@ export async function sealReviewStateFixtureAndAssert(
   state: ReviewStateRecord,
   expected: ExpectedReviewStateSeal,
 ): Promise<ReviewSealPayload | ReviewStatePayload> {
-  const reviewDirectory = resolveContainedPath(
+  const { reviewDirectory, statePath } = resolveReviewStatePaths(
     state.projectRoot,
-    '.filid/review',
-    state.normalizedBranch,
-  );
-  const statePath = resolveContainedPath(
-    reviewDirectory,
-    REVIEW_STATE_FILE_NAMES.STATE,
+    fixture.branchName,
   );
   const reportPath = resolveContainedPath(
     reviewDirectory,
@@ -108,6 +104,14 @@ export async function sealReviewStateFixtureAndAssert(
   expect(Object.keys(sealed.summary).sort()).toEqual(
     [
       'action',
+      'reusedGroups',
+      'reusedFiles',
+      'reviewFiles',
+      'rerunGroups',
+      'newGroups',
+      'removedGroups',
+      'bookkeepingGroups',
+      'remainingMaxReviewerHandoffs',
       'confirmed',
       'disposition',
       'filesReviewed',

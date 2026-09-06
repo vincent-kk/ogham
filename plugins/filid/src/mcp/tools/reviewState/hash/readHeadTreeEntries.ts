@@ -10,13 +10,14 @@ import { executeReviewGit } from './executeReviewGit.js';
 export async function readHeadTreeEntries(
   projectRoot: string,
   changedPaths: readonly string[],
+  revision: string = REVIEW_STATE_GIT.HEAD,
 ): Promise<Map<string, ReviewHeadTreeEntry>> {
   if (changedPaths.length === 0) return new Map();
 
   const output = await executeReviewGit(projectRoot, [
     REVIEW_STATE_GIT.LS_TREE,
     ...REVIEW_STATE_GIT_ARGUMENTS.HEAD_TREE,
-    REVIEW_STATE_GIT.HEAD,
+    revision,
     REVIEW_STATE_GIT.END_OF_OPTIONS,
     ...changedPaths,
   ]);

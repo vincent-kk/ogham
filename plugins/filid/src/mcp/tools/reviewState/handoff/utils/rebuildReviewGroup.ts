@@ -13,6 +13,7 @@ import type {
   ReviewStatePaths,
   ReviewStateRecord,
 } from '../../state/reviewStateTypes.js';
+import { writeReviewGroupProgress } from '../../state/writeReviewGroupProgress.js';
 
 /**
  * Replay validated raw rounds while preserving raw drafts and existing verifier bytes.
@@ -51,6 +52,8 @@ export async function rebuildReviewGroup(
         : item,
     ),
   };
+  if (state.incremental)
+    replayed = writeReviewGroupProgress(paths.statePath, replayed, group);
   try {
     for (let round = 1; round <= group.validated.review!.round; round += 1) {
       const raw = saved.get(round)!;

@@ -11,8 +11,10 @@ import { renderVerifyBrief } from '../brief/renderVerifyBrief.js';
 import { readInlineReviewDiffs } from '../diff/readInlineReviewDiffs.js';
 import { checkReviewOpinion } from '../opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../opinion/parseReviewOpinion.js';
+import { buildReviewOpinionCheckOptions } from '../opinion/utils/buildReviewOpinionCheckOptions.js';
 import { loadActorMethods } from '../rules/loadActorMethods.js';
 import { resolveReviewArtifactPath } from '../state/resolveReviewArtifactPath.js';
+import { resolveReviewOpinionSourceHash } from '../state/resolveReviewOpinionSourceHash.js';
 import type {
   ReviewStatePaths,
   ReviewStateRecord,
@@ -108,17 +110,21 @@ export async function recoverReviewGroups(
           resolveReviewArtifactPath(paths, group.opinionPath),
         )!;
         const parsed = parseReviewOpinion(bytes);
+        const opinionSourceHash = resolveReviewOpinionSourceHash(
+          paths,
+          group,
+          state.sourceHash,
+        );
         if (
           !parsed.opinion ||
+          opinionSourceHash === null ||
           !checkReviewOpinion(
             parsed.opinion,
-            {
-              group: group.id,
-              round: group.validated.review.round,
-              sourceHash: state.sourceHash,
-              units: group.units,
-              policy: group,
-            },
+            buildReviewOpinionCheckOptions(
+              group,
+              group.validated.review.round,
+              opinionSourceHash,
+            ),
             [],
           )
         )

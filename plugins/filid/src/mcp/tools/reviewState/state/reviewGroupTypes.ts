@@ -1,3 +1,10 @@
+import type { ReviewFinding } from '../opinion/reviewOpinionTypes.js';
+
+import type {
+  ReviewInputManifest,
+  ReviewOpinionOrigin,
+} from './reviewIncrementalTypes.js';
+
 /** Changed-line range owned by one review unit. */
 export interface ReviewHunk {
   /** First old-file line consumed by the hunk. */
@@ -36,6 +43,18 @@ export interface ReviewUnit {
 
 /** Deterministic reviewer assignment with artifact and validation handoff state. */
 export interface ReviewGroup {
+  /** Unresolved earlier findings requiring explicit independent decisions on this commit. */
+  priorFindings?: ReviewFinding[];
+  /** Path-neutral inputs for each assigned committed file. */
+  fileInputs?: Record<string, ReviewInputManifest>;
+  /** Original unit contract for validating unchanged opinion bytes. */
+  opinionUnits?: ReviewUnit[];
+  /** Original opinion paths mapped onto retained current paths. */
+  opinionPaths?: Record<string, string>;
+  /** Observed input manifest, absent in legacy groups. */
+  input?: ReviewInputManifest;
+  /** Unchanged opinion provenance across generations. */
+  reusedFrom?: ReviewOpinionOrigin;
   /** At-least-two-digit creation-order identifier. */
   id: string;
   /** Independently reviewable units assigned to this reviewer. */
@@ -50,6 +69,8 @@ export interface ReviewGroup {
   candidateIds: string[];
   /** Review-directory-relative reviewer brief path. */
   briefPath: string;
+  /** UTF-8 byte length of the rendered brief before incremental context. */
+  coreBriefByteLength?: number;
   /** Review-directory-relative first-round skeleton path. */
   skeletonPath: string;
   /** Review-directory-relative merged reviewer opinion path. */

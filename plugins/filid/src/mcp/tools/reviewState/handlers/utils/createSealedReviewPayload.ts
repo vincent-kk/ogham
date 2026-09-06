@@ -1,6 +1,7 @@
 import type { REVIEW_STATE_ACTIONS } from '../../../../../constants/reviewState.js';
 import { REVIEW_STATE_DISPOSITIONS } from '../../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
+import type { ReviewReuseSummary } from '../../state/reviewIncrementalTypes.js';
 import type {
   ReviewSealPayload,
   ReviewStateInput,
@@ -27,6 +28,8 @@ const EMPTY_SEAL_DIAGNOSTICS: readonly never[] = Object.freeze([]);
 
 /** Values needed to project a successful seal response. */
 interface CreateSealedReviewPayloadInput {
+  /** Active generation reuse counters, absent for legacy state. */
+  reuse?: ReviewReuseSummary;
   /** Validated seal request. */
   input: SealInput;
   /** Canonical branch review paths. */
@@ -61,6 +64,7 @@ export function createSealedReviewPayload(
       confirmed: input.summary.confirmed,
       refuted: input.summary.refuted,
       indeterminate: input.summary.indeterminate,
+      ...(input.reuse ?? {}),
     },
     data: {
       reportPath: input.paths.reportPath,

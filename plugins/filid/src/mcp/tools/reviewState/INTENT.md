@@ -1,44 +1,36 @@
-# reviewState — cross-review bookkeeping
+# reviewState
 
 ## Purpose
 
-committed diff hash와 branch-scoped artifact lifecycle을 기준으로 변경 범위 증거를 수집하고, reviewable unit을 선별·청킹·그룹화하며, branch·base·change context 해석, 규칙 해석, diff·brief 물질화, opinion 검증, 결정적 verdict fold와 보고서 렌더링, 판정 보류 원인·해소 안내의 분리, merge-track 재개 관측을 관리한다.
-
-## Structure
-
-- effect 경계는 `handlers/` 하나이며 나머지 organ은 순수 계산이다 — Git evidence와 state, 재개 관측, 선별·청킹·그룹화, diff·brief 물질화, opinion 검증, verdict fold, 렌더링이 한 단계씩 이어진다.
-- `handoff/` organ은 artifact 신뢰 관측을 순수 handoff 계획에서 분리한다 — prepare 복구 경로가 계획 계산을 오염시키지 않게 하려는 분할이다.
+Own committed-change review preparation, file-level reuse, bounded reviewer rounds, independent verification, and deterministic verdict publication.
 
 ## Conventions
 
-- state path는 `.filid/review/<readable-name>-<branch-digest>/review-state.json`이다.
-- hash는 merge-base와 NUL-safe sorted changed-file tree identity로 계산한다.
-- static action·status·artifact 이름과 기본 한도는 constants가 소유한다.
-- state는 prepare 산출물이 모두 기록된 뒤 마지막에 한 번 atomic 저장한다.
+- Ordinary host subagents read materialized briefs, write opinions, and call validation.
+- Committed file identity and explicitly assigned judgment inputs determine reuse.
+- Each generation keeps its own artifacts; the branch state identifies the active generation.
+- Original opinion bytes and their provenance survive reuse and path projection.
 
 ## Boundaries
 
 ### Always do
 
-- prepare와 seal에서 현재 committed content hash를 재계산한다.
-- 모든 unit과 group에 설정된 file·churn 상한을 적용하고 roster 항목을 빠뜨리지 않는다.
-- prepare에서 설정된 전체 review group 예산을 초과하면 액터 handoff를 내보내지 않는다.
-- 그룹 위험 근거와 모델 티어를 명시하며 위험 신호 부재를 안전 판정으로 바꾸지 않는다.
-- 최초 prepare의 effective effort를 고정하고 현재 검증 정책·완료 기록·artifact hash·review hash 결합을 seal의 신뢰 근거로 삼는다.
-- state I/O, artifact path, repository rule path와 cleanup에 project containment와 symlink guard를 요구한다.
-- cleanup에 literal `confirm: true`를 요구한다.
+- Recheck committed inputs before accepting validation or publishing a verdict.
+- Retain unchanged file results independently of their original batch peers.
+- Require completed, validated reviewer and verifier artifacts for reuse.
+- Preserve unresolved findings until current verification explicitly resolves them.
+- Apply group budgets to new reviewer work and keep effort stable during resume.
+- Guard state publication against conflicts and late generation writers.
+- Enforce project containment and symlink checks for artifacts and rule paths.
+- Require literal confirmation for the cleanup action.
 
 ### Ask first
 
-- state schema, opinion JSON schema, 규칙 맵 형식 또는 렌더링 형식 변경
-- required artifact 또는 cache-hit 의미 변경
+- Change state, opinion, rule-map, or report contracts outside approved scope.
 
 ### Never do
 
-- review finding을 생성하거나 그 진위를 판단하지 않는다. 도구가 측정한 candidate와 diff 밖 finding의 decision은 evidence의 결정론적 fold이며 판단이 아니다. 배정 finding의 판단은 opinion·verification 파일을 쓴 actor의 것이다.
-- fix 적용, commit/push/PR을 수행하거나 `assess` 관측을 중단 지시로 바꾸지 않는다.
-- working-tree content를 committed blob으로 가장하거나 review root 전체를 branch target으로 정규화하지 않는다.
-
-## Dependencies
-
-- cross-platform path·spawn·filesystem, config loader, common envelope와 review constants
+- Generate review findings or decide their truth in bookkeeping code.
+- Apply fixes, commit, push, or operate PRs from this tool.
+- Treat worktree content as committed input.
+- Require a dedicated host agent, hook, access broker, or query receipt.

@@ -14,6 +14,7 @@ import {
 } from './helpers/createReviewStateSealFixture.js';
 import { prepareReviewStateSealFixture } from './helpers/prepareReviewStateSealFixture.js';
 import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
+import { refreshReviewFixtureInputs } from './helpers/refreshReviewFixtureInputs.js';
 
 /** Isolated repository used to exercise real round validation and handoffs. */
 let fixture: ReviewStateSealFixture;
@@ -70,7 +71,16 @@ describe('cost-aware reviewer handoffs', () => {
       legacy.effort = effort;
       legacy.groups[0]!.rounds = effort === 'medium' ? 2 : 1;
       legacy.groups[0]!.validated.review!.complete = true;
-      writeFileAtomicallySync(prepared.data.statePath, JSON.stringify(legacy));
+      writeFileAtomicallySync(
+        prepared.data.statePath,
+        JSON.stringify(
+          await refreshReviewFixtureInputs(
+            legacy,
+            resolveReviewStatePaths(fixture.projectRoot, fixture.branchName),
+            fixture.pluginRoot,
+          ),
+        ),
+      );
       const opinionPath = portableJoin(
         prepared.data.reviewDirectory,
         group.opinionPath,

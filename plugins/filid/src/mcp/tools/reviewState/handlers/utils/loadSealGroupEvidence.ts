@@ -3,9 +3,12 @@ import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
 import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
+import { projectReviewOpinion } from '../../opinion/projectReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
+import { buildReviewOpinionCheckOptions } from '../../opinion/utils/buildReviewOpinionCheckOptions.js';
 import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
+import { resolveReviewOpinionSourceHash } from '../../state/resolveReviewOpinionSourceHash.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 import type { ReviewStatePaths } from '../../state/reviewStateTypes.js';
 import type {
@@ -28,6 +31,12 @@ export function loadSealGroupEvidence(
 ): SealGroupEvidence[] {
   return groups.map((group) => {
     const issueSet = new Set<ReviewTrustIssue>();
+    const opinionSourceHash = resolveReviewOpinionSourceHash(
+      paths,
+      group,
+      sourceHash,
+    );
+    if (opinionSourceHash === null) issueSet.add('artifact not validated');
     const reviewValidation = group.validated.review;
     const verifyValidation = group.validated.verify;
     const reviewPath = resolveReviewArtifactPath(paths, group.opinionPath);
@@ -67,19 +76,48 @@ export function loadSealGroupEvidence(
           !parsed.opinion ||
           !checkReviewOpinion(
             parsed.opinion,
-            {
-              group: group.id,
-              round: reviewValidation!.round,
-              sourceHash,
-              units: group.units,
-              policy: group,
-            },
+            buildReviewOpinionCheckOptions(
+              group,
+              reviewValidation!.round,
+              opinionSourceHash!,
+            ),
             [],
           )
         )
           issueSet.add('artifact not validated');
-        else review = parsed.opinion;
+        else
+          review = projectReviewOpinion(
+            {
+              ...parsed.opinion,
+              findings: [
+                ...parsed.opinion.findings,
+                ...(group.priorFindings ?? []),
+              ],
+            },
+            group,
+          );
         verify = JSON.parse(verifyBytes) as VerifyOpinion;
+        if (group.opinionPaths && review)
+          verify = {
+            ...verify,
+            decisions: verify.decisions.filter((decision) =>
+              review!.findings.some(
+                (finding) => finding.id === decision.findingId,
+              ),
+            ),
+            observations: verify.observations
+              .filter(
+                (observation) =>
+                  group.opinionPaths![observation.path] !== undefined ||
+                  !group.opinionUnits?.some(
+                    (unit) => unit.path === observation.path,
+                  ),
+              )
+              .map((observation) => ({
+                ...observation,
+                path: group.opinionPaths![observation.path] ?? observation.path,
+              })),
+          };
       } catch {
         issueSet.add('artifact not validated');
       }

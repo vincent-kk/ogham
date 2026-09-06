@@ -3,7 +3,7 @@ name: pull-request
 user-invocable: true
 description: 'Sync branch FCA documents through enrich-docs, record what could not be repaired as a PR handoff, then open or update a structured GitHub pull request. Use when a branch is ready for a PR.'
 argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve] [--push|--no-push]'
-version: '2.0.0'
+version: '2.1.0'
 complexity: complex
 plugin: filid
 ---
@@ -26,14 +26,22 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
 
 1. Resolve absolute `PROJECT_ROOT`.
 2. Read the current branch. A detached or empty branch name is an unrecoverable input error.
-3. The branch must have at least one commit not on the base ref.
+3. Resolve the base **before** assessment or document sync. Run the executable relative to this `SKILL.md`, passing the user's `--base` only when supplied:
+
+   ```text
+   node <skill-directory>/scripts/resolveBaseBranch.mjs --project-root <PROJECT_ROOT> [--base <REF>]
+   ```
+
+   Read its JSON: retain `baseRef` as `BASE_REF` and `baseBranch` as `BASE_BRANCH` for all stages. An explicit base skips inference. Report `source`, `ahead`, `behind`, and any `ambiguous` / `tiedCandidates` evidence; never reimplement the ranking in the prompt. A nonzero exit stops with its diagnostic and the §1 base-resolution message. The branch must have at least one commit not on the base ref; the script enforces this too. `reference.md` §2 defines the local-ref snapshot and ambiguity contract.
+
 4. Worktree state — ask the tool, do not classify by hand:
 
    ```text
    mcp__plugin_filid_tools__review_state({
      action: "assess",
      projectRoot: PROJECT_ROOT,
-     branchName: BRANCH
+     branchName: BRANCH,
+     baseRef: BASE_REF
    })
    ```
 
@@ -105,11 +113,11 @@ Source modifications left by Stage 1 surface as a Stage 0 abort on the next run.
 
 ## Stage 2 — Base Branch Resolution
 
-Use `--base` when given. Otherwise resolve in the order documented in `reference.md` §2 (configured remote default → `origin/main` → `origin/master`). Verify the ref exists before continuing.
+Keep the `BASE_REF` and `BASE_BRANCH` resolved in Stage 0. Verify `BASE_REF` still exists before continuing; do not re-estimate after the document commit or replace the selected ref with the default branch.
 
 ## Stage 3 — Change Analysis and PR Body
 
-1. Collect the commit subjects and the changed-file list for `<BASE_REF>...HEAD`.
+1. Collect branch-only commit subjects with `git log --format=%s <BASE_REF>..HEAD`. Collect changed paths with `git diff --name-only <BASE_REF>...HEAD` and file statistics with `git diff --stat <BASE_REF>...HEAD`. The triple-dot diff starts at the merge-base and excludes base-only changes.
 2. Build the body with the four canonical sections in `reference.md` §3: **Architecture**, **Code**, **Test**, **FCA Handoff**. Every section is present even when its content is "none"; the handoff section follows §7.
 3. Record the FCA document commit from Stage 1 in the Architecture section when one was made.
 4. The PR title is English. The body follows the `[filid:lang]` language; technical terms, identifiers, and paths stay in their original form.
@@ -122,7 +130,7 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 1. `UNPUSHED = true` and `--push` on (the default): run `git push -u origin <BRANCH>` first — a PR opened from a stale remote head would review commits the branch no longer matches. `UNPUSHED = true` and `--push` off (`--no-push`): skip `gh` entirely, report Stage 3's saved body, and print the §1 unpushed-branch message. `UNPUSHED = false`: continue.
 2. With `GH_AUTH = false` or `--no-push`, report `<data.reviewDirectory>/pr-body.md` as `body-saved` instead of publishing. Otherwise `gh pr view` decides create versus update.
 3. <!-- [INTERACTIVE] --> An existing PR requires an explicit overwrite confirmation before its body is replaced.
-4. Read the saved body through `--body-file <data.reviewDirectory>/pr-body.md` when calling `gh pr create` or `gh pr edit`. `--draft` creates a draft PR.
+4. Read the saved body through `--body-file <data.reviewDirectory>/pr-body.md` when calling `gh pr create --base <BASE_BRANCH>` or `gh pr edit --base <BASE_BRANCH>`. Use the branch name returned by the script, never a remote-qualified diff ref. The existing PR confirmation covers its body and selected base. `--draft` creates a draft PR.
 5. Keep the branch-specific saved body after publication or a publication failure and report the URL or saved path. The branch segment prevents another branch from overwriting this run's body.
 
 ## Options

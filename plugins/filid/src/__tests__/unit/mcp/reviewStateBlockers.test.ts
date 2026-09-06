@@ -15,6 +15,7 @@ import {
   REVIEW_STATE_PHASES,
 } from '../../../constants/reviewState.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
+import { resolveReviewStatePaths } from '../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 
 import { buildReviewOpinion } from './reviewState/helpers/buildReviewOpinion.js';
 import {
@@ -196,12 +197,10 @@ describe('review blocker artifact lifecycle', () => {
       opinion: buildReviewOpinion(state, group),
       decisions: [],
     });
-    const blockersPath = resolveContainedPath(
+    const blockersPath = resolveReviewStatePaths(
       validated.projectRoot,
-      '.filid/review',
-      validated.normalizedBranch,
-      REVIEW_STATE_FILE_NAMES.BLOCKERS,
-    );
+      fixture.branchName,
+    ).blockersPath;
     writeFileAtomicallySync(blockersPath, 'stale blocker report\n');
 
     const sealed = await handleReviewState({
@@ -430,7 +429,7 @@ describe('review blocker artifact lifecycle', () => {
     ).toMatchObject({ phase: REVIEW_STATE_PHASES.PREPARED, verdict: null });
   });
 
-  it('removes a sealed blocker artifact only during an explicit fresh prepare', async () => {
+  it('preserves a sealed blocker artifact when explicit force opens a new generation', async () => {
     const prepared = await prepareReviewBlockerFixture(fixture);
     const blockersPath = resolveContainedPath(
       prepared.paths.reviewDirectory,
@@ -452,6 +451,14 @@ describe('review blocker artifact lifecycle', () => {
     });
 
     expect(forced.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
-    expect(readUtf8FileIfExistsSync(blockersPath)).toBeNull();
+    expect(readUtf8FileIfExistsSync(blockersPath)).not.toBeNull();
+    expect(
+      readUtf8FileIfExistsSync(
+        resolveContainedPath(
+          forced.data.reviewDirectory,
+          REVIEW_STATE_FILE_NAMES.BLOCKERS,
+        ),
+      ),
+    ).toBeNull();
   });
 });

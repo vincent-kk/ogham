@@ -9,6 +9,8 @@ import {
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 
 import { hasCanonicalReviewGroupPaths } from './hasCanonicalReviewGroupPaths.js';
+import { ReviewIncrementalSchemas } from './reviewIncrementalSchemas.js';
+import { ReviewPriorFindingSchema } from './reviewPriorFindingSchema.js';
 import type { ReviewStateRecord } from './reviewStateTypes.js';
 
 /** Strict persisted range schema for one changed hunk. */
@@ -65,6 +67,12 @@ const ReviewValidationSchema = z
 /** Strict persisted review-group schema. */
 const ReviewGroupSchema = z
   .object({
+    input: ReviewIncrementalSchemas.input.optional(),
+    fileInputs: z.record(ReviewIncrementalSchemas.input).optional(),
+    priorFindings: z.array(ReviewPriorFindingSchema).optional(),
+    opinionUnits: z.array(ReviewUnitSchema).optional(),
+    opinionPaths: z.record(z.string()).optional(),
+    reusedFrom: ReviewIncrementalSchemas.origin.optional(),
     id: z.string().regex(/^\d{2,}$/),
     units: z.array(ReviewUnitSchema),
     churn: z.number().int().nonnegative(),
@@ -72,6 +80,7 @@ const ReviewGroupSchema = z
     dependsOn: z.array(z.string()),
     candidateIds: z.array(z.string()),
     briefPath: z.string(),
+    coreBriefByteLength: z.number().int().positive().optional(),
     skeletonPath: z.string(),
     opinionPath: z.string(),
     verifyBriefPath: z.string(),
@@ -143,6 +152,10 @@ const ReviewScopeSchema = z
     evidenceComplete: z.boolean(),
     worktree: z.nativeEnum(WORKTREE_DISPOSITIONS),
     dirtyPaths: z.array(z.string()),
+    dirtyPathsHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
     statuses: z
       .object({
         structure: z.nativeEnum(TOOL_STATUSES),
@@ -160,6 +173,11 @@ const ReviewScopeSchema = z
 /** Complete strict schema for the canonical review-state v2 record. */
 export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
   .object({
+    incremental: ReviewIncrementalSchemas.state.optional(),
+    generationId: z
+      .string()
+      .regex(/^[a-f0-9]{32}$/)
+      .optional(),
     schemaVersion: z.literal(REVIEW_STATE_SCHEMA_VERSION),
     validationPolicyVersion: z.number().int().positive().optional(),
     projectRoot: z.string(),
@@ -184,6 +202,16 @@ export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
   })
   .strict()
   .superRefine((state, context) => {
+    if (
+      state.incremental &&
+      (!state.generationId ||
+        state.groups.some((group) => !group.input || !group.fileInputs))
+    )
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          'incremental state requires generation and file input manifests',
+      });
     if (
       state.phase === REVIEW_STATE_PHASES.PREPARED &&
       (state.verdict !== null || state.sealedAt !== undefined)

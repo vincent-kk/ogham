@@ -199,6 +199,7 @@ describe('Filid 1.0 MCP tool surface', () => {
             ],
           },
           effort: { enum: ['auto', 'low', 'medium', 'high'] },
+          userInstructions: { type: 'string' },
           kind: { enum: ['review', 'verify'] },
           group: { type: 'string' },
           round: { type: 'integer', minimum: 1 },

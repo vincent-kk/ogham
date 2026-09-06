@@ -171,13 +171,15 @@ describe('review_state cache semantics', () => {
       baseRef: 'main',
     });
 
-    expect(refreshed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
+    expect(refreshed.summary.disposition).not.toBe(
+      REVIEW_STATE_DISPOSITIONS.CACHED,
+    );
     expect(readPreparedReviewState(refreshed).phase).toBe(
       REVIEW_STATE_PHASES.PREPARED,
     );
   });
 
-  it('force prepare invalidates the sealed report before another seal', async () => {
+  it('force prepare preserves the prior report and requires a new seal', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -225,8 +227,18 @@ describe('review_state cache semantics', () => {
       branchName: 'feature/cache',
     });
 
-    expect(refreshed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
-    expect(readUtf8FileIfExistsSync(reportPath)).toBeNull();
+    expect(refreshed.summary.disposition).not.toBe(
+      REVIEW_STATE_DISPOSITIONS.CACHED,
+    );
+    expect(readUtf8FileIfExistsSync(reportPath)).not.toBeNull();
+    expect(
+      readUtf8FileIfExistsSync(
+        resolveContainedPath(
+          refreshed.data.reviewDirectory,
+          REVIEW_STATE_FILE_NAMES.REPORT,
+        ),
+      ),
+    ).toBeNull();
     expect(readUtf8FileIfExistsSync(otherReportPath)).toBe(
       '# Other branch review\n',
     );
@@ -240,7 +252,7 @@ describe('review_state cache semantics', () => {
     );
   });
 
-  it('content-changing prepare invalidates the prior sealed report', async () => {
+  it('content-changing prepare retains history without exposing its prior verdict', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -277,8 +289,18 @@ describe('review_state cache semantics', () => {
       branchName: 'feature/cache',
     });
 
-    expect(refreshed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
-    expect(readUtf8FileIfExistsSync(reportPath)).toBeNull();
+    expect(refreshed.summary.disposition).not.toBe(
+      REVIEW_STATE_DISPOSITIONS.CACHED,
+    );
+    expect(readUtf8FileIfExistsSync(reportPath)).not.toBeNull();
+    expect(
+      readUtf8FileIfExistsSync(
+        resolveContainedPath(
+          refreshed.data.reviewDirectory,
+          REVIEW_STATE_FILE_NAMES.REPORT,
+        ),
+      ),
+    ).toBeNull();
     expect(immediateSeal.summary.disposition).toBe(
       REVIEW_STATE_DISPOSITIONS.MISSING,
     );

@@ -300,6 +300,7 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
     action: z.literal(REVIEW_STATE_ACTIONS.PREPARE),
     baseRef: z.string().min(1).optional(),
     changeContext: z.string().optional(),
+    userInstructions: z.string().optional(),
     force: z.boolean().optional(),
     effort: z
       .enum([
@@ -341,6 +342,12 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
 ]);
 
 const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
+  userInstructions: z
+    .string()
+    .optional()
+    .describe(
+      'prepare only: explicit user review requirements, compared for the files that consume them.',
+    ),
   ...REVIEW_STATE_COMMON_SCHEMA,
   action: z
     .nativeEnum(REVIEW_STATE_ACTIONS)
@@ -374,7 +381,9 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
   force: z
     .boolean()
     .optional()
-    .describe('prepare only: discard existing unsealed artifacts first.'),
+    .describe(
+      'prepare only: review all files in a fresh generation while preserving previous artifacts.',
+    ),
   effort: z
     .enum([
       REVIEW_DEFAULT_EFFORT,

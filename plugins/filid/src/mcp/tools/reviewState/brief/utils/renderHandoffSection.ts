@@ -27,7 +27,6 @@ function rowBelongsToGroup(
   entry: ReviewHandoffEntry,
   groupFiles: readonly string[],
 ): boolean {
-  if (['document-sync', 'unresolved-path'].includes(entry.class)) return true;
   if (entry.path === '.' || groupFiles.includes('.')) return true;
   return groupFiles.some(
     (path) =>

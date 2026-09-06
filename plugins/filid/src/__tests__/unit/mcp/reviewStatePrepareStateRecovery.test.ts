@@ -1,6 +1,9 @@
 import { rmSync } from 'node:fs';
 
-import { writeFileAtomicallySync } from '@ogham/cross-platform';
+import {
+  readUtf8FileIfExistsSync,
+  writeFileAtomicallySync,
+} from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { REVIEW_STATE_ACTIONS } from '../../../constants/reviewState.js';
@@ -37,6 +40,7 @@ describe('review_state prepare state recovery', () => {
     writeFileAtomicallySync(prepared.data.statePath, '{"schemaVersion":');
 
     const recovered = await handleReviewState({
+      force: true,
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
       branchName: fixture.branchName,
@@ -45,5 +49,29 @@ describe('review_state prepare state recovery', () => {
 
     expect(recovered.status).toBe('ok');
     expect(recovered.summary.disposition).toBe('fresh');
+  });
+
+  it('rejects a truncated state without force, leaving the file untouched', async () => {
+    const prepared = await handleReviewState({
+      action: REVIEW_STATE_ACTIONS.PREPARE,
+      projectRoot: fixture.projectRoot,
+      branchName: fixture.branchName,
+      baseRef: 'main',
+    });
+    writeFileAtomicallySync(prepared.data.statePath, '{"schemaVersion":');
+    const truncatedBefore = readUtf8FileIfExistsSync(prepared.data.statePath);
+
+    await expect(
+      handleReviewState({
+        action: REVIEW_STATE_ACTIONS.PREPARE,
+        projectRoot: fixture.projectRoot,
+        branchName: fixture.branchName,
+        baseRef: 'main',
+      }),
+    ).rejects.toMatchObject({ code: 'review-incremental-bootstrap-required' });
+
+    expect(readUtf8FileIfExistsSync(prepared.data.statePath)).toBe(
+      truncatedBefore,
+    );
   });
 });

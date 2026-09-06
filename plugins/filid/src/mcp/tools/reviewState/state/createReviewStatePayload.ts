@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs';
+
 import { listReviewArtifacts } from './listReviewArtifacts.js';
 import { reviewReportExists } from './reviewReportExists.js';
 import {
@@ -27,6 +29,9 @@ export function createReviewStatePayload({
   handoff,
 }: CreateReviewStatePayloadInput): ReviewStatePayload {
   const artifactPaths = listReviewArtifacts(paths.reviewDirectory);
+  if (existsSync(paths.statePath) && !artifactPaths.includes(paths.statePath))
+    artifactPaths.push(paths.statePath);
+  artifactPaths.sort();
   const reportPath = reviewReportExists(paths.reportPath)
     ? paths.reportPath
     : undefined;
@@ -52,6 +57,12 @@ export function createReviewStatePayload({
             evidenceComplete: state.scope.evidenceComplete,
             worktree: state.scope.worktree,
             effort: state.effort,
+            ...(state.incremental
+              ? {
+                  ...state.incremental.summary,
+                  generationId: state.generationId,
+                }
+              : {}),
             ...(state.verdict === null ? {} : { verdict: state.verdict }),
           }
         : {}),

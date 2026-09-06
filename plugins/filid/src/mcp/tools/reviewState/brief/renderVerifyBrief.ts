@@ -1,4 +1,4 @@
-import { splitVerifierAssignment } from '../opinion/splitVerifierAssignment.js';
+import { mergeVerifierAssignment } from '../opinion/mergeVerifierAssignment.js';
 import { escapeMarkdownCell } from '../scope/utils/escapeMarkdownCell.js';
 import { renderMarkdownTable } from '../scope/utils/renderMarkdownTable.js';
 
@@ -16,7 +16,10 @@ const DELIVERABLE_HEADING_PATTERN = /^## Deliverable\r?$/m;
  * @returns Verifier Markdown containing the exact v7 output contract.
  */
 export function renderVerifyBrief(input: RenderVerifyBriefInput): string {
-  const { assigned } = splitVerifierAssignment(input.findings);
+  const { assigned } = mergeVerifierAssignment(
+    input.findings,
+    input.group.priorFindings,
+  );
   const deliverable = input.verifierMethod.search(DELIVERABLE_HEADING_PATTERN);
   if (deliverable < 0)
     throw new Error('Verifier method is missing its Deliverable section.');

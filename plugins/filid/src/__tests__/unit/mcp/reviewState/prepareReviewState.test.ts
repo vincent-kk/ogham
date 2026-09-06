@@ -134,7 +134,7 @@ describe('prepareReviewState optional inputs', () => {
           portableJoin(unchanged.data.reviewDirectory, group.briefPath),
           'utf8',
         ),
-      ).toContain(handoff.recorded[0]!.note);
+      ).toContain('Confirm the updated claim against the tree.');
     const forced = await handleReviewState({ ...changedRequest, force: true });
     for (const group of forced.data.groups)
       expect(

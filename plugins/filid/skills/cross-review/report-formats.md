@@ -50,6 +50,19 @@ generated_at: <timestamp>
 | verification_status | <status>                       |
 | worktree            | <classification>               |
 
+### Incremental Reuse
+
+| Field                        | Value   |
+| ---------------------------- | ------- |
+| reusedGroups                 | <count> |
+| reusedFiles                  | <count> |
+| reviewFiles                  | <count> |
+| rerunGroups                  | <count> |
+| newGroups                    | <count> |
+| removedGroups                | <count> |
+| bookkeepingGroups            | <count> |
+| remainingMaxReviewerHandoffs | <count> |
+
 ## Coverage
 
 <review target, reviewed, pending, excluded, and total counts; exclusion reasons with up to three representative paths>
@@ -87,7 +100,7 @@ generated_at: <timestamp>
 **<verdict>** — <reason derived from the sealed evidence>
 ```
 
-An empty evidence table may render a `None` row. Findings retain their confirmed evidence; the orchestrator does not rewrite claims or add fixes during rendering.
+The Incremental Reuse subsection appears only for an observed-input generation. Its counters come from the persisted reuse decisions and report remaining reviewer handoffs, excluding verifier work and retries. An empty evidence table may render a `None` row. Findings retain their confirmed evidence; the orchestrator does not rewrite claims or add fixes during rendering.
 
 At seal, the Verification Log records FCA candidates as `CONFIRMED` with `evidence.md#<id>` and `canonical structure evidence measured on snapshot <snapshotHash>`, and deterministically refuted findings outside the changed hunks as `REFUTED` with assigned hunk ranges and `finding lies outside the changed hunks`.
 

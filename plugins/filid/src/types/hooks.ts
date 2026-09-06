@@ -17,6 +17,10 @@ export interface HookBaseInput {
    * session_id, i.e. the shared behavior).
    */
   transcript_path?: string;
+  /** Unique subagent identifier when the event originates in a subagent. */
+  agent_id?: string;
+  /** Agent frontmatter name supplied for subagent and --agent executions. */
+  agent_type?: string;
 }
 
 /** SessionStart hook input */

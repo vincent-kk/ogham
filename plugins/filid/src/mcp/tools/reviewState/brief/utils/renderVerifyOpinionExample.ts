@@ -1,18 +1,19 @@
 import { REVIEW_OPINION_SCHEMA_VERSION } from '../../../../../constants/reviewState.js';
-import { splitVerifierAssignment } from '../../opinion/splitVerifierAssignment.js';
+import { mergeVerifierAssignment } from '../../opinion/mergeVerifierAssignment.js';
 import type { RenderVerifyBriefInput } from '../reviewBriefTypes.js';
 
 /**
  * Render a semantically valid verifier opinion covering every required ID.
- * @param input Located findings partitioned by the shared verifier assignment rule.
+ * @param input Located findings and the group whose unresolved prior findings stay assigned.
  * @returns Compact JSON with the exact required decision identity set.
  */
 export function renderVerifyOpinionExample(
   input: RenderVerifyBriefInput,
 ): string {
-  const decisionIds = splitVerifierAssignment(input.findings).assigned.map(
-    ({ id }) => id,
-  );
+  const decisionIds = mergeVerifierAssignment(
+    input.findings,
+    input.group.priorFindings,
+  ).assigned.map(({ id }) => id);
   return JSON.stringify({
     schema: REVIEW_OPINION_SCHEMA_VERSION,
     group: input.group.id,

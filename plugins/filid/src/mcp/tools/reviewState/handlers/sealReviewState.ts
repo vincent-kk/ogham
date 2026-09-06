@@ -35,6 +35,7 @@ import type {
 import { writeReviewState } from '../state/writeReviewState.js';
 import { foldReviewVerdict } from '../verdict/foldReviewVerdict.js';
 
+import { assertReviewInputsFresh } from './utils/assertReviewInputsFresh.js';
 import { createSealedReviewPayload } from './utils/createSealedReviewPayload.js';
 import { loadSealGroupEvidence } from './utils/loadSealGroupEvidence.js';
 import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
@@ -107,6 +108,7 @@ export async function sealReviewState(
       ],
     });
 
+  await assertReviewInputsFresh(state, paths);
   if (state.phase === REVIEW_STATE_PHASES.SEALED) {
     const summary =
       state.verdict === null
@@ -141,6 +143,7 @@ export async function sealReviewState(
       input,
       paths,
       summary,
+      reuse: state.incremental?.summary,
       hasFixRequests: summary.verdict === 'REQUEST_CHANGES',
       blockersPath: blockers.blockersPath,
     });
@@ -230,12 +233,17 @@ export async function sealReviewState(
     },
     files: state.scope.files,
     fold,
+    reuse: state.incremental?.summary,
   };
   const report = renderReviewReport(renderInput);
   const blockers = renderReviewBlockers(renderInput);
   const fixRequests = renderFixRequests(renderInput);
   const prComment = renderPrComment(renderInput);
-  const updatedSession = renderChecklistBlock(session, fold.checklist);
+  const updatedSession = renderChecklistBlock(
+    session,
+    fold.checklist,
+    state.incremental?.summary,
+  );
   const sealedState: ReviewStateRecord = {
     ...state,
     phase: REVIEW_STATE_PHASES.SEALED,
@@ -263,6 +271,7 @@ export async function sealReviewState(
       refuted: fold.refuted.length,
       indeterminate: fold.indeterminate.length,
     },
+    reuse: state.incremental?.summary,
     hasFixRequests: fixRequests !== null,
     blockersPath: blockers === null ? null : paths.blockersPath,
   });

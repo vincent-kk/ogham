@@ -21,6 +21,10 @@ import type {
 } from '../../../../types/toolEnvelope.js';
 
 import type { ReviewGroup } from './reviewGroupTypes.js';
+import type {
+  ReviewIncrementalState,
+  ReviewReuseSummary,
+} from './reviewIncrementalTypes.js';
 
 /** Extracts the union of values exposed by a constant record. */
 type ValueOf<T> = T[keyof T];
@@ -246,6 +250,8 @@ export type ReviewStateInput =
       baseRef?: string;
       /** Optional untrusted change summary overriding generated Git context. */
       changeContext?: string;
+      /** Explicit user review requirements supplied to the assigned reviewers. */
+      userInstructions?: string;
       force?: boolean;
       /** Optional reviewer effort overriding repository configuration. */
       effort?: ReviewEffortMode;
@@ -318,6 +324,10 @@ export interface ReviewHandoffPlan {
 
 /** Persisted identity and lifecycle state for one branch review. */
 export interface ReviewStateRecord extends ReviewEffortMetadata {
+  /** Observed-input protocol, absent in legacy sessions. */
+  incremental?: ReviewIncrementalState;
+  /** Isolated artifact epoch; absent only in legacy branch-root sessions. */
+  generationId?: string;
   /** Persisted record schema version. */
   schemaVersion: typeof REVIEW_STATE_SCHEMA_VERSION;
   /** Trust policy of fresh validation; absent in unsupported legacy records. */
@@ -356,6 +366,8 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
     worktree: WorktreeDisposition;
     /** Bounded project-relative dirty-path list. */
     dirtyPaths: string[];
+    /** Complete dirty-path identity; absent only in earlier v2 records. */
+    dirtyPathsHash?: string;
     /** Per-axis FCA evidence statuses. */
     statuses: Pick<ReviewEvidenceStatuses, 'structure' | 'verification'>;
     /** Complete changed-file roster, including skipped paths. */
@@ -374,12 +386,15 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
 }
 
 /** Bounded inline facts returned for every review_state action. */
-export interface ReviewStateSummary extends ReviewEffortMetadata {
+export interface ReviewStateSummary
+  extends ReviewEffortMetadata, Partial<ReviewReuseSummary> {
   action: ReviewStateAction;
   /** Lifecycle disposition. Absent for `assess`, which reads no state file. */
   disposition?: ReviewStateDisposition;
   phase?: ReviewStatePhase;
   sourceHash?: string;
+  /** Active observed-input generation, when enabled. */
+  generationId?: string;
   /** Absent for `assess`, which does not enumerate artifacts. */
   artifactCount?: number;
   /** `assess` only: where the cycle resumes. */
@@ -445,7 +460,10 @@ export interface ReviewStateSummary extends ReviewEffortMetadata {
 }
 
 /** Exact bounded summary returned by the prepare action. */
-export interface ReviewPrepareSummary extends ReviewEffortMetadata {
+export interface ReviewPrepareSummary
+  extends ReviewEffortMetadata, Partial<ReviewReuseSummary> {
+  /** Active isolated artifact generation. */
+  generationId?: string;
   /** Selected public action. */
   action: typeof REVIEW_STATE_ACTIONS.PREPARE;
   /** Whether artifacts were created, resumed, or restored from cache. */
@@ -497,6 +515,8 @@ export interface ReviewPrepareData extends ReviewHandoffPlan {
   evidencePath: string;
   /** Absolute orchestration session path. */
   sessionPath: string;
+  /** Machine-readable current-generation reuse decisions. */
+  reuseDecisionsPath?: string;
   /** Complete committed changed-file roster. */
   files: ReviewScopeFile[];
   /** Deterministic review groups. */
@@ -611,7 +631,7 @@ export type ReviewValidatePayload =
   ReviewReviewerValidatePayload | ReviewVerifierValidatePayload;
 
 /** Exact bounded summary returned after a successful seal. */
-export interface ReviewSealResponseSummary {
+export interface ReviewSealResponseSummary extends Partial<ReviewReuseSummary> {
   /** Selected public action. */
   action: typeof REVIEW_STATE_ACTIONS.SEAL;
   /** Completed lifecycle disposition. */

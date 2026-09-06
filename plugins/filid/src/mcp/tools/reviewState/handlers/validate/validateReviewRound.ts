@@ -21,6 +21,7 @@ import { writeAutoVerifyOpinion } from '../../handoff/utils/writeAutoVerifyOpini
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
 import { checkReviewOpinion } from '../../opinion/checkReviewOpinion.js';
 import { mergeReviewRounds } from '../../opinion/mergeReviewRounds.js';
+import { mergeVerifierAssignment } from '../../opinion/mergeVerifierAssignment.js';
 import { parseReviewOpinion } from '../../opinion/parseReviewOpinion.js';
 import type { ReviewOpinion } from '../../opinion/reviewOpinionTypes.js';
 import { splitVerifierAssignment } from '../../opinion/splitVerifierAssignment.js';
@@ -31,7 +32,7 @@ import type {
   ReviewValidatePayload,
   ReviewValidationProblem,
 } from '../../state/reviewStateTypes.js';
-import { writeReviewState } from '../../state/writeReviewState.js';
+import { writeReviewGroupProgress } from '../../state/writeReviewGroupProgress.js';
 
 import { createValidatePayload } from './createValidatePayload.js';
 import { locateReviewFindings } from './locateReviewFindings.js';
@@ -214,7 +215,10 @@ export async function validateReviewRound(
   )
     ? round + 1
     : null;
-  const { assigned } = splitVerifierAssignment(merged.opinion.findings);
+  const { assigned } = mergeVerifierAssignment(
+    merged.opinion.findings,
+    group.priorFindings,
+  );
   const verifierRequired = nextRound === null && assigned.length > 0;
   writeFileAtomicallySync(opinionPath, mergedBytes);
   if (nextRound !== null)
@@ -232,7 +236,7 @@ export async function validateReviewRound(
       diffs: readInlineReviewDiffs(paths, group),
       group,
       files: state.scope.files,
-      findings: assigned,
+      findings: merged.opinion.findings,
       sourceHash: state.sourceHash,
     }),
   );
@@ -253,13 +257,13 @@ export async function validateReviewRound(
       updatedGroup,
       state.sourceHash,
     );
-  const updatedState = {
+  let updatedState = {
     ...state,
     groups: state.groups.map((candidateGroup) =>
       candidateGroup.id === group.id ? updatedGroup : candidateGroup,
     ),
   };
-  writeReviewState(paths.statePath, updatedState);
+  updatedState = writeReviewGroupProgress(paths.statePath, updatedState, group);
   return createValidatePayload({
     handoff: planNextHandoffs({
       state: updatedState,

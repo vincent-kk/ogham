@@ -15,6 +15,7 @@ import { isFindingDiagnostic } from '../../utils/isFindingDiagnostic.js';
 import { selectVerificationEvidence } from '../../utils/selectVerificationEvidence.js';
 import { classifyWorktreePaths } from '../assess/classifyWorktreePaths.js';
 import { parseGitStatusPaths } from '../assess/parseGitStatusPaths.js';
+import { computeReviewDirtyPathsHash } from '../hash/computeReviewDirtyPathsHash.js';
 import { executeReviewGit } from '../hash/executeReviewGit.js';
 import type {
   ReviewEvidenceStatuses,
@@ -62,6 +63,8 @@ interface CollectedChangedScopeEvidence {
   worktree: WorktreeDisposition;
   /** Bounded, sorted dirty-path facts returned and persisted by prepare. */
   dirtyPaths: string[];
+  /** Digest of the complete sorted dirty-path set. */
+  dirtyPathsHash: string;
   /** Per-axis structure and verification statuses. */
   statuses: Pick<ReviewEvidenceStatuses, 'structure' | 'verification'>;
   /** Full committed roster enriched with review selection facts. */
@@ -222,6 +225,7 @@ export async function collectChangedScopeEvidence(
     evidenceComplete: statuses.evidenceComplete,
     worktree: worktree.disposition,
     dirtyPaths: dirtyPaths.slice(0, REVIEW_SCOPE_DIRTY_PATH_LIMIT),
+    dirtyPathsHash: computeReviewDirtyPathsHash(dirtyPaths),
     statuses: {
       structure: statuses.structure,
       verification: statuses.verification,
