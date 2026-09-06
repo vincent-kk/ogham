@@ -1,5 +1,7 @@
 import type { ReviewHunk } from '../state/reviewGroupTypes.js';
 
+import { splitTrimmedReviewLines } from './utils/splitTrimmedReviewLines.js';
+
 /** Deterministic source location attached to a validated review finding. */
 interface ResolvedFindingLines {
   /** Inclusive one-based source range, or `unknown` when no unique match exists. */
@@ -29,14 +31,8 @@ export function resolveFindingLines(
   existingCode: string,
   hunks: readonly ReviewHunk[],
 ): ResolvedFindingLines {
-  const sourceLines = sourceText
-    .replace(/\r\n?/g, '\n')
-    .split('\n')
-    .map((line) => line.trim());
-  const expectedLines = existingCode
-    .replace(/\r\n?/g, '\n')
-    .split('\n')
-    .map((line) => line.trim());
+  const sourceLines = splitTrimmedReviewLines(sourceText);
+  const expectedLines = splitTrimmedReviewLines(existingCode);
   if (expectedLines.every((line) => line.length === 0))
     return { lines: 'unknown', inDiff: false };
 

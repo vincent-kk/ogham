@@ -5,8 +5,16 @@ import { summarizeOutOfScopeViolations } from './summarizeOutOfScopeViolations.j
 import { escapeMarkdownCell } from './utils/escapeMarkdownCell.js';
 import { renderMarkdownTable } from './utils/renderMarkdownTable.js';
 
+/** Backticks escaped inside evidence table code spans. */
+const BACKTICK_PATTERN = /`/g;
+
+/**
+ * Wrap an evidence value in an escaped Markdown table code span.
+ * @param value Raw path, rule, or diagnostic identifier to display as code.
+ * @returns One inline code span whose table delimiters and backticks are escaped.
+ */
 function codeCell(value: string): string {
-  return `\`${escapeMarkdownCell(value).replace(/`/g, '\\`')}\``;
+  return `\`${escapeMarkdownCell(value).replace(BACKTICK_PATTERN, '\\`')}\``;
 }
 
 /**

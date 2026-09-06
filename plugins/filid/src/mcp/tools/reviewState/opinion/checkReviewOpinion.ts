@@ -29,6 +29,9 @@ const REVIEW_FINDING_CATEGORIES = new Set<string>([
 /** Reviewer coverage results admitted by schema seven. */
 const REVIEW_FILE_RESULTS = new Set<string>(['reviewed', 'skipped']);
 
+/** Finding sequence with at least three decimal digits after the group prefix. */
+const FINDING_ORDINAL_PATTERN = /^\d{3,}$/;
+
 /**
  * Check a structurally parsed reviewer opinion against its prepared group.
  *
@@ -117,7 +120,7 @@ export function checkReviewOpinion(
     const ordinal = finding.id.startsWith(findingPrefix)
       ? finding.id.slice(findingPrefix.length)
       : '';
-    if (!/^\d{3,}$/.test(ordinal) || findingIds.has(finding.id))
+    if (!FINDING_ORDINAL_PATTERN.test(ordinal) || findingIds.has(finding.id))
       problems.push({
         code: 'finding-id-invalid',
         path: finding.path,

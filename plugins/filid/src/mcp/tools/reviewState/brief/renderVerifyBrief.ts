@@ -6,6 +6,9 @@ import type { RenderVerifyBriefInput } from './reviewBriefTypes.js';
 import { renderBriefDiffs } from './utils/renderBriefDiffs.js';
 import { renderVerifyOpinionExample } from './utils/renderVerifyOpinionExample.js';
 
+/** Verifier method section that begins the materialized assignment instructions. */
+const DELIVERABLE_HEADING_PATTERN = /^## Deliverable\r?$/m;
+
 /**
  * Render one verifier brief containing only independently assigned findings.
  * @param input Group files, located findings, method, diffs, and source identity.
@@ -13,7 +16,7 @@ import { renderVerifyOpinionExample } from './utils/renderVerifyOpinionExample.j
  */
 export function renderVerifyBrief(input: RenderVerifyBriefInput): string {
   const { assigned } = splitVerifierAssignment(input.findings);
-  const deliverable = input.verifierMethod.search(/^## Deliverable\r?$/m);
+  const deliverable = input.verifierMethod.search(DELIVERABLE_HEADING_PATTERN);
   if (deliverable < 0)
     throw new Error('Verifier method is missing its Deliverable section.');
   const filesByPath = new Map(input.files.map((file) => [file.path, file]));

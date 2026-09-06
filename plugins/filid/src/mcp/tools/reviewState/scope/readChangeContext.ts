@@ -10,6 +10,12 @@ import type { ReviewChangedFile } from '../state/reviewStateTypes.js';
 import { parseHandoffBlock } from './parseHandoffBlock.js';
 import type { ReviewHandoffSeed } from './reviewHandoffSeedSchema.js';
 
+/** CRLF and standalone CR line endings normalized for context rendering. */
+const CARRIAGE_RETURN_NEWLINE_PATTERN = /\r\n?/g;
+
+/** Control characters removed while preserving normalized newlines and tabs. */
+const DISALLOWED_CONTROL_CHARACTER_PATTERN = /[^\P{Cc}\n\t]/gu;
+
 /**
  * Read commit context or sanitize caller text for untrusted artifact rendering.
  * @param input Absolute Git root, merge base, numstat roster, and optional text.
@@ -59,8 +65,8 @@ export async function readChangeContext(input: {
     context = `${log.trimEnd().split('\n').slice(0, REVIEW_CHANGE_CONTEXT_LOG_LIMIT).join('\n')}\n${input.files.length} files changed, ${totals.insertions} insertions(+), ${totals.deletions} deletions(-)`;
   }
   const sanitized = context
-    .replace(/\r\n?/g, '\n')
-    .replace(/[^\P{Cc}\n\t]/gu, '');
+    .replace(CARRIAGE_RETURN_NEWLINE_PATTERN, '\n')
+    .replace(DISALLOWED_CONTROL_CHARACTER_PATTERN, '');
   if (sanitized.length > REVIEW_CHANGE_CONTEXT_LIMIT)
     diagnostics.push({
       code: REVIEW_STATE_DIAGNOSTIC_CODES.CHANGE_CONTEXT_TRUNCATED,

@@ -2,6 +2,9 @@ import type { ReviewChecklistEntry } from '../verdict/reviewVerdictTypes.js';
 
 import { renderCoverageTable } from './utils/renderCoverageTable.js';
 
+/** Canonical checklist headings; matchAll preserves independent repeated calls. */
+const REVIEW_CHECKLIST_HEADING_PATTERN = /^## Review Checklist\s*$/gm;
+
 /**
  * Replace the complete final session checklist while preserving prior content.
  *
@@ -14,7 +17,9 @@ export function renderChecklistBlock(
   sessionMarkdown: string,
   checklist: readonly ReviewChecklistEntry[],
 ): string {
-  const headings = [...sessionMarkdown.matchAll(/^## Review Checklist\s*$/gm)];
+  const headings = [
+    ...sessionMarkdown.matchAll(REVIEW_CHECKLIST_HEADING_PATTERN),
+  ];
   const heading = headings.at(-1);
   if (!heading)
     throw new Error('Session must contain a ## Review Checklist heading.');

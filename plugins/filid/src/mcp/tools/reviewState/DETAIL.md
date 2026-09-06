@@ -21,6 +21,7 @@
 - 선택 `review.maxGroups`를 넘는 reviewable group은 fresh·resumable prepare에서 오류로 거부하고 handoff를 반환하지 않는다. candidate-only group은 액터 비용이 없어 세지 않는다. sealed cache에는 적용하지 않는다. 기존 group 구성과 검증 identity는 resume에서 보존하므로 그룹 크기 설정을 바꾸려면 `--force`가 필요하다.
 - fresh prepare는 배정된 source의 보안·동시성 경로 단어, 어댑터가 보고한 공개 진입점, 배정된 external-import-boundary·circular-dependency·entry-point-surface error 후보, 선택 highRiskPaths glob을 위험 신호로 사용한다. 구분자·camel case 단어를 비교하고 각 종류의 첫 경로만 남겨 riskReasons는 최대 다섯 개다. 문서·검증·skipped 파일, churn·파일 수·owner 수만으로는 강화하지 않는다. 경로는 휴리스틱이며 신호 없음은 안전의 증거가 아니다.
 - 위험 근거는 그룹에 저장해 재개 중 다시 분류하지 않는다. 기존 riskReasons 없는 state v2도 읽으며, 위험 경로 설정·정책 변경은 새 준비 또는 명시 force에 적용한다. 완료된 기존 리뷰를 새 정책만으로 재실행하지 않는다.
+- 경로 단어 분리와 source·excerpt 줄 정규화는 각각 순수 보조 함수로 일원화한다. 고정 정규식은 모듈 상수로 재사용하며 약어·camel case·숫자 경계, 줄바꿈·공백·빈 토큰과 반복 호출 결과를 유지한다. 입력별 동적 정규식은 공유하지 않는다.
 - 같은 group을 재계산할 때 조기 완료를 보존한다. effort를 낮춰 이미 검증한 round가 새 한도에 도달하면 완료로 바꾸고 추가 reviewer를 배정하지 않는다. 명시적으로 round 한도를 높인 경우에만 보존된 조기 완료를 다시 열 수 있다.
 - `planRequired`는 unit chunk 크기가 아니라 원본 파일 churn으로 결정한다. FCA candidate는 path 일치, owner 일치, `01` 순서에서 가장 작은 한 group에만 배정한다.
 - reviewable unit 없이 candidate만 있으면 rounds 0의 `01` group과 complete empty merged opinion, review validation hash, verify brief, 빈 COMPLETE auto-verify opinion과 reviewSha256으로 결합된 verify validation을 만든다. 둘 다 없으면 group도 없다.

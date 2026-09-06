@@ -9,6 +9,8 @@ import type {
   ReviewScopeFile,
 } from '../state/reviewStateTypes.js';
 
+import { tokenizeReviewRiskPath } from './utils/tokenizeReviewRiskPath.js';
+
 /** Facts available before any reviewer runs; no model-based triage is required. */
 interface AssessReviewGroupRiskInput {
   /** Bounded assignment whose source files and candidate IDs determine scope. */
@@ -40,11 +42,7 @@ export function assessReviewGroupRisk(
   if (files.length === 0) return [];
   const reasons = new Map<string, string>();
   for (const file of files) {
-    const words = file.path
-      .replace(/([A-Z]+)([A-Z][a-z])/g, '$1/$2')
-      .replace(/([a-z0-9])([A-Z])/g, '$1/$2')
-      .toLowerCase()
-      .split(/[^a-z0-9]+/);
+    const words = tokenizeReviewRiskPath(file.path);
     for (const [kind, keywords] of Object.entries(REVIEW_RISK_PATH_WORDS))
       if (!reasons.has(kind) && keywords.some((word) => words.includes(word)))
         reasons.set(kind, `${kind}: ${file.path}`);

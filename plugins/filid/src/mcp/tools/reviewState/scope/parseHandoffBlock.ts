@@ -10,6 +10,9 @@ import {
   type ReviewHandoffSeed,
 } from './reviewHandoffSeedSchema.js';
 
+/** CRLF and standalone CR line endings normalized before handoff parsing. */
+const CARRIAGE_RETURN_NEWLINE_PATTERN = /\r\n?/g;
+
 /** First complete handoff comment after caller newlines have been normalized. */
 const REVIEW_HANDOFF_BLOCK_PATTERN = new RegExp(
   String.raw`<!--[ \t]*${REVIEW_HANDOFF_MARKER}[ \t]*\n([\s\S]*?)\n-->`,
@@ -38,7 +41,10 @@ export function parseHandoffBlock(changeContext: string): {
   /** At most one JSON or schema diagnostic for the first matching block. */
   diagnostics: ToolDiagnostic[];
 } {
-  const remainder = changeContext.replace(/\r\n?/g, '\n');
+  const remainder = changeContext.replace(
+    CARRIAGE_RETURN_NEWLINE_PATTERN,
+    '\n',
+  );
   const match = REVIEW_HANDOFF_BLOCK_PATTERN.exec(remainder);
   if (!match) return { handoff: null, remainder, diagnostics: [] };
 

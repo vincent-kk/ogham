@@ -75,4 +75,22 @@ describe('resolveFindingLines', () => {
 
     expect(result).toEqual({ lines: '2-3', inDiff: true });
   });
+
+  it.each(['\n', '\r\n', '\r'])(
+    'preserves source line numbers with %j newlines across repeated calls',
+    (newline) => {
+      const source = ['  before(); ', '\tfirst();', ' second();  ', ''].join(
+        newline,
+      );
+      for (let repeat = 0; repeat < 3; repeat += 1) {
+        expect(
+          resolveFindingLines(source, 'first();\r\nsecond();', []),
+        ).toEqual({ lines: '2-3', inDiff: false });
+        expect(resolveFindingLines(source, ' \r\n\t', [])).toEqual({
+          lines: 'unknown',
+          inDiff: false,
+        });
+      }
+    },
+  );
 });

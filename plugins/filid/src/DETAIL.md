@@ -8,6 +8,7 @@
 - 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다.
 - 소스 루트 named entry point는 FCA 경계 식별용으로 `VERSION`만 열거하고, npm manifest에는 library export를 선언하지 않는다.
 - `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로 고치지 않는다.
+- 공용 glob 변환은 고정 치환 정규식을 모듈 상수로 재사용하고, 입력별 결과 정규식은 호출마다 생성한다. 치환 순서와 glob 매칭 의미는 유지한다.
 
 ## API Contracts
 
@@ -48,4 +49,4 @@
 
 ## Last Updated
 
-2026-09-05 — 4-tool MCP 표면과 resolve action batch 계약을 명시했다.
+2026-09-06

@@ -5,6 +5,18 @@ import type {
 import { escapeMarkdownCell } from '../../scope/utils/escapeMarkdownCell.js';
 import { renderMarkdownTable } from '../../scope/utils/renderMarkdownTable.js';
 
+/** Consecutive newline sequences collapsed for single-line handoff cells. */
+const NEWLINE_RUN_PATTERN = /(?:\r\n?|\n)+/g;
+
+/** Tabs rendered as spaces inside handoff text. */
+const TAB_PATTERN = /\t/g;
+
+/** Remaining Unicode control characters omitted from handoff display. */
+const CONTROL_CHARACTER_PATTERN = /\p{Cc}/gu;
+
+/** Backticks omitted from the snapshot identifier's inline code span. */
+const BACKTICK_PATTERN = /`/g;
+
 /**
  * Select claims naming related paths or outcomes that apply to every group.
  * @param entry Validated claim with a project-relative path.
@@ -32,9 +44,9 @@ function rowBelongsToGroup(
  */
 function normalizeHandoffString(value: string): string {
   return value
-    .replace(/(?:\r\n?|\n)+/g, ' ')
-    .replace(/\t/g, ' ')
-    .replace(/\p{Cc}/gu, '');
+    .replace(NEWLINE_RUN_PATTERN, ' ')
+    .replace(TAB_PATTERN, ' ')
+    .replace(CONTROL_CHARACTER_PATTERN, '');
 }
 
 /**
@@ -50,7 +62,7 @@ export function renderHandoffSection(
 ): string {
   const snapshotHash = normalizeHandoffString(
     handoff.snapshotHash ?? 'unknown',
-  ).replace(/`/g, '');
+  ).replace(BACKTICK_PATTERN, '');
   const documentSync = normalizeHandoffString(handoff.documentSync);
   const rows: string[][] = [];
   const seen = new Set<string>();

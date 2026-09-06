@@ -41,6 +41,25 @@ describe('review risk evidence', () => {
     },
   );
 
+  it('keeps acronym and digit boundaries stable across repeated calls', () => {
+    const cases = [
+      ['src/JWTValidator.ts', ['security-path']],
+      ['src/author.ts', []],
+      ['src/v2AuthGuard.ts', ['security-path']],
+      ['src/mutex2.ts', []],
+      ['src/JWT-mutex.ts', ['security-path', 'concurrency-path']],
+    ] as const;
+    for (let repeat = 0; repeat < 3; repeat += 1)
+      for (const [path, kinds] of cases) {
+        const input = buildReviewBriefInput();
+        input.group.units = [{ ...input.group.units[0]!, path }];
+        input.files = [{ ...input.files[0]!, path }];
+        expect(assessReviewGroupRisk({ ...input, highRiskPaths: [] })).toEqual(
+          kinds.map((kind) => `${kind}: ${path}`),
+        );
+      }
+  });
+
   it('uses adapter-reported entry points instead of guessing from a basename', () => {
     const tree = buildFractalTree([
       {
