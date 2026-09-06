@@ -35,7 +35,7 @@ Push state is a separate fact, not a stage: `summary.unpushedCommits` counts com
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Dirty **source** worktree                 | Stop. Report the abort message verbatim.                                                                                                          |
 | Dirty generated paths only                | Continue — `pr-create` classifies them and never stages them.                                                                                     |
-| Document sync failed, declined or partial | Continue — `pr-create` records the outcome and the unrepaired findings in the PR body's `FCA Handoff`; `review` reads the body as change context. |
+| Document sync failed, declined or skipped | Continue — `pr-create` records the outcome and the unrepaired findings in the PR body's `FCA Handoff`; `review` reads the body as change context. |
 | `gh` unauthenticated                      | Continue — the body is saved locally; report the path.                                                                                            |
 
 With `--no-push`, only a saved body exists, so `review` has no PR to start from and the cycle ends there — a publication-option ending, not a document-sync one.

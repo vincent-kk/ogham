@@ -39,7 +39,7 @@ export const REVIEW_STATE_GIT_ARGUMENTS = {
   DIFF_COMMITTED_STATUS: ['--name-status', '-z', '--no-renames'],
   DIFF_COMMITTED_NUMSTAT: ['--numstat', '-z', '--no-renames'],
   HEAD_TREE: ['-rz', '--full-tree'],
-  STATUS_PORCELAIN: ['status', '--porcelain', '-z'],
+  STATUS_PORCELAIN: ['status', '--porcelain', '-z', '--untracked-files=all'],
   UPSTREAM_COUNT: ['rev-list', '--count', '@{upstream}..HEAD'],
   REMOTE_HEAD: ['symbolic-ref', '--short', 'refs/remotes/origin/HEAD'],
   VERIFY_REF: ['rev-parse', '--verify', '--quiet'],
@@ -296,7 +296,6 @@ export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   ACTOR_METHOD_MISSING: 'review-actor-method-missing',
   STATE_MISSING: 'review-state-missing',
   SOURCE_HASH_STALE: 'review-source-hash-stale',
-  STATE_SEALED: 'review-state-sealed',
   REPORT_MISSING: 'review-report-missing',
   /** A marked sealed review has lost its canonical blocker report. */
   BLOCKERS_MISSING: 'review-blockers-missing',
@@ -315,7 +314,6 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   STATE_MISSING: 'No prepared review state exists for this branch.',
   SOURCE_HASH_STALE:
     'Committed source content no longer matches the prepared review state.',
-  STATE_SEALED: 'A sealed review state cannot be scoped again.',
   REPORT_MISSING: 'The canonical review report is missing.',
   BLOCKERS_MISSING: 'The canonical review blocker report is missing.',
   BLOCKERS_INVALID:

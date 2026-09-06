@@ -54,7 +54,9 @@ export function foldReviewVerdict(
         affectsVerdict: true,
       });
 
-    for (const gap of evidence.review?.gaps ?? []) {
+    const review = evidence.issues.length === 0 ? evidence.review : null;
+    const verify = evidence.issues.length === 0 ? evidence.verify : null;
+    for (const gap of review?.gaps ?? []) {
       hasGap = true;
       unresolved.push({
         source: `review ${evidence.group.id}`,
@@ -64,7 +66,7 @@ export function foldReviewVerdict(
         affectsVerdict: true,
       });
     }
-    if (evidence.verify?.state === 'INDETERMINATE') {
+    if (verify?.state === 'INDETERMINATE') {
       hasIndeterminateVerifier = true;
       unresolved.push({
         source: `verification ${evidence.group.id}`,
@@ -74,7 +76,7 @@ export function foldReviewVerdict(
         affectsVerdict: true,
       });
     }
-    for (const observation of evidence.verify?.observations ?? [])
+    for (const observation of verify?.observations ?? [])
       unresolved.push({
         source: `verification ${evidence.group.id}`,
         path: observation.path,

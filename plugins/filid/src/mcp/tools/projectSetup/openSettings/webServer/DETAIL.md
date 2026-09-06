@@ -21,6 +21,7 @@
 ### AC-websrv-settle — bounded 대기 해소
 
 - 저장 또는 닫기 이벤트가 대기 중인 도구 호출을 정확히 한 번 깨운다.
+- 이미 취소된 signal은 waiter나 대기 타이머를 등록하지 않고 즉시 pending을 반환한다.
 
 ## History
 

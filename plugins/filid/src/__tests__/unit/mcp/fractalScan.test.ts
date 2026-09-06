@@ -1,4 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 import { portableJoin, spawnCliSync } from '@ogham/cross-platform';
@@ -8,6 +8,8 @@ import { FRACTAL_SCAN_DETAILS } from '../../../constants/mcpContracts.js';
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scanDefaults.js';
 import { handleFractalScan } from '../../../mcp/tools/fractalInspect/fractalScan/index.js';
+import { collectExportedNames } from '../../../mcp/tools/fractalInspect/fractalScan/utils/collectExportedNames.js';
+import type { FractalNode } from '../../../types/fractal.js';
 import type {
   FractalScanData,
   FractalScanFullData,
@@ -192,6 +194,49 @@ describe('fractal-scan tool — maxDepth resolution priority', () => {
 });
 
 describe('fractal-scan tool — detail projections', () => {
+  it('retains whole-project diagnostics when nameFilter has no paths projection', async () => {
+    const root = mkdtempSync(
+      portableJoin(tmpdir(), 'filid-filter-diagnostics-'),
+    );
+    try {
+      writeFileSync(portableJoin(root, 'INTENT.md'), '# Sparse contract');
+      const plain = await handleFractalScan({ path: root });
+      const filtered = await handleFractalScan({
+        path: root,
+        nameFilter: 'absent-node',
+      });
+      expect(plain.diagnostics.length).toBeGreaterThan(0);
+      expect(filtered.diagnostics).toEqual(plain.diagnostics);
+      expect(filtered.summary).not.toHaveProperty('diagnosticsOutOfScope');
+      expect(filtered.data).toBeUndefined();
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it.each(['unsupported', 'indeterminate'] as const)(
+    'omits export names when a surface is %s',
+    (certainty) => {
+      const node = {
+        entryPointSurfaces: [{ certainty, exportedNames: [] }],
+      } as unknown as FractalNode;
+      expect(collectExportedNames(node)).toBeUndefined();
+    },
+  );
+
+  it('distinguishes absent entry points from exact empty exports', () => {
+    expect(
+      collectExportedNames({
+        entryPointSurfaces: [],
+      } as unknown as FractalNode),
+    ).toBeUndefined();
+    expect(
+      collectExportedNames({
+        entryPointSurfaces: [{ certainty: 'exact', exportedNames: [] }],
+      } as unknown as FractalNode),
+    ).toEqual([]);
+  });
+
   it('summary detail returns counts without a nodes payload', async () => {
     const result = await handleFractalScan({
       path: import.meta.dirname,

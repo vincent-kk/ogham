@@ -148,6 +148,7 @@ describe('planNextHandoffs', () => {
       ...group,
       id: '02',
       dependsOn: ['01'],
+      validated: { review: null, verify: null },
       briefPath: 'briefs/review-02.md',
       skeletonPath: 'opinions/review-02.r1.json',
       opinionPath: 'opinions/review-02.json',

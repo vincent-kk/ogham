@@ -1,8 +1,9 @@
-import { readFileSync, rmSync } from 'node:fs';
+import { readFileSync, realpathSync, rmSync } from 'node:fs';
 
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { REVIEW_CHANGE_CONTEXT_LIMIT } from '../../../../constants/reviewState.js';
 import { computeReviewArtifactHash } from '../../../../mcp/tools/reviewState/hash/computeReviewArtifactHash.js';
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 import { REVIEW_HANDOFF_SEED_SCHEMA } from '../../../../mcp/tools/reviewState/scope/reviewHandoffSeedSchema.js';
@@ -13,6 +14,7 @@ import {
 } from './helpers/createReviewStateSealFixture.js';
 import { prepareCandidateOnlyReviewState } from './helpers/prepareCandidateOnlyReviewState.js';
 import { runReviewStateFixtureGit } from './helpers/runReviewStateFixtureGit.js';
+import { writeReviewStateFixtureFile } from './helpers/writeReviewStateFixtureFile.js';
 
 /** Isolated Git repository and plugin root for prepare input contracts. */
 let fixture: ReviewStateSealFixture;
@@ -29,6 +31,39 @@ afterEach(() => {
 });
 
 describe('prepareReviewState optional inputs', () => {
+  it('keeps non-review files in an untracked .filid directory dirty', async () => {
+    writeReviewStateFixtureFile(
+      fixture.projectRoot,
+      '.filid/local-note.txt',
+      'local changes',
+    );
+    const result = await handleReviewState({
+      action: 'prepare',
+      projectRoot: fixture.projectRoot,
+    });
+    expect(result.data.dirtyPaths).toContain('.filid/local-note.txt');
+    expect(result.summary.worktree).toBe('source-dirty');
+  });
+
+  it('detects the branch and normalizes a subdirectory to the Git root', async () => {
+    const result = await handleReviewState({
+      action: 'prepare',
+      projectRoot: portableJoin(fixture.projectRoot, 'src'),
+    });
+    expect(result.data.branchName).toBe(fixture.branchName);
+    expect(result.data.projectRoot).toBe(realpathSync(fixture.projectRoot));
+  });
+
+  it('reports an unresolved branch on detached HEAD', async () => {
+    runReviewStateFixtureGit(fixture.projectRoot, ['checkout', '--detach']);
+    await expect(
+      handleReviewState({
+        action: 'prepare',
+        projectRoot: fixture.projectRoot,
+      }),
+    ).rejects.toMatchObject({ code: 'review-branch-unresolved' });
+  });
+
   it('carries valid changeContext handoff claims only into newly written review briefs', async () => {
     const handoff = REVIEW_HANDOFF_SEED_SCHEMA.parse({
       schema: 1,
@@ -225,7 +260,8 @@ describe('prepareReviewState optional inputs', () => {
     const request = {
       action: 'prepare' as const,
       projectRoot: fixture.projectRoot,
-      changeContext: '\u0000\u0007' + 'x'.repeat(8100),
+      changeContext:
+        '\u0000\u0007' + 'x'.repeat(REVIEW_CHANGE_CONTEXT_LIMIT + 100),
     };
     const prepared = await handleReviewState(request);
     expect(prepared.diagnostics).toContainEqual(
@@ -236,8 +272,10 @@ describe('prepareReviewState optional inputs', () => {
     for (const result of [prepared, resumed]) {
       expect(result.status).toBe('ok');
       const session = readFileSync(result.data.sessionPath, 'utf8');
-      expect(session).toContain('x'.repeat(8000));
-      expect(session).not.toContain('x'.repeat(8001));
+      expect(session).toContain('x'.repeat(REVIEW_CHANGE_CONTEXT_LIMIT));
+      expect(session).not.toContain(
+        'x'.repeat(REVIEW_CHANGE_CONTEXT_LIMIT + 1),
+      );
       expect(session).not.toContain('\u0000');
       expect(session).not.toContain('\u0007');
     }

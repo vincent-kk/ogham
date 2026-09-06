@@ -13,7 +13,9 @@ export function runReviewStateFixtureGit(
   args: readonly string[],
 ): string {
   const result = spawnCliSync('git', args, { cwd: projectRoot });
-  if (result.code !== 0 || result.spawnError)
-    throw new Error(result.stderr || result.spawnError?.message);
+  if (result.code !== 0 || result.spawnError || result.timedOut)
+    throw new Error(
+      `git ${args.join(' ')} (code=${result.code}, timedOut=${result.timedOut}): ${result.stderr || result.stdout || result.spawnError?.message || 'no output'}`,
+    );
   return result.stdout.trimEnd();
 }

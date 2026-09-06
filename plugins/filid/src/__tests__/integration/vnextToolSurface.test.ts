@@ -75,8 +75,9 @@ describe('Filid 1.0 MCP tool surface', () => {
     'returns %s without handoffs or a cached verdict in the MCP envelope',
     async (code) => {
       const fixture = createReviewStateSealFixture();
-      const connection = await connectTestClient();
+      let connection: Awaited<ReturnType<typeof connectTestClient>> | undefined;
       try {
+        connection = await connectTestClient(createServer());
         const prepared = await handleReviewState({
           action: 'prepare',
           projectRoot: fixture.projectRoot,
@@ -134,7 +135,7 @@ describe('Filid 1.0 MCP tool surface', () => {
         expect(envelope.summary?.verdict).toBeUndefined();
         expect(readFileSync(prepared.data.statePath, 'utf8')).toBe(stateBytes);
       } finally {
-        await connection.close();
+        await connection?.close();
         rmSync(fixture.projectRoot, { recursive: true, force: true });
         rmSync(fixture.pluginRoot, { recursive: true, force: true });
         if (fixture.originalPluginRoot === undefined)
@@ -162,7 +163,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('advertises literal cleanup confirmation for review_state', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const tools = await connection.client.listTools();
       const schema = tools.tools.find(
@@ -179,7 +180,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('advertises the review_state v7 action fields', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const tools = await connection.client.listTools();
       const schema = tools.tools.find(
@@ -209,7 +210,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('describes every advertised input field of every tool', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const { tools } = await connection.client.listTools();
       const undescribed = tools.flatMap(({ name, inputSchema }) =>
@@ -234,7 +235,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('advertises the project-setup action union and optional shared path', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const tools = await connection.client.listTools();
       const schema = tools.tools.find(
@@ -259,7 +260,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('advertises inspection actions and non-empty resolve requests', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const tools = await connection.client.listTools();
       const schema = tools.tools.find(
@@ -293,7 +294,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('advertises restructure actions and the optional plan path', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const tools = await connection.client.listTools();
       const schema = tools.tools.find(
@@ -316,7 +317,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('returns invalid project input as a structured Filid error', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const result = await connection.client.callTool({
         name: McpToolName.PROJECT_SETUP,
@@ -347,7 +348,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('rejects removed scalar context fields beside a request batch', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const result = await connection.client.callTool({
         name: McpToolName.FRACTAL_INSPECT,
@@ -381,7 +382,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('requires planPath for restructure validation actions', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const result = await connection.client.callTool({
         name: McpToolName.RESTRUCTURE,
@@ -413,7 +414,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   });
 
   it('requires path for project-setup rule synchronization', async () => {
-    const connection = await connectTestClient();
+    const connection = await connectTestClient(createServer());
     try {
       const result = await connection.client.callTool({
         name: McpToolName.PROJECT_SETUP,

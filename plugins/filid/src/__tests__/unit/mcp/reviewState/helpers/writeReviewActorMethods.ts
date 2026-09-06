@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { writeReviewRulePluginFile } from './writeReviewRulePluginFile.js';
+import { writeReviewStateFixtureFile } from './writeReviewStateFixtureFile.js';
 
 /**
  * Populate a fixture plugin with the canonical actor methods loaded by prepare.
@@ -10,7 +10,7 @@ import { writeReviewRulePluginFile } from './writeReviewRulePluginFile.js';
 export function writeReviewActorMethods(pluginRoot: string): void {
   for (const actor of ['reviewer', 'verifier']) {
     const relative = `skills/cross-review/reviewers/${actor}.md`;
-    writeReviewRulePluginFile(
+    writeReviewStateFixtureFile(
       pluginRoot,
       relative,
       readFileSync(

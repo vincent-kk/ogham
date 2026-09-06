@@ -164,7 +164,7 @@ describe('merge-track skill recovery contracts', () => {
       .find(
         (line) =>
           line.split('|')[1]?.trim() ===
-          'Document sync failed, declined or partial',
+          'Document sync failed, declined or skipped',
       );
 
     expect(outcome?.split('|')[2]?.trim()).toMatch(/^Continue\b/u);

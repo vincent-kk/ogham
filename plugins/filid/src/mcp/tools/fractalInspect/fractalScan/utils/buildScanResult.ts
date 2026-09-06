@@ -22,9 +22,8 @@ import { buildFractalScanSummary } from './buildFractalScanSummary.js';
  * @param snapshot Snapshot the projection reads.
  * @param validation Structure validation run against the same snapshot.
  * @param detail Projection level requested by the caller.
- * @param diagnostics Snapshot diagnostics for the whole project. A name filter
- * narrows them to the surviving nodes — otherwise the answer to a small query
- * arrives behind a project-sized payload.
+ * @param diagnostics Whole-project diagnostics; only a filtered paths projection
+ * narrows them to the surviving nodes. Summary and full retain all diagnostics.
  * @param nameFilter Node name filter; applies to the `paths` projection only,
  * so summary counts keep describing the whole tree.
  * @returns Payload whose summary is bounded and whose data follows `detail`.

@@ -311,20 +311,10 @@ describe('review blocker artifact lifecycle', () => {
       });
       const target =
         artifact === 'report' ? prepared.paths.reportPath : blockersPath;
-      const original =
-        readUtf8FileIfExistsSync(target) ??
-        [
-          '---',
-          'blockers_schema: 1',
-          `source_hash: ${JSON.stringify(prepared.state.sourceHash)}`,
-          `snapshot_hash: ${JSON.stringify(prepared.state.scope.snapshotHash)}`,
-          `branch: ${JSON.stringify(prepared.state.branchName)}`,
-          'verdict: INCONCLUSIVE',
-          '---',
-          '',
-          '# Review blockers — INCONCLUSIVE',
-          '',
-        ].join('\n');
+      const original = readUtf8FileIfExistsSync(target);
+      expect(original).not.toBeNull();
+      if (original === null)
+        throw new Error(`Missing sealed artifact: ${target}`);
       writeFileAtomicallySync(target, original.replace(pattern, replacement));
       const preserved = readFileSync(target, 'utf8');
 
@@ -385,7 +375,9 @@ describe('review blocker artifact lifecycle', () => {
             ? { baseRef: 'main' }
             : {}),
         }),
-      ).rejects.toMatchObject({ code: 'review-validation-policy-outdated' });
+      ).rejects.toMatchObject({
+        code: REVIEW_STATE_DIAGNOSTIC_CODES.VALIDATION_POLICY_OUTDATED,
+      });
     },
   );
 

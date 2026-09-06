@@ -11,6 +11,7 @@ export function haveSameReviewPaths(
   if (left.length !== right.length) return false;
   const expected = new Set(right);
   return (
-    expected.size === right.length && left.every((path) => expected.has(path))
+    expected.size === right.length &&
+    left.every((path) => expected.delete(path))
   );
 }

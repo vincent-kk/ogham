@@ -22,23 +22,25 @@ const documents = Object.fromEntries(
   ]),
 );
 
-/** Extract explicit resolve calls whose argument object ends at the next fence. */
-function resolveCalls(document: string): string[] {
+/** Extract every inspection call so missing actions cannot disappear during selection. */
+function inspectCalls(document: string): string[] {
   const marker = 'mcp__plugin_filid_tools__fractal_inspect({';
   return document
     .split(marker)
     .slice(1)
-    .map((remainder) => marker + remainder.slice(0, remainder.indexOf('```')))
-    .filter((call) => /action:\s*"resolve"/.test(call));
+    .map((remainder) => marker + remainder.slice(0, remainder.indexOf('```')));
 }
 
 describe('shipped fractal_inspect resolve caller contract', () => {
   it('uses requests arrays in every explicit tool-call example', () => {
-    const calls = Object.values(documents).flatMap(resolveCalls);
+    const calls = Object.values(documents).flatMap(inspectCalls);
 
     expect(calls.length).toBeGreaterThanOrEqual(5);
     for (const call of calls) {
-      expect(call).toMatch(/action:\s*"resolve"/);
+      expect(call).toMatch(
+        /action:\s*"(?:resolve|validate|scan|verification)"/,
+      );
+      if (!/action:\s*"resolve"/.test(call)) continue;
       expect(call).toMatch(/\n\s+requests:\s*\[/);
       const topLevelIndent = call.match(/\n([ \t]*)path:/)?.[1];
       expect(topLevelIndent).toBeDefined();

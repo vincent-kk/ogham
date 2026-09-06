@@ -2,13 +2,22 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { logHookFailure, normalizeCodexToolUses } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { commitVisit } from '../../../core/infra/cacheManager/caches/fractalMapCache.js';
 import * as validator from '../../../hooks/preToolUse/helpers/preToolValidator/preToolValidator.js';
 import * as structureGuard from '../../../hooks/preToolUse/helpers/structureGuard/structureGuard.js';
-import { handlePreToolUse } from '../../../hooks/preToolUse/index.js';
+import {
+  handlePreToolUse,
+  handlePreToolUseBatch,
+} from '../../../hooks/preToolUse/index.js';
 import type { PreToolUseInput } from '../../../types/hooks.js';
+
+vi.mock('@ogham/cross-platform', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('@ogham/cross-platform')>()),
+  logHookFailure: vi.fn(),
+}));
 
 vi.mock(
   '../../../core/infra/cacheManager/caches/fractalMapCache.js',
@@ -69,6 +78,47 @@ afterEach(() => {
 });
 
 describe('optional visit-cache failures', () => {
+  it('records optional visit errors without changing the permission result', async () => {
+    await handlePreToolUse(
+      makeInput(tmpDir, 'Read', { file_path: 'INTENT.md' }),
+    );
+    expect(logHookFailure).toHaveBeenCalledWith(
+      'filid',
+      'pre-tool-use-visit',
+      expect.objectContaining({ message: 'visit cache unavailable' }),
+    );
+  });
+
+  it('retains earlier batch denials when a later path has a non-directory parent', async () => {
+    writeFileSync(join(tmpDir, 'blocked'), 'ordinary file');
+    const command = [
+      '*** Begin Patch',
+      '*** Add File: INTENT.md',
+      ...Array.from({ length: 80 }, () => '+overflow'),
+      '*** Add File: blocked/ordinary.ts',
+      '+export {};',
+      '*** End Patch',
+    ].join('\n');
+    const input = makeInput(tmpDir, 'apply_patch', {
+      command,
+    } as PreToolUseInput['tool_input']);
+    const result = await handlePreToolUseBatch(normalizeCodexToolUses(input));
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain('50');
+  });
+
+  it('keeps the document gate on an unresolvable target', () => {
+    writeFileSync(join(tmpDir, 'blocked'), 'ordinary file');
+    const input = makeInput(tmpDir, 'Write', {
+      file_path: 'blocked/INTENT.md',
+      content: `${INTENT_AT_CAP}\noverflow`,
+    });
+    expect(
+      validator.validatePreToolUse(input).hookSpecificOutput
+        ?.permissionDecision,
+    ).toBe('deny');
+  });
+
   it.each(['Write', 'Edit'] as const)(
     'keeps the INTENT %s denial after the cache throws',
     async (toolName) => {

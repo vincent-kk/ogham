@@ -4,6 +4,7 @@ import type {
   OpinionParseResult,
   UncheckedVerifyOpinion,
 } from './uncheckedOpinionTypes.js';
+import { JSON_PARSE_DETAIL_LIMIT } from './utils/opinionDiagnosticLimits.js';
 import { renderSchemaIssue } from './utils/renderSchemaIssue.js';
 import { REVIEW_RESOLUTION_SCHEMA } from './utils/reviewResolutionSchema.js';
 
@@ -39,9 +40,6 @@ const VERIFY_OPINION_SCHEMA = z
     resolution: REVIEW_RESOLUTION_SCHEMA.optional(),
   })
   .strict();
-
-/** Maximum JSON parser diagnostic detail retained from an artifact. */
-const JSON_PARSE_DETAIL_LIMIT = 240;
 
 /**
  * Parse untrusted verifier JSON without collapsing semantic errors.

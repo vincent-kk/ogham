@@ -15,6 +15,7 @@
 ## API Contracts
 
 - Input: `{ path, requests: [{ targetPath, comparePaths? }, ...] }`; `requests`는 최소 1개다.
+- 개별 request 타입은 `ContextResolveInput`의 구성 요소로 유지하며 별도의 barrel export로 노출하지 않는다.
 - Summary: project root와 request, resolved, failed, indeterminate 건수.
 - Data: 입력 순서의 `results`; 각 result는 index, normalized target path, status, diagnostics와 success discriminator를 가진다.
 - 성공 result는 item summary와 core `ContextResolution`을 가진다. 실패 result는 target diagnostic만 가지며 다른 request 결과를 보존한다.

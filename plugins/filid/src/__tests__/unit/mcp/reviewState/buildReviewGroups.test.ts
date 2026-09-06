@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
+import {
+  REVIEW_GROUP_ADAPTIVE_FILE_LIMIT,
+  REVIEW_GROUP_FILE_LIMIT,
+} from '../../../../constants/reviewState.js';
 import { buildReviewGroups } from '../../../../mcp/tools/reviewState/group/buildReviewGroups.js';
+import { resolveReviewGroupFileLimit } from '../../../../mcp/tools/reviewState/group/utils/resolveReviewGroupFileLimit.js';
 import { resolveReviewGroupStem } from '../../../../mcp/tools/reviewState/group/utils/resolveReviewGroupStem.js';
 import type { ReviewUnit } from '../../../../mcp/tools/reviewState/state/reviewGroupTypes.js';
 import type { ReviewScopeFile } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
@@ -73,6 +78,21 @@ function makeUnit(
 }
 
 describe('buildReviewGroups', () => {
+  it.each([
+    { count: 2, churn: 800, expected: REVIEW_GROUP_FILE_LIMIT },
+    { count: 64, churn: 1, expected: REVIEW_GROUP_ADAPTIVE_FILE_LIMIT },
+    { count: 24, churn: 50, expected: 12 },
+    { count: 0, churn: 0, expected: REVIEW_GROUP_FILE_LIMIT },
+  ])(
+    'sizes automatic groups for $count files at $churn lines',
+    ({ count, churn, expected }) => {
+      const units = Array.from({ length: count }, (_, index) =>
+        makeUnit(`src/${index}.ts`, churn),
+      );
+      expect(resolveReviewGroupFileLimit(units, 800)).toBe(expected);
+    },
+  );
+
   it('collapses explicit locales without collapsing dotted code suffixes', () => {
     expect(resolveReviewGroupStem('foo.api.ts')).not.toBe(
       resolveReviewGroupStem('foo.ts'),

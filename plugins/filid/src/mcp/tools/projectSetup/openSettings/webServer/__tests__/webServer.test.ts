@@ -1,4 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { request } from 'node:http';
+
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import type {
   SaveBody,
@@ -126,6 +128,49 @@ function postSave(h: SettingsServerInstance, body: unknown): Promise<Response> {
 }
 
 describe('filid settings web server', () => {
+  it('does not register a waiter for an already-aborted signal', async () => {
+    const h = await start();
+    const controller = new AbortController();
+    controller.abort();
+    const listener = vi.spyOn(controller.signal, 'addEventListener');
+    const waiting = h.awaitSettled(600, controller.signal);
+    await h.close();
+    await expect(waiting).resolves.toEqual({ kind: 'pending' });
+    expect(listener).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    { headers: { Host: 'evil.example' }, error: 'Invalid host' },
+    { headers: { Origin: 'https://evil.example' }, error: 'Invalid origin' },
+  ])('rejects $error at the HTTP boundary', async ({ headers, error }) => {
+    const h = await start();
+    const response = await new Promise<{
+      status: number | undefined;
+      body: string;
+    }>((resolve, reject) => {
+      const req = request(
+        urlFor(h, '/save'),
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...headers },
+        },
+        (res) => {
+          let body = '';
+          res.setEncoding('utf8');
+          res.on('data', (chunk) => {
+            body += chunk;
+          });
+          res.on('end', () => resolve({ status: res.statusCode, body }));
+        },
+      );
+      req.on('error', reject);
+      req.end(JSON.stringify(VALID_BODY));
+    });
+    expect(response.status).toBe(403);
+    expect(response.body).toContain(error);
+    expect(savedBody).toBeNull();
+  });
+
   it('rejects requests with a wrong or missing token (401)', async () => {
     const h = await start();
     const wrong = await fetch(urlFor(h, '/', 'bad-token'));
@@ -249,13 +294,18 @@ describe('filid settings web server', () => {
 
   it('close is idempotent and fires onClose once', async () => {
     let closedCount = 0;
+    let didClose!: () => void;
+    const closed = new Promise<void>((resolve) => {
+      didClose = resolve;
+    });
     const h = await start({
       idleMs: 60,
       onClose: () => {
         closedCount += 1;
+        didClose();
       },
     });
-    await new Promise((r) => setTimeout(r, 160));
+    await closed;
     expect(closedCount).toBe(1);
     await h.close();
     expect(closedCount).toBe(1);

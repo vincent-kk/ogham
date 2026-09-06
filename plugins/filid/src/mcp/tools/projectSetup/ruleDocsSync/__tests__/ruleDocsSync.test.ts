@@ -45,7 +45,8 @@ describe('handleRuleDocsSync', () => {
   const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
 
   afterEach(() => {
-    process.env.CLAUDE_PLUGIN_ROOT = originalPluginRoot;
+    if (originalPluginRoot === undefined) delete process.env.CLAUDE_PLUGIN_ROOT;
+    else process.env.CLAUDE_PLUGIN_ROOT = originalPluginRoot;
     for (const dir of tempDirs.splice(0))
       rmSync(dir, { recursive: true, force: true });
   });

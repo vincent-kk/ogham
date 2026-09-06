@@ -53,6 +53,12 @@ describe('revalidate measurement scope contract', () => {
     for (const line of aggregateLines)
       expect(line).toMatch(/never|not a search/i);
 
+    const allCalls = [
+      ...toolCalls(skill, 'fractal_inspect'),
+      ...toolCalls(reference, 'fractal_inspect'),
+    ];
+    for (const call of allCalls)
+      expect(call).toMatch(/action:\s*"(?:resolve|validate)"/);
     const contextResolveCalls = toolCalls(reference, 'fractal_inspect').filter(
       (call) => /action:\s*"resolve"/.test(call),
     );
@@ -62,16 +68,11 @@ describe('revalidate measurement scope contract', () => {
         expect.stringMatching(/path:\s*PROJECT_ROOT,[\s\S]+requests:\s*\[/),
       ]),
     );
-    for (const call of contextResolveCalls)
-      expect(call).toMatch(/action:\s*"resolve"/);
-
-    const structureValidateCalls = [
-      ...toolCalls(skill, 'fractal_inspect'),
-      ...toolCalls(reference, 'fractal_inspect'),
-    ].filter((call) => /action:\s*"validate"/.test(call));
+    const structureValidateCalls = allCalls.filter((call) =>
+      /action:\s*"validate"/.test(call),
+    );
     expect(structureValidateCalls.length).toBeGreaterThan(0);
     for (const call of structureValidateCalls) {
-      expect(call).toMatch(/action:\s*"validate"/);
       expect(call).not.toMatch(/path:\s*PROJECT_ROOT/);
     }
   });

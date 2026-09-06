@@ -37,6 +37,4 @@
 
 ## Dependencies
 
-- `../../../../core/infra/configLoader` — `loadConfig`, `writeConfig`, `getRuleDocsStatus`, `syncRuleDocs`, `createDefaultConfig`
-- `@ogham/cross-platform` — `projectRoot`, `pluginRoot`, `openBrowser`
-- `@ogham/http-kit` — 요청 가드, 토큰
+- `../../../../core/infra/configLoader` — 설정 migration과 저장·규칙 동기화의 정책을 이 core에 일임해 HTTP 세션이 영속 정책을 복제하지 않는다.

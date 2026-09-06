@@ -65,6 +65,7 @@ export async function startSettingsServer(
     signal?: AbortSignal,
   ): Promise<SettleEvent> {
     if (closed) return Promise.resolve({ kind: 'closed' });
+    if (signal?.aborted) return Promise.resolve({ kind: 'pending' });
     return new Promise((resolve) => {
       let done = false;
       const finish = (event: SettleEvent): void => {

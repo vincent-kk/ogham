@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 경로 목록의 동등성은 순서와 무관하고 양쪽의 중복을 거부한다. membership 검사에 쓰는 하나의 집합을 반복 조회·소거에 재사용하며 중복 개수만 읽기 위한 추가 집합은 만들지 않는다.
+
 - `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess` 여섯 action만 지원한다.
 - `prepare`는 merge-base와 committed changed-file blob으로 source hash를 계산하고 변경 roster·FCA 증거·review group을 한 snapshot에서 만든다. 모든 canonical artifact를 먼저 쓴 뒤 `ReviewStateRecord` v2를 마지막에 한 번 atomic 저장한다.
 - `prepare`는 `changeContext` 안의 `<!-- filid:handoff v1 -->` 블록을 절단 전에 추출해 zod 스키마로 검증하고, 각 review brief에 `## FCA Handoff` 섹션으로 그룹별 행을 싣는다. 블록은 canonical evidence가 아니라 검증할 주장이며 상태 레코드에 저장되지 않는다.
@@ -10,6 +12,7 @@
 - project-root finding은 ancestor만으로 교차하지 않고 root owner가 같은 때만 포함한다. verification status에는 같은 path·owner 또는 owner 아래 변경과 교차하는 verification file만 반영하지만 graph certainty와 non-finding diagnostic은 project-wide다.
 - `evidence.md`는 schema 7 frontmatter와 Changed Scope, Candidates, Informational, Out-of-scope Observations, Diagnostics를 atomic하게 기록한다. 범위 밖 finding은 source·rule·severity별 count로만 남기고 finding diagnostic은 중복 기록하지 않는다.
 - prepare는 dirty path를 `clean | documents-only | generated-only | source-dirty`로 관측하되 판정하지 않는다. documents-only와 source-dirty도 artifact를 만들고 최종 fold에서 inconclusive가 된다.
+- 미추적 경로는 파일별로 관측하며 review 산출물 하위만 제외한다. 상위 `.filid` 디렉터리에 있는 일반 미커밋 파일은 dirty evidence에 남긴다.
 - fresh/force는 branch directory의 stale artifact를 지우고 처음부터 만든다. 같은 hash의 prepared state는 resumable이고 같은 hash의 sealed state와 report가 함께 있을 때만 cached다. schema v1은 prepare에서 fresh로 재생성하고, 다른 action에서는 `missing`과 `review-state-schema-mismatch` 진단으로 처리한다.
 - resumable에서 `evidence.md`와 완전한 state가 있으면 선별·청킹·그룹화를 되살리고 누락 artifact를 복구한다. effective effort는 최초 prepare부터 고정하며, 누락 artifact 복구에서도 기존 round 상한과 미완료 검토를 보존한다. evidence가 없으면 범위 산출부터 다시 만든다. `recoverReviewGroups`는 병합 opinion 누락·hash 불일치 시 raw round r1…rK가 모두 있으면 round 1부터 K까지 순차 재검증해 병합 opinion을 재구성한다. 같은 바이트로 복원되면 기존 verify의 reviewSha256 결합을 유지하고, 달라지면 verify invalid 복구가 이를 지운다. raw round가 하나라도 없으면 review·verify validation을 지우고 병합 opinion을 삭제하며 r1 skeleton을 다시 쓴다. stale rN 파일은 이후 round 진행이 덮어쓴다. validate의 직전 round validation 순서 검사는 유지한다. 미완료 review는 다음 round skeleton을, 완료 review는 배정 finding이 없으면 auto-verify를, 있으면 누락 verify brief를 만든다. verify 파일·hash·reviewSha256 결합이 깨지면 verify validation을 지우고 같은 복구를 적용한다. 복구와 state 저장을 끝낸 뒤 artifact를 재관측한다.
 - 파일 role은 generated → deleted source → binary → lockfile → document → verification → source 순서로 결정한다. generated·deleted·binary·lockfile만 skip reason을 가지며 모든 roster 항목은 session에 남는다.
@@ -36,6 +39,8 @@
 - `checkpoint`는 state와 group별 artifact 존재·신뢰를 읽고 handoff를 관측만 한다. `assess`는 dirty 경로, entry stage, base ref와 unpushed commit 수를 관측만 하고 state를 읽거나 쓰지 않는다. 재검증 보고서 frontmatter의 유일한 유효 전체 `head_sha`가 관측한 현재 Git HEAD와 일치하고, 기록된 `verdict`가 `PASS`, `FAIL`, `INCONCLUSIVE` 중 하나일 때만 완료 근거로 사용한다. `cleanup`은 literal `confirm: true` 뒤 해당 branch directory만 지운다.
 
 ## API Contracts
+
+- TypeScript entry point는 handler와 MCP envelope 소비자가 사용하는 `ReviewStateResult`만 노출한다. 내부 opinion·group·state 타입은 외부 계약으로 재노출하지 않는다.
 
 - 모든 action의 projectRoot는 저장소 안의 절대 경로이며 Git toplevel로 정규화한다. branchName은 선택 입력으로, 문자열이면 기존 branch 검증을 적용하고 생략하면 Git 현재 branch를 해석한다. detached HEAD의 빈 branch는 `review-branch-unresolved` error다. directory key는 원래 branch 문자열을 정규화하고 응답 branchName은 원래 문자열을 보존한다.
 - prepare input은 `{ action: "prepare", projectRoot, branchName?, baseRef?, force?, effort?, changeContext? }`이다. 명시 baseRef는 그 ref만 검증하고 실패 시 `review-base-ref-unresolved` error다. 생략하면 remote HEAD → remote candidate → local main·master 순서로 해석하며 전부 없으면 같은 error다. effort는 input → `config.review.effort` → `auto` 순서이고 concurrency는 `config.review.concurrency` → 기본 상수 순서다. 고정 effort는 auto 판정을 우회한다.
@@ -158,10 +163,14 @@
 
 ### AC-review-seal — 신뢰 가능한 fold와 canonical rendering
 
+- 신뢰 검사에 실패한 group의 gap·verifier state·observation은 canonical unresolved evidence에 복사하지 않는다. 해당 group은 artifact trust 진단으로만 판정 보류 원인을 설명한다.
+- fix request의 외부 설명·경로·규칙·branch는 줄바꿈과 Markdown 제어 문자를 escape한 데이터로 렌더링하며 새 제목·링크·FIX 항목을 만들 수 없다.
+
 - current hash와 session이 없으면 seal하지 않고, reviewable unit이 있는데 merged opinion이 하나도 없으면 `review-opinions-missing`으로 indeterminate다. 단, documents-only 또는 source-dirty worktree는 reviewer를 실행하지 않는 경로이므로 누락 group evidence를 포함해 `INCONCLUSIVE`로 봉인한다.
 - 현재 검증 정책·opinion 의미 검증·complete·review hash·verify hash·review/verify 결합 중 하나라도 깨진 group은 trusted input이 아니며 이유가 unresolved evidence에 남는다.
 - pending coverage, evidence gap, verifier-level indeterminate와 severity와 무관한 indeterminate decision은 confirmed finding보다 먼저 `INCONCLUSIVE`를 만든다. 모든 증거가 complete일 때 confirmed가 있으면 `REQUEST_CHANGES`, 없으면 `APPROVED`다.
 - report, optional fix request, PR comment와 session checklist가 같은 fold 결과를 표현한 뒤에만 state가 sealed 되고 verdict가 저장된다.
+- sealed report의 LF/CRLF frontmatter는 같은 parser로 읽으며 동일한 coverage·decision count를 복원한다.
 
 ### AC-review-blockers — 분리된 보류 원인과 해소 안내
 
@@ -189,6 +198,58 @@
 - **Consumers**: `handoff/utils/rebuildReviewGroup.ts`
 - **Direct import**: `allowed`
 - **Reason**: 재구성은 공개 validation 순서를 그대로 재생해야 하므로 이 organ 간 직접 호출을 유지한다.
+
+### `brief` — Explicit review fixture consumers
+
+- **Consumers**: `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildLargeReviewBriefInputs.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildReviewBriefInput.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildVerifyBriefInput.ts`
+- **Direct import**: `allowed`
+- **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
+
+### `group` — Explicit review fixture consumers
+
+- **Consumers**: `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildLargeReviewBriefInputs.ts`
+- **Direct import**: `allowed`
+- **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
+
+### `hash` — Explicit review fixture consumers
+
+- **Consumers**: `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/loadBaselineFoldInput.ts`
+- **Direct import**: `allowed`
+- **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
+
+### `opinion` — Explicit review fixture consumers
+
+- **Consumers**: `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildBlockerRenderInput.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildVerdictReviewFinding.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/loadBaselineFoldInput.ts`
+- **Direct import**: `allowed`
+- **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
+
+### `render` — Explicit review fixture consumers
+
+- **Consumers**: `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildBlockerRenderInput.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildReviewRenderInput.ts`
+- **Direct import**: `allowed`
+- **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
+
+### `rules` — Explicit review fixture consumers
+
+- **Consumers**: `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildLargeReviewBriefInputs.ts`
+- **Direct import**: `allowed`
+- **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
+
+### `state` — Explicit review fixture consumers
+
+- **Consumers**: `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildReviewHandoffFixture.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildReviewOpinion.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildVerifyOpinion.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/loadBaselineFoldInput.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/prepareCandidateOnlyReviewState.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/prepareReviewBlockerFixture.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/prepareReviewStateFixture.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/prepareReviewStateSealFixture.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/readPersistedReviewState.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/readPreparedReviewState.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/sealReviewStateFixtureAndAssert.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/validateAutoReviewStateSealGroup.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/validatePreparedReviewState.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/validateReviewStateSealGroup.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/writeReviewStateFixtureJson.ts`, `**/plugins/filid/src/__tests__/unit/mcp/scope/helpers/createReviewScopeFileFixture.ts`
+- **Direct import**: `allowed`
+- **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
+
+### `verdict` — Explicit review fixture consumers
+
+- **Consumers**: `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/buildBlockerRenderInput.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/createVerdictFoldFixture.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/loadBaselineFoldInput.ts`, `**/plugins/filid/src/__tests__/unit/mcp/reviewState/helpers/readBaselineExpectedSets.ts`
+- **Direct import**: `allowed`
+- **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
+
+## History
+
+- 2026-09-06 — 대형 brief 비용 기준은 동일한 644개 `.ts` 단위와 정본 default·fca·ecmascript 규칙으로 비교한다. 과거 renderer `8ed691301a894de3734391e2dbc4dd60c4f75f78`에 같은 입력을 넣어 얻은 981,364 bytes를 기준으로 고정했다. 서로 다른 규칙 payload를 비교하면 절감률을 증명할 수 없으므로 입력을 일치시키고, 정본 reviewer method와 중복되는 안내를 줄여 15% 절감 조건을 유지한다.
 
 ## Last Updated
 

@@ -18,6 +18,33 @@ type ReviewOpinion = NonNullable<SealGroupEvidence['review']>;
 type ReviewFinding = ReviewOpinion['findings'][number];
 
 describe('foldReviewVerdict', () => {
+  it('excludes rejected artifact contents from canonical unresolved evidence', () => {
+    const input = createVerdictFoldFixture();
+    const group = input.groups[0]!;
+    group.issues = ['review rounds incomplete'];
+    group.review!.gaps = [
+      { path: 'src/a.ts', rule: 'UNTRUSTED', detail: 'untrusted gap' },
+    ];
+    group.verify!.state = 'INDETERMINATE';
+    group.verify!.observations = [
+      { path: 'src/a.ts', detail: 'untrusted observation' },
+    ];
+    const result = foldReviewVerdict(input);
+    expect(result.verdict).toBe('INCONCLUSIVE');
+    expect(result.unresolved).toContainEqual(
+      expect.objectContaining({ rule: 'artifact trust' }),
+    );
+    expect(result.unresolved.map(({ detail }) => detail)).not.toEqual(
+      expect.arrayContaining(['untrusted gap']),
+    );
+    expect(result.unresolved.map(({ detail }) => detail)).not.toEqual(
+      expect.arrayContaining(['untrusted observation']),
+    );
+    expect(result.unresolved).not.toContainEqual(
+      expect.objectContaining({ rule: 'verifier state' }),
+    );
+  });
+
   it('confirms assigned FCA candidates from canonical snapshot evidence', () => {
     const input = createVerdictFoldFixture();
     input.groups[0]!.verify!.decisions = [];

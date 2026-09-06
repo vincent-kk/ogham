@@ -20,7 +20,7 @@ const AT_SIGN_PATTERN = /@/g;
 
 /** ASCII control characters replaced with spaces (built without a control-char regex literal). */
 const CONTROL_CHAR_PATTERN = new RegExp(
-  `[${String.fromCharCode(0)}-${String.fromCharCode(8)}${String.fromCharCode(11)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
+  `[${String.fromCharCode(0)}-${String.fromCharCode(9)}${String.fromCharCode(11)}-${String.fromCharCode(31)}${String.fromCharCode(127)}]`,
   'g',
 );
 

@@ -294,12 +294,13 @@ describe('renderReviewBrief', () => {
     const output = renderReviewBrief(buildReviewBriefInput());
 
     expect(output).toContain('retain chunk ("k/n" or null)');
-    expect(output).toContain('non-empty reason for skipped');
+    expect(output).toContain('skipped needs reason');
     expect(output).toContain('| src/b.ts | M | source | src | 2/3 |');
-    expect(output).toContain('Text must be non-empty');
+    expect(output).toContain('nonblank text');
     expect(output).toContain(
-      'resolution?: {question,evidenceNeeded,nextAction,doneWhen,suggestedOwner,humanReason?}',
+      'gap resolution?: question≤240; evidenceNeeded≤5×300; nextAction/doneWhen≤600',
     );
-    expect(output).toContain('humanReason required for human');
+    expect(output).toContain('suggestedOwner=agent|human|unknown');
+    expect(output).toContain('humanReason≤400 required for human');
   });
 });

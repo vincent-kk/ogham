@@ -45,6 +45,11 @@ describe('project-setup action dispatcher', () => {
       adapterIds: ['ecmascript'],
     });
 
+    expect(CHILD_HANDLERS.init).toHaveBeenCalledWith({
+      path: PROJECT_ROOT,
+      language: 'Korean',
+      adapterIds: ['ecmascript'],
+    });
     expect(result).toEqual({
       projectRoot: PROJECT_ROOT,
       status: TOOL_STATUSES.OK,

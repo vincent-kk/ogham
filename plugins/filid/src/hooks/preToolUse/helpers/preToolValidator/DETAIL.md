@@ -4,6 +4,7 @@
 
 - Write/Edit가 INTENT.md 또는 DETAIL.md를 변경할 때 문서 계약을 검증하고, Delete가 두 보호 문서를 제거하려 하면 deny한다.
 - Write/Edit의 문서 여부는 host filesystem이 해석한 물리 target으로 판정한다. 실제 보호 문서를 가리키는 case alias와 symlink는 동일하게 검증하며, case-sensitive filesystem의 별개 파일은 보호 문서로 추측하지 않는다.
+- canonicalization 예외는 입력 경로 기준 판정으로 복구한다. 읽기 불가능한 parent 때문에 INTENT cap 또는 보호 문서 Delete 검사가 생략되지 않는다.
 - INTENT.md Write는 50줄 cap과 3-tier boundary를, Edit은 최종 투영 가능한 경우 50줄 cap을 검사한다.
 - DETAIL.md Write는 기존 내용이 있을 때 append-only 변경을 거부한다.
 - INTENT.md/DETAIL.md Delete는 content 투영 없이 거부한다. host-canonical parent와 보존된 terminal entry로 판정해 case alias와 보호 문서 symlink 삭제 우회를 막고, 존재하지 않는 대상도 같은 entry 의미로 판정한다.

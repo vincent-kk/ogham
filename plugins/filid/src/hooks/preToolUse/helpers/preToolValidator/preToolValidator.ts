@@ -1,5 +1,3 @@
-import { canonicalizeTargetPathSync } from '@ogham/cross-platform';
-
 import {
   DENY_RETRY_GUIDANCE,
   HOOK_TOOL_NAME,
@@ -8,6 +6,7 @@ import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
 import { isDetailMd } from '../../../shared/utils/isDetailMd.js';
 import { isIntentMd } from '../../../shared/utils/isIntentMd.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
+import { resolveHookTargetPath } from '../../utils/resolveHookTargetPath.js';
 
 import { handleDetailMdWrite } from './utils/handleDetailMdWrite.js';
 import { handleIntentMdEdit } from './utils/handleIntentMdEdit.js';
@@ -41,7 +40,6 @@ export {
  * @param input - Host operation with a cwd accepted by the hook boundary.
  * @param oldContent - Existing physical DETAIL content, when readable.
  * @returns The operation's permission decision and optional warning context.
- * @throws Filesystem canonicalization errors other than a missing target.
  */
 export function validatePreToolUse(
   input: PreToolUseInput,
@@ -53,12 +51,10 @@ export function validatePreToolUse(
   const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
   const documentPath =
     input.tool_name === HOOK_TOOL_NAME.DELETE
-      ? canonicalizeTargetPathSync(safeCwd, filePath, {
-          preserveTerminalEntry: true,
-        })
+      ? resolveHookTargetPath(safeCwd, filePath, true)
       : input.tool_name === HOOK_TOOL_NAME.WRITE ||
           input.tool_name === HOOK_TOOL_NAME.EDIT
-        ? canonicalizeTargetPathSync(safeCwd, filePath)
+        ? resolveHookTargetPath(safeCwd, filePath)
         : filePath;
 
   if (

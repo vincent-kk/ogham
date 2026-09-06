@@ -1,6 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 
-import { REVIEW_CHANGE_CONTEXT_LIMIT } from '../../../../constants/reviewState.js';
+import {
+  REVIEW_CHANGE_CONTEXT_LIMIT,
+  REVIEW_CHANGE_CONTEXT_LOG_LIMIT,
+} from '../../../../constants/reviewState.js';
 import { executeReviewGit } from '../../../../mcp/tools/reviewState/hash/executeReviewGit.js';
 import { readChangeContext } from '../../../../mcp/tools/reviewState/scope/readChangeContext.js';
 import { REVIEW_HANDOFF_SEED_SCHEMA } from '../../../../mcp/tools/reviewState/scope/reviewHandoffSeedSchema.js';
@@ -10,9 +13,12 @@ vi.mock('../../../../mcp/tools/reviewState/hash/executeReviewGit.js', () => ({
 }));
 
 describe('readChangeContext', () => {
-  it('limits generated commit context to 30 non-merge log lines and adds numstat totals', async () => {
+  it('limits generated commit context to the non-merge log budget and adds numstat totals', async () => {
     vi.mocked(executeReviewGit).mockResolvedValue(
-      Array.from({ length: 35 }, (_, i) => `hash${i}\tsubject${i}`).join('\n'),
+      Array.from(
+        { length: REVIEW_CHANGE_CONTEXT_LOG_LIMIT + 5 },
+        (_, i) => `hash${i}\tsubject${i}`,
+      ).join('\n'),
     );
     const result = await readChangeContext({
       projectRoot: '/project',
@@ -27,8 +33,12 @@ describe('readChangeContext', () => {
         },
       ],
     });
-    expect(result.changeContext).toContain('hash29\tsubject29');
-    expect(result.changeContext).not.toContain('hash30\tsubject30');
+    expect(result.changeContext).toContain(
+      `hash${REVIEW_CHANGE_CONTEXT_LOG_LIMIT - 1}\tsubject${REVIEW_CHANGE_CONTEXT_LOG_LIMIT - 1}`,
+    );
+    expect(result.changeContext).not.toContain(
+      `hash${REVIEW_CHANGE_CONTEXT_LOG_LIMIT}\tsubject${REVIEW_CHANGE_CONTEXT_LOG_LIMIT}`,
+    );
     expect(result.changeContext).toContain(
       '1 files changed, 3 insertions(+), 2 deletions(-)',
     );

@@ -40,8 +40,6 @@ interface WritePreparedReviewArtifactsInput extends ReviewEffortMetadata {
   paths: ReviewStatePaths;
   /** Groups awaiting final diff paths and artifact output. */
   groups: readonly ReviewGroup[];
-  /** Prior groups used to identify reviews reopened by an effort change. */
-  previousGroups: readonly ReviewGroup[];
   /** Rendered unit bytes keyed by path and chunk identity. */
   renderedUnits: readonly RenderedReviewUnit[];
   /** Complete changed-file roster with final rule selections. */
@@ -88,22 +86,6 @@ function artifactPath(paths: ReviewStatePaths, relativePath: string): string {
 }
 
 /**
- * Select the reviewer round that prepare must hand back to an actor.
- * @param group Retuned group whose current validation may be incomplete.
- * @param previous Same-identity group before the effort change.
- * @returns The newly required round only when a complete review was reopened.
- */
-function resolvePreparedReviewRound(
-  group: ReviewGroup,
-  previous: ReviewGroup | undefined,
-): number {
-  const review = group.validated.review;
-  if (previous?.validated.review?.complete && review?.complete === false)
-    return review.round + 1;
-  return 1;
-}
-
-/**
  * Materialize prepare artifacts without overwriting preserved resume outputs.
  * @param input Groups, rendered units, rule bodies, scope facts, and write policy.
  * @returns Groups carrying final diff paths and candidate-only validation hashes.
@@ -135,9 +117,6 @@ export function writePreparedReviewArtifacts(
     input.candidates.map((candidate) => [candidate.id, candidate]),
   );
   const rulesById = new Map(input.activeRules.map((rule) => [rule.id, rule]));
-  const previousGroupsById = new Map(
-    input.previousGroups.map((group) => [group.id, group]),
-  );
   const groups = materialized.map((group) => {
     const candidates = group.candidateIds.map((id) => {
       const candidate = candidatesById.get(id);
@@ -173,10 +152,7 @@ export function writePreparedReviewArtifacts(
         : prepared;
     }
 
-    const reviewRound = resolvePreparedReviewRound(
-      group,
-      previousGroupsById.get(group.id),
-    );
+    const reviewRound = 1;
     const briefPath = artifactPath(input.paths, group.briefPath);
     if (
       input.rewriteReviewBriefs ||
@@ -221,12 +197,7 @@ export function writePreparedReviewArtifacts(
         ),
       );
     }
-    const skeletonPath = artifactPath(
-      input.paths,
-      reviewRound === 1
-        ? group.skeletonPath
-        : `opinions/review-${group.id}.r${String(reviewRound)}.json`,
-    );
+    const skeletonPath = artifactPath(input.paths, group.skeletonPath);
     if (
       !input.preserveOpinions ||
       (!group.validated.review && !existsSync(skeletonPath))

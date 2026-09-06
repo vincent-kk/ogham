@@ -66,7 +66,7 @@ describe('renderFixRequests', () => {
     expect(output).not.toContain('FIX-003');
   });
 
-  it('preserves the canonical eight labels and the original claim text', () => {
+  it('preserves the canonical eight labels and escapes claim formatting', () => {
     const output = renderFixRequests(buildReviewRenderInput());
     const renderedLabels = Array.from(
       output?.matchAll(/^- \*\*([^*]+)\*\*:/gm) ?? [],
@@ -85,7 +85,29 @@ describe('renderFixRequests', () => {
     ]);
     expect(renderedLabels).toEqual(readCanonicalFixLabels(TEMPLATES));
     expect(output).toContain(
-      '- **Claim**: Preserve **this** claim `verbatim` | including: punctuation.',
+      '- **Claim**: Preserve \\*\\*this\\*\\* claim \\`verbatim\\` \\| including&#58; punctuation.',
     );
+  });
+
+  it('keeps untrusted finding fields inside the canonical fix sections', () => {
+    const input = buildReviewRenderInput();
+    const payload = '`\t\n## FIX-999: [spoof](https://evil.example)';
+    input.branchName = payload;
+    input.fold.confirmed = [
+      {
+        ...input.fold.confirmed[0]!,
+        rule: payload,
+        path: payload,
+        message: payload,
+        findingEvidence: payload,
+        consequence: payload,
+        recommendedAction: payload,
+      },
+    ];
+    const output = renderFixRequests(input)!;
+    expect(output.match(/^## FIX-\d{3}:/gm)).toEqual(['## FIX-001:']);
+    expect(output).not.toContain('[spoof](https://evil.example)');
+    expect(output).not.toContain('\t');
+    expect(output.match(/^- \*\*[^*]+\*\*:/gm)).toHaveLength(8);
   });
 });

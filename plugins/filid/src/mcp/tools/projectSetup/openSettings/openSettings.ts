@@ -38,6 +38,8 @@ interface ActiveServer extends SettingsServerInstance {
 }
 
 let currentServer: ActiveServer | null = null;
+/** Serializes startup and project replacement for the MCP module singleton. */
+let starting: Promise<void> | null = null;
 
 /**
  * `project_setup` settings action: start (or reuse) the local settings server, open the
@@ -51,26 +53,32 @@ export async function handleOpenSettings(
 ): Promise<OpenSettingsOutput> {
   const root = projectRoot(input.path);
 
-  // A server bound to another project cannot serve this one — replace it.
-  if (currentServer && currentServer.projectRoot !== root)
-    await currentServer.close();
-
-  if (!currentServer) {
-    const handle = await startSettingsServer({
-      settingsHtml: loadSettingsHtml(),
-      loadState: () => buildSettingsState(root),
-      persistSave: (body) => persistSave(root, body),
-      onClose: () => {
-        currentServer = null;
-      },
-    });
-    currentServer = { ...handle, projectRoot: root };
-    // openBrowser no-ops under OGHAM_NO_BROWSER (e2e runs, headless hosts);
-    // the URL still returns so callers can surface it.
-    openBrowser(handle.url);
+  while (starting) await starting;
+  if (!currentServer || currentServer.projectRoot !== root) {
+    starting = (async () => {
+      if (currentServer) await currentServer.close();
+      const handle = await startSettingsServer({
+        settingsHtml: loadSettingsHtml(),
+        loadState: () => buildSettingsState(root),
+        persistSave: (body) => persistSave(root, body),
+        onClose: () => {
+          if (currentServer === active) currentServer = null;
+        },
+      });
+      const active = { ...handle, projectRoot: root };
+      currentServer = active;
+      // openBrowser no-ops under OGHAM_NO_BROWSER (e2e runs, headless hosts);
+      // the URL still returns so callers can surface it.
+      openBrowser(handle.url);
+    })();
+    try {
+      await starting;
+    } finally {
+      starting = null;
+    }
   }
 
-  const server = currentServer;
+  const server = currentServer!;
   // server.url carries a one-time auth token in its query string. Only the
   // browser (opened above) and a manual reopen of a still-pending page need
   // it, so terminal states return the token-less base URL and never echo the

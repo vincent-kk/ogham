@@ -4,6 +4,7 @@ import { renderMarkdownTable } from '../scope/utils/renderMarkdownTable.js';
 
 import type { RenderVerifyBriefInput } from './reviewBriefTypes.js';
 import { renderBriefDiffs } from './utils/renderBriefDiffs.js';
+import { renderReviewUnitRow } from './utils/renderReviewUnitRow.js';
 import { renderVerifyOpinionExample } from './utils/renderVerifyOpinionExample.js';
 
 /** Verifier method section that begins the materialized assignment instructions. */
@@ -35,16 +36,7 @@ export function renderVerifyBrief(input: RenderVerifyBriefInput): string {
       const file = filesByPath.get(unit.path);
       if (!file)
         throw new Error(`Review unit is absent from roster: ${unit.path}`);
-      return [
-        escapeMarkdownCell(unit.path),
-        unit.change,
-        file.role,
-        escapeMarkdownCell(file.owner ?? ''),
-        unit.chunk ? `${unit.chunk.index}/${unit.chunk.total}` : '',
-        String(unit.churn),
-        escapeMarkdownCell(unit.diffPath),
-        unit.hunks.map((hunk) => `${hunk.newStart}-${hunk.newEnd}`).join(', '),
-      ];
+      return renderReviewUnitRow(unit, file);
     }),
   );
   const decisions = renderMarkdownTable(

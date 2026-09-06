@@ -4,7 +4,10 @@ import {
   resolveContainedPath,
 } from '@ogham/cross-platform';
 
-import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
+import {
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_FILE_NAMES,
+} from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 
 import type { LoadedReviewRule } from './reviewRuleTypes.js';
@@ -20,8 +23,7 @@ export function loadRepositoryRules(projectRoot: string): LoadedReviewRule[] {
   try {
     configPath = resolveContainedPath(
       projectRoot,
-      '.filid',
-      'review-rules.json',
+      REVIEW_STATE_FILE_NAMES.REPOSITORY_RULES,
     );
     assertNoSymlinkDescendantsSync(projectRoot, configPath);
   } catch (error) {

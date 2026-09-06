@@ -5,7 +5,7 @@ import {
   type CodexMoveProvenance,
   type NormalizeCodexToolUsesResult,
   type NormalizedCodexToolUse,
-  canonicalizeTargetPathSync,
+  logHookFailure,
 } from '@ogham/cross-platform';
 
 import {
@@ -25,6 +25,7 @@ import {
 } from './helpers/preToolValidator/preToolValidator.js';
 import { guardStructure } from './helpers/structureGuard/structureGuard.js';
 import { mergeResults } from './utils/mergeResults.js';
+import { resolveHookTargetPath } from './utils/resolveHookTargetPath.js';
 
 /** Codex Move provenance with Filid's local validation state. */
 type FilidMoveProvenance = CodexMoveProvenance & {
@@ -77,7 +78,8 @@ export async function handlePreToolUse(
   let visit: HookOutput;
   try {
     visit = processVisit(input);
-  } catch {
+  } catch (error) {
+    logHookFailure('filid', 'pre-tool-use-visit', error);
     visit = { continue: true };
   }
   if (!mutation) return mergeResults([visit]);
@@ -94,7 +96,7 @@ export async function handlePreToolUse(
     return mergeResults([visit, denyStalePatchTarget(filePath)]);
   let oldContent: string | undefined;
   if (effectiveInput.tool_name !== HOOK_TOOL_NAME.DELETE) {
-    const documentPath = canonicalizeTargetPathSync(safeCwd, filePath);
+    const documentPath = resolveHookTargetPath(safeCwd, filePath);
     if (isDetailMd(documentPath))
       try {
         oldContent = readFileSync(documentPath, 'utf-8');
@@ -131,10 +133,7 @@ function prepareMoveDestination(
         tool_input: { ...input.tool_input, content: projection.content },
       },
     };
-  const destinationPath = canonicalizeTargetPathSync(
-    safeCwd,
-    move.destinationPath,
-  );
+  const destinationPath = resolveHookTargetPath(safeCwd, move.destinationPath);
   if (isIntentMd(destinationPath) || isDetailMd(destinationPath))
     return {
       ok: false,
@@ -173,10 +172,10 @@ function wasTouchedEarlier(
   safeCwd: string,
 ): boolean {
   if (!input.codexPriorTouchedPaths?.length) return false;
-  const canonicalTarget = canonicalizeTargetPathSync(safeCwd, targetPath);
+  const canonicalTarget = resolveHookTargetPath(safeCwd, targetPath);
   return input.codexPriorTouchedPaths.some(
     (priorPath) =>
-      canonicalizeTargetPathSync(safeCwd, priorPath) === canonicalTarget,
+      resolveHookTargetPath(safeCwd, priorPath) === canonicalTarget,
   );
 }
 

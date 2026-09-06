@@ -9,7 +9,8 @@
 
 ## API Contracts
 
-- Input: `{ path?: string, language?: string, adapterIds?: string[] }`.
+- Input: `{ path: string, language?: string, adapterIds?: string[] }`.
+- The parent `project_setup` init action owns optional-path resolution; this child requires the resolved root.
 - Output uses the common envelope; summary reports whether the config was created and its absolute path.
 - Existing configuration is never overwritten.
 

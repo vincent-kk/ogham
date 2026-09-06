@@ -4,12 +4,6 @@
 
 `fractal_inspect`의 `scan` action에서 등록 adapter로 하나의 project snapshot을 만들고 기본적으로 작은 FCA tree summary를 공통 envelope로 반환한다.
 
-## Structure
-
-- `fractalScan.ts` — snapshot과 summary/path/full projection
-- `utils/` — snapshot을 summary/path/full DTO로 투영하고 이름으로 좁히는 flat organ
-- `index.ts` — named handler export
-
 ## Conventions
 
 - default detail은 `summary`, full payload는 envelope budget에 맡긴다.

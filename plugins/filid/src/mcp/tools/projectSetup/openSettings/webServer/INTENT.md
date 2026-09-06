@@ -36,5 +36,4 @@
 
 ## Dependencies
 
-- `node:http` · `@ogham/http-kit` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
-- `../../../../core/infra/configLoader` — 저장 core (`writeConfig`, `syncRuleDocs`)
+- 저장은 주입된 `persistSave` 콜백에 일임한다. HTTP lifecycle이 configLoader 정책을 직접 알지 않게 유지하기 위한 경계다.

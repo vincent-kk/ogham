@@ -18,6 +18,16 @@ const EMPTY_MODEL = {
 } as const;
 
 describe('renderEvidenceMarkdown', () => {
+  it('uses a longer code delimiter when identifiers contain backticks', () => {
+    const output = renderEvidenceMarkdown({
+      ...EMPTY_MODEL,
+      diagnostics: [{ code: 'a`b', message: 'diagnostic', path: '`c``d`' }],
+    });
+    expect(output).toContain('`` a`b ``');
+    expect(output).toContain('``` `c``d` ```');
+    expect(output).not.toContain('a\\`b');
+  });
+
   it('renders the eight canonical frontmatter keys', () => {
     const output = renderEvidenceMarkdown(EMPTY_MODEL);
     const frontmatter = output.split('---')[1]?.trim().split('\n');

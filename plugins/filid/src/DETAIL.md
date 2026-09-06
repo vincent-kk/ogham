@@ -7,6 +7,7 @@
 - `mcp`와 `hooks`는 host 경계이며 정책 판단을 하지 않는다.
 - 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다.
 - 소스 루트 named entry point는 FCA 경계 식별용으로 `VERSION`만 열거하고, npm manifest에는 library export를 선언하지 않는다.
+- 통합 테스트의 transport 헬퍼는 연결할 SDK server를 검증 파일에서 인자로 받는다. 헬퍼가 MCP server 구현을 import하면 src에서 server로 역방향 의존이 생기므로 구체적인 server 생성은 검증 파일이 소유한다.
 - `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로 고치지 않는다.
 - 공용 glob 변환은 고정 치환 정규식을 모듈 상수로 재사용하고, 입력별 결과 정규식은 호출마다 생성한다. 치환 순서와 glob 매칭 의미는 유지한다.
 

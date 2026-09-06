@@ -4,11 +4,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   PROJECT_SETUP_ACTIONS,
   RULE_DOC_ACTIONS,
-} from '../../../constants/mcpContracts.js';
-import { TOOL_STATUSES } from '../../../constants/toolEnvelope.js';
-import { initProject } from '../../tools/projectSetup/handlers/initProject.js';
-import { openSettingsSession } from '../../tools/projectSetup/handlers/openSettingsSession.js';
-import { syncRuleDocs } from '../../tools/projectSetup/handlers/syncRuleDocs.js';
+} from '../../../../constants/mcpContracts.js';
+import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { initProject } from '../handlers/initProject.js';
+import { openSettingsSession } from '../handlers/openSettingsSession.js';
+import { syncRuleDocs } from '../handlers/syncRuleDocs.js';
 
 const RAW_TOOL_HANDLERS = vi.hoisted(() => ({
   handleOpenSettings: vi.fn(),
@@ -16,13 +16,13 @@ const RAW_TOOL_HANDLERS = vi.hoisted(() => ({
   handleRuleDocsSync: vi.fn(),
 }));
 
-vi.mock('../../tools/projectSetup/openSettings/index.js', () => ({
+vi.mock('../openSettings/index.js', () => ({
   handleOpenSettings: RAW_TOOL_HANDLERS.handleOpenSettings,
 }));
-vi.mock('../../tools/projectSetup/projectInit/index.js', () => ({
+vi.mock('../projectInit/index.js', () => ({
   handleProjectInit: RAW_TOOL_HANDLERS.handleProjectInit,
 }));
-vi.mock('../../tools/projectSetup/ruleDocsSync/index.js', () => ({
+vi.mock('../ruleDocsSync/index.js', () => ({
   handleRuleDocsSync: RAW_TOOL_HANDLERS.handleRuleDocsSync,
 }));
 
@@ -280,7 +280,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('legacy MCP tool payload adapters', () => {
+describe('project_setup payload adapters', () => {
   it('summarizes project initialization at the canonical root', () => {
     RAW_TOOL_HANDLERS.handleProjectInit.mockReturnValue(PROJECT_INIT_OUTPUT);
 

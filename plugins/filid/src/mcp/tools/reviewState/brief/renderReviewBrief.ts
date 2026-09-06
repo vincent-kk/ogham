@@ -1,29 +1,11 @@
 import { escapeMarkdownCell } from '../scope/utils/escapeMarkdownCell.js';
 import { renderMarkdownTable } from '../scope/utils/renderMarkdownTable.js';
-import type { ReviewHunk, ReviewUnit } from '../state/reviewGroupTypes.js';
 
 import type { RenderReviewBriefInput } from './reviewBriefTypes.js';
 import { renderBriefDiffs } from './utils/renderBriefDiffs.js';
 import { renderChangeContext } from './utils/renderChangeContext.js';
 import { renderHandoffSection } from './utils/renderHandoffSection.js';
-
-/**
- * Render a chunk identity for a human-facing Markdown table.
- * @param chunk Optional one-based chunk identity.
- * @returns Fraction text or an empty unchunked marker.
- */
-function renderChunk(chunk: ReviewUnit['chunk']): string {
-  return chunk ? `${chunk.index}/${chunk.total}` : '';
-}
-
-/**
- * Render one unit's ordered new-file ranges without inventing context.
- * @param hunks Unit hunk ranges in diff order.
- * @returns Comma-separated inclusive ranges.
- */
-function renderNewRanges(hunks: readonly ReviewHunk[]): string {
-  return hunks.map((hunk) => `${hunk.newStart}-${hunk.newEnd}`).join(', ');
-}
+import { renderReviewUnitRow } from './utils/renderReviewUnitRow.js';
 
 /**
  * Render one reviewer brief while keeping the full roster in the shared checklist.
@@ -51,16 +33,7 @@ export function renderReviewBrief(
       const file = filesByPath.get(unit.path);
       if (!file)
         throw new Error(`Review unit is absent from roster: ${unit.path}`);
-      return [
-        escapeMarkdownCell(unit.path),
-        unit.change,
-        file.role,
-        escapeMarkdownCell(file.owner ?? ''),
-        renderChunk(unit.chunk),
-        String(unit.churn),
-        escapeMarkdownCell(unit.diffPath),
-        renderNewRanges(unit.hunks),
-      ];
+      return renderReviewUnitRow(unit, file);
     }),
   );
   const priorGroups = input.group.dependsOn;
@@ -70,7 +43,7 @@ export function renderReviewBrief(
   const groupPaths = new Set(input.group.units.map(({ path }) => path));
   const otherFiles = input.files.filter(({ path }) => !groupPaths.has(path));
   const rosterSummary = otherFiles.length
-    ? `${otherFiles.length} other changed files. Search ../session.md (Review Checklist) for specific callers/consumers only; never read the full roster.`
+    ? `${otherFiles.length} other changed files: ../session.md (Review Checklist). Search callers/consumers only; never read the full roster.`
     : 'none';
   const candidatesTable = renderMarkdownTable(
     [
@@ -162,12 +135,11 @@ export function renderReviewBrief(
     '',
     '## Output Contract',
     '',
-    'Use the prewritten JSON skeleton at `output`; keep identity, cover each unit once, no extra keys; JSON only.',
-    '- files: result=reviewed|skipped (non-empty reason for skipped); retain chunk ("k/n" or null).',
-    '- state=COMPLETE|INDETERMINATE; gaps need non-empty path/rule/detail.',
-    '- gap resolution?: {question,evidenceNeeded,nextAction,doneWhen,suggestedOwner,humanReason?}; caps 240/5x300/600/600/400; owner=agent|human|unknown; humanReason required for human; advice only.',
-    `- findings: [{id:R${input.group.id}-NNN,severity:error|warning,category:bug|security|performance|maintainability|test|documentation|contract|structure|verification,path,existingCode,lines,rule,message,evidence,consequence,recommendedAction}]; Text must be non-empty; path assigned; lines from existingCode or "unknown".`,
-    '- nonblank checked required for COMPLETE; riskPlan:string|null per Method; [] for no findings/gaps.',
+    'Fill the prewritten JSON skeleton at `output`; preserve identity/keys; one result per unit.',
+    '- files: result=reviewed|skipped; skipped needs reason; retain chunk ("k/n" or null).',
+    '- gaps: [] or nonblank path/rule/detail.',
+    '- gap resolution?: question≤240; evidenceNeeded≤5×300; nextAction/doneWhen≤600; suggestedOwner=agent|human|unknown; humanReason≤400 required for human. Advice only.',
+    `- findings: [{id:R${input.group.id}-NNN,severity:error|warning,category:bug|security|performance|maintainability|test|documentation|contract|structure|verification,path,existingCode,lines,rule,message,evidence,consequence,recommendedAction}]; nonblank text; assigned path; lines=range|unknown.`,
     '',
   ].join('\n');
 }

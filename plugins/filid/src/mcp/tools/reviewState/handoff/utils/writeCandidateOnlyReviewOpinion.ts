@@ -3,7 +3,11 @@ import {
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
-import { REVIEW_OPINION_SCHEMA_VERSION } from '../../../../../constants/reviewState.js';
+import {
+  REVIEW_OPINION_SCHEMA_VERSION,
+  REVIEW_STATE_JSON_INDENT,
+  REVIEW_STATE_JSON_TRAILING_NEWLINE,
+} from '../../../../../constants/reviewState.js';
 import { computeReviewArtifactHash } from '../../hash/computeReviewArtifactHash.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
@@ -40,8 +44,8 @@ export function writeCandidateOnlyReviewOpinion(
       riskPlan: null,
     },
     null,
-    2,
-  )}\n`;
+    REVIEW_STATE_JSON_INDENT,
+  )}${REVIEW_STATE_JSON_TRAILING_NEWLINE}`;
   const opinionPath = resolveReviewArtifactPath(paths, group.opinionPath);
   let persistedOpinion = readUtf8FileIfExistsSync(opinionPath);
   if (!preserveOpinion || persistedOpinion === null) {

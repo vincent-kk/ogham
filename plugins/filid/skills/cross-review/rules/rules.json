@@ -36,7 +36,7 @@
     },
     {
       "id": "shell",
-      "match": ["**/*.sh", "**/*.bash", "**/*.zsh", "**/*.mjs"],
+      "match": ["**/*.sh", "**/*.bash", "**/*.zsh"],
       "file": "lang/shell.md"
     }
   ]

@@ -23,7 +23,7 @@ import { readPreparedReviewState } from './reviewState/helpers/readPreparedRevie
 import { readReviewStateFixtureJson } from './reviewState/helpers/readReviewStateFixtureJson.js';
 import { resolveReviewArtifactFromDirectory } from './reviewState/helpers/resolveReviewArtifactFromDirectory.js';
 import { writeReviewActorMethods } from './reviewState/helpers/writeReviewActorMethods.js';
-import { writeReviewRulePluginFile } from './reviewState/helpers/writeReviewRulePluginFile.js';
+import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewStateFixtureFile.js';
 
 /** Temporary repository exercised by the prepare contract tests. */
 let projectRoot: string;
@@ -69,7 +69,7 @@ beforeEach(() => {
   fixturePluginRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-plugin-'));
   process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
   writeReviewActorMethods(fixturePluginRoot);
-  writeReviewRulePluginFile(
+  writeReviewStateFixtureFile(
     fixturePluginRoot,
     'skills/cross-review/rules/rules.json',
     `${JSON.stringify({
@@ -84,12 +84,12 @@ beforeEach(() => {
       ],
     })}\n`,
   );
-  writeReviewRulePluginFile(
+  writeReviewStateFixtureFile(
     fixturePluginRoot,
     'skills/cross-review/rules/default.md',
     '# Default review rule\n',
   );
-  writeReviewRulePluginFile(
+  writeReviewStateFixtureFile(
     fixturePluginRoot,
     'skills/cross-review/rules/lang/ecmascript.md',
     '# ECMAScript review rule\n',

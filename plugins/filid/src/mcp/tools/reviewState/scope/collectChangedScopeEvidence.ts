@@ -107,10 +107,7 @@ export async function collectChangedScopeEvidence(
   const reviewPrefix = `${REVIEW_STATE_DIRECTORY_NAMES.FILID}/${REVIEW_STATE_DIRECTORY_NAMES.REVIEW}`;
   const dirtyPaths = parseGitStatusPaths(statusOutput)
     .filter(
-      (path) =>
-        !`${reviewPrefix}/`.startsWith(
-          path.endsWith('/') ? path : `${path}/`,
-        ) && !path.startsWith(`${reviewPrefix}/`),
+      (path) => path !== reviewPrefix && !path.startsWith(`${reviewPrefix}/`),
     )
     .sort();
   const worktree = classifyWorktreePaths(dirtyPaths, input.generatedPaths);

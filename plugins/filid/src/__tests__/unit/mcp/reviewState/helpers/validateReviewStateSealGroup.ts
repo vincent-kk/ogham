@@ -8,6 +8,7 @@ import {
   REVIEW_VALIDATE_KINDS,
 } from '../../../../../constants/reviewState.js';
 import { handleReviewState } from '../../../../../mcp/tools/reviewState/index.js';
+import { resolveReviewStatePaths } from '../../../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 import type { ReviewStateRecord } from '../../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
 import { buildVerifyOpinion } from './buildVerifyOpinion.js';
@@ -49,16 +50,12 @@ export async function validateReviewStateSealGroup(
 ): Promise<ReviewStateRecord> {
   const group = input.state.groups[0];
   if (!group) throw new Error('seal fixture did not create a review group');
-  const reviewDirectory = resolveContainedPath(
+  const { reviewDirectory } = resolveReviewStatePaths(
     input.fixture.projectRoot,
-    '.filid/review',
-    input.state.normalizedBranch,
+    input.fixture.branchName,
   );
   writeFileAtomicallySync(
-    resolveContainedPath(
-      reviewDirectory,
-      `opinions/review-${group.id}.r1.json`,
-    ),
+    resolveContainedPath(reviewDirectory, group.skeletonPath),
     `${JSON.stringify(input.opinion)}\n`,
   );
   const review = await handleReviewState({

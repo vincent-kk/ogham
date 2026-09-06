@@ -1,4 +1,5 @@
 import type { ReviewRenderInput } from './reviewRenderTypes.js';
+import { escapeReviewBlockerText } from './utils/escapeReviewBlockerText.js';
 
 /**
  * Render canonical fix requests for confirmed findings only.
@@ -11,20 +12,20 @@ export function renderFixRequests(input: ReviewRenderInput): string | null {
   const requests = input.fold.confirmed.map((finding, index) => {
     const fixId = `FIX-${String(index + 1).padStart(3, '0')}`;
     return [
-      `## ${fixId}: ${finding.rule} at ${finding.path}`,
+      `## ${fixId}: ${escapeReviewBlockerText(finding.rule)} at ${escapeReviewBlockerText(finding.path)}`,
       '',
       `- **Severity**: ${finding.severity}`,
       `- **Category**: ${finding.category}`,
-      `- **Path**: \`${finding.path}\``,
-      `- **Rule**: ${finding.rule}`,
-      `- **Claim**: ${finding.message}`,
-      `- **Evidence**: ${finding.findingEvidence ?? finding.decisionEvidence}`,
-      `- **Consequence**: ${finding.consequence ?? finding.decisionReason}`,
-      `- **Recommended Action**: ${finding.recommendedAction ?? `Resolve the confirmed ${finding.rule} violation at ${finding.path}.`}`,
+      `- **Path**: ${escapeReviewBlockerText(finding.path)}`,
+      `- **Rule**: ${escapeReviewBlockerText(finding.rule)}`,
+      `- **Claim**: ${escapeReviewBlockerText(finding.message)}`,
+      `- **Evidence**: ${escapeReviewBlockerText(finding.findingEvidence ?? finding.decisionEvidence)}`,
+      `- **Consequence**: ${escapeReviewBlockerText(finding.consequence ?? finding.decisionReason)}`,
+      `- **Recommended Action**: ${escapeReviewBlockerText(finding.recommendedAction ?? `Resolve the confirmed ${finding.rule} violation at ${finding.path}.`)}`,
     ].join('\n');
   });
   return [
-    `# Fix Requests — ${input.branchName}`,
+    `# Fix Requests — ${escapeReviewBlockerText(input.branchName)}`,
     '',
     ...requests.flatMap((request) => [request, '']),
   ].join('\n');

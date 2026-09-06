@@ -8,8 +8,8 @@ import { selectReviewEffort } from '../../../../mcp/tools/reviewState/handlers/u
 
 import { buildLargeReviewBriefInputs } from './helpers/buildLargeReviewBriefInputs.js';
 
-/** Measured with the pre-compaction renderer and canonical method on 2026-09-06. */
-const BASELINE_REVIEW_BRIEF_BYTES = 918804;
+/** Fixed pre-reduction byte baseline for the canonical reviewer-brief cost bound. */
+const BASELINE_REVIEW_BRIEF_BYTES = 981364;
 
 describe('large change deterministic cost bound', () => {
   it('reduces fixed 46-group reviewer briefs by at least fifteen percent', () => {

@@ -5,24 +5,14 @@ import type {
   ReviewVerdict,
 } from '../../verdict/reviewVerdictTypes.js';
 
-/** Canonical LF-delimited frontmatter at the start of a sealed report. */
-const SEALED_FRONTMATTER_PATTERN = /^---\n([\s\S]*?)\n---\n/u;
+import { parseSealedReviewFrontmatter } from './parseSealedReviewFrontmatter.js';
 
-/** Persisted total file count in canonical report metadata. */
-const FILES_TOTAL_PATTERN = /^files_total: (\d+)$/mu;
-
-/** Persisted reviewed file count in canonical report metadata. */
-const FILES_REVIEWED_PATTERN = /^files_reviewed: (\d+)$/mu;
-
-/** Persisted skipped file count in canonical report metadata. */
-const FILES_SKIPPED_PATTERN = /^files_skipped: (\d+)$/mu;
-
-/** Verdict scalar compared with the sealed state before trusting report counts. */
-const SEALED_VERDICT_PATTERN = /^verdict: (.+)$/mu;
+/** Unsigned integer scalar used by sealed file counts. */
+const COUNT_PATTERN = /^\d+$/u;
 
 /** Verification table bounded by the canonical report section headings. */
 const VERIFICATION_LOG_PATTERN =
-  /\n## Verification Log\n\n([\s\S]*?)\n\n## Confirmed Findings\n/u;
+  /\r?\n## Verification Log\r?\n\r?\n([\s\S]*?)\r?\n\r?\n## Confirmed Findings\r?\n/u;
 
 /** Decision column of canonical verification rows; consumed with matchAll. */
 const VERIFICATION_DECISION_PATTERN =
@@ -40,18 +30,20 @@ export function readSealedReviewSummary(
   verdict: ReviewVerdict,
 ): ReviewSealSummary | null {
   const report = readUtf8FileIfExistsSync(reportPath);
-  const frontmatter = report?.match(SEALED_FRONTMATTER_PATTERN)?.[1];
+  const frontmatter = report ? parseSealedReviewFrontmatter(report) : null;
   if (!report || !frontmatter) return null;
 
-  const readCount = (pattern: RegExp): number | null => {
-    const match = frontmatter.match(pattern);
-    return match ? Number.parseInt(match[1]!, 10) : null;
+  const readCount = (key: string): number | null => {
+    const value = frontmatter.get(key);
+    return value !== undefined && COUNT_PATTERN.test(value)
+      ? Number.parseInt(value, 10)
+      : null;
   };
-  const filesTotal = readCount(FILES_TOTAL_PATTERN);
-  const filesReviewed = readCount(FILES_REVIEWED_PATTERN);
-  const filesSkipped = readCount(FILES_SKIPPED_PATTERN);
+  const filesTotal = readCount('files_total');
+  const filesReviewed = readCount('files_reviewed');
+  const filesSkipped = readCount('files_skipped');
   if (
-    frontmatter.match(SEALED_VERDICT_PATTERN)?.[1] !== verdict ||
+    frontmatter.get('verdict') !== verdict ||
     filesTotal === null ||
     filesReviewed === null ||
     filesSkipped === null

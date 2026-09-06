@@ -1,3 +1,4 @@
+import { ANALYSIS_CERTAINTIES } from '../../../../../constants/analysisCertainties.js';
 import type { FractalNode } from '../../../../../types/fractal.js';
 
 /**
@@ -7,7 +8,13 @@ import type { FractalNode } from '../../../../../types/fractal.js';
  * inspected — which keeps "nothing exported" distinct from "never looked".
  */
 export function collectExportedNames(node: FractalNode): string[] | undefined {
-  if (!node.entryPointSurfaces) return undefined;
+  if (
+    !node.entryPointSurfaces?.length ||
+    node.entryPointSurfaces.some(
+      (surface) => surface.certainty !== ANALYSIS_CERTAINTIES.EXACT,
+    )
+  )
+    return undefined;
   return [
     ...new Set(
       node.entryPointSurfaces.flatMap((surface) => surface.exportedNames),

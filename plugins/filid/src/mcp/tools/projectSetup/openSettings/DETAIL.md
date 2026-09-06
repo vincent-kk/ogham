@@ -3,6 +3,7 @@
 ## Requirements
 
 - Start or reuse a token-protected loopback settings server for one project.
+- Concurrent calls share the in-flight startup. A different project waits for startup and replacement; an older server's close callback cannot clear its successor.
 - Load config v2, or the in-memory v1 migration result with diagnostics, into the page state.
 - Validate and persist only config v2 save bodies through configLoader.
 - Preserve managed rule-document selection and resynchronization behavior.
@@ -11,6 +12,7 @@
 ## API Contracts
 
 - Input: `{ path?: string, waitSeconds?: number }`.
+- Entry point exposes the handler, `OpenSettingsOutput`, and its `SaveSummary` component type so the dispatcher can describe the returned save result. Server startup inputs and page payload types remain internal.
 - Output uses the common envelope; summary preserves saved/closed/pending, URL, message and optional save summary.
 - `SettingsPageState` includes project root, config existence, config v2, config diagnostics, and rule-document status.
 - `SaveBody.config` is strict config v2; unknown or legacy keys are rejected.
@@ -27,6 +29,7 @@
 
 - Missing or incorrect session tokens are rejected.
 - Wait timeout returns a reusable pending URL.
+- Overlapping calls for one project open one browser tab and use the same server. Failed startup releases the in-flight slot for retry.
 
 ## History
 

@@ -3,19 +3,8 @@ import type { ReviewEvidenceModel } from '../state/reviewStateTypes.js';
 
 import { summarizeOutOfScopeViolations } from './summarizeOutOfScopeViolations.js';
 import { escapeMarkdownCell } from './utils/escapeMarkdownCell.js';
+import { renderMarkdownCodeCell } from './utils/renderMarkdownCodeCell.js';
 import { renderMarkdownTable } from './utils/renderMarkdownTable.js';
-
-/** Backticks escaped inside evidence table code spans. */
-const BACKTICK_PATTERN = /`/g;
-
-/**
- * Wrap an evidence value in an escaped Markdown table code span.
- * @param value Raw path, rule, or diagnostic identifier to display as code.
- * @returns One inline code span whose table delimiters and backticks are escaped.
- */
-function codeCell(value: string): string {
-  return `\`${escapeMarkdownCell(value).replace(BACKTICK_PATTERN, '\\`')}\``;
-}
 
 /**
  * Render one canonical evidence.md document from deterministic scope facts.
@@ -26,10 +15,10 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
   const changedScope = renderMarkdownTable(
     ['Path', 'Change', 'Role', 'Owner', 'Churn'],
     model.files.map((file) => [
-      codeCell(file.path),
+      renderMarkdownCodeCell(file.path),
       file.change,
       file.role,
-      file.owner ? codeCell(file.owner) : '—',
+      file.owner ? renderMarkdownCodeCell(file.owner) : '—',
       `+${file.insertions}/-${file.deletions}`,
     ]),
   );
@@ -39,8 +28,8 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
       candidate.id,
       candidate.category,
       candidate.severity,
-      codeCell(candidate.path),
-      codeCell(candidate.rule),
+      renderMarkdownCodeCell(candidate.path),
+      renderMarkdownCodeCell(candidate.rule),
       escapeMarkdownCell(candidate.message),
     ]),
   );
@@ -49,8 +38,8 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
     model.informational.map((row) => [
       row.category,
       row.severity,
-      codeCell(row.path),
-      codeCell(row.rule),
+      renderMarkdownCodeCell(row.path),
+      renderMarkdownCodeCell(row.rule),
       escapeMarkdownCell(row.message),
     ]),
     true,
@@ -59,7 +48,7 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
     ['Source', 'Rule', 'Severity', 'Count'],
     summarizeOutOfScopeViolations(model.outOfScope).map((row) => [
       row.source,
-      codeCell(row.rule),
+      renderMarkdownCodeCell(row.rule),
       row.severity,
       String(row.count),
     ]),
@@ -71,7 +60,7 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
       : model.diagnostics
           .map(
             (diagnostic) =>
-              `- ${codeCell(diagnostic.code)} — ${escapeMarkdownCell(diagnostic.message)}${diagnostic.path ? ` (${codeCell(diagnostic.path)})` : ''}`,
+              `- ${renderMarkdownCodeCell(diagnostic.code)} — ${escapeMarkdownCell(diagnostic.message)}${diagnostic.path ? ` (${renderMarkdownCodeCell(diagnostic.path)})` : ''}`,
           )
           .join('\n');
   return [

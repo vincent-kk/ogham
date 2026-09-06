@@ -1,16 +1,10 @@
 import { mkdtempSync } from 'node:fs';
 
-import {
-  ensureDirectorySync,
-  portableDirname,
-  portableJoin,
-  resolveContainedPath,
-  spawnCliSync,
-  tmp,
-  writeFileAtomicallySync,
-} from '@ogham/cross-platform';
+import { portableJoin, tmp } from '@ogham/cross-platform';
 
 import { createReviewRulePluginRoot } from './createReviewRulePluginRoot.js';
+import { runReviewStateFixtureGit } from './runReviewStateFixtureGit.js';
+import { writeReviewStateFixtureFile } from './writeReviewStateFixtureFile.js';
 
 /** Complete temporary-repository identity used by seal integration tests. */
 export interface ReviewStateSealFixture {
@@ -35,27 +29,29 @@ export function createReviewStateSealFixture(): ReviewStateSealFixture {
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
   const projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-seal-'));
   const branchName = 'feature/seal-v7';
-  const runGit = (args: readonly string[]): void => {
-    const result = spawnCliSync('git', args, { cwd: projectRoot });
-    if (result.code !== 0 || result.spawnError)
-      throw new Error(result.stderr || result.spawnError?.message);
-  };
-  const writeProjectFile = (relativePath: string, content: string): void => {
-    const path = resolveContainedPath(projectRoot, relativePath);
-    ensureDirectorySync(portableDirname(path));
-    writeFileAtomicallySync(path, content);
-  };
-  runGit(['init', '-b', 'main']);
-  runGit(['config', 'user.email', 'filid@example.test']);
-  runGit(['config', 'user.name', 'Filid Test']);
-  writeProjectFile('src/value.ts', 'export const value = 1;\n');
-  writeProjectFile('yarn.lock', 'base-lock\n');
-  runGit(['add', '--all']);
-  runGit(['commit', '-m', 'base']);
-  runGit(['checkout', '-b', branchName]);
-  writeProjectFile('src/value.ts', 'export const value = 2;\n');
-  writeProjectFile('yarn.lock', 'feature-lock\n');
-  runGit(['add', '--all']);
-  runGit(['commit', '-m', 'feature']);
+  runReviewStateFixtureGit(projectRoot, ['init', '-b', 'main']);
+  runReviewStateFixtureGit(projectRoot, [
+    'config',
+    'user.email',
+    'filid@example.test',
+  ]);
+  runReviewStateFixtureGit(projectRoot, ['config', 'user.name', 'Filid Test']);
+  writeReviewStateFixtureFile(
+    projectRoot,
+    'src/value.ts',
+    'export const value = 1;\n',
+  );
+  writeReviewStateFixtureFile(projectRoot, 'yarn.lock', 'base-lock\n');
+  runReviewStateFixtureGit(projectRoot, ['add', '--all']);
+  runReviewStateFixtureGit(projectRoot, ['commit', '-m', 'base']);
+  runReviewStateFixtureGit(projectRoot, ['checkout', '-b', branchName]);
+  writeReviewStateFixtureFile(
+    projectRoot,
+    'src/value.ts',
+    'export const value = 2;\n',
+  );
+  writeReviewStateFixtureFile(projectRoot, 'yarn.lock', 'feature-lock\n');
+  runReviewStateFixtureGit(projectRoot, ['add', '--all']);
+  runReviewStateFixtureGit(projectRoot, ['commit', '-m', 'feature']);
   return { projectRoot, pluginRoot, branchName, originalPluginRoot };
 }

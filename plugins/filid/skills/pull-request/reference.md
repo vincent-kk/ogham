@@ -181,7 +181,7 @@ Counts: 1 code-change, 0 config-decision, 1 indeterminate, 0 needs-rework, 0 unr
 </details>
 
 <!-- filid:handoff v1
-{"schema":1,"snapshotHash":"9e31fcaf08d71b924d67f4081e2d8fb0c491f304abeca20dfc1711bc24a14e52","scope":["plugins/filid/src"],"documentSync":"committed","repaired":3,"recorded":[{"class":"code-change","ruleId":"circular-dependency","path":"plugins/filid/src","severity":"error","certainty":"exact","note":"plugins/filid/src → plugins/filid/src/mcp/server → plugins/filid/src"},{"class":"indeterminate","ruleId":"test-record-case-cap","path":"plugins/filid/src/__tests__/unit/mcp/reviewState/readReviewState.test.ts","severity":"warning","certainty":"indeterminate","note":"parameterized case at offset 6203 uses a dynamic table; case count > 32 is indeterminate"}],"truncated":0}
+{"schema":1,"snapshotHash":"9e31fcaf08d71b924d67f4081e2d8fb0c491f304abeca20dfc1711bc24a14e52","scope":["plugins/filid/src"],"documentSync":"committed","repaired":3,"recorded":[{"class":"code-change","ruleId":"circular-dependency","path":"plugins/filid/src","severity":"error","certainty":"exact","note":"plugins/filid/src → plugins/filid/src/mcp/server → plugins/filid/src"},{"class":"indeterminate","ruleId":"test-record-case-cap","path":"plugins/filid/src/__tests__/unit/mcp/reviewState/readReviewState.test.ts","severity":"warning","certainty":"indeterminate","note":"parameterized case at offset 6203 uses a dynamic table; case count \u003e 32 is indeterminate"}],"truncated":0}
 -->
 ```
 

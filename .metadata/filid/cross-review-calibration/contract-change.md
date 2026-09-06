@@ -14,6 +14,12 @@ Start from `clean-change.md` and apply its clean implementation and verification
 
 - `toSlug(input: string): string` is exported from `index.ts`.
 
+## Acceptance Criteria
+
+### AC-slugify-normalization — slug normalization
+
+- Mixed-case input lowercases, separator runs collapse, and edge separators are trimmed.
+
 ## Last Updated
 
 2026-07-27

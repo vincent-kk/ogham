@@ -1,7 +1,10 @@
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 import type { RenderReviewBriefInput } from '../../../../../mcp/tools/reviewState/brief/reviewBriefTypes.js';
 import { buildReviewGroups } from '../../../../../mcp/tools/reviewState/group/buildReviewGroups.js';
+import { loadRuleMap } from '../../../../../mcp/tools/reviewState/rules/loadRuleMap.js';
+import { resolveFileRules } from '../../../../../mcp/tools/reviewState/rules/resolveFileRules.js';
 
 import { buildReviewBriefInput } from './buildReviewBriefInput.js';
 
@@ -38,16 +41,13 @@ export function buildLargeReviewBriefInputs(): RenderReviewBriefInput[] {
     ),
     'utf8',
   );
-  const rules = ['default', 'fca', 'tests'].map((id) => ({
-    id,
-    body: readFileSync(
-      new URL(
-        `../../../../../../skills/cross-review/rules/${id}.md`,
-        import.meta.url,
-      ),
-      'utf8',
-    ),
-  }));
+  const ruleMap = loadRuleMap(
+    fileURLToPath(new URL('../../../../../../', import.meta.url)),
+  );
+  const selected = files.flatMap((file) =>
+    resolveFileRules({ file, rules: ruleMap, overrides: [] }),
+  );
+  const rules = ruleMap.filter((rule) => selected.includes(rule.id));
   return groups.map((group) => ({
     ...seed,
     reviewerMethod,

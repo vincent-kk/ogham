@@ -4,11 +4,6 @@
 
 project path, output language와 optional adapter IDs를 검증해 부재한 config v2만 생성한다.
 
-## Structure
-
-- `projectInit.ts` — input boundary와 configLoader 호출
-- `index.ts` — named tool export
-
 ## Conventions
 
 - 기존 config는 덮어쓰지 않고 생성 경로 요약만 반환한다.

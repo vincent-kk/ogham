@@ -13,7 +13,12 @@ import {
 } from '../../../constants/mcpContracts.js';
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { CONTRACT_INTENTS } from '../../../constants/restructure.js';
-import { REVIEW_STATE_ACTIONS } from '../../../constants/reviewState.js';
+import {
+  REVIEW_DEFAULT_EFFORT,
+  REVIEW_EFFORT_ROUNDS,
+  REVIEW_STATE_ACTIONS,
+  REVIEW_VALIDATE_KINDS,
+} from '../../../constants/reviewState.js';
 import { VERSION } from '../../../version.js';
 import type { FractalInspectResult } from '../../tools/fractalInspect/index.js';
 import {
@@ -205,7 +210,7 @@ const FRACTAL_INSPECT_ADVERTISED_INPUT_SCHEMA = z
       ),
     path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
     detail: z
-      .enum(['summary', 'paths', 'full', 'files'])
+      .nativeEnum({ ...FRACTAL_SCAN_DETAILS, ...VERIFICATION_SCAN_DETAILS })
       .optional()
       .describe(
         'scan: summary (default) | paths | full. verification: summary (default) | files.',
@@ -296,7 +301,14 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
     baseRef: z.string().min(1).optional(),
     changeContext: z.string().optional(),
     force: z.boolean().optional(),
-    effort: z.enum(['auto', 'low', 'medium', 'high']).optional(),
+    effort: z
+      .enum([
+        REVIEW_DEFAULT_EFFORT,
+        ...(Object.keys(
+          REVIEW_EFFORT_ROUNDS,
+        ) as (keyof typeof REVIEW_EFFORT_ROUNDS)[]),
+      ])
+      .optional(),
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
@@ -306,7 +318,7 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
     action: z.literal(REVIEW_STATE_ACTIONS.VALIDATE),
-    kind: z.enum(['review', 'verify']),
+    kind: z.nativeEnum(REVIEW_VALIDATE_KINDS),
     group: z.string().regex(/^\d{2,}$/),
     round: z.number().int().min(1).optional(),
   }),
@@ -364,13 +376,18 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .optional()
     .describe('prepare only: discard existing unsealed artifacts first.'),
   effort: z
-    .enum(['auto', 'low', 'medium', 'high'])
+    .enum([
+      REVIEW_DEFAULT_EFFORT,
+      ...(Object.keys(
+        REVIEW_EFFORT_ROUNDS,
+      ) as (keyof typeof REVIEW_EFFORT_ROUNDS)[]),
+    ])
     .optional()
     .describe(
       'prepare only: auto selects low at the configured group threshold, otherwise medium; low/medium/high cap reviewer rounds at 1/2/3. Explicit input overrides config.',
     ),
   kind: z
-    .enum(['review', 'verify'])
+    .nativeEnum(REVIEW_VALIDATE_KINDS)
     .optional()
     .describe('validate only: opinion kind to validate.'),
   group: z

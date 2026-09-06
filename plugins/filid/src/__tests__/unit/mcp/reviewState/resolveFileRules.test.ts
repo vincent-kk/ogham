@@ -12,6 +12,7 @@ import { describe, expect, it } from 'vitest';
 
 import { findRepositoryRulePaths } from '../../../../mcp/tools/reviewState/rules/findRepositoryRulePaths.js';
 import { loadRepositoryRules } from '../../../../mcp/tools/reviewState/rules/loadRepositoryRules.js';
+import { loadRuleMap } from '../../../../mcp/tools/reviewState/rules/loadRuleMap.js';
 import { resolveFileRules } from '../../../../mcp/tools/reviewState/rules/resolveFileRules.js';
 
 /** Ordered built-in rules used to prove always, match, and when selection. */
@@ -24,6 +25,17 @@ const BUILT_IN_RULES = [
 ] as const;
 
 describe('resolveFileRules', () => {
+  it('assigns ECMAScript rules and excludes shell rules for mjs source', () => {
+    const rules = loadRuleMap(process.cwd());
+    const selected = resolveFileRules({
+      file: { path: 'scripts/build.mjs', role: 'source', owner: null },
+      rules,
+      overrides: [],
+    });
+    expect(selected).toContain('ecmascript');
+    expect(selected).not.toContain('shell');
+  });
+
   it('selects always, matching, role, and owner rules in map order', () => {
     expect(
       resolveFileRules({

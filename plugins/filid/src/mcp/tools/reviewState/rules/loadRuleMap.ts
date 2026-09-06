@@ -4,7 +4,10 @@ import {
   resolveContainedPath,
 } from '@ogham/cross-platform';
 
-import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
+import {
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_FILE_NAMES,
+} from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 
 import type { LoadedReviewRule } from './reviewRuleTypes.js';
@@ -34,7 +37,10 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
     'cross-review',
     'rules',
   );
-  const mapPath = resolveContainedPath(rulesDirectory, 'rules.json');
+  const mapPath = resolveContainedPath(
+    rulesDirectory,
+    REVIEW_STATE_FILE_NAMES.RULE_MAP,
+  );
   assertNoSymlinkDescendantsSync(pluginRoot, mapPath);
   const raw = readUtf8FileIfExistsSync(mapPath);
   if (raw === null)
