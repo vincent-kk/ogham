@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Claude Code 플러그인의 Layer 1 자동 실행 계층. 3개 lifecycle 이벤트를 `bridge/*.mjs` 스크립트에 매핑하는 canonical 설정 노드.
+Claude Code 플러그인의 Layer 1 자동 실행 계층. 3개 lifecycle 이벤트의 4개 진입점을 `bridge/*.mjs` 스크립트에 매핑하는 canonical 설정 노드.
 
 ## Structure
 
@@ -13,6 +13,7 @@ Claude Code 플러그인의 Layer 1 자동 실행 계층. 3개 lifecycle 이벤�
 | ------------------ | ------------------- | ------------------------ | ------- |
 | `SessionStart`     | `*`                 | `setup.mjs`              | 30s     |
 | `PreToolUse`       | `Read\|Write\|Edit` | `pre-tool-use.mjs`       | 10s     |
+| `PreToolUse`       | `*`                 | `guard-review-actor.mjs` | 5s      |
 | `UserPromptSubmit` | `*`                 | `user-prompt-submit.mjs` | 5s      |
 
 ## Conventions
@@ -20,14 +21,14 @@ Claude Code 플러그인의 Layer 1 자동 실행 계층. 3개 lifecycle 이벤�
 - Claude·Codex hook command는 `libs/run.cjs`, agy 는 `run-agy.mjs` 를 통해 실행
 - 스크립트 경로는 `${CLAUDE_PLUGIN_ROOT}` 변수로 참조
 - 구현체는 `src/hooks/<name>/<name>.entry.ts`에 위치, `scripts/buildHooks.mjs`로 번들링
-- 공식 hook 빌드는 세 lifecycle bundle과 `run-agy.mjs`·`run-hook.cmd` 공용 runner만 유지
+- 공식 hook 빌드는 네 lifecycle bundle과 `run-agy.mjs`·`run-hook.cmd` 공용 runner만 유지
 
 ## Boundaries
 
 ### Always do
 
-- `hooks.json` 수정 시 `scripts/buildHooks.mjs`의 `HOOK_ENTRIES` 배열과 동기화 유지
-- 새 hook 추가 시 대응하는 `src/hooks/<name>/<name>.entry.ts` 진입점 생성
+- canonical manifest와 hook build entry 목록을 동기화
+- 새 hook 추가 시 대응하는 TypeScript bundle 진입점 생성
 - 제거된 hook의 stale bridge bundle은 공식 hook 빌드에서 정리
 
 ### Ask first
@@ -37,10 +38,10 @@ Claude Code 플러그인의 Layer 1 자동 실행 계층. 3개 lifecycle 이벤�
 
 ### Never do
 
-- `hooks.json`에 인라인 스크립트 직접 작성 (반드시 bridge 스크립트 경로 참조)
-- host runner (`libs/run.cjs`·`run-agy.mjs`) 우회하여 직접 `.mjs` 실행 경로 설정
+- canonical manifest에 인라인 스크립트 직접 작성 (반드시 bridge bundle 참조)
+- 공용 host runner를 우회하는 직접 bundle 실행 경로 설정
 - 이 디렉터리에 구현 코드 배치 (설정 전용 노드)
-- 루트 `hooks.json`, `.codex-plugin/hooks.json`, `bridge/*` 생성물을 직접 편집
+- 생성된 host adapter와 runtime bundle을 직접 편집
 
 ## Dependencies
 

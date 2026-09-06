@@ -27,6 +27,7 @@ const HOOK_BUNDLE_NAME = {
   SETUP: 'setup',
   USER_PROMPT_SUBMIT: 'user-prompt-submit',
   PRE_TOOL_USE: 'pre-tool-use',
+  GUARD_REVIEW_ACTOR: 'guard-review-actor',
 } as const;
 
 const SHARED_RUNNER_NAME = {
@@ -54,7 +55,13 @@ interface HookCase {
 }
 
 interface CanonicalHooksManifest {
-  hooks: Record<string, unknown>;
+  hooks: Record<
+    string,
+    Array<{
+      matcher?: string;
+      hooks?: Array<{ command?: string; timeout?: number; type?: string }>;
+    }>
+  >;
 }
 
 interface PreToolUseBundleResult {
@@ -121,10 +128,21 @@ const HOOK_CASES: readonly HookCase[] = [
       hook_event_name: HOOK_EVENT_NAME.PRE_TOOL_USE,
     }),
   },
+  {
+    name: HOOK_BUNDLE_NAME.GUARD_REVIEW_ACTOR,
+    buildInput: (cwd) => ({
+      cwd,
+      session_id: 'smoke',
+      agent_type: 'general-purpose',
+      tool_name: 'Read',
+      tool_input: { file_path: portableResolve(cwd, 'noop.txt') },
+      hook_event_name: HOOK_EVENT_NAME.PRE_TOOL_USE,
+    }),
+  },
 ];
 
 describe('hook bundle registration', () => {
-  it('registers only the three active lifecycle hooks', () => {
+  it('registers only the three active lifecycle events and four entries', () => {
     const manifestText = readUtf8FileIfExistsSync(CANONICAL_HOOKS_PATH);
     expect(manifestText).not.toBeNull();
 
@@ -133,6 +151,18 @@ describe('hook bundle registration', () => {
       [...EXPECTED_HOOK_EVENTS].sort(),
     );
     expect(manifestText).not.toContain(RETIRED_AGENT_BUNDLE);
+    expect(manifest.hooks.PreToolUse).toHaveLength(2);
+    expect(manifest.hooks.PreToolUse).toContainEqual({
+      matcher: '*',
+      hooks: [
+        {
+          type: 'command',
+          command:
+            'node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" "${CLAUDE_PLUGIN_ROOT}/bridge/guard-review-actor.mjs"',
+          timeout: 5,
+        },
+      ],
+    });
   });
 
   it('keeps only active hook bundles and shared runners', () => {

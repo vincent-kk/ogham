@@ -34,17 +34,18 @@ Do not write `opinions/verify-NN.md`, any normal cross-review artifact, or any p
 
 ## Deliverable
 
-Write valid JSON only to `opinions/verify-NN.json` at the brief's `output` path. Use its compact Output Contract shape; no output skeleton is prewritten. Replace illustrative decisions with independent evidence and write no other artifact or project file. An empty assignment produces `state: "COMPLETE"` and `decisions: []`.
+With a review context capability, submit valid JSON through its `submit` operation and write no file directly. In the legacy path, write it only to `opinions/verify-NN.json` at the brief's `output` path. Use the compact Output Contract shape, replace illustrative decisions with independent evidence, and write no other artifact or project file. An empty assignment produces `state: "COMPLETE"` and `decisions: []`.
 
-Your final message is exactly one line: `done: <output path>`. Report nothing else; the opinion file is the deliverable.
+Your final message is exactly one line: `done: <group>` for a context capability or `done: <output path>` for the legacy path. Report nothing else.
 
 ## Inputs
 
 - the absolute verifier brief path; the brief is self-contained with the method, assigned evidence, and diffs (or their paths)
 - the same distinct host-authoritative current-user block and `USR-NNN` mapping supplied to the reviewer
 - the exact output path
+- or one context capability whose paginated brief supplies all of the above
 
-Read the brief once, then open only the evidence it names or evidence needed to decide an assigned candidate.
+With a context capability, obtain the complete paginated brief and every targeted source query through that capability. In the legacy path, read the brief once, then open only the evidence it names or evidence needed to decide an assigned candidate.
 
 ## Method
 

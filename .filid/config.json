@@ -145,6 +145,10 @@
         ]
       },
       {
+        "basename": "guardReviewActor.entry.ts",
+        "paths": ["**/plugins/filid/src/hooks/guardReviewActor"]
+      },
+      {
         "basename": "agentEnforcer.entry.ts",
         "paths": [
           "**/plugins/filid/src/hooks/agentEnforcer",

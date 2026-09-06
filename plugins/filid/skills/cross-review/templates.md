@@ -2,7 +2,7 @@
 
 ## Reviewer opinion JSON
 
-For round 1, write the path named by the review brief's `output` field. For round 2 or later, use the orchestrator-supplied output path with the same schema:
+With a context capability, submit this object through `operation: "submit"`; the broker owns the output path. In the legacy path, write the review brief's `output` path for round 1 and the orchestrator-supplied output path for later rounds:
 
 ```json
 {
@@ -51,7 +51,7 @@ For round 1, write the path named by the review brief's `output` field. For roun
 
 ## Verifier opinion JSON
 
-Write the path named by the verifier brief's `output` field with this schema:
+With a context capability, submit this object through `operation: "submit"`; the broker owns the output path. In the legacy path, write the verifier brief's `output` path:
 
 ```json
 {

@@ -30,11 +30,13 @@ const HOOK_BUNDLE_NAME = Object.freeze({
   SETUP: 'setup',
   USER_PROMPT_SUBMIT: 'user-prompt-submit',
   PRE_TOOL_USE: 'pre-tool-use',
+  GUARD_REVIEW_ACTOR: 'guard-review-actor',
 });
 const HOOK_ENTRY_NAME = Object.freeze({
   SETUP: 'setup',
   USER_PROMPT_SUBMIT: 'userPromptSubmit',
   PRE_TOOL_USE: 'preToolUse',
+  GUARD_REVIEW_ACTOR: 'guardReviewActor',
 });
 const SHARED_RUNNER_NAME = Object.freeze({
   AGY: 'run-agy',
@@ -95,6 +97,11 @@ const HOOK_ENTRIES = [
     name: HOOK_BUNDLE_NAME.PRE_TOOL_USE,
     entry: HOOK_ENTRY_NAME.PRE_TOOL_USE,
     maxBytes: HEAVY_HOOK_BYTES,
+  },
+  {
+    name: HOOK_BUNDLE_NAME.GUARD_REVIEW_ACTOR,
+    entry: HOOK_ENTRY_NAME.GUARD_REVIEW_ACTOR,
+    maxBytes: LIGHT_HOOK_BYTES,
   },
 ];
 

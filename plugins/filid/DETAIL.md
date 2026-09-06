@@ -5,7 +5,7 @@
 - Filid는 INTENT.md와 DETAIL.md의 의도, 경계, 현재 계약을 관리한다.
 - Filid는 FCA 노드, 어댑터가 보고한 진입점, 외부 import 경계와 실제 의존 DAG를 검사한다.
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
-- Filid의 cross-review는 `review_state prepare`가 변경 roster·FCA 후보를 선별·청킹·그룹화하고 규칙·diff·brief를 물질화하며, 그룹별 actor가 JSON opinion과 verification을 쓴다. `validate`가 이를 검사하고 `seal`이 검증된 hash만 결정적으로 fold·렌더링한다. INCONCLUSIVE 원인과 해소 제안은 일반 finding·coverage와 분리해 별도 보고서로 제공하며 코드는 수정하지 않는다.
+- Filid의 cross-review는 `review_state prepare`가 변경 roster·FCA 후보를 선별·청킹·그룹화하고 규칙·diff·brief를 물질화하며, 그룹별 actor가 JSON opinion과 verification을 쓴다. Claude의 native actor는 plugin-wide PreToolUse hook이 `agent_type`으로 식별해 context broker 외 호출을 막고, 같은 경계를 제공하지 않는 host는 repository mode를 사용한다. `validate`가 의견을 검사하고 `seal`이 검증된 hash만 결정적으로 fold·렌더링한다. INCONCLUSIVE 원인과 해소 제안은 일반 finding·coverage와 분리해 별도 보고서로 제공하며 코드는 수정하지 않는다.
 - cross-review는 일반 첫 reviewer와 verifier에 효율 모델을 사용한다. 기본 동시성 8·1024줄·자동 최대 32파일로 그룹을 구성하며 기본 전체 그룹 상한 64를 배정 전에 검사한다. 기본 auto는 reviewable group이 설정 threshold(기본 16) 이상이면 low, 미만이면 medium을 선택한다. low는 전체 그룹을 한 번씩 검토하며 위험 그룹은 첫 회부터 상위 모델을 사용한다. medium/high는 위험·불확실성과 신규 finding에 따라 남은 예산에서 후속 검토한다. 전체 roster와 완전한 opinion 예시를 brief마다 반복하지 않고 미리 쓴 reviewer skeleton을 재사용한다. 적용 규칙·전체 diff·독립 verifier·불확실성 판정은 유지한다.
 - `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `fractal_inspect` `resolve` 결과의 `data.results[].summary.chainPaths` 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
 - `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 PR 본문의 `FCA Handoff`에 `unresolved-path`로 기록하고 계속한다.
@@ -109,6 +109,7 @@
 
 ## History
 
+- 2026-09-07 — Claude plugin agent에서 inline hook이 무시되므로 actor capability guard를 plugin-wide PreToolUse hook으로 옮기고 `agent_type`으로 적용 범위를 한정했다.
 - 2026-09-06 — 대형 PR에서 작은 파일 분할과 roster 반복이 액터·입력 비용을 확대해, 효율 모델 기본값·조건부 후속 리뷰·자동 그룹 크기·선택 그룹 예산·공통 checklist 참조를 도입했다.
 - 2026-09-05 — `pull-request`의 문서 동기화 BLOCKED 종료를 제거하고 자기복구·handoff 기록으로 바꿨다. 테스트 파일 하나의 indeterminate certainty가 규칙 네 개와 스캔 status를 거쳐 PR 생성 전체를 막았기 때문이며, 고칠 수 없는 finding은 PR 본문에 실려 review의 입력이 된다.
 - 2026-09-05 — 같은 lifecycle의 기능을 action으로 묶어 상시 schema 비용을 줄이고 도구 이름을 일관되게 만들기 위해 공개 MCP 표면을 9개에서 4개로 병합했다.
@@ -124,4 +125,4 @@
 
 ## Last Updated
 
-2026-09-06
+2026-09-07

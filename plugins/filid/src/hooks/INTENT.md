@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Claude Code의 SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·PreToolUse 검증/주입/가드를 독립 sub-fractal로 구현한다. 엔트리 파일(`*.entry.ts`)은 공식 hook 빌드가 `bridge/*.mjs`로 번들링한다.
+Claude Code의 SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·PreToolUse 검증/주입/actor 격리를 독립 sub-fractal로 구현한다. 엔트리 파일(`*.entry.ts`)은 공식 hook 빌드가 `bridge/*.mjs`로 번들링한다.
 
 ## Structure
 
@@ -14,6 +14,7 @@ Claude Code의 SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·Pre
 | `preToolValidator` | PreToolUse (내부) | INTENT/DETAIL write gate                    |
 | `structureGuard`   | PreToolUse (내부) | 재분류/organ subdir/순환 import 경고        |
 | `preToolUse`       | PreToolUse        | 위 3개 서브모듈 오케스트레이션              |
+| `guardReviewActor` | PreToolUse        | review actor 도구·action 경계 강제          |
 | `shared` organ     | -                 | `isFcaProject`/`isIntentMd`/`isDetailMd`    |
 | `utils` organ      | -                 | `validateCwd`, organ 구조 검사 등           |
 
@@ -29,7 +30,7 @@ Claude Code의 SessionStart 초기화·UserPromptSubmit 컨텍스트 주입·Pre
 ### Always do
 
 - 새 훅 추가 시 canonical `hooks/hooks.json`, build entry, 공개 entry point를 함께 갱신
-- setup/user-prompt-submit/pre-tool-use와 공용 runner만 배포
+- setup/user-prompt-submit/pre-tool-use/guard-review-actor와 공용 runner만 배포
 
 ### Ask first
 

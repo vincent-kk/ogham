@@ -15,7 +15,7 @@
 
 - MCP 도구 4개: `project_setup`, `fractal_inspect`, `restructure`, `review_state`.
 - `fractal_inspect`의 `resolve` action은 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
-- 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
+- 훅 진입점 4개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`, `hooks/guardReviewActor`.
 - 소스 루트 entry point의 공개 surface는 생성된 `VERSION` 하나다.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
 
@@ -50,4 +50,4 @@
 
 ## Last Updated
 
-2026-09-06
+2026-09-07
