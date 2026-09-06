@@ -9,6 +9,7 @@ import {
   REVIEW_STATE_SCHEMA_VERSION,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { assessReviewGroupRisk } from '../group/assessReviewGroupRisk.js';
 import { buildReviewGroups } from '../group/buildReviewGroups.js';
 import { planNextHandoffs } from '../handoff/planNextHandoffs.js';
 import { readReviewGroupArtifactStatus } from '../handoff/readReviewGroupArtifactStatus.js';
@@ -232,6 +233,15 @@ export async function prepareReviewState(
   });
   files = applyMissingTestRules({ files, groups, activeRules });
   assertReviewGroupBudget(groups, settings.maxGroups);
+  groups = groups.map((group) => ({
+    ...group,
+    riskReasons: assessReviewGroupRisk({
+      group,
+      files,
+      candidates: collected.candidates,
+      highRiskPaths: settings.highRiskPaths,
+    }),
+  }));
   const context = await readChangeContext({
     projectRoot: input.projectRoot,
     baseCommit: source.baseCommit,

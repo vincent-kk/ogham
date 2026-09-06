@@ -43,6 +43,29 @@ describe('renderPrComment', () => {
     );
   });
 
+  it.each([
+    [
+      'Windows drive',
+      'C:\\repo\\.metadata\\filid\\reviews\\feature-render-v7',
+      'C:/repo/.metadata/filid/reviews/feature-render-v7/review-report.md',
+    ],
+    [
+      'Windows UNC',
+      '\\\\server\\share\\.metadata\\filid\\reviews\\feature-render-v7',
+      '//server/share/.metadata/filid/reviews/feature-render-v7/review-report.md',
+    ],
+  ])(
+    'formats the %s report pointer with forward slashes',
+    (_pathKind, reviewDirectory, reportPath) => {
+      const output = renderPrComment({
+        ...buildReviewRenderInput(),
+        reviewDirectory,
+      });
+
+      expect(output).toContain(`> Full report: \`${reportPath}\``);
+    },
+  );
+
   it('keeps the empty confirmed block and replaces the complete session checklist', () => {
     const input = buildReviewRenderInput();
     const comment = renderPrComment({

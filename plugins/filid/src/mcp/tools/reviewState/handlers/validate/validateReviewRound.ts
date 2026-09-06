@@ -197,14 +197,21 @@ export async function validateReviewRound(
   const { assigned: newlyAssigned } = splitVerifierAssignment(
     merged.addedFindings,
   );
-  const nextRound =
-    round < (context.replayThroughRound ?? 0) ||
-    (round < group.rounds &&
-      newlyAssigned.some(
-        (finding) => state.effort === 'high' || finding.severity === 'error',
-      ))
-      ? round + 1
-      : null;
+  const nextRound = (
+    context.replayReview
+      ? round < context.replayReview.round ||
+        (!context.replayReview.complete && round < group.rounds)
+      : round < group.rounds &&
+        ((round === 1 &&
+          ((group.riskReasons?.length ?? 0) > 0 ||
+            current.state === 'INDETERMINATE')) ||
+          newlyAssigned.some(
+            (finding) =>
+              state.effort === 'high' || finding.severity === 'error',
+          ))
+  )
+    ? round + 1
+    : null;
   const { assigned } = splitVerifierAssignment(merged.opinion.findings);
   const verifierRequired = nextRound === null && assigned.length > 0;
   writeFileAtomicallySync(opinionPath, mergedBytes);

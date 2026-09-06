@@ -31,6 +31,7 @@ interface FilidConfigV2 {
     groupChurnLimit?: number;
     groupFileLimit?: number;
     maxGroups?: number;
+    highRiskPaths?: string[];
     planChurnLimit?: number;
     concurrency?: number;
     lockfiles?: string[];
@@ -76,6 +77,7 @@ interface FilidConfigV2 {
 - 중복 lockfile basename은 최초 순서를 보존하며 하나로 줄고, 생략한 값은 review constants의 기본값을 쓴다.
 - `groupChurnLimit` override는 group과 file chunk 양쪽에 같은 상한으로 전달된다.
 - `maxGroups`는 선택 양의 정수로 round-trip하며, 생략된 `groupFileLimit`은 loader에서 고정 값으로 채우지 않는다.
+- `highRiskPaths`는 선택 비어 있지 않은 glob 문자열 배열이며 기본 위험 신호에 추가된다. 생략하거나 빈 배열이면 추가 경로가 없다. prepare가 경로 의미를 해석하며 loader는 값을 보존한다.
 
 ### AC-config-excluded-directories — 스캔 제외 디렉터리 선언
 
@@ -127,4 +129,4 @@ interface FilidConfigV2 {
 
 ## Last Updated
 
-2026-09-06 — review 그룹 예산과 자동 크기 선택 계약을 갱신했다.
+2026-09-06 — review 그룹 예산·자동 크기 선택과 추가 위험 경로 계약을 갱신했다.

@@ -41,6 +41,7 @@ export function resolvePrepareSettings(input: PrepareInput) {
     concurrency: review?.concurrency ?? REVIEW_CONCURRENCY,
     groupFileLimit: review?.groupFileLimit,
     maxGroups: review?.maxGroups,
+    highRiskPaths: review?.highRiskPaths ?? [],
     groupChurnLimit: review?.groupChurnLimit ?? REVIEW_GROUP_CHURN_LIMIT,
     planChurnLimit: review?.planChurnLimit ?? REVIEW_PLAN_CHURN_LIMIT,
     lockfiles: review?.lockfiles ?? REVIEW_LOCKFILE_BASENAMES,

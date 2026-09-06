@@ -113,6 +113,7 @@ export function renderReviewBrief(
     `group: ${input.group.id}`,
     `rounds: ${input.group.rounds}`,
     `plan_required: ${input.group.planRequired}`,
+    `risk_reasons: ${JSON.stringify(input.group.riskReasons ?? [])}`,
     `depends_on: ${JSON.stringify(input.group.dependsOn)}`,
     `source_hash: ${input.sourceHash}`,
     `base_ref: ${JSON.stringify(input.baseRef)}`,

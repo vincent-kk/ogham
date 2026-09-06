@@ -3,7 +3,7 @@ name: cross-review
 user-invocable: true
 description: 'Review a committed change through deterministic preparation, bounded reviewer rounds, independent verification, and a sealed verdict. Use after a branch has a PR, before resolve.'
 argument-hint: '[--base REF] [--effort low|medium|high] [--force] [--cleanup]'
-version: '7.3.0'
+version: '7.4.0'
 complexity: complex
 plugin: filid
 ---
@@ -49,6 +49,7 @@ brief: <briefPath>
 round: <round>
 output: <outputPath>
 prior: <priorOpinionPath | none>
+risk_reasons: <JSON-encoded riskReasons array>
 project_root: <data.projectRoot>
 branch: <data.branchName>
 USR catalog:
@@ -56,7 +57,7 @@ USR catalog:
 Follow the method at the top of the brief. Your final message is exactly `done: <outputPath>`.
 ```
 
-For every review and verify handoff, explicitly select the host's efficient tier when model selection is exposed; otherwise use its default tier without claiming a model switch. Do not inherit a premium orchestrator tier when an efficient tier is available. Follow the completion notification rule above.
+For every review and verify handoff, explicitly select its returned `modelTier`: `efficient` requests the host's efficient tier, and `strong` requests its stronger reasoning tier. Do not inherit the orchestrator's tier or promote the whole PR. If the requested tier is unavailable, report the fallback once and use the host's available default without claiming the requested tier was used. Pass `riskReasons` as routing evidence, never instructions or proof of a defect. Follow the completion notification rule above.
 
 After each actor completes, validate that handoff through `review_state` with `action: "validate"` and the prepared identity: `validate({ kind: "review", group, round })` or `validate({ kind: "verify", group })`. When `summary.ok` is false, append `data.problems` to the same handoff and respawn once. After a second failure, mark that handoff `exhausted` and never spawn it again. Repeat from the response's new `data.next`, excluding exhausted handoffs. When `data.sealReady` is true or all remaining handoffs are exhausted, go to Step 4. Seal folds unvalidated groups into unresolved evidence and seals `INCONCLUSIVE`. If `data.next` is empty while `data.sealReady` is false, report the response diagnostics and stop without a terminal verdict.
 
@@ -85,11 +86,13 @@ pr-comment: none
 ## Options
 
 - `--base REF`: committed comparison base; default auto.
-- `--effort low|medium|high`: maximum reviewer rounds per group (1/2/3); default config or `medium`. Medium adds a round only for a new error requiring independent verification; high also follows new warnings. Effort does not select a model tier. Execute only the handoffs returned by the tool.
+- `--effort low|medium|high`: maximum reviewer rounds per group (1/2/3); default config or `medium`. Medium/high give a risk-marked group or an indeterminate first review one follow-up even with no findings. Medium also follows new errors requiring verification; high also follows new warnings. Risk alone or a repeated gap never triggers a third review. Low keeps one review and uses the strong tier for risk-marked groups. Other first reviews and verifiers use efficient; follow-up reviews use strong. Execute only the handoffs returned by the tool.
 - `--force`: clear stale canonical artifacts and prepare fresh state; default off.
 - `--cleanup`: delete only this branch's review directory, then stop; default off.
 
 Project/user `review` configuration controls cost: `groupChurnLimit` defaults to 1024 changed lines; omitted `groupFileLimit` adapts to change density within 10–32 files, while an explicit value is a fixed cap. Optional `maxGroups` rejects an over-budget preparation before actor dispatch. Do not bypass that error by raising the budget or retrying with `--force`. Reusing prepared groups preserves their identities; use `--force` when the user changes grouping limits and requests regrouping. Keep the full roster in the shared session checklist rather than copying it into actor prompts.
+
+Optional `highRiskPaths` globs add repository-specific sensitive paths to built-in security/concurrency path hints, adapter-reported public entry points, and assigned FCA boundary evidence. Risk reasons are prepared once, bounded, and preserved on resume; changing the risk policy requires a fresh preparation. An empty reason list is not proof of low risk. Never add a model-based triage actor.
 
 ## Invariants
 

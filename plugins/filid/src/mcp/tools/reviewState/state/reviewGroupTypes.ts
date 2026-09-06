@@ -60,6 +60,8 @@ export interface ReviewGroup {
   verifyPath: string;
   /** Maximum review rounds, or zero for a candidate-only group. */
   rounds: number;
+  /** Prepared risk evidence, absent in legacy sessions; no signal is not a safety claim. */
+  riskReasons?: string[];
   /** Hash-bound validation handoffs for reviewer and verifier artifacts. */
   validated: {
     /** Last validated merged review artifact, if review is valid. */

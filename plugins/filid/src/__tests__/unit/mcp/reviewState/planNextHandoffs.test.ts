@@ -112,6 +112,11 @@ describe('planNextHandoffs', () => {
         : [
             {
               kind: row.kind,
+              modelTier:
+                row.kind === 'review' && row.nextRound! >= 2
+                  ? 'strong'
+                  : 'efficient',
+              riskReasons: [],
               group: '01',
               ...(row.nextRound === undefined ? {} : { round: row.nextRound }),
               briefPath: portableJoin(

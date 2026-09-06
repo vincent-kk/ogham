@@ -132,6 +132,8 @@ describe('validateReviewRound handoff', () => {
       {
         kind: 'verify',
         group: '01',
+        modelTier: 'efficient',
+        riskReasons: [],
         briefPath: portableJoin(paths.reviewDirectory, group.verifyBriefPath),
         outputPath: portableJoin(paths.reviewDirectory, group.verifyPath),
         priorOpinionPath: null,

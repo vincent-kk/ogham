@@ -60,6 +60,12 @@ export function planNextHandoffs(input: {
         status?.review === 'trusted' ? review!.round + 1 : (review?.round ?? 1);
       next.push({
         kind: 'review',
+        modelTier:
+          round >= 2 ||
+          (group.rounds === 1 && (group.riskReasons?.length ?? 0) > 0)
+            ? 'strong'
+            : 'efficient',
+        riskReasons: group.riskReasons ?? [],
         group: group.id,
         round,
         briefPath: portableJoin(paths.reviewDirectory, group.briefPath),
@@ -79,6 +85,8 @@ export function planNextHandoffs(input: {
     )
       next.push({
         kind: 'verify',
+        modelTier: 'efficient',
+        riskReasons: group.riskReasons ?? [],
         group: group.id,
         briefPath: portableJoin(paths.reviewDirectory, group.verifyBriefPath),
         outputPath: portableJoin(paths.reviewDirectory, group.verifyPath),

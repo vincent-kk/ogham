@@ -99,9 +99,21 @@ Produces a read-only placement plan — `sourcePath → targetPath`, the basis f
 /filid:cross-review --base origin/main
 ```
 
-`review_state(prepare)` records the committed-file roster and FCA evidence, then deterministically selects, chunks, groups, and materializes bounded diffs and briefs. Both reviewers and verifiers use the host's efficient model tier when available. Reviewers write JSON opinions against layered rules; `validate` merges them and requests another review only when its effort policy requires it. A verifier independently decides assigned findings as `CONFIRMED | REFUTED | INDETERMINATE`. `seal` trusts only validated hashes, folds the verdict, and renders the report, fix requests, and PR comment. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
+`review_state(prepare)` records the committed-file roster and FCA evidence, then deterministically selects, chunks, groups, and materializes bounded diffs and briefs. Ordinary first reviews and verifiers use the host's efficient model tier; the tool explicitly routes selected reviews to its stronger tier. Reviewers write JSON opinions against layered rules; `validate` merges them and requests another review only when its risk and effort policy requires it. A verifier independently decides assigned findings as `CONFIRMED | REFUTED | INDETERMINATE`. `seal` trusts only validated hashes, folds the verdict, and renders the report, fix requests, and PR comment. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
 
-The default group budget is **1,024 changed lines**. The file cap adapts to change density within 10–32 files; explicitly setting `review.groupFileLimit` selects a fixed cap. The full changed-file checklist stays in the shared session instead of being copied into every brief. Default `medium` permits a second review only for a new error requiring verification; `low` uses one review, and explicit `high` can follow new warnings for up to three rounds. These effort levels do not select model tiers.
+The default group budget is **1,024 changed lines**. The file cap adapts to change density within 10–32 files; explicitly setting `review.groupFileLimit` selects a fixed cap. The full changed-file checklist stays in the shared session instead of being copied into every brief.
+
+Risk routing uses security/concurrency path words, adapter-reported public entry points, assigned FCA boundary evidence, and optional `highRiskPaths` globs. Only assigned source files contribute; churn, file counts, and multiple owners do not by themselves raise risk. These are routing hints, and no signal is not a safety guarantee. At most five evidence reasons are stored per group; no extra triage actor runs.
+
+| Review situation                                       | Model and continuation                                                                 |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
+| Ordinary first review                                  | Efficient; finishes after one review when complete and no new error requires follow-up |
+| Risk-marked group, default `medium` or explicit `high` | Efficient first review, then one independent strong review even with no findings       |
+| Risk-marked group, explicit `low`                      | One strong review                                                                      |
+| Indeterminate first review or a new assigned error     | Strong follow-up within the configured round budget                                    |
+| Independent finding verifier                           | Efficient                                                                              |
+
+`low`, `medium`, and `high` cap reviewer rounds at 1, 2, and 3. High can also follow new warnings; risk alone or the same evidence gap does not trigger a third round. Follow-up reviewers inspect the diff before reading the prior opinion. Evidence gaps remain visible in the merged result rather than being silently cleared.
 
 An optional project or user configuration can stop oversized reviews before any actor is dispatched:
 
@@ -109,12 +121,13 @@ An optional project or user configuration can stop oversized reviews before any 
 {
   "review": {
     "groupChurnLimit": 1024,
-    "maxGroups": 48
+    "maxGroups": 48,
+    "highRiskPaths": ["src/payments/**", "src/session/**"]
   }
 }
 ```
 
-`maxGroups` counts reviewable groups, not concurrent actors or total follow-up calls. Exceeding it reports `review-group-budget-exceeded`; no files are silently skipped. Omit it for unrestricted group counts. Existing prepared groups keep their identities; use `--force` to apply changed grouping limits. Lowering `concurrency` changes scheduling, not the total work.
+`maxGroups` counts reviewable groups, not concurrent actors or total follow-up calls. Exceeding it reports `review-group-budget-exceeded`; no files are silently skipped. Omit it for unrestricted group counts. `highRiskPaths` adds to the built-in hints. Existing prepared groups keep their identities and saved risk reasons; use a fresh preparation or explicit `--force` to apply changed grouping or risk settings. Lowering `concurrency` changes scheduling, not the total work.
 
 ### Migrate legacy document names
 

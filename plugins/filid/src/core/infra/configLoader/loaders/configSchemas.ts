@@ -61,6 +61,7 @@ const ReviewConfigSchema = z
     groupChurnLimit: z.number().int().positive().optional(),
     groupFileLimit: z.number().int().positive().optional(),
     maxGroups: z.number().int().positive().optional(),
+    highRiskPaths: z.array(z.string().min(1)).optional(),
     planChurnLimit: z.number().int().positive().optional(),
     concurrency: z.number().int().positive().optional(),
     lockfiles: z.array(z.string().min(1)).optional(),

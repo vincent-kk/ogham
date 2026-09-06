@@ -77,6 +77,7 @@ const ReviewGroupSchema = z
     verifyBriefPath: z.string(),
     verifyPath: z.string(),
     rounds: z.number().int().nonnegative(),
+    riskReasons: z.array(z.string().min(1)).max(5).optional(),
     validated: ReviewValidationSchema,
   })
   .strict()
@@ -102,6 +103,7 @@ const ReviewScopeFileSchema = z
     skipReason: z.string().nullable(),
     rules: z.array(z.string()),
     repositoryRules: z.array(z.string()),
+    publicEntryPoint: z.boolean().optional(),
   })
   .strict();
 

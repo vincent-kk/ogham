@@ -55,5 +55,11 @@ export function classifyChangedFile(
     skipReason,
     rules: [],
     repositoryRules: [],
+    ...(owner?.entryPoints.some(
+      (point) =>
+        portableResolve(options.projectRoot, point.path) === absolutePath,
+    )
+      ? { publicEntryPoint: true }
+      : {}),
   };
 }

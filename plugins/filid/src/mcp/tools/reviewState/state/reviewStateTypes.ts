@@ -110,6 +110,8 @@ export interface ReviewScopeFile extends ReviewChangedFile {
   rules: string[];
   /** Ordered repository instruction paths the reviewer must read. */
   repositoryRules: string[];
+  /** Whether the current adapter snapshot reports this path as a public entry point. */
+  publicEntryPoint?: boolean;
 }
 
 /** Structure or verification violation normalized to a project-relative path. */
@@ -267,7 +269,7 @@ export type ResolvedReviewStateInput = ReviewStateInput & {
   branchName: string;
 };
 
-/** One runnable actor assignment, containing only canonical absolute paths. */
+/** One runnable actor assignment with canonical paths and explicit model routing. */
 export interface ReviewHandoff {
   /** Actor whose opinion is required next. */
   kind: 'review' | 'verify';
@@ -281,6 +283,10 @@ export interface ReviewHandoff {
   outputPath: string;
   /** Merged opinion for review round 2 or later, otherwise null. */
   priorOpinionPath: string | null;
+  /** Host model capability requested for this actor, independent of the parent model. */
+  modelTier: 'efficient' | 'strong';
+  /** Bounded prepared risk evidence; empty does not certify low risk. */
+  riskReasons: string[];
 }
 
 /** Pure orchestration result derived after artifact effects finish. */

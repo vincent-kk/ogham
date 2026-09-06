@@ -1,18 +1,6 @@
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 
-/**
- * Return the stable group identity that validation hashes may follow.
- *
- * @param group Review group whose mutable validation and diff paths are ignored.
- * @returns Deterministic JSON identity for safe validation retention.
- */
-function groupIdentity(group: ReviewGroup): string {
-  const { rounds: _rounds, validated: _validated, units, ...identity } = group;
-  return JSON.stringify({
-    ...identity,
-    units: units.map(({ diffPath: _diffPath, ...unit }) => unit),
-  });
-}
+import { resolveReviewGroupIdentity } from './resolveReviewGroupIdentity.js';
 
 /**
  * Retain validation handoffs only when a recomputed group keeps its identity.
@@ -25,20 +13,23 @@ export function retainReviewGroupValidations(
   previousGroups: readonly ReviewGroup[],
 ): ReviewGroup[] {
   const previousByIdentity = new Map(
-    previousGroups.map((group) => [groupIdentity(group), group.validated]),
+    previousGroups.map((group) => [resolveReviewGroupIdentity(group), group]),
   );
   return groups.map((group) => {
-    const validated = previousByIdentity.get(groupIdentity(group));
+    const previous = previousByIdentity.get(resolveReviewGroupIdentity(group));
+    const validated = previous?.validated;
     return {
       ...group,
+      ...(previous ? { riskReasons: previous.riskReasons } : {}),
       validated: validated
         ? {
             review: validated.review
               ? {
                   ...validated.review,
                   complete:
-                    validated.review.complete &&
-                    validated.review.round >= group.rounds,
+                    validated.review.round >= group.rounds ||
+                    (validated.review.complete &&
+                      group.rounds <= previous!.rounds),
                 }
               : null,
             verify: validated.verify ? { ...validated.verify } : null,
