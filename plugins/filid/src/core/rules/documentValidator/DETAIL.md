@@ -50,7 +50,7 @@
 ### AC-document-surface — 1.0 document surface
 
 - public surface는 INTENT.md·DETAIL.md validator와, snapshot evidence가 재사용하는 markdown 분해 유틸(`splitMarkdownSections`, `extractPathTokens`)만 제공한다.
-- `.filid/criteria.md` 전용 validator나 validation type을 노출하지 않는다.
+- legacy acceptance ledger 전용 validator나 validation type을 노출하지 않는다.
 
 ## Boundary Exemptions
 

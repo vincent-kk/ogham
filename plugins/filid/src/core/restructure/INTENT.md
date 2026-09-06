@@ -4,17 +4,6 @@
 
 한 `ProjectSnapshot`에서 source의 목표 위치, required artifact, import rewrite 후보와 실행 전후 검증 결과를 산출한다. project source는 변경하지 않는다.
 
-## Structure
-
-| Path          | Role                                            |
-| ------------- | ----------------------------------------------- |
-| `index.ts`    | named public barrel                             |
-| `planner/`    | flat placement와 plan summary 계산 organ        |
-| `imports/`    | flat exact path-like import rewrite 계산 organ  |
-| `specifiers/` | flat specifier stem·확장자 표기 판정 organ      |
-| `validator/`  | flat snapshot 기반 pre/postcondition 검사 organ |
-| `__tests__/`  | 15-case contract spec와 32-case test-record     |
-
 ## Conventions
 
 - 판단 우선순위: 1. exact snapshot evidence 2. 경계 보존 3. 자동화.
@@ -40,7 +29,3 @@
 - project file 생성·이동·삭제·수정
 - 언어 확장자, entry filename, alias 의미 또는 grab-bag 이름 추측
 - unresolved move나 source==target instruction을 실행 가능한 `moves`에 포함
-
-## Dependencies
-
-- `../analysis/lcaCalculator/`, `../../types/`, `../../constants/`, `@ogham/cross-platform`

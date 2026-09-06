@@ -21,7 +21,7 @@ config, cache와 content-addressed ephemeral tool artifact의 host I/O를 소유
 
 ### Always do
 
-- cache는 `getCacheDir()`, tool artifact는 plugin cache `artifacts/` 아래만 저장
+- cache는 `getCacheDir()`, tool artifact는 영구 데이터와 섞이지 않도록 plugin cache의 content-addressed ephemeral 저장소에만 둔다.
 - source tree와 ephemeral artifact 경계를 분리
 
 ### Ask first

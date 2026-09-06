@@ -6,8 +6,7 @@ Write/Edit이 디렉토리 구조를 위반할 가능성을 PreToolUse 시점에
 
 ## Structure
 
-- `structureGuard.ts` — `guardStructure`, `clearOrganCache` re-export
-- 실제 검사 로직은 `../utils/` organ의 `checkIntentMdReclassification`, `checkOrganSubdirectory`, `checkCircularImports`, `getParentSegments`, `organStructureChecker`에 위임
+- 이 모듈은 `intentInjector`, `preToolValidator`의 상위/하위가 아니라 PreToolUse가 독립적으로 호출하는 sibling 단계다. 같은 helper 계층이라는 이유만으로 위임 관계로 오인할 수 있어 이를 명시한다.
 
 ## Conventions
 
@@ -26,7 +25,7 @@ Write/Edit이 디렉토리 구조를 위반할 가능성을 PreToolUse 시점에
 ### Always do
 
 - 어떤 조건에서도 `continue: false` 반환 금지 (경고 전용)
-- 검사 로직은 `../utils/`로 분리 유지 (파일 내부 인라인 금지)
+- `intentInjector`, `preToolValidator`와 직접 결합하지 않고 PreToolUse orchestration이 각 결과를 합치도록 하며, 공유 판정 로직은 이 파일에 인라인하지 않음
 
 ### Ask first
 
@@ -37,8 +36,3 @@ Write/Edit이 디렉토리 구조를 위반할 가능성을 PreToolUse 시점에
 
 - 동기 I/O 과다 호출 (훅 레이턴시 폭발)
 - organ cache(`organStructureChecker`)를 세션 간 공유
-
-## Dependencies
-
-- `../utils/` (`getParentSegments`, `checkIntentMdReclassification`, `checkOrganSubdirectory`, `checkCircularImports`, `organStructureChecker`, `validateCwd`)
-- `../../types/hooks.js`
