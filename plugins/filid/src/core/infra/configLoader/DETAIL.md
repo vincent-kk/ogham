@@ -27,7 +27,8 @@ interface FilidConfigV2 {
   adapters: { mode: 'auto' | 'explicit'; enabled: string[] };
   rules: Record<string, RuleOverride>;
   review?: {
-    effort?: 'low' | 'medium' | 'high';
+    effort?: 'auto' | 'low' | 'medium' | 'high';
+    autoLowEffortGroupThreshold?: number;
     groupChurnLimit?: number;
     groupFileLimit?: number;
     maxGroups?: number;
@@ -48,8 +49,8 @@ interface FilidConfigV2 {
 ```
 
 - `loadConfig(projectRoot)` — v2 config 또는 in-memory migrated v1, warnings와 diagnostics를 반환한다.
-- `review`의 숫자 필드는 integer·positive, effort는 세 enum 값, lockfile은 비어 있지 않은 basename 문자열 목록이다. 위반은 기존 config validation error 경로를 따르고, 생략한 값은 review constants에서 채운다.
-- review 기본값은 effort `medium`, group churn 1024, plan churn 50, concurrency 8이다. `groupFileLimit` 생략은 변경 밀도에 따른 10~32 자동 상한이고 명시한 값은 고정 상한이다. `maxGroups` 생략은 전체 그룹 예산을 제한하지 않으며, 명시하면 prepare가 액터 배정 전에 reviewable 그룹 수를 검사한다. lockfile 기본값은 npm·Yarn·pnpm·Bun·Cargo·Poetry·Pipenv·Composer·Bundler·Go·Gradle·Nix·Mix의 canonical lockfile basename이다.
+- `review`의 숫자 필드는 integer·positive, effort는 `auto | low | medium | high`, lockfile은 비어 있지 않은 basename 문자열 목록이다. 위반은 기존 config validation error 경로를 따르고, 생략한 값은 review constants에서 채운다.
+- review 기본값은 effort `auto`, auto low group threshold 16, maxGroups 64, group churn 1024, plan churn 50, concurrency 8이다. auto는 reviewable group이 threshold 이상이면 low, 미만이면 medium을 선택한다. `groupFileLimit` 생략은 변경 밀도에 따른 10~32 자동 상한이고 명시한 값은 고정 상한이다. prepare는 액터 배정 전에 reviewable 그룹 수를 검사하며 명시 `maxGroups`는 기본 상한을 덮어쓴다. lockfile 기본값은 npm·Yarn·pnpm·Bun·Cargo·Poetry·Pipenv·Composer·Bundler·Go·Gradle·Nix·Mix의 canonical lockfile basename이다.
 - `migrateConfigV1(input)` — source를 쓰지 않고 대응 필드와 discarded key 목록을 반환한다.
 - `createDefaultConfig(language?, adapterIds?)` — 15개 built-in rule을 roster 기본 severity 그대로 실은 v2 config를 auto adapter mode로 만든다. severity 정본은 `constants/builtinRuleSeverities`이며 이 함수는 그것을 옮겨 적을 뿐이다.
 - `initProject(projectRoot, options)` — 부재한 config만 생성하며 기존 파일을 덮어쓰지 않는다.
@@ -73,6 +74,7 @@ interface FilidConfigV2 {
 ### AC-config-review — review 실행 설정
 
 - `review`의 effort와 양의 정수 limit·concurrency가 strict schema를 통과하고 round-trip한다.
+- `autoLowEffortGroupThreshold`는 선택 양의 정수로 두 config 레이어에서 보존되며, 명시 prepare effort가 병합된 config effort보다 우선한다.
 - 잘못된 enum, 0·음수·fraction 숫자와 빈 lockfile 이름은 config validation error다.
 - 중복 lockfile basename은 최초 순서를 보존하며 하나로 줄고, 생략한 값은 review constants의 기본값을 쓴다.
 - `groupChurnLimit` override는 group과 file chunk 양쪽에 같은 상한으로 전달된다.

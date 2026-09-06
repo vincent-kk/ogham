@@ -6,33 +6,29 @@ import type { ReviewGroup } from '../state/reviewGroupTypes.js';
  * @param group Deterministic group whose units become pending file rows.
  * @param sourceHash Immutable committed-source identity.
  * @param round One-based review round represented by the skeleton.
- * @returns Two-space JSON with one trailing newline.
+ * @returns Compact JSON with one trailing newline for a bounded skeleton read.
  */
 export function renderOpinionSkeleton(
   group: ReviewGroup,
   sourceHash: string,
   round = 1,
 ): string {
-  return `${JSON.stringify(
-    {
-      schema: REVIEW_OPINION_SCHEMA_VERSION,
-      group: group.id,
-      round,
-      state: 'INDETERMINATE',
-      sourceHash,
-      files: group.units.map((unit) => ({
-        path: unit.path,
-        change: unit.change,
-        chunk: unit.chunk ? `${unit.chunk.index}/${unit.chunk.total}` : null,
-        result: 'pending',
-        reason: null,
-      })),
-      findings: [],
-      checked: [],
-      gaps: [],
-      riskPlan: null,
-    },
-    null,
-    2,
-  )}\n`;
+  return `${JSON.stringify({
+    schema: REVIEW_OPINION_SCHEMA_VERSION,
+    group: group.id,
+    round,
+    state: 'INDETERMINATE',
+    sourceHash,
+    files: group.units.map((unit) => ({
+      path: unit.path,
+      change: unit.change,
+      chunk: unit.chunk ? `${unit.chunk.index}/${unit.chunk.total}` : null,
+      result: 'pending',
+      reason: null,
+    })),
+    findings: [],
+    checked: [],
+    gaps: [],
+    riskPlan: null,
+  })}\n`;
 }

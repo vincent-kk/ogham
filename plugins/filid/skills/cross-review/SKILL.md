@@ -2,8 +2,8 @@
 name: cross-review
 user-invocable: true
 description: 'Review a committed change through deterministic preparation, bounded reviewer rounds, independent verification, and a sealed verdict. Use after a branch has a PR, before resolve.'
-argument-hint: '[--base REF] [--effort low|medium|high] [--force] [--cleanup]'
-version: '7.4.0'
+argument-hint: '[--base REF] [--effort auto|low|medium|high] [--force] [--cleanup]'
+version: '7.5.0'
 complexity: complex
 plugin: filid
 ---
@@ -35,6 +35,7 @@ For every MCP response, when inline `data` is absent and `artifact.path` is pres
 - With `--cleanup`, call `review_state({ action: "cleanup", projectRoot: PROJECT_ROOT, confirm: true })`, report `cleaned`, and stop.
 - Otherwise call `review_state({ action: "prepare", projectRoot: PROJECT_ROOT, baseRef?: --base, effort?, force?, changeContext?: PR_BODY })`. Omit unsupplied optional values and omit `branchName`.
 - Use returned `data.projectRoot`, `data.branchName`, and `data.baseRef` as `PROJECT_ROOT`, `BRANCH`, and `BASE_REF` in every subsequent call. Use `data.reviewDirectory` and `summary.sourceHash` without deriving them. Artifacts use `review_schema: 7`.
+- Brief the user once with `summary.effortMode`, effective `effort`, `effortReason`, `reviewableGroups`, `maxReviewerHandoffs`, and `concurrency`. The handoff bound excludes verifiers and retries; it is not a token estimate. Continue automatically.
 - For `summary.disposition: cached`, go to Step 4; otherwise go to Step 3. If `summary.worktree` is `documents-only` or `source-dirty`, prepare returns empty `data.next` and `data.sealReady: true`, so go to Step 4.
 
 Allow one forced restart for a stale, missing, or incompatible state. A second identity failure stops without a terminal verdict.
@@ -86,11 +87,14 @@ pr-comment: none
 ## Options
 
 - `--base REF`: committed comparison base; default auto.
-- `--effort low|medium|high`: maximum reviewer rounds per group (1/2/3); default config or `medium`. Medium/high give a risk-marked group or an indeterminate first review one follow-up even with no findings. Medium also follows new errors requiring verification; high also follows new warnings. Risk alone or a repeated gap never triggers a third review. Low keeps one review and uses the strong tier for risk-marked groups. Other first reviews and verifiers use efficient; follow-up reviews use strong. Execute only the handoffs returned by the tool.
+- `--effort auto|low|medium|high`: explicit input overrides project/user `review.effort`, then defaults to `auto`. Auto selects low for at least `review.autoLowEffortGroupThreshold` reviewable groups (default 16), otherwise medium; skipped files and candidate-only groups do not count. Low/medium/high allow at most 1/2/3 reviewer rounds. This controls Filid rounds, independently of the host model's reasoning-effort setting.
+- Medium/high allow a risk-marked or indeterminate first review one follow-up; medium also follows new assigned errors, high also new warnings. Risk alone or repeated gaps never trigger round 3. Low reviews every group once and starts risk-marked groups at strong. Other first reviews and verifiers use efficient; follow-ups use strong. Use only returned handoffs; unresolved gaps remain INCONCLUSIVE.
 - `--force`: clear stale canonical artifacts and prepare fresh state; default off.
 - `--cleanup`: delete only this branch's review directory, then stop; default off.
 
-Project/user `review` configuration controls cost: `groupChurnLimit` defaults to 1024 changed lines; omitted `groupFileLimit` adapts to change density within 10–32 files, while an explicit value is a fixed cap. Optional `maxGroups` rejects an over-budget preparation before actor dispatch. Do not bypass that error by raising the budget or retrying with `--force`. Reusing prepared groups preserves their identities; use `--force` when the user changes grouping limits and requests regrouping. Keep the full roster in the shared session checklist rather than copying it into actor prompts.
+Project/user `review` configuration controls cost: `concurrency` stays 8; `groupChurnLimit` stays 1024 changed lines; omitted `groupFileLimit` adapts within 10–32 files. `maxGroups` defaults to 64 and rejects over-budget preparation before dispatch. Only a user's explicit budget change may raise it; `--force` never bypasses it. Auto effort preserves group composition. Keep the full roster in the session checklist. Changed grouping limits require requested `--force` regrouping.
+
+Legacy prepared sessions retain persisted effort when no explicit effort is supplied or configured; explicit `--effort auto` opts them in. Auto resumes re-evaluate the configured threshold without discarding valid opinions. Sealed caches do not reopen for policy changes.
 
 Optional `highRiskPaths` globs add repository-specific sensitive paths to built-in security/concurrency path hints, adapter-reported public entry points, and assigned FCA boundary evidence. Risk reasons are prepared once, bounded, and preserved on resume; changing the risk policy requires a fresh preparation. An empty reason list is not proof of low risk. Never add a model-based triage actor.
 

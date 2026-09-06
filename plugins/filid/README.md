@@ -105,29 +105,38 @@ The default group budget is **1,024 changed lines**. The file cap adapts to chan
 
 Risk routing uses security/concurrency path words, adapter-reported public entry points, assigned FCA boundary evidence, and optional `highRiskPaths` globs. Only assigned source files contribute; churn, file counts, and multiple owners do not by themselves raise risk. These are routing hints, and no signal is not a safety guarantee. At most five evidence reasons are stored per group; no extra triage actor runs.
 
-| Review situation                                       | Model and continuation                                                                 |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------- |
-| Ordinary first review                                  | Efficient; finishes after one review when complete and no new error requires follow-up |
-| Risk-marked group, default `medium` or explicit `high` | Efficient first review, then one independent strong review even with no findings       |
-| Risk-marked group, explicit `low`                      | One strong review                                                                      |
-| Indeterminate first review or a new assigned error     | Strong follow-up within the configured round budget                                    |
-| Independent finding verifier                           | Efficient                                                                              |
+| Review situation                                   | Model and continuation                                                                 |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Ordinary first review                              | Efficient; finishes after one review when complete and no new error requires follow-up |
+| Risk-marked group, effective `medium` or `high`    | Efficient first review, then one independent strong review even with no findings       |
+| Risk-marked group, effective `low`                 | One strong review                                                                      |
+| Indeterminate first review or a new assigned error | Strong follow-up within the configured round budget                                    |
+| Independent finding verifier                       | Efficient                                                                              |
 
 `low`, `medium`, and `high` cap reviewer rounds at 1, 2, and 3. High can also follow new warnings; risk alone or the same evidence gap does not trigger a third round. Follow-up reviewers inspect the diff before reading the prior opinion. Evidence gaps remain visible in the merged result rather than being silently cleared.
 
-An optional project or user configuration can stop oversized reviews before any actor is dispatched:
+Fresh reviews default to `auto`: at least 16 reviewable groups selects `low`, fewer selects `medium`. Explicit `--effort` overrides project/user `review.effort`, which overrides the default. `review.autoLowEffortGroupThreshold` changes this boundary; fixed `low|medium|high` disables auto selection. This controls Filid reviewer rounds, separately from the host model's reasoning effort. Concurrency stays **8**, grouping stays unchanged, and every group receives a first review.
+
+Add this `review` fragment to an existing project or user Filid config; it is not a complete standalone config:
 
 ```json
 {
   "review": {
     "groupChurnLimit": 1024,
-    "maxGroups": 48,
+    "effort": "auto",
+    "autoLowEffortGroupThreshold": 16,
+    "maxGroups": 64,
+    "concurrency": 8,
     "highRiskPaths": ["src/payments/**", "src/session/**"]
   }
 }
 ```
 
-`maxGroups` counts reviewable groups, not concurrent actors or total follow-up calls. Exceeding it reports `review-group-budget-exceeded`; no files are silently skipped. Omit it for unrestricted group counts. `highRiskPaths` adds to the built-in hints. Existing prepared groups keep their identities and saved risk reasons; use a fresh preparation or explicit `--force` to apply changed grouping or risk settings. Lowering `concurrency` changes scheduling, not the total work.
+`maxGroups` defaults to **64** and counts reviewable groups, excluding candidate-only bookkeeping. Exceeding it reports `review-group-budget-exceeded` before dispatch; no files are silently skipped. A user-configured value can raise or lower the ceiling. `highRiskPaths` adds to the built-in hints. Existing prepared groups keep their identities and saved risk reasons; use a fresh preparation or explicit `--force` to apply changed grouping or risk settings. Concurrency changes scheduling, not total work.
+
+Legacy prepared sessions retain their saved effort unless an explicit request or config chooses a mode. Explicit `--effort auto` opts them in. Automatic resumes re-evaluate the threshold; metadata-only changes preserve briefs, caller context, and opinions. Effective effort changes retune rounds while retaining valid opinions. Sealed caches remain closed. Prepare reports the mode, effective effort, reason, reviewable group count, and `maxReviewerHandoffs` (the sum of configured reviewer rounds, excluding verification and retries). It is a call bound, not a token budget.
+
+Reviewer briefs reuse the prewritten opinion skeleton and verifier briefs keep a compact inline JSON shape. Full assigned diffs, applicable rules, source tracing, independent finding verification, and `INCONCLUSIVE` for unresolved evidence remain required. Fewer review rounds can still miss defects; deterministic coverage tests and live model calibration measure different aspects of quality.
 
 ### Migrate legacy document names
 

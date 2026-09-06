@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { REVIEW_BRIEF_INLINE_DIFF_LIMIT } from '../../../../constants/reviewState.js';
+import { renderOpinionSkeleton } from '../../../../mcp/tools/reviewState/brief/renderOpinionSkeleton.js';
 import { renderReviewBrief } from '../../../../mcp/tools/reviewState/brief/renderReviewBrief.js';
 import { checkReviewOpinion } from '../../../../mcp/tools/reviewState/opinion/checkReviewOpinion.js';
 import { parseReviewOpinion } from '../../../../mcp/tools/reviewState/opinion/parseReviewOpinion.js';
@@ -9,10 +10,6 @@ import { REVIEW_HANDOFF_SEED_SCHEMA } from '../../../../mcp/tools/reviewState/sc
 import type { ReviewValidationProblem } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
 import { buildReviewBriefInput } from './helpers/buildReviewBriefInput.js';
-
-/** Output-contract JSON fence captured from a rendered brief. */
-const OUTPUT_CONTRACT_PATTERN =
-  /## Output Contract\n\n```json\n([\s\S]*?)\n```/;
 
 describe('renderReviewBrief', () => {
   it('renders FCA Handoff between Change Context and Files', () => {
@@ -256,10 +253,17 @@ describe('renderReviewBrief', () => {
     expect(output).toContain('## Other Changed Files\n\nnone');
   });
 
-  it('renders a valid schema-7 reviewer opinion example', () => {
+  it('points to a schema-7 skeleton whose completed assignments validate', () => {
     const input = buildReviewBriefInput();
     const output = renderReviewBrief(input);
-    const contract = output.match(OUTPUT_CONTRACT_PATTERN)?.[1] ?? '';
+    expect(output).toContain('prewritten JSON skeleton');
+    expect(output).toContain(`output: ${input.group.skeletonPath}`);
+    const skeleton = JSON.parse(
+      renderOpinionSkeleton(input.group, input.sourceHash),
+    );
+    skeleton.state = 'COMPLETE';
+    for (const file of skeleton.files) file.result = 'reviewed';
+    const contract = JSON.stringify(skeleton);
     const parsed = parseReviewOpinion(contract);
     const problems: ReviewValidationProblem[] = [];
 
@@ -285,15 +289,9 @@ describe('renderReviewBrief', () => {
   it('states chunk identity and skipped-result requirements', () => {
     const output = renderReviewBrief(buildReviewBriefInput());
 
-    expect(output).toContain(
-      '`chunk` must be `"k/n"` for a chunked unit and `null` for an unchunked unit.',
-    );
-    expect(output).toContain(
-      'A `skipped` result requires a non-empty `reason`.',
-    );
+    expect(output).toContain('retain chunk ("k/n" or null)');
+    expect(output).toContain('non-empty reason for skipped');
     expect(output).toContain('| src/b.ts | M | source | src | 2/3 |');
-    expect(output).toContain(
-      '`existingCode` is required and must not be empty.',
-    );
+    expect(output).toContain('Text must be non-empty');
   });
 });

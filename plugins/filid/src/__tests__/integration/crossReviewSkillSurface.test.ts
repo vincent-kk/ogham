@@ -59,9 +59,9 @@ const genuineGap = readFileSync(
 
 describe('cross-review v7 skill surface', () => {
   it('declares the v7 frontmatter and orchestration schema', () => {
-    expect(skill).toContain("version: '7.4.0'");
+    expect(skill).toContain("version: '7.5.0'");
     expect(skill).toContain('review_schema: 7');
-    expect(skill).toContain('--effort low|medium|high');
+    expect(skill).toContain('--effort auto|low|medium|high');
   });
 
   it('contains exactly the required v7 files', () => {
@@ -173,6 +173,10 @@ describe('cross-review v7 skill surface', () => {
   });
 
   it('describes validation retries and authoritative concurrency', () => {
+    expect(skill).toContain('--effort auto|low|medium|high');
+    expect(skill).toContain('autoLowEffortGroupThreshold');
+    expect(skill).toContain('maxReviewerHandoffs');
+    expect(skill).toContain('defaults to 64');
     expect(skill).toContain('summary.concurrency');
     expect(skill).toContain('data.next');
     expect(skill).toContain('data.sealReady');

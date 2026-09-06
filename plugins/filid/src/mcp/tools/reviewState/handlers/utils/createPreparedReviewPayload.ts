@@ -62,10 +62,24 @@ export function createPreparedReviewPayload(
         0,
       ),
       groupsTotal: input.state.groups.length,
+      reviewableGroups: input.state.groups.filter((group) => group.rounds > 0)
+        .length,
+      maxReviewerHandoffs: input.state.groups.reduce(
+        (total, group) => total + group.rounds,
+        0,
+      ),
       candidateCount: input.state.scope.candidates.length,
       evidenceComplete: input.state.scope.evidenceComplete,
       worktree: input.state.scope.worktree,
       effort: input.state.effort,
+      effortMode: input.state.effortMode ?? input.state.effort,
+      effortReason: input.state.effortReason ?? 'legacy-resume',
+      ...(input.state.autoLowEffortGroupThreshold === undefined
+        ? {}
+        : {
+            autoLowEffortGroupThreshold:
+              input.state.autoLowEffortGroupThreshold,
+          }),
       concurrency: input.concurrency,
       ...(input.state.verdict === null ? {} : { verdict: input.state.verdict }),
     },

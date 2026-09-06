@@ -60,7 +60,13 @@ export const REVIEW_EFFORT_ROUNDS = {
 } as const;
 
 /** Effort used when neither the request nor configuration chooses one. */
-export const REVIEW_DEFAULT_EFFORT = 'medium';
+export const REVIEW_DEFAULT_EFFORT = 'auto';
+
+/** Reviewable group count at which automatic effort selects a single round. */
+export const REVIEW_AUTO_LOW_EFFORT_GROUP_THRESHOLD = 16;
+
+/** Default prepare-time ceiling on groups requiring reviewer actors. */
+export const REVIEW_MAX_GROUPS = 64;
 
 /** Minimum file cap used by automatic review-group sizing. */
 export const REVIEW_GROUP_FILE_LIMIT = 10;

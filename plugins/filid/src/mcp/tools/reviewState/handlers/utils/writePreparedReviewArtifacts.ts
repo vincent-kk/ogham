@@ -22,13 +22,14 @@ import type { ReviewHandoffSeed } from '../../scope/reviewHandoffSeedSchema.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 import type {
   ReviewEffort,
+  ReviewEffortMetadata,
   ReviewScopeCandidate,
   ReviewScopeFile,
   ReviewStatePaths,
 } from '../../state/reviewStateTypes.js';
 
 /** All state-independent values needed to write prepare's derived artifacts. */
-interface WritePreparedReviewArtifactsInput {
+interface WritePreparedReviewArtifactsInput extends ReviewEffortMetadata {
   /** Verbatim actor methods, needed only when a brief must be rendered. */
   actorMethods: { reviewer: string; verifier: string } | null;
   /** Sanitized untrusted summary for the session and reviewer brief. */
@@ -251,6 +252,9 @@ export function writePreparedReviewArtifacts(
         sourceHash: input.sourceHash,
         reviewDirectory: input.paths.reviewDirectory,
         effort: input.effort,
+        effortMode: input.effortMode,
+        effortReason: input.effortReason,
+        autoLowEffortGroupThreshold: input.autoLowEffortGroupThreshold,
         createdAt: input.createdAt,
         files: input.files,
         groups,

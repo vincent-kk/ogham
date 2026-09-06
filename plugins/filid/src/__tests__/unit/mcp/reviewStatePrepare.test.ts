@@ -179,13 +179,18 @@ describe('review_state prepare v7', () => {
     expect(Object.keys(result.summary).sort()).toEqual(
       [
         'action',
+        'autoLowEffortGroupThreshold',
         'candidateCount',
         'concurrency',
         'disposition',
         'effort',
+        'effortMode',
+        'effortReason',
         'evidenceComplete',
         'filesTotal',
         'groupsTotal',
+        'reviewableGroups',
+        'maxReviewerHandoffs',
         'snapshotHash',
         'sourceHash',
         'unitsTotal',

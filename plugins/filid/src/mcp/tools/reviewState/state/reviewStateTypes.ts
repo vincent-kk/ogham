@@ -43,6 +43,23 @@ export type WorktreeDisposition = ValueOf<typeof WORKTREE_DISPOSITIONS>;
 /** Reviewer effort level and its configured round count. */
 export type ReviewEffort = keyof typeof REVIEW_EFFORT_ROUNDS;
 
+/** Requested round policy; auto resolves only after reviewable groups exist. */
+export type ReviewEffortMode = ReviewEffort | 'auto';
+
+/** Observable reason for selecting or retaining the effective round policy. */
+export type ReviewEffortReason =
+  'fixed' | 'auto-standard' | 'auto-large' | 'legacy-resume';
+
+/** Optional metadata keeps state v2 readable across the automatic-policy rollout. */
+export interface ReviewEffortMetadata {
+  /** Requested policy, or the retained effective mode of a legacy session. */
+  effortMode?: ReviewEffortMode;
+  /** Reason for selecting the effective effort. */
+  effortReason?: ReviewEffortReason;
+  /** Positive reviewable-group threshold used by automatic selection. */
+  autoLowEffortGroupThreshold?: number;
+}
+
 /** Stable problem codes emitted while validating opinion artifacts. */
 export type ReviewValidationProblemCode =
   | 'parse-error'
@@ -229,7 +246,7 @@ export type ReviewStateInput =
       changeContext?: string;
       force?: boolean;
       /** Optional reviewer effort overriding repository configuration. */
-      effort?: ReviewEffort;
+      effort?: ReviewEffortMode;
     }
   | {
       action:
@@ -298,7 +315,7 @@ export interface ReviewHandoffPlan {
 }
 
 /** Persisted identity and lifecycle state for one branch review. */
-export interface ReviewStateRecord {
+export interface ReviewStateRecord extends ReviewEffortMetadata {
   /** Persisted record schema version. */
   schemaVersion: typeof REVIEW_STATE_SCHEMA_VERSION;
   /** Absolute project root owning the review. */
@@ -353,7 +370,7 @@ export interface ReviewStateRecord {
 }
 
 /** Bounded inline facts returned for every review_state action. */
-export interface ReviewStateSummary {
+export interface ReviewStateSummary extends ReviewEffortMetadata {
   action: ReviewStateAction;
   /** Lifecycle disposition. Absent for `assess`, which reads no state file. */
   disposition?: ReviewStateDisposition;
@@ -379,6 +396,10 @@ export interface ReviewStateSummary {
   unitsTotal?: number;
   /** Number of deterministic reviewer groups. */
   groupsTotal?: number;
+  /** Groups requiring a reviewer, excluding candidate-only bookkeeping. */
+  reviewableGroups?: number;
+  /** Sum of configured group rounds; excludes verifier and retry calls. */
+  maxReviewerHandoffs?: number;
   /** Number of non-informational FCA candidates. */
   candidateCount?: number;
   /** Whether structure and verification evidence are conclusive. */
@@ -420,7 +441,7 @@ export interface ReviewStateSummary {
 }
 
 /** Exact bounded summary returned by the prepare action. */
-export interface ReviewPrepareSummary {
+export interface ReviewPrepareSummary extends ReviewEffortMetadata {
   /** Selected public action. */
   action: typeof REVIEW_STATE_ACTIONS.PREPARE;
   /** Whether artifacts were created, resumed, or restored from cache. */
@@ -438,6 +459,10 @@ export interface ReviewPrepareSummary {
   unitsTotal: number;
   /** Number of deterministic reviewer groups. */
   groupsTotal: number;
+  /** Groups requiring a reviewer, excluding candidate-only bookkeeping. */
+  reviewableGroups: number;
+  /** Sum of configured group rounds; excludes verifier and retry calls. */
+  maxReviewerHandoffs: number;
   /** Number of non-informational FCA candidates. */
   candidateCount: number;
   /** Whether structure and verification evidence are conclusive. */

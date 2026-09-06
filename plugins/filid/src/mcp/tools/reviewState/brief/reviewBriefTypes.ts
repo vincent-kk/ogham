@@ -3,6 +3,7 @@ import type { ReviewFinding } from '../opinion/reviewOpinionTypes.js';
 import type { ReviewHandoffSeed } from '../scope/reviewHandoffSeedSchema.js';
 import type { ReviewGroup } from '../state/reviewGroupTypes.js';
 import type {
+  ReviewEffortMetadata,
   ReviewScopeCandidate,
   ReviewScopeFile,
 } from '../state/reviewStateTypes.js';
@@ -42,7 +43,7 @@ export interface RenderReviewBriefInput {
 }
 
 /** Explicit inputs needed to render the cross-review orchestration session. */
-export interface RenderSessionMarkdownInput {
+export interface RenderSessionMarkdownInput extends ReviewEffortMetadata {
   /** Bounded untrusted change summary supplied by prepare. */
   changeContext: string;
   /** Source branch under review. */

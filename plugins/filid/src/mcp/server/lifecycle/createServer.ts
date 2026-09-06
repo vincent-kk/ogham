@@ -296,7 +296,7 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
     baseRef: z.string().min(1).optional(),
     changeContext: z.string().optional(),
     force: z.boolean().optional(),
-    effort: z.enum(['low', 'medium', 'high']).optional(),
+    effort: z.enum(['auto', 'low', 'medium', 'high']).optional(),
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
@@ -364,9 +364,11 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .optional()
     .describe('prepare only: discard existing unsealed artifacts first.'),
   effort: z
-    .enum(['low', 'medium', 'high'])
+    .enum(['auto', 'low', 'medium', 'high'])
     .optional()
-    .describe('prepare only: reviewer effort and maximum round count.'),
+    .describe(
+      'prepare only: auto selects low at the configured group threshold, otherwise medium; low/medium/high cap reviewer rounds at 1/2/3. Explicit input overrides config.',
+    ),
   kind: z
     .enum(['review', 'verify'])
     .optional()

@@ -4,6 +4,7 @@ import { renderMarkdownTable } from '../scope/utils/renderMarkdownTable.js';
 
 import type { RenderSessionMarkdownInput } from './reviewBriefTypes.js';
 import { renderChangeContext } from './utils/renderChangeContext.js';
+import { renderReviewPolicyMetadata } from './utils/renderReviewPolicyMetadata.js';
 
 /**
  * Return every creation-ordered group containing a unit for one path.
@@ -48,6 +49,7 @@ export function renderSessionMarkdown(
     `review_directory: ${JSON.stringify(input.reviewDirectory)}`,
     `changed_files_count: ${input.files.length}`,
     `effort: ${input.effort}`,
+    ...renderReviewPolicyMetadata(input, input.groups),
     `created_at: ${input.createdAt}`,
     '---',
     '',

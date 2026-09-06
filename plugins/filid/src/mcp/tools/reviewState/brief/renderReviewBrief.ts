@@ -6,7 +6,6 @@ import type { RenderReviewBriefInput } from './reviewBriefTypes.js';
 import { renderBriefDiffs } from './utils/renderBriefDiffs.js';
 import { renderChangeContext } from './utils/renderChangeContext.js';
 import { renderHandoffSection } from './utils/renderHandoffSection.js';
-import { renderReviewOpinionExample } from './utils/renderReviewOpinionExample.js';
 
 /**
  * Render a chunk identity for a human-facing Markdown table.
@@ -71,7 +70,7 @@ export function renderReviewBrief(
   const groupPaths = new Set(input.group.units.map(({ path }) => path));
   const otherFiles = input.files.filter(({ path }) => !groupPaths.has(path));
   const rosterSummary = otherFiles.length
-    ? `${otherFiles.length} other changed files. Search ../session.md (Review Checklist) only for a specific caller or consumer lookup; do not read the full roster.`
+    ? `${otherFiles.length} other changed files. Search ../session.md (Review Checklist) for specific callers/consumers only; never read the full roster.`
     : 'none';
   const candidatesTable = renderMarkdownTable(
     [
@@ -103,7 +102,6 @@ export function renderReviewBrief(
     .sort((left, right) => left.id.localeCompare(right.id))
     .map(({ id, body }) => `### ${id}\n\n${body.trimEnd()}`)
     .join('\n\n');
-  const outputContract = renderReviewOpinionExample(input, round);
   const outputPath =
     round === 1
       ? input.group.skeletonPath
@@ -164,21 +162,11 @@ export function renderReviewBrief(
     '',
     '## Output Contract',
     '',
-    '```json',
-    outputContract,
-    '```',
-    '',
-    'The fenced object is a valid shape example. Replace all illustrative text with review evidence and return only the JSON object in the opinion file.',
-    '',
-    '- `state` must be `COMPLETE` or `INDETERMINATE`.',
-    '- `files` must contain every assigned `(path, change, chunk)` exactly once and no unassigned unit.',
-    '- `chunk` must be `"k/n"` for a chunked unit and `null` for an unchunked unit.',
-    '- `result` must be `reviewed` or `skipped`. A `skipped` result requires a non-empty `reason`.',
-    '- Finding `severity` must be `error` or `warning`.',
-    '- Finding `category` must be `bug`, `security`, `performance`, `maintainability`, `test`, `documentation`, `contract`, `structure`, or `verification`.',
-    '- `existingCode` is required and must not be empty. `lines` may be `unknown`; validation resolves it from committed source.',
-    '- `INDETERMINATE` requires at least one non-empty `gaps` entry.',
-    '- `riskPlan` is a string or `null`.',
+    'Read the prewritten JSON skeleton at the handoff output path. Preserve keys and identity; complete assigned units once, without extras. Write JSON only.',
+    '- result: reviewed|skipped (non-empty reason for skipped); retain chunk ("k/n" or null).',
+    '- state: COMPLETE|INDETERMINATE; INDETERMINATE requires gaps [{path, rule, detail}], all non-empty.',
+    `- findings: [{id: R${input.group.id}-NNN, severity: error|warning, category: bug|security|performance|maintainability|test|documentation|contract|structure|verification, path, existingCode, lines, rule, message, evidence, consequence, recommendedAction}]. Text must be non-empty; path must be assigned. lines may be "unknown"; validation locates committed code.`,
+    '- checked: inspected paths/IDs; riskPlan: string|null; use [] for no findings/gaps.',
     '',
   ].join('\n');
 }

@@ -34,7 +34,7 @@ Do not write `opinions/verify-NN.md`, any normal cross-review artifact, or any p
 
 ## Deliverable
 
-Write valid JSON only to `opinions/verify-NN.json` at the `output` path named by the supplied verifier brief. Start from a parseable `INDETERMINATE` skeleton, replace it with the complete decision set, and write no other artifact or project file. An empty assignment produces `state: "COMPLETE"` and `decisions: []`.
+Write valid JSON only to `opinions/verify-NN.json` at the brief's `output` path. Use its compact Output Contract shape; no output skeleton is prewritten. Replace illustrative decisions with independent evidence and write no other artifact or project file. An empty assignment produces `state: "COMPLETE"` and `decisions: []`.
 
 Your final message is exactly one line: `done: <output path>`. Report nothing else; the opinion file is the deliverable.
 

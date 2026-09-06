@@ -4,6 +4,7 @@ import { removeFileIfExistsSync } from '@ogham/cross-platform';
 
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
+  REVIEW_EFFORT_ROUNDS,
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_PHASES,
   REVIEW_STATE_SCHEMA_VERSION,
@@ -44,7 +45,9 @@ import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
 import { resolvePreparedReviewFiles } from './utils/resolvePreparedReviewFiles.js';
 import { retainReviewGroupValidations } from './utils/retainReviewGroupValidations.js';
 import { retuneReviewGroups } from './utils/retuneReviewGroups.js';
+import { selectReviewEffort } from './utils/selectReviewEffort.js';
 import { writePreparedReviewArtifacts } from './utils/writePreparedReviewArtifacts.js';
+import { writeReviewSessionPolicy } from './utils/writeReviewSessionPolicy.js';
 
 /** Prepare input narrowed from the public review-state action union. */
 type PrepareInput = Extract<
@@ -93,15 +96,34 @@ export async function prepareReviewState(
   const canResume =
     sameIdentity && existing.phase === REVIEW_STATE_PHASES.PREPARED;
   if (canResume) assertReviewGroupBudget(existing.groups, settings.maxGroups);
-  const effortChanged = canResume && existing.effort !== settings.effort;
+  const preserveLegacy =
+    canResume &&
+    !settings.effortExplicit &&
+    (existing.effortMode === undefined ||
+      existing.effortReason === 'legacy-resume');
+  let policy = selectReviewEffort(
+    preserveLegacy ? existing.effort : settings.effortMode,
+    canResume ? existing.groups.filter((group) => group.rounds > 0).length : 0,
+    settings.autoLowEffortGroupThreshold,
+  );
+  if (preserveLegacy) policy.effortReason = 'legacy-resume';
+  const effortChanged = canResume && existing.effort !== policy.effort;
+  const metadataChanged =
+    canResume &&
+    (existing.effortMode !== policy.effortMode ||
+      existing.effortReason !== policy.effortReason ||
+      existing.autoLowEffortGroupThreshold !==
+        policy.autoLowEffortGroupThreshold);
 
   if (
     canResume &&
     !effortChanged &&
     hasCompletePreparedArtifacts(paths, existing)
   ) {
+    const selected = { ...existing, ...policy };
+    if (metadataChanged) writeReviewSessionPolicy(paths.sessionPath, selected);
     const state = await recoverReviewGroups(
-      existing,
+      selected,
       paths,
       settings.pluginRoot,
     );
@@ -144,7 +166,7 @@ export async function prepareReviewState(
     if (!presence.diffs)
       assertRenderedUnitsMatchGroups(renderedUnits, existing.groups);
     const preparedGroups = effortChanged
-      ? retuneReviewGroups(existing.groups, settings.rounds)
+      ? retuneReviewGroups(existing.groups, REVIEW_EFFORT_ROUNDS[policy.effort])
       : existing.groups;
     const groups = writePreparedReviewArtifacts({
       actorMethods: loadedRules?.actorMethods ?? null,
@@ -160,15 +182,18 @@ export async function prepareReviewState(
       sourceHash: existing.sourceHash,
       baseRef: existing.baseRef,
       branchName: existing.branchName,
-      effort: settings.effort,
+      ...policy,
       createdAt: existing.preparedAt,
       onlyMissingArtifacts: true,
       preserveOpinions: true,
       rewriteReviewBriefs: effortChanged,
       rewriteSession: effortChanged,
     });
+    const selected = { ...existing, ...policy, groups };
+    if (metadataChanged && !effortChanged)
+      writeReviewSessionPolicy(paths.sessionPath, selected);
     const state = await recoverReviewGroups(
-      { ...existing, effort: settings.effort, groups },
+      selected,
       paths,
       settings.pluginRoot,
     );
@@ -226,13 +251,20 @@ export async function prepareReviewState(
     units: renderedUnits.map(({ unit }) => unit),
     files,
     candidates: collected.candidates,
-    rounds: settings.rounds,
+    rounds: 1,
     groupFileLimit: settings.groupFileLimit,
     groupChurnLimit: settings.groupChurnLimit,
     planChurnLimit: settings.planChurnLimit,
   });
   files = applyMissingTestRules({ files, groups, activeRules });
   assertReviewGroupBudget(groups, settings.maxGroups);
+  policy = selectReviewEffort(
+    preserveLegacy ? existing.effort : settings.effortMode,
+    groups.filter((group) => group.rounds > 0).length,
+    settings.autoLowEffortGroupThreshold,
+  );
+  if (preserveLegacy) policy.effortReason = 'legacy-resume';
+  groups = retuneReviewGroups(groups, REVIEW_EFFORT_ROUNDS[policy.effort]);
   groups = groups.map((group) => ({
     ...group,
     riskReasons: assessReviewGroupRisk({
@@ -263,7 +295,7 @@ export async function prepareReviewState(
     sourceHash: source.sourceHash,
     baseRef,
     branchName: input.branchName,
-    effort: settings.effort,
+    ...policy,
     createdAt,
     onlyMissingArtifacts: false,
     preserveOpinions: canResume,
@@ -280,7 +312,7 @@ export async function prepareReviewState(
     fileHashes: source.fileHashes,
     phase: REVIEW_STATE_PHASES.PREPARED,
     preparedAt: createdAt,
-    effort: settings.effort,
+    ...policy,
     groups,
     scope: {
       snapshotHash: collected.snapshotHash,

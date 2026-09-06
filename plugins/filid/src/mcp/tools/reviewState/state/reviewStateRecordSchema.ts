@@ -172,6 +172,11 @@ export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
     preparedAt: z.string(),
     sealedAt: z.string().optional(),
     effort: z.enum(['low', 'medium', 'high']),
+    effortMode: z.enum(['auto', 'low', 'medium', 'high']).optional(),
+    effortReason: z
+      .enum(['fixed', 'auto-standard', 'auto-large', 'legacy-resume'])
+      .optional(),
+    autoLowEffortGroupThreshold: z.number().int().positive().optional(),
     groups: z.array(ReviewGroupSchema),
     scope: ReviewScopeSchema,
     verdict: z.enum(['APPROVED', 'REQUEST_CHANGES', 'INCONCLUSIVE']).nullable(),

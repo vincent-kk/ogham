@@ -57,7 +57,8 @@ const StructureConfigSchema = z
 /** Optional cross-review execution settings stored in Filid configuration. */
 const ReviewConfigSchema = z
   .object({
-    effort: z.enum(['low', 'medium', 'high']).optional(),
+    effort: z.enum(['auto', 'low', 'medium', 'high']).optional(),
+    autoLowEffortGroupThreshold: z.number().int().positive().optional(),
     groupChurnLimit: z.number().int().positive().optional(),
     groupFileLimit: z.number().int().positive().optional(),
     maxGroups: z.number().int().positive().optional(),

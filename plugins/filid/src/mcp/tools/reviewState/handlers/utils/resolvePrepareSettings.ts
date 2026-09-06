@@ -1,10 +1,11 @@
 import type { REVIEW_STATE_ACTIONS } from '../../../../../constants/reviewState.js';
 import {
+  REVIEW_AUTO_LOW_EFFORT_GROUP_THRESHOLD,
   REVIEW_CONCURRENCY,
   REVIEW_DEFAULT_EFFORT,
-  REVIEW_EFFORT_ROUNDS,
   REVIEW_GROUP_CHURN_LIMIT,
   REVIEW_LOCKFILE_BASENAMES,
+  REVIEW_MAX_GROUPS,
   REVIEW_PLAN_CHURN_LIMIT,
 } from '../../../../../constants/reviewState.js';
 import { loadConfig } from '../../../../../core/index.js';
@@ -34,13 +35,16 @@ export function resolvePrepareSettings(input: PrepareInput) {
     throw new Error(`config validation failed: ${validationFailure}`);
   const config = loaded.config;
   const review = config?.review;
-  const effort = input.effort ?? review?.effort ?? REVIEW_DEFAULT_EFFORT;
+  const effortMode = input.effort ?? review?.effort ?? REVIEW_DEFAULT_EFFORT;
   return {
-    effort,
-    rounds: REVIEW_EFFORT_ROUNDS[effort],
+    effortMode,
+    effortExplicit: input.effort !== undefined || review?.effort !== undefined,
+    autoLowEffortGroupThreshold:
+      review?.autoLowEffortGroupThreshold ??
+      REVIEW_AUTO_LOW_EFFORT_GROUP_THRESHOLD,
     concurrency: review?.concurrency ?? REVIEW_CONCURRENCY,
     groupFileLimit: review?.groupFileLimit,
-    maxGroups: review?.maxGroups,
+    maxGroups: review?.maxGroups ?? REVIEW_MAX_GROUPS,
     highRiskPaths: review?.highRiskPaths ?? [],
     groupChurnLimit: review?.groupChurnLimit ?? REVIEW_GROUP_CHURN_LIMIT,
     planChurnLimit: review?.planChurnLimit ?? REVIEW_PLAN_CHURN_LIMIT,

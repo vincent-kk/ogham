@@ -94,7 +94,9 @@ describe('review_state prepare effort skeleton', () => {
     expect(readUtf8FileIfExistsSync(opinionPath)).toBe(opinionBefore);
     const highBrief = readUtf8FileIfExistsSync(briefPath);
     expect(highBrief).toContain('rounds: 3');
-    expect(highBrief).toContain('"round": 2');
+    expect(JSON.parse(readUtf8FileIfExistsSync(roundTwoPath)!)).toMatchObject({
+      round: 2,
+    });
     expect(highBrief).toContain(
       `output: ${roundReviewOpinionPath(highGroup.id, 2)}`,
     );
