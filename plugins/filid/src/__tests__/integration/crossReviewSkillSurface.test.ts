@@ -62,7 +62,7 @@ const genuineGap = readFileSync(
 
 describe('cross-review v7 skill surface', () => {
   it('declares the v7 frontmatter and orchestration schema', () => {
-    expect(skill).toContain("version: '7.9.0'");
+    expect(skill).toContain("version: '7.10.0'");
     expect(skill).toContain('review_schema: 7');
     expect(skill).toContain('--effort auto|low|medium|high');
   });

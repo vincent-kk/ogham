@@ -10,6 +10,7 @@
 - `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `fractal_inspect` `resolve` 결과의 `data.results[].summary.chainPaths` 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
 - `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 PR 본문의 `FCA Handoff`에 `unresolved-path`로 기록하고 계속한다.
 - `pull-request`는 FCA 문서 commit과 PR 생성·갱신을 수행하며, 문서 commit 이후 원격 branch와 현재 HEAD를 다시 비교해 뒤처졌으면 기본적으로 push한 뒤 게시한다. `--no-push`와 publication 실패는 branch별로 저장된 body를 남겨 복구할 수 있어야 한다.
+- `pull-request`는 명시 base가 없으면 로컬 Git 그래프에서 가까운 부모 후보를 스크립트로 추정하며 문서 동기화·파일 diff·PR 게시에 같은 base를 사용한다. `cross-review`는 명시 override가 없고 PR이 있으면 PR에 기록된 base branch를 prepare에 전달한다.
 - `pull-request`의 문서 동기화는 PR 생성을 막지 않는다. Stage 1은 `enrich-docs --repair`로 문서 계약 finding만 고치고, 고치지 못한 finding·indeterminate 증거·동기화 실패는 PR 본문의 `FCA Handoff` 섹션과 `<!-- filid:handoff v1 -->` 블록에 기록해 cross-review의 change context로 넘긴다. 소스·import·파일 배치 finding은 여기서 고치지 않는다.
 - Filid의 resolve는 confirmed fix 전체를 한 decision sheet에 모아 Severity/Category와 독립적인 적용 추천을 표시하고, 명백하거나 영향이 작은 수정은 기본 선택한 채 논쟁적인 결정만 전면에 둔다.
 - spec-document는 파일당 15 cases, test-record는 파일당 32 cases를 허용하고 두 역할 사이의 promotion 관계를 만들지 않는다.
@@ -69,6 +70,14 @@
 - non-FCA 경로도 PR의 Code/Architecture 분석에서는 유지되며 owner가 하나도 없으면 document sync는 `no-change`다.
 - PR 문서 동기화와 resolve의 문서 수정 위임은 INTENT와 DETAIL을 모두 평가한다.
 - 게시 단계는 문서 commit 이후 push 필요 여부를 다시 계산하며 `--no-push`도 갱신된 결과를 따른다.
+
+### AC-root-pr-base — PR base와 변경 범위 일치
+
+- 명시 `--base`는 자동 후보 탐색을 생략하며, 유효하지 않으면 다른 base로 대체하지 않는다.
+- 자동 추정은 local branch와 origin tracking ref의 merge-base·commit 거리를 사용한다. 같은 이름의 origin ref를 우선하며 현재 branch·HEAD를 포함하는 후보·무관한 history·복수 merge-base 후보는 제외한다. shallow history는 자동 추정하지 않는다.
+- head 쪽 commit 거리가 최소인 후보에서 기본 브랜치, base 쪽 거리, branch 이름 순으로 선택하며 동률 후보는 ambiguity와 함께 보고한다. 이름·시간·파일 변경 줄 수로 부모 관계를 단정하지 않는다.
+- base는 문서 동기화보다 먼저 결정한다. 파일 목록·통계는 `BASE_REF...HEAD`, commit 목록은 `BASE_REF..HEAD`, PR create/edit는 해당 base branch를 사용한다.
+- cross-review의 우선순위는 명시 `--base`, PR의 `baseRefName`에 해당하는 origin tracking ref, PR 부재·조회 실패 시 기존 auto다. PR base 누락이나 ref 해석 실패는 중단하며 저장소 기본 브랜치로 대체하지 않는다.
 
 ### AC-root-pr-handoff — 문서 동기화 자기복구와 handoff
 

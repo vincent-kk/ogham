@@ -27,7 +27,7 @@ yourself.
 Pull request aborted: the branch has no commits ahead of <BASE_REF>.
 ```
 
-**Stage 2 — base unresolvable**
+**Stage 0/2 — base unresolvable**
 
 ```text
 Pull request aborted: could not resolve a base ref. Pass --base explicitly.
@@ -41,14 +41,11 @@ Pull request body saved: origin has no <BRANCH>, or it is behind HEAD, and
 with --push.
 ```
 
-## §2 Base resolution order
+## §2 Scripted base resolution
 
-1. `--base REF` when supplied.
-2. The remote HEAD default branch (`git symbolic-ref refs/remotes/origin/HEAD`).
-3. `origin/main`.
-4. `origin/master`.
+Run `scripts/resolveBaseBranch.mjs --project-root <PROJECT_ROOT>` in Stage 0. Forward `--base <REF>` when supplied to bypass inference; accept a local or origin branch, not a tag or commit ID. The script reads local refs without fetching.
 
-Each candidate is verified with `git rev-parse --verify` before use. The first one that resolves wins. Nothing further is guessed.
+Use returned JSON `baseRef` for diffs and `baseBranch` for `gh --base`. Report `source`, `ahead`, `behind`, and `ambiguous` / `tiedCandidates` when present. `mergeBase` and `head` identify the compared commits. Preserve the selection throughout this run. On exit 1, report stderr and stop; never substitute another base. An ambiguous estimate can be overridden with `--base`.
 
 ## §3 PR body layout
 

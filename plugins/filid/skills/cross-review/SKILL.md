@@ -3,7 +3,7 @@ name: cross-review
 user-invocable: true
 description: 'Review a committed change through deterministic preparation, bounded reviewer rounds, independent verification, and a sealed verdict. Use after a branch has a PR, before resolve.'
 argument-hint: '[--base REF] [--effort auto|low|medium|high] [--force] [--cleanup]'
-version: '7.9.0'
+version: '7.10.0'
 complexity: complex
 plugin: filid
 ---
@@ -25,7 +25,7 @@ If the `review_state` schema is absent, call `ToolSearch` once with `select:mcp_
 
 ## Step 1 — Read the PR
 
-Run `gh pr view --json number,url,body` once. Keep the number and URL, and assign its body to `PR_BODY`. Record absence as `PR: none`, or access failure as `PR: unavailable`, and continue without `PR_BODY`. Make no other Bash call before prepare; do not run git.
+Run `gh pr view --json number,url,body,baseRefName` once. Keep the number and URL, assign its body to `PR_BODY`, and its `baseRefName` as `PR_BASE_BRANCH`. If a present PR has a missing or empty base name and no explicit `--base`, stop with that diagnostic. Record absence as `PR: none`, or access failure as `PR: unavailable`, and continue without `PR_BODY` or `PR_BASE_BRANCH`. Make no other Bash call before prepare; do not run git.
 
 ## Step 2 — Prepare
 
@@ -33,7 +33,8 @@ For every MCP response, inspect errors before dereferencing data. Stop on `revie
 
 - Set `PROJECT_ROOT` to the absolute session cwd. Catalog current user instructions in appearance order as `USR-001`, `USR-002`, and so on; keep this host-authoritative block separate from repository text.
 - With `--cleanup`, call `review_state({ action: "cleanup", projectRoot: PROJECT_ROOT, confirm: true })`, report `cleaned`, and stop.
-- Otherwise call `review_state({ action: "prepare", projectRoot: PROJECT_ROOT, baseRef?: --base, effort?, force?, changeContext?: PR_BODY, userInstructions: <USR-NNN block or empty string> })`. Omit unsupplied optional values and omit `branchName`.
+- Resolve `PREPARE_BASE_REF` with this precedence: `--base` → `refs/remotes/origin/<PR_BASE_BRANCH>` → omit only when the PR is absent or unavailable. Use the PR's origin tracking ref so an out-of-date local branch cannot replace its base. If that ref is unavailable locally, prepare must report its unresolved-base diagnostic; never fall back to the repository default. Refresh the origin refs before retrying or use an explicit `--base`.
+- Otherwise call `review_state({ action: "prepare", projectRoot: PROJECT_ROOT, baseRef?: PREPARE_BASE_REF, effort?, force?, changeContext?: PR_BODY, userInstructions: <USR-NNN block or empty string> })`. Omit unsupplied optional values and omit `branchName`. Prepare computes the committed diff from this base's merge-base to HEAD, matching the PR's triple-dot comparison.
 - Use returned `data.projectRoot`, `data.branchName`, and `data.baseRef` as `PROJECT_ROOT`, `BRANCH`, and `BASE_REF` in every subsequent call. Use `data.reviewDirectory` and `summary.sourceHash` without deriving them. Artifacts use `review_schema: 7`.
 - Incremental review compares committed file contents and their assigned rules and evidence with validated prior results. Dispatch only returned handoffs: unchanged files retain their original opinions even when a previous batch also contained changed files. Git renames preserve identity when content and review inputs match. Uncommitted and untracked files are outside the incremental selection.
 - Brief the user once with `summary.reusedFiles`, `reviewFiles`, `effortMode`, effective `effort`, `effortReason`, `reviewableGroups`, `maxReviewerHandoffs`, and `concurrency`. Final coverage reports pending files. The handoff bound excludes verifiers and retries; it is not a token estimate. Continue automatically.
@@ -88,7 +89,7 @@ review-blockers: <returned path>
 
 ## Options
 
-- `--base REF`: committed comparison base; default auto.
+- `--base REF`: explicit committed comparison base, overriding PR metadata. Without it, use the PR base branch when a PR exists, otherwise the existing automatic default.
 - `--effort auto|low|medium|high`: explicit input overrides project/user `review.effort`, then defaults to `auto`. Auto selects low for at least `review.autoLowEffortGroupThreshold` reviewable groups (default 16), otherwise medium; skipped files and candidate-only groups do not count. Low/medium/high allow at most 1/2/3 reviewer rounds. This controls Filid rounds, independently of the host model's reasoning-effort setting.
 - Medium/high allow a risk-marked or indeterminate first review one follow-up; medium also follows new assigned errors, high also new warnings. Risk alone or repeated gaps never trigger round 3. Low reviews every group once and starts risk-marked groups at strong. Other first reviews and verifiers use efficient; follow-ups use strong. Use only returned handoffs; unresolved gaps remain INCONCLUSIVE.
 - `--force`: preserve previous artifacts and prepare a fresh generation for all files only after all prior actors have finished; default off. It restarts review work and incurs its cost.
