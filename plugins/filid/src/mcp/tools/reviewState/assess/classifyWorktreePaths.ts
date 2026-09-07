@@ -49,7 +49,7 @@ function resolveDisposition(
   source: readonly string[],
 ): WorktreeAssessment['disposition'] {
   if (source.length > 0) return WORKTREE_DISPOSITIONS.SOURCE_DIRTY;
-  if (generated.length > 0) return WORKTREE_DISPOSITIONS.GENERATED_ONLY;
   if (documents.length > 0) return WORKTREE_DISPOSITIONS.DOCUMENTS_ONLY;
+  if (generated.length > 0) return WORKTREE_DISPOSITIONS.GENERATED_ONLY;
   return WORKTREE_DISPOSITIONS.CLEAN;
 }

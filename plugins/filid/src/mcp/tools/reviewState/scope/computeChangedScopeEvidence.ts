@@ -1,11 +1,6 @@
 import { pathForCompare } from '@ogham/cross-platform';
 
-import {
-  REVIEW_SCOPE_DIRTY_PATH_LIMIT,
-  REVIEW_STATE_DELETED_FILE_HASH,
-  REVIEW_STATE_DIRECTORY_NAMES,
-  REVIEW_STATE_GIT_ARGUMENTS,
-} from '../../../../constants/reviewState.js';
+import { REVIEW_STATE_DELETED_FILE_HASH } from '../../../../constants/reviewState.js';
 import { RULE_SCOPES } from '../../../../constants/ruleScopes.js';
 import { validateStructure } from '../../../../core/index.js';
 import { aggregateCertainty } from '../../../../core/verification/index.js';
@@ -13,10 +8,6 @@ import type { RuleScope } from '../../../../types/rules.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
 import { isFindingDiagnostic } from '../../utils/isFindingDiagnostic.js';
 import { selectVerificationEvidence } from '../../utils/selectVerificationEvidence.js';
-import { classifyWorktreePaths } from '../assess/classifyWorktreePaths.js';
-import { parseGitStatusPaths } from '../assess/parseGitStatusPaths.js';
-import { computeReviewDirtyPathsHash } from '../hash/computeReviewDirtyPathsHash.js';
-import { executeReviewGit } from '../hash/executeReviewGit.js';
 import type { ReviewScopeViolation } from '../state/reviewStateTypes.js';
 
 import { buildScopeCandidates } from './buildScopeCandidates.js';
@@ -27,6 +18,7 @@ import type {
 import { classifyChangedFile } from './classifyChangedFile.js';
 import { deriveEvidenceStatuses } from './deriveEvidenceStatuses.js';
 import { readChangedFileRoster } from './readChangedFileRoster.js';
+import { readReviewWorktree } from './readReviewWorktree.js';
 import { selectChangedScopeVerificationFiles } from './selectChangedScopeVerificationFiles.js';
 import { selectChangedScopeViolations } from './selectChangedScopeViolations.js';
 import { haveSameReviewPaths } from './utils/haveSameReviewPaths.js';
@@ -55,16 +47,10 @@ export async function computeChangedScopeEvidence(
       'Committed changed-file roster does not match the prepared file hashes',
     );
 
-  const statusOutput = await executeReviewGit(input.projectRoot, [
-    ...REVIEW_STATE_GIT_ARGUMENTS.STATUS_PORCELAIN,
-  ]);
-  const reviewPrefix = `${REVIEW_STATE_DIRECTORY_NAMES.FILID}/${REVIEW_STATE_DIRECTORY_NAMES.REVIEW}`;
-  const dirtyPaths = parseGitStatusPaths(statusOutput)
-    .filter(
-      (path) => path !== reviewPrefix && !path.startsWith(`${reviewPrefix}/`),
-    )
-    .sort();
-  const worktree = classifyWorktreePaths(dirtyPaths, input.generatedPaths);
+  const worktree = await readReviewWorktree(
+    input.projectRoot,
+    input.generatedPaths,
+  );
   const context = await createToolSnapshot(input.projectRoot);
   const verificationRoles = new Map(
     context.snapshot.verification.files.map((file) => [
@@ -159,9 +145,7 @@ export async function computeChangedScopeEvidence(
   return {
     snapshotHash: context.snapshot.snapshotHash,
     evidenceComplete: statuses.evidenceComplete,
-    worktree: worktree.disposition,
-    dirtyPaths: dirtyPaths.slice(0, REVIEW_SCOPE_DIRTY_PATH_LIMIT),
-    dirtyPathsHash: computeReviewDirtyPathsHash(dirtyPaths),
+    ...worktree,
     statuses,
     files,
     candidates,

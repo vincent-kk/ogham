@@ -125,7 +125,7 @@ describe('cost-aware reviewer handoffs', () => {
       effort: 'medium' as const,
       severity: 'error',
       missing: true,
-      nextKind: null,
+      nextKind: 'review',
     },
     {
       effort: 'high' as const,

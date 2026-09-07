@@ -134,7 +134,7 @@ filid 스킬은 CLI 명령이 아니라 **LLM 프롬프트**입니다. Claude Co
 
 `maxGroups` 기본값은 **64**이며, candidate-only 장부를 제외한 리뷰 가능 그룹만 셉니다. 초과하면 dispatch 전에 `review-group-budget-exceeded`를 보고하고, 파일을 조용히 건너뛰지 않습니다. 사용자가 설정한 값은 상한을 올리거나 내릴 수 있습니다. `highRiskPaths`는 내장 힌트에 더해집니다. 이미 준비된 그룹은 identity와 저장된 리스크 사유를 유지합니다. 그룹화나 리스크 설정을 바꾸려면 새로 준비하거나 `--force`를 명시하세요. 동시성은 스케줄만 바꾸고 총량은 바꾸지 않습니다.
 
-실효 effort는 같은 소스 identity에 대해 준비 시점부터 고정되며, 첫 검증 전에도 적용됩니다. 실효 effort가 바뀌면 `review-effort-locked`를 반환합니다. 저장된 effort로 재개하거나, 이전 actor가 모두 끝난 뒤 `--force`를 명시하세요. 같은 effort의 메타데이터 변경은 brief·호출자 맥락·opinion을 보존합니다. 신규 상태는 `validationPolicyVersion: 1`을 기록하고, 더 오래되었거나 지원하지 않는 정책은 이전 승인을 재사용하거나 reviewer를 자동 재시작하지 않고 `review-validation-policy-outdated`를 반환합니다. 현재 정책으로 봉인된 캐시는 닫힌 채로 둡니다. prepare는 모드, 실효 effort, 사유, 리뷰 가능 그룹 수, `maxReviewerHandoffs`(설정된 reviewer 라운드 합, 검증과 재시도 제외)를 보고합니다. 이는 호출 한도이며 토큰 예산이 아닙니다.
+실효 effort는 같은 소스 identity에 대해 준비 시점부터 고정되며, 첫 검증 전에도 적용됩니다. 실효 effort가 바뀌면 `review-effort-locked`를 반환합니다. 저장된 effort로 재개하거나, 이전 actor가 모두 끝난 뒤 `--force`를 명시하세요. 같은 effort의 메타데이터 변경은 brief·호출자 맥락·opinion을 보존합니다. 신규 상태는 `validationPolicyVersion: 2`를 기록하고, 더 오래되었거나 지원하지 않는 정책은 이전 승인을 재사용하거나 reviewer를 자동 재시작하지 않고 `review-validation-policy-outdated`를 반환합니다. seal은 현재 작업 트리를 다시 확인하며, 봉인 후 변경은 기존 산출물을 보존한 채 `review-worktree-stale`로 반환하고 prepare를 요구합니다. prepare는 모드, 실효 effort, 사유, 리뷰 가능 그룹 수, `maxReviewerHandoffs`(설정된 reviewer 라운드 합, 검증과 재시도 제외)를 보고합니다. 이는 호출 한도이며 토큰 예산이 아닙니다.
 
 리뷰 가능한 `COMPLETE` opinion은 `checked`에 비어 있지 않은 검사 증거가 필요하고, 준비가 계획을 요구하거나 리스크를 표시하면 비어 있지 않은 `riskPlan`도 필요합니다. 진짜 `INDETERMINATE` 공백은 그 기록을 생략할 수 있고 결론이 나지 않은 채로 남습니다. 이 검사는 기록의 존재만 확인하고, 실제 모델 티어·검사 깊이·탐지 품질은 확인하지 않습니다.
 

@@ -36,6 +36,10 @@ describe('review validation policy compatibility', () => {
     ['prepared', 99, 'checkpoint'],
     ['prepared', 99, 'validate'],
     ['prepared', 99, 'seal'],
+    ['prepared', 1, 'prepare'],
+    ['prepared', 1, 'checkpoint'],
+    ['prepared', 1, 'validate'],
+    ['prepared', 1, 'seal'],
     ['sealed', undefined, 'prepare'],
     ['sealed', undefined, 'checkpoint'],
     ['sealed', undefined, 'validate'],
@@ -44,6 +48,10 @@ describe('review validation policy compatibility', () => {
     ['sealed', 99, 'checkpoint'],
     ['sealed', 99, 'validate'],
     ['sealed', 99, 'seal'],
+    ['sealed', 1, 'prepare'],
+    ['sealed', 1, 'checkpoint'],
+    ['sealed', 1, 'validate'],
+    ['sealed', 1, 'seal'],
   ] as const)(
     'blocks %s policy %s through %s without rewriting history',
     async (phase, version, action) => {
@@ -100,7 +108,7 @@ describe('review validation policy compatibility', () => {
       effort: 'low',
     });
     const state = readPreparedReviewState(prepared);
-    expect(state).toHaveProperty('validationPolicyVersion', 1);
+    expect(state).toHaveProperty('validationPolicyVersion', 2);
     const group = state.groups[0]!;
     writeFileSync(
       join(prepared.data.reviewDirectory, group.skeletonPath),
@@ -149,7 +157,7 @@ describe('review validation policy compatibility', () => {
     expect(fresh.summary.disposition).toBe('fresh');
     expect(readPreparedReviewState(fresh)).toHaveProperty(
       'validationPolicyVersion',
-      1,
+      2,
     );
   });
 });
