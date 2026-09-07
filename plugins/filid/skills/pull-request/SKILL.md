@@ -2,8 +2,8 @@
 name: pull-request
 user-invocable: true
 description: 'Sync branch FCA documents through enrich-docs, record what could not be repaired as a PR handoff, then open or update a structured GitHub pull request. Use when a branch is ready for a PR.'
-argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve] [--push|--no-push]'
-version: '2.1.0'
+argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve] [--push|--no-push] [--issue URL] [--spec URL] [--decision URL|PATH] [--screenshot URL|PATH] [--focus TEXT] [--notes PATH]'
+version: '2.2.0'
 complexity: complex
 plugin: filid
 ---
@@ -56,6 +56,9 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
 
 5. `gh auth status` — on failure set `GH_AUTH = false`, continue through Stage 3's body save, and report the saved path in Stage 4.
 6. Remote state — `git rev-parse --verify -q refs/remotes/origin/<BRANCH>`; when it resolves, `git rev-list --count origin/<BRANCH>..HEAD`. Set `UNPUSHED = true` when the remote branch is missing or that count is above zero. Not an abort: `--push` is on by default, so Stage 4 pushes the branch before opening the PR; with `--no-push` Stage 4 saves the body instead of calling `gh`, whose own error (`Head sha can't be blank`) never names the cause.
+7. Caller inputs — read every `--issue`, `--spec`, `--decision`, `--screenshot`, `--focus`, and `--notes` value and preserve the normalized result as `INPUTS` through Stage 3. Parse a present notes file with `reference.md` §8; when it is missing or unreadable, report it, retain no notes content, and continue.
+   - For each repository-relative `--decision` path, require `git cat-file -e HEAD:<path>`. When it exists, obtain the repository URL with `gh repo view --json url -q .url` and render its `https://<host>/<owner>/<repo>/blob/<BRANCH>/<path>` link. When either operation fails, discard that decision item, report it in the terminal, and continue.
+   - Upload each local `--screenshot` path now with `gh image <path>` so Stage 3 has the emitted Markdown reference before saving the body. If the extension is unavailable or upload fails, retain the local path marked `(not uploaded)` in `INPUTS`, report the failure, and continue.
 
 ## Stage 1 — FCA Document Sync
 
@@ -81,7 +84,7 @@ At entry, initialize the handoff with `recorded: []`, `repaired: 0`, and `docume
 
    A `resolved: true` item contributes its `result.summary.ownerFractalPath`; keep its diagnostics visible. Apply `reference.md` §6 to `resolved: false` items: it defines the `context-target-unresolved`, `git cat-file -e HEAD:<path>`, and `structure.additionalExcludedDirectories` evidence for ownerless classification. For a path absent from `HEAD` — a deleted or renamed source — resolve its nearest ancestor directory that `git cat-file -e HEAD:<dir>` confirms and take that owner; when no ancestor resolves, or any other diagnostic appears, record the path and the diagnostic verbatim as an `unresolved-path` handoff entry (§7) and continue. Collect distinct resolved owners as the document audit scope; do not enrich the whole tree.
 
-3. Report ownerless non-FCA paths and carry their count summary into Architecture as specified in §6. Keep all changed paths in Stage 3's PR analysis. With no owners, make no enrich-docs call and report `no-change`, unless the sync is already `failed` or the flag requires `skipped`.
+3. Report ownerless non-FCA paths and carry their count summary into the `(non-FCA)` row and the bullet list of the `Changes` block as specified in §6. Keep all changed paths in Stage 3's PR analysis. With no owners, make no enrich-docs call and report `no-change`, unless the sync is already `failed` or the flag requires `skipped`.
 4. When owners exist and `--skip-enrich` is absent, invoke `Skill("filid:enrich-docs", "<owner fractal paths> --include-detail --repair")` so the audit covers both INTENT.md and DETAIL.md. Append `--auto-approve` **exactly when this skill received it** — never by inferring that a pipeline is running. An orchestrator that wants unattended document sync passes the flag; without it, enrich-docs keeps its own approval step and a standalone run stays interactive.
 5. Read the enrich-docs report when step 4 ran. Nothing here exits:
 
@@ -117,11 +120,19 @@ Keep the `BASE_REF` and `BASE_BRANCH` resolved in Stage 0. Verify `BASE_REF` sti
 
 ## Stage 3 — Change Analysis and PR Body
 
-1. Collect branch-only commit subjects with `git log --format=%s <BASE_REF>..HEAD`. Collect changed paths with `git diff --name-only <BASE_REF>...HEAD` and file statistics with `git diff --stat <BASE_REF>...HEAD`. The triple-dot diff starts at the merge-base and excludes base-only changes.
-2. Build the body with the four canonical sections in `reference.md` §3: **Architecture**, **Code**, **Test**, **FCA Handoff**. Every section is present even when its content is "none"; the handoff section follows §7.
-3. Record the FCA document commit from Stage 1 in the Architecture section when one was made.
-4. The PR title is English. The body follows the `[filid:lang]` language; technical terms, identifiers, and paths stay in their original form.
-5. Apply the §7 budget procedure and validate the machine JSON. Always write the complete body first to `<data.reviewDirectory>/pr-body.md`, using `data.reviewDirectory` from Stage 0's `review_state({ action: "assess" })` call; Stage 4 publishes from this file.
+1. Collect branch-only commit subjects with `git log --format=%s <BASE_REF>..HEAD`. Collect changed paths with `git diff --name-only <BASE_REF>...HEAD`, Kind evidence with `git diff --name-status -M <BASE_REF>...HEAD`, file statistics with `git diff --stat <BASE_REF>...HEAD`, and summary statistics with `git diff --shortstat <BASE_REF>...HEAD`. The triple-dot diff starts at the merge-base and excludes base-only changes.
+2. Build the body from `reference.md` §3: five open sections on top, four collapsed regions below, in that order; optional sections are omitted when their inputs are absent.
+3. Build the `Changes` rows only from Stage 1's resolved `ownerFractalPath` set and the name-status output from step 1:
+   - Start with one row for each owner fractal. Add a `removed` row directly from `D <F>/INTENT.md` and a `moved` row directly from `R… <old>/INTENT.md <F>/INTENT.md` even when the deleted source has no current owner. Add one final `(non-FCA)` row when ownerless paths exist; its `What changed` cell gives their count and whether configuration declares the exclusion.
+   - Derive `Kind` by first match: `removed` for `D <F>/INTENT.md`; `new` for `A <F>/INTENT.md`; `moved` for `R… <old>/INTENT.md <F>/INTENT.md`, with `<old> → <F>` in `What changed`; `boundary` for `M <F>/INTENT.md` or a changed non-document file directly below `<F>` rather than a subdirectory; `test` when every changed path under `<F>` has a `__tests__`, `tests`, `test`, `spec`, `specs`, `e2e`, or `fixtures` segment or a filename containing `.test.` or `.spec.`; otherwise `behavior`. The verification-path predicate is an approximation.
+   - Sort `removed`, `new`, `moved`, and `boundary` first in that order, each by changed-file count descending, then sort `test` and `behavior` by changed-file count descending. Do not display those counts in the rows.
+   - Derive `Contract` bullets only from `new`, `removed`, `moved`, and `boundary` rows, one consumer-visible change per fractal. `behavior` and `test` never enter `Contract`.
+   - Source the `Changes` `<summary>` file and line statistics from `git diff --shortstat <BASE_REF>...HEAD` and its fractal count from the distinct owner-fractal set.
+4. Record the FCA document commit from Stage 1 as a bullet under the `Changes` table when one was made.
+5. Links, Review notes, Work context, and Verification are never inferred. Use only caller options or notes, commands run and observed before this skill invocation, files actually present in the branch diff, and commit messages. Never infer a design decision by reading code.
+6. Include a mermaid diagram only for a relationship-changing change; keep it to at most 12 nodes and 600 characters including its fence, then add one sentence stating its point. Do not prescribe an authoring method.
+7. The PR title is English. The body follows the `[filid:lang]` language; technical terms, identifiers, and paths stay in their original form.
+8. Apply the §7 budget procedure and validate the machine JSON. Always write the complete body first to `<data.reviewDirectory>/pr-body.md`, using `data.reviewDirectory` from Stage 0's `review_state({ action: "assess" })` call; Stage 4 publishes from this file.
 
 ## Stage 4 — PR Publication
 
@@ -135,14 +146,20 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 
 ## Options
 
-| Option           | Type   | Default | Effect                                                                                                              |
-| ---------------- | ------ | ------- | ------------------------------------------------------------------------------------------------------------------- |
-| `--base REF`     | string | auto    | Base branch for the diff and the PR                                                                                 |
-| `--skip-enrich`  | flag   | off     | Skip the enrich-docs call in Stage 1; scope resolution and the handoff still run                                    |
-| `--auto-approve` | flag   | off     | Forwarded to `enrich-docs`, which then writes without asking                                                        |
-| `--draft`        | flag   | off     | Create the PR as a draft                                                                                            |
-| `--title TITLE`  | string | auto    | PR title; generated when omitted                                                                                    |
-| `--push`         | flag   | on      | Push an unpushed branch before Stage 4; `--no-push` turns it off, and the run then ends with a saved body, not a PR |
+| Option                   | Type     | Default | Effect                                                                                                              |
+| ------------------------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------------- |
+| `--base REF`             | string   | auto    | Base branch for the diff and the PR                                                                                 |
+| `--skip-enrich`          | flag     | off     | Skip the enrich-docs call in Stage 1; scope resolution and the handoff still run                                    |
+| `--auto-approve`         | flag     | off     | Forwarded to `enrich-docs`, which then writes without asking                                                        |
+| `--draft`                | flag     | off     | Create the PR as a draft                                                                                            |
+| `--title TITLE`          | string   | auto    | PR title; generated when omitted                                                                                    |
+| `--push`                 | flag     | on      | Push an unpushed branch before Stage 4; `--no-push` turns it off, and the run then ends with a saved body, not a PR |
+| `--issue URL`            | string[] | none    | Add an Issue link; repeatable, and only an explicit `closes:` prefix adds a closing keyword                         |
+| `--spec URL`             | string[] | none    | Add a Spec link; repeatable                                                                                         |
+| `--decision URL\|PATH`   | string[] | none    | Add a Decision link; repeatable, with repository-relative paths validated at `HEAD`                                 |
+| `--screenshot URL\|PATH` | string[] | none    | Add a screenshot; repeatable, with local paths uploaded during Stage 0                                              |
+| `--focus TEXT`           | string   | none    | Supply `Review notes` / `Start here`                                                                                |
+| `--notes PATH`           | string   | none    | Read caller-authored `Summary`, `Review notes`, `Verification`, and `Work context` prose                            |
 
 ## Invariants
 
@@ -155,14 +172,17 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 - Stage 1 repairs document-contract findings only. Source, import, dependency and file-placement findings are recorded, never fixed here.
 - Input-error aborts are exactly Stage 0's detached/empty branch, no commits ahead of base, `source-dirty` worktree, and `documents-only` with `--skip-enrich`; and Stage 2's unresolved base. Base resolution never guesses silently.
 - `GH_AUTH = false` and `--no-push` are body-saving publication fallbacks, not aborts. The saved body retains the handoff.
+- Links, Review notes, Verification and Work context are never inferred from code; absent inputs omit the section, they never invent it.
+- The body never carries secrets, tokens, or Claude session identifiers; a screenshot that failed to upload stays a local path marked `(not uploaded)`.
 
 ## Terminal Output
 
 ```text
 Pull request: <created|updated|body-saved> <url-or-path>
+Body folded: <items>
 Document sync: <committed|no-change|skipped|declined|failed>
 Handoff: <N> recorded (<c> code-change, <d> config-decision, <i> indeterminate, <r> needs-rework, <u> unresolved-path, <s> document-sync), <R> repaired
 Branch push: <pushed|up-to-date|declined>
 ```
 
-The six class counts sum to `<N>`. For `body-saved`, print `Pull request: body-saved <path>` with `<path>` equal to `<data.reviewDirectory>/pr-body.md`, exactly as written in Stage 3.
+Emit `Body folded: <items>` immediately after `Pull request:` only when §7 reduced or removed at least one item; omit the line otherwise. The six class counts sum to `<N>`. For `body-saved`, print `Pull request: body-saved <path>` with `<path>` equal to `<data.reviewDirectory>/pr-body.md`, exactly as written in Stage 3.
