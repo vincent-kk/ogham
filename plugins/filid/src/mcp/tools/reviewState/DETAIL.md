@@ -53,6 +53,7 @@
 - TypeScript entry point는 handler와 MCP envelope 소비자가 사용하는 `ReviewStateResult`와 caller-entry 검증용 `REVIEW_HANDOFF_CALLER_ENTRY_SCHEMA`를 노출한다. 내부 opinion·group·state 타입은 외부 계약으로 재노출하지 않는다.
 
 - 모든 action의 projectRoot는 저장소 안의 절대 경로이며 Git toplevel로 정규화한다. branchName은 선택 입력으로, 문자열이면 기존 branch 검증을 적용하고 생략하면 Git 현재 branch를 해석한다. detached HEAD의 빈 branch는 `review-branch-unresolved` error다. directory key는 원래 branch 문자열을 정규화하고 응답 branchName은 원래 문자열을 보존한다.
+- 한 action이 실행되는 동안 commit graph와 ref는 바뀌지 않으므로, `executeReviewGit`은 action 범위 안에서 같은 projectRoot·인자의 읽기 전용 Git 질의를 한 번만 실행하고 결과를 공유한다. 실패한 질의는 캐시하지 않고, working tree를 읽는 `status`는 action이 artifact를 쓰는 사이에 달라질 수 있어 매번 실행한다. action 범위 밖에서는 캐시가 없어 단위별 helper의 동작이 그대로다.
 - prepare input은 `{ action: "prepare", projectRoot, branchName?, baseRef?, force?, effort?, changeContext?, changeContextPath?, userInstructions? }`이다. 생략한 사용자 검토 기준은 빈 문자열이다. 호환되지 않는 과거 입력 계약은 explicit force로 원본을 보존한 채 다시 시작한다.
 - handoff input은 `{ action: "handoff", projectRoot, branchName?, baseRef?, documentSync, repaired, entries? }`이다. 활성 state에 generation이 있으면 generation 디렉터리, 없으면 branch 디렉터리의 `handoff.md`를 쓰며 caller는 응답의 `data.handoffPath`만 사용한다.
 - changeContext 또는 changeContextPath(절대 경로, 1 MiB 이하, 둘 다 주면 오류) → handoff 추출 → `REVIEW_CHANGE_CONTEXT_SECTIONS` 헤딩 발췌(없으면 앞부분과 `review-change-context-untemplated`) → 제어문자 제거 → 3000자 절단(`review-change-context-truncated`) 순서로 처리한다. 둘 다 생략하면 baseCommit..HEAD의 non-merge commit hash·subject 최대 30줄과 numstat 합계 한 줄로 생성한다. session·brief는 이를 untrusted 저장소 데이터로 표시한다.
@@ -283,6 +284,7 @@
 
 ## History
 
+- 2026-09-08 — action 범위 Git 질의 memoization. 한 action이 같은 `ls-tree`·`merge-base`·`diff`·`log`를 group마다 다시 실행해 Windows CI에서 filid 테스트 시간의 대부분을 Git 프로세스 생성이 차지했다. 결과가 바뀔 수 없는 범위(하나의 action)에서만 공유하므로 관측 의미는 유지된다.
 - 2026-09-06 — 대형 brief 비용 기준은 동일한 644개 `.ts` 단위와 정본 default·fca·ecmascript 규칙으로 비교한다. 과거 renderer `8ed691301a894de3734391e2dbc4dd60c4f75f78`에 같은 입력을 넣어 얻은 981,364 bytes를 기준으로 고정했다. 서로 다른 규칙 payload를 비교하면 절감률을 증명할 수 없으므로 입력을 일치시키고, 정본 reviewer method와 중복되는 안내를 줄여 15% 절감 조건을 유지한다.
 
 ## Last Updated

@@ -1,29 +1,40 @@
-import { spawnCli } from '@ogham/cross-platform';
+import { REVIEW_STATE_GIT } from '../../../../constants/reviewState.js';
 
-import {
-  REVIEW_STATE_GIT,
-  REVIEW_STATE_GIT_TIMEOUT_MS,
-} from '../../../../constants/reviewState.js';
+import { reviewGitCacheScope } from './reviewGitCacheScope.js';
+import { spawnReviewGit } from './spawnReviewGit.js';
 
-export async function executeReviewGit(
+/**
+ * Subcommands that read the working tree. An action writes review artifacts
+ * while it runs, so their output can change between two calls in one action.
+ */
+const WORKTREE_QUERIES = new Set(['status']);
+
+/**
+ * Read from Git for a review_state action, sharing identical read-only
+ * queries within the action.
+ *
+ * Inside runWithReviewGitCache, a query with the same root and arguments as
+ * an earlier one returns the earlier output — or joins its pending process —
+ * except working-tree queries, which always spawn. A failed query is not
+ * cached, so a retry spawns again. Outside a cache scope every call spawns.
+ *
+ * @param projectRoot Absolute repository root the command runs in.
+ * @param args Git arguments, passed verbatim without a shell.
+ * @returns Raw standard output with line endings untouched.
+ * @throws When Git cannot be spawned, times out, or exits non-zero.
+ */
+export function executeReviewGit(
   projectRoot: string,
   args: readonly string[],
 ): Promise<string> {
-  const result = await spawnCli(REVIEW_STATE_GIT.BINARY, args, {
-    cwd: projectRoot,
-    timeoutMs: REVIEW_STATE_GIT_TIMEOUT_MS,
-    normalizeEol: false,
-  });
-
-  if (result.spawnError)
-    throw new Error(
-      `${REVIEW_STATE_GIT.BINARY} ${args[0] ?? ''} failed in ${projectRoot}: ${result.spawnError.message}`,
-      { cause: result.spawnError },
-    );
-  if (result.code !== 0)
-    throw new Error(
-      `${REVIEW_STATE_GIT.BINARY} ${args[0] ?? ''} failed in ${projectRoot} (exit ${result.code}): ${result.stderr.trim()}`,
-    );
-
-  return result.stdout;
+  const cache = reviewGitCacheScope.getStore();
+  if (!cache || WORKTREE_QUERIES.has(args[0] ?? ''))
+    return spawnReviewGit(projectRoot, args);
+  const key = [projectRoot, ...args].join(REVIEW_STATE_GIT.RECORD_SEPARATOR);
+  const pending = cache.get(key);
+  if (pending) return pending;
+  const output = spawnReviewGit(projectRoot, args);
+  cache.set(key, output);
+  output.catch(() => cache.delete(key));
+  return output;
 }
