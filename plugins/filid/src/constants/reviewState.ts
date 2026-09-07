@@ -4,7 +4,7 @@ import { BUILTIN_RULE_IDS } from './builtinRuleIds.js';
 export const REVIEW_STATE_SCHEMA_VERSION = 2 as const;
 
 /** Validation contract required before persisted opinions may be reused. */
-export const REVIEW_VALIDATION_POLICY_VERSION = 1 as const;
+export const REVIEW_VALIDATION_POLICY_VERSION = 2 as const;
 export const REVIEW_STATE_HASH_ALGORITHM = 'sha256';
 export const REVIEW_STATE_HASH_ENCODING = 'hex';
 export const REVIEW_STATE_HASH_SEPARATOR = '\0';
@@ -356,6 +356,7 @@ export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   ACTOR_METHOD_MISSING: 'review-actor-method-missing',
   STATE_MISSING: 'review-state-missing',
   SOURCE_HASH_STALE: 'review-source-hash-stale',
+  WORKTREE_STALE: 'review-worktree-stale',
   REPORT_MISSING: 'review-report-missing',
   /** A marked sealed review has lost its canonical blocker report. */
   BLOCKERS_MISSING: 'review-blockers-missing',
@@ -374,6 +375,8 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   STATE_MISSING: 'No prepared review state exists for this branch.',
   SOURCE_HASH_STALE:
     'Committed source content no longer matches the prepared review state.',
+  WORKTREE_STALE:
+    'The worktree no longer matches the sealed review. Run prepare to refresh the generation.',
   REPORT_MISSING: 'The canonical review report is missing.',
   BLOCKERS_MISSING: 'The canonical review blocker report is missing.',
   BLOCKERS_INVALID:

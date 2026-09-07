@@ -50,6 +50,8 @@ export async function validateReviewRound(
 ): Promise<ReviewValidatePayload> {
   const { input, paths, state, group } = context;
   const round = input.round!;
+  if (group.validated.review && round < group.validated.review.round)
+    throw new Error(`review round is out of order for group ${group.id}`);
   let prior: ReviewOpinion | null = null;
   if (round > 1) {
     const priorValidation = group.validated.review;

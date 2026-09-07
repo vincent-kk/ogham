@@ -14,6 +14,7 @@ export function splitVerifierAssignment(findings: readonly ReviewFinding[]): {
   for (const finding of findings) {
     const outside =
       finding.inDiff === false &&
+      finding.lines !== 'unknown' &&
       !finding.rule.startsWith('USR-') &&
       !finding.rule.startsWith('FCA-');
     (outside ? deterministicRefuted : assigned).push(finding);
