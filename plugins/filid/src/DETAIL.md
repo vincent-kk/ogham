@@ -7,12 +7,14 @@
 - `mcp`와 `hooks`는 host 경계이며 정책 판단을 하지 않는다.
 - 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다.
 - 소스 루트 named entry point는 FCA 경계 식별용으로 `VERSION`만 열거하고, npm manifest에는 library export를 선언하지 않는다.
+- 통합 테스트의 transport 헬퍼는 연결할 SDK server를 검증 파일에서 인자로 받는다. 헬퍼가 MCP server 구현을 import하면 src에서 server로 역방향 의존이 생기므로 구체적인 server 생성은 검증 파일이 소유한다.
 - `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로 고치지 않는다.
+- 공용 glob 변환은 고정 치환 정규식을 모듈 상수로 재사용하고, 입력별 결과 정규식은 호출마다 생성한다. 치환 순서와 glob 매칭 의미는 유지한다.
 
 ## API Contracts
 
-- MCP 도구 9개: `project_init`, `rule_docs_sync`, `open_settings`, `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`, `review_state`.
-- `context_resolve`는 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
+- MCP 도구 4개: `project_setup`, `fractal_inspect`, `restructure`, `review_state`.
+- `fractal_inspect`의 `resolve` action은 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
 - 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
 - 소스 루트 entry point의 공개 surface는 생성된 `VERSION` 하나다.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
@@ -26,7 +28,7 @@
 
 ### AC-src-surface — 1.0 표면
 
-- MCP 도구가 정확히 9개 등록된다.
+- MCP 도구가 정확히 4개 등록된다.
 - 소스 루트 entry point가 `VERSION`만 named export하고 npm manifest에는 library export가 없다.
 
 ### AC-src-generated — 생성물 불가침
@@ -43,8 +45,9 @@
 
 ## History
 
+- 2026-09-05 — setup, inspection과 restructure lifecycle을 action-dispatched 도구로 병합해 MCP 표면을 4개로 줄였다.
 - 2026-08-28 — 대규모 변경의 반복 snapshot 비용을 없애기 위해 `context_resolve` 공개 DTO를 array-first batch로 바꿨다.
 
 ## Last Updated
 
-2026-08-28 — npm 공개 API와 분리된 소스 FCA entry point의 단일 named export를 명시했다.
+2026-09-07

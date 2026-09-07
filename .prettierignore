@@ -23,3 +23,9 @@ plugins/*/templates/rules/
 # and rewrites `*.test.*` into `_.test._`, silently corrupting the deployed
 # rules — the file is byte-owned by the rule-docs sync.
 AGENTS.md
+
+# Cross-review calibration baselines are preserved runner output: opinion JSON
+# bytes are coupled to the validation sha256 recorded in review-state.json, and
+# the fold-replay test compares against them byte-for-byte. Reformatting breaks
+# that coupling, so every baseline-* tree stays exactly as the runner wrote it.
+.metadata/filid/cross-review-calibration/baseline-*/

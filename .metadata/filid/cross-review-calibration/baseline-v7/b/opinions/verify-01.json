@@ -1,0 +1,20 @@
+{
+  "schema": 7,
+  "group": "01",
+  "state": "COMPLETE",
+  "sourceHash": "1b85e98f04761ff88a81e634dac64dc9f88dd28e8dbb6eab512d7ec2923b562b",
+  "decisions": [
+    {
+      "findingId": "FCA-001",
+      "verdict": "CONFIRMED",
+      "evidence": "evidence.md Candidates table row: FCA-001 | structure | warning | src/slugify | zero-peer-file | Fractal root \"slugify\" contains peer file \"notes.md\" not in any allowed category; diffs/01/01-notes.md.diff confirms notes.md is a newly added file directly under src/slugify (new file mode 100644, +3/-0).",
+      "reason": "The canonical structure-scan row in evidence.md matches this candidate's path (src/slugify), rule (zero-peer-file), category (structure), and severity (warning) exactly, and the diff independently confirms notes.md was added as a peer file directly in the slugify fractal root rather than inside an allowed sub-fractal category, so the finding is confirmed under the FCA-canonical-row rule rather than the inDiff:false refutation rule."
+    }
+  ],
+  "observations": [],
+  "checked": [
+    "src/slugify/notes.md",
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts"
+  ]
+}

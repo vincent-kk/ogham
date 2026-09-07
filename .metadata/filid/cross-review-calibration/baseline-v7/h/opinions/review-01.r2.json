@@ -1,0 +1,30 @@
+{
+  "schema": 7,
+  "group": "01",
+  "round": 2,
+  "state": "COMPLETE",
+  "sourceHash": "9ff71d83433b305f8a797dcbe6b4b317ce0deef0c2f005737183484ac995ae6a",
+  "files": [
+    {
+      "path": "src/slugify/slugify.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/tests/slugify.spec.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    }
+  ],
+  "findings": [],
+  "checked": [
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts"
+  ],
+  "gaps": [],
+  "riskPlan": null
+}

@@ -4,12 +4,14 @@ import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js'
 import {
   REVIEW_STATE_ACTIONS as ACTIONS,
   REVIEW_STATE_FILE_NAMES,
+  REVIEW_STATE_GIT,
   REVIEW_STATE_GIT_ARGUMENTS,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { loadConfig } from '../../../../core/index.js';
 import { classifyWorktreePaths } from '../assess/classifyWorktreePaths.js';
 import { parseGitStatusPaths } from '../assess/parseGitStatusPaths.js';
+import { readRevalidationHead } from '../assess/readRevalidationHead.js';
 import { readUnpushedCommits } from '../assess/readUnpushedCommits.js';
 import { resolveBaseRef } from '../assess/resolveBaseRef.js';
 import { resolveEntryStage } from '../assess/resolveEntryStage.js';
@@ -18,12 +20,12 @@ import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import { reviewReportExists } from '../state/reviewReportExists.js';
 import type {
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
 type AssessInput = Extract<
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   { action: typeof REVIEW_STATE_ACTIONS.ASSESS }
 > & {
   /** Whether a pull request exists; the caller owns PR lookups, not this tool. */
@@ -50,14 +52,19 @@ export async function assessReviewState(
     parseGitStatusPaths(status),
     generatedPaths,
   );
-  const [baseRef, unpushedCommits] = await Promise.all([
+  const [baseRef, unpushedCommits, head] = await Promise.all([
     resolveBaseRef(input.projectRoot, input.baseRef),
     readUnpushedCommits(input.projectRoot),
+    executeReviewGit(input.projectRoot, [
+      ...REVIEW_STATE_GIT_ARGUMENTS.VERIFY_REF,
+      REVIEW_STATE_GIT.HEAD,
+    ]).catch(() => null),
   ]);
+  const revalidationHead = readRevalidationHead(
+    portableJoin(paths.reviewDirectory, REVIEW_STATE_FILE_NAMES.RE_VALIDATE),
+  );
   const entryStage = resolveEntryStage({
-    hasReValidate: reviewReportExists(
-      portableJoin(paths.reviewDirectory, REVIEW_STATE_FILE_NAMES.RE_VALIDATE),
-    ),
+    hasReValidate: head !== null && revalidationHead === head.trim(),
     hasJustifications: reviewReportExists(
       portableJoin(
         paths.reviewDirectory,

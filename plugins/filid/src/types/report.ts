@@ -67,7 +67,7 @@ export interface FractalScanFullData {
 
 export type FractalScanData = FractalScanPathsData | FractalScanFullData;
 
-/** Bounded counts for one `context_resolve` batch. */
+/** Bounded counts for one `fractal_inspect` resolve batch. */
 export interface ContextResolveSummary {
   /** Absolute root shared by every request in the batch. */
   projectRoot: string;
@@ -120,7 +120,7 @@ export type ContextResolveResult =
       diagnostics: ToolDiagnostic[];
     };
 
-/** Artifact-eligible ordered results for a `context_resolve` batch. */
+/** Artifact-eligible ordered results for a `fractal_inspect` resolve batch. */
 export interface ContextResolveData {
   results: ContextResolveResult[];
 }
@@ -178,7 +178,7 @@ export interface ScanReport {
 }
 
 /**
- * MCP-response shape for `fractal_scan`.
+ * MCP-response shape for `fractal_inspect` action `scan`.
  *
  * Differs from {@link ScanReport} in that `tree` is a {@link FractalTreeDto} with
  * a flat `nodes: FractalNode[]` array instead of a `Map`. This eliminates the
@@ -191,7 +191,7 @@ export interface ScanReportDto {
   duration: number;
 }
 
-/** Compact `fractal_scan` result — always context-safe. */
+/** Compact `fractal_inspect` scan result — always context-safe. */
 export interface ScanSummaryDto {
   outputMode: 'summary';
   root: string;
@@ -204,7 +204,7 @@ export interface ScanSummaryDto {
   duration: number;
 }
 
-/** Path-projection `fractal_scan` result (structure without payload bulk). */
+/** Path-projection `fractal_inspect` scan result (structure without payload bulk). */
 export interface ScanPathsDto {
   outputMode: 'paths';
   root: string;

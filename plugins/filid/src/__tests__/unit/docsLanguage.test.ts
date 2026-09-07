@@ -17,12 +17,27 @@ const FORBIDDEN_APPEND_ONLY_ONLY =
 const INTENT_CAP_DESCRIPTION = /INTENT\.md at 50 lines or fewer/;
 const DETAIL_APPEND_DESCRIPTION = /append-only DETAIL\.md/;
 
-const GUIDE_SCOPE = [
-  'skills/cross-review/phases/evidence.md',
-  'skills/cross-review/contracts.md',
+/** Canonical v7 cross-review Markdown that must remain English. */
+const CROSS_REVIEW_ENGLISH_SCOPE = [
+  'skills/cross-review/SKILL.md',
   'skills/cross-review/templates.md',
+  'skills/cross-review/reviewers/reviewer.md',
+  'skills/cross-review/reviewers/verifier.md',
+  'skills/cross-review/rules/default.md',
+  'skills/cross-review/rules/lang/ecmascript.md',
+  'skills/cross-review/rules/lang/workflows.md',
+  'skills/cross-review/rules/lang/manifests.md',
+  'skills/cross-review/rules/lang/shell.md',
+] as const;
+
+/** Guide-like sources checked for obsolete cap-rule wording. */
+const GUIDE_SCOPE = [
+  ...CROSS_REVIEW_ENGLISH_SCOPE,
   'src/constants/hookContext.ts',
-];
+] as const;
+
+/** Korean script ranges excluded from English-only documents. */
+const KOREAN_SCRIPT = /[\u3131-\u318e\uac00-\ud7a3]/u;
 
 const SCOPE = [
   'INTENT.md',
@@ -32,6 +47,14 @@ const SCOPE = [
 ];
 
 describe('docs-language: cap-rule expression hygiene', () => {
+  it('keeps the v7 cross-review skill, rule, and brief documents in English', () => {
+    for (const rel of CROSS_REVIEW_ENGLISH_SCOPE) {
+      const path = resolve(repoRoot, rel);
+      const content = readFileSync(path, 'utf-8');
+      expect(content, `file=${rel}`).not.toMatch(KOREAN_SCRIPT);
+    }
+  });
+
   it('forbids joint INTENT/DETAIL cap expression in cascade-source scope files', () => {
     for (const rel of SCOPE) {
       const path = resolve(repoRoot, rel);

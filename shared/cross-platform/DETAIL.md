@@ -258,7 +258,8 @@ quarantine 이름으로 atomic rename한 프로세스만 정리하며 owner toke
 `assertNoSymlinkDescendantsSync`는 신뢰 경계인 `root` 자체가 아니라
 `root`부터 `targetPath`까지 이미 존재하는 descendant segment를 검사한다.
 `canonicalizeTargetPathSync`는 가장 가까운 기존 ancestor를 host `realpath`로
-해석하고 suffix를 붙인다. terminal entry 보존 옵션은 unlink가 제거할 마지막
+해석하고 suffix를 붙이며, referent가 아직 없는 기존 symlink도 target을 따라간다.
+반복 link는 `ELOOP`로 종료한다. terminal entry 보존 옵션은 unlink가 제거할 마지막
 directory entry를 역참조하지 않으면서 symlink ancestor와 case alias를 숨기지 않는다.
 
 제한 훅도 패키지 루트에서 필요한 읽기·쓰기·host·section·error-log·portable
@@ -301,4 +302,4 @@ artifact apply는 계속 atomic write와 lock을 사용한다.
 
 ## Last Updated
 
-2026-08-23 — Codex hook 정규화 계약과 설정 병합 검증 참조를 현재 구조에 맞췄다.
+2026-09-05 — 기존 target canonicalization의 missing symlink referent 해석과 반복 link 종료를 명시했다.

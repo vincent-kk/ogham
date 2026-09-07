@@ -10,7 +10,7 @@ Claude Code 플러그인 모노레포. 사용자용 카탈로그는 [README.md](
 ## Generated surfaces
 
 - `.codex-plugin/`, 루트 `plugin.json`, `mcp_config.json`, `hooks.json`은 plugin compiler 산출물이다. 원본 매니페스트·스킬·훅을 수정한 뒤 재생성하며 손편집하지 않는다.
-- `bridge/`와 `public/`은 패키지가 배포하는 런타임 산출물이라 커밋될 수 있지만 손편집하지 않는다. 패키지별 생성 권한은 더 가까운 `CLAUDE.md`가 우선한다.
+- `bridge/` and `public/` contain generated runtime artifacts. Rebuild and validate them without hand edits, and exclude build outputs from commits.
 
 ## Hidden loader and bundle rules
 

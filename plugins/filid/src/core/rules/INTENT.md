@@ -14,10 +14,10 @@
 
 ## Conventions
 
-- 규칙 roster는 정확히 15개다. 새 규칙은 `ruleEngine/evaluation/loadBuiltinRules.ts`에 등록하고 ID는 `constants/builtinRuleIds.ts`에서 가져온다.
-- 규칙 하나의 판정은 `ruleEngine/utils/check*.ts` 한 파일이 담당한다.
+- 규칙 roster는 정확히 15개다. 새 규칙은 단일 로더에 명시적으로 등록하고 ID는 canonical built-in 집합에서 가져온다.
+- 규칙 하나의 판정은 관심 증거별 단일 check가 담당한다.
 - thrown check와 unsupported·indeterminate 증거는 PASS가 아니라 finding으로 변환한다. 확실성을 통과로 바꾸지 않는 것이 이 모듈의 핵심 계약이다.
-- severity 오버라이드는 `ruleEngine/utils/remapSeverity.ts`, 면제는 `wrapExempt.ts` 한 곳만 거친다.
+- severity override와 면제는 각각 하나의 중앙 단계에서만 적용한다.
 
 ## Boundaries
 
@@ -35,8 +35,3 @@
 
 - 규칙 평가에서 파일 수정
 - indeterminate·unsupported를 PASS로 승격
-
-## Dependencies
-
-- `constants/`(rule ID·severity·organ name·scan default), `types/`, `lib/globToRegexp.ts`, `lib/isDynamicGlob.ts`
-- 형제 fractal entry point: `core/analysis/dependencyGraph`, `core/infra/configLoader`

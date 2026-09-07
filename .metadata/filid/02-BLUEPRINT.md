@@ -191,7 +191,7 @@ getDirectDependencies / topologicalSort
 
 **핵심 알고리즘**: 어댑터의 dependency reference를 소유 fractal로 승격해 edge를 만들고, 각 edge는 `sourceFile` · `rawSpecifier` · `resolvedPath`를 증거로 갖는다. cycle은 **실제 directed closed route**를 반환한다. 그래프를 만들 수 없는 파일이 결론에 영향을 줄 수 있으면 전체 결과가 `indeterminate`다.
 
-소유 subtree 안의 organ 참조는 **edge로는 보존되지만 cycle adjacency에서 빠진다.** 부모 소유 organ을 자식 fractal이 참조할 때 생기는 `부모 → 자식 → 부모` 왕복은 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure_plan`이 incoming edge로 소비자를 계산하기 때문이다.
+소유 subtree 안의 organ 참조는 **edge로는 보존되지만 cycle adjacency에서 빠진다.** 부모 소유 organ을 자식 fractal이 참조할 때 생기는 `부모 → 자식 → 부모` 왕복은 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure`의 `plan` action이 incoming edge로 소비자를 계산하기 때문이다.
 
 `resolveOwningOrganPath`는 `ownerPath` 안에 있으면서 `filePath`를 담는 **가장 깊은** organ을 돌려준다. organ이 fractal의 조상일 수도 있어 owner 안 containment를 함께 요구한다. 진입점에서 공개되므로 그래프와 rule engine이 같은 판정을 공유한다.
 
@@ -233,7 +233,7 @@ computeSnapshotHash(inputs)                 → string
 
 **핵심 알고리즘**: 정렬된 상대 경로와 구조 판정에 사용된 파일 내용의 SHA-256을 결합한다. **root 경로와 mtime에 독립적이며** 내용과 구조 변화에만 반응한다. `evidence/collectLegacyCriteriaLedger.ts`가 legacy `.filid/criteria.md`의 절대 경로와 이관 대상 root DETAIL 경로를 보존하며, ledger bytes도 hash 입력에 포함된다.
 
-`outputLanguage`는 snapshot 생성에 사용한 config의 문서 출력 언어이며 `context_resolve`가 config 재조회 없이 그대로 반환한다.
+`outputLanguage`는 snapshot 생성에 사용한 config의 문서 출력 언어이며 `fractal_inspect`의 `resolve` action이 config 재조회 없이 그대로 반환한다.
 
 ---
 

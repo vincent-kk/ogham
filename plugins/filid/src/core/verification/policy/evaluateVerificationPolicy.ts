@@ -1,5 +1,4 @@
 import { VERIFICATION_CASE_CAPS } from '../../../constants/verificationThresholds.js';
-import type { AnalysisCertainty } from '../../../types/adapters.js';
 import type {
   ContractGroupsByOwner,
   VerificationFileAnalysis,
@@ -8,22 +7,13 @@ import type {
   VerificationViolation,
 } from '../../../types/verification.js';
 
+import { aggregateCertainty } from './aggregateCertainty.js';
 import { findSpecFragmentation } from './findSpecFragmentation.js';
 
 function capRule(role: VerificationFileAnalysis['role']): VerificationRuleId {
   return role === 'spec-document'
     ? 'spec-document-case-cap'
     : 'test-record-case-cap';
-}
-
-function aggregateCertainty(
-  files: readonly VerificationFileAnalysis[],
-): AnalysisCertainty {
-  if (files.some((file) => file.count.certainty === 'unsupported'))
-    return 'unsupported';
-  if (files.some((file) => file.count.certainty === 'indeterminate'))
-    return 'indeterminate';
-  return 'exact';
 }
 
 function evaluateCaseCap(

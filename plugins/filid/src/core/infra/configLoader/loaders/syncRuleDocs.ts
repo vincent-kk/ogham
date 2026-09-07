@@ -30,8 +30,8 @@ import { retireOtherScopeRuleDocs } from './retireOtherScopeRuleDocs.js';
  * - not selected + absent → unchanged
  *
  * This function MUST be invoked exclusively from setup surfaces: the
- * settings page server (`open_settings`, interactive path) or the
- * `rule_docs_sync` tool driven by the setup skill (headless/CI fallback).
+ * settings page server (`project_setup` action `settings`, interactive path)
+ * or the `rules-sync` action driven by the setup skill (headless/CI fallback).
  * It is safe to call repeatedly (idempotent relative to the selection +
  * resync inputs).
  *

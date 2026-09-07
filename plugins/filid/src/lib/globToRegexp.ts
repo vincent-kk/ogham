@@ -1,3 +1,18 @@
+/** Regex syntax that a glob treats as literal text. */
+const REGEXP_METACHARACTER_PATTERN = /[.+^${}()|[\]\\]/g;
+
+/** Recursive wildcard protected before single-star conversion. */
+const DOUBLE_STAR_PATTERN = /\*\*/g;
+
+/** Single-segment wildcard after recursive wildcards have been protected. */
+const SINGLE_STAR_PATTERN = /\*/g;
+
+/** Protected recursive wildcard restored after single-star conversion. */
+const DOUBLE_STAR_PLACEHOLDER_PATTERN = /__DOUBLESTAR__/g;
+
+/** Single-character wildcard restricted to one path segment. */
+const QUESTION_MARK_PATTERN = /\?/g;
+
 /**
  * @file globToRegexp.ts
  * @description Convert a minimal picomatch-style glob into a `RegExp`.
@@ -18,10 +33,10 @@
  */
 export function globToRegExp(pattern: string): RegExp {
   const escaped = pattern
-    .replace(/[.+^${}()|[\]\\]/g, '\\$&')
-    .replace(/\*\*/g, '__DOUBLESTAR__')
-    .replace(/\*/g, '[^/]*')
-    .replace(/__DOUBLESTAR__/g, '.*')
-    .replace(/\?/g, '[^/]');
+    .replace(REGEXP_METACHARACTER_PATTERN, '\\$&')
+    .replace(DOUBLE_STAR_PATTERN, '__DOUBLESTAR__')
+    .replace(SINGLE_STAR_PATTERN, '[^/]*')
+    .replace(DOUBLE_STAR_PLACEHOLDER_PATTERN, '.*')
+    .replace(QUESTION_MARK_PATTERN, '[^/]');
   return new RegExp(`^${escaped}$`);
 }

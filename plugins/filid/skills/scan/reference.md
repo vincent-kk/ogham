@@ -7,7 +7,8 @@ This reference defines the only full-project FCA audit workflow. The workflow is
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_scan({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "scan",
   path: "<target-path>",
   detail: "summary"
 })
@@ -20,9 +21,9 @@ Retain the project root, snapshot hash, adapter IDs, node counts, depth, violati
 Call:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "validate",
   path: "<target-path>",
-  mode: "project",
   scopes: [
     "documents",
     "nodes",
@@ -50,7 +51,8 @@ The structural pass covers:
 Call:
 
 ```text
-mcp__plugin_filid_tools__verification_scan({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "verification",
   path: "<target-path>",
   detail: "files"
 })

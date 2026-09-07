@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 2,
+  "projectRoot": "<PROJECT_ROOT>",
+  "branchName": "calib/b",
+  "normalizedBranch": "calib-b-6f43cfcba1f77fe2c7be482a5336372de354571024a24a81532873f2f0af4f3a",
+  "baseRef": "main",
+  "baseCommit": "d531309689a5bb5d26396f9cbc801c736d86a6bf",
+  "sourceHash": "1b85e98f04761ff88a81e634dac64dc9f88dd28e8dbb6eab512d7ec2923b562b",
+  "fileHashes": {
+    "src/slugify/notes.md": "11d46c323d9c1bcd770835c38af2f730af7870bf",
+    "src/slugify/slugify.ts": "02d358d22e3059a3726cb01aa39f767f789344b9",
+    "src/slugify/tests/slugify.spec.ts": "639793c49af6b9537fb506692b99a3ad90615e41"
+  },
+  "phase": "sealed",
+  "preparedAt": "2026-09-04T19:52:52.769Z",
+  "effort": "medium",
+  "groups": [
+    {
+      "id": "01",
+      "units": [
+        {
+          "path": "src/slugify/notes.md",
+          "change": "A",
+          "chunk": null,
+          "churn": 3,
+          "hunks": [
+            {
+              "oldStart": 0,
+              "oldEnd": -1,
+              "newStart": 1,
+              "newEnd": 3
+            }
+          ],
+          "diffPath": "diffs/01/01-notes.md.diff"
+        },
+        {
+          "path": "src/slugify/slugify.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 5,
+              "oldEnd": 9,
+              "newStart": 5,
+              "newEnd": 9
+            }
+          ],
+          "diffPath": "diffs/01/02-slugify.ts.diff"
+        },
+        {
+          "path": "src/slugify/tests/slugify.spec.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 4,
+          "hunks": [
+            {
+              "oldStart": 10,
+              "oldEnd": 13,
+              "newStart": 10,
+              "newEnd": 17
+            }
+          ],
+          "diffPath": "diffs/01/03-slugify.spec.ts.diff"
+        }
+      ],
+      "churn": 9,
+      "planRequired": false,
+      "dependsOn": [],
+      "candidateIds": [
+        "FCA-001"
+      ],
+      "briefPath": "briefs/review-01.md",
+      "skeletonPath": "opinions/review-01.r1.json",
+      "opinionPath": "opinions/review-01.json",
+      "verifyBriefPath": "briefs/verify-01.md",
+      "verifyPath": "opinions/verify-01.json",
+      "rounds": 2,
+      "validated": {
+        "review": {
+          "round": 1,
+          "sha256": "54dcd4220b83c239352bd27f27b5f73d459d43bbf9c3c5c725d69aea4db3569b",
+          "complete": true
+        },
+        "verify": {
+          "sha256": "c40647d4ddc4a6368d91ebb048c4cd56eb2c930f44fa1d1152dfd747d35ceedd",
+          "reviewSha256": "54dcd4220b83c239352bd27f27b5f73d459d43bbf9c3c5c725d69aea4db3569b"
+        }
+      }
+    }
+  ],
+  "scope": {
+    "snapshotHash": "1bd790d39ea15a466e2cae71ee7a0aa24a1bca19ccc95d671d1b598a079565bb",
+    "evidenceComplete": true,
+    "worktree": "clean",
+    "dirtyPaths": [],
+    "statuses": {
+      "structure": "violations",
+      "verification": "ok"
+    },
+    "files": [
+      {
+        "path": "src/slugify/notes.md",
+        "change": "A",
+        "insertions": 3,
+        "deletions": 0,
+        "binary": false,
+        "role": "document",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "documents",
+          "fca"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/slugify.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/tests/slugify.spec.ts",
+        "change": "M",
+        "insertions": 4,
+        "deletions": 0,
+        "binary": false,
+        "role": "verification",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "tests",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      }
+    ],
+    "candidates": [
+      {
+        "id": "FCA-001",
+        "source": "structure",
+        "scope": "nodes",
+        "category": "structure",
+        "severity": "warning",
+        "path": "src/slugify",
+        "rule": "zero-peer-file",
+        "message": "Fractal root \"slugify\" contains peer file \"notes.md\" not in any allowed category. Promote it to a sub-fractal directory."
+      }
+    ],
+    "informational": [],
+    "outOfScopeCount": 0,
+    "infoCount": 0
+  },
+  "verdict": "REQUEST_CHANGES",
+  "sealedAt": "2026-09-04T19:55:38.246Z"
+}

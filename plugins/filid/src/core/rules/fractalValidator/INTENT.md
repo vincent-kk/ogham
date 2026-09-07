@@ -35,9 +35,3 @@
 - containment edge로 dependency cycle을 추정한다.
 - 분석 예외나 unresolved dependency를 빈 violation으로 바꾼다.
 - 특정 언어의 확장자, 진입점 이름, 테스트 문법을 해석한다.
-
-## Dependencies
-
-- `../ruleEngine/`
-- `../../analysis/dependencyGraph/`
-- `../../../types/`

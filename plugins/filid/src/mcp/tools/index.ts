@@ -1,9 +1,4 @@
-export { handleContextResolve } from './contextResolve/index.js';
-export { handleFractalScan } from './fractalScan/index.js';
-export { handleOpenSettings } from './openSettings/index.js';
-export { handleProjectInit } from './projectInit/index.js';
-export { handleRestructurePlan } from './restructurePlan/index.js';
+export { handleFractalInspect } from './fractalInspect/index.js';
+export { handleProjectSetup } from './projectSetup/index.js';
+export { handleRestructure } from './restructure/index.js';
 export { handleReviewState } from './reviewState/index.js';
-export { handleRuleDocsSync } from './ruleDocsSync/index.js';
-export { handleStructureValidate } from './structureValidate/index.js';
-export { handleVerificationScan } from './verificationScan/index.js';

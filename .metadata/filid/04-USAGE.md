@@ -91,7 +91,7 @@ git status --short
 - 앞의 다섯 명령과 `git diff --check`는 exit 0이어야 한다.
 - `rg`는 live source·skill·rule에서 매치 0이어야 한다. 남는 매치는 "의존하지 않는다"는 선언, 제거된 도구의 oracle, 훅 번들 가드 자체뿐이다.
 - build 후 생성물 diff를 검토해 손편집 흔적이 없어야 한다.
-- **canonical 규칙 문서를 고쳤다면 `yarn filid build:rules` 뒤 `rule_docs_sync`로 배포까지 해야 한 단위가 끝난다.** 원본만 고치면 이 저장소의 에이전트가 stale 규칙을 계속 읽는다.
+- **canonical 규칙 문서를 고쳤다면 `yarn filid build:rules` 뒤 `project_setup`의 `rules-sync` action으로 배포까지 해야 한 단위가 끝난다.** 원본만 고치면 이 저장소의 에이전트가 stale 규칙을 계속 읽는다.
 
 ### 생성물 편집 금지
 
@@ -270,7 +270,7 @@ snapshot 증거로 INTENT.md / DETAIL.md를 개선한다. **편집 전에 승인
 /filid:cross-review 처음부터 다시 해줘        # force
 ```
 
-contract·structure·verification 3관점 병렬 리뷰 + adversarial 판정. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 **FCA scope**로 명시된다. PR 코멘트는 사용자가 PR scope를 요청했을 때만 게시한다.
+커밋된 파일을 내장 규칙과 저장소 규칙으로 빠짐없이 리뷰하고 FCA 도구 행을 후보에 합친 뒤, 모든 후보를 별도 verifier가 독립 검증한다. verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE`이며 커밋 변경 범위에만 적용된다. 브랜치에 PR이 있으면 기존 verdict 코멘트를 갱신하고, PR이 없으면 게시하지 않는다.
 
 ### /filid:resolve
 
@@ -279,10 +279,10 @@ contract·structure·verification 3관점 병렬 리뷰 + adversarial 판정. ve
 /filid:resolve --auto
 ```
 
-interactive 실행은 모든 confirmed fix를 먼저 보여 준다. `Severity`/`Perspective`는 finding의 종류이고, `Recommendation`은 적용 편의와 논쟁성을 따로 판정한다.
+interactive 실행은 모든 confirmed fix를 먼저 보여 준다. `Severity`와 `Category`는 finding의 사실이고, `Recommendation`은 적용 편의와 논쟁성을 따로 판정한다.
 
 ```text
-Default | ID      | Severity | Perspective | Recommendation | Path
+Default | ID      | Severity | Category  | Recommendation | Path
 [?]     | FIX-004 | error    | structure   | Discuss        | src/api
 [x]     | FIX-001 | warning  | contract    | Apply          | src/index.ts
 ```
@@ -330,18 +330,19 @@ interface ToolResultEnvelope<Summary, Data> {
 }
 ```
 
-### fractal_scan
+### fractal_inspect — scan
 
 ```json
-{ "path": "/repo", "depth": 3, "detail": "summary" }
+{ "action": "scan", "path": "/repo", "maxDepth": 3, "detail": "summary" }
 ```
 
 `detail`은 `summary | paths | full`. summary만 요청하면 대형 트리를 인라인하지 않는다.
 
-### context_resolve
+### fractal_inspect — resolve
 
 ```json
 {
+  "action": "resolve",
   "path": "/repo",
   "requests": [{ "targetPath": "/repo/src/core/restructure" }]
 }
@@ -403,10 +404,11 @@ interface ToolResultEnvelope<Summary, Data> {
 
 여러 target은 `requests`에 함께 넣는다. 한 호출은 document-only snapshot을 한 번 만들고 결과 순서와 개수를 보존한다. 일부 target 해석 실패는 해당 `resolved: false` item으로 남고 나머지 성공 결과는 유지된다. 단일 target도 길이 1의 배열을 사용한다.
 
-### restructure_plan
+### restructure — plan
 
 ```json
 {
+  "action": "plan",
   "path": "/repo",
   "requests": [
     {
@@ -421,22 +423,30 @@ interface ToolResultEnvelope<Summary, Data> {
 
 **크기와 무관하게 항상 plan artifact를 남긴다.**
 
-### structure_validate
+### fractal_inspect — validate
 
 ```json
 {
+  "action": "validate",
   "path": "/repo",
-  "mode": "project",
   "scopes": ["documents", "dag"]
 }
 ```
 
-`mode`는 `project | plan-precondition | plan-postcondition`. plan mode에서는 `planPath`가 필수다. `scopes`를 생략하면 전부 검사한다.
+`scopes`를 생략하면 여섯 project scope를 전부 검사한다.
 
-### verification_scan
+### restructure — precondition / postcondition
 
 ```json
-{ "path": "/repo", "detail": "summary" }
+{ "action": "precondition", "path": "/repo", "planPath": "/tmp/plan.json" }
+```
+
+외부 actor가 plan을 실행한 뒤 같은 `planPath`로 `action: "postcondition"`을 호출한다.
+
+### fractal_inspect — verification
+
+```json
+{ "action": "verification", "path": "/repo", "detail": "summary" }
 ```
 
 summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `caseCap`을 분리하고 전체 `fragmentationCount`, `violationCount`, certainty를 함께 반환한다.
@@ -452,7 +462,7 @@ summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `
 }
 ```
 
-`prepare | checkpoint | seal | cleanup`. `cleanup`은 리터럴 `confirm: true`를 요구한다.
+`prepare | checkpoint | validate | seal | cleanup | assess`. `prepare`는 커밋 변경 roster와 FCA 후보를 수집하고 canonical `evidence.md`, group, bounded diff와 brief, JSON opinion 뼈대를 만든다. `validate`는 review round를 검사·병합하고 verifier JSON을 검증하며 hash를 state에 기록한다. `seal`은 그 hash와 source identity를 확인한 뒤 verdict를 fold하고 보고서·fix request·PR 코멘트를 렌더링한다. `cleanup`은 리터럴 `confirm: true`를 요구한다.
 
 ---
 
@@ -502,7 +512,7 @@ v1 config는 읽을 때 메모리에서만 v2로 변환된다. 디스크 기록�
 해소책은 셋이며 finding이 세 가지를 모두 제시한다.
 
 1. **organ을 fractal로 승격** — 외부 계약이 실재한다면 문서와 진입점을 준다.
-2. **소비자들의 lowest common fractal로 이동** — `restructure_plan`이 목표 경로를 계산한다.
+2. **소비자들의 lowest common fractal로 이동** — `restructure`의 `plan` action이 목표 경로를 계산한다.
 3. **면책 선언** — 소유 프랙탈의 `DETAIL.md`에 조건부 섹션을 추가한다.
 
 ```md

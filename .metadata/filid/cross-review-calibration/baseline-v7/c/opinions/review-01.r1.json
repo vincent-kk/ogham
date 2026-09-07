@@ -1,0 +1,57 @@
+{
+  "schema": 7,
+  "group": "01",
+  "round": 1,
+  "state": "COMPLETE",
+  "sourceHash": "d0011d64309a4f128668891c2e82e34586ba9096996601439286916d3045b2b6",
+  "files": [
+    {
+      "path": "src/index.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/slugify.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/tests/INTENT.md",
+      "change": "A",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/tests/slugify.spec.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    }
+  ],
+  "findings": [],
+  "checked": [
+    "src/index.ts",
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/INTENT.md",
+    "src/slugify/tests/slugify.spec.ts",
+    "src/slugify/index.ts",
+    "src/slugify/INTENT.md",
+    "src/slugify/DETAIL.md",
+    "src/INTENT.md",
+    "src/DETAIL.md",
+    "FCA-001",
+    "FCA-002",
+    "FCA-003",
+    "FCA-004",
+    "FCA-005",
+    "FCA-006"
+  ],
+  "gaps": [],
+  "riskPlan": null
+}

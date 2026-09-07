@@ -1,20 +1,27 @@
-import { lstatSync, readdirSync, realpathSync } from "node:fs";
-import { basename, dirname, resolve } from "node:path";
+import { lstatSync, readdirSync, readlinkSync, realpathSync } from "node:fs";
+import { basename, dirname, parse, resolve, sep } from "node:path";
+
+import { anchorTargetPath } from "./canonicalizeTargetPathSync/anchorTargetPath.js";
 
 /**
- * Resolve host aliases in the nearest existing ancestor of a target path.
+ * Resolve host aliases and dangling symlinks before a missing path suffix.
  * @param cwd - Directory used to resolve a relative `targetPath`.
  * @param targetPath - Path to canonicalize, relative to `cwd` or absolute.
  * @param options - When `preserveTerminalEntry` is set, the final path
  *   component is kept as an entry rather than followed as a symlink.
  * @returns The host-canonical absolute path for `targetPath`.
+ * @throws Unexpected filesystem errors or repeated symbolic-link traversal.
  */
 export function canonicalizeTargetPathSync(
   cwd: string,
   targetPath: string,
   options: Readonly<{ preserveTerminalEntry?: boolean }> = {},
 ): string {
-  const absoluteTarget = resolve(cwd, targetPath);
+  const absoluteTarget = anchorTargetPath(cwd, targetPath, {
+    parse,
+    resolve,
+    sep,
+  });
 
   if (options.preserveTerminalEntry) {
     let terminalIdentity: { dev: number; ino: number } | null = null;
@@ -49,6 +56,28 @@ export function canonicalizeTargetPathSync(
       return resolve(realpathSync.native(cursor), ...suffix);
     } catch (error) {
       rethrowUnlessEnoent(error);
+
+      let linkTarget: string | undefined;
+      try {
+        if (lstatSync(cursor).isSymbolicLink())
+          linkTarget = readlinkSync(cursor);
+      } catch (linkError) {
+        rethrowUnlessEnoent(linkError);
+      }
+      if (linkTarget !== undefined) {
+        const physicalParent = realpathSync.native(dirname(cursor));
+        const target = anchorTargetPath(physicalParent, linkTarget, {
+          parse,
+          resolve,
+          sep,
+        });
+        cursor =
+          suffix.length === 0
+            ? target
+            : `${target}${target.endsWith(sep) ? "" : sep}${suffix.join(sep)}`;
+        suffix.length = 0;
+        continue;
+      }
 
       const parent = dirname(cursor);
       if (parent === cursor) return absoluteTarget;

@@ -5,7 +5,8 @@
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_scan({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "scan",
   path: "<target-path>",
   detail: "paths"
 })
@@ -20,9 +21,9 @@ If detailed data is persisted as an artifact, read only the path projection need
 Call:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "validate",
   path: "<target-path>",
-  mode: "project",
   scopes: [
     "documents",
     "nodes",

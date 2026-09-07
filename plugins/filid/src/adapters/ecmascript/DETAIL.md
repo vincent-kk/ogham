@@ -18,6 +18,9 @@
 - `import.meta`는 dependency가 아니다. `import` 뒤에 `.`이 오면 메타 속성 참조이므로 뒤따르는 문자열을 specifier로 읽지 않는다. 이를 구분하지 않으면 `join(dirname(fileURLToPath(import.meta.url)), '../..')` 같은 경로 계산이 해석 불가 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
 - re-export 탐지는 export 절 형태로 한정한다. `export {…} from`과 `export * [as x] from`(각각 `type` 접두 허용)에서 절이 닫히는 바로 그 위치의 `from` 식별자만 재export 키워드다. 위치를 보지 않고 뒤따르는 아무 `from` 토큰이나 채택하면, `from`이라는 파라미터를 쓰는 exported 함수의 다음 문자열 리터럴이 유령 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
 - `.each`와 호출 괄호 사이의 TypeScript 타입 인자 목록은 table이 아니다. `it.each<T>([…])`에서 `<…>`를 건너뛰고 그 뒤의 정적 table을 읽는다. 건너뛰지 않으면 정적 배열 리터럴이 동적 table로 잡혀 파일 전체의 case count가 `indeterminate`가 된다 — 타입 인자는 row 수에 아무 영향이 없다.
+- 배열 table의 spread는 바깥 행을 확장할 때만 계수를 미확정으로 만든다. 행 내부 객체·배열·함수 인자의 spread와 문자열·주석 속 `...`는 바깥 행 수를 바꾸지 않으므로 정적 계수를 유지한다.
+- 같은 파일에서 사용보다 앞에 선언한 최상위 단일 `const NAME = [...]` table을 제한적으로 해석한다. 초기값은 직접 배열 리터럴이며 선택적인 `as const` 뒤에서 선언이 끝나야 한다. `as const`만으로 런타임 불변성을 가정하지 않는다.
+- 상수 table의 모든 이름 사용을 확인한다. 지원하는 `.each`의 직접 인자, `for (const element of NAME)`, 단일 요소 인자를 받는 arrow callback의 표준 `.map`만 허용한다. 변경, alias, 외부 전달, export, 이름 가려짐 또는 그 밖의 사용은 indeterminate로 남긴다. `eval`·`Function` identifier가 있는 소스도 동적 접근을 배제할 수 없어 지원하지 않는다. import·중첩 선언·동적 초기값·범용 스코프 해석은 지원하지 않는다.
 - 지원 불가능한 alias·동적 표현은 unsupported/indeterminate evidence를 남긴다.
 - verification 동작은 작업 2의 15/32와 contract-marker 계약을 구현한다.
 - verification role은 **파일명 접미사가 후보를 고르고 파일 내용이 확정한다.** `.spec`/`.test` stem은 후보일 뿐이며, 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`다. 접미사만으로 역할을 주면 프로덕션 파일을 `x.spec.ts`로 개명하는 것만으로 boundary와 DAG 면제를 얻는다 — 개명은 증거가 아니다.
@@ -62,6 +65,11 @@
 
 - 정적 parameterized row와 suite multiplier를 exact count에 반영한다.
 - 타입 인자를 동반한 `it.each<T>([…])`의 정적 row도 exact count에 반영한다. 타입 인자 안의 함수 타입도 table 판정을 흐리지 않는다.
+- 행 내부 객체·배열·함수 인자의 spread와 문자열·주석 속 `...`가 있어도 고정 행 수와 suite multiplier를 exact count에 반영한다.
+- 바깥 배열 table의 spread는 indeterminate로 유지하며, 별도로 확인한 일반 case는 known lower bound에 남긴다.
+- 허용한 읽기 사용만 가진 최상위 const 배열은 직접 table과 같은 행 수로 계수한다. 반복 참조와 parameterized suite에도 같은 수를 적용한다.
+- 배열 값의 문자열이 괄호나 쉼표여도 문법 구분자로 취급하지 않고 한 행으로 계수한다.
+- 상수 table의 길이를 확신할 수 없는 변경·참조 전달·이름 가려짐·동적 초기값은 indeterminate로 보존한다.
 - 동적 table, alias와 알 수 없는 문법은 indeterminate이며 skip, todo와 property declaration은 각각 1 case다.
 
 ### AC-ecmascript-verification-role — 내용이 역할을 확정한다
@@ -73,9 +81,12 @@
 
 ## History
 
+- 2026-09-06 — 최상위 const 배열 참조의 제한적 해석을 추가했다. 공급자 목록을 여러 테스트에서 공유하는 정적 table을 계수하되, 선언의 길이만 믿지 않고 허용한 사용 형태를 확인한다.
+- 2026-09-06 — spread를 바깥 배열 table의 행 확장 위치에서만 미확정으로 취급한다. 배열 원문 전체의 `...`를 찾는 방식은 행 내부 객체 속성 확장까지 동적 행으로 오인했다.
+- 2026-08-23 — `.each`와 호출 괄호 사이의 TypeScript 타입 인자 목록을 건너뛰도록 정적 table 판정을 고쳤다. 타입 인자는 row 수를 바꾸지 않는데도 table을 못 읽게 만들어 파일 전체를 indeterminate로 떨어뜨리고 있었다.
 - 2026-08-18 — re-export 탐지를 export 절 형태로 한정했다. `from`은 위치가 키워드를 만든다 — 절 경계 밖의 `from` 식별자는 재export가 아니다.
 - 2026-07-28 — verification role 판정을 접미사 후보 + 내용 확정으로 좁히고, source discovery에서 git이 무시하는 경로를 제외했다.
 
 ## Last Updated
 
-2026-08-23 — `.each`와 호출 괄호 사이의 타입 인자 목록을 건너뛰도록 정적 table 판정을 고쳤다. 타입 인자는 row 수를 바꾸지 않는데도 table을 못 읽게 만들어 파일 전체를 indeterminate로 떨어뜨리고 있었다.
+2026-09-06

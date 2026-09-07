@@ -6,12 +6,7 @@
 
 ## Structure
 
-- `userPromptSubmit.ts` — `handleUserPromptSubmit` (fmap reset + turn 증가 → session-first inject)
-- `userPromptSubmit.entry.ts` — stdin → handler → stdout 파이프
-- `utils/injectContext.ts` — 세션 첫 프롬프트 포인터 주입
-- `utils/buildMinimalContext.ts` — host target 포인터·언어 태그·비활성 규칙 조립
-- `__tests__/` organ — 단위 테스트
-- `DETAIL.md` — 공개 prompt lifecycle 계약
+- `userPromptSubmit.entry.ts`가 stdin/stdout host 진입점이고 `userPromptSubmit.ts`는 handler 구현이다. 유사한 이름이 공개 진입점을 혼동시킬 수 있어 둘을 구분한다.
 
 ## Conventions
 
@@ -41,9 +36,3 @@
 - branch·spike·harvest 배너 주입
 - 훅 번들에 zod import (번들 크기 예산 초과 — `readHookConfig` 패턴 사용)
 - 번들 출력에 범용 manager·planning·apply·transaction 코드 포함
-
-## Dependencies
-
-- `@ogham/agent-artifacts`
-- `../../core/infra/cacheManager/`
-- `../shared/`, `../utils/validateCwd.js`

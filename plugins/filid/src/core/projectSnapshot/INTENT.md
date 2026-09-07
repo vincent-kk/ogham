@@ -6,10 +6,7 @@
 
 ## Structure
 
-- `projectSnapshot.ts` — snapshot orchestration entry
-- `snapshotHash/` — 정렬된 relative path와 file content hash organ
-- `evidence/` — 문서, entry surface, dependency와 legacy ledger 증거 수집 organ
-- entry point는 `index.ts`; 구현은 `projectSnapshot.ts`다.
+- `projectSnapshot.ts`는 공개 진입점이 아니라 snapshot orchestration의 canonical 구현이다. 파일명이 공개 표면처럼 보일 수 있어 이 구분을 명시한다.
 
 ## Conventions
 
@@ -38,7 +35,3 @@
 - 생태계 확장자·entry 이름·import 문법 해석
 - legacy ledger 삭제 또는 자동 변환
 - 프로젝트 파일 수정
-
-## Dependencies
-
-- `../../adapters/`, `../tree/`, `../verification/`, `../analysis/dependencyGraph/`

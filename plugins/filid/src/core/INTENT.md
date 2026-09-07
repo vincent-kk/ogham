@@ -4,19 +4,6 @@
 
 등록된 어댑터 증거를 FCA snapshot, 규칙 결과, 최소 context와 읽기 전용 restructure plan으로 변환한다.
 
-## Structure
-
-| Sub-fractal        | Role                                               |
-| ------------------ | -------------------------------------------------- |
-| `tree/`            | node discovery, owner와 classification             |
-| `rules/`           | 문서 parser와 15개 FCA policy rule                 |
-| `analysis/`        | dependency graph와 multi-consumer LCA              |
-| `verification/`    | spec-document/test-record 분석과 contract link     |
-| `projectSnapshot/` | tree·DAG·verification의 content-addressed snapshot |
-| `contextResolver/` | owner-to-root INTENT/DETAIL 경로 chain             |
-| `restructure/`     | read-only placement plan과 pre/postcondition       |
-| `infra/`           | config, cache와 ephemeral artifact persistence     |
-
 ## Conventions
 
 - 판단 우선순위: 1. 확실한 증거 2. 경계 보존 3. 자동화 범위
