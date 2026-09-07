@@ -4,7 +4,9 @@ import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vitest';
 
-/** Loader input for the PR body layout and budget contract. */
+import { REVIEW_CHANGE_CONTEXT_SECTIONS } from '../../constants/reviewState.js';
+
+/** Loader input for the PR body layout and handoff contract. */
 const pullRequestReference = readFileSync(
   fileURLToPath(
     new URL('../../../skills/pull-request/reference.md', import.meta.url),
@@ -42,7 +44,7 @@ describe('PR body template skill contracts', () => {
       '<summary><b>Changes</b>',
       '<summary>Screenshots</summary>',
       '<summary>Work context</summary>',
-      '## FCA Handoff',
+      '<!-- appended by review_state handoff; do not author -->',
     ];
 
     let prior = -1;
@@ -52,6 +54,14 @@ describe('PR body template skill contracts', () => {
       prior = current;
     }
     expect(skeleton).not.toMatch(/^## Changes$/m);
+  });
+
+  it('keeps every change-context excerpt heading in the body skeleton', () => {
+    const section = pullRequestReference.split('## §3')[1].split('## §4')[0];
+    const skeleton = section.split('```markdown')[1].split('\n```')[0];
+
+    for (const heading of REVIEW_CHANGE_CONTEXT_SECTIONS)
+      expect(skeleton).toContain(heading);
   });
 
   it('documents every Changes kind', () => {
@@ -67,16 +77,18 @@ describe('PR body template skill contracts', () => {
     }
   });
 
-  it('uses the approved body fold order and removes the former budget wording', () => {
-    expect(pullRequestReference).toContain(
-      'Fold order: Work context, Screenshots, Changes, mermaid, Review notes, scope, Verification, Approach.',
-    );
-    expect(pullRequestReference).not.toContain(
-      'Architecture, Code, and Test use the remaining space',
-    );
+  it('delegates handoff rendering without body folding or character budgets', () => {
+    const stage3 = pullRequest
+      .split('## Stage 3')[1]
+      .split('## Stage 4')[0];
+
+    expect(pullRequestReference).not.toContain('Fold order:');
+    expect(pullRequestReference).not.toContain('8000');
+    expect(stage3).toContain('action: "handoff"');
+    expect(pullRequest).not.toContain('Body folded:');
   });
 
-  it('exposes the six caller options at version 2.2.0', () => {
+  it('exposes the six caller options at version 2.3.0', () => {
     const options = pullRequest
       .split('## Options')[1]
       .split('## Invariants')[0];
@@ -90,7 +102,7 @@ describe('PR body template skill contracts', () => {
     ]) {
       expect(options).toContain(`\`${option}`);
     }
-    expect(pullRequest).toContain("version: '2.2.0'");
+    expect(pullRequest).toContain("version: '2.3.0'");
   });
 
   it('forbids inferring caller-authored sections from code', () => {

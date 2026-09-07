@@ -81,13 +81,13 @@ Between `resolve` and `revalidate`, push the branch. `revalidate` re-measures a 
 
 Stage outcomes that stop the pipeline:
 
-| Stage        | Stop condition                                                                                                                                                                                                    |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pr-create`  | Any Stage 0 abort. Document sync never stops the cycle — its findings ride in the PR body's `FCA Handoff`, which `review` reads as change context. A dirty generated path is not an abort — see `reference.md` §3 |
-| `review`     | Verdict `INCONCLUSIVE` — evidence could not settle it                                                                                                                                                             |
-| `review`     | Verdict `APPROVED` — nothing to resolve; report and END                                                                                                                                                           |
-| `resolve`    | Typecheck failure under `--auto`                                                                                                                                                                                  |
-| `revalidate` | Never stops the pipeline; its verdict is the pipeline result                                                                                                                                                      |
+| Stage        | Stop condition                                                                                                                                                                                                                                            |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pr-create`  | Any Stage 0 abort. Document sync never stops the cycle — its findings ride in the PR body's `FCA Handoff`, and `review` reads the body's handoff block and top sections as change context. A dirty generated path is not an abort — see `reference.md` §3 |
+| `review`     | Verdict `INCONCLUSIVE` — evidence could not settle it                                                                                                                                                                                                     |
+| `review`     | Verdict `APPROVED` — nothing to resolve; report and END                                                                                                                                                                                                   |
+| `resolve`    | Typecheck failure under `--auto`                                                                                                                                                                                                                          |
+| `revalidate` | Never stops the pipeline; its verdict is the pipeline result                                                                                                                                                                                              |
 
 A stopped pipeline is resumable: re-run `/filid:pipeline` and Step 2 re-enters at the right stage.
 

@@ -9,12 +9,14 @@ import {
 import { ToolDiagnosticError } from '../../errors/toolDiagnosticError.js';
 
 import { assessReviewState } from './handlers/assessReviewState.js';
+import { buildReviewHandoff } from './handlers/buildReviewHandoff.js';
 import { cleanupReviewState } from './handlers/cleanupReviewState.js';
 import { prepareReviewState } from './handlers/prepareReviewState.js';
 import { readReviewCheckpoint } from './handlers/readReviewCheckpoint.js';
 import { sealReviewState } from './handlers/sealReviewState.js';
 import { validateReviewOpinion } from './handlers/validateReviewOpinion.js';
 import { executeReviewGit } from './hash/executeReviewGit.js';
+import { readChangeContextFile } from './scope/readChangeContextFile.js';
 import type {
   ResolvedReviewStateInput,
   ReviewStateInput,
@@ -82,13 +84,34 @@ export async function handleReviewState(
   } as ResolvedReviewStateInput;
 
   switch (input.action) {
-    case REVIEW_STATE_ACTIONS.PREPARE:
+    case REVIEW_STATE_ACTIONS.PREPARE: {
       if (
         input.changeContext !== undefined &&
         typeof input.changeContext !== 'string'
       )
         throw new Error(REVIEW_STATE_ERROR_MESSAGES.CHANGE_CONTEXT_INVALID);
-      return prepareReviewState(input);
+      if (
+        input.changeContextPath !== undefined &&
+        typeof input.changeContextPath !== 'string'
+      )
+        throw new Error(
+          REVIEW_STATE_ERROR_MESSAGES.CHANGE_CONTEXT_PATH_INVALID,
+        );
+      if (
+        input.changeContext !== undefined &&
+        input.changeContextPath !== undefined
+      )
+        throw new Error(REVIEW_STATE_ERROR_MESSAGES.CHANGE_CONTEXT_CONFLICT);
+      const { changeContextPath, ...prepareInput } = input;
+      return prepareReviewState({
+        ...prepareInput,
+        ...(changeContextPath === undefined
+          ? {}
+          : { changeContext: readChangeContextFile(changeContextPath) }),
+      });
+    }
+    case REVIEW_STATE_ACTIONS.HANDOFF:
+      return buildReviewHandoff(input);
     case REVIEW_STATE_ACTIONS.CHECKPOINT:
       return readReviewCheckpoint({
         ...input,

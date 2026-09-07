@@ -84,6 +84,7 @@ describe('incremental generation publication', () => {
     );
     const opinionBytes = readFileSync(opinionPath, 'utf8');
     expect(staged.opinionsDirectory).not.toBe(paths.opinionsDirectory);
+    expect(staged.handoffPath).toBe(join(staged.reviewDirectory, 'handoff.md'));
     publishReviewGeneration(staged, next, before);
     expect(
       readFileSync(join(staged.reviewDirectory, 'origin-state.json'), 'utf8'),

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Own committed-change review preparation, file-level reuse, bounded reviewer rounds, independent verification, and deterministic verdict publication.
+Own committed-change review preparation, file-level reuse, bounded reviewer rounds, independent verification, deterministic verdict publication, and PR handoff section generation.
 
 ## Conventions
 

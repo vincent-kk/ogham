@@ -18,13 +18,24 @@ type PrepareInput = Extract<
   Record<'action', typeof REVIEW_STATE_ACTIONS.PREPARE>
 >;
 
+/** Handoff input that reuses prepare's repository-backed path settings. */
+type HandoffInput = Extract<
+  ReviewStateInput,
+  Record<'action', typeof REVIEW_STATE_ACTIONS.HANDOFF>
+>;
+
+/** Settings inputs shared by prepare and handoff without admitting other actions. */
+type PrepareSettingsInput =
+  | Pick<PrepareInput, 'action' | 'projectRoot' | 'effort'>
+  | Pick<HandoffInput, 'action' | 'projectRoot'>;
+
 /**
- * Resolve every prepare setting through request, config, and constant defaults.
- * @param input Validated prepare request whose root selects project config.
+ * Resolve settings shared by prepare and handoff through request and config defaults.
+ * @param input Validated request whose root selects project config.
  * @returns Effective review limits, rule root, generated paths, and concurrency.
  * @throws When a configured value fails schema validation.
  */
-export function resolvePrepareSettings(input: PrepareInput) {
+export function resolvePrepareSettings(input: PrepareSettingsInput) {
   const loaded = loadConfig(input.projectRoot);
   const validationFailure = loaded.warnings.find(
     (warning) =>
@@ -35,10 +46,12 @@ export function resolvePrepareSettings(input: PrepareInput) {
     throw new Error(`config validation failed: ${validationFailure}`);
   const config = loaded.config;
   const review = config?.review;
-  const effortMode = input.effort ?? review?.effort ?? REVIEW_DEFAULT_EFFORT;
+  const requestedEffort = 'effort' in input ? input.effort : undefined;
+  const effortMode = requestedEffort ?? review?.effort ?? REVIEW_DEFAULT_EFFORT;
   return {
     effortMode,
-    effortExplicit: input.effort !== undefined || review?.effort !== undefined,
+    effortExplicit:
+      requestedEffort !== undefined || review?.effort !== undefined,
     autoLowEffortGroupThreshold:
       review?.autoLowEffortGroupThreshold ??
       REVIEW_AUTO_LOW_EFFORT_GROUP_THRESHOLD,

@@ -40,7 +40,7 @@ describe('PR base skill wiring regressions', () => {
 
   it('reads PR base metadata in the existing single lookup', () => {
     expect(crossReview).toContain(
-      'gh pr view --json number,url,body,baseRefName',
+      'gh pr view --json number,url,baseRefName',
     );
     expect(crossReview).toContain('baseRefName` as `PR_BASE_BRANCH');
     expect(crossReview).toContain('missing or empty');
