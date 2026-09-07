@@ -25,7 +25,7 @@
 - `fractal_inspect`의 `resolve` action은 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
 - merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3과 handoff 블록 §7, review report와 PR comment는 `skills/cross-review/report-formats.md`, fix request의 여덟 필드 블록은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 스킬 실행에 필요한 형식은 스킬 폴더 안에 두며 플러그인 내부 INTENT/DETAIL을 색인하지 않는다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
-- cross-review의 resumable·cached 산출물은 `review_schema: 7`, state schema 2와 `validationPolicyVersion: 1`을 선언한다. schema v1과 파일별 입력 기록이 없는 legacy는 명시 force로 새 기준점을 준비하며, schema 2의 구형·미지원 검증 정책은 `review-validation-policy-outdated`로 차단하고 기존 파일을 보존한다. 명시 force만 같은 source를 새 검증 정책으로 재준비한다. 새 INCONCLUSIVE seal은 identity-bound `review-blockers.md`와 nullable `ReviewSealData.blockersPath`를 제공한다. 현재 정책의 marker 없는 legacy seal은 null로 읽고, marker가 있는 sidecar 유실·불일치는 자동 force 없이 진단한다.
+- cross-review의 resumable·cached 산출물은 `review_schema: 7`, state schema 2와 `validationPolicyVersion: 2`를 선언한다. schema v1과 파일별 입력 기록이 없는 legacy는 명시 force로 새 기준점을 준비하며, schema 2의 구형·미지원 검증 정책은 `review-validation-policy-outdated`로 차단하고 기존 파일을 보존한다. 명시 force만 같은 source를 새 검증 정책으로 재준비한다. 위치 미확정 지적은 독립 검증하며, 삭제 파일의 인용은 committed diff의 삭제 전 코드에서 가져온다. HEAD의 파일 부재만으로 삭제 결함을 반박하지 않는다. 새 INCONCLUSIVE seal은 identity-bound `review-blockers.md`와 nullable `ReviewSealData.blockersPath`를 제공한다. 현재 정책의 marker 없는 legacy seal은 null로 읽고, marker가 있는 sidecar 유실·불일치는 자동 force 없이 진단한다.
 - fix request는 검증 가능한 원 claim을 포함하며, resolve가 만든 accepted FIX ID는 revalidate에서 해당 canonical request의 Severity, Category, Path, Rule, Claim, Evidence, Consequence, Recommended Action과 정확히 결합된다.
 - interactive resolve는 항목별 질문을 반복하지 않는다. 전체 sheet 뒤 한 batch decision round에서 추천안 일괄 적용, 전체 적용, ID별 적용·논의·warning 생략·근거 있는 거부를 받고, 논의가 남으면 미결 항목만 다시 묶는다. `--auto`도 같은 sheet와 원래 추천을 보여 주되 decision만 전부 자동 선택하고 질문하지 않는다.
 - `cross-review`와 `revalidate`는 브랜치에 pull request가 있을 때 판정을 PR 코멘트로 남긴다. PR이 없으면 남기지 않으며, 코멘트 부재는 실패가 아니다. 코멘트 형식은 각각 `skills/cross-review/report-formats.md`와 `skills/revalidate/reference.md` §4가 정의한다 — 판정표는 접힘 밖, 본문은 접힘 안, 호스트 코멘트 크기 상한 안에 들어가고, 같은 표제의 기존 코멘트는 새로 달지 않고 갱신한다.
@@ -133,4 +133,4 @@
 
 ## Last Updated
 
-2026-09-07
+2026-09-08

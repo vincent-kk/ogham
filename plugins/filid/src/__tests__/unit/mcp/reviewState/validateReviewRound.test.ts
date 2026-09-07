@@ -22,6 +22,7 @@ import {
 import { prepareReviewStateSealFixture } from './helpers/prepareReviewStateSealFixture.js';
 import { readPersistedReviewState } from './helpers/readPersistedReviewState.js';
 import { refreshReviewFixtureInputs } from './helpers/refreshReviewFixtureInputs.js';
+import { runReviewStateFixtureGit } from './helpers/runReviewStateFixtureGit.js';
 
 /** Isolated Git repository and actor-method fixture for validation effects. */
 let fixture: ReviewStateSealFixture;
@@ -89,6 +90,29 @@ describe('validateReviewRound handoff', () => {
   });
 
   it('assigns FCA-1 reviewer claims, excludes FCA-001 and refuted IDs, and advances verifier handoffs', async () => {
+    for (const value of [2, 3]) {
+      writeFileAtomicallySync(
+        portableJoin(fixture.projectRoot, 'src/value.ts'),
+        `export const value = ${value};\n\n\n\n\nexport const unchanged = 0;\n`,
+      );
+      runReviewStateFixtureGit(fixture.projectRoot, [
+        'commit',
+        '-am',
+        `Record value ${value} with unchanged context`,
+      ]);
+    }
+    await handleReviewState({
+      action: 'prepare',
+      projectRoot: fixture.projectRoot,
+      baseRef: 'HEAD~1',
+      effort: 'low',
+      force: true,
+    });
+    state = readPersistedReviewState(
+      fixture.projectRoot,
+      state.normalizedBranch,
+    );
+    paths = resolveReviewStatePaths(state.projectRoot, state.branchName);
     const group = state.groups[0]!;
     state.scope.candidates.push({
       id: 'FCA-001',
@@ -103,7 +127,10 @@ describe('validateReviewRound handoff', () => {
     group.candidateIds.push('FCA-001');
     state = await refreshReviewFixtureInputs(state, paths, fixture.pluginRoot);
     writeReviewState(paths.statePath, state);
-    const finding = buildReviewStateSealFinding('01');
+    const finding = {
+      ...buildReviewStateSealFinding(group.id),
+      existingCode: 'export const value = 3;',
+    };
     writeFileAtomicallySync(
       portableJoin(paths.reviewDirectory, group.skeletonPath),
       JSON.stringify({
@@ -112,8 +139,8 @@ describe('validateReviewRound handoff', () => {
           { ...finding, rule: 'FCA-1' },
           {
             ...finding,
-            id: 'R01-002',
-            existingCode: 'not present in the committed source',
+            id: `R${group.id}-002`,
+            existingCode: 'export const unchanged = 0;',
             rule: 'DEF-1',
           },
         ],
@@ -123,7 +150,7 @@ describe('validateReviewRound handoff', () => {
       action: 'validate',
       projectRoot: fixture.projectRoot,
       kind: 'review',
-      group: '01',
+      group: group.id,
       round: 1,
     });
     expect(reviewed.data).toMatchObject({
@@ -133,7 +160,7 @@ describe('validateReviewRound handoff', () => {
     expect(reviewed.data.next).toEqual([
       {
         kind: 'verify',
-        group: '01',
+        group: group.id,
         modelTier: 'efficient',
         riskReasons: [],
         briefPath: portableJoin(paths.reviewDirectory, group.verifyBriefPath),
@@ -145,17 +172,17 @@ describe('validateReviewRound handoff', () => {
       portableJoin(paths.reviewDirectory, group.verifyBriefPath),
       'utf8',
     );
-    expect(brief).toContain('| R01-001 |');
+    expect(brief).toContain(`| R${group.id}-001 |`);
     expect(brief).toContain('FCA-1');
     expect(brief).not.toContain('| FCA-001 |');
-    expect(brief).not.toContain('| R01-002 |');
+    expect(brief).not.toContain(`| R${group.id}-002 |`);
     const assigned = {
-      findingId: 'R01-001',
+      findingId: `R${group.id}-001`,
       verdict: 'REFUTED',
       evidence: 'src/value.ts:1',
       reason: 'The reviewer claim does not reproduce.',
     };
-    for (const findingId of ['FCA-001', 'R01-002']) {
+    for (const findingId of ['FCA-001', `R${group.id}-002`]) {
       writeFileAtomicallySync(
         portableJoin(paths.reviewDirectory, group.verifyPath),
         JSON.stringify(
@@ -169,7 +196,7 @@ describe('validateReviewRound handoff', () => {
         action: 'validate',
         projectRoot: fixture.projectRoot,
         kind: 'verify',
-        group: '01',
+        group: group.id,
       });
       expect(rejected.summary).toMatchObject({ ok: false });
       expect(rejected.data.problems).toContainEqual(
@@ -186,7 +213,7 @@ describe('validateReviewRound handoff', () => {
       action: 'validate',
       projectRoot: fixture.projectRoot,
       kind: 'verify',
-      group: '01',
+      group: group.id,
     });
     expect(verified.summary).toMatchObject({ ok: true });
     expect(verified.data).toMatchObject({ next: [], sealReady: true });

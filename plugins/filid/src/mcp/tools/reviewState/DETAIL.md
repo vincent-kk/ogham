@@ -21,6 +21,7 @@
 - project-root finding은 ancestor만으로 교차하지 않고 root owner가 같은 때만 포함한다. verification status에는 같은 path·owner 또는 owner 아래 변경과 교차하는 verification file만 반영하지만 graph certainty와 non-finding diagnostic은 project-wide다.
 - `evidence.md`는 schema 7 frontmatter와 Changed Scope, Candidates, Informational, Out-of-scope Observations, Diagnostics를 atomic하게 기록한다. 범위 밖 finding은 source·rule·severity별 count로만 남기고 finding diagnostic은 중복 기록하지 않는다.
 - prepare는 dirty path를 `clean | documents-only | generated-only | source-dirty`로 관측하되 판정하지 않는다. 응답용 path 목록은 상한을 두지만 state의 dirty 관측은 안내용이며 미커밋 변경만으로 파일별 리뷰를 무효화하지 않는다. documents-only와 source-dirty도 artifact를 만들고 최종 fold에서 inconclusive가 된다.
+- 생성물과 모듈 문서가 함께 dirty이면 documents-only로 분류하여 문서 변경을 inconclusive 근거로 유지한다. source-dirty가 최우선이며 generated-only는 문서와 소스 변경이 모두 없을 때만 적용한다.
 - 미추적 경로는 파일별로 관측하며 review 산출물 하위만 제외한다. 상위 `.filid` 디렉터리에 있는 일반 미커밋 파일은 dirty evidence에 남긴다.
 - prepare는 기존 generation을 보존한다. force는 새 generation에서 모든 대상 파일을 다시 검토한다. 같은 입력의 prepared generation은 resumable이고 같은 입력의 sealed generation과 report가 함께 있으면 cached다. 파일별 입력 기록이 없는 legacy 또는 손상된 state는 자동 삭제하지 않고 명시 force로만 새 기준점을 만든다.
 - resumable에서 `evidence.md`와 완전한 state가 있으면 선별·청킹·그룹화를 되살리고 누락 artifact를 복구한다. effective effort는 최초 prepare부터 고정하며, 누락 artifact 복구에서도 기존 round 상한과 미완료 검토를 보존한다. evidence가 없으면 범위 산출부터 다시 만든다. `recoverReviewGroups`는 병합 opinion 누락·hash 불일치 시 raw round r1…rK가 모두 있으면 round 1부터 K까지 순차 재검증해 병합 opinion을 재구성한다. 같은 바이트로 복원되면 기존 verify의 reviewSha256 결합을 유지하고, 달라지면 verify invalid 복구가 이를 지운다. raw round가 하나라도 없으면 review·verify validation을 지우고 병합 opinion을 삭제하며 r1 skeleton을 다시 쓴다. stale rN 파일은 이후 round 진행이 덮어쓴다. validate의 직전 round validation 순서 검사는 유지한다. 미완료 review는 다음 round skeleton을, 완료 review는 새 finding과 이전 미해결 finding이 모두 없으면 auto-verify를, 있으면 누락 verify brief를 만든다. verify 파일·hash·reviewSha256 결합이 깨지면 verify validation을 지우고 같은 복구를 적용한다. 복구와 state 저장을 끝낸 뒤 artifact를 재관측한다.
@@ -59,7 +60,7 @@
 - legacy cached 및 artifact가 완전한 legacy resumable 분기는 기존 session·brief를 재사용하므로 changeContext를 읽지 않고 diagnostics를 빈 배열로 반환한다. 증분 prepare는 같은 source에서도 actor context, 규칙, 근거와 실행 정책을 다시 관측한 뒤에만 현재 generation을 재사용한다.
 - validate input은 `{ action: "validate", projectRoot, branchName?, kind, group, round? }`이다. review kind는 범위 안의 round가 필수이고 verify kind는 round를 금지한다. group은 `^\d{2,}$`이며 state에 존재해야 한다.
 - seal input은 `{ action: "seal", projectRoot, branchName?, baseRef? }`이고, state·matching hash·session을 요구한다.
-- state v2는 root·branch·base, source/file hash, phase와 timestamp 외에 `effort`, `groups`, prepare의 전체 `scope` snapshot, 전체 dirty path 집합 hash, nullable `verdict`와 optional 양의 정수 `validationPolicyVersion`을 가진다. 증분 state는 같은 v2의 additive 필드로 generation ID, committed HEAD·명시적 사용자 기준·environment·decision summary, 파일별 input manifest·원본 opinion의 경로 투영·origin·이전 미해결 finding를 기록한다. fresh state의 정책 버전은 1이며, 누락 또는 미지원 버전의 같은-identity 재사용은 artifact 변경 전 stable diagnostic으로 차단한다. group은 unit·churn·dependency·candidate·artifact path·round와 review/verify validation hash를 보존한다. opinion schema 7과 원본 bytes는 generation 사이에서 다시 쓰지 않는다.
+- state v2는 root·branch·base, source/file hash, phase와 timestamp 외에 `effort`, `groups`, prepare의 전체 `scope` snapshot, 전체 dirty path 집합 hash, nullable `verdict`와 optional 양의 정수 `validationPolicyVersion`을 가진다. 증분 state는 같은 v2의 additive 필드로 generation ID, committed HEAD·명시적 사용자 기준·environment·decision summary, 파일별 input manifest·원본 opinion의 경로 투영·origin·이전 미해결 finding를 기록한다. fresh state의 정책 버전은 2이며, 누락 또는 미지원 버전의 같은-identity 재사용은 artifact 변경 전 stable diagnostic으로 차단한다. group은 unit·churn·dependency·candidate·artifact path·round와 review/verify validation hash를 보존한다. opinion schema 7과 원본 bytes는 generation 사이에서 다시 쓰지 않는다.
 - scope file은 path·change·insertions·deletions·binary에 role·owner·nullable skip reason·rule ID·repository rule path를 더한다. unit은 nullable chunk index/total, churn, old/new hunk range와 review-directory-relative diff path를 가진다.
 - group의 review validation은 nullable `{ round, sha256, complete }`, verify validation은 nullable `{ sha256, reviewSha256 }`다. state verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE | null`이다.
 - state 파일이 없으면 `missing`, schema version이 2가 아니면 schema mismatch, v2 구조가 malformed이거나 group ID에서 유도한 canonical artifact path와 다르면 `STATE_INVALID` error다. prepare만 schema mismatch를 fresh로 낮춘다.
@@ -80,11 +81,11 @@
 - review opinion은 schema 7, group, round, state, sourceHash, 배정 file 결과, finding, checked, gap, nullable risk plan을 가진 JSON이다. `chunk`는 `"k/n"` 또는 null이고 file result는 `reviewed | skipped`, state는 `COMPLETE | INDETERMINATE`다. skipped result는 reason이 필수이고 indeterminate state는 gap이 하나 이상이어야 한다.
 - review finding ID는 group별 `R<group>-<NNN>`이고 severity는 `error | warning`, category는 `bug | security | performance | maintainability | test | documentation | contract | structure | verification`이다. path는 배정 unit이어야 하며 `existingCode`, rule, message, evidence, consequence, recommendedAction은 비어 있지 않아야 한다.
 - review validation problem code는 `parse-error`, `schema-mismatch`, `source-hash-mismatch`, `file-missing`, `file-unassigned`, `result-invalid`, `finding-id-invalid`, `enum-invalid`, `field-empty`, `path-unassigned`, `gap-required`다. missing file은 `indeterminate`와 `review-opinion-invalid` 진단이고, 내용 문제는 `ok: false`인 정상 payload다.
-- finding line은 먼저 배정 unit의 hunk에서, 다음으로 HEAD file 전체에서 trim 단위로 `existingCode`를 찾는다. 유일한 위치만 `start-end`와 `inDiff`를 기록하고 나머지는 `unknown`, false다.
+- finding line은 먼저 배정 unit의 hunk에서, 다음으로 HEAD file 전체에서 trim 단위로 `existingCode`를 찾는다. 유일한 위치만 `start-end`와 `inDiff`를 기록하고 나머지는 `unknown`, false다. 삭제된 배정 파일은 HEAD를 조회하지 않고 삭제 diff의 발췌를 보존한 채 `unknown`, false로 독립 verifier에게 전달한다.
 - round 1은 merged opinion을 만들고 이후 round는 `(path, lines, rule, existingCode)`로 deduplicate한 뒤 ID를 다시 순번화한다. files·checked·gaps는 합집합, state는 어느 입력이든 indeterminate이면 indeterminate, round는 최대값이다. 위험 신호와 첫 round의 불확실성은 finding과 독립적으로 한 번의 후속 review를 요구할 수 있다.
 - review validate summary는 disposition `validated`, kind·group·round·ok·problem/findings/new-findings count·next round를 싣고 data는 problem 목록, merged opinion path와 verify brief path, next·sealReady·verifierRequired를 싣는다. 성공한 merged opinion의 hash와 complete 여부를 state에 쓰고 기존 verify validation은 지운다.
 - review validate는 다음 round가 필요할 때만 배정 unit 전체가 pending인 skeleton을 만든다. 남은 round가 있으면 위험 그룹 또는 INDETERMINATE 첫 review는 finding이 없어도 두 번째 review를 수행한다. 그 외 medium은 신규 assigned error, 명시 high는 신규 assigned finding이 있을 때만 추가한다. 반복된 gap이나 위험 신호만으로 세 번째 review를 만들지 않으며 최대 1·2·3 round와 복구 replay prefix를 지킨다. 후속 reviewer는 prior를 읽기 전에 diff를 독립 검토하고 마지막에 prior와 중복 제거한다. rounds 0 group에 review validate를 호출하면 error다.
-- `splitVerifierAssignment`는 inDiff가 false이고 rule이 USR-·FCA- 어느 접두도 아닌 finding을 deterministicRefuted로, 나머지를 assigned로 분리한다. 이전 generation의 미해결 finding은 현재 diff 밖이라는 이유로 자동 refute하지 않고 verifier에게 배정한다. lines unknown도 같은 분류를 따른다. brief 렌더·verify validate·seal fold는 같은 순수 함수를 쓴다.
+- `splitVerifierAssignment`는 위치가 확정되고 inDiff가 false이며 rule이 USR-·FCA- 어느 접두도 아닌 finding만 deterministicRefuted로, 나머지는 assigned로 분리한다. lines unknown은 diff 밖이라는 증거가 아니므로 독립 verifier에게 배정한다. 이전 generation의 미해결 finding도 현재 diff 밖이라는 이유로 자동 refute하지 않는다. brief 렌더·verify validate·seal fold는 같은 순수 함수를 쓴다.
 - verify brief는 group·source hash·output frontmatter, verifier method의 Deliverable부터 끝까지 verbatim, Files, Diffs, assigned finding만의 Decisions Required, Output Contract를 가진다. Re-verification Mode와 Prior Verifier Guidance 절은 포함하지 않으며 FCA candidate ID 행도 넣지 않는다. FCA-1 rule을 인용한 reviewer finding은 assigned에 남는다.
 - 마지막 review round에서 assigned가 비면 빈 COMPLETE verify JSON(decisions·observations는 빈 배열, checked는 group unit path)을 직접 쓰고 verifierRequired는 false다. 동일 바이트 hash를 validated.verify.sha256, 병합 opinion hash를 reviewSha256에 기록하고 state를 마지막에 저장한다. rounds 0 group도 prepare에서 같은 auto-verify를 기록한다.
 - verify opinion은 schema 7, group, state, sourceHash, decision, observation, checked를 가진 JSON이다. decision은 새 finding과 이전 미해결 finding을 포함한 verify brief의 모든 ID와 정확히 일치하며 verdict는 `CONFIRMED | REFUTED | INDETERMINATE`, evidence와 reason은 비어 있지 않다.
@@ -182,16 +183,19 @@
 - round merge는 distinct unknown-line finding을 `existingCode`로 구분한다. 위험·불확실성 재검토가 필요하지 않고 새 finding도 없으면 다음 round를 만들지 않는다.
 - medium의 일반 그룹에서 경고나 결정론 refuted finding만 추가되면 다음 리뷰 없이 필요한 독립 verifier로 진행한다. 신규 assigned error와 명시 high의 신규 assigned warning은 남은 round를 사용할 수 있다. 위험 그룹의 무지적 첫 review는 strong 후속 review로 가며 low는 strong 한 번으로 끝난다.
 - review 성공은 merged hash·round·complete를 기록하고 verify validation을 무효화한다. verify 성공은 file hash와 그 review hash를 함께 기록한다.
+- 마지막으로 검증된 round보다 과거인 공개 validation은 파일·state를 쓰기 전에 거부한다. 현재 마지막 완료 round의 재검증과 validation을 초기화한 내부 순차 recovery는 유지한다.
 - verify decision은 splitVerifierAssignment의 assigned finding ID를 빠짐없이 정확히 한 번 판정한다. assigned가 비면 마지막 round는 auto-verify를 기록한다.
 
 ### AC-review-quality — 검증 정책과 완료 근거
 
-- fresh state는 `validationPolicyVersion: 1`을 기록한다. 같은 identity의 구형·미지원 정책을 prepare, checkpoint, validate, seal에서 재사용하면 `review-validation-policy-outdated` error만 반환하고 verdict·handoff를 노출하거나 artifact를 변경하지 않는다. 자동 force하지 않으며 cleanup과 새 source/명시 force의 fresh 준비는 유지한다.
+- fresh state는 `validationPolicyVersion: 2`를 기록한다. 같은 identity의 구형·미지원 정책을 prepare, checkpoint, validate, seal에서 재사용하면 `review-validation-policy-outdated` error만 반환하고 verdict·handoff를 노출하거나 artifact를 변경하지 않는다. 자동 force하지 않으며 cleanup과 새 source/명시 force의 fresh 준비는 유지한다.
 - reviewable COMPLETE는 공백 아닌 checked 항목과, planRequired 또는 riskReasons가 있을 때 공백 아닌 riskPlan을 요구한다. INDETERMINATE는 genuine gap이 있으면 빈 checked/null riskPlan을 허용하며 candidate-only 자동 opinion도 최소 기록 조건에서 제외한다. 제공된 공백 문자열은 허용하지 않는다.
 - raw round·prior 재구성·artifact trust·recovery·verifier 선행 검사·seal이 동일한 authoritative group policy로 검사한다. 이전 round의 기록으로 현재 raw round 누락을 덮지 않는다.
 - 필드 검증은 기록 존재만 확인하며 실제 모델 tier나 독해·탐지 품질을 인증하지 않는다.
 
 ### AC-review-seal — 신뢰 가능한 fold와 canonical rendering
+
+- 첫 seal은 현재 dirty 경로를 prepare와 같은 파싱·review 산출물 제외·분류·상한·hash 규칙으로 다시 관측하여 fold·report·blocker·sealed state에 사용한다. sealed cache의 dirty path hash 또는 분류가 달라지면 `review-worktree-stale` 진단으로 반환하고 기존 artifact와 verdict는 덮어쓰지 않는다.
 
 - 신뢰 검사에 실패한 group의 gap·verifier state·observation은 canonical unresolved evidence에 복사하지 않는다. 해당 group은 artifact trust 진단으로만 판정 보류 원인을 설명한다.
 - fix request의 외부 설명·경로·규칙·branch는 줄바꿈과 Markdown 제어 문자를 escape한 데이터로 렌더링하며 새 제목·링크·FIX 항목을 만들 수 없다.
@@ -283,4 +287,4 @@
 
 ## Last Updated
 
-2026-09-07
+2026-09-08

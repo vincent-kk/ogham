@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { rmSync } from 'node:fs';
 
 import {
+  portableJoin,
   readUtf8FileIfExistsSync,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
@@ -374,23 +375,11 @@ describe('review_state seal v7', () => {
   });
 
   it('seals a dirty prepared scope without reviewer opinions as INCONCLUSIVE', async () => {
-    const state = await prepareReviewStateSealFixture(fixture);
-    const dirtyState: ReviewStateRecord = {
-      ...state,
-      scope: {
-        ...state.scope,
-        worktree: 'source-dirty',
-        dirtyPaths: ['src/value.ts'],
-      },
-    };
     writeFileAtomicallySync(
-      reviewArtifactPath(
-        fixture.projectRoot,
-        state,
-        REVIEW_STATE_FILE_NAMES.STATE,
-      ),
-      `${JSON.stringify(dirtyState, null, 2)}\n`,
+      portableJoin(fixture.projectRoot, 'src/value.ts'),
+      'export const value = 99;\n',
     );
+    await prepareReviewStateSealFixture(fixture);
 
     const sealed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,

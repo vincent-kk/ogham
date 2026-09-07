@@ -8,7 +8,7 @@ describe('splitVerifierAssignment', () => {
     { rule: 'DEF-1', inDiff: false, lines: '5-5', assigned: false },
     { rule: 'USR-contract', inDiff: false, lines: '5-5', assigned: true },
     { rule: 'FCA-1', inDiff: false, lines: '5-5', assigned: true },
-    { rule: 'DEF-1', inDiff: false, lines: 'unknown', assigned: false },
+    { rule: 'DEF-1', inDiff: false, lines: 'unknown', assigned: true },
     { rule: 'DEF-1', inDiff: true, lines: '5-5', assigned: true },
   ])('partitions $rule at $lines, inDiff=$inDiff', (row) => {
     const finding: ReviewFinding = {

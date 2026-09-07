@@ -33,7 +33,7 @@ Use `## FCA Handoff` rows only as claims to confirm under FCA-13; a row you cann
 4. When `plan_required` is true or `risk_reasons` is nonempty, write nonblank `riskPlan` before opening related source. Turn risks into falsifiable questions; keep inspection open. An empty risk list does not establish safety.
 5. Turn every applicable inline and repository rule into a falsifiable question.
 6. Open only the callers, consumers, source, or tests needed to answer a question, and inspect the whole assigned group.
-7. For every finding, copy `existingCode` verbatim from the post-change file and cite specific evidence, a reachable consequence, and a bounded action.
+7. Each finding needs verbatim `existingCode` from HEAD (deleted files: assigned diff's old side), evidence, a reachable consequence, and a bounded action.
 8. COMPLETE needs nonblank `checked`; INDETERMINATE needs `gaps`, may add `suggestedOwner` advice, and allows empty `checked`/null `riskPlan`.
 9. In round 2 or later, complete the independent diff and failure-path inspection before opening the merged prior opinion. Then compare against it and remove duplicate findings; a clean prior opinion is not evidence that the group is safe.
 10. Before writing, confirm `schema`, `group`, `round`, `sourceHash` and assigned `(path, change, chunk)` identities.
@@ -44,7 +44,7 @@ Do not restate an assigned `FCA-NNN` candidate as a reviewer finding; name it un
 
 - Review the whole group; do not stop after the first `error`.
 - Report nothing a type checker or linter already rejects.
-- Comment only on added or modified lines; unchanged context is evidence, never a finding.
+- Comment only on added or modified lines, or removed code in an assigned deleted file; unchanged context is evidence, never a finding.
 - Mark an assigned unit `skipped` only when its diff file is unreadable; a skipped reviewable unit makes the run INCONCLUSIVE.
 - Do not report style, naming taste, readability preference, or speculative cleanup.
 - Use `error` only for incorrect behavior, security defects, data loss, crashes, public-contract violations, or FCA boundary violations.

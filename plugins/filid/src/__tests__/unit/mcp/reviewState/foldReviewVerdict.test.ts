@@ -68,7 +68,7 @@ describe('foldReviewVerdict', () => {
     const group = input.groups[0]!;
     group.verify!.decisions = [];
     group.review!.findings = [
-      buildVerdictReviewFinding({ lines: 'unknown', inDiff: false }),
+      buildVerdictReviewFinding({ lines: '20-20', inDiff: false }),
     ];
     group.group.units[0]!.hunks.push({
       oldStart: 10,
@@ -287,7 +287,7 @@ describe('foldReviewVerdict', () => {
     const input = createVerdictFoldFixture();
     input.groups[0]!.verify!.state = 'INDETERMINATE';
     input.groups[0]!.review!.findings = [
-      buildVerdictReviewFinding({ inDiff: false, lines: 'unknown' }),
+      buildVerdictReviewFinding({ inDiff: false, lines: '20-20' }),
     ];
 
     const result = foldReviewVerdict(input);

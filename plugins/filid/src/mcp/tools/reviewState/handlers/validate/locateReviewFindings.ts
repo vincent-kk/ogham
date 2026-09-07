@@ -4,7 +4,7 @@ import type { ReviewFinding } from '../../opinion/reviewOpinionTypes.js';
 import type { ReviewUnit } from '../../state/reviewGroupTypes.js';
 
 /**
- * Resolve every reviewer finding against the committed HEAD source once per path.
+ * Locate findings in committed HEAD, preserving deleted-file claims as unknown.
  *
  * @param projectRoot Absolute repository root used for safe Git invocation.
  * @param findings Validated reviewer findings awaiting canonical locations.
@@ -19,6 +19,12 @@ export async function locateReviewFindings(
   const sourceByPath = new Map<string, string>();
   const located: ReviewFinding[] = [];
   for (const finding of findings) {
+    if (
+      units.some((unit) => unit.path === finding.path && unit.change === 'D')
+    ) {
+      located.push({ ...finding, lines: 'unknown', inDiff: false });
+      continue;
+    }
     let sourceText = sourceByPath.get(finding.path);
     if (sourceText === undefined) {
       sourceText = await executeReviewGit(projectRoot, [

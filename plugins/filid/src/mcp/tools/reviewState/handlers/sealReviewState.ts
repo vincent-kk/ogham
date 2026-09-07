@@ -20,6 +20,7 @@ import { renderPrComment } from '../render/renderPrComment.js';
 import { renderReviewBlockers } from '../render/renderReviewBlockers.js';
 import { renderReviewReport } from '../render/renderReviewReport.js';
 import type { ReviewRenderInput } from '../render/reviewRenderTypes.js';
+import { readReviewWorktree } from '../scope/readReviewWorktree.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { assertReviewValidationPolicy } from '../state/assertReviewValidationPolicy.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
@@ -40,6 +41,7 @@ import { createSealedReviewPayload } from './utils/createSealedReviewPayload.js'
 import { loadSealGroupEvidence } from './utils/loadSealGroupEvidence.js';
 import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
 import { readSealedReviewSummary } from './utils/readSealedReviewSummary.js';
+import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
 
 /** Shared state-reading input shape accepted by checkpoint and seal. */
 type CheckpointOrSealInput = Extract<
@@ -109,7 +111,32 @@ export async function sealReviewState(
     });
 
   await assertReviewInputsFresh(state, paths);
+  const settings = resolvePrepareSettings({
+    action: 'prepare',
+    projectRoot: input.projectRoot,
+  });
+  const worktree = await readReviewWorktree(
+    input.projectRoot,
+    settings.generatedPaths,
+  );
   if (state.phase === REVIEW_STATE_PHASES.SEALED) {
+    if (
+      worktree.dirtyPathsHash !== state.scope.dirtyPathsHash ||
+      worktree.worktree !== state.scope.worktree
+    )
+      return createReviewStatePayload({
+        action: input.action,
+        disposition: REVIEW_STATE_DISPOSITIONS.STALE,
+        paths,
+        status: TOOL_STATUSES.INDETERMINATE,
+        diagnostics: [
+          {
+            code: REVIEW_STATE_DIAGNOSTIC_CODES.WORKTREE_STALE,
+            message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.WORKTREE_STALE,
+            path: paths.statePath,
+          },
+        ],
+      });
     const summary =
       state.verdict === null
         ? null
@@ -176,8 +203,8 @@ export async function sealReviewState(
       ) !== null,
   );
   const worktreeForcesInconclusive =
-    state.scope.worktree === WORKTREE_DISPOSITIONS.DOCUMENTS_ONLY ||
-    state.scope.worktree === WORKTREE_DISPOSITIONS.SOURCE_DIRTY;
+    worktree.worktree === WORKTREE_DISPOSITIONS.DOCUMENTS_ONLY ||
+    worktree.worktree === WORKTREE_DISPOSITIONS.SOURCE_DIRTY;
   if (
     reviewableGroups.length > 0 &&
     !hasMergedReview &&
@@ -210,7 +237,7 @@ export async function sealReviewState(
       evidenceComplete: state.scope.evidenceComplete,
       structureStatus: state.scope.statuses.structure,
       verificationStatus: state.scope.statuses.verification,
-      worktree: state.scope.worktree,
+      worktree: worktree.worktree,
     },
     files: state.scope.files,
     candidates: state.scope.candidates,
@@ -229,7 +256,7 @@ export async function sealReviewState(
       evidenceComplete: state.scope.evidenceComplete,
       structureStatus: state.scope.statuses.structure,
       verificationStatus: state.scope.statuses.verification,
-      worktree: state.scope.worktree,
+      worktree: worktree.worktree,
     },
     files: state.scope.files,
     fold,
@@ -246,6 +273,7 @@ export async function sealReviewState(
   );
   const sealedState: ReviewStateRecord = {
     ...state,
+    scope: { ...state.scope, ...worktree },
     phase: REVIEW_STATE_PHASES.SEALED,
     sealedAt: generatedAt,
     verdict: fold.verdict,

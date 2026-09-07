@@ -35,7 +35,7 @@ export function buildVerifyBriefInput(): RenderVerifyBriefInput {
         category: 'test',
         severity: 'warning',
         path: 'src/b.ts',
-        lines: 'unknown',
+        lines: '20-20',
         inDiff: false,
         rule: 'TST-1',
         message: 'The boundary case lacks verification.',
