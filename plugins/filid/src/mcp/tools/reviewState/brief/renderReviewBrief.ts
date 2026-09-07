@@ -1,3 +1,4 @@
+import { REVIEW_RESOLUTION_SCHEMA } from '../opinion/utils/reviewResolutionSchema.js';
 import { escapeMarkdownCell } from '../scope/utils/escapeMarkdownCell.js';
 import { renderMarkdownTable } from '../scope/utils/renderMarkdownTable.js';
 
@@ -6,6 +7,61 @@ import { renderBriefDiffs } from './utils/renderBriefDiffs.js';
 import { renderChangeContext } from './utils/renderChangeContext.js';
 import { renderHandoffSection } from './utils/renderHandoffSection.js';
 import { renderReviewUnitRow } from './utils/renderReviewUnitRow.js';
+
+/** Require a numeric Zod boundary before publishing it in every reviewer brief. */
+function requireSchemaBound(
+  value: number | null | undefined,
+  field: string,
+): number {
+  if (value === null || value === undefined)
+    throw new Error(`Review resolution schema must bound ${field}.`);
+  return value;
+}
+
+/** Require a trimmed schema string to remain nonblank before rendering its cap. */
+function requireNonblankStringLimit(
+  minimum: number | null,
+  maximum: number | null,
+  field: string,
+): number {
+  if (requireSchemaBound(minimum, `${field} minimum`) !== 1)
+    throw new Error(`Review resolution schema must keep ${field} nonblank.`);
+  return requireSchemaBound(maximum, `${field} maximum`);
+}
+
+/** Render the terse resolution contract from the authoritative Zod schema. */
+function renderReviewResolutionContract(): string {
+  const {
+    question,
+    evidenceNeeded,
+    nextAction,
+    doneWhen,
+    suggestedOwner,
+    humanReason,
+  } = REVIEW_RESOLUTION_SCHEMA.innerType().shape;
+  const nextActionLimit = requireNonblankStringLimit(
+    nextAction.minLength,
+    nextAction.maxLength,
+    'nextAction',
+  );
+  const doneWhenLimit = requireNonblankStringLimit(
+    doneWhen.minLength,
+    doneWhen.maxLength,
+    'doneWhen',
+  );
+  const actionContract =
+    nextActionLimit === doneWhenLimit
+      ? `nextAction/doneWhen≤${nextActionLimit}`
+      : `nextAction≤${nextActionLimit},doneWhen≤${doneWhenLimit}`;
+
+  return [
+    `question≤${requireNonblankStringLimit(question.minLength, question.maxLength, 'question')}`,
+    `evidenceNeeded=${requireSchemaBound(evidenceNeeded._def.minLength?.value, 'evidenceNeeded count minimum')}..${requireSchemaBound(evidenceNeeded._def.maxLength?.value, 'evidenceNeeded count maximum')}×≤${requireNonblankStringLimit(evidenceNeeded.element.minLength, evidenceNeeded.element.maxLength, 'evidenceNeeded item')}`,
+    actionContract,
+    `suggestedOwner=${suggestedOwner.options.join('|')}`,
+    `humanReason?≤${requireNonblankStringLimit(humanReason.unwrap().minLength, humanReason.unwrap().maxLength, 'humanReason')}(human:required)`,
+  ].join(',');
+}
 
 /**
  * Render one reviewer brief while keeping the full roster in the shared checklist.
@@ -135,10 +191,10 @@ export function renderReviewBrief(
     '',
     '## Output Contract',
     '',
-    'Fill the prewritten JSON skeleton at `output`; preserve identity/keys; one result per unit.',
+    'Use prewritten JSON skeleton; keep keys/units',
     '- files: result=reviewed|skipped; skipped needs reason; retain chunk ("k/n" or null).',
-    '- gaps: [] or nonblank path/rule/detail.',
-    '- gap resolution?: question≤240; evidenceNeeded≤5×300; nextAction/doneWhen≤600; suggestedOwner=agent|human|unknown; humanReason≤400 required for human. Advice only.',
+    '- checked: COMPLETE=>nonempty nonblank-string[]',
+    `- gaps: []|[{path,rule,detail,resolution?:{${renderReviewResolutionContract()}}}]; text nonblank; advice only.`,
     `- findings: [{id:R${input.group.id}-NNN,severity:error|warning,category:bug|security|performance|maintainability|test|documentation|contract|structure|verification,path,existingCode,lines,rule,message,evidence,consequence,recommendedAction}]; nonblank text; assigned path; lines=range|unknown.`,
     '',
   ].join('\n');
