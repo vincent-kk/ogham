@@ -2,7 +2,15 @@ name: CI
 
 on:
   # Manual run (e.g. after docs/adapter-only changes that path filters skip).
+  # `mode: full` plans every workspace; `affected` diffs against the default
+  # branch, which yields an empty plan when dispatched on the default branch itself.
   workflow_dispatch:
+    inputs:
+      mode:
+        description: "full: every workspace; affected: only what the change reaches"
+        type: choice
+        options: [full, affected]
+        default: full
   # Run CI when source/test code changes, and when anything the host adapters are
   # derived from — or the adapters themselves — changes.
   #
@@ -39,6 +47,7 @@ on:
       - ".agents/**"
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     paths:
       - "**.ts"
       - "**.tsx"
@@ -56,9 +65,111 @@ on:
       - "**/.codex-plugin/**"
       - ".agents/**"
 
+# A newer run on the same branch supersedes the older one; main is never cancelled.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+defaults:
+  run:
+    # One shell on every OS so globs and `&&` behave the same on Windows.
+    shell: bash
+
 jobs:
-  test:
-    name: ${{ matrix.os }} / Node ${{ matrix.node }}
+  # Decide what this change can affect. scripts/ciPlan.mjs maps the changed
+  # files to workspaces, expands dependents (whose tests can break) and
+  # dependencies (whose dist the build needs), and degrades to a full plan when
+  # a root input changed or the base ref cannot be resolved. Full runs are also
+  # forced by the `ci:full` PR label, a `[ci full]` commit message, or the
+  # workflow_dispatch `mode` input.
+  plan:
+    name: Plan
+    runs-on: ubuntu-latest
+    outputs:
+      mode: ${{ steps.plan.outputs.mode }}
+      reason: ${{ steps.plan.outputs.reason }}
+      build: ${{ steps.plan.outputs.build }}
+      test: ${{ steps.plan.outputs.test }}
+      typecheck: ${{ steps.plan.outputs.typecheck }}
+      typecheckTests: ${{ steps.plan.outputs.typecheckTests }}
+      lint: ${{ steps.plan.outputs.lint }}
+      scriptsTests: ${{ steps.plan.outputs.scriptsTests }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Compute plan
+        id: plan
+        env:
+          EVENT: ${{ github.event_name }}
+          DISPATCH_MODE: ${{ github.event.inputs.mode }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          FULL_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'ci:full') }}
+          FULL_MESSAGE: ${{ contains(github.event.head_commit.message, '[ci full]') }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+        run: |
+          case "$EVENT" in
+            pull_request)
+              if [ "$FULL_LABEL" = "true" ]; then
+                node scripts/ciPlan.mjs --full="ci:full label" --github-output
+              else
+                node scripts/ciPlan.mjs --base="$PR_BASE" --head="$PR_HEAD" --github-output
+              fi
+              ;;
+            push)
+              if [ "$FULL_MESSAGE" = "true" ]; then
+                node scripts/ciPlan.mjs --full="[ci full] in commit message" --github-output
+              elif [ "$PUSH_BEFORE" = "0000000000000000000000000000000000000000" ]; then
+                node scripts/ciPlan.mjs --full="no previous commit on this ref" --github-output
+              else
+                node scripts/ciPlan.mjs --base="$PUSH_BEFORE" --head="$GITHUB_SHA" --github-output
+              fi
+              ;;
+            *)
+              if [ "$DISPATCH_MODE" = "affected" ]; then
+                node scripts/ciPlan.mjs --base="origin/$DEFAULT_BRANCH" --head="$GITHUB_SHA" --github-output
+              else
+                node scripts/ciPlan.mjs --full="workflow_dispatch" --github-output
+              fi
+              ;;
+          esac
+
+      - name: Summary
+        env:
+          MODE: ${{ steps.plan.outputs.mode }}
+          REASON: ${{ steps.plan.outputs.reason }}
+          BUILD: ${{ steps.plan.outputs.build }}
+          TEST: ${{ steps.plan.outputs.test }}
+          TYPECHECK: ${{ steps.plan.outputs.typecheck }}
+          LINT: ${{ steps.plan.outputs.lint }}
+        run: |
+          {
+            echo "## CI plan: \`$MODE\`"
+            echo
+            echo "$REASON"
+            echo
+            echo "| Step | Targets |"
+            echo "| --- | --- |"
+            echo "| build | ${BUILD:-_none_} |"
+            echo "| test | ${TEST:-_none_} |"
+            echo "| typecheck | ${TYPECHECK:-_none_} |"
+            echo "| lint | ${LINT:-_none_} |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # Build then test on every supported OS/Node pair: the build scripts spawn
+  # shells and the cross-platform package exists for exactly these differences.
+  build-test:
+    name: Build & test / ${{ matrix.os }} / Node ${{ matrix.node }}
+    needs: plan
+    if: needs.plan.outputs.build != '' || needs.plan.outputs.test != '' || needs.plan.outputs.scriptsTests == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -68,34 +179,145 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Corepack first so setup-node's yarn cache resolves the pinned Yarn 4.
+      - name: Enable Corepack
+        run: corepack enable
+
       - name: Setup Node.js ${{ matrix.node }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node }}
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build
+        if: needs.plan.outputs.build != ''
+        env:
+          WORKSPACES: ${{ needs.plan.outputs.build }}
+        run: node scripts/buildAll.mjs --only="$WORKSPACES" --jobs=3
+
+      - name: Test
+        if: needs.plan.outputs.test != ''
+        env:
+          PROJECTS: ${{ needs.plan.outputs.test }}
+        run: |
+          args=()
+          IFS=',' read -ra projects <<< "$PROJECTS"
+          for project in "${projects[@]}"; do args+=(--project "$project"); done
+          yarn vitest run "${args[@]}"
+
+      - name: Test (repository scripts)
+        if: needs.plan.outputs.scriptsTests == 'true'
+        run: node --test scripts/__tests__/*.test.mjs
+
+  # Type results do not depend on the OS or Node version, so one runner suffices.
+  typecheck:
+    name: Typecheck
+    needs: plan
+    if: needs.plan.outputs.typecheck != '' || needs.plan.outputs.typecheckTests != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Enable Corepack
         run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
 
       - name: Install dependencies
         run: yarn install --immutable
 
       - name: Typecheck
-        run: yarn typecheck
+        if: needs.plan.outputs.typecheck != ''
+        env:
+          WORKSPACES: ${{ needs.plan.outputs.typecheck }}
+        run: node scripts/typecheckAll.mjs --only="$WORKSPACES"
 
-      - name: Typecheck (cennad tests)
-        run: yarn cennad typecheck:tests
+      - name: Typecheck (test sources)
+        if: needs.plan.outputs.typecheckTests != ''
+        env:
+          WORKSPACES: ${{ needs.plan.outputs.typecheckTests }}
+        run: |
+          IFS=',' read -ra workspaces <<< "$WORKSPACES"
+          for workspace in "${workspaces[@]}"; do
+            yarn workspace "$workspace" typecheck:tests
+          done
 
-      # Clean-regen gate: regenerate the host adapters from the Claude canonical
-      # files and fail if the result differs from what is committed. Catches a
-      # hand-edited adapter and a canonical change that was never re-synced.
+  lint:
+    name: Lint
+    needs: plan
+    if: needs.plan.outputs.lint != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint
+        env:
+          TARGETS: ${{ needs.plan.outputs.lint }}
+        run: |
+          IFS=',' read -ra targets <<< "$TARGETS"
+          # A markdown-only workspace (prawf) matches no lintable file.
+          yarn eslint --no-error-on-unmatched-pattern "${targets[@]}"
+
+  # Clean-regen gate: regenerate the host adapters from the Claude canonical
+  # files and fail if the result differs from what is committed. Catches a
+  # hand-edited adapter and a canonical change that was never re-synced. This
+  # job deliberately does not depend on the plan: the generator reads every
+  # plugin, and the root adapters it writes (`.agents/**`) are ignored by the
+  # planner, so gating it on the plan would let a root adapter drift through.
+  adapters:
+    name: Adapters in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
       - name: Adapters in sync
         run: yarn plugin:adapters:check
 
-      - name: Build
-        run: yarn build:all
-
-      - name: Test
-        run: yarn test:run
-
-      - name: Lint
-        run: yarn lint
+  # Single required status check: green when every job either passed or was
+  # skipped by the plan, red when any job failed or was cancelled.
+  ci:
+    name: CI
+    needs: [plan, build-test, typecheck, lint, adapters]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check job results
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS"
+          if echo "$RESULTS" | grep -Eq '"result": "(failure|cancelled)"'; then
+            echo "A required job failed or was cancelled."
+            exit 1
+          fi

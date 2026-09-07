@@ -442,10 +442,11 @@ Please use a transpiler like Babel to transform the code for your target environ
 
 ## Scripts
 
-- `yarn build:all` — Build all packages
+- `yarn build:all` — Build all packages (`--only=<name,...>` for a subset, `--jobs=<n>` to build consumers in parallel)
 - `yarn test` — Run tests across all packages
 - `yarn lint` — Check code style
-- `yarn typecheck` — Verify TypeScript types
+- `yarn typecheck` — Verify TypeScript types (`--only=<name,...>` for a subset)
+- `yarn ci:plan` — Print which workspaces a change affects (`--base`, `--head`, `--full`); CI runs only that subset, or everything with the `ci:full` PR label, `[ci full]` in the commit message, or a manual run
 - `yarn tag:packages <commit>` — Create Git tags for all packages based on their versions
 
 ---

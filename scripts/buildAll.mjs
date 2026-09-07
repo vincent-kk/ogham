@@ -4,9 +4,19 @@
  *
  * Same provider/consumer staging as scripts/typecheckAll.mjs:
  * providers emit dist first so consumer `tsc -p tsconfig.build.json`
- * can resolve their .d.ts files. Consumers run sequentially via
+ * can resolve their .d.ts files. Consumers run via
  * `yarn workspaces foreach --topological-dev` so package dependencies
  * such as @ogham/maencof -> @ogham/maencof-lens keep their build order.
+ *
+ * usage: node scripts/buildAll.mjs [--only=<name,...>] [--jobs=<n>]
+ *
+ *   --only   Build only the named workspaces (providers and consumers
+ *            alike). The list must already include every dependency the
+ *            named consumers need — scripts/ciPlan.mjs produces such a
+ *            list as its `build` field.
+ *   --jobs   Run independent consumer builds in parallel, at most <n> at
+ *            once. Consumers only ever write inside their own directory,
+ *            so parallel builds do not race. Default: sequential.
  */
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -27,6 +37,20 @@ const PROVIDERS = [
 ];
 
 const EXCLUDES = PROVIDERS.map(({ name }) => `--exclude=${name}`);
+
+function readOption(name) {
+  const match = process.argv.find((arg) => arg.startsWith(`--${name}=`));
+  return match?.slice(name.length + 3);
+}
+
+const only = readOption("only")?.split(",").filter(Boolean);
+const jobs = Number(readOption("jobs") ?? 1);
+const selectedProviders = PROVIDERS.filter(
+  ({ name }) => !only || only.includes(name),
+);
+const consumerIncludes = (only ?? [])
+  .filter((name) => !PROVIDERS.some((provider) => provider.name === name))
+  .flatMap((name) => ["--include", name]);
 
 async function clearTscCache(pkgDir) {
   for (const f of [
@@ -56,26 +80,31 @@ function run(cmd, args, label) {
 }
 
 // 1. Build providers sequentially.
-for (const { name, dir } of PROVIDERS) {
+for (const { name, dir } of selectedProviders) {
   console.log(`\n→ Building ${name} (provider)`);
   await clearTscCache(dir);
   await run("yarn", ["workspace", name, "build"], `${name} build`);
 }
 
 // 2. Build the rest via foreach with dependency ordering among consumers.
-console.log(`\n→ Building remaining workspaces`);
-await run(
-  "yarn",
-  [
-    "workspaces",
-    "foreach",
-    "-A",
-    "--topological-dev",
-    ...EXCLUDES,
-    "run",
-    "build",
-  ],
-  "consumers build",
-);
-
-console.log("\n✓ All workspaces built");
+if (only && consumerIncludes.length === 0) {
+  console.log("\n✓ No consumer workspace selected");
+} else {
+  console.log(`\n→ Building ${only ? "selected" : "remaining"} workspaces`);
+  await run(
+    "yarn",
+    [
+      "workspaces",
+      "foreach",
+      "-A",
+      "--topological-dev",
+      ...(jobs > 1 ? ["--parallel", "--jobs", String(jobs)] : []),
+      ...EXCLUDES,
+      ...consumerIncludes,
+      "run",
+      "build",
+    ],
+    "consumers build",
+  );
+  console.log(`\n✓ ${only ? "Selected" : "All"} workspaces built`);
+}

@@ -20,6 +20,13 @@
  * removes bridge/ (not dist/), we additionally clear the stale
  * tsbuildinfo so tsc actually re-emits dist instead of short-
  * circuiting on the incremental cache.
+ *
+ * usage: node scripts/typecheckAll.mjs [--only=<name,...>]
+ *
+ *   --only   Typecheck only the named workspaces. Every provider is still
+ *            built first: a consumer's typecheck needs its providers' dist,
+ *            and the four provider builds are cheaper than tracking which
+ *            ones the named consumers import.
  */
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
@@ -54,6 +61,13 @@ const CONSUMERS = [
   "@ogham/seiri",
   "@ogham/plugin-compiler",
 ];
+
+function readOption(name) {
+  const match = process.argv.find((arg) => arg.startsWith(`--${name}=`));
+  return match?.slice(name.length + 3);
+}
+
+const only = readOption("only")?.split(",").filter(Boolean);
 
 async function clearTscCache(pkgDir) {
   for (const f of [
@@ -93,7 +107,10 @@ for (const { name, dir } of PROVIDERS) {
 //
 // A provider's build runs tsconfig.build.json, which excludes its spec files,
 // so the provider's own `typecheck` is the only pass that covers them.
-const TYPECHECK_TARGETS = [...PROVIDERS.map(({ name }) => name), ...CONSUMERS];
+const TYPECHECK_TARGETS = only ?? [
+  ...PROVIDERS.map(({ name }) => name),
+  ...CONSUMERS,
+];
 console.log(
   `\n→ Typechecking ${TYPECHECK_TARGETS.length} workspaces in parallel`,
 );
@@ -103,4 +120,4 @@ await Promise.all(
   ),
 );
 
-console.log("\n✓ All workspaces typecheck clean");
+console.log(`\n✓ ${only ? "Selected" : "All"} workspaces typecheck clean`);

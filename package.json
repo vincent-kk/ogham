@@ -20,6 +20,7 @@
     "atlassian": "yarn workspace @ogham/atlassian",
     "build:all": "node scripts/buildAll.mjs",
     "cennad": "yarn workspace @ogham/cennad",
+    "ci:plan": "node scripts/ciPlan.mjs",
     "clean": "yarn workspaces foreach -A exec rm -rf dist .tsbuildinfo",
     "crossPlatform": "yarn workspace @ogham/cross-platform",
     "deilen": "yarn workspace @ogham/deilen",
