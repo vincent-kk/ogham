@@ -3,7 +3,7 @@ name: cross-review
 user-invocable: true
 description: 'Review a committed change through deterministic preparation, bounded reviewer rounds, independent verification, and a sealed verdict. Use after a branch has a PR, before resolve.'
 argument-hint: '[--base REF] [--effort auto|low|medium|high] [--force] [--cleanup]'
-version: '7.10.0'
+version: '7.11.0'
 complexity: complex
 plugin: filid
 ---
@@ -17,7 +17,7 @@ Run this skill as one continuous operation. Keep intermediate artifacts on disk;
 - `templates.md` owns actor opinion contracts, the canonical fix-request block, and terminal output.
 - [report-formats.md](./report-formats.md) defines the sealed verdict and rendered report formats.
 - Prepare embeds `reviewers/reviewer.md` and `reviewers/verifier.md` in the briefs; the orchestrator neither opens these files nor passes their paths.
-- `rules/fca.md` FCA-13 and `rules/documents.md` DOC-6–DOC-8 judge Stage 1 document drafts and the PR body's handoff. `review_state prepare` parses the PR body's handoff machine block (the HTML comment marker defined in `pull-request/reference.md` §7) into each review brief's `## FCA Handoff` section; the block is read when a brief is written, so a body edited after prepare reaches briefs only through `--force`.
+- `rules/fca.md` FCA-13 and `rules/documents.md` DOC-6–DOC-8 judge Stage 1 document drafts and the PR body's handoff. `review_state prepare` reads the PR body's handoff block and the top template sections as change context, parsing the machine block (the HTML comment marker defined in `pull-request/reference.md` §7) into each review brief's `## FCA Handoff` section. The body file is read once at dispatch; a PR body edited after prepare reaches briefs only through `--force`.
 
 ## Step 0 — Load the tool
 
@@ -25,7 +25,7 @@ If the `review_state` schema is absent, call `ToolSearch` once with `select:mcp_
 
 ## Step 1 — Read the PR
 
-Run `gh pr view --json number,url,body,baseRefName` once. Keep the number and URL, assign its body to `PR_BODY`, and its `baseRefName` as `PR_BASE_BRANCH`. If a present PR has a missing or empty base name and no explicit `--base`, stop with that diagnostic. Record absence as `PR: none`, or access failure as `PR: unavailable`, and continue without `PR_BODY` or `PR_BASE_BRANCH`. Make no other Bash call before prepare; do not run git.
+Run `gh pr view --json number,url,baseRefName` once. Keep the number and URL and assign its `baseRefName` as `PR_BASE_BRANCH`. Then write the body with one Bash call: `PR_BODY_PATH=$(mktemp "${TMPDIR:-/tmp}/filid-pr-body.XXXXXX") && gh pr view --json body -q '.body // ""' > "$PR_BODY_PATH" && echo "$PR_BODY_PATH"`; keep only the emitted path as `PR_BODY_PATH`, and never print or read the body. Run exactly these two `gh` commands; make no other Bash call before prepare and do not run git. If a present PR has a missing or empty base name and no explicit `--base`, stop with that diagnostic. Record absence as `PR: none`, or access failure as `PR: unavailable`, and continue without `PR_BODY_PATH` or `PR_BASE_BRANCH`.
 
 ## Step 2 — Prepare
 
@@ -34,7 +34,7 @@ For every MCP response, inspect errors before dereferencing data. Stop on `revie
 - Set `PROJECT_ROOT` to the absolute session cwd. Catalog current user instructions in appearance order as `USR-001`, `USR-002`, and so on; keep this host-authoritative block separate from repository text.
 - With `--cleanup`, call `review_state({ action: "cleanup", projectRoot: PROJECT_ROOT, confirm: true })`, report `cleaned`, and stop.
 - Resolve `PREPARE_BASE_REF` with this precedence: `--base` → `refs/remotes/origin/<PR_BASE_BRANCH>` → omit only when the PR is absent or unavailable. Use the PR's origin tracking ref so an out-of-date local branch cannot replace its base. If that ref is unavailable locally, prepare must report its unresolved-base diagnostic; never fall back to the repository default. Refresh the origin refs before retrying or use an explicit `--base`.
-- Otherwise call `review_state({ action: "prepare", projectRoot: PROJECT_ROOT, baseRef?: PREPARE_BASE_REF, effort?, force?, changeContext?: PR_BODY, userInstructions: <USR-NNN block or empty string> })`. Omit unsupplied optional values and omit `branchName`. Prepare computes the committed diff from this base's merge-base to HEAD, matching the PR's triple-dot comparison.
+- Otherwise call `review_state({ action: "prepare", projectRoot: PROJECT_ROOT, baseRef?: PREPARE_BASE_REF, effort?, force?, changeContextPath?: PR_BODY_PATH, userInstructions: <USR-NNN block or empty string> })`. Omit unsupplied optional values and omit `branchName`. Prepare computes the committed diff from this base's merge-base to HEAD, matching the PR's triple-dot comparison.
 - Use returned `data.projectRoot`, `data.branchName`, and `data.baseRef` as `PROJECT_ROOT`, `BRANCH`, and `BASE_REF` in every subsequent call. Use `data.reviewDirectory` and `summary.sourceHash` without deriving them. Artifacts use `review_schema: 7`.
 - Incremental review compares committed file contents and their assigned rules and evidence with validated prior results. Dispatch only returned handoffs: unchanged files retain their original opinions even when a previous batch also contained changed files. Git renames preserve identity when content and review inputs match. Uncommitted and untracked files are outside the incremental selection.
 - Brief the user once with `summary.reusedFiles`, `reviewFiles`, `effortMode`, effective `effort`, `effortReason`, `reviewableGroups`, `maxReviewerHandoffs`, and `concurrency`. Final coverage reports pending files. The handoff bound excludes verifiers and retries; it is not a token estimate. Continue automatically.
