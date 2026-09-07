@@ -17,6 +17,7 @@ export function assertReviewStatePaths(paths: ReviewStatePaths): void {
     resolveContainedPath(paths.reviewRoot, paths.normalizedBranch),
     paths.statePath,
   );
+  assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.handoffPath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.reportPath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.blockersPath);
   assertNoSymlinkDescendantsSync(paths.reviewDirectory, paths.evidencePath);

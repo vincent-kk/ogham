@@ -12,8 +12,9 @@
 
 - 경로 목록의 동등성은 순서와 무관하고 양쪽의 중복을 거부한다. membership 검사에 쓰는 하나의 집합을 반복 조회·소거에 재사용하며 중복 개수만 읽기 위한 추가 집합은 만들지 않는다.
 
-- `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess` 여섯 action만 지원한다.
+- `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`, `handoff` 일곱 action만 지원한다.
 - `prepare`는 merge-base와 committed changed-file blob으로 source hash를 계산하고 변경 roster·FCA 증거·review group을 한 snapshot에서 만든다. 모든 canonical artifact를 먼저 쓴 뒤 `ReviewStateRecord` v2를 마지막에 한 번 atomic 저장한다.
+- `handoff`는 prepare와 같은 규칙으로 base와 설정을 해석하고 같은 snapshot의 changed-scope finding을 골라 분류·상한을 적용한 `## FCA Handoff` 섹션을 `<reviewDirectory>/handoff.md`에 쓴다. caller `entries`의 `note`·`ruleId`·`path`는 도구가 상한에 맞춰 자른다. `Counts:`와 응답 `data.counts`는 machine block 상한 전에 완전한 handoff를 집계하며, scan-level non-finding 진단은 envelope에 유지하면서 `indeterminate` claim으로도 기록한다. state와 `evidence.md`는 쓰지 않고, 렌더 결과를 `parseHandoffBlock`으로 자체 검증한다. validation 실패는 `snapshotHash: null`, `documentSync: failed`, `handoff-validate` 합성 항목으로 기록한다.
 - `prepare`는 `changeContext` 안의 `<!-- filid:handoff v1 -->` 블록을 절단 전에 추출해 zod 스키마로 검증하고, 각 review brief에 `## FCA Handoff` 섹션으로 그룹별 행을 싣는다. 블록은 canonical evidence가 아니라 검증할 주장이다. 원문 changeContext는 입력 재관측을 위해 recipe에 저장한다.
 - roster는 NUL-safe Git name-status와 numstat에서 A/M/D·owner·churn·binary를 보존하고 `fileHashes` key 집합과 정확히 일치해야 한다. 다르면 축소하지 않고 internal error다.
 - FCA 후보는 같은 snapshot에서 변경 path·그 ancestor·owner와 교차하는 structure/verification finding만 `(path, rule, message)`로 중복 제거하고 정렬해 `FCA-NNN`을 부여한다. 같은 key는 error severity가 이기며 info는 informational 관측으로 남는다.
@@ -48,12 +49,13 @@
 
 ## API Contracts
 
-- TypeScript entry point는 handler와 MCP envelope 소비자가 사용하는 `ReviewStateResult`만 노출한다. 내부 opinion·group·state 타입은 외부 계약으로 재노출하지 않는다.
+- TypeScript entry point는 handler와 MCP envelope 소비자가 사용하는 `ReviewStateResult`와 caller-entry 검증용 `REVIEW_HANDOFF_CALLER_ENTRY_SCHEMA`를 노출한다. 내부 opinion·group·state 타입은 외부 계약으로 재노출하지 않는다.
 
 - 모든 action의 projectRoot는 저장소 안의 절대 경로이며 Git toplevel로 정규화한다. branchName은 선택 입력으로, 문자열이면 기존 branch 검증을 적용하고 생략하면 Git 현재 branch를 해석한다. detached HEAD의 빈 branch는 `review-branch-unresolved` error다. directory key는 원래 branch 문자열을 정규화하고 응답 branchName은 원래 문자열을 보존한다.
-- prepare input은 `{ action: "prepare", projectRoot, branchName?, baseRef?, force?, effort?, changeContext?, userInstructions? }`이다. 생략한 사용자 검토 기준은 빈 문자열이다. 호환되지 않는 과거 입력 계약은 explicit force로 원본을 보존한 채 다시 시작한다.
-- changeContext는 handoff 추출 후 남은 본문의 제어문자를 제거하고 8000자로 제한하며 초과 시 `review-change-context-truncated` warning을 반환한다. 생략하면 baseCommit..HEAD의 non-merge commit hash·subject 최대 30줄과 numstat 합계 한 줄로 생성한다. session·brief는 이를 untrusted 저장소 데이터로 표시한다.
-- handoff 스키마는 `scope/reviewHandoffSeedSchema.ts`가 정본이며 `skills/pull-request/reference.md` §7은 같은 계약의 writer 서술이다. 상한은 항목 40, note 120자, path 400자, ruleId 80자, scope 200개, snapshotHash 128자 또는 null이다. 잘못된 블록은 진단 `review-handoff-invalid` 하나로 보고되고 본문에 텍스트로 남는다. 판단에 쓰이는 handoff 행이 바뀌면 해당 파일만 새 generation의 brief에 재배정한다. snapshotHash와 생성 통계만의 변화는 재리뷰 사유가 아니다.
+- prepare input은 `{ action: "prepare", projectRoot, branchName?, baseRef?, force?, effort?, changeContext?, changeContextPath?, userInstructions? }`이다. 생략한 사용자 검토 기준은 빈 문자열이다. 호환되지 않는 과거 입력 계약은 explicit force로 원본을 보존한 채 다시 시작한다.
+- handoff input은 `{ action: "handoff", projectRoot, branchName?, baseRef?, documentSync, repaired, entries? }`이다. 활성 state에 generation이 있으면 generation 디렉터리, 없으면 branch 디렉터리의 `handoff.md`를 쓰며 caller는 응답의 `data.handoffPath`만 사용한다.
+- changeContext 또는 changeContextPath(절대 경로, 1 MiB 이하, 둘 다 주면 오류) → handoff 추출 → `REVIEW_CHANGE_CONTEXT_SECTIONS` 헤딩 발췌(없으면 앞부분과 `review-change-context-untemplated`) → 제어문자 제거 → 3000자 절단(`review-change-context-truncated`) 순서로 처리한다. 둘 다 생략하면 baseCommit..HEAD의 non-merge commit hash·subject 최대 30줄과 numstat 합계 한 줄로 생성한다. session·brief는 이를 untrusted 저장소 데이터로 표시한다.
+- handoff writer(`handoff`)와 reader(`prepare`)는 `scope/reviewHandoffSeedSchema.ts`의 스키마, 상수, 분류 표와 changed-scope 후보 선택 함수를 공유하며 `skills/pull-request/reference.md` §7은 같은 계약을 서술한다. 상한은 항목 40, note 120자, path 400자, ruleId 80자, scope 200개, snapshotHash 128자 또는 null이다. 잘못된 블록은 진단 `review-handoff-invalid` 하나로 보고되고 본문에 텍스트로 남는다. 판단에 쓰이는 handoff 행이 바뀌면 해당 파일만 새 generation의 brief에 재배정한다. snapshotHash와 생성 통계만의 변화는 재리뷰 사유가 아니다.
 - legacy cached 및 artifact가 완전한 legacy resumable 분기는 기존 session·brief를 재사용하므로 changeContext를 읽지 않고 diagnostics를 빈 배열로 반환한다. 증분 prepare는 같은 source에서도 actor context, 규칙, 근거와 실행 정책을 다시 관측한 뒤에만 현재 generation을 재사용한다.
 - validate input은 `{ action: "validate", projectRoot, branchName?, kind, group, round? }`이다. review kind는 범위 안의 round가 필수이고 verify kind는 round를 금지한다. group은 `^\d{2,}$`이며 state에 존재해야 한다.
 - seal input은 `{ action: "seal", projectRoot, branchName?, baseRef? }`이고, state·matching hash·session을 요구한다.
@@ -134,10 +136,12 @@
 
 ### AC-review-handoff — handoff 블록 파싱
 
+- handoff action은 동일 snapshot의 changed-scope finding과 caller 항목을 정렬·상한 처리한 뒤 파서 왕복 검증을 통과한 섹션만 `handoff.md`에 기록한다. 계산 중에도 state와 `evidence.md`는 생성하거나 변경하지 않는다.
+- validation 실패는 caller 항목과 `handoff-validate` 합성 항목을 포함한 실패 handoff로 계속된다. 합성 항목이 우선하므로 caller 항목은 항목 상한보다 하나 적게 유지하고 초과분은 `truncated`에 더한다. 빈 finding은 `None`과 빈 `recorded`로 직렬화한다.
 - 유효한 handoff 블록은 각 review brief의 `## FCA Handoff` 섹션에 그룹 필터된 행으로 나타나며 남은 본문에서는 블록이 제거된다.
 - 블록이 없으면 `## FCA Handoff` 섹션이 없다.
 - 무효 블록은 `review-handoff-invalid` 진단 하나를 내고 섹션을 만들지 않으며 개행 정규화 후 본문 원문을 유지한다.
-- 8000자를 넘는 본문 끝의 블록도 절단 전에 파싱되며 절단 진단은 남은 본문을 기준으로 한다.
+- 본문 끝의 블록도 발췌·절단 전에 파싱되며 절단 진단은 남은 본문을 기준으로 한다.
 - CRLF 본문과 LF 본문의 파싱 결과가 같다.
 - `snapshotHash: null`인 블록은 유효하다.
 - verifier brief는 바뀌지 않는다.

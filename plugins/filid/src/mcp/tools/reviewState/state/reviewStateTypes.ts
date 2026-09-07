@@ -1,11 +1,13 @@
 import type {
   REVIEW_EFFORT_ROUNDS,
   REVIEW_ENTRY_STAGES,
+  REVIEW_HANDOFF_DOCUMENT_SYNC_STATES,
   REVIEW_STATE_ACTIONS,
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_PHASES,
   REVIEW_STATE_SCHEMA_VERSION,
   REVIEW_VALIDATE_KINDS,
+  ReviewHandoffClass,
   WORKTREE_DISPOSITIONS,
 } from '../../../../constants/reviewState.js';
 import type { VerificationRole } from '../../../../types/adapters.js';
@@ -19,6 +21,7 @@ import type {
   ToolPayload,
   ToolStatus,
 } from '../../../../types/toolEnvelope.js';
+import type { ReviewHandoffEntry } from '../scope/reviewHandoffSeedSchema.js';
 
 import type { ReviewGroup } from './reviewGroupTypes.js';
 import type {
@@ -31,6 +34,17 @@ type ValueOf<T> = T[keyof T];
 
 /** Supported review_state action values. */
 export type ReviewStateAction = ValueOf<typeof REVIEW_STATE_ACTIONS>;
+
+/** Document synchronization outcome recorded in a generated PR handoff. */
+export type ReviewHandoffDocumentSync =
+  (typeof REVIEW_HANDOFF_DOCUMENT_SYNC_STATES)[number];
+
+/** Caller-authored handoff claim whose judgment fields have stable defaults. */
+export type ReviewHandoffCallerEntry = Pick<
+  ReviewHandoffEntry,
+  'class' | 'ruleId' | 'path' | 'note'
+> &
+  Partial<Pick<ReviewHandoffEntry, 'severity' | 'certainty'>>;
 
 /** Persisted review lifecycle phase values. */
 export type ReviewStatePhase = ValueOf<typeof REVIEW_STATE_PHASES>;
@@ -250,11 +264,29 @@ export type ReviewStateInput =
       baseRef?: string;
       /** Optional untrusted change summary overriding generated Git context. */
       changeContext?: string;
+      /** Absolute path of an untrusted change summary file read once at dispatch. */
+      changeContextPath?: string;
       /** Explicit user review requirements supplied to the assigned reviewers. */
       userInstructions?: string;
       force?: boolean;
       /** Optional reviewer effort overriding repository configuration. */
       effort?: ReviewEffortMode;
+    }
+  | {
+      /** PR handoff generation operation selected on the review-state tool. */
+      action: typeof REVIEW_STATE_ACTIONS.HANDOFF;
+      /** Absolute repository path normalized by the dispatcher. */
+      projectRoot: string;
+      /** Optional branch key; the dispatcher resolves the current branch when omitted. */
+      branchName?: string;
+      /** Optional comparison ref resolved with the prepare action's rules. */
+      baseRef?: string;
+      /** Stage 1 document synchronization outcome to record. */
+      documentSync: ReviewHandoffDocumentSync;
+      /** Number of document repairs completed before handoff generation. */
+      repaired: number;
+      /** Additional Stage 1 claims bounded by the handoff writer. */
+      entries?: ReviewHandoffCallerEntry[];
     }
   | {
       action:
@@ -675,6 +707,43 @@ export type ReviewSealPayload = ToolPayload<
   data: ReviewSealData;
 };
 
+/** Exact bounded summary returned after PR handoff generation. */
+export interface ReviewHandoffSummary {
+  /** Selected public action. */
+  action: typeof REVIEW_STATE_ACTIONS.HANDOFF;
+  /** Number of claims retained in the machine block. */
+  recorded: number;
+  /** Number of claims omitted from the bounded machine block. */
+  truncated: number;
+  /** Number of Stage 1 document repairs represented by the summary. */
+  repaired: number;
+  /** Effective document synchronization outcome written to the seed. */
+  documentSync: ReviewHandoffDocumentSync;
+  /** Snapshot identity, or null when validation failed before it was known. */
+  snapshotHash: string | null;
+}
+
+/** Exact artifact and classification data returned after PR handoff generation. */
+export interface ReviewHandoffData {
+  /** Absolute directory containing the generated handoff artifact. */
+  reviewDirectory: string;
+  /** Absolute canonical PR handoff section artifact path. */
+  handoffPath: string;
+  /** Complete claim counts before bounded machine-block truncation. */
+  counts: Record<ReviewHandoffClass, number>;
+  /** Bounded owner scope stored in the machine block. */
+  scope: string[];
+}
+
+/** Exact tool envelope returned after a PR handoff artifact is written. */
+export type ReviewHandoffPayload = ToolPayload<
+  ReviewHandoffSummary,
+  ReviewHandoffData
+> & {
+  /** Inline handoff artifact data is always present. */
+  data: ReviewHandoffData;
+};
+
 /** Current presence of every artifact needed to resume a prepared review. */
 export interface ReviewCheckpointArtifacts {
   /** Whether every brief currently required by group validation state exists. */
@@ -755,17 +824,20 @@ export type ReviewStateResult =
   | ReviewPreparePayload
   | ReviewValidatePayload
   | ReviewSealPayload
+  | ReviewHandoffPayload
   | ReviewStatePayload;
 
 /** Action-correlated response returned for a validated review_state input. */
 export type ReviewStateResultFor<Input extends ReviewStateInput> =
   Input extends { action: typeof REVIEW_STATE_ACTIONS.PREPARE }
     ? ReviewPreparePayload
-    : Input extends { action: typeof REVIEW_STATE_ACTIONS.VALIDATE }
-      ? ReviewValidatePayload | ReviewStatePayload
-      : Input extends { action: typeof REVIEW_STATE_ACTIONS.SEAL }
-        ? ReviewSealPayload | ReviewStatePayload
-        : ReviewStatePayload;
+    : Input extends { action: typeof REVIEW_STATE_ACTIONS.HANDOFF }
+      ? ReviewHandoffPayload
+      : Input extends { action: typeof REVIEW_STATE_ACTIONS.VALIDATE }
+        ? ReviewValidatePayload | ReviewStatePayload
+        : Input extends { action: typeof REVIEW_STATE_ACTIONS.SEAL }
+          ? ReviewSealPayload | ReviewStatePayload
+          : ReviewStatePayload;
 
 /** Contained canonical paths for one branch review directory. */
 export interface ReviewStatePaths {
@@ -774,6 +846,8 @@ export interface ReviewStatePaths {
   reviewRoot: string;
   reviewDirectory: string;
   statePath: string;
+  /** Canonical PR handoff section artifact path. */
+  handoffPath: string;
   reportPath: string;
   /** Canonical review blocker artifact path. */
   blockersPath: string;

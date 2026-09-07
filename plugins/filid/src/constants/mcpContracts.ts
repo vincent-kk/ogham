@@ -147,5 +147,5 @@ export const MCP_TOOL_DESCRIPTIONS = {
   RESTRUCTURE:
     'Plan a read-only placement move, then check its preconditions and postconditions around an external actor.',
   REVIEW_STATE:
-    'Manage cross-review artifact lifecycle state and collect changed-scope FCA evidence.',
+    'Manage cross-review artifact lifecycle state, collect changed-scope FCA evidence, and generate the PR handoff section.',
 } as const;
