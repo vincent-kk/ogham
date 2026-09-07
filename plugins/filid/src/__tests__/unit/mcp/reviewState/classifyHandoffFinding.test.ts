@@ -52,23 +52,28 @@ describe('classifyHandoffFinding', () => {
     ).toEqual({ class: 'indeterminate', notePrefix: '' });
   });
 
-  it('classifies a generated stale path as a configuration decision', () => {
+  it('classifies a wildcard-generated stale path as a configuration decision', () => {
     expect(
       classifyHandoffFinding(
         violation({
           ruleId: 'stale-path',
-          message: 'The generated path dist/types is stale.',
+          message:
+            'Path token `packages/web/dist/index.js` in section "Structure" resolves to nothing from packages/web, its ancestors, or the project root — the reference has drifted or never existed.',
         }),
         RULE_SCOPES.DOCUMENTS,
-        ['dist'],
+        ['packages/*/dist'],
       ),
     ).toEqual({ class: 'config-decision', notePrefix: '' });
   });
 
-  it('classifies a non-generated stale path as rework', () => {
+  it('does not treat a short generated token as a substring match', () => {
     expect(
       classifyHandoffFinding(
-        violation({ ruleId: 'stale-path', message: 'src/old.ts is stale.' }),
+        violation({
+          ruleId: 'stale-path',
+          message:
+            'Path token `src/dist-utils/README.md` in section "Structure" resolves to nothing from src, its ancestors, or the project root — the reference has drifted or never existed.',
+        }),
         RULE_SCOPES.DOCUMENTS,
         ['dist'],
       ),
@@ -80,7 +85,8 @@ describe('classifyHandoffFinding', () => {
       classifyHandoffFinding(
         violation({
           ruleId: 'missing-field',
-          message: 'Boundary Exemption has an empty Reason.',
+          message:
+            'Boundary exemption "src/internal" has no reason; an exemption without one is an unmet contract, not a granted exemption.',
         }),
         RULE_SCOPES.DOCUMENTS,
         [],
@@ -113,19 +119,6 @@ describe('classifyHandoffFinding', () => {
       expect(
         classifyHandoffFinding(violation({ ruleId }), RULE_SCOPES.NODES, []),
       ).toEqual({ class: handoffClass, notePrefix: '' });
-    },
-  );
-
-  it.each(['test-record-case-cap', 'spec-contract-link'])(
-    'classifies exact verification rule %s as a code change',
-    (ruleId) => {
-      expect(
-        classifyHandoffFinding(
-          violation({ ruleId, certainty: 'exact' }),
-          RULE_SCOPES.VERIFICATION,
-          [],
-        ),
-      ).toEqual({ class: 'code-change', notePrefix: '' });
     },
   );
 

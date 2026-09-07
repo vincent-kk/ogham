@@ -121,6 +121,7 @@ export async function computeChangedScopeEvidence(
       path: toProjectRelativePath(input.projectRoot, violation.path),
       ruleId: violation.ruleId,
       message: violation.message,
+      ...(violation.certainty ? { certainty: violation.certainty } : {}),
     }));
   const selection = selectChangedScopeViolations(
     [...structureViolations, ...verificationViolations],

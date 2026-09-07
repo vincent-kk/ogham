@@ -25,6 +25,8 @@ export interface VerificationViolation {
   path: string;
   severity: 'error' | 'warning';
   message: string;
+  /** Evidence certainty inherited from the analyzed case count. */
+  certainty?: AnalysisCertainty;
 }
 
 export interface VerificationProjectAnalysis {

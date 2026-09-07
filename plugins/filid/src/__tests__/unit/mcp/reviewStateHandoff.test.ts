@@ -10,10 +10,12 @@ import {
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
+  REVIEW_HANDOFF_MAX_ENTRIES,
   REVIEW_STATE_ACTIONS,
   type ReviewHandoffClass,
 } from '../../../constants/reviewState.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
+import { buildHandoffSeed } from '../../../mcp/tools/reviewState/scope/buildHandoffSeed.js';
 import { computeChangedScopeEvidence } from '../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js';
 import { foldHandoffScope } from '../../../mcp/tools/reviewState/scope/foldHandoffScope.js';
 import { parseHandoffBlock } from '../../../mcp/tools/reviewState/scope/parseHandoffBlock.js';
@@ -170,6 +172,68 @@ describe('review_state handoff', () => {
     expect(existsSync(result.data.handoffPath)).toBe(true);
   });
 
+  it('carries production verification certainty into machine entries', async () => {
+    writeProjectFile(
+      '.filid/config.json',
+      `${JSON.stringify({
+        version: '2.0',
+        language: 'English',
+        adapters: { mode: 'explicit', enabled: ['ecmascript'] },
+        rules: {},
+      })}\n`,
+    );
+    writeProjectFile(
+      'package.json',
+      `${JSON.stringify({ name: 'fixture', type: 'module' })}\n`,
+    );
+    writeProjectFile(
+      'src/over-cap.test.ts',
+      Array.from(
+        { length: 33 },
+        (_, index) => `it('case ${index}', () => {});`,
+      ).join('\n'),
+    );
+    writeProjectFile(
+      'src/dynamic.spec.ts',
+      "it.each(loadRows())('row', () => {});\n",
+    );
+    runReviewStateFixtureGit(projectRoot, ['add', '--all']);
+    runReviewStateFixtureGit(projectRoot, [
+      'commit',
+      '-m',
+      'add verification evidence',
+    ]);
+
+    const result = await handleReviewState({
+      action: REVIEW_STATE_ACTIONS.HANDOFF,
+      projectRoot,
+      branchName: BRANCH,
+      baseRef: 'main',
+      documentSync: 'no-change',
+      repaired: 0,
+    });
+    const parsed = parseHandoffBlock(
+      readFileSync(result.data.handoffPath, 'utf8'),
+    );
+
+    expect(parsed.handoff?.recorded).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          class: 'code-change',
+          ruleId: 'test-record-case-cap',
+          path: 'src/over-cap.test.ts',
+          certainty: 'exact',
+        }),
+        expect.objectContaining({
+          class: 'indeterminate',
+          ruleId: 'spec-document-case-cap',
+          path: 'src/dynamic.spec.ts',
+          certainty: 'indeterminate',
+        }),
+      ]),
+    );
+  });
+
   it('keeps caller document-sync entries and fills their defaults', async () => {
     const result = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.HANDOFF,
@@ -258,6 +322,44 @@ describe('review_state handoff', () => {
     );
     expect(parsed.handoff?.recorded).toHaveLength(40);
     expect(parsed.handoff?.truncated).toBe(1);
+  });
+
+  it('retains caller entries before truncating machine candidates', () => {
+    const callerEntries = Array.from({ length: 5 }, (_, index) => ({
+      class: 'document-sync' as const,
+      ruleId: `caller-${index}`,
+      path: '.',
+      note: `caller entry ${index}`,
+    }));
+    const { seed } = buildHandoffSeed({
+      snapshotHash: 'snapshot-hash',
+      scope: ['.'],
+      documentSync: 'no-change',
+      repaired: 0,
+      findings: Array.from(
+        { length: REVIEW_HANDOFF_MAX_ENTRIES },
+        (_, index) => ({
+          violation: {
+            source: 'structure' as const,
+            severity: 'warning' as const,
+            path: `src/machine-${index}.ts`,
+            ruleId: `machine-${index}`,
+            message: `machine entry ${index}`,
+            certainty: 'exact' as const,
+          },
+          class: 'code-change' as const,
+          notePrefix: '',
+        }),
+      ),
+      outOfScopeRoot: [],
+      callerEntries,
+    });
+
+    expect(seed.recorded).toHaveLength(REVIEW_HANDOFF_MAX_ENTRIES);
+    expect(seed.truncated).toBe(callerEntries.length);
+    expect(
+      seed.recorded.filter(({ ruleId }) => ruleId.startsWith('caller-')),
+    ).toHaveLength(callerEntries.length);
   });
 
   it('counts all forty-five findings while recording only forty', async () => {

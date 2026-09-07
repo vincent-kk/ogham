@@ -8,7 +8,9 @@ function escapeRegularExpression(value: string): string {
 }
 
 /**
- * Check whether a project-wide finding names a changed file or owner path.
+ * Match an escaped literal path only when its leading edge is string start,
+ * whitespace, quote, backtick, or `(` and its trailing edge is string end,
+ * whitespace, quote, backtick, `)`, comma, or slash.
  * @param message Finding message used as the only project-wide path evidence.
  * @param paths Changed file and owner paths eligible for segment-boundary matches.
  * @returns Whether one eligible path occurs as a complete message segment.
@@ -20,6 +22,7 @@ export function handoffMessageNamesChangedScope(
   return paths.some(
     (path) =>
       path !== null &&
+      path !== '.' &&
       new RegExp(
         `(^|[\\s"'\`(])${escapeRegularExpression(path)}($|[\\s"'\`),/])`,
         'u',

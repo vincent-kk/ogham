@@ -3,7 +3,6 @@ import {
   REVIEW_HANDOFF_HASH_LIMIT,
   REVIEW_HANDOFF_MAX_ENTRIES,
   REVIEW_HANDOFF_NOTE_LIMIT,
-  REVIEW_HANDOFF_PATH_LIMIT,
   REVIEW_HANDOFF_RULE_ID_LIMIT,
   REVIEW_HANDOFF_SCHEMA_VERSION,
   type ReviewHandoffClass,
@@ -20,19 +19,25 @@ import {
   type ReviewHandoffSeed,
 } from './reviewHandoffSeedSchema.js';
 import { normalizeHandoffCallerEntry } from './normalizeHandoffCallerEntry.js';
+import { boundHandoffPath } from './utils/boundHandoffPath.js';
 
 /**
- * Replace an oversized path with its nearest serializable ancestor.
- * @param path Normalized project-relative path from snapshot evidence.
- * @returns A real ancestor within the handoff path limit, or project root.
+ * Compare bounded handoff entries in their canonical display order.
+ * @param left First entry considered for display.
+ * @param right Second entry considered for display.
+ * @returns Negative, zero, or positive according to class, path, and rule id.
  */
-function boundHandoffPath(path: string): string {
-  let bounded = path;
-  while (bounded.length > REVIEW_HANDOFF_PATH_LIMIT && bounded.includes('/'))
-    bounded = bounded.slice(0, bounded.lastIndexOf('/'));
-  if (bounded.length === 0 || bounded.length > REVIEW_HANDOFF_PATH_LIMIT)
-    return '.';
-  return bounded;
+function compareHandoffEntries(
+  left: ReviewHandoffEntry,
+  right: ReviewHandoffEntry,
+): number {
+  const classDifference =
+    REVIEW_HANDOFF_CLASS_ORDER.indexOf(left.class) -
+    REVIEW_HANDOFF_CLASS_ORDER.indexOf(right.class);
+  if (classDifference !== 0) return classDifference;
+  if (left.path !== right.path) return left.path < right.path ? -1 : 1;
+  if (left.ruleId === right.ruleId) return 0;
+  return left.ruleId < right.ruleId ? -1 : 1;
 }
 
 /**
@@ -66,7 +71,7 @@ export function buildHandoffSeed(input: {
   seed: ReviewHandoffSeed;
   counts: Record<ReviewHandoffClass, number>;
 } {
-  const entries: ReviewHandoffEntry[] = [
+  const machineEntries: ReviewHandoffEntry[] = [
     ...input.findings.map(
       ({ violation, class: handoffClass, notePrefix }): ReviewHandoffEntry => ({
         class: handoffClass,
@@ -91,23 +96,18 @@ export function buildHandoffSeed(input: {
         REVIEW_HANDOFF_NOTE_LIMIT,
       ),
     })),
-    ...input.callerEntries.map(normalizeHandoffCallerEntry),
-  ].sort((left, right) => {
-    const classDifference =
-      REVIEW_HANDOFF_CLASS_ORDER.indexOf(left.class) -
-      REVIEW_HANDOFF_CLASS_ORDER.indexOf(right.class);
-    if (classDifference !== 0) return classDifference;
-    if (left.path !== right.path) return left.path < right.path ? -1 : 1;
-    if (left.ruleId === right.ruleId) return 0;
-    return left.ruleId < right.ruleId ? -1 : 1;
-  });
+  ];
+  const callerEntries = input.callerEntries.map(normalizeHandoffCallerEntry);
+  const entries = [...machineEntries, ...callerEntries];
   const counts = Object.fromEntries(
     REVIEW_HANDOFF_CLASS_ORDER.map((handoffClass) => [
       handoffClass,
       entries.filter((entry) => entry.class === handoffClass).length,
     ]),
   ) as Record<ReviewHandoffClass, number>;
-  const recorded = entries.slice(0, REVIEW_HANDOFF_MAX_ENTRIES);
+  const recorded = [...callerEntries, ...machineEntries]
+    .slice(0, REVIEW_HANDOFF_MAX_ENTRIES)
+    .sort(compareHandoffEntries);
   const scope = input.scope
     .map(boundHandoffPath)
     .sort()

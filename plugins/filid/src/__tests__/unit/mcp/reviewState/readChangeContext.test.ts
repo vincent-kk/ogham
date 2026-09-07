@@ -96,6 +96,7 @@ describe('readChangeContext', () => {
     );
     expect(result.changeContext).not.toContain('Changes text');
     expect(result.changeContext).not.toContain('Work context text');
+    expect(result.handoff).toBeNull();
     expect(result.diagnostics).toEqual([]);
   });
 
@@ -175,6 +176,33 @@ describe('readChangeContext', () => {
       handoff,
       diagnostics: [],
     });
+  });
+
+  it('turns an invalid marked handoff into an indeterminate brief input', async () => {
+    const result = await readChangeContext({
+      projectRoot: '/project',
+      baseCommit: 'base',
+      files: [],
+      changeContext: [
+        '## Summary',
+        'Summary text',
+        '<!-- filid:handoff v1',
+        '{"schema":0}',
+        '-->',
+      ].join('\n'),
+    });
+
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({ code: 'review-handoff-invalid' }),
+    ]);
+    expect(result.handoff?.recorded).toEqual([
+      expect.objectContaining({
+        class: 'indeterminate',
+        ruleId: 'review-handoff-invalid',
+        path: '.',
+        certainty: 'unstated',
+      }),
+    ]);
   });
 
   it('keeps caller text sanitization unchanged for a template section', async () => {
