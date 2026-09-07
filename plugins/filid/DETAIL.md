@@ -67,7 +67,7 @@
 
 - 현재 `HEAD`에 존재하는 ownerless 경로는 non-FCA로 보고되며, config-excluded 이름은 그 이유를 보강한다. config-excluded 이름 아래라도 `fractal_inspect` `resolve` 결과에 owner가 있으면 문서 동기화 대상이다.
 - `HEAD`에 없는 unresolved 경로와 `context-target-unresolved` 이외의 실패는 non-FCA로 바뀌지 않고 `FCA Handoff`에 `unresolved-path`로 기록된다. PR 생성은 계속된다.
-- non-FCA 경로도 PR의 Code/Architecture 분석에서는 유지되며 owner가 하나도 없으면 document sync는 `no-change`다.
+- non-FCA 경로도 PR의 `Changes` 표에서는 유지되며 owner가 하나도 없으면 document sync는 `no-change`다.
 - PR 문서 동기화와 resolve의 문서 수정 위임은 INTENT와 DETAIL을 모두 평가한다.
 - 게시 단계는 문서 commit 이후 push 필요 여부를 다시 계산하며 `--no-push`도 갱신된 결과를 따른다.
 

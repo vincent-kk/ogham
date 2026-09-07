@@ -49,22 +49,91 @@ Use returned JSON `baseRef` for diffs and `baseBranch` for `gh --base`. Report `
 
 ## §3 PR body layout
 
-Four sections, always present, in this order. An empty section carries the single word `None`; FCA Handoff also retains its machine block as defined in §7.
+Five open sections appear at the top, followed by four collapsed regions. The complete open area stays within 40 lines. Optional sections are omitted, including their headings or wrappers, when their inputs are absent.
+
+| Order | Area                 | Section           | Required | When empty                      |
+| ----- | -------------------- | ----------------- | -------- | ------------------------------- |
+| 1     | open                 | `## Summary`      | yes      | Keep all three bullets          |
+| 2     | open                 | `## Links`        | no       | Omit the section                |
+| 3     | open                 | `## Contract`     | yes      | `None`                          |
+| 4     | open                 | `## Review notes` | no       | Omit the section                |
+| 5     | open                 | `## Verification` | yes      | Use the unchecked fallback line |
+| 6     | collapsed            | `Changes`         | yes      | Keep one `None` table row       |
+| 7     | collapsed            | `Screenshots`     | no       | Omit the region                 |
+| 8     | collapsed            | `Work context`    | no       | Omit the region                 |
+| 9     | collapsed internally | `## FCA Handoff`  | yes      | Follow §7                       |
 
 ```markdown
-## Architecture
+## Summary
 
-<FCA-visible changes: fractals added, moved, or reclassified; INTENT.md /
-DETAIL.md commits made by Stage 1; entry-point or boundary changes.>
+- **Why** — <problem or motivation>
+- **What** — <consumer-visible result>
+- **Approach** — <implementation approach>
 
-## Code
+<optional fenced mermaid diagram>
 
-<Behavioral changes grouped by owning fractal, one line each.>
+<one-sentence diagram takeaway>
 
-## Test
+## Links
 
-<spec-document and test-record changes, with the case-count delta when it
-moved.>
+| Kind     | Link                                |
+| -------- | ----------------------------------- |
+| Issue    | [<label>](url) — <one-line summary> |
+| Spec     | [<label>](url) — <one-line summary> |
+| Decision | [<label>](url) — <one-line summary> |
+
+## Contract
+
+- `<fractal>` — <consumer-visible structural change>
+- **Rollback** — <rollback path>
+
+> [!WARNING]
+> **Breaking** — <breaking consumer impact>
+
+## Review notes
+
+- **Start here** — <review entry point>
+- **Constraints** — <assumptions and known limitations>
+- **Risk** — <risk and coupled files>
+
+## Verification
+
+- [x] `<command or check>` — <observed result>
+- [ ] <remaining check> — <reason and how to close it>
+
+<details>
+<summary><b>Changes</b> — <n> files, <k> fractals, +<a> / −<b> · base <code>&lt;BASE_BRANCH&gt;</code></summary>
+
+| Fractal     | Kind   | What changed          |
+| ----------- | ------ | --------------------- |
+| `<fractal>` | <kind> | <one-sentence change> |
+
+- Stage 1 document sync commit `<hash>` — <document change summary>.
+- <n> non-FCA paths were excluded from document sync — <config declaration status>.
+
+</details>
+
+<details>
+<summary>Screenshots</summary>
+
+|                Before                |                After                |
+| :----------------------------------: | :---------------------------------: |
+| <img src="<before-url>" width="320"> | <img src="<after-url>" width="320"> |
+
+<optional screenshot note>
+
+</details>
+
+<details>
+<summary>Work context</summary>
+
+- **Environment** — <runtime and base>
+- **Account / data** — <non-secret account and fixture context>
+- **Manual steps**
+  1. <step>
+- **Expected** — <expected result>
+
+</details>
 
 ## FCA Handoff
 
@@ -77,10 +146,26 @@ Rules:
 - Body prose follows `[filid:lang]`. Identifiers, paths, commands, and rule IDs stay in their original form.
 - Never paste a raw diff. Reference paths instead.
 - Never invent a rationale that is not in the commits or the FCA documents.
+- `Summary` always has `**Why**`, `**What**`, and `**Approach**` bullets. Include one mermaid diagram only when the change alters relationships; it has at most 12 nodes and 600 characters including its fence, followed by one sentence stating the point. This contract does not prescribe how to author the diagram.
+- `Links`, `Review notes`, `Screenshots`, and `Work context` are optional. If one has no caller input, omit its heading or complete `<details>` region. `Contract` uses `None` when no structural row exists. Empty `Verification` uses `- [ ] No verification recorded by the author — rely on CI results and reviewer judgment.` Render that fallback in the body language (`[filid:lang]`); the English literal above is the reference wording. The required `Changes` table uses one `None` row when it has no changes.
+- Keep the five open sections to at most 40 lines in total. If necessary, reduce each `Review notes` bullet to one sentence and each checked `Verification` item to its command and observed result.
+- Build `Contract` only from `Changes` rows whose `Kind` is `new`, `removed`, `moved`, or `boundary`. Give each affected fractal one `` `<fractal>` — <consumer-visible change> `` bullet. Do not promote `behavior` or `test` rows. Keep `**Rollback**` and any `> [!WARNING]` breaking notice in `Contract`.
+- The only evidence for `Changes` rows is the Stage 1 `fractal_inspect` `resolve` batch's `ownerFractalPath` set and `git diff --name-status -M <BASE_REF>...HEAD`. Create one row per owner fractal, add rows established by the `removed` and `moved` rules below, and put one final `(non-FCA)` row when ownerless paths exist. That row states the path count and whether configuration declares the exclusion. Put the Stage 1 document commit and non-FCA exclusion summaries in bullets below the table.
+- Derive `Kind` by first match:
+  1. `removed` for `D <F>/INTENT.md`.
+  2. `new` for `A <F>/INTENT.md`.
+  3. `moved` for `R… <old>/INTENT.md <F>/INTENT.md`; write `<old> → <F>` in `What changed`.
+  4. `boundary` for `M <F>/INTENT.md` or a changed non-document file directly under `<F>`, not in one of its subdirectories.
+  5. `test` when every changed path under `<F>` matches the approximate verification predicate: a path segment is `__tests__`, `tests`, `test`, `spec`, `specs`, `e2e`, or `fixtures`, or the filename contains `.test.` or `.spec.`.
+  6. `behavior` for every other row.
+- The `What changed` cell of a `test` row states the spec-document / test-record case-count delta when those documents changed, and `no case-count delta` otherwise.
+- Sort `removed`, `new`, `moved`, and `boundary` first in that order, then `test` and `behavior`. Within each kind, sort by changed-file count descending. Do not display file counts in table rows.
+- Links, Review notes, Work context, and Verification come only from caller input, commands observed before this skill invocation, files actually present in the branch diff, and commit messages. Do not infer design decisions from code.
 
 ## §4 What this skill does not do
 
 - It does not run `cross-review`. Chain that separately, or use `pipeline`.
+- It does not infer links, decisions, or verification results. Those come from the caller's inputs and the branch, never from reading code.
 - It pushes an unpushed branch — no remote counterpart, or local commits the remote lacks — before opening the PR (`--push`, on by default), and says so in the terminal output. `--no-push` turns it off: the run then ends with the body saved locally and the §1 message; `gh` is not called, because its own error (`Head sha can't be blank`) does not name the cause.
 - It does not edit source code. Stage 1 touches documents only.
 - It does not fix source-level findings. Cycles, boundary violations, verification caps and indeterminate evidence are recorded in the handoff for `cross-review`.
@@ -118,7 +203,7 @@ Stage 1 narrows only the FCA document audit, never the PR change list. Send ever
 | The target is absent from `HEAD`, including a deleted or renamed source                                        | unresolved                 | Resolve the nearest ancestor directory present in `HEAD`; when none resolves, record `unresolved-path` (§7) and continue.                 |
 | Any other failed diagnostic                                                                                    | unresolved                 | Record the diagnostic verbatim as `unresolved-path` (§7) and continue.                                                                    |
 
-`additionalExcludedDirectories` entries are directory names, not paths or globs. Compare complete project-relative directory segments; never match the basename or a partial segment. The config match is a reason, not an ownership override, and is consulted only after `resolved: false`. Config-declared and structural ownerless paths are listed in terminal progress and summarized by count in the PR Architecture section. They remain in the Code/Test analysis because non-FCA is a document-ownership verdict, not a request to hide the change.
+`additionalExcludedDirectories` entries are directory names, not paths or globs. Compare complete project-relative directory segments; never match the basename or a partial segment. The config match is a reason, not an ownership override, and is consulted only after `resolved: false`. Config-declared and structural ownerless paths are listed in terminal progress and summarized by count in the bullet list under the `Changes` table. They remain in the `Changes` table as the `(non-FCA)` row because non-FCA is a document-ownership verdict, not a request to hide the change.
 
 When every changed path is non-FCA, Stage 1 completes the single `fractal_inspect` `resolve` batch, makes no enrich-docs call, and reports `Document sync: no-change` (`skipped` with `--skip-enrich`). A failed item is never converted to non-FCA merely because ignoring it would let publication continue.
 
@@ -146,11 +231,14 @@ Rules for the body format:
 
 - **Always present.** Keep `## FCA Handoff` and the machine block in every body. With zero findings, replace `<details>` with `None` and keep `"recorded":[]`. Otherwise use the summary, class counts, table, and machine block shown below. Counts describe the complete handoff, including entries omitted from the machine block; repaired documents contribute only to `repaired`.
 - **Budget.** Keep the whole PR body within 8000 characters, the consumer's `REVIEW_CHANGE_CONTEXT_LIMIT`. Measure exactly as `readChangeContext.ts` does: normalize `\r\n?` to `\n`, remove Cc control characters except LF and TAB, then use JavaScript string `.length`. Apply the following procedure in order:
-  1. Apply the field caps below, then serialize and measure the required skeleton: all four section headings, the handoff summary line, class-count line, and required JSON with `recorded: []`. Fold `scope` by count and serialized length: merge the deepest paths into their least common ancestor until there are at most 20 owner paths and the skeleton plus the 1500-character handoff reserve plus the three minimal section count sentences fits within 8000 characters. Re-serialize after each fold. Boundary example: 20 scope paths of 400 characters each must still fold when that total exceeds 8000 characters, even though the count cap is already met.
-  2. Reserve 1500 characters for the handoff from the space left after the skeleton. Architecture, Code, and Test use the remaining space. If those sections exceed it, collapse each to one summary line per owner fractal; if still too large, retain only owner and changed-file counts. Reduce enumeration while preserving the meaning.
+  1. Apply the field caps below, then serialize and measure the required skeleton: all required markers (the five open headings, the `Changes` summary line, and `## FCA Handoff`), the handoff summary line, class-count line, and required JSON with `recorded: []`. Fold `scope` by count and serialized length: merge the deepest paths into their least common ancestor until there are at most 20 owner paths and the skeleton plus the 1500-character handoff reserve plus the minimal `Summary` bullets, `Contract` as `None`, the single `Verification` fallback line, and the collapsed `Changes` block with its `<summary>` line and one `None` row fits within 8000 characters. Re-serialize after each fold. Boundary example: 20 scope paths of 400 characters each must still fold when that total exceeds 8000 characters, even though the count cap is already met.
+  2. Apply caller-input caps before insertion: `Summary`'s `Approach` is 600 characters, `Review notes` is 900, `Verification` is 1200, and `Work context` is 1500. When a cap is exceeded, discard trailing lines and end with `… (<n> lines omitted)`. Cap each `Links` cell at 300 characters, each `Why` and `What` bullet at 300, and each `Contract` bullet at 200. When structural fractals exceed 10, replace their individual Contract bullets with one Kind-count line such as `new 3, moved 1, boundary 12` while preserving `> [!WARNING]` and `**Rollback**`. Reserve 1500 characters for the handoff from the space left after the skeleton, then give the remaining space to the human-facing sections. Reduce them by removing `Work context`, removing `Screenshots`, shortening each `Changes` `What changed` cell to one sentence, collapsing the `Changes` table to one line of fractal counts by Kind, removing the mermaid diagram, removing `Review notes`, continuing the common-ancestor `scope` folding from step 5, removing unchecked `Verification` lines from the end and leaving `… (<n> lines omitted)`, and finally removing `Summary`'s `Approach` bullet. Re-serialize and measure after each operation. After the terminal `Pull request:` line, emit `Body folded: <items>` for the items reduced or removed; omit this line when nothing was folded.
+
+     Fold order: Work context, Screenshots, Changes, mermaid, Review notes, scope, Verification, Approach.
+
   3. Allocate the space left to machine entries first (at most 40), then table rows (at most 20). The machine block is the canonical carrier; the table is a display projection of entries already in `recorded`, so table rows are always a subset of `recorded`. Apply the collapse rule below to those entries before adding table rows. Before adding each entry or row, measure the resulting serialized body and include it only when it fits.
   4. Set `truncated` to the number of findings omitted from the machine block alone. Table collapse and omission are shown by visible counts and do not increase `truncated`.
-  5. Re-measure the complete body and read the JSON back with `JSON.parse`. If residual overflow remains, remove trailing table rows first, then trailing machine entries, updating the omission line and `truncated` respectively. If overflow still remains, continue the same common-ancestor scope folding regardless of whether prose remains until the complete body fits. Preserve the four headings and valid required JSON throughout; finish only with a body of at most 8000 characters.
+  5. Re-measure the complete body and read the JSON back with `JSON.parse`. If residual overflow remains, remove trailing table rows first, then trailing machine entries, updating the omission line and `truncated` respectively. If overflow still remains, continue the same common-ancestor scope folding regardless of whether prose remains until the complete body fits. Preserve the required markers and valid required JSON throughout. Then remove unchecked `Verification` lines from the end, leaving `… (<n> lines omitted)`; finally remove `Summary`'s `Approach` bullet. Finish only with a body of at most 8000 characters.
 - **Table cap and collapse.** Sort by class in this order: `code-change`, `config-decision`, `indeterminate`, `needs-rework`, `unresolved-path`, `document-sync`. The table has at most 20 data rows, derived only from `recorded`. More than five recorded findings with the same class and rule collapse into one row: Path is their longest common path prefix, and Note gives the count. Summarize any further omitted table rows drawn from `recorded` below the table as `… and <k> more (see machine block)`. Displayed, collapsed, and omitted table rows describe only findings present in `recorded`; findings absent from `recorded` may be mentioned only when `truncated > 0`, with a separate machine-omission count.
 - **Machine block.** Use one line of JSON with `schema: 1`, `snapshotHash`, `scope`, `documentSync`, `repaired`, `recorded`, and `truncated`. Each `recorded` entry has exactly six fields: `class`, `ruleId`, `path`, `severity`, `certainty`, and `note`. Retain findings individually even when the table collapses them. `severity` is `error`, `warning`, or `info`; certainty is `exact`, `indeterminate`, `unsupported`, or `unstated`. `documentSync` is `committed`, `no-change`, `skipped`, `declined`, or `failed`; both counts are nonnegative integers. `review_state prepare` reads this contract through its Zod schema, so adding or renaming fields requires changing both writer and reader.
 - **Field caps.** `scope` has at most 20 entries; each normalized scope path and finding `path` is 1–400 characters. `snapshotHash` is 1–128 characters or `null`; `ruleId` is 1–80 characters; `note` is at most 120 characters; `recorded` has at most 40 entries. Use the first 128 hash characters and first 80 rule-ID characters if needed. Never shorten a path with an ellipsis. For a path over 400 characters, replace it with its nearest ancestor directory path of at most 400 characters; keep a real project path so the reader's segment-prefix matching still works. If even the first segment exceeds 400 characters, use `.`. A note is the message's first 120 characters, including any classification prefix within that cap. Preserve diagnostics verbatim in Stage 1's report; the body carries the bounded prefix.
@@ -204,3 +292,28 @@ Counts: 0 code-change, 0 config-decision, 0 indeterminate, 0 needs-rework, 0 unr
 ```
 
 `cross-review` Step 1 reads the PR body into `changeContext`; `review_state prepare` parses the machine block into the brief's `## FCA Handoff` section, and the visible table reaches reviewers as untrusted change context.
+
+## §8 Caller inputs
+
+URL-shaped values use repeatable options; prose comes from one notes file.
+
+| Option                     | Repeatable | Destination                   |
+| -------------------------- | ---------- | ----------------------------- |
+| `--issue <url\|#n>`        | yes        | `Links` / `Issue`             |
+| `--spec <url>`             | yes        | `Links` / `Spec`              |
+| `--decision <url\|path>`   | yes        | `Links` / `Decision`          |
+| `--screenshot <url\|path>` | yes        | `Screenshots`                 |
+| `--focus <text>`           | no         | `Review notes` / `Start here` |
+| `--notes <path>`           | no         | Recognized prose sections     |
+
+Rules:
+
+- A link cell is `[<label>](<url>) — <one-line summary>`. Take the summary only from caller text in the form `<url-or-path> -- <summary>`; without that text, render only the link. Cap each complete cell at 300 characters.
+- Only an explicit `closes:` prefix on an `--issue` value renders a GitHub closing keyword. A plain URL or `#n` never implies `Closes`.
+- For a repository-relative `--decision` path, require `git cat-file -e HEAD:<path>`. If it exists, obtain the repository URL with `gh repo view --json url -q .url` and render `https://<host>/<owner>/<repo>/blob/<BRANCH>/<path>`. If validation or rendering fails, discard that item and report it in the terminal; do not abort.
+- A local `--screenshot` path is uploaded with `gh image <path>`, and the emitted Markdown reference supplies the body URL. If the extension is unavailable or upload fails, retain the local path marked `(not uploaded)` and report the failure in the terminal.
+- The notes file recognizes only the fixed English H2 headings `Summary`, `Review notes`, `Verification`, and `Work context`. Match them case-insensitively after trimming surrounding whitespace. `Summary` replaces the content of the `**Approach**` bullet; insert the other recognized bodies unchanged as the complete section contents. Concatenate duplicate recognized headings in file order.
+- Ignore text before the first H2 and all unrecognized headings, and report the ignored heading names or preamble in the terminal. A missing notes file is reported and contributes no notes content; it does not abort.
+- Before insertion, cap notes prose by section: `Summary` / Approach 600 characters, `Review notes` 900, `Verification` 1200, and `Work context` 1500. Drop trailing lines and append `… (<n> lines omitted)` when content exceeds its cap.
+- Links, Review notes, Verification, and Work context are never inferred from code. Their evidence is caller input and commands whose results the caller observed before invoking the skill. Design decisions are never inferred by reading code.
+- Work context never contains secrets, tokens, or Claude session identifiers.

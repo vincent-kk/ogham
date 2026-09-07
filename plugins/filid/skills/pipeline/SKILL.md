@@ -110,6 +110,8 @@ Result: <verdict or stop reason>
 | `--title TITLE` | string | auto    | Forwarded to `pr-create`                                                                                       |
 | `--push`        | flag   | on      | Forwarded to `pr-create`; `--no-push` turns it off — `pr-create` then saves the body and the cycle stops there |
 
+`--issue`, `--spec`, `--decision`, `--screenshot`, `--focus`, and `--notes` are forwarded to `pr-create` unchanged.
+
 ## Invariants
 
 - The pipeline never calls an MCP tool other than `review_state`, and never edits a file.
