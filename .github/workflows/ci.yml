@@ -89,6 +89,7 @@ jobs:
       mode: ${{ steps.plan.outputs.mode }}
       reason: ${{ steps.plan.outputs.reason }}
       build: ${{ steps.plan.outputs.build }}
+      dist: ${{ steps.plan.outputs.dist }}
       test: ${{ steps.plan.outputs.test }}
       typecheck: ${{ steps.plan.outputs.typecheck }}
       typecheckTests: ${{ steps.plan.outputs.typecheckTests }}
@@ -268,6 +269,14 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
+
+      # `import/no-unresolved` resolves @ogham/* through package exports that
+      # point into dist/, so the shared providers must be built first.
+      - name: Build shared providers
+        if: needs.plan.outputs.dist != ''
+        env:
+          WORKSPACES: ${{ needs.plan.outputs.dist }}
+        run: node scripts/buildAll.mjs --only="$WORKSPACES"
 
       - name: Lint
         env:

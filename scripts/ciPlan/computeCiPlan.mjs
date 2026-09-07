@@ -10,6 +10,9 @@ import { expandClosure } from "./expandClosure.mjs";
  *   typecheck and lint results can differ.
  * @property {string[]} build `affected` plus every transitive dependency that has a `build`
  *   script, so each affected workspace can resolve what it imports.
+ * @property {string[]} dist The `build` entries under `shared/` — the packages whose
+ *   `dist/` consumers resolve through package exports, which lint and typecheck need
+ *   even without building the consumers themselves.
  * @property {string[]} test Affected workspaces that are vitest projects.
  * @property {string[]} typecheck Affected workspaces with a `typecheck` script.
  * @property {string[]} typecheckTests Affected workspaces with a `typecheck:tests` script.
@@ -49,6 +52,7 @@ function fullPlan(workspaces, reason) {
     changed: names,
     affected: names,
     build: select(workspaces, names, "hasBuild"),
+    dist: selectDist(workspaces, names),
     test: select(workspaces, names, "hasTests"),
     typecheck: select(workspaces, names, "hasTypecheck"),
     typecheckTests: select(workspaces, names, "hasTypecheckTests"),
@@ -80,6 +84,7 @@ function affectedPlan(workspaces, changed) {
     changed: ordered(changed),
     affected: ordered(affected),
     build: select(workspaces, ordered(build), "hasBuild"),
+    dist: selectDist(workspaces, ordered(build)),
     test: select(workspaces, ordered(affected), "hasTests"),
     typecheck: select(workspaces, ordered(affected), "hasTypecheck"),
     typecheckTests: select(workspaces, ordered(affected), "hasTypecheckTests"),
@@ -93,4 +98,12 @@ function select(workspaces, names, flag) {
   return workspaces
     .filter((workspace) => chosen.has(workspace.name) && workspace[flag])
     .map((workspace) => workspace.name);
+}
+
+function selectDist(workspaces, names) {
+  return select(workspaces, names, "hasBuild").filter((name) =>
+    workspaces
+      .find((workspace) => workspace.name === name)
+      .dir.startsWith("shared/"),
+  );
 }

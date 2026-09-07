@@ -104,6 +104,7 @@ describe("computeCiPlan", () => {
       "@ogham/maencof",
       "@ogham/maencof-lens",
     ]);
+    assert.deepEqual(plan.dist, ["@ogham/cross-platform"]);
     assert.deepEqual(plan.test, ["@ogham/maencof", "@ogham/maencof-lens"]);
     assert.deepEqual(plan.lint, ["plugins/maencof", "plugins/maencof-lens"]);
     assert.equal(plan.scriptsTests, false);
