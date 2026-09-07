@@ -16,6 +16,7 @@ import { CONTRACT_INTENTS } from '../../../constants/restructure.js';
 import {
   REVIEW_DEFAULT_EFFORT,
   REVIEW_EFFORT_ROUNDS,
+  REVIEW_HANDOFF_DOCUMENT_SYNC_STATES,
   REVIEW_STATE_ACTIONS,
   REVIEW_VALIDATE_KINDS,
 } from '../../../constants/reviewState.js';
@@ -29,7 +30,10 @@ import {
 } from '../../tools/index.js';
 import type { ProjectSetupResult } from '../../tools/projectSetup/index.js';
 import type { RestructureResult } from '../../tools/restructure/index.js';
-import type { ReviewStateResult } from '../../tools/reviewState/index.js';
+import {
+  REVIEW_HANDOFF_CALLER_ENTRY_SCHEMA,
+  type ReviewStateResult,
+} from '../../tools/reviewState/index.js';
 import { wrapHandler } from '../envelope/wrapHandler.js';
 import { deferInputValidation } from '../utils/deferInputValidation.js';
 
@@ -300,6 +304,7 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
     action: z.literal(REVIEW_STATE_ACTIONS.PREPARE),
     baseRef: z.string().min(1).optional(),
     changeContext: z.string().optional(),
+    changeContextPath: z.string().min(1).optional(),
     userInstructions: z.string().optional(),
     force: z.boolean().optional(),
     effort: z
@@ -310,6 +315,14 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
         ) as (keyof typeof REVIEW_EFFORT_ROUNDS)[]),
       ])
       .optional(),
+  }),
+  z.object({
+    ...REVIEW_STATE_COMMON_SCHEMA,
+    action: z.literal(REVIEW_STATE_ACTIONS.HANDOFF),
+    baseRef: z.string().min(1).optional(),
+    documentSync: z.enum(REVIEW_HANDOFF_DOCUMENT_SYNC_STATES),
+    repaired: z.number().int().nonnegative(),
+    entries: z.array(REVIEW_HANDOFF_CALLER_ENTRY_SCHEMA).optional(),
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
@@ -355,6 +368,7 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
       'prepare opens or resumes a run; checkpoint re-checks source identity; ' +
         'validate checks one review or verification opinion; seal folds and ' +
         'renders the verdict; cleanup deletes this branch state; ' +
+        'handoff generates the bounded PR handoff section; ' +
         'assess reports where the merge-track cycle resumes and how the dirty ' +
         'worktree classifies, without reading or writing review state.',
     ),
@@ -370,7 +384,7 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .min(1)
     .optional()
     .describe(
-      'Comparison base ref; prepare resolves remote HEAD, remote defaults, then local main or master when omitted.',
+      'Comparison base ref; prepare and handoff resolve remote HEAD, remote defaults, then local main or master when omitted.',
     ),
   changeContext: z
     .string()
@@ -378,6 +392,27 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .describe(
       'prepare only: untrusted change summary; defaults to commit subjects and diff totals.',
     ),
+  changeContextPath: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'prepare only: absolute file path whose contents replace changeContext; mutually exclusive with changeContext.',
+    ),
+  documentSync: z
+    .enum(REVIEW_HANDOFF_DOCUMENT_SYNC_STATES)
+    .optional()
+    .describe('handoff only: Stage 1 document synchronization outcome.'),
+  repaired: z
+    .number()
+    .int()
+    .nonnegative()
+    .optional()
+    .describe('handoff only: number of documents repaired during Stage 1.'),
+  entries: z
+    .array(REVIEW_HANDOFF_CALLER_ENTRY_SCHEMA)
+    .optional()
+    .describe('handoff only: additional Stage 1 claims bounded when recorded.'),
   force: z
     .boolean()
     .optional()

@@ -1,12 +1,16 @@
 import {
   REVIEW_CHANGE_CONTEXT_LIMIT,
   REVIEW_CHANGE_CONTEXT_LOG_LIMIT,
+  REVIEW_CHANGE_CONTEXT_SECTIONS,
   REVIEW_STATE_DIAGNOSTIC_CODES,
 } from '../../../../constants/reviewState.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import { executeReviewGit } from '../hash/executeReviewGit.js';
 import type { ReviewChangedFile } from '../state/reviewStateTypes.js';
 
+import { buildHandoffSeed } from './buildHandoffSeed.js';
+import { excerptChangeContextSections } from './excerptChangeContextSections.js';
+import { mapEvidenceDiagnosticToHandoffFinding } from './mapEvidenceDiagnosticToHandoffFinding.js';
 import { parseHandoffBlock } from './parseHandoffBlock.js';
 import type { ReviewHandoffSeed } from './reviewHandoffSeedSchema.js';
 
@@ -17,9 +21,9 @@ const CARRIAGE_RETURN_NEWLINE_PATTERN = /\r\n?/g;
 const DISALLOWED_CONTROL_CHARACTER_PATTERN = /[^\P{Cc}\n\t]/gu;
 
 /**
- * Read commit context or sanitize caller text for untrusted artifact rendering.
+ * Read commit context or excerpt and sanitize caller text for untrusted artifact rendering.
  * @param input Absolute Git root, merge base, numstat roster, and optional text.
- * @returns Bounded context, validated handoff claims, and nonfatal parsing or truncation diagnostics.
+ * @returns Bounded context, handoff claims or an invalid-block seed, and nonfatal diagnostics.
  * @throws When Git cannot supply the requested committed change context.
  */
 export async function readChangeContext(input: {
@@ -32,11 +36,11 @@ export async function readChangeContext(input: {
   /** Caller text to sanitize instead of deriving context from Git. */
   changeContext?: string;
 }): Promise<{
-  /** Sanitized untrusted context bounded by the shared character limit. */
+  /** Sanitized untrusted excerpt bounded by the shared character limit. */
   changeContext: string;
-  /** Validated caller claims extracted before context truncation, or null for Git context. */
+  /** Validated claims or an invalid-block diagnostic seed, else null when absent. */
   handoff: ReviewHandoffSeed | null;
-  /** Nonfatal diagnostics describing invalid handoff data or context truncation. */
+  /** Nonfatal diagnostics describing invalid handoff data, template mismatch, or truncation. */
   diagnostics: ToolDiagnostic[];
 }> {
   let context = input.changeContext;
@@ -44,9 +48,37 @@ export async function readChangeContext(input: {
   const diagnostics: ToolDiagnostic[] = [];
   if (context !== undefined) {
     const parsed = parseHandoffBlock(context);
-    context = parsed.remainder;
-    handoff = parsed.handoff;
+    const excerpt = excerptChangeContextSections(
+      parsed.remainder,
+      REVIEW_CHANGE_CONTEXT_SECTIONS,
+    );
+    context = excerpt.excerpt;
+    const invalidFindings = parsed.diagnostics
+      .filter(
+        (diagnostic) =>
+          diagnostic.code === REVIEW_STATE_DIAGNOSTIC_CODES.HANDOFF_INVALID,
+      )
+      .map(mapEvidenceDiagnosticToHandoffFinding);
+    handoff =
+      parsed.handoff ??
+      (invalidFindings.length > 0
+        ? buildHandoffSeed({
+            snapshotHash: null,
+            scope: [],
+            documentSync: 'failed',
+            repaired: 0,
+            findings: invalidFindings,
+            outOfScopeRoot: [],
+            callerEntries: [],
+          }).seed
+        : null);
     diagnostics.push(...parsed.diagnostics);
+    if (!excerpt.matched)
+      diagnostics.push({
+        code: REVIEW_STATE_DIAGNOSTIC_CODES.CHANGE_CONTEXT_UNTEMPLATED,
+        message:
+          'Change context did not match any configured template section.',
+      });
   } else {
     const log = await executeReviewGit(input.projectRoot, [
       'log',

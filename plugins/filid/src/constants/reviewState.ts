@@ -1,3 +1,5 @@
+import { BUILTIN_RULE_IDS } from './builtinRuleIds.js';
+
 /** Schema version for persisted review state records. */
 export const REVIEW_STATE_SCHEMA_VERSION = 2 as const;
 
@@ -53,6 +55,7 @@ export const REVIEW_STATE_ACTIONS = {
   SEAL: 'seal',
   CLEANUP: 'cleanup',
   ASSESS: 'assess',
+  HANDOFF: 'handoff',
 } as const;
 
 /** Review rounds assigned to each supported effort level. */
@@ -162,8 +165,18 @@ export const REVIEW_BASE_REF_CANDIDATES = [
 /** Maximum combined UTF-8 diff bytes embedded in one actor brief. */
 export const REVIEW_BRIEF_INLINE_DIFF_LIMIT = 16384;
 
-/** Maximum characters of sanitized change context rendered in artifacts. */
-export const REVIEW_CHANGE_CONTEXT_LIMIT = 8000;
+/** Maximum characters of a sanitized change-context excerpt rendered in artifacts. */
+export const REVIEW_CHANGE_CONTEXT_LIMIT = 3000;
+
+/** Maximum bytes accepted from one change-context input file. */
+export const REVIEW_CHANGE_CONTEXT_FILE_LIMIT = 1_048_576;
+
+/** Ordered PR body headings retained in the change-context excerpt. */
+export const REVIEW_CHANGE_CONTEXT_SECTIONS = [
+  '## Summary',
+  '## Contract',
+  '## Review notes',
+] as const;
 
 /** Maximum non-merge commit subjects included in generated change context. */
 export const REVIEW_CHANGE_CONTEXT_LOG_LIMIT = 30;
@@ -177,6 +190,18 @@ export const REVIEW_HANDOFF_SCHEMA_VERSION = 1;
 /** Maximum recorded claims accepted in one handoff payload. */
 export const REVIEW_HANDOFF_MAX_ENTRIES = 40;
 
+/** Maximum characters accepted in one handoff path. */
+export const REVIEW_HANDOFF_PATH_LIMIT = 400;
+
+/** Maximum characters accepted in one handoff rule identifier. */
+export const REVIEW_HANDOFF_RULE_ID_LIMIT = 80;
+
+/** Maximum characters accepted in one handoff snapshot hash. */
+export const REVIEW_HANDOFF_HASH_LIMIT = 128;
+
+/** Maximum owner paths accepted in one handoff scope. */
+export const REVIEW_HANDOFF_SCOPE_LIMIT = 200;
+
 /** Maximum characters retained in one handoff claim's note. */
 export const REVIEW_HANDOFF_NOTE_LIMIT = 120;
 
@@ -189,6 +214,38 @@ export const REVIEW_HANDOFF_CLASSES = [
   'unresolved-path',
   'document-sync',
 ] as const;
+
+/** Claim classes emitted by the handoff writer and accepted by its reader. */
+export type ReviewHandoffClass = (typeof REVIEW_HANDOFF_CLASSES)[number];
+
+/** Stable table and seed ordering, identical to the declared class order. */
+export const REVIEW_HANDOFF_CLASS_ORDER = REVIEW_HANDOFF_CLASSES;
+
+/** Built-in finding rules whose handoff treatment is independent of scope. */
+export const REVIEW_HANDOFF_RULE_CLASSES: Readonly<
+  Record<string, ReviewHandoffClass>
+> = {
+  [BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY]: 'code-change',
+  [BUILTIN_RULE_IDS.EXTERNAL_IMPORT_BOUNDARY]: 'code-change',
+  [BUILTIN_RULE_IDS.PURE_FUNCTION_ISOLATION]: 'code-change',
+  [BUILTIN_RULE_IDS.MAX_DEPTH]: 'code-change',
+  [BUILTIN_RULE_IDS.ZERO_PEER_FILE]: 'code-change',
+  [BUILTIN_RULE_IDS.MODULE_ENTRY_POINT]: 'code-change',
+  [BUILTIN_RULE_IDS.ENTRY_POINT_SURFACE]: 'code-change',
+  [BUILTIN_RULE_IDS.ORGAN_NO_INTENTMD]: 'config-decision',
+};
+
+/** Maximum visible rows in the human-readable handoff table. */
+export const REVIEW_HANDOFF_TABLE_ROW_LIMIT = 20;
+
+/** Same-class and same-rule row count above which the table collapses a group. */
+export const REVIEW_HANDOFF_COLLAPSE_THRESHOLD = 5;
+
+/** Rule identifiers reserved for caller and validation synchronization claims. */
+export const REVIEW_HANDOFF_SYNTHETIC_RULE_IDS = {
+  DOCUMENT_SYNC: 'document-sync',
+  HANDOFF_VALIDATE: 'handoff-validate',
+} as const;
 
 /** Document synchronization outcomes accepted from the handoff writer. */
 export const REVIEW_HANDOFF_DOCUMENT_SYNC_STATES = [
@@ -241,6 +298,7 @@ export const REVIEW_STATE_DIRECTORY_NAMES = {
 /** Canonical filenames used by review-state artifacts and rule discovery. */
 export const REVIEW_STATE_FILE_NAMES = {
   STATE: 'review-state.json',
+  HANDOFF: 'handoff.md',
   REPORT: 'review-report.md',
   BLOCKERS: 'review-blockers.md',
   PR_COMMENT: 'pr-comment.md',
@@ -291,6 +349,8 @@ export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   BRANCH_UNRESOLVED: 'review-branch-unresolved',
   BASE_REF_UNRESOLVED: 'review-base-ref-unresolved',
   CHANGE_CONTEXT_TRUNCATED: 'review-change-context-truncated',
+  /** Caller context did not contain any configured PR template section. */
+  CHANGE_CONTEXT_UNTEMPLATED: 'review-change-context-untemplated',
   /** Invalid JSON or schema in the first handoff block. */
   HANDOFF_INVALID: 'review-handoff-invalid',
   ACTOR_METHOD_MISSING: 'review-actor-method-missing',
@@ -339,6 +399,15 @@ export const REVIEW_DECISION_COVERAGE_MISMATCH = 'decision coverage mismatch';
 export const REVIEW_STATE_ERROR_MESSAGES = {
   /** Reject non-string caller context before preparing artifacts. */
   CHANGE_CONTEXT_INVALID: 'changeContext must be a string',
+  /** Reject a path that cannot identify a readable regular file directly. */
+  CHANGE_CONTEXT_PATH_INVALID:
+    'changeContextPath must be an absolute path to a readable regular file',
+  /** Reject ambiguous simultaneous inline and file context inputs. */
+  CHANGE_CONTEXT_CONFLICT:
+    'changeContext and changeContextPath are mutually exclusive',
+  /** Reject a context file whose byte size exceeds the reader boundary. */
+  CHANGE_CONTEXT_FILE_TOO_LARGE:
+    'changeContextPath file exceeds the change context file limit',
   /** Brief rendering requires the canonical reviewer and verifier methods. */
   ACTOR_METHODS_REQUIRED:
     'Actor methods are required to render a review brief.',

@@ -55,7 +55,87 @@ describe('readChangeContext', () => {
     );
   });
 
-  it('parses a trailing handoff before limiting a body longer than 8000 characters', async () => {
+  it('keeps only configured template sections in heading order', async () => {
+    const result = await readChangeContext({
+      projectRoot: '/project',
+      baseCommit: 'base',
+      files: [],
+      changeContext: [
+        '## Summary',
+        'Summary text',
+        '## Links',
+        'Link text',
+        '## Contract',
+        'Contract text',
+        '## Review notes',
+        'Review text',
+        '## Verification',
+        'Verification text',
+        '<details>',
+        '<summary>Changes</summary>',
+        'Changes text',
+        '</details>',
+        '<details>',
+        '<summary>Work context</summary>',
+        'Work context text',
+        '</details>',
+      ].join('\n'),
+    });
+
+    expect(result.changeContext).toBe(
+      [
+        '## Summary',
+        'Summary text',
+        '',
+        '## Contract',
+        'Contract text',
+        '',
+        '## Review notes',
+        'Review text',
+      ].join('\n'),
+    );
+    expect(result.changeContext).not.toContain('Changes text');
+    expect(result.changeContext).not.toContain('Work context text');
+    expect(result.handoff).toBeNull();
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it('keeps untemplated caller text and reports one diagnostic', async () => {
+    const changeContext = 'Unstructured summary\nwith supporting detail';
+    const result = await readChangeContext({
+      projectRoot: '/project',
+      baseCommit: 'base',
+      files: [],
+      changeContext,
+    });
+
+    expect(result.changeContext).toBe(changeContext);
+    expect(result.diagnostics).toEqual([
+      {
+        code: 'review-change-context-untemplated',
+        message: 'Change context did not match any configured template section.',
+      },
+    ]);
+  });
+
+  it('limits an extracted template section to the change context budget', async () => {
+    const result = await readChangeContext({
+      projectRoot: '/project',
+      baseCommit: 'base',
+      files: [],
+      changeContext: `## Summary\n${'x'.repeat(REVIEW_CHANGE_CONTEXT_LIMIT + 100)}`,
+    });
+
+    expect(result.changeContext).toHaveLength(REVIEW_CHANGE_CONTEXT_LIMIT);
+    expect(result.diagnostics).toEqual([
+      {
+        code: 'review-change-context-truncated',
+        message: 'Change context was truncated to 3000 characters.',
+      },
+    ]);
+  });
+
+  it('parses a trailing handoff before excerpting and limiting the body', async () => {
     const handoff = REVIEW_HANDOFF_SEED_SCHEMA.parse({
       schema: 1,
       snapshotHash: 'snapshot-hash',
@@ -67,43 +147,74 @@ describe('readChangeContext', () => {
     });
     const block = `<!-- filid:handoff v1\n${JSON.stringify(handoff)}\n-->`;
     const input = { projectRoot: '/project', baseCommit: 'base', files: [] };
+    const longRemainder = `## Summary\n${'x'.repeat(REVIEW_CHANGE_CONTEXT_LIMIT + 100)}`;
     const result = await readChangeContext({
       ...input,
-      changeContext: `${'x'.repeat(REVIEW_CHANGE_CONTEXT_LIMIT + 100)}\n${block}`,
+      changeContext: `${longRemainder}\n${block}`,
     });
     expect(result).toEqual({
-      changeContext: 'x'.repeat(REVIEW_CHANGE_CONTEXT_LIMIT),
+      changeContext: longRemainder.slice(0, REVIEW_CHANGE_CONTEXT_LIMIT),
       handoff,
       diagnostics: [
         {
           code: 'review-change-context-truncated',
-          message: 'Change context was truncated to 8000 characters.',
+          message: 'Change context was truncated to 3000 characters.',
         },
       ],
     });
-    const boundedRemainder = `${'x'.repeat(REVIEW_CHANGE_CONTEXT_LIMIT - 1)}\n`;
+    const heading = '## Summary\n';
+    const boundedRemainder = `${heading}${'x'.repeat(
+      REVIEW_CHANGE_CONTEXT_LIMIT - heading.length - 1,
+    )}\n`;
     expect(
       await readChangeContext({
         ...input,
         changeContext: `${boundedRemainder}${block}`,
       }),
     ).toEqual({
-      changeContext: boundedRemainder,
+      changeContext: boundedRemainder.trimEnd(),
       handoff,
       diagnostics: [],
     });
   });
 
-  it('keeps caller text sanitization unchanged when no handoff block is present', async () => {
+  it('turns an invalid marked handoff into an indeterminate brief input', async () => {
+    const result = await readChangeContext({
+      projectRoot: '/project',
+      baseCommit: 'base',
+      files: [],
+      changeContext: [
+        '## Summary',
+        'Summary text',
+        '<!-- filid:handoff v1',
+        '{"schema":0}',
+        '-->',
+      ].join('\n'),
+    });
+
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({ code: 'review-handoff-invalid' }),
+    ]);
+    expect(result.handoff?.recorded).toEqual([
+      expect.objectContaining({
+        class: 'indeterminate',
+        ruleId: 'review-handoff-invalid',
+        path: '.',
+        certainty: 'unstated',
+      }),
+    ]);
+  });
+
+  it('keeps caller text sanitization unchanged for a template section', async () => {
     vi.mocked(executeReviewGit).mockClear();
     const result = await readChangeContext({
       projectRoot: '/project',
       baseCommit: 'base',
       files: [],
-      changeContext: '\u0000Before\r\nAfter\rFinal\ttext\u0007',
+      changeContext: '## Summary\r\n\u0000Before\r\nAfter\rFinal\ttext\u0007',
     });
     expect(result).toEqual({
-      changeContext: 'Before\nAfter\nFinal\ttext',
+      changeContext: '## Summary\nBefore\nAfter\nFinal\ttext',
       handoff: null,
       diagnostics: [],
     });

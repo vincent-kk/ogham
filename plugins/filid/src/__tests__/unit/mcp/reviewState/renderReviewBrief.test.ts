@@ -286,17 +286,16 @@ describe('renderReviewBrief', () => {
     expect(contract).not.toContain('reviewed | skipped');
   });
 
-  it('states chunk identity and skipped-result requirements', () => {
+  it('states file, checked-array, and nested gap requirements', () => {
     const output = renderReviewBrief(buildReviewBriefInput());
 
     expect(output).toContain('retain chunk ("k/n" or null)');
     expect(output).toContain('skipped needs reason');
     expect(output).toContain('| src/b.ts | M | source | src | 2/3 |');
     expect(output).toContain('nonblank text');
+    expect(output).toContain('checked: COMPLETE=>nonempty nonblank-string[]');
     expect(output).toContain(
-      'gap resolution?: question≤240; evidenceNeeded≤5×300; nextAction/doneWhen≤600',
+      'gaps: []|[{path,rule,detail,resolution?:{question≤240,evidenceNeeded=1..5×≤300,nextAction/doneWhen≤600,suggestedOwner=agent|human|unknown,humanReason?≤400(human:required)}}]; text nonblank; advice only.',
     );
-    expect(output).toContain('suggestedOwner=agent|human|unknown');
-    expect(output).toContain('humanReason≤400 required for human');
   });
 });

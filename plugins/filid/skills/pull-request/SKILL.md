@@ -3,7 +3,7 @@ name: pull-request
 user-invocable: true
 description: 'Sync branch FCA documents through enrich-docs, record what could not be repaired as a PR handoff, then open or update a structured GitHub pull request. Use when a branch is ready for a PR.'
 argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve] [--push|--no-push] [--issue URL] [--spec URL] [--decision URL|PATH] [--screenshot URL|PATH] [--focus TEXT] [--notes PATH]'
-version: '2.2.0'
+version: '2.3.0'
 complexity: complex
 plugin: filid
 ---
@@ -62,9 +62,9 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
 
 ## Stage 1 — FCA Document Sync
 
-With `--skip-enrich`, step 4 is skipped; scope resolution, ownerless reporting and the handoff (steps 1–3, 7) still run.
+With `--skip-enrich`, step 4 is skipped; scope resolution, ownerless reporting and the handoff (steps 1–3) still run.
 
-At entry, initialize the handoff with `recorded: []`, `repaired: 0`, and `documentSync` unset. Every subsequent step records into this handoff; `reference.md` §7 defines its classes and serialization.
+At entry, initialize `HANDOFF_ENTRIES = []`, `REPAIRED = 0`, and leave `documentSync` unset. Subsequent findings append to `HANDOFF_ENTRIES`; `reference.md` §7 defines the entry contract.
 
 1. Derive the changed paths: `git diff --name-only <BASE_REF>...HEAD`.
 2. Map all changed paths to their owning fractals with one `fractal_inspect` `resolve` batch:
@@ -80,25 +80,25 @@ At entry, initialize the handoff with `recorded: []`, `repaired: 0`, and `docume
    })
    ```
 
-   Read ordered `data.results`, or the artifact results when inline `data` is absent. If the batch call fails, its artifact cannot be read, or `data.results` is missing after that fallback, record one `document-sync` entry with the diagnostic verbatim, set `Document sync: failed`, leave the owner set empty, skip step 4, and proceed to step 7.
+   Read ordered `data.results`, or the artifact results when inline `data` is absent. If the batch call fails, its artifact cannot be read, or `data.results` is missing after that fallback, append `{ class: "document-sync", ruleId: "document-sync", path: ".", note: <diagnostic verbatim> }` to `HANDOFF_ENTRIES`, set `Document sync: failed`, leave the owner set empty, skip step 4, and proceed to step 7.
 
-   A `resolved: true` item contributes its `result.summary.ownerFractalPath`; keep its diagnostics visible. Apply `reference.md` §6 to `resolved: false` items: it defines the `context-target-unresolved`, `git cat-file -e HEAD:<path>`, and `structure.additionalExcludedDirectories` evidence for ownerless classification. For a path absent from `HEAD` — a deleted or renamed source — resolve its nearest ancestor directory that `git cat-file -e HEAD:<dir>` confirms and take that owner; when no ancestor resolves, or any other diagnostic appears, record the path and the diagnostic verbatim as an `unresolved-path` handoff entry (§7) and continue. Collect distinct resolved owners as the document audit scope; do not enrich the whole tree.
+   A `resolved: true` item contributes its `result.summary.ownerFractalPath`; keep its diagnostics visible. Apply `reference.md` §6 to `resolved: false` items: it defines the `context-target-unresolved`, `git cat-file -e HEAD:<path>`, and `structure.additionalExcludedDirectories` evidence for ownerless classification. For a path absent from `HEAD` — a deleted or renamed source — resolve its nearest ancestor directory that `git cat-file -e HEAD:<dir>` confirms and take that owner; when no ancestor resolves, or any other diagnostic appears, append `{ class: "unresolved-path", ruleId: <diagnostic code>, path: <changed path>, note: <diagnostic verbatim> }` to `HANDOFF_ENTRIES` and continue. Collect distinct resolved owners as the document audit scope; do not enrich the whole tree.
 
 3. Report ownerless non-FCA paths and carry their count summary into the `(non-FCA)` row and the bullet list of the `Changes` block as specified in §6. Keep all changed paths in Stage 3's PR analysis. With no owners, make no enrich-docs call and report `no-change`, unless the sync is already `failed` or the flag requires `skipped`.
 4. When owners exist and `--skip-enrich` is absent, invoke `Skill("filid:enrich-docs", "<owner fractal paths> --include-detail --repair")` so the audit covers both INTENT.md and DETAIL.md. Append `--auto-approve` **exactly when this skill received it** — never by inferring that a pipeline is running. An orchestrator that wants unattended document sync passes the flag; without it, enrich-docs keeps its own approval step and a standalone run stays interactive.
 5. Read the enrich-docs report when step 4 ran. Nothing here exits:
 
-   | enrich-docs outcome                                    | `Document sync`                                          | Handoff                                                                                                           |
-   | ------------------------------------------------------ | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-   | `Enrich-docs complete`                                 | `committed` when step 6 committed, otherwise `no-change` | `Repaired: n` becomes the repaired count; each `Needs rework` document and each `deferred:` line becomes an entry |
-   | `Enrich-docs skipped: all RICH`                        | `committed` when step 6 committed, otherwise `no-change` | none                                                                                                              |
-   | `Enrich-docs cancelled`                                | `declined`                                               | one `document-sync` entry: approval declined                                                                      |
-   | `Enrich-docs failed: <reason>`                         | `failed`                                                 | one `document-sync` entry carrying `<reason>` verbatim                                                            |
-   | any other ending — unreadable artifact, missing marker | `failed`                                                 | one `document-sync` entry with the diagnostic verbatim                                                            |
+   | enrich-docs outcome                                    | `Document sync`                                          | Handoff                                                                                                                                                                                                                            |
+   | ------------------------------------------------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+   | `Enrich-docs complete`                                 | `committed` when step 6 committed, otherwise `no-change` | Set `REPAIRED` from `Repaired: n`; append each `Needs rework` document as `{ class: "needs-rework", ruleId: "needs-rework", path, note }` and each `deferred:` line as `{ class: "needs-rework", ruleId: "deferred", path, note }` |
+   | `Enrich-docs skipped: all RICH`                        | `committed` when step 6 committed, otherwise `no-change` | none                                                                                                                                                                                                                               |
+   | `Enrich-docs cancelled`                                | `declined`                                               | Append `{ class: "document-sync", ruleId: "document-sync", path: ".", note: "approval declined" }` to `HANDOFF_ENTRIES`                                                                                                            |
+   | `Enrich-docs failed: <reason>`                         | `failed`                                                 | Append `{ class: "document-sync", ruleId: "document-sync", path: ".", note: <reason verbatim> }` to `HANDOFF_ENTRIES`                                                                                                              |
+   | any other ending — unreadable artifact, missing marker | `failed`                                                 | Append `{ class: "document-sync", ruleId: "document-sync", path: ".", note: <diagnostic verbatim> }` to `HANDOFF_ENTRIES`                                                                                                          |
 
    Resolve competing `Document sync` outcomes with this precedence: `failed` > `declined` > `skipped` > `committed` > `no-change`.
 
-   `--skip-enrich` skips step 4 only: steps 1–3 and 7 still run, `Document sync` reports `skipped` subject to this precedence, and one `document-sync` entry names the flag.
+   `--skip-enrich` skips step 4 only: steps 1–3 and 7 still run, `Document sync` reports `skipped` subject to this precedence, and `{ class: "document-sync", ruleId: "document-sync", path: ".", note: "--skip-enrich" }` is appended to `HANDOFF_ENTRIES`.
 
 6. Only when `git status --porcelain` reports `INTENT.md` / `DETAIL.md` changes, stage **only** those document paths and commit:
 
@@ -108,9 +108,9 @@ At entry, initialize the handoff with `recorded: []`, `repaired: 0`, and `docume
 
    For both `Enrich-docs complete` and `Enrich-docs skipped: all RICH`, decide the final `Document sync` from this step's actual commit result: `committed` when this step committed, otherwise `no-change`; preserve any higher-priority outcome. A `documents-only` worktree can carry user edits, so `documents-only → all RICH → commit success` reports `committed`.
 
-   If `git add` or `git commit` fails, set `Document sync: failed`, record one `document-sync` entry with the diagnostic verbatim, and leave the worktree's document changes intact. Never report a failed commit as `committed`. Continue through step 7 to Stage 2.
+   If `git add` or `git commit` fails, set `Document sync: failed`, append `{ class: "document-sync", ruleId: "document-sync", path: ".", note: <diagnostic verbatim> }` to `HANDOFF_ENTRIES`, and leave the worktree's document changes intact. Never report a failed commit as `committed`. Continue through step 7 to Stage 2.
 
-7. Collect the remaining findings once: `mcp__plugin_filid_tools__fractal_inspect({ action: "validate", path: PROJECT_ROOT })` — `scopes` omitted, so every scope is evaluated. Read `data.result.violations`, or the artifact's equivalent, and `summary.snapshotHash`. Keep violations inside an owner fractal and project-wide violations whose `message` names an owner path; `RuleViolation` carries no evidence field. Retain project-wide findings with `path: "."` and no owner path in the message as `scope-uncertain` (§7). Classify retained violations and scan diagnostics with the §7 rules. If this call fails, its artifact cannot be read, or the required data is absent after the artifact fallback, record one `handoff-validate` entry with the diagnostic verbatim, set `snapshotHash` to `null` and `Document sync: failed`, and continue to Stage 2. These findings and the earlier step entries form the handoff; this step never stops the run.
+7. Remaining findings are computed by `review_state handoff` in Stage 3 step 8; this step records nothing.
 
 Source modifications left by Stage 1 surface as a Stage 0 abort on the next run. That is the intended contract, not a defect. Generated paths do not — they are classified, not staged.
 
@@ -132,7 +132,20 @@ Keep the `BASE_REF` and `BASE_BRANCH` resolved in Stage 0. Verify `BASE_REF` sti
 5. Links, Review notes, Work context, and Verification are never inferred. Use only caller options or notes, commands run and observed before this skill invocation, files actually present in the branch diff, and commit messages. Never infer a design decision by reading code.
 6. Include a mermaid diagram only for a relationship-changing change; keep it to at most 12 nodes and 600 characters including its fence, then add one sentence stating its point. Do not prescribe an authoring method.
 7. The PR title is English. The body follows the `[filid:lang]` language; technical terms, identifiers, and paths stay in their original form.
-8. Apply the §7 budget procedure and validate the machine JSON. Always write the complete body first to `<data.reviewDirectory>/pr-body.md`, using `data.reviewDirectory` from Stage 0's `review_state({ action: "assess" })` call; Stage 4 publishes from this file.
+8. Write the human body without `## FCA Handoff` to `<data.reviewDirectory>/pr-body.md`, using `data.reviewDirectory` from Stage 0's `review_state({ action: "assess" })` call. Then call:
+
+   ```text
+   mcp__plugin_filid_tools__review_state({
+     action: "handoff",
+     projectRoot: PROJECT_ROOT,
+     baseRef: BASE_REF,
+     documentSync,
+     repaired: REPAIRED,
+     entries: HANDOFF_ENTRIES
+   })
+   ```
+
+   Append the file at `data.handoffPath` with `printf '\n' >> <pr-body.md> && cat <data.handoffPath> >> <pr-body.md>`, and take the `Handoff:` terminal counts from `summary` and `data.counts`. If the response is an error envelope with no `data.handoffPath`, no section was written. Retry the same call once. If it fails again, publish the body without the section, set `Document sync: failed`, print the `Handoff:` line with zero counts and `<R> repaired`, then the diagnostic verbatim. Stage 4 publishes from this file unchanged.
 
 ## Stage 4 — PR Publication
 
@@ -141,7 +154,7 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 1. `UNPUSHED = true` and `--push` on (the default): run `git push -u origin <BRANCH>` first — a PR opened from a stale remote head would review commits the branch no longer matches. `UNPUSHED = true` and `--push` off (`--no-push`): skip `gh` entirely, report Stage 3's saved body, and print the §1 unpushed-branch message. `UNPUSHED = false`: continue.
 2. With `GH_AUTH = false` or `--no-push`, report `<data.reviewDirectory>/pr-body.md` as `body-saved` instead of publishing. Otherwise `gh pr view` decides create versus update.
 3. <!-- [INTERACTIVE] --> An existing PR requires an explicit overwrite confirmation before its body is replaced.
-4. Read the saved body through `--body-file <data.reviewDirectory>/pr-body.md` when calling `gh pr create --base <BASE_BRANCH>` or `gh pr edit --base <BASE_BRANCH>`. Use the branch name returned by the script, never a remote-qualified diff ref. The existing PR confirmation covers its body and selected base. `--draft` creates a draft PR.
+4. Read the saved body through `--body-file <data.reviewDirectory>/pr-body.md` when calling `gh pr create --base <BASE_BRANCH>` or `gh pr edit --base <BASE_BRANCH>`. Use the branch name returned by the script, never a remote-qualified diff ref. The existing PR confirmation covers its body and selected base. `--draft` creates a draft PR. If GitHub rejects the body for its 65,536-character limit, keep the file unchanged and report `body-saved`; never fold it.
 5. Keep the branch-specific saved body after publication or a publication failure and report the URL or saved path. The branch segment prevents another branch from overwriting this run's body.
 
 ## Options
@@ -168,7 +181,7 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 - Only `INTENT.md` / `DETAIL.md` are staged by this skill. Any other staged path is a defect.
 - Generated paths are classified so the cycle can continue, never staged and never committed. Committing build output stays the developer's call.
 - Config-declared and existing ownerless non-FCA paths are reported and excluded only from document sync. An unresolved path missing from `HEAD` or carrying another diagnostic is recorded as `unresolved-path` in the handoff and never blocks PR creation.
-- Document sync never blocks PR creation. What Stage 1 could not repair, and a sync that failed, was declined, or was skipped with `--skip-enrich`, is recorded in the PR body's `FCA Handoff` section and in the `Handoff:` terminal line; `cross-review` reads the body as change context.
+- Document sync never blocks PR creation. What Stage 1 could not repair, and a sync that failed, was declined, or was skipped with `--skip-enrich`, is recorded in the PR body's `FCA Handoff` section and in the `Handoff:` terminal line; `review` reads the body's handoff block and top sections as change context.
 - Stage 1 repairs document-contract findings only. Source, import, dependency and file-placement findings are recorded, never fixed here.
 - Input-error aborts are exactly Stage 0's detached/empty branch, no commits ahead of base, `source-dirty` worktree, and `documents-only` with `--skip-enrich`; and Stage 2's unresolved base. Base resolution never guesses silently.
 - `GH_AUTH = false` and `--no-push` are body-saving publication fallbacks, not aborts. The saved body retains the handoff.
@@ -179,10 +192,9 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 
 ```text
 Pull request: <created|updated|body-saved> <url-or-path>
-Body folded: <items>
 Document sync: <committed|no-change|skipped|declined|failed>
 Handoff: <N> recorded (<c> code-change, <d> config-decision, <i> indeterminate, <r> needs-rework, <u> unresolved-path, <s> document-sync), <R> repaired
 Branch push: <pushed|up-to-date|declined>
 ```
 
-Emit `Body folded: <items>` immediately after `Pull request:` only when §7 reduced or removed at least one item; omit the line otherwise. The six class counts sum to `<N>`. For `body-saved`, print `Pull request: body-saved <path>` with `<path>` equal to `<data.reviewDirectory>/pr-body.md`, exactly as written in Stage 3.
+The six class counts sum to `<N>`. For `body-saved`, print `Pull request: body-saved <path>` with `<path>` equal to `<data.reviewDirectory>/pr-body.md`, exactly as written in Stage 3.

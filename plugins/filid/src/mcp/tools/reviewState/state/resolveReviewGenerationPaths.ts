@@ -37,6 +37,10 @@ export function resolveReviewGenerationPaths(
       branchDirectory,
       REVIEW_STATE_FILE_NAMES.STATE,
     ),
+    handoffPath: resolveContainedPath(
+      reviewDirectory,
+      REVIEW_STATE_FILE_NAMES.HANDOFF,
+    ),
     reportPath: resolveContainedPath(
       reviewDirectory,
       REVIEW_STATE_FILE_NAMES.REPORT,
@@ -67,6 +71,7 @@ export function resolveReviewGenerationPaths(
   };
   for (const path of [
     resolved.statePath,
+    resolved.handoffPath,
     resolved.reportPath,
     resolved.blockersPath,
     resolved.evidencePath,

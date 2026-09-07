@@ -85,8 +85,8 @@
 - `boundaries`, `dag`, `nodes`, `entry-points`, `verification` 스코프 finding과 certainty가 `indeterminate`/`unsupported`로 명시된 모든 finding은 고치지 않고 기록한다.
 - 스캔 `status`는 편집 가부의 근거가 아니다. enrich-docs는 `scan detail: "full"`의 노드별 `documentEvidence.findings`를 편집 입력으로 쓰고, `documentEvidence`가 없거나 scan을 읽을 수 없는 문서만 보류한다. non-finding 진단은 보고하되 편집을 막지 않는다.
 - RICH 문서는 `--repair`에서 finding이 이름 붙인 범위만 고치고 그 밖의 RICH 내용은 건드리지 않는다.
-- PR 본문 네 번째 섹션 `## FCA Handoff`는 항상 존재하며, 접히는 표와 한 줄 JSON `<!-- filid:handoff v1 -->` 블록을 담는다. 0건이면 `None`과 빈 `recorded`다. 본문 전체는 cross-review의 `changeContext` 상한 8000자 안에 들어가도록 handoff를 먼저 줄인다.
-- `review_state prepare`는 `changeContext`의 handoff 블록을 파싱해 brief의 `## FCA Handoff` 섹션으로 전달한다. 상태 스키마 2와 `evidence.md`는 바뀌지 않는다.
+- PR 본문 네 번째 섹션 `## FCA Handoff`는 항상 존재하며, `review_state handoff`가 접히는 표와 한 줄 JSON `<!-- filid:handoff v1 -->` 블록을 생성한다. 0건이면 `None`과 빈 `recorded`이며 본문 문자 예산은 두지 않는다.
+- PR 본문 조회는 caller가 소유하고 `review_state prepare`는 `changeContextPath`의 파일을 읽는다. `changeContext`와 함께 주면 오류이며, handoff 블록을 먼저 파싱한 뒤 `## Summary`·`## Contract`·`## Review notes`만 발췌해 3000자로 제한하여 brief의 `## FCA Handoff`와 change context로 전달한다.
 - 터미널 출력은 `Handoff:` 줄로 class별 개수와 repaired 개수를 보고한다.
 - 입력 오류만 abort다: Stage 0의 detached/empty branch, base 대비 커밋 0, `source-dirty`, `documents-only` + `--skip-enrich`; Stage 2의 base 미해결. `GH_AUTH = false`와 `--no-push`는 body 저장 fallback이다.
 - 리뷰 단계가 문서를 정교화한다. cross-review는 handoff 표의 행을 검증할 주장으로 다루고 초안 충분성·INTENT 예산·파생 내용을 `documentation` finding으로 낸다. resolve는 문서 항목을 `enrich-docs --include-detail --repair`로 위임하고, enrich-docs는 DETAIL 부재를 MISSING으로, INTENT 50행 초과분을 DETAIL로 이관한다.

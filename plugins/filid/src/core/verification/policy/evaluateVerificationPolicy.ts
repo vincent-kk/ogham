@@ -27,6 +27,7 @@ function evaluateCaseCap(
         path: file.path,
         severity: 'warning',
         message: `${ruleId} is ${file.count.certainty}; ${file.count.reasons.join('; ') || 'exact case count unavailable'}.`,
+        certainty: file.count.certainty,
       },
     ];
 
@@ -38,6 +39,7 @@ function evaluateCaseCap(
       path: file.path,
       severity: 'error',
       message: `${file.role} has ${file.count.exactCount} semantic cases; the per-file cap is ${cap}.`,
+      certainty: file.count.certainty,
     },
   ];
 }
