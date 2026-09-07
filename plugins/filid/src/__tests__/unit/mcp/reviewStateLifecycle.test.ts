@@ -24,10 +24,31 @@ import {
 } from '../../../constants/reviewState.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 
+import { commitReviewStateFixture } from './reviewState/helpers/commitReviewStateFixture.js';
+import { createReviewRulePluginRoot } from './reviewState/helpers/createReviewRulePluginRoot.js';
+import { readPreparedReviewState } from './reviewState/helpers/readPreparedReviewState.js';
+import { validatePreparedReviewState } from './reviewState/helpers/validatePreparedReviewState.js';
+
+/** Temporary repository exercised by lifecycle tests. */
 let projectRoot: string;
+
+/** Temporary path used to verify containment behavior. */
 let externalRoot: string;
+
+/** Temporary plugin root containing the minimal review-rule map. */
+let fixturePluginRoot: string;
+
+/** Host plugin-root value restored after each test. */
+let originalPluginRoot: string | undefined;
 const INVALID_CLEANUP_BRANCH_NAMES = ['', '../feature'] as const;
 
+/**
+ * Runs a Git command against the temporary lifecycle repository.
+ *
+ * @param args - Git arguments excluding the executable name.
+ * @returns The command's standard output without trailing line breaks.
+ * @throws When Git cannot start or exits unsuccessfully.
+ */
 function git(args: readonly string[]): string {
   const result = spawnCliSync('git', args, { cwd: projectRoot });
   if (result.code !== 0 || result.spawnError)
@@ -35,33 +56,41 @@ function git(args: readonly string[]): string {
   return result.stdout.trimEnd();
 }
 
+/**
+ * Writes one fixture file below the temporary repository root.
+ *
+ * @param relativePath - Repository-relative destination path.
+ * @param content - Complete UTF-8 file content.
+ * @returns Nothing.
+ */
 function writeProjectFile(relativePath: string, content: string): void {
   const filePath = resolveContainedPath(projectRoot, relativePath);
   ensureDirectorySync(portableDirname(filePath));
   writeFileAtomicallySync(filePath, content);
 }
 
-function commit(message: string): void {
-  git(['add', '--all']);
-  git(['commit', '-m', message]);
-}
-
 beforeEach(() => {
+  originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
+  fixturePluginRoot = createReviewRulePluginRoot();
+  process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
   projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-lifecycle-'));
   externalRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-external-'));
   git(['init', '-b', 'main']);
   git(['config', 'user.email', 'filid@example.test']);
   git(['config', 'user.name', 'Filid Test']);
   writeProjectFile('src/value', 'base\n');
-  commit('base');
+  commitReviewStateFixture(projectRoot, 'base');
   git(['checkout', '-b', 'feature/lifecycle']);
   writeProjectFile('src/value', 'feature\n');
-  commit('feature');
+  commitReviewStateFixture(projectRoot, 'feature');
 });
 
 afterEach(() => {
   rmSync(projectRoot, { recursive: true, force: true });
   rmSync(externalRoot, { recursive: true, force: true });
+  rmSync(fixturePluginRoot, { recursive: true, force: true });
+  if (originalPluginRoot === undefined) delete process.env.CLAUDE_PLUGIN_ROOT;
+  else process.env.CLAUDE_PLUGIN_ROOT = originalPluginRoot;
 });
 
 describe('review_state lifecycle', () => {
@@ -75,17 +104,18 @@ describe('review_state lifecycle', () => {
 
     expect(result.status).toBe('ok');
     expect(result.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
-    expect(result.data?.state).toMatchObject({
+    const state = readPreparedReviewState(result);
+    expect(state).toMatchObject({
       schemaVersion: REVIEW_STATE_SCHEMA_VERSION,
-      projectRoot,
+      projectRoot: git(['rev-parse', '--show-toplevel']),
       branchName: 'feature/lifecycle',
       baseRef: 'main',
       phase: REVIEW_STATE_PHASES.PREPARED,
     });
-    expect(result.data.state!.normalizedBranch).not.toContain('/');
+    expect(state.normalizedBranch).not.toContain('/');
     expect(
       JSON.parse(readUtf8FileIfExistsSync(result.data?.statePath ?? '') ?? ''),
-    ).toEqual(result.data?.state);
+    ).toEqual(state);
   });
 
   it('resumes a matching prepared checkpoint without rewriting it', async () => {
@@ -105,16 +135,17 @@ describe('review_state lifecycle', () => {
     expect(checkpoint.summary.disposition).toBe(
       REVIEW_STATE_DISPOSITIONS.RESUMABLE,
     );
-    expect(checkpoint.data?.state).toEqual(prepared.data?.state);
+    expect(checkpoint.data?.state).toEqual(readPreparedReviewState(prepared));
   });
 
-  it('does not seal a prepared state without a review report', async () => {
+  it('does not seal a prepared state without merged review opinions', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: 'feature/lifecycle',
       baseRef: 'main',
     });
+    const stateBeforeSeal = readPreparedReviewState(prepared);
     const sealed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
       projectRoot,
@@ -125,10 +156,10 @@ describe('review_state lifecycle', () => {
     expect(sealed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.MISSING);
     expect(sealed.diagnostics).toContainEqual(
       expect.objectContaining({
-        code: REVIEW_STATE_DIAGNOSTIC_CODES.REPORT_MISSING,
+        code: REVIEW_STATE_DIAGNOSTIC_CODES.OPINIONS_MISSING,
       }),
     );
-    expect(sealed.data?.state).toEqual(prepared.data?.state);
+    expect(readPreparedReviewState(prepared)).toEqual(stateBeforeSeal);
   });
 
   it('seals a matching prepared state and serves it as cached', async () => {
@@ -142,7 +173,13 @@ describe('review_state lifecycle', () => {
       prepared.data?.reviewDirectory ?? '',
       REVIEW_STATE_FILE_NAMES.REPORT,
     );
-    writeFileAtomicallySync(reportPath, '# Review\n');
+    await validatePreparedReviewState({
+      projectRoot,
+      pluginRoot: fixturePluginRoot,
+      branchName: 'feature/lifecycle',
+      originalPluginRoot,
+      state: readPreparedReviewState(prepared),
+    });
 
     const sealed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
@@ -157,8 +194,10 @@ describe('review_state lifecycle', () => {
 
     expect(sealed.status).toBe('ok');
     expect(sealed.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.SEALED);
-    expect(sealed.data?.state?.phase).toBe(REVIEW_STATE_PHASES.SEALED);
-    expect(sealed.data?.state?.sealedAt).toBeDefined();
+    expect(readPreparedReviewState(prepared).phase).toBe(
+      REVIEW_STATE_PHASES.SEALED,
+    );
+    expect(readPreparedReviewState(prepared).sealedAt).toBeDefined();
     expect(checkpoint.summary.disposition).toBe(
       REVIEW_STATE_DISPOSITIONS.CACHED,
     );
@@ -172,8 +211,9 @@ describe('review_state lifecycle', () => {
       branchName: 'feature/lifecycle',
       baseRef: 'main',
     });
+    const stateBeforeSeal = readPreparedReviewState(prepared);
     writeProjectFile('src/value', 'changed after prepare\n');
-    commit('change reviewed content');
+    commitReviewStateFixture(projectRoot, 'change reviewed content');
 
     const sealed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
@@ -188,7 +228,7 @@ describe('review_state lifecycle', () => {
         code: REVIEW_STATE_DIAGNOSTIC_CODES.SOURCE_HASH_STALE,
       }),
     );
-    expect(sealed.data?.state).toEqual(prepared.data?.state);
+    expect(readPreparedReviewState(prepared)).toEqual(stateBeforeSeal);
   });
 
   it('force prepares a fresh state instead of using a sealed cache', async () => {
@@ -198,13 +238,13 @@ describe('review_state lifecycle', () => {
       branchName: 'feature/lifecycle',
       baseRef: 'main',
     });
-    writeFileAtomicallySync(
-      resolveContainedPath(
-        prepared.data?.reviewDirectory ?? '',
-        REVIEW_STATE_FILE_NAMES.REPORT,
-      ),
-      '# Review\n',
-    );
+    await validatePreparedReviewState({
+      projectRoot,
+      pluginRoot: fixturePluginRoot,
+      branchName: 'feature/lifecycle',
+      originalPluginRoot,
+      state: readPreparedReviewState(prepared),
+    });
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.SEAL,
       projectRoot,
@@ -220,8 +260,10 @@ describe('review_state lifecycle', () => {
     });
 
     expect(forced.summary.disposition).toBe(REVIEW_STATE_DISPOSITIONS.FRESH);
-    expect(forced.data.state!.phase).toBe(REVIEW_STATE_PHASES.PREPARED);
-    expect(forced.data.state!.sealedAt).toBeUndefined();
+    expect(readPreparedReviewState(forced).phase).toBe(
+      REVIEW_STATE_PHASES.PREPARED,
+    );
+    expect(readPreparedReviewState(forced).sealedAt).toBeUndefined();
   });
 
   it('requires literal confirmation before cleanup', async () => {
@@ -287,7 +329,7 @@ describe('review_state lifecycle', () => {
     );
     const externalBranch = resolveContainedPath(
       externalRoot,
-      prepared.data.state!.normalizedBranch,
+      readPreparedReviewState(prepared).normalizedBranch,
     );
     const markerPath = resolveContainedPath(externalBranch, 'marker');
     ensureDirectorySync(externalBranch);

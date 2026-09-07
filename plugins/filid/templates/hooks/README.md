@@ -34,7 +34,7 @@ The hook build also emits shared host runners:
 2. Document validation keeps INTENT.md at 50 lines or fewer, requires `### Always do`, `### Ask first`, and `### Never do`, and rejects append-only DETAIL.md growth.
 3. Structure guarding reports organ placement and dependency-boundary risks.
 
-The INTENT.md and DETAIL.md write gates are branch-independent. Spike branches, reflogs, harvest manifests, and `.filid/criteria.md` do not bypass them. A legacy `.filid/criteria.md` ledger is reported by `structure_validate`; hooks do not deny a tool call merely because that ledger exists.
+The INTENT.md and DETAIL.md write gates are branch-independent. Spike branches, reflogs, harvest manifests, and `.filid/criteria.md` do not bypass them. A legacy `.filid/criteria.md` ledger is reported by `fractal_inspect` action `validate`; hooks do not deny a tool call merely because that ledger exists.
 
 ## Registration
 

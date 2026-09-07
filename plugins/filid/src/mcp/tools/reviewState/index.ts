@@ -1,11 +1,7 @@
+export { observeReviewGroupInputs } from './handlers/utils/observeReviewGroupInputs.js';
 export { handleReviewState } from './reviewState.js';
 export type {
-  ReviewStateAction,
-  ReviewStateData,
-  ReviewStateDisposition,
-  ReviewStateInput,
-  ReviewStatePayload,
-  ReviewStatePhase,
+  ReviewStatePaths,
   ReviewStateRecord,
-  ReviewStateSummary,
+  ReviewStateResult,
 } from './state/reviewStateTypes.js';

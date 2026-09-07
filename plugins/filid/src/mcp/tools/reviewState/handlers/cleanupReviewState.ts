@@ -1,5 +1,7 @@
 import { rmSync } from 'node:fs';
 
+import { resolveContainedPath } from '@ogham/cross-platform';
+
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
   REVIEW_STATE_DISPOSITIONS,
@@ -8,14 +10,14 @@ import {
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
-import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
+import { resolveLegacyReviewStatePaths } from '../state/resolveReviewStatePaths.js';
 import type {
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   ReviewStatePayload,
 } from '../state/reviewStateTypes.js';
 
 type CleanupInput = Extract<
-  ReviewStateInput,
+  ResolvedReviewStateInput,
   { action: typeof REVIEW_STATE_ACTIONS.CLEANUP }
 >;
 
@@ -24,9 +26,15 @@ export async function cleanupReviewState(
 ): Promise<ReviewStatePayload> {
   if (input.confirm !== true)
     throw new Error(REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED);
-  const paths = resolveReviewStatePaths(input.projectRoot, input.branchName);
+  const paths = resolveLegacyReviewStatePaths(
+    input.projectRoot,
+    input.branchName,
+  );
   assertReviewStatePaths(paths);
-  rmSync(paths.reviewDirectory, { recursive: true, force: true });
+  rmSync(resolveContainedPath(paths.reviewRoot, paths.normalizedBranch), {
+    recursive: true,
+    force: true,
+  });
 
   return createReviewStatePayload({
     action: input.action,

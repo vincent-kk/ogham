@@ -24,7 +24,7 @@
 
 ### Always do
 
-- 분석 함수 변경 후 `src/__tests__/unit/core/dependencyGraph.test.ts`·`lcaCalculator.test.ts` 갱신
+- 분석 함수 변경 후 dependency graph와 LCA 검증을 함께 갱신
 - 소비자를 소유 fractal로 올린 뒤 교집합을 구하기 (문자열 공통 prefix 금지)
 
 ### Ask first
@@ -34,9 +34,5 @@
 
 ### Never do
 
-- `mcp/`, `hooks/` 등 상위 계층 직접 import
+- 상위 orchestration 계층을 직접 import
 - 미해소 의존성을 PASS로 승격
-
-## Dependencies
-
-- `types/fractal.ts`, `types/adapters.ts`, `constants/nodeTypes.ts`, `constants/pathMarkers.ts`, `@ogham/cross-platform` 경로 compat helper

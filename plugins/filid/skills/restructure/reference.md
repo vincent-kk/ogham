@@ -8,6 +8,7 @@ Each request maps directly to the public `RestructurePlanInput` contract:
 
 ```text
 {
+  action: "plan",
   path: "<project-path>",
   requests: [{
     sourcePath: "<existing-unit-path>",
@@ -23,7 +24,7 @@ Use placement requests explicitly supplied by the user or copied from a previous
 Call:
 
 ```text
-mcp__plugin_filid_tools__restructure_plan(<RestructurePlanInput>)
+mcp__plugin_filid_tools__restructure(<RestructureInput>)
 ```
 
 The tool is read-only. It returns a summary plus an artifact for the full plan regardless of plan size. The artifact stores a common `ToolPayload`; read its `.data` as the `RestructurePlan`. Verify that the artifact SHA-256 matches the envelope before using it.
@@ -37,9 +38,9 @@ The plan contains exact `sourcePath -> targetPath` moves, target node type, plac
 Before presenting a plan for approval, call:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__restructure({
+  action: "precondition",
   path: "<project-path>",
-  mode: "plan-precondition",
   planPath: "<absolute-plan-artifact-path>"
 })
 ```
@@ -82,9 +83,9 @@ Record which plan instruction produced each filesystem change. The skill does no
 Call the same validator against the same artifact after all approved external operations:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__restructure({
+  action: "postcondition",
   path: "<project-path>",
-  mode: "plan-postcondition",
   planPath: "<absolute-plan-artifact-path>"
 })
 ```

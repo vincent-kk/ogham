@@ -1,0 +1,12 @@
+{
+  "schema": 7,
+  "group": "01",
+  "state": "COMPLETE",
+  "sourceHash": "e06801cfbe46ceba265b3c8daeab70512c1c72ede3f484be2703752553cceeba",
+  "decisions": [],
+  "observations": [],
+  "checked": [
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts"
+  ]
+}

@@ -3,7 +3,7 @@ name: context-query
 user-invocable: true
 description: 'Resolve a path to its owner fractal and minimal INTENT/DETAIL chain, then answer a focused FCA question. Use when asking which fractal owns a file or which boundary contract applies before a change.'
 argument-hint: '<question>'
-version: '2.0.0'
+version: '2.1.0'
 complexity: simple
 plugin: filid
 ---
@@ -30,7 +30,8 @@ Use `/filid:guide` for a project-wide human-readable map and `/filid:scan` for a
 Parse a project path and target path from the question, then call:
 
 ```text
-mcp__plugin_filid_tools__context_resolve({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "resolve",
   path: "<project-path>",
   requests: [{ targetPath: "<target-path>" }]
 })
@@ -50,9 +51,9 @@ If the evidence cannot fit the budget, report what is known and list the unread 
 
 ## MCP Surface
 
-| Tool                                       | Purpose                                                                                   |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__context_resolve` | resolve the owner fractal, minimal document chain, nearest DETAIL.md, and output language |
+| Tool + action                                        | Purpose                                                                                   |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `mcp__plugin_filid_tools__fractal_inspect` `resolve` | resolve the owner fractal, minimal document chain, nearest DETAIL.md, and output language |
 
 ## Invariants
 

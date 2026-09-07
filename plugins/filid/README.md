@@ -4,7 +4,7 @@ A Claude Code plugin that keeps a codebase's module boundaries and contract docu
 
 As a codebase grows, AI agents lose context, documents drift from code, and directory structures lose their shape. filid answers exactly that, and only that, through **Fractal Context Architecture (FCA-AI)**: it owns `INTENT.md` and `DETAIL.md`, checks the fractal/organ structure and its dependency DAG, decides where a shared unit belongs, and reviews a change against that evidence.
 
-It is deliberately not a general code-quality tool. Naming, function size, cyclomatic complexity, cohesion metrics, test quality and coverage belong elsewhere — filid reports what it can prove about structure and contracts, and says `indeterminate` instead of guessing.
+filid is deliberately not a repository-wide code-quality rule engine. Outside the committed-change scope of cross-review, naming, function size, cyclomatic complexity, cohesion metrics, test quality, and coverage belong elsewhere. Within that scope, cross-review judges defects, security, performance, maintainability, tests, documentation, and FCA evidence; uncertain evidence remains explicit instead of becoming a guess.
 
 ---
 
@@ -37,9 +37,9 @@ claude --plugin-dir ./plugins/filid
 
 Building produces:
 
-- `bridge/mcp-server.cjs` — MCP server (9 tools)
+- `bridge/mcp-server.cjs` — MCP server (4 tools)
 - `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 3 hook scripts
-- `public/settings.html` — the settings UI served by `open_settings`
+- `public/settings.html` — the settings UI served by `project_setup` action `settings`
 
 There is no native dependency and no global module lookup: the plugin installs and runs with only the MCP SDK and Zod at runtime.
 
@@ -99,7 +99,46 @@ Produces a read-only placement plan — `sourcePath → targetPath`, the basis f
 /filid:cross-review --base origin/main
 ```
 
-Three independent perspectives — contract, structure, verification — review the committed change in parallel, then an adversarial arbiter rules every blocking finding `CONFIRMED | REFUTED | INDETERMINATE`. Refuted findings drop out of the verdict but stay in the arbitration log. The verdict is `APPROVED | REQUEST_CHANGES | INCONCLUSIVE` and is explicitly scoped to FCA — it is not a security, product, or UX review.
+`review_state(prepare)` records the committed-file roster and FCA evidence, then deterministically selects, chunks, groups, and materializes bounded diffs and briefs. Ordinary first reviews and verifiers use the host's efficient model tier; the tool explicitly routes selected reviews to its stronger tier. Reviewers write JSON opinions against layered rules; `validate` merges them and requests another review only when its risk and effort policy requires it. A verifier independently decides assigned findings as `CONFIRMED | REFUTED | INDETERMINATE`. `seal` trusts only validated hashes, folds the verdict, and renders the report, fix requests, and PR comment. Only confirmed findings affect fix requests; the verdict covers the committed change, not defects outside that scope.
+
+The default group budget is **1,024 changed lines**. The file cap adapts to change density within 10–32 files; explicitly setting `review.groupFileLimit` selects a fixed cap. The full changed-file checklist stays in the shared session instead of being copied into every brief.
+
+Risk routing uses security/concurrency path words, adapter-reported public entry points, assigned FCA boundary evidence, and optional `highRiskPaths` globs. Only assigned source files contribute; churn, file counts, and multiple owners do not by themselves raise risk. These are routing hints, and no signal is not a safety guarantee. At most five evidence reasons are stored per group; no extra triage actor runs.
+
+| Review situation                                   | Model and continuation                                                                 |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Ordinary first review                              | Efficient; finishes after one review when complete and no new error requires follow-up |
+| Risk-marked group, effective `medium` or `high`    | Efficient first review, then one independent strong review even with no findings       |
+| Risk-marked group, effective `low`                 | One strong review                                                                      |
+| Indeterminate first review or a new assigned error | Strong follow-up within the configured round budget                                    |
+| Independent finding verifier                       | Efficient                                                                              |
+
+`low`, `medium`, and `high` cap reviewer rounds at 1, 2, and 3. High can also follow new warnings; risk alone or the same evidence gap does not trigger a third round. Follow-up reviewers inspect the diff before reading the prior opinion. Evidence gaps remain visible in the merged result rather than being silently cleared.
+
+Fresh reviews default to `auto`: at least 16 reviewable groups selects `low`, fewer selects `medium`. Explicit `--effort` overrides project/user `review.effort`, which overrides the default. `review.autoLowEffortGroupThreshold` changes this boundary; fixed `low|medium|high` disables auto selection. This controls Filid reviewer rounds, separately from the host model's reasoning effort. Concurrency stays **8**, grouping stays unchanged, and every group receives a first review.
+
+Add this `review` fragment to an existing project or user Filid config; it is not a complete standalone config:
+
+```json
+{
+  "review": {
+    "groupChurnLimit": 1024,
+    "effort": "auto",
+    "autoLowEffortGroupThreshold": 16,
+    "maxGroups": 64,
+    "concurrency": 8,
+    "highRiskPaths": ["src/payments/**", "src/session/**"]
+  }
+}
+```
+
+`maxGroups` defaults to **64** and counts reviewable groups, excluding candidate-only bookkeeping. Exceeding it reports `review-group-budget-exceeded` before dispatch; no files are silently skipped. A user-configured value can raise or lower the ceiling. `highRiskPaths` adds to the built-in hints. Existing prepared groups keep their identities and saved risk reasons; use a fresh preparation or explicit `--force` to apply changed grouping or risk settings. Concurrency changes scheduling, not total work.
+
+Effective effort is frozen from preparation for the same source identity, including before the first validation. A changed effective effort returns `review-effort-locked`; resume with the saved effort or explicitly use `--force` after all prior actors finish. Matching-effort metadata changes preserve briefs, caller context, and opinions. Fresh state records `validationPolicyVersion: 1`; older or unsupported policies return `review-validation-policy-outdated` without reusing old approvals or automatically restarting reviewers. Current-policy sealed caches remain closed. Prepare reports the mode, effective effort, reason, reviewable group count, and `maxReviewerHandoffs` (the sum of configured reviewer rounds, excluding verification and retries). It is a call bound, not a token budget.
+
+A reviewable `COMPLETE` opinion requires nonblank inspection evidence in `checked`, and a nonblank `riskPlan` when preparation requires planning or marks risk. Genuine `INDETERMINATE` gaps may omit those records and remain inconclusive. These checks establish record presence, not actual model tier, inspection depth, or detection quality.
+
+Reviewer briefs reuse the prewritten opinion skeleton and verifier briefs keep a compact inline JSON shape. Full assigned diffs, applicable rules, source tracing, independent finding verification, and `INCONCLUSIVE` for unresolved evidence remain required. Fewer review rounds can still miss defects; deterministic coverage tests and live model calibration measure different aspects of quality.
 
 ### Migrate legacy document names
 
@@ -127,20 +166,20 @@ A blocked write explains its reason and denies only that one tool call — your 
 
 ## Skills Reference
 
-| Skill                  | What it does                                                              |
-| ---------------------- | ------------------------------------------------------------------------- |
-| `/filid:setup`         | Initialize config and rule documents; propose missing INTENT/DETAIL       |
-| `/filid:scan`          | The single full-project FCA audit                                         |
-| `/filid:context-query` | Resolve a path to its owner fractal and minimal document chain            |
-| `/filid:guide`         | Explain the current tree, classifications, and placement rules            |
-| `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval       |
-| `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions |
-| `/filid:cross-review`  | Three-perspective FCA review with adversarial arbitration                 |
-| `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                  |
-| `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR               |
-| `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications      |
-| `/filid:revalidate`    | Re-measure the correction delta and issue the final PASS or FAIL          |
-| `/filid:pipeline`      | Run the whole merge-track cycle end to end, with resume support           |
+| Skill                  | What it does                                                                                                                                                   |
+| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/filid:setup`         | Initialize config and rule documents; propose missing INTENT/DETAIL                                                                                            |
+| `/filid:scan`          | The single full-project FCA audit                                                                                                                              |
+| `/filid:context-query` | Resolve a path to its owner fractal and minimal document chain                                                                                                 |
+| `/filid:guide`         | Explain the current tree, classifications, and placement rules                                                                                                 |
+| `/filid:enrich-docs`   | Improve INTENT.md / DETAIL.md from snapshot evidence, with approval                                                                                            |
+| `/filid:restructure`   | Read-only placement plan → approval → external execution → postconditions                                                                                      |
+| `/filid:cross-review`  | Review a committed change file by file against layered rules and changed-scope FCA evidence, then independently verify every candidate with an efficient model |
+| `/filid:migrate`       | Migrate legacy CLAUDE.md / SPEC.md names                                                                                                                       |
+| `/filid:pull-request`  | Sync branch FCA documents, then open a structured GitHub PR                                                                                                    |
+| `/filid:resolve`       | Decide each fix request, delegate corrections, record justifications                                                                                           |
+| `/filid:revalidate`    | Re-measure the correction delta and issue the final PASS or FAIL                                                                                               |
+| `/filid:pipeline`      | Run the whole merge-track cycle end to end, with resume support                                                                                                |
 
 ---
 
@@ -172,17 +211,12 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 
 ## MCP Tools
 
-| Tool                 | Role                                               |
-| -------------------- | -------------------------------------------------- |
-| `project_init`       | Initialize FCA in a project                        |
-| `rule_docs_sync`     | Sync the managed rule documents                    |
-| `open_settings`      | Open the settings UI                               |
-| `fractal_scan`       | Inspect the snapshot tree                          |
-| `context_resolve`    | Batch owner/document chains from one snapshot      |
-| `restructure_plan`   | Decide placement; returns a plan artifact          |
-| `structure_validate` | Validate a project, or a plan's pre/postconditions |
-| `verification_scan`  | Judge spec-document / test-record contracts        |
-| `review_state`       | cross-review bookkeeping                           |
+| Tool              | Actions                                                            | Role                                                   |
+| ----------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
+| `project_setup`   | `init`, `rules-status`, `rules-manifest`, `rules-sync`, `settings` | Initialize FCA, manage rules, or open settings         |
+| `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                      | Inspect FCA structure, tests, and owner chains         |
+| `restructure`     | `plan`, `precondition`, `postcondition`                            | Plan placement and validate external execution         |
+| `review_state`    | `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`   | Prepare, validate, fold, and render cross-review state |
 
 Every tool returns the same envelope. Results stay small: anything over 16 KiB is written to a content-addressed artifact and referenced by path and SHA-256.
 

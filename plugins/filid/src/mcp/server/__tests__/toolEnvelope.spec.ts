@@ -80,7 +80,7 @@ afterEach(() => {
 describe('common MCP tool envelope', () => {
   it('keeps small data inline as compact JSON', () => {
     const envelope = materializeToolEnvelope(
-      McpToolName.FRACTAL_SCAN,
+      McpToolName.FRACTAL_INSPECT,
       payloadFor(SMALL_DATA),
     );
     expect(envelope.data).toEqual(SMALL_DATA);
@@ -90,7 +90,7 @@ describe('common MCP tool envelope', () => {
 
   it('omits data and persists an oversized payload', () => {
     const envelope = materializeToolEnvelope(
-      McpToolName.FRACTAL_SCAN,
+      McpToolName.FRACTAL_INSPECT,
       payloadFor('x'.repeat(TOOL_INLINE_BUDGET_BYTES)),
     );
     expect(envelope.data).toBeUndefined();
@@ -99,7 +99,7 @@ describe('common MCP tool envelope', () => {
 
   it('always persists a small restructure plan payload', () => {
     const envelope = materializeToolEnvelope(
-      McpToolName.RESTRUCTURE_PLAN,
+      McpToolName.RESTRUCTURE,
       payloadFor(SMALL_DATA, TOOL_PERSISTENCE.ALWAYS),
     );
     expect(envelope.data).toBeUndefined();
@@ -108,7 +108,7 @@ describe('common MCP tool envelope', () => {
 
   it('returns an absolute ephemeral JSON artifact path', () => {
     const envelope = materializeToolEnvelope(
-      McpToolName.RESTRUCTURE_PLAN,
+      McpToolName.RESTRUCTURE,
       payloadFor(SMALL_DATA, TOOL_PERSISTENCE.ALWAYS),
     );
     expect(portableIsAbsolute(envelope.artifact?.path ?? '')).toBe(true);
@@ -120,17 +120,14 @@ describe('common MCP tool envelope', () => {
 
   it('writes the complete payload into the artifact', () => {
     const payload = payloadFor(SMALL_DATA, TOOL_PERSISTENCE.ALWAYS);
-    const envelope = materializeToolEnvelope(
-      McpToolName.RESTRUCTURE_PLAN,
-      payload,
-    );
+    const envelope = materializeToolEnvelope(McpToolName.RESTRUCTURE, payload);
     const content = readFileSync(envelope.artifact?.path ?? '', 'utf8');
     expect(JSON.parse(content)).toEqual(payload);
   });
 
   it('reports artifact bytes from the exact UTF-8 content', () => {
     const envelope = materializeToolEnvelope(
-      McpToolName.RESTRUCTURE_PLAN,
+      McpToolName.RESTRUCTURE,
       payloadFor(SMALL_DATA, TOOL_PERSISTENCE.ALWAYS),
     );
     const content = readFileSync(envelope.artifact?.path ?? '', 'utf8');
@@ -139,7 +136,7 @@ describe('common MCP tool envelope', () => {
 
   it('reports the SHA-256 of the exact artifact content', () => {
     const envelope = materializeToolEnvelope(
-      McpToolName.RESTRUCTURE_PLAN,
+      McpToolName.RESTRUCTURE,
       payloadFor(SMALL_DATA, TOOL_PERSISTENCE.ALWAYS),
     );
     const content = readFileSync(envelope.artifact?.path ?? '', 'utf8');
@@ -152,11 +149,11 @@ describe('common MCP tool envelope', () => {
 
   it('reuses the same content-addressed path for the same payload', () => {
     const first = materializeToolEnvelope(
-      McpToolName.RESTRUCTURE_PLAN,
+      McpToolName.RESTRUCTURE,
       payloadFor(SMALL_DATA, TOOL_PERSISTENCE.ALWAYS),
     );
     const second = materializeToolEnvelope(
-      McpToolName.RESTRUCTURE_PLAN,
+      McpToolName.RESTRUCTURE,
       payloadFor(SMALL_DATA, TOOL_PERSISTENCE.ALWAYS),
     );
     expect(second.artifact?.path).toBe(first.artifact?.path);
@@ -170,7 +167,10 @@ describe('common MCP tool envelope', () => {
   });
 
   it('serializes the materialized envelope through toolResult', () => {
-    const result = toolResult(McpToolName.FRACTAL_SCAN, payloadFor(SMALL_DATA));
+    const result = toolResult(
+      McpToolName.FRACTAL_INSPECT,
+      payloadFor(SMALL_DATA),
+    );
     const parsed = JSON.parse(result.content[0].text);
     expect(parsed).toMatchObject({
       status: TOOL_STATUSES.OK,
@@ -193,9 +193,9 @@ describe('common MCP tool envelope', () => {
       map: new Map([[MAP_ENTRY_KEY, MAP_ENTRY_VALUE]]),
       set: new Set([SET_ENTRY_VALUE]),
     };
-    const inline = toolResult(McpToolName.FRACTAL_SCAN, payloadFor(data));
+    const inline = toolResult(McpToolName.FRACTAL_INSPECT, payloadFor(data));
     const persisted = materializeToolEnvelope(
-      McpToolName.RESTRUCTURE_PLAN,
+      McpToolName.RESTRUCTURE,
       payloadFor(data, TOOL_PERSISTENCE.ALWAYS),
     );
     const inlineData = JSON.parse(inline.content[0].text).data;
@@ -220,7 +220,7 @@ describe('common MCP tool envelope', () => {
         },
       ],
     };
-    const result = toolResult(McpToolName.FRACTAL_SCAN, payload);
+    const result = toolResult(McpToolName.FRACTAL_INSPECT, payload);
     const parsed = JSON.parse(result.content[0].text);
     const artifactPayload = JSON.parse(
       readFileSync(parsed.artifact.path, 'utf8'),
@@ -244,11 +244,11 @@ describe('common MCP tool envelope', () => {
     const artifactDirectory = portableJoin(
       pluginCache('filid'),
       ARTIFACTS_DIRECTORY_NAME,
-      McpToolName.FRACTAL_SCAN,
+      McpToolName.FRACTAL_INSPECT,
     );
 
     expect(() =>
-      materializeToolEnvelope(McpToolName.FRACTAL_SCAN, payload),
+      materializeToolEnvelope(McpToolName.FRACTAL_INSPECT, payload),
     ).toThrow(INLINE_BUDGET_ERROR_MESSAGE);
     const artifactFiles = listDirectoryIfExistsSync(artifactDirectory);
     expect(artifactFiles).toHaveLength(1);
@@ -268,7 +268,7 @@ describe('common MCP tool envelope', () => {
     const escapedDirectory = portableJoin(stateRoot, ESCAPED_DIRECTORY_NAME);
     const toolDirectory = portableJoin(
       artifactDirectory,
-      McpToolName.RESTRUCTURE_PLAN,
+      McpToolName.RESTRUCTURE,
     );
     mkdirSync(artifactDirectory, { recursive: true });
     mkdirSync(escapedDirectory, { recursive: true });
@@ -276,7 +276,7 @@ describe('common MCP tool envelope', () => {
 
     expect(() =>
       materializeToolEnvelope(
-        McpToolName.RESTRUCTURE_PLAN,
+        McpToolName.RESTRUCTURE,
         payloadFor(SMALL_DATA, TOOL_PERSISTENCE.ALWAYS),
       ),
     ).toThrow(/symbolic link/);

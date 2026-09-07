@@ -5,7 +5,8 @@
 Create the post-initialization snapshot projection:
 
 ```text
-mcp__plugin_filid_tools__fractal_scan({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "scan",
   path: "<target-path>",
   detail: "paths"
 })

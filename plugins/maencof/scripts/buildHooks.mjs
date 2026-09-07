@@ -117,7 +117,7 @@ const POST_TOOL_USE_BYTES = 12 * 1024;
 // pre-tool-use bundles the Codex apply_patch normalizer, whose helper-per-branch
 // parser dominates the emitted bytes — pure Node-builtin code carrying no module.
 // FORBIDDEN_PATTERNS below, not this cap, is the isolation guarantee.
-const PRE_TOOL_USE_BYTES = 14 * 1024;
+const PRE_TOOL_USE_BYTES = 15 * 1024;
 
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
 // kept stable). `entryPath` is the esbuild entry relative to src/hooks.

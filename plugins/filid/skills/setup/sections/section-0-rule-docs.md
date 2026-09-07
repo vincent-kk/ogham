@@ -7,7 +7,8 @@
 Call:
 
 ```text
-mcp__plugin_filid_tools__project_init({
+mcp__plugin_filid_tools__project_setup({
+  action: "init",
   path: "<target-path>",
   language: "<session-language>",
   adapterIds: ["<explicit-adapter-id>"]
@@ -25,8 +26,8 @@ mcp__plugin_filid_tools__project_init({
 Inspect the deployment first:
 
 ```text
-mcp__plugin_filid_tools__rule_docs_sync({
-  action: "status",
+mcp__plugin_filid_tools__project_setup({
+  action: "rules-status",
   path: "<absolute-target-path>"
 })
 ```
@@ -34,7 +35,8 @@ mcp__plugin_filid_tools__rule_docs_sync({
 On an interactive local host, call:
 
 ```text
-mcp__plugin_filid_tools__open_settings({
+mcp__plugin_filid_tools__project_setup({
+  action: "settings",
   path: "<absolute-target-path>",
   waitSeconds: 300
 })
@@ -46,11 +48,11 @@ The page owns config and managed-document persistence. Dispatch on the stable st
 - `closed`: keep the existing state and continue.
 - `pending`: call once more. If still pending, return the URL and stop because the user interaction has not completed.
 
-In a headless environment, do not invent a config editing path. Use `rule_docs_sync` directly:
+In a headless environment, do not invent a config editing path. Use `project_setup` directly:
 
-1. `action: "manifest"` to discover managed IDs.
-2. `action: "status"` to inspect deployed state.
-3. `action: "sync"` with `selections` and optional `resync`.
+1. `action: "rules-manifest"` to discover managed IDs.
+2. `action: "rules-status"` to inspect deployed state.
+3. `action: "rules-sync"` with `selections` and optional `resync`.
 
 Required documents are always deployed. Optional drift is overwritten only when its ID is explicitly present in `resync`. An `unsupported` status or any diagnostic is reported and is not treated as successful synchronization.
 

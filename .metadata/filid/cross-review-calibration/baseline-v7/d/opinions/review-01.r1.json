@@ -1,0 +1,54 @@
+{
+  "schema": 7,
+  "group": "01",
+  "round": 1,
+  "state": "COMPLETE",
+  "sourceHash": "6502d5f00aa93648260ec975a5d646e80cde1442052ddf3aa1278a05414e2f25",
+  "files": [
+    {
+      "path": "src/slugify/DETAIL.md",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/slugify.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/tests/slugify.spec.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "R01-001",
+      "severity": "error",
+      "category": "documentation",
+      "path": "src/slugify/DETAIL.md",
+      "existingCode": "- `toSlug(input: string): string` is exported from `index.ts`.",
+      "lines": "12",
+      "rule": "DOC-2",
+      "message": "DETAIL.md's API Contracts section now states that `toSlug(input: string): string` is exported from `index.ts`, but the shipped code still exports and defines only `slugify` (src/slugify/slugify.ts:3, src/slugify/index.ts:1); no `toSlug` symbol exists anywhere in the change.",
+      "evidence": "src/slugify/DETAIL.md:12 promises `toSlug`; src/slugify/index.ts:1 (`export { slugify } from './slugify.js';`) and src/slugify/slugify.ts:3 (`export function slugify(input: string): string {`) show only `slugify` is exported; src/slugify/tests/slugify.spec.ts:3 imports `slugify`, not `toSlug`.",
+      "consequence": "A consumer or future maintainer reading DETAIL.md will look for or rely on a `toSlug` export that does not exist, causing an import error or wasted integration effort; the documented public contract is unimplemented.",
+      "recommendedAction": "Revert the DETAIL.md Requirements/API Contracts entries to describe the actual exported `slugify` function, or actually rename the exported function to `toSlug` across slugify.ts, index.ts, and the spec file so the contract and code agree."
+    }
+  ],
+  "checked": [
+    "src/slugify/DETAIL.md",
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts",
+    "src/slugify/index.ts",
+    "src/slugify/INTENT.md"
+  ],
+  "gaps": [],
+  "riskPlan": null
+}

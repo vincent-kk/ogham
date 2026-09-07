@@ -4,12 +4,6 @@
 
 현재 JavaScript/TypeScript 생태계의 파일, module/framework entry point, import/export와 verification syntax를 lexical evidence로 해석한다.
 
-## Structure
-
-- `structure/` organ — source discovery, lexical token scan, entry point와 dependency evidence
-- `verification/` organ — verification role, semantic case와 contract marker 분석
-- `index.ts` — 등록 가능한 structure/verification adapter named exports
-
 ## Conventions
 
 - 이 디렉터리가 확장자, entry filename, package/framework 이름과 test syntax의 유일한 출처다.

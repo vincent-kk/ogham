@@ -47,6 +47,64 @@ describe('ecmascript semantic verification counting', () => {
     ).toMatchObject({ certainty: 'exact', exactCount: 2 });
   });
 
+  it('counts object rows whose properties use spread', () => {
+    expect(
+      countSemanticCases(
+        "it.each([{ ...seed, value: 1 }, { ...seed, value: 2 }])('row', () => {});",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
+
+  it('counts tuple rows containing object spread', () => {
+    expect(
+      countSemanticCases(
+        "it.each([['prepared', { ...state, verdict: 'APPROVED' }], ['sealed', { ...state, phase: 'sealed' }]])('rejects %s', () => {});",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
+
+  it('counts tuple rows whose values use array spread', () => {
+    expect(
+      countSemanticCases("it.each([[...left], [...right]])('row', () => {});"),
+    ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
+
+  it('counts rows constructed with spread call arguments', () => {
+    expect(
+      countSemanticCases(
+        "it.each([makeRow(...left), makeRow(...right)])('row', () => {});",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
+
+  it('ignores ellipses in parameter table strings and comments', () => {
+    expect(
+      countSemanticCases(
+        "it.each(['...', /* ... */ 'kept'])('row', () => {});",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
+
+  it('keeps outer table spread indeterminate while preserving known cases', () => {
+    expect(
+      countSemanticCases(
+        "it('known', () => {}); it.each([1, ...rows, 2])('row', () => {});",
+      ),
+    ).toMatchObject({
+      certainty: 'indeterminate',
+      exactCount: undefined,
+      knownLowerBound: 1,
+    });
+  });
+
+  it('multiplies suite cases when object rows use spread', () => {
+    expect(
+      countSemanticCases(
+        "describe.each([{ ...first }, { ...second }])('suite', () => { it('one', () => {}); it('two', () => {}); });",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 4 });
+  });
+
   it('counts tagged-template data rows without counting its header', () => {
     expect(
       countSemanticCases(

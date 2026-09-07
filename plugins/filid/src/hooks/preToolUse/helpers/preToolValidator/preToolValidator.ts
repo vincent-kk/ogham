@@ -1,5 +1,3 @@
-import { canonicalizeTargetPathSync } from '@ogham/cross-platform';
-
 import {
   DENY_RETRY_GUIDANCE,
   HOOK_TOOL_NAME,
@@ -8,6 +6,7 @@ import type { HookOutput, PreToolUseInput } from '../../../../types/hooks.js';
 import { isDetailMd } from '../../../shared/utils/isDetailMd.js';
 import { isIntentMd } from '../../../shared/utils/isIntentMd.js';
 import { validateCwd } from '../../../utils/validateCwd.js';
+import { resolveHookTargetPath } from '../../utils/resolveHookTargetPath.js';
 
 import { handleDetailMdWrite } from './utils/handleDetailMdWrite.js';
 import { handleIntentMdEdit } from './utils/handleIntentMdEdit.js';
@@ -29,12 +28,18 @@ export {
  * - Blocks if detected as append-only (when oldContent provided)
  *
  * For Edit tool targeting INTENT.md:
- * - Warns when new_string exceeds 20 lines (partial edits cannot be validated for line limit)
+ * - Validates projected content against the line cap when the edit is exact
+ * - Warns when an inexact edit's new_string exceeds 20 lines
  *
  * Delete of INTENT.md or DETAIL.md is denied because it removes the active
  * boundary contract rather than revising it.
  *
  * Branch names and criteria ledgers do not affect this validator.
+ * Write/Edit follow the physical target; Delete preserves the final entry.
+ *
+ * @param input - Host operation with a cwd accepted by the hook boundary.
+ * @param oldContent - Existing physical DETAIL content, when readable.
+ * @returns The operation's permission decision and optional warning context.
  */
 export function validatePreToolUse(
   input: PreToolUseInput,
@@ -46,10 +51,11 @@ export function validatePreToolUse(
   const filePath = input.tool_input.file_path ?? input.tool_input.path ?? '';
   const documentPath =
     input.tool_name === HOOK_TOOL_NAME.DELETE
-      ? canonicalizeTargetPathSync(safeCwd, filePath, {
-          preserveTerminalEntry: true,
-        })
-      : filePath;
+      ? resolveHookTargetPath(safeCwd, filePath, true)
+      : input.tool_name === HOOK_TOOL_NAME.WRITE ||
+          input.tool_name === HOOK_TOOL_NAME.EDIT
+        ? resolveHookTargetPath(safeCwd, filePath)
+        : filePath;
 
   if (
     input.tool_name === HOOK_TOOL_NAME.DELETE &&
@@ -63,19 +69,19 @@ export function validatePreToolUse(
       },
     };
 
-  if (input.tool_name === HOOK_TOOL_NAME.EDIT && isIntentMd(filePath))
-    return handleIntentMdEdit(input, safeCwd, filePath);
+  if (input.tool_name === HOOK_TOOL_NAME.EDIT && isIntentMd(documentPath))
+    return handleIntentMdEdit(input, safeCwd, documentPath);
 
   const content = input.tool_input.content;
 
   if (input.tool_name !== HOOK_TOOL_NAME.WRITE) return { continue: true };
 
   // No truthiness gate: empty content must still satisfy the full document.
-  if (isIntentMd(filePath)) return handleIntentMdWrite(content ?? '');
+  if (isIntentMd(documentPath)) return handleIntentMdWrite(content ?? '');
 
   if (!content) return { continue: true };
 
-  if (isDetailMd(filePath) && oldContent !== undefined)
+  if (isDetailMd(documentPath) && oldContent !== undefined)
     return handleDetailMdWrite(content, oldContent);
 
   return { continue: true };

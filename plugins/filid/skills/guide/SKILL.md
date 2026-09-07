@@ -3,7 +3,7 @@ name: guide
 user-invocable: true
 description: 'Explain the current FCA tree, node classifications, validation findings, and evidence-based placement rules, read-only. Use for onboarding to the structure or deciding where a new module belongs.'
 argument-hint: '[path]'
-version: '2.0.0'
+version: '2.1.0'
 complexity: simple
 plugin: filid
 ---
@@ -30,7 +30,8 @@ Use `/filid:scan` for the full audit verdict. Use `/filid:restructure` when a sp
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_scan({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "scan",
   path: "<target-path>",
   detail: "paths"
 })
@@ -43,9 +44,9 @@ Use the returned classifications, document state, and entry-point counts directl
 Call:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "validate",
   path: "<target-path>",
-  mode: "project",
   scopes: [
     "documents",
     "nodes",
@@ -80,10 +81,10 @@ Emit the current-structure table, current findings, placement rules, and new mod
 
 ## MCP Surface
 
-| Tool                                          | Purpose                                                          |
-| --------------------------------------------- | ---------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__fractal_scan`       | current tree, classifications, documents, and entry-point counts |
-| `mcp__plugin_filid_tools__structure_validate` | current FCA findings by canonical scope                          |
+| Tool + action                                         | Purpose                                                          |
+| ----------------------------------------------------- | ---------------------------------------------------------------- |
+| `mcp__plugin_filid_tools__fractal_inspect` `scan`     | current tree, classifications, documents, and entry-point counts |
+| `mcp__plugin_filid_tools__fractal_inspect` `validate` | current FCA findings by canonical scope                          |
 
 ## Invariants
 

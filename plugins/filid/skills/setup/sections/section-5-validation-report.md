@@ -5,16 +5,16 @@
 Validate the post-initialization snapshot:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "validate",
   path: "<target-path>",
-  mode: "project",
   scopes: ["documents", "nodes", "entry-points"]
 })
 ```
 
 Read the findings from the returned result or, when the payload is persisted, from its artifact — the same handling `section-1-directory-scan.md` applies to the scan call.
 
-The setup report combines this result with `fractal_scan(detail: "paths")`. It must not claim compliance when either tool returns diagnostics, a non-exact certainty, or a non-OK status.
+The setup report combines this result with `fractal_inspect` action `scan` using `detail: "paths"`. It must not claim compliance when either action returns diagnostics, a non-exact certainty, or a non-OK status.
 
 Use this compact format:
 

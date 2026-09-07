@@ -1,0 +1,181 @@
+{
+  "schemaVersion": 2,
+  "projectRoot": "<PROJECT_ROOT>",
+  "branchName": "calib/f",
+  "normalizedBranch": "calib-f-296aae6b5f24a3994a6bddaeaa5c5cf9b57bca938bd242fadc8a0e34ca99603a",
+  "baseRef": "main",
+  "baseCommit": "2ae9e6bfbf87fa2d078e94caf39f93323d6a361b",
+  "sourceHash": "cf908f44abebdb894b2ac5875ee38edde22adc6f5bccda07590fe6d2a8cb16ce",
+  "fileHashes": {
+    "src/slugify/notes.md": "11d46c323d9c1bcd770835c38af2f730af7870bf",
+    "src/slugify/slugify.ts": "02d358d22e3059a3726cb01aa39f767f789344b9",
+    "src/slugify/tests/slugify.spec.ts": "989d017ed20a5640fea54053b0af0b4d325ca6da"
+  },
+  "phase": "sealed",
+  "preparedAt": "2026-09-04T20:08:25.776Z",
+  "effort": "medium",
+  "groups": [
+    {
+      "id": "01",
+      "units": [
+        {
+          "path": "src/slugify/notes.md",
+          "change": "A",
+          "chunk": null,
+          "churn": 3,
+          "hunks": [
+            {
+              "oldStart": 0,
+              "oldEnd": -1,
+              "newStart": 1,
+              "newEnd": 3
+            }
+          ],
+          "diffPath": "diffs/01/01-notes.md.diff"
+        },
+        {
+          "path": "src/slugify/slugify.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 5,
+              "oldEnd": 9,
+              "newStart": 5,
+              "newEnd": 9
+            }
+          ],
+          "diffPath": "diffs/01/02-slugify.ts.diff"
+        },
+        {
+          "path": "src/slugify/tests/slugify.spec.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 16,
+          "hunks": [
+            {
+              "oldStart": 2,
+              "oldEnd": 13,
+              "newStart": 2,
+              "newEnd": 17
+            }
+          ],
+          "diffPath": "diffs/01/03-slugify.spec.ts.diff"
+        }
+      ],
+      "churn": 21,
+      "planRequired": false,
+      "dependsOn": [],
+      "candidateIds": [
+        "FCA-001",
+        "FCA-002"
+      ],
+      "briefPath": "briefs/review-01.md",
+      "skeletonPath": "opinions/review-01.r1.json",
+      "opinionPath": "opinions/review-01.json",
+      "verifyBriefPath": "briefs/verify-01.md",
+      "verifyPath": "opinions/verify-01.json",
+      "rounds": 2,
+      "validated": {
+        "review": {
+          "round": 1,
+          "sha256": "26ef84dbbbd6a24b84e6d9f1df9cca3d1856a3b86c367be483f12c4aa9d065dc",
+          "complete": true
+        },
+        "verify": {
+          "sha256": "5e18867661326e74da9c3db51d4562aa19cccd817785cbf3f6494749494c172a",
+          "reviewSha256": "26ef84dbbbd6a24b84e6d9f1df9cca3d1856a3b86c367be483f12c4aa9d065dc"
+        }
+      }
+    }
+  ],
+  "scope": {
+    "snapshotHash": "1cd5186cacf03bdd63df03c8e79be5922d6344dbbbd7f642e4123b0d6eef39c1",
+    "evidenceComplete": false,
+    "worktree": "clean",
+    "dirtyPaths": [],
+    "statuses": {
+      "structure": "indeterminate",
+      "verification": "indeterminate"
+    },
+    "files": [
+      {
+        "path": "src/slugify/notes.md",
+        "change": "A",
+        "insertions": 3,
+        "deletions": 0,
+        "binary": false,
+        "role": "document",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "documents",
+          "fca"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/slugify.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "src/slugify/tests/slugify.spec.ts",
+        "change": "M",
+        "insertions": 10,
+        "deletions": 6,
+        "binary": false,
+        "role": "verification",
+        "owner": "src/slugify",
+        "skipReason": null,
+        "rules": [
+          "default",
+          "tests",
+          "fca",
+          "ecmascript"
+        ],
+        "repositoryRules": []
+      }
+    ],
+    "candidates": [
+      {
+        "id": "FCA-001",
+        "source": "structure",
+        "scope": "nodes",
+        "category": "structure",
+        "severity": "warning",
+        "path": "src/slugify",
+        "rule": "zero-peer-file",
+        "message": "Fractal root \"slugify\" contains peer file \"notes.md\" not in any allowed category. Promote it to a sub-fractal directory."
+      },
+      {
+        "id": "FCA-002",
+        "source": "structure",
+        "scope": "verification",
+        "category": "verification",
+        "severity": "warning",
+        "path": "src/slugify/tests/slugify.spec.ts",
+        "rule": "spec-document-case-cap",
+        "message": "spec-document-case-cap is indeterminate; parameterized case at offset 297 uses a dynamic table."
+      }
+    ],
+    "informational": [],
+    "outOfScopeCount": 3,
+    "infoCount": 0
+  },
+  "verdict": "INCONCLUSIVE",
+  "sealedAt": "2026-09-04T20:14:25.496Z"
+}

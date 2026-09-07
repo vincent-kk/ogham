@@ -4,7 +4,7 @@ user-invocable: true
 disable-model-invocation: true
 description: 'Migrate legacy CLAUDE.md/SPEC.md names to INTENT.md/DETAIL.md via a portable dry-run-first script with post-validation.'
 argument-hint: '[path] [--execute] [--auto-commit]'
-version: '2.0.0'
+version: '2.1.0'
 complexity: simple
 plugin: filid
 ---
@@ -67,9 +67,9 @@ The script performs:
 After execution, call:
 
 ```text
-mcp__plugin_filid_tools__structure_validate({
+mcp__plugin_filid_tools__fractal_inspect({
+  action: "validate",
   path: "<target-path>",
-  mode: "project",
   scopes: ["documents", "nodes", "entry-points"]
 })
 ```

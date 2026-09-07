@@ -1,0 +1,45 @@
+{
+  "schema": 7,
+  "group": "01",
+  "round": 2,
+  "state": "COMPLETE",
+  "sourceHash": "1f95261bd25404a0f647eec2cd891ce4a1b5daadf2fa4f912ff1671ecc16f029",
+  "files": [
+    {
+      "path": "src/slugify/slugify.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    },
+    {
+      "path": "src/slugify/tests/slugify.spec.ts",
+      "change": "M",
+      "chunk": null,
+      "result": "reviewed",
+      "reason": null
+    }
+  ],
+  "findings": [
+    {
+      "id": "R01-002",
+      "severity": "error",
+      "category": "bug",
+      "path": "src/slugify/slugify.ts",
+      "existingCode": "const truncated = normalized.slice(0, MAX_SLUG_LENGTH);\n  return truncated[0].toLowerCase() + truncated.slice(1);",
+      "lines": "8-9",
+      "inDiff": true,
+      "rule": "DEF-2",
+      "message": "Slicing `normalized` to `MAX_SLUG_LENGTH` happens after the separator-trim step, so truncation can land exactly on an internal `-` and expose it as a new trailing character; the changed return line does not re-trim it. For `slugify('a'.repeat(63) + ' b')`, `normalized` is `'a'.repeat(63) + '-b'` (65 chars); slicing to 64 yields `'a'.repeat(63) + '-'`, and the change's `truncated[0].toLowerCase() + truncated.slice(1)` returns that string unmodified (first char was already lowercase from the earlier `.toLowerCase()`), so the function returns a slug ending in `-` instead of a clean 63-character slug.",
+      "evidence": "src/slugify/slugify.ts:8-9",
+      "consequence": "The test added in this same change, `slugify.spec.ts:14-16` (`expect(slugify('a'.repeat(63) + ' b')).toBe('a'.repeat(63))`), fails against this implementation: the actual return value is `'a'.repeat(63) + '-'`, not `'a'.repeat(63)`. Any consumer relying on a truncated slug never ending in a separator (e.g. as a URL path segment or CSS id) gets a trailing `-` for reachable inputs whose separator falls at the truncation boundary.",
+      "recommendedAction": "Re-apply the trailing-separator trim after truncation, e.g. `return truncated.replace(/-+$/, '')` (guarding the empty-string case per R01-001), so truncation cannot expose a stray separator."
+    }
+  ],
+  "checked": [
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts"
+  ],
+  "gaps": [],
+  "riskPlan": null
+}

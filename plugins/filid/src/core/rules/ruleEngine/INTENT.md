@@ -38,7 +38,3 @@ ProjectSnapshot의 문서, node, entry, boundary, DAG, verification과 legacy mi
 - core에서 생태계 파일명·확장자·import 문법 해석
 - legacy criteria ledger 자동 삭제 또는 자동 변환
 - project rule을 node 수만큼 중복 평가
-
-## Dependencies
-
-- `../../projectSnapshot/`, `../documentValidator/`, `../../verification/`

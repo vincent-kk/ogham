@@ -15,7 +15,7 @@
 ## Conventions
 
 - 분류 입력은 adapter가 보고한 entry descriptor를 받고 filename을 해석하지 않는다.
-- filesystem I/O는 `scanner/`, 순수 hierarchy 조립은 `treeBuilder/`에 둔다.
+- 효과 경계를 분리하기 위해 filesystem I/O는 `fractalTree/scanner/`, 순수 hierarchy 조립은 `fractalTree/treeBuilder/`에 둔다.
 - organ 안에서도 traversal을 계속해 nested fractal을 재분류한다.
 
 ## Boundaries

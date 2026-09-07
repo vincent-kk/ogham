@@ -5,7 +5,7 @@ import {
   type CodexMoveProvenance,
   type NormalizeCodexToolUsesResult,
   type NormalizedCodexToolUse,
-  canonicalizeTargetPathSync,
+  logHookFailure,
 } from '@ogham/cross-platform';
 
 import {
@@ -25,6 +25,7 @@ import {
 } from './helpers/preToolValidator/preToolValidator.js';
 import { guardStructure } from './helpers/structureGuard/structureGuard.js';
 import { mergeResults } from './utils/mergeResults.js';
+import { resolveHookTargetPath } from './utils/resolveHookTargetPath.js';
 
 /** Codex Move provenance with Filid's local validation state. */
 type FilidMoveProvenance = CodexMoveProvenance & {
@@ -54,9 +55,13 @@ type PreparedMoveInput =
  * governed at all — validation and guards are as opt-in as injection.
  *
  * Visit delivery never decides permission; mutation calls continue through
- * the validator and structure guard in the same invocation.
+ * the validator and structure guard even when optional visit delivery fails.
  *
  * Branch names and criteria ledgers do not affect hook permission decisions.
+ *
+ * @param input - One host operation, optionally carrying normalized Move data.
+ * @returns The merged visit context, document decision, and structure result.
+ * @throws Mandatory validation or structure errors outside optional delivery.
  */
 export async function handlePreToolUse(
   input: FilidPreToolUseInput,
@@ -70,7 +75,13 @@ export async function handlePreToolUse(
     input.tool_name === HOOK_TOOL_NAME.EDIT ||
     input.tool_name === HOOK_TOOL_NAME.DELETE;
 
-  const visit = processVisit(input);
+  let visit: HookOutput;
+  try {
+    visit = processVisit(input);
+  } catch (error) {
+    logHookFailure('filid', 'pre-tool-use-visit', error);
+    visit = { continue: true };
+  }
   if (!mutation) return mergeResults([visit]);
 
   const prepared = prepareMoveDestination(input, safeCwd);
@@ -84,15 +95,15 @@ export async function handlePreToolUse(
   )
     return mergeResults([visit, denyStalePatchTarget(filePath)]);
   let oldContent: string | undefined;
-  if (
-    effectiveInput.tool_name !== HOOK_TOOL_NAME.DELETE &&
-    isDetailMd(filePath)
-  )
-    try {
-      oldContent = readFileSync(resolve(safeCwd, filePath), 'utf-8');
-    } catch {
-      /* new file */
-    }
+  if (effectiveInput.tool_name !== HOOK_TOOL_NAME.DELETE) {
+    const documentPath = resolveHookTargetPath(safeCwd, filePath);
+    if (isDetailMd(documentPath))
+      try {
+        oldContent = readFileSync(documentPath, 'utf-8');
+      } catch {
+        /* Prior content is optional for new or unreadable documents. */
+      }
+  }
 
   const structure = guardStructure(effectiveInput);
   return mergeResults([
@@ -122,7 +133,8 @@ function prepareMoveDestination(
         tool_input: { ...input.tool_input, content: projection.content },
       },
     };
-  if (isIntentMd(move.destinationPath) || isDetailMd(move.destinationPath))
+  const destinationPath = resolveHookTargetPath(safeCwd, move.destinationPath);
+  if (isIntentMd(destinationPath) || isDetailMd(destinationPath))
     return {
       ok: false,
       denial: denyInexactContractMove(
@@ -160,10 +172,10 @@ function wasTouchedEarlier(
   safeCwd: string,
 ): boolean {
   if (!input.codexPriorTouchedPaths?.length) return false;
-  const canonicalTarget = canonicalizeTargetPathSync(safeCwd, targetPath);
+  const canonicalTarget = resolveHookTargetPath(safeCwd, targetPath);
   return input.codexPriorTouchedPaths.some(
     (priorPath) =>
-      canonicalizeTargetPathSync(safeCwd, priorPath) === canonicalTarget,
+      resolveHookTargetPath(safeCwd, priorPath) === canonicalTarget,
   );
 }
 

@@ -3,15 +3,10 @@ import { type ZodTypeAny } from 'zod';
 
 import type { McpToolName } from '../../../constants/mcpToolNames.js';
 import { TOOL_INPUT_DIAGNOSTIC_CODE } from '../../../constants/toolEnvelope.js';
-import type { ToolPayload } from '../../../types/toolEnvelope.js';
+import type { HandlerExtra, ToolPayload } from '../../../types/toolEnvelope.js';
 
 import { toolError } from './toolError.js';
 import { toolResult } from './toolResult.js';
-
-/** Subset of the MCP request extra forwarded to handlers (abort propagation). */
-export interface HandlerExtra {
-  signal?: AbortSignal;
-}
 
 /**
  * Wrap one payload-producing handler with the common artifact boundary.

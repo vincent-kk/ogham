@@ -1,3 +1,8 @@
+# Repository Requirements
+
+- For arrays with fewer than 5,000 elements, prefer direct array operations for one-off work. Avoid constructing a `Set` only to inspect its size or perform a single lookup. Use a `Set` when repeated membership operations reuse the index enough to amortize construction. Verify performance-sensitive choices with measurements.
+- Exclude build outputs from commits. Run the designated builds and artifact checks, but stage source changes separately from generated runtime bundles and compiled assets.
+
 <!-- FILID:START:filid_fractal-boundaries.md -->
 # Fractal Boundaries
 

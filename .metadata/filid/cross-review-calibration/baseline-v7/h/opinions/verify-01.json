@@ -1,0 +1,25 @@
+{
+  "schema": 7,
+  "group": "01",
+  "state": "COMPLETE",
+  "sourceHash": "9ff71d83433b305f8a797dcbe6b4b317ce0deef0c2f005737183484ac995ae6a",
+  "decisions": [
+    {
+      "findingId": "R01-001",
+      "verdict": "CONFIRMED",
+      "evidence": "src/slugify/slugify.ts:8-9: for input `${'a'.repeat(63)} b`, normalized = 'a'.repeat(63) + '-b' (65 chars); truncated = normalized.slice(0,64) = 'a'.repeat(63) + '-' (64 chars); return truncated[0].toLowerCase() + truncated.slice(1) yields 'a'.repeat(63) + '-', not 'a'.repeat(63) as asserted by src/slugify/tests/slugify.spec.ts:14-16.",
+      "reason": "Manually tracing slugify.ts:8-9 against the test input produces a string with a trailing '-' that does not equal the test's expected 'a'.repeat(63), so the test as written fails against the implementation."
+    },
+    {
+      "findingId": "R01-002",
+      "verdict": "CONFIRMED",
+      "evidence": "src/slugify/slugify.ts:4-9: for input '' or '---', .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') reduces normalized to '', so truncated = ''.slice(0,64) = '', and line 9 evaluates truncated[0] as undefined then calls .toLowerCase() on it.",
+      "reason": "undefined.toLowerCase() at slugify.ts:9 throws TypeError: Cannot read properties of undefined (reading 'toLowerCase') whenever normalized is empty, which is reachable and previously returned '' without error."
+    }
+  ],
+  "observations": [],
+  "checked": [
+    "src/slugify/slugify.ts",
+    "src/slugify/tests/slugify.spec.ts"
+  ]
+}

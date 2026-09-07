@@ -6,6 +6,14 @@
 
 ---
 
+## Cross-review 비용 정책
+
+fresh 기본값은 `effort: auto`, `autoLowEffortGroupThreshold: 16`, `maxGroups: 64`, `concurrency: 8`이다. 명시 effort → project/user config → 기본값 순으로 해석한다. 실제 reviewer를 배정할 group이 16개 이상이면 low, 미만이면 medium이며 그룹 분할 기준은 유지한다. 동시성은 처리 시간을, 그룹 상한과 round 정책은 배정량을 제어한다. 어느 값도 provider token의 절대 상한은 아니다.
+
+모든 group의 첫 리뷰와 diff 독해가 기본 비용이다. low의 위험 group은 첫 회부터 strong, 일반 group과 finding별 독립 verifier는 efficient다. 반복 JSON 예시는 미리 쓴 reviewer skeleton과 짧은 계약으로 대체하며, verifier는 brief 안의 최소 JSON shape를 사용한다. 규칙·diff·source 추적·validation은 보존한다. `maxReviewerHandoffs`는 group rounds의 합으로 verifier·재시도·추가 source 읽기를 제외한다.
+
+prepared session의 effective effort는 최초 배정부터 고정한다. auto 재개에서 threshold 변경이 다른 effort를 만들면 기존 작업을 보존하고 오류로 중단한다. 검증 정책이 오래된 기록도 자동 재검토하지 않으며 명시 force만 새 비용을 발생시킨다. 같은 effective effort의 metadata 변경은 유효 brief·opinion을 다시 읽는 actor 작업을 만들지 않으며 sealed cache는 유지한다. 실제 token·cached input·output·시간·비용과 blind finding/gap 정확도는 함께 측정해야 한다. brief bytes 감소만으로 전체 token 절감이나 동일 탐지율을 주장하지 않는다.
+
 ## Hook 오버헤드
 
 ### 등록된 훅 3개
@@ -72,10 +80,10 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 1.0의 도구는 AST 파싱을 하지 않는다. 비용은 두 가지가 지배한다.
 
-1. **snapshot 생성** — 디렉터리 traversal과 구조 판정에 쓰인 파일 내용의 SHA-256. `fractal_scan`, `context_resolve`, `restructure_plan`, `structure_validate`, `verification_scan`은 각각의 tool 호출 안에서 필요한 snapshot을 한 번 만든다. 서로 다른 tool 호출은 in-memory snapshot을 공유하지 않는다. `context_resolve.requests[]`의 모든 target은 한 document-only snapshot을 공유하므로 N개 target을 N번 호출할 때의 반복 traversal을 없앤다. traversal은 git-ignored 경로를 걸러내기 위해 `git ls-files`를 **traversal당 한 번** spawn한다 — 경로당이 아니며, 결과 집합은 그 traversal 동안 재사용된다. 한 snapshot은 tree scan과 adapter discovery를 합쳐 여러 traversal을 돈다. 걸러낸 경로만큼 이후 단계의 입력이 줄어들지만, 순비용의 방향은 측정하지 않았다.
+1. **snapshot 생성** — 디렉터리 traversal과 구조 판정에 쓰인 파일 내용의 SHA-256. `fractal_inspect`의 각 action과 `restructure`의 각 action은 각각의 tool 호출 안에서 필요한 snapshot을 한 번 만든다. 서로 다른 tool 호출은 in-memory snapshot을 공유하지 않는다. `fractal_inspect` resolve action의 `requests[]` 모든 target은 한 document-only snapshot을 공유하므로 N개 target을 N번 호출할 때의 반복 traversal을 없앤다. traversal은 git-ignored 경로를 걸러내기 위해 `git ls-files`를 **traversal당 한 번** spawn한다 — 경로당이 아니며, 결과 집합은 그 traversal 동안 재사용된다. 한 snapshot은 tree scan과 adapter discovery를 합쳐 여러 traversal을 돈다. 걸러낸 경로만큼 이후 단계의 입력이 줄어들지만, 순비용의 방향은 측정하지 않았다.
 2. **lexical scan** — 어댑터가 의존성·진입점·case를 세는 단일 패스. 정규식 기반 전체 파싱이 아니라 문자열·주석·괄호 nesting만 구분한다.
 
-`project_init`, `rule_docs_sync`, `open_settings`, `review_state`는 snapshot을 필요로 하지 않는다.
+`project_setup`의 모든 action과 `review_state`는 snapshot을 필요로 하지 않는다.
 
 ---
 
@@ -129,7 +137,7 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 ### 1. 한 호출의 여러 요청이 하나의 snapshot을 공유한다
 
-`context_resolve`의 여러 target과 `restructure_plan`의 여러 placement request는 각각 한 tool 호출 안에서 하나의 snapshot을 공유한다. 100개 target을 scalar 호출 100번으로 나누면 snapshot도 100번 만들지만, `requests` 100개인 한 호출은 한 번만 만든다. `verification_scan.filePaths[]`와 `structure_validate.scopes[]`도 이미 한 호출 안에서 배열 범위를 처리한다.
+`fractal_inspect` resolve action의 여러 target과 `restructure` plan action의 여러 placement request는 각각 한 tool 호출 안에서 하나의 snapshot을 공유한다. 100개 target을 scalar 호출 100번으로 나누면 snapshot도 100번 만들지만, `requests` 100개인 한 호출은 한 번만 만든다. `fractal_inspect` verification action의 `filePaths[]`와 validate action의 `scopes[]`도 이미 한 호출 안에서 배열 범위를 처리한다.
 
 snapshot hash는 정렬된 상대 경로와 구조 판정에 쓰인 파일 내용의 SHA-256을 결합하며 root 경로와 mtime에 독립이다. checkout이나 clone이 거짓 무효화를 일으키지 않는다.
 
@@ -151,7 +159,7 @@ MCP 도구는 스킬이 호출할 때만 동작한다. 일반 개발 중에는 �
 
 ### 6. 계획은 만들되 실행하지 않는다
 
-`restructure_plan`은 프로젝트 트리를 건드리지 않는다. 계획 생성이 실패해도 저장소는 그대로이며, 재시도 비용은 계획 재생성뿐이다.
+`restructure`의 `plan` action은 프로젝트 트리를 건드리지 않는다. 계획 생성이 실패해도 저장소는 그대로이며, 재시도 비용은 계획 재생성뿐이다.
 
 ---
 

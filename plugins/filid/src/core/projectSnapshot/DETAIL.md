@@ -16,8 +16,8 @@
 - DETAIL.md가 `## Boundary Exemptions`를 선언하면 그 항목을 `node.documentEvidence.boundaryExemptions`에 보존한다. `targetPath`는 소유 프랙탈 기준으로 정규화한 절대 경로이며, rule engine은 다시 파일을 읽지 않고 이 evidence만 읽는다.
 - dependency graph는 non-organ owner path와 함께 organ path 목록도 받아, owner subtree 안의 owned-organ 참조를 cycle adjacency에서 제외한다.
 - 동일 bytes와 구조는 프로젝트 absolute root 및 mtime과 무관하게 같은 hash이고 file content 또는 구조 입력 변경은 hash를 바꾼다.
-- root `.filid/criteria.md`가 없으면 `legacyCriteriaLedger`는 `null`이다.
-- root `.filid/criteria.md`가 있으면 absolute ledger path와 migration target인 root `DETAIL.md` absolute path를 보존하고 ledger content를 snapshot hash에 포함한다.
+- root에 legacy acceptance ledger가 없으면 `legacyCriteriaLedger`는 `null`이다.
+- root에 legacy acceptance ledger가 있으면 absolute ledger path와 migration target인 root `DETAIL.md` absolute path를 보존하고 ledger content를 snapshot hash에 포함한다.
 
 ## API Contracts
 
@@ -47,7 +47,7 @@
 ### AC-legacy-criteria-evidence — Legacy ledger migration evidence
 
 - ledger가 없으면 `legacyCriteriaLedger`가 `null`이고 별도 hash file input이 없다.
-- ledger가 있으면 evidence의 `path`와 `targetDetailPath`가 각각 absolute root `.filid/criteria.md`와 root `DETAIL.md`를 가리킨다.
+- ledger가 있으면 evidence의 `path`는 해당 legacy ledger의 absolute 위치를, `targetDetailPath`는 root `DETAIL.md`를 가리킨다.
 - collector는 ledger를 삭제하거나 DETAIL로 자동 변환하지 않는다.
 
 ### AC-snapshot-boundary-exemptions — 선언된 면책 evidence

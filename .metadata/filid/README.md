@@ -33,7 +33,7 @@
 
 | #   | 문서                                          | 설명                                                                                       |
 | --- | --------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| 01  | [ARCHITECTURE.md](./01-ARCHITECTURE.md)       | 전체 구조 & 설계 철학 — FCA-AI 이론 매핑, 레이어, 디렉터리 구조, ADR 12개, 0.8.x 제거 목록 |
+| 01  | [ARCHITECTURE.md](./01-ARCHITECTURE.md)       | 전체 구조 & 설계 철학 — FCA-AI 이론 매핑, 레이어, 디렉터리 구조, ADR 14개, 0.8.x 제거 목록 |
 | 02  | [BLUEPRINT.md](./02-BLUEPRINT.md)             | 모듈별 기술 청사진 — 13개 도메인의 목적, 알고리즘, 입출력, 의존 방향                       |
 | 03  | [LIFECYCLE.md](./03-LIFECYCLE.md)             | 라이프사이클 & 워크플로우 — 스킬 12개, merge-track 5단계, Hook 이벤트 타임라인             |
 | 04  | [USAGE.md](./04-USAGE.md)                     | 설치, 설정, 사용 방법 — 빌드, config v2, 스킬·MCP 사용법, 트러블슈팅                       |
@@ -78,7 +78,7 @@
 | 아키텍처 결정      | 01-ARCHITECTURE, 02-BLUEPRINT                       |
 | 빌드/의존성 변경   | 01-ARCHITECTURE, 04-USAGE, 05-COST-ANALYSIS         |
 
-**canonical 규칙 문서(`plugins/filid/templates/rules/`)를 고치면 `yarn filid build:rules` + `rule_docs_sync`까지가 한 단위다.** 원본만 고치고 재배포하지 않으면 이 저장소에서 일하는 에이전트가 stale 규칙을 읽는다.
+**canonical 규칙 문서(`plugins/filid/templates/rules/`)를 고치면 `yarn filid build:rules` + `project_setup`의 `rules-sync` action까지가 한 단위다.** 원본만 고치고 재배포하지 않으면 이 저장소에서 일하는 에이전트가 stale 규칙을 읽는다.
 
 ---
 
@@ -89,11 +89,11 @@
 | 버전           | 0.9.0-beta.1 (`private: true` — npm 라이브러리 표면 없음)                                                                                                   |
 | 소스 파일      | 391개 `.ts` (테스트 제외) + 75개 테스트 파일                                                                                                                |
 | 런타임 의존    | 2개 (`@modelcontextprotocol/sdk`, `zod`) — native 바이너리 0                                                                                                |
-| MCP 도구       | **9개** — project_init, rule_docs_sync, open_settings, fractal_scan, context_resolve, restructure_plan, structure_validate, verification_scan, review_state |
+| MCP 도구       | **4개** — project_setup, fractal_inspect, restructure, review_state |
 | 내장 규칙      | **15개** ([07-RULES-REFERENCE](./07-RULES-REFERENCE.md#내장-규칙-15개))                                                                                     |
 | 배포 규칙 문서 | **4개** (fractal-boundaries, module-documents, verification-records, code-placement — 모두 required)                                                        |
 | 스킬           | **12개** — setup, scan, context-query, guide, enrich-docs, restructure, migrate + merge-track 5(pull-request, cross-review, resolve, revalidate, pipeline)  |
-| 에이전트       | **0개** (cross-review는 고정 3관점 + 적대적 판정)                                                                                                           |
+| 에이전트       | **0개** (cross-review는 `review_state(prepare)` 증거로 변경 그룹 reviewer와 효율 모델 verifier를 실행)                                                      |
 | Hook 이벤트    | **3개** — SessionStart, UserPromptSubmit, PreToolUse(Read\|Write\|Edit)                                                                                     |
 | Hook 브리지    | 4개 (setup.mjs, user-prompt-submit.mjs, pre-tool-use.mjs, run-agy.mjs)                                                                                      |
 | 번들 크기      | 498,413 B (MCP 416,185 + 훅 3개 48,560 + settings UI 30,263 + 러너)                                                                                         |

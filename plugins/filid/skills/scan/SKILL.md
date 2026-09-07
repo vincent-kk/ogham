@@ -3,7 +3,7 @@ name: scan
 user-invocable: true
 description: 'Run the single full-project FCA audit across snapshot structure, document and import boundaries, dependency DAG, and verification contracts. Use before review or integration, or as a health check.'
 argument-hint: '[path]'
-version: '2.0.0'
+version: '2.1.0'
 complexity: medium
 plugin: filid
 ---
@@ -30,11 +30,11 @@ Run all phases in one continuous operation. Large payloads and artifacts are int
 
 ### Phase 1 — Snapshot Summary
 
-Call `mcp__plugin_filid_tools__fractal_scan` with `detail: "summary"`.
+Call `mcp__plugin_filid_tools__fractal_inspect` with `action: "scan"` and `detail: "summary"`.
 
 ### Phase 2 — Full Structural Validation
 
-Call `mcp__plugin_filid_tools__structure_validate` with `mode: "project"` and all six canonical scopes:
+Call `mcp__plugin_filid_tools__fractal_inspect` with `action: "validate"` and all six canonical scopes:
 
 - `documents`
 - `nodes`
@@ -45,7 +45,7 @@ Call `mcp__plugin_filid_tools__structure_validate` with `mode: "project"` and al
 
 ### Phase 3 — Verification Documents
 
-Call `mcp__plugin_filid_tools__verification_scan` with `detail: "files"` and without `filePaths`, so both verification roles and fragmentation links are audited across the whole project.
+Call `mcp__plugin_filid_tools__fractal_inspect` with `action: "verification"`, `detail: "files"`, and no `filePaths`, so both verification roles and fragmentation links are audited across the whole project.
 
 ### Phase 4 — Consolidated Verdict
 
@@ -61,11 +61,11 @@ End with `Scan complete: <N> findings`.
 
 ## MCP Surface
 
-| Tool                                          | Purpose                                                  |
-| --------------------------------------------- | -------------------------------------------------------- |
-| `mcp__plugin_filid_tools__fractal_scan`       | snapshot identity, adapters, certainty, and node summary |
-| `mcp__plugin_filid_tools__structure_validate` | complete FCA structural rule evaluation                  |
-| `mcp__plugin_filid_tools__verification_scan`  | per-role case caps, fragmentation, and contract links    |
+| Tool + action                                             | Purpose                                                  |
+| --------------------------------------------------------- | -------------------------------------------------------- |
+| `mcp__plugin_filid_tools__fractal_inspect` `scan`         | snapshot identity, adapters, certainty, and node summary |
+| `mcp__plugin_filid_tools__fractal_inspect` `validate`     | complete FCA structural rule evaluation                  |
+| `mcp__plugin_filid_tools__fractal_inspect` `verification` | per-role case caps, fragmentation, and contract links    |
 
 ## Invariants
 

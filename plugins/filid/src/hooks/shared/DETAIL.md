@@ -22,7 +22,7 @@
 ### AC-shared-minimal-surface — 최소 공통 표면
 
 - public surface는 FCA 프로젝트, INTENT.md와 DETAIL.md predicate만 열거한다.
-- `.filid/criteria.md` 전용 predicate를 노출하지 않는다.
+- legacy acceptance ledger 전용 predicate를 노출하지 않는다.
 
 ## Boundary Exemptions
 
