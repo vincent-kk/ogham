@@ -18,9 +18,9 @@ export const CENNAD_HOME = resolveCennadHome();
 // Windows — mirrors the Antigravity CLI layout.
 export const AGY_HOME = join(homedir(), '.gemini', 'antigravity-cli');
 
-// agy loads MCP servers from here even in headless `-p` mode; cennad provisions a
-// yt-dlp-mcp server into it when antigravity YouTube support is enabled.
-export const AGY_MCP_CONFIG_PATH = join(AGY_HOME, 'mcp_config.json');
+// agy reads global MCP servers from ~/.gemini/config/mcp_config.json,
+// shared with the Antigravity IDE.
+export const AGY_MCP_CONFIG_PATH = join(homedir(), '.gemini', 'config', 'mcp_config.json');
 
 // cwd → conversation-id map and per-conversation transcript. Used to recover the
 // answer from disk when `agy -p` drops stdout (Issue #76).

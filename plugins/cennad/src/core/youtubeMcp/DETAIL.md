@@ -4,7 +4,7 @@
 
 - 설정 저장 시 `@ogham/yt-dlp-mcp`를 선택된 사용자 CLI에 멱등 등록하거나 해제한다.
 - Claude와 Codex는 `resolveUserMcpTarget` 및 shared MCP manager를 사용한다.
-- Antigravity는 전용 global `mcp_config.json` adapter를 유지한다.
+- Antigravity는 전용 global `~/.gemini/config/mcp_config.json` adapter를 유지한다.
 - `targets.claude`는 신규·기존 설정 모두 기본적으로 비활성화한다.
 - 대상 CLI가 없거나 적용에 실패해도 설정 저장은 실패시키지 않는다.
 
@@ -25,7 +25,7 @@
 
 ### AC-target-isolation — 대상별 격리
 
-- claude·codex 는 목적별 사용자 MCP target 과 manager 를 쓰고, antigravity 는 글로벌 `mcp_config.json` 을 관리한다.
+- claude·codex 는 목적별 사용자 MCP target 과 manager 를 쓰고, antigravity 는 글로벌 `~/.gemini/config/mcp_config.json` 을 관리한다.
 - 체크되지 않은 대상 CLI 의 설정은 건드리지 않는다.
 
 ### AC-language-passthrough — 언어 전달
@@ -35,4 +35,4 @@
 
 ## Last Updated
 
-2026-07-30 — 기존 계약을 acceptance group 으로 명시했다(내용 변경 없음).
+2026-09-09 — antigravity 글로벌 MCP 설정 경로를 ~/.gemini/config/mcp_config.json 으로 명시했다.

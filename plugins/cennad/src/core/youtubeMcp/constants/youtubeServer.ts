@@ -1,7 +1,8 @@
 import type { YoutubeAddonLanguage } from '../../../types/index.js';
 
 // Shared definition of the yt-dlp-mcp MCP server (@ogham/yt-dlp-mcp),
-// provisioned identically into antigravity's mcp_config.json and codex's config.toml.
+// provisioned identically into antigravity's ~/.gemini/config/mcp_config.json
+// and codex's config.toml.
 // The CLIs invoke this server on their own in headless mode, so cennad only ensures
 // it is registered — no dispatch-path change.
 export const YOUTUBE_MCP_KEY = 'yt-dlp-mcp';

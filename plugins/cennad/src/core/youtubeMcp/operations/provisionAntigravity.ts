@@ -50,7 +50,8 @@ function entryMatches(existing: unknown, desired: DesiredServer): boolean {
 }
 
 // Idempotently registers (enabled) or unregisters (disabled) the yt-dlp-mcp
-// MCP server in antigravity's global mcp_config.json. While enabled, cennad owns the
+// MCP server in antigravity's global ~/.gemini/config/mcp_config.json.
+// While enabled, cennad owns the
 // entry: it writes the canonical command/args/env (env carries YTDLP_LANG), so a
 // language change is reapplied on the next save. Preserves every other server and
 // top-level key. Never throws: any read/write failure resolves to `{ ok: false }`
