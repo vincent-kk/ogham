@@ -8,8 +8,8 @@ const UNRESOLVED_ANSWER = /\s(missing|ambiguous)$/;
  * Find which candidate names resolve to an object, in one Git process.
  *
  * Every candidate is handed to `git cat-file --batch-check`, which resolves
- * names exactly like `rev-parse --verify` and answers one line per input
- * line in order. When the answer count does not match, or a candidate is
+ * the same names as `rev-parse --verify`, additionally requires the object
+ * to be present, and answers one line per input line in order. When the answer count does not match, or a candidate is
  * empty or could not be sent on one line, each candidate is verified on its
  * own instead.
  *

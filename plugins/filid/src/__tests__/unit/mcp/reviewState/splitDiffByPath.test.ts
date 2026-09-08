@@ -40,6 +40,13 @@ describe('splitDiffByPath', () => {
     expect(split.unmatchedSections).toBe(0);
   });
 
+  it('counts leading non-header output so the caller falls back', () => {
+    const colored = `\u001b[1m${section('src/a.ts', 'a')}`;
+    const split = splitDiffByPath(colored, ['src/a.ts']);
+    expect(split.matched.size).toBe(0);
+    expect(split.unmatchedSections).toBe(1);
+  });
+
   it('returns nothing for empty output', () => {
     const split = splitDiffByPath('', ['src/a.ts']);
     expect(split.matched.size).toBe(0);

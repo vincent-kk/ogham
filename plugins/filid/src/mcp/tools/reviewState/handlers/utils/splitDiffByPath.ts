@@ -14,8 +14,10 @@ const HEADER_PREFIX = 'diff --git ';
  * A section runs from one `diff --git` header line to the next. A section
  * is attributed to a requested path only when its header is exactly
  * `diff --git a/<path> b/<path>`, which Git prints for every path it does
- * not quote; a quoted header is counted, not guessed at. Patch body lines
- * always carry a prefix character, so a raw header can only start a section.
+ * not quote; a quoted header is counted, not guessed at, and so is any text
+ * before the first header, which Git prints only when its output is not a
+ * plain patch. Patch body lines always carry a prefix character, so a raw
+ * header can only start a section.
  *
  * @param diffText Output of `git diff` over several paths, renames disabled.
  * @param paths Paths the diff was requested for.
@@ -46,5 +48,5 @@ function listSections(diffText: string): string[] {
     if (line.startsWith(HEADER_PREFIX) || sections.length === 0)
       sections.push(line);
     else sections[sections.length - 1] += line;
-  return diffText.startsWith(HEADER_PREFIX) ? sections : [];
+  return diffText.length === 0 ? [] : sections;
 }
