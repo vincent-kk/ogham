@@ -58,6 +58,22 @@ describe('executeReviewGit', () => {
     expect(spawnCli).toHaveBeenCalledTimes(3);
   });
 
+  it('keys the cache on standard input as well', async () => {
+    resolveSpawn('first');
+    resolveSpawn('second');
+    await runWithReviewGitCache(async () => {
+      await executeReviewGit(ROOT, ['cat-file', '--batch-check'], 'main\n');
+      await executeReviewGit(ROOT, ['cat-file', '--batch-check'], 'master\n');
+      await executeReviewGit(ROOT, ['cat-file', '--batch-check'], 'main\n');
+    });
+    expect(spawnCli).toHaveBeenCalledTimes(2);
+    expect(spawnCli).toHaveBeenLastCalledWith(
+      'git',
+      ['cat-file', '--batch-check'],
+      expect.objectContaining({ input: 'master\n' }),
+    );
+  });
+
   it('never caches a working-tree status query', async () => {
     resolveSpawn(' M a.ts\0');
     resolveSpawn('');

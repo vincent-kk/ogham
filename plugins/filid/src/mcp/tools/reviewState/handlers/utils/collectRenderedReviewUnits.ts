@@ -5,6 +5,8 @@ import type { RenderedReviewUnit } from '../../diff/reviewUnitDiffTypes.js';
 import { executeReviewGit } from '../../hash/executeReviewGit.js';
 import type { ReviewScopeFile } from '../../state/reviewStateTypes.js';
 
+import { readCommittedFileDiffs } from './readCommittedFileDiffs.js';
+
 /** Inputs required to materialize every reviewable committed file diff. */
 interface CollectRenderedReviewUnitsInput {
   /** Absolute repository root used as the Git working directory. */
@@ -29,15 +31,14 @@ export async function collectRenderedReviewUnits(
 ): Promise<RenderedReviewUnit[]> {
   const rendered: RenderedReviewUnit[] = [];
   const range = `${input.baseCommit}${REVIEW_STATE_GIT.RANGE_SEPARATOR}${REVIEW_STATE_GIT.HEAD}`;
-  for (const file of input.files) {
-    if (file.skipReason !== null) continue;
-    let diffText = await executeReviewGit(input.projectRoot, [
-      REVIEW_STATE_GIT.DIFF,
-      '--no-renames',
-      range,
-      REVIEW_STATE_GIT.END_OF_OPTIONS,
-      file.path,
-    ]);
+  const reviewable = input.files.filter((file) => file.skipReason === null);
+  const diffs = await readCommittedFileDiffs(
+    input.projectRoot,
+    [range],
+    reviewable.map((file) => file.path),
+  );
+  for (const file of reviewable) {
+    let diffText = diffs.get(file.path) ?? '';
     let chunkFile = file;
     if (!diffText && input.fallbackBase) {
       diffText = await executeReviewGit(input.projectRoot, [
