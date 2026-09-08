@@ -443,10 +443,11 @@ Babel 같은 트랜스파일러를 사용하여 대상 환경에 맞게 코드�
 
 ## 스크립트
 
-- `yarn build:all` — 전체 패키지 빌드
+- `yarn build:all` — 전체 패키지 빌드 (`--only=<name,...>`로 일부만, `--jobs=<n>`으로 소비자 패키지 병렬 빌드)
 - `yarn test` — 전체 패키지 테스트 실행
 - `yarn lint` — 코드 스타일 검사
-- `yarn typecheck` — TypeScript 타입 검증
+- `yarn typecheck` — TypeScript 타입 검증 (`--only=<name,...>`로 일부만)
+- `yarn ci:plan` — 변경이 영향을 주는 워크스페이스 출력 (`--base`, `--head`, `--full`); CI는 이 부분집합만 실행하며, PR 라벨 `ci:full`, 커밋 메시지 `[ci full]`, 수동 실행 시 전체를 실행
 - `yarn tag:packages <commit>` — 각 패키지 버전 기반으로 Git 태그 생성
 
 ---
