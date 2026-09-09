@@ -15,10 +15,10 @@ const BLOCKER_SECTIONS = [
 /**
  * Render only the questions preventing a conclusive review and how to resolve them.
  * @param input Shared sealed identity and the full deterministic blocker model.
- * @returns Complete blocker Markdown for INCONCLUSIVE, otherwise null.
+ * @returns Complete blocker Markdown whenever evidence remains unresolved, otherwise null.
  */
 export function renderReviewBlockers(input: ReviewRenderInput): string | null {
-  if (input.fold.verdict !== 'INCONCLUSIVE') return null;
+  if (input.fold.blockers.length === 0) return null;
   const blockers = sortReviewBlockers(input.fold.blockers);
   return [
     '---',
@@ -26,10 +26,10 @@ export function renderReviewBlockers(input: ReviewRenderInput): string | null {
     `source_hash: ${JSON.stringify(input.evidence.sourceHash)}`,
     `snapshot_hash: ${JSON.stringify(input.evidence.snapshotHash)}`,
     `branch: ${JSON.stringify(input.branchName)}`,
-    'verdict: INCONCLUSIVE',
+    `verdict: ${input.fold.verdict}`,
     '---',
     '',
-    '# Review blockers — INCONCLUSIVE',
+    `# Review blockers — ${input.fold.verdict}`,
     '',
     `${blockers.length} unresolved review blockers. This report excludes confirmed findings, refutations, and normal exclusions.`,
     '',

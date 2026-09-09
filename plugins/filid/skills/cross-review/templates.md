@@ -47,7 +47,7 @@ For round 1, write the path named by the review brief's `output` field. For roun
 }
 ```
 
-`chunk` is a string such as `"2/3"` or `null`. Use `COMPLETE` or `INDETERMINATE`; an indeterminate opinion has at least one gap. Include every assigned unit exactly once. `lines` is provisional because `validate` resolves it from `existingCode`. Categories are `bug`, `security`, `performance`, `maintainability`, `test`, `documentation`, `contract`, `structure`, and `verification`. For reviewable COMPLETE opinions, `checked` must be nonempty and every `checked` entry must be nonblank. `riskPlan` must be nonblank when `plan_required` is true or `risk_reasons` is nonempty. INDETERMINATE with a genuine gap permits empty `checked` and null `riskPlan`; provided blank strings are always invalid. A gap may add `resolution: {question, evidenceNeeded, nextAction, doneWhen, suggestedOwner, humanReason?}`: question is 1–240 characters, evidenceNeeded has 1–5 entries of 1–300 characters, nextAction and doneWhen are 1–600 characters, suggestedOwner is `agent`, `human`, or `unknown`, and humanReason is 1–400 characters and required for `human`.
+`chunk` is "k/n" or null. Include assigned units exactly once; validate resolves lines from existingCode. Categories remain bug, security, performance, maintainability, test, documentation, contract, structure, verification. COMPLETE needs nonempty checked and every `checked` entry must be nonblank. `riskPlan` is nonblank for plan_required or risk_reasons. INDETERMINATE needs a gap and permits empty checked/null riskPlan. Each gap references a prepared evidence.md causeId or resolution {question,evidenceNeeded,nextAction,doneWhen,suggestedOwner,humanReason?,options?}. Question: 1–240 chars; evidence: 1–5 entries of 1–300; nextAction/doneWhen: 1–600; humanReason: 1–400. Human requires a reason evidence alone cannot choose and 2–5 distinct nonblank options of 1–300 chars. Agent recovery states the missing observation, why it matters, affected scope, next check and completion condition; unsupported analysis names the missing capability.
 
 ## Verifier opinion JSON
 
@@ -107,4 +107,4 @@ pr-comment: none
 review-blockers: <returned path>
 ```
 
-For `APPROVED` and `REQUEST_CHANGES`, omit the `review-blockers` line. For `INCONCLUSIVE`, use the successful seal's `data.blockersPath`, or `unavailable (legacy)` only for a current-policy cached seal that returned null. Substitute `posted`, `unavailable`, or `failed: <reason>` for `none` after publication. Before seal, no terminal verdict marker is valid.
+Include review-blockers whenever data.blockersPath is non-null, also for incomplete REQUEST_CHANGES. Legacy INCONCLUSIVE without a sidecar uses unavailable (legacy). Report reviewComplete, human-decision requirement and agent next action from the sealed comment. Substitute publication status for none. No terminal verdict is valid before seal.

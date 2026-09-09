@@ -119,7 +119,7 @@ export type ReviewScopeRole =
 export type ReviewScopeCategory = 'contract' | 'structure' | 'verification';
 
 /** FCA evidence origin before review judgment. */
-export type ReviewScopeSource = 'structure' | 'verification';
+export type ReviewScopeSource = 'structure' | 'verification' | 'analysisAxes';
 
 /** Git-derived changed path before snapshot classification. */
 export interface ReviewChangedFile {
@@ -216,6 +216,11 @@ export interface ClassifyChangedFileOptions {
 
 /** Structure and verification statuses plus whether both are conclusive. */
 export interface ReviewEvidenceStatuses {
+  /** Original collected certainty, distinct from aggregate public statuses. */
+  analysisAxes?: {
+    dependencies: AnalysisCertainty;
+    verification: AnalysisCertainty;
+  };
   structure: ToolStatus;
   verification: ToolStatus;
   evidenceComplete: boolean;
@@ -390,6 +395,8 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
   groups: ReviewGroup[];
   /** Complete prepare-time evidence and roster snapshot. */
   scope: {
+    /** Prepared non-finding diagnostics, absent in legacy records. */
+    diagnostics?: ToolDiagnostic[];
     /** FCA snapshot identity used to render evidence. */
     snapshotHash: string;
     /** Whether both structure and verification evidence are conclusive. */
@@ -401,7 +408,10 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
     /** Complete dirty-path identity; absent only in earlier v2 records. */
     dirtyPathsHash?: string;
     /** Per-axis FCA evidence statuses. */
-    statuses: Pick<ReviewEvidenceStatuses, 'structure' | 'verification'>;
+    statuses: Pick<
+      ReviewEvidenceStatuses,
+      'structure' | 'verification' | 'analysisAxes'
+    >;
     /** Complete changed-file roster, including skipped paths. */
     files: ReviewScopeFile[];
     /** Changed-scope FCA claims requiring verifier decisions. */
@@ -562,7 +572,10 @@ export interface ReviewPrepareData extends ReviewHandoffPlan {
   /** Bounded project-relative dirty paths. */
   dirtyPaths: string[];
   /** Per-axis FCA evidence statuses. */
-  statuses: Pick<ReviewEvidenceStatuses, 'structure' | 'verification'>;
+  statuses: Pick<
+    ReviewEvidenceStatuses,
+    'structure' | 'verification' | 'analysisAxes'
+  >;
 }
 
 /** Exact tool envelope returned by every successful prepare disposition. */
@@ -664,6 +677,7 @@ export type ReviewValidatePayload =
 
 /** Exact bounded summary returned after a successful seal. */
 export interface ReviewSealResponseSummary extends Partial<ReviewReuseSummary> {
+  reviewComplete?: boolean;
   /** Selected public action. */
   action: typeof REVIEW_STATE_ACTIONS.SEAL;
   /** Completed lifecycle disposition. */
@@ -688,7 +702,7 @@ export interface ReviewSealResponseSummary extends Partial<ReviewReuseSummary> {
 export interface ReviewSealData {
   /** Absolute canonical review report path. */
   reportPath: string;
-  /** Absolute blocker report path for new INCONCLUSIVE seals, otherwise null. */
+  /** Absolute blocker report path for seals with unresolved evidence, otherwise null. */
   blockersPath: string | null;
   /** Absolute fix-request path, or null when no fixes were rendered. */
   fixRequestsPath: string | null;
@@ -796,7 +810,10 @@ export interface ReviewStateData {
   /** Bounded dirty path list. */
   dirtyPaths?: string[];
   /** Per-axis evidence statuses. */
-  statuses?: Pick<ReviewEvidenceStatuses, 'structure' | 'verification'>;
+  statuses?: Pick<
+    ReviewEvidenceStatuses,
+    'structure' | 'verification' | 'analysisAxes'
+  >;
   /** Opinion contract problems found by validate. */
   problems?: ReviewValidationProblem[];
   /** Absolute canonical merged reviewer opinion path. */

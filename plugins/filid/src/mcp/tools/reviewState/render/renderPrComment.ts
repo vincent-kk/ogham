@@ -3,6 +3,7 @@ import { normalize, portableJoin } from '@ogham/cross-platform';
 import { REVIEW_STATE_FILE_NAMES } from '../../../../constants/reviewState.js';
 
 import type { ReviewRenderInput } from './reviewRenderTypes.js';
+import { escapeReviewBlockerText } from './utils/escapeReviewBlockerText.js';
 import { renderBlockerSummary } from './utils/renderBlockerSummary.js';
 import { renderConfirmedFindingsTable } from './utils/renderConfirmedFindingsTable.js';
 import { renderCoverageSummary } from './utils/renderCoverageSummary.js';
@@ -31,12 +32,24 @@ export function renderPrComment(input: ReviewRenderInput): string {
   return [
     `## Code Review Governance — ${input.fold.verdict}`,
     '',
-    ...(input.fold.verdict === 'INCONCLUSIVE'
-      ? [renderBlockerSummary(input, 'comment'), '']
-      : []),
     '| Field | Value |',
     '| --- | --- |',
     `| Verdict | ${input.fold.verdict} |`,
+    `| Confirmed defects | ${input.fold.confirmed.length} |`,
+    `| Review complete | ${input.fold.reviewComplete} |`,
+    `| Human decision required | ${input.fold.blockers.some((blocker) => blocker.attention === 'human-decision')} |`,
+    `| Agent next action | ${escapeReviewBlockerText(
+      input.fold.blockers
+        .filter((blocker) => blocker.attention === 'evidence-recovery')
+        .map((blocker) => blocker.resolution.nextAction)
+        .slice(0, 3)
+        .join(' ') ||
+        (input.fold.confirmed.length > 0
+          ? 'Apply the confirmed corrections and run a fresh review.'
+          : input.fold.reviewComplete
+            ? 'No pending review work.'
+            : 'Identify the missing evidence and validate it.'),
+    )} |`,
     `| Branch | \`${input.branchName}\` |`,
     `| Base | \`${input.baseRef}\` |`,
     `| Snapshot | \`${input.evidence.snapshotHash || 'unavailable'}\` |`,
@@ -44,6 +57,9 @@ export function renderPrComment(input: ReviewRenderInput): string {
     `| Findings | ${input.fold.confirmed.length} confirmed · ${input.fold.refuted.length} refuted · ${input.fold.indeterminate.length} indeterminate |`,
     `| Generated | ${input.generatedAt} |`,
     '',
+    ...(input.fold.blockers.length > 0
+      ? [renderBlockerSummary(input, 'comment'), '']
+      : []),
     `<details><summary>Confirmed findings (${input.fold.confirmed.length})</summary>`,
     '',
     confirmed,

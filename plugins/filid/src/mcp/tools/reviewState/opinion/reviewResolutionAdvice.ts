@@ -12,4 +12,6 @@ export interface ReviewResolutionAdvice {
   suggestedOwner: 'agent' | 'human' | 'unknown';
   /** Why evidence gathering alone cannot settle a proposed human decision. */
   humanReason?: string;
+  /** Concrete distinct alternatives requiring a human choice. */
+  options?: string[];
 }

@@ -17,6 +17,27 @@ import type {
 export function foldReviewVerdict(
   input: FoldReviewVerdictInput,
 ): ReviewVerdictFold {
+  input = {
+    ...input,
+    groups: input.groups.map((group) =>
+      (group.review &&
+        (group.sourceHash ?? group.review.sourceHash) !==
+          input.evidence.sourceHash) ||
+      (group.verify &&
+        (group.sourceHash ?? group.verify.sourceHash) !==
+          input.evidence.sourceHash) ||
+      (group.review &&
+        group.verify &&
+        group.review.sourceHash !== group.verify.sourceHash)
+        ? {
+            ...group,
+            review: null,
+            verify: null,
+            issues: [...group.issues, 'source identity mismatch'],
+          }
+        : group,
+    ),
+  };
   const coverage = buildChecklist(input.files, input.groups);
   const joined = joinDecisions(
     input.groups,
@@ -95,28 +116,29 @@ export function foldReviewVerdict(
       affectsVerdict: false,
     });
 
-  let verdict: ReviewVerdict;
-  if (
-    !input.evidence.evidenceComplete ||
+  const dirty =
     input.evidence.worktree === 'documents-only' ||
-    input.evidence.worktree === 'source-dirty' ||
-    hasUntrustedGroup
-  )
-    verdict = 'INCONCLUSIVE';
-  else if (
-    coverage.checklist.some(({ result }) => result === 'pending') ||
-    hasGap ||
-    hasIndeterminateVerifier
-  )
-    verdict = 'INCONCLUSIVE';
-  else if (joined.unresolved.some(({ affectsVerdict }) => affectsVerdict))
-    verdict = 'INCONCLUSIVE';
-  else if (joined.indeterminate.length > 0) verdict = 'INCONCLUSIVE';
-  else if (joined.confirmed.length > 0) verdict = 'REQUEST_CHANGES';
-  else verdict = 'APPROVED';
+    input.evidence.worktree === 'source-dirty';
+  const reviewComplete =
+    input.evidence.evidenceComplete &&
+    !dirty &&
+    !hasUntrustedGroup &&
+    !coverage.checklist.some(({ result }) => result === 'pending') &&
+    !hasGap &&
+    !hasIndeterminateVerifier &&
+    !joined.unresolved.some(({ affectsVerdict }) => affectsVerdict) &&
+    joined.indeterminate.length === 0;
+  const verdict: ReviewVerdict = dirty
+    ? 'INCONCLUSIVE'
+    : joined.confirmed.length > 0
+      ? 'REQUEST_CHANGES'
+      : reviewComplete
+        ? 'APPROVED'
+        : 'INCONCLUSIVE';
 
   return {
     verdict,
+    reviewComplete,
     blockers: buildReviewBlockers(input, coverage, joined, verdict),
     checklist: coverage.checklist,
     decisions: joined.decisions,

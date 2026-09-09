@@ -15,22 +15,26 @@ export function finalizeReviewBlockers(
   const grouped = new Map<string, ReviewBlockerCause[]>();
   for (const cause of causes) {
     const { kind, scope, detail } = cause;
-    const key = JSON.stringify([
-      kind,
-      scope.path,
-      scope.rule,
-      scope.findingId,
-      detail,
-      kind === 'artifact-trust' || kind === 'verifier-indeterminate'
-        ? scope.groupId
-        : null,
-    ]);
+    const key = cause.causeId
+      ? JSON.stringify(['cause', cause.causeId])
+      : JSON.stringify([
+          kind,
+          scope.path,
+          scope.rule,
+          scope.findingId,
+          detail,
+          kind === 'artifact-trust' || kind === 'verifier-indeterminate'
+            ? scope.groupId
+            : null,
+        ]);
     grouped.set(key, [...(grouped.get(key) ?? []), cause]);
   }
   return [...grouped]
     .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
     .map(([, occurrences], index): ReviewBlocker => {
-      const first = occurrences[0]!;
+      const first =
+        occurrences.find((cause) => cause.adviceSource === 'deterministic') ??
+        occurrences[0]!;
       const variants = new Map<string, ReviewResolutionAdvice>();
       for (const { resolution } of occurrences)
         if (resolution)
@@ -42,6 +46,7 @@ export function finalizeReviewBlockers(
               resolution.doneWhen,
               resolution.suggestedOwner,
               resolution.humanReason,
+              resolution.options,
             ]),
             resolution,
           );
@@ -81,6 +86,10 @@ export function finalizeReviewBlockers(
         .map(([, source]) => source);
       return {
         ...first,
+        occurrences: occurrences.map(({ scope, detail }) => ({
+          scope,
+          detail,
+        })),
         id: `BLK-${String(index + 1).padStart(3, '0')}`,
         scope: {
           ...first.scope,

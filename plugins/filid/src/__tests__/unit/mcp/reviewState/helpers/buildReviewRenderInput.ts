@@ -123,6 +123,7 @@ export function buildReviewRenderInput(): ReviewRenderInput {
       },
     ],
     fold: {
+      reviewComplete: false,
       verdict: 'REQUEST_CHANGES',
       blockers: [],
       checklist: [

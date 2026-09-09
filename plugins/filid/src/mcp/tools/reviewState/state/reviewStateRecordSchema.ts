@@ -148,6 +148,22 @@ const ReviewScopeInformationalSchema = z
 /** Strict persisted prepare-scope snapshot schema. */
 const ReviewScopeSchema = z
   .object({
+    diagnostics: z
+      .array(
+        z
+          .object({
+            code: z.string(),
+            message: z.string(),
+            path: z.string().optional(),
+            causeId: z.string().optional(),
+            specifier: z.string().optional(),
+            affects: z
+              .array(z.enum(['dependencies', 'boundaries', 'verification']))
+              .optional(),
+          })
+          .strict(),
+      )
+      .optional(),
     snapshotHash: z.string(),
     evidenceComplete: z.boolean(),
     worktree: z.nativeEnum(WORKTREE_DISPOSITIONS),
@@ -158,6 +174,13 @@ const ReviewScopeSchema = z
       .optional(),
     statuses: z
       .object({
+        analysisAxes: z
+          .object({
+            dependencies: z.nativeEnum(ANALYSIS_CERTAINTIES),
+            verification: z.nativeEnum(ANALYSIS_CERTAINTIES),
+          })
+          .strict()
+          .optional(),
         structure: z.nativeEnum(TOOL_STATUSES),
         verification: z.nativeEnum(TOOL_STATUSES),
       })

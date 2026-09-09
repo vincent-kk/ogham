@@ -124,6 +124,7 @@ export async function recoverReviewGroups(
               group,
               group.validated.review.round,
               opinionSourceHash,
+              state.scope.diagnostics,
             ),
             [],
           )

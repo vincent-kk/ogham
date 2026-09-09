@@ -34,6 +34,7 @@ export function collectPriorReviewFindings(
     paths,
     previous.groups,
     previous.sourceHash,
+    previous.scope.diagnostics,
   );
   const refuted = new Set(
     joinDecisions(
@@ -72,6 +73,7 @@ export function collectPriorReviewFindings(
               group.group,
               previous.sourceHash,
             ) ?? '',
+            previous.scope.diagnostics,
           ),
           [],
         )

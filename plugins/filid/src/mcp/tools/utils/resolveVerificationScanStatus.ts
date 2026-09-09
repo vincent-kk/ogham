@@ -23,7 +23,11 @@ export function resolveVerificationScanStatus(
     return TOOL_STATUSES.UNSUPPORTED;
   if (
     certainty === ANALYSIS_CERTAINTIES.INDETERMINATE ||
-    diagnostics.some((d) => !isFindingDiagnostic(d))
+    diagnostics.some(
+      (d) =>
+        !isFindingDiagnostic(d) &&
+        (!d.affects?.length || d.affects.includes('verification')),
+    )
   )
     return TOOL_STATUSES.INDETERMINATE;
   return violationCount > 0 ? TOOL_STATUSES.VIOLATIONS : TOOL_STATUSES.OK;

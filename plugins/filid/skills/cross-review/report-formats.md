@@ -6,16 +6,17 @@
 
 Only a successful seal returns a terminal verdict. Policy errors return diagnostics without a verdict. If every merged opinion is missing for reviewable groups, seal stops without a verdict; the documents-only/source-dirty path may still seal INCONCLUSIVE from worktree evidence.
 
-Use the returned `summary.verdict`. Incomplete or untrusted evidence, a dirty worktree, pending coverage, reviewer gaps, or an indeterminate verifier or decision produce `INCONCLUSIVE`. Otherwise, confirmed findings produce `REQUEST_CHANGES`; with none, the result is `APPROVED`. Informational observations do not change the verdict. Never replace missing evidence with an approval or calculate a competing verdict in prose.
+Use `summary.verdict` and `summary.reviewComplete` independently. Dirty worktrees remain INCONCLUSIVE. Source-matched trusted confirmed defects produce REQUEST_CHANGES even when evidence or coverage is incomplete. Without confirmed defects, incomplete review is INCONCLUSIVE and only complete review is APPROVED. Untrusted sources and invalid decision sets cannot confirm defects. INCONCLUSIVE never implies a human decision: agent evidence recovery and human choices are separate blocker routes.
 
 ## Review report
 
-`review-report.md` records the full evidence, including verdict-neutral observations. Preserve the metadata keys and section order. For INCONCLUSIVE, include the shown `blockers_report` marker immediately after `verdict`; omit it for conclusive reports:
+`review-report.md` records all evidence and verdict-neutral observations. Preserve metadata and section order. Include `review_complete` and include `blockers_report` whenever blockers exist, including REQUEST_CHANGES.
 
 ```markdown
 ---
 review_schema: 7
 verdict: <APPROVED | REQUEST_CHANGES | INCONCLUSIVE>
+review_complete: <true | false>
 blockers_report: review-blockers.md
 branch: <branch>
 base_ref: <base ref>
@@ -31,7 +32,7 @@ generated_at: <timestamp>
 
 ## Review blockers
 
-<up to five blocker IDs, questions, proposed routes, and next actions, plus the remaining count and review-blockers.md link; INCONCLUSIVE only>
+<up to five blocker IDs, questions, routes and next actions, remaining count and sidecar link; whenever blockers exist>
 
 ## Scope
 
@@ -106,7 +107,7 @@ At seal, the Verification Log records FCA candidates as `CONFIRMED` with `eviden
 
 ## Blocker report
 
-New-format INCONCLUSIVE seals also render `review-blockers.md`. It contains only verdict blockers and their resolution proposals, never confirmed findings, refutations, or normal exclusions. The report index is limited to five questions while every `BLK-NNN` card remains below it. Cards are grouped in this attention order: `Human decision requests`, `Needs triage`, then `Evidence recovery`.
+New-format incomplete seals render `review-blockers.md`, including REQUEST_CHANGES with incomplete evidence. Explicit cause IDs aggregate occurrences across groups while preserving every affected scope, original detail and source. Rules alone never merge causes. Human decisions require concrete options and a reason evidence alone cannot decide; missing advice is triage, not a human requirement.
 
 ```markdown
 ---
@@ -144,19 +145,23 @@ A current-policy sealed report with no `blockers_report` marker is a legacy cach
 ```markdown
 ## Code Review Governance — <verdict>
 
-### Review blockers
-
-<the same up-to-five INCONCLUSIVE action summary and remaining count; the local blocker artifact path is plain text, not a remote link>
-
 | Field     | Value                                                       |
 | --------- | ----------------------------------------------------------- |
 | Verdict   | <verdict>                                                   |
+| Confirmed defects | <count> |
+| Review complete | <true or false> |
+| Human decision required | <true or false> |
+| Agent next action | <bounded evidence recovery and correction work> |
 | Branch    | `<branch>`                                                  |
 | Base      | `<base ref>`                                                |
 | Snapshot  | `<snapshot hash or unavailable>`                            |
 | Coverage  | <count> reviewed · <count> skipped · <count> total          |
 | Findings  | <count> confirmed · <count> refuted · <count> indeterminate |
 | Generated | <timestamp>                                                 |
+
+### Review blockers
+
+<bounded blocker summary; Human decision requests, Needs triage, Evidence recovery; local artifact path remains plain text>
 
 <details><summary>Confirmed findings (<count>)</summary>
 

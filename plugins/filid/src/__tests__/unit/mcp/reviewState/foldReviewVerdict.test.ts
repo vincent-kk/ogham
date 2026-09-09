@@ -131,20 +131,21 @@ describe('foldReviewVerdict', () => {
     },
   );
 
-  it('applies incomplete evidence before a confirmed candidate without dropping roster rows', () => {
+  it('retains corrections and incomplete evidence without dropping roster rows', () => {
     const input = createVerdictFoldFixture();
     input.evidence.evidenceComplete = false;
 
     const result = foldReviewVerdict(input);
 
-    expect(result.verdict).toBe('INCONCLUSIVE');
+    expect(result.verdict).toBe('REQUEST_CHANGES');
+    expect(result.reviewComplete).toBe(false);
     expect(result.checklist.map(({ path }) => path)).toEqual([
       'src/a.ts',
       'README.md',
     ]);
   });
 
-  it('applies a review gap before a confirmed candidate', () => {
+  it('retains a review gap alongside a confirmed candidate', () => {
     const input = createVerdictFoldFixture();
     input.groups[0]!.review!.gaps = [
       {
@@ -156,7 +157,8 @@ describe('foldReviewVerdict', () => {
 
     const result = foldReviewVerdict(input);
 
-    expect(result.verdict).toBe('INCONCLUSIVE');
+    expect(result.verdict).toBe('REQUEST_CHANGES');
+    expect(result.reviewComplete).toBe(false);
     expect(result.unresolved).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -283,7 +285,7 @@ describe('foldReviewVerdict', () => {
     );
   });
 
-  it('keeps an indeterminate verifier opinion inconclusive after refuted decisions', () => {
+  it('retains verifier uncertainty alongside confirmed and refuted decisions', () => {
     const input = createVerdictFoldFixture();
     input.groups[0]!.verify!.state = 'INDETERMINATE';
     input.groups[0]!.review!.findings = [
@@ -292,7 +294,8 @@ describe('foldReviewVerdict', () => {
 
     const result = foldReviewVerdict(input);
 
-    expect(result.verdict).toBe('INCONCLUSIVE');
+    expect(result.verdict).toBe('REQUEST_CHANGES');
+    expect(result.reviewComplete).toBe(false);
     expect(result.refuted).toHaveLength(1);
     expect(result.unresolved).toContainEqual({
       source: 'verification 01',
@@ -313,7 +316,8 @@ describe('foldReviewVerdict', () => {
 
     const result = foldReviewVerdict(input);
 
-    expect(result.verdict).toBe('INCONCLUSIVE');
+    expect(result.verdict).toBe('REQUEST_CHANGES');
+    expect(result.reviewComplete).toBe(false);
     expect(result.checklist[0]).toEqual(
       expect.objectContaining({
         path: 'src/a.ts',

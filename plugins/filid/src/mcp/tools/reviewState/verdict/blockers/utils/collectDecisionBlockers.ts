@@ -27,6 +27,21 @@ export function collectDecisionBlockers(
         issues.length === 0 && review !== null && verify !== null,
     );
     if (matchingGroups.length > 0 && groups.length === 0) continue;
+    // A failed exact-set check already explains conclusive decisions withheld for trust.
+    if (
+      groups.some(({ group }) =>
+        joined.coverageIssues.some((issue) => issue.groupId === group.id),
+      ) &&
+      (decision.origin === 'fca' ||
+        groups.some(({ verify }) =>
+          verify?.decisions.some(
+            (value) =>
+              value.findingId === decision.id &&
+              value.verdict !== 'INDETERMINATE',
+          ),
+        ))
+    )
+      continue;
     const sources: ReviewBlockerSource[] =
       decision.origin === 'fca'
         ? [

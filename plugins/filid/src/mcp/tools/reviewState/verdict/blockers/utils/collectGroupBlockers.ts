@@ -55,6 +55,7 @@ export function collectGroupBlockers(
     for (const [gapIndex, gap] of (review?.gaps ?? []).entries())
       causes.push({
         kind: 'review-gap',
+        causeId: gap.causeId,
         scope: { ...scope, path: gap.path, rule: gap.rule },
         detail: gap.detail,
         sources: [

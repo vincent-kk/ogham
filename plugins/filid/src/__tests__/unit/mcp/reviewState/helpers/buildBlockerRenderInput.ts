@@ -32,6 +32,10 @@ export function buildBlockerRenderInput(count = 8): ReviewRenderInput {
                 ? {
                     humanReason:
                       'The intended contract requires a policy choice.',
+                    options: [
+                      'Preserve current behavior',
+                      'Adopt the new contract',
+                    ],
                   }
                 : {}),
             },

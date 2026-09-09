@@ -69,6 +69,7 @@ export function readReviewGroupArtifactStatus(
             group,
             validation.round,
             opinionSourceHash,
+            state.scope.diagnostics,
           ),
           [],
         )

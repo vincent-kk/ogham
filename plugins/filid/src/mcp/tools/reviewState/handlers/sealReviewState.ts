@@ -229,9 +229,11 @@ export async function sealReviewState(
     paths,
     state.groups,
     state.sourceHash,
+    state.scope.diagnostics,
   );
   const fold = foldReviewVerdict({
     evidence: {
+      diagnostics: state.scope.diagnostics,
       sourceHash: state.sourceHash,
       snapshotHash: state.scope.snapshotHash,
       evidenceComplete: state.scope.evidenceComplete,
@@ -251,6 +253,7 @@ export async function sealReviewState(
     reviewDirectory: paths.reviewDirectory,
     generatedAt,
     evidence: {
+      analysisAxes: state.scope.statuses.analysisAxes,
       sourceHash: state.sourceHash,
       snapshotHash: state.scope.snapshotHash,
       evidenceComplete: state.scope.evidenceComplete,
@@ -292,6 +295,7 @@ export async function sealReviewState(
     paths,
     summary: {
       verdict: fold.verdict,
+      reviewComplete: fold.reviewComplete,
       filesTotal: fold.filesTotal,
       filesReviewed: fold.filesReviewed,
       filesSkipped: fold.filesSkipped,

@@ -2,6 +2,9 @@
 
 ## Requirements
 
+- Prepared diagnostic causes retain their impact axes and consumer/target evidence through state, actor briefs and sealed reports. Gaps reference an existing cause or supply actionable resolution advice. Unknown cause references fail validation. Human advice requires distinct concrete options and a reason evidence gathering cannot decide.
+- Defect disposition and review completeness are independent. Trusted, source-matched confirmed defects require corrections even with analysis gaps. Incomplete evidence never approves; INCONCLUSIVE alone never implies a human decision. Blockers retain all occurrences and sources by explicit cause identity, never by rule alone.
+
 - prepare는 커밋된 파일별 입력과 마지막 검증 결과를 기준으로 증분 리뷰를 준비한다. 명시적 사용자 검토 기준은 `userInstructions`로 전달한다. 호스트 종류와 도구 조회 기록은 재사용 조건이 아니다.
 - 일반 서브에이전트가 brief를 읽고 지정된 opinion 파일을 쓴 뒤 validate를 호출한다. 증분 기능은 전용 agent, hook, context broker 또는 조회 receipt를 요구하지 않는다.
 - 매 prepare는 파일별 committed blob/mode, 소유 경계, 적용 rule ID/body와 명시적 사용자 기준, 해당 파일의 candidate/handoff를 비교한다. 변경된 입력을 소비하는 파일만 추가 배정한다. 무변경 파일의 의견 bytes와 sourceHash는 보존하며 현재 판정에는 파일별로 투영한다.
@@ -95,15 +98,15 @@
 - seal은 validation hash가 없는 group을 `review rounds incomplete`, `artifact not validated`, `artifact modified after validation`, `verifier decided a superseded opinion` 중 해당 이유와 함께 unresolved evidence로 취급한다. hash가 일치해도 merged review opinion의 schema·identity·배정 unit·완료 기록을 같은 group policy로 다시 검사하고 실패한 group은 신뢰하지 않는다. reviewable unit이 있는데 병합 opinion이 하나도 없으면 `review-opinions-missing`이지만, documents-only 또는 source-dirty worktree는 그 자체가 결정적인 inconclusive 근거이므로 누락 opinion도 unresolved evidence로 fold하고 봉인한다.
 - checklist는 trim 후 비어 있지 않은 prepare skip reason만 `skipped`, 모든 unit이 reviewed이면 `reviewed`, reviewer skip·missing opinion·pending unit이면 `pending`으로 정규화한다. reviewer skip reason은 unresolved evidence에도 남긴다. 전체 파일 수는 유지하며 표시용 대상 수는 reviewed+pending이다. 대상이 없으면 비율은 N/A이며 정상 제외는 verdict-neutral이다.
 - coverage 요약은 대상·완료·pending·제외·전체 및 제외 사유별 수와 정렬된 대표 경로 최대 3개를 보여 준다. 전체 경로와 원래 사유는 기존 표에 보존한다.
-- fold는 evidence incomplete, documents-only/source-dirty worktree, trusted group artifact 부재, pending checklist, opinion gap, verifier opinion의 `INDETERMINATE` state, 결정론 decision 합류와 ID 커버리지 검사, severity와 무관한 candidate의 indeterminate decision을 순서대로 `INCONCLUSIVE`로 만든다. 그 뒤 confirmed candidate가 있으면 `REQUEST_CHANGES`, 아니면 `APPROVED`다.
-- 결정론 fold는 배정 FCA candidate를 CONFIRMED(evidence `evidence.md#<id>`, reason `canonical structure evidence measured on snapshot <snapshotHash>`), deterministicRefuted finding을 REFUTED(evidence는 배정 unit hunk 범위 `<path>:<newStart>-<newEnd>[, ...]`, reason `finding lies outside the changed hunks`)로 합류시킨다. decision ID 집합은 candidate ID ∪ merged finding ID와 각 한 번씩 일치해야 한다. 누락·중복·미배정 ID 또는 verify가 결정론 대상을 판정하면 unresolved evidence `decision coverage mismatch`로 INCONCLUSIVE다. auto-verify도 기존 complete·review hash·verify hash·reviewSha256 검사를 통과해야 하며 report 형식은 유지한다.
+- Fold first excludes source-mismatched or untrusted group artifacts. Dirty worktree remains INCONCLUSIVE. Otherwise trusted confirmed defects produce REQUEST_CHANGES regardless of completeness. `reviewComplete` independently requires conclusive evidence, trusted artifacts, complete coverage and decisions, and no gaps. Without confirmed defects, incomplete review is INCONCLUSIVE and only a complete review is APPROVED.
+- Deterministic FCA confirmation and out-of-diff refutation retain snapshot/hunk evidence. Decision sets must exactly match assignments. Invalid sets cannot contribute confirmed findings; reviewComplete remains false and exact-set recovery is retained.
 - `review-report.md` 형식은 스킬이 독립적으로 실행할 수 있도록 `skills/cross-review/report-formats.md`에서 정의한다. 구현은 schema 7 frontmatter 뒤 Scope, Evidence Status, optional Incremental Reuse, Coverage, Verification Log, Confirmed Findings, Refuted Candidates, Unresolved Evidence, Final Verdict를 순서대로 렌더링하고 confirmed path에 확정 line을 붙인다.
 - 이 계약 이전에 기록된 verify opinion은 재검증해야 한다(결정론 대상 ID 거부).
 - `fix-requests.md`는 `REQUEST_CHANGES`일 때만 seal이 렌더링한다. 항목은 `FIX-001`부터이며 canonical 여덟 필드 `Severity`, `Category`, `Path`, `Rule`, `Claim`, `Evidence`, `Consequence`, `Recommended Action`의 세부 블록은 `skills/cross-review/templates.md`의 fix-request 절을 정본으로 참조한다.
 - `pr-comment.md` 형식은 스킬이 독립적으로 실행할 수 있도록 `skills/cross-review/report-formats.md`에서 정의한다. 구현은 `## Code Review Governance — <verdict>` 표, 세 개의 details block과 report pointer를 렌더링한다. report pointer는 host와 입력 path flavor에 관계없이 `/` separator로 표시하고 Windows drive·UNC root는 보존한다.
 - seal summary는 verdict·file coverage·decision count와 optional 증분 재사용 수치를, data는 report path, nullable fix-request path, PR comment path, session path와 nullable blockersPath를 싣는다. session checklist block도 같은 fold 결과와 optional Incremental Reuse 표로 통째로 교체한다.
-- optional resolution은 reviewer gap, INDETERMINATE verifier decision/opinion에 question·evidenceNeeded·nextAction·doneWhen·suggestedOwner(agent/human/unknown)와 optional humanReason을 담는다. trim 후 질문 1–240자, 행동·해소 조건 각각 1–600자, 증거 1–5개(각 1–300자), 사람 판단 사유 1–400자이며 human일 때 사유가 필수다. legacy schema-7의 필드 부재는 허용하되 담당을 미상으로 표시한다. 후속 round의 동일 gap resolution만 최신 제공값으로 보강하고 gap 누적·state 정책은 유지한다.
-- 새 INCONCLUSIVE seal은 `review-blockers.md`에 blockers_schema 1과 source/snapshot/branch/verdict identity를 기록하고 report에 canonical blockers_report marker를 추가한다. current-policy legacy report는 blockersPath=null이며 소급 생성하지 않는다. marker가 있는 sidecar의 부재·무효는 `review-blockers-missing`·`review-blockers-invalid` 진단으로 멈춘다. prepare는 ToolDiagnosticError, checkpoint/seal은 stale 응답을 사용하며 자동 force하지 않는다. 구형 validation policy 거부가 이 호환성보다 우선한다.
+- Resolution contains question, evidenceNeeded, nextAction, doneWhen, suggestedOwner and optional humanReason/options. Existing length bounds remain; human requires a reason and 2–5 distinct nonblank options (1–300 characters each). Fresh opinions need a known diagnostic causeId or resolution; legacy state without diagnostics remains readable. Merge preserves gaps and cause IDs.
+- New seals with blockers, including incomplete REQUEST_CHANGES, write the identity-bound blockers_schema 1 sidecar and blockers_report marker. Legacy reports without a marker remain unchanged. Missing or invalid marked artifacts stop cache reuse.
 - checkpoint는 state의 effort·groups와 top-level 및 group별 diff·brief·opinion·verify 존재, next·sealReady 및 optional 증분 재사용 수치를 반환한다. checkpoint·validate·seal은 현재 committed source와 파일별 판단 입력 및 규칙 발견 환경을 다시 확인한다.
 - `assess` summary는 `entryStage`, `worktreeDisposition`, `baseRef`, `unpushedCommits`, `dirtyPathCount`를 싣고 data의 assessment가 경로 목록을 담는다. 값은 관측 사실이며 중단 지시가 아니다.
 - `assess`의 완료 근거는 report template의 평평한 `key: scalar` frontmatter 안의 단일 `head_sha`와 `verdict`다. 전체 Git SHA-1 또는 SHA-256의 소문자 hex와 `PASS | FAIL | INCONCLUSIVE` 중 하나인 판정을 요구한다. 본문, 누락, 중복·모호한 키, 불완전한 frontmatter나 축약 SHA는 근거가 아니다. HEAD를 관측할 수 없거나 값이 다르거나 유효한 판정이 없으면 justifications → fix requests → PR → pr-create 순서로 재개한다.
@@ -204,13 +207,17 @@
 
 - current hash와 session이 없으면 seal하지 않고, reviewable unit이 있는데 merged opinion이 하나도 없으면 `review-opinions-missing`으로 indeterminate다. 단, documents-only 또는 source-dirty worktree는 reviewer를 실행하지 않는 경로이므로 누락 group evidence를 포함해 `INCONCLUSIVE`로 봉인한다.
 - 현재 검증 정책·opinion 의미 검증·complete·review hash·verify hash·review/verify 결합 중 하나라도 깨진 group은 trusted input이 아니며 이유가 unresolved evidence에 남는다.
-- pending coverage, evidence gap, verifier-level indeterminate와 severity와 무관한 indeterminate decision은 confirmed finding보다 먼저 `INCONCLUSIVE`를 만든다. 모든 증거가 complete일 때 confirmed가 있으면 `REQUEST_CHANGES`, 없으면 `APPROVED`다.
+- Pending coverage, evidence gaps and indeterminate decisions keep reviewComplete=false without hiding trusted confirmed findings. REQUEST_CHANGES retains the blocker sidecar and resolution routes. Source mismatch and unvalidated artifacts never contribute confirmed findings.
 - report, optional fix request, PR comment와 session checklist가 같은 fold 결과를 표현한 뒤에만 state가 sealed 되고 verdict가 저장된다.
 - sealed report의 LF/CRLF frontmatter는 같은 parser로 읽으며 동일한 coverage·decision count를 복원한다.
 
 ### AC-review-blockers — 분리된 보류 원인과 해소 안내
 
-- evidence incomplete·dirty worktree·pending·artifact trust·review gap·verifier state·decision indeterminacy/coverage를 빠짐없이 수집하며 기존 판정 우선순위와 finding 집합은 유지한다. 정상 제외·확정·반증·중립 관측은 blocker가 아니다.
+- Prepared diagnostics preserve original dependency/verification certainty separately from aggregate structure status. Dependency-only diagnostics do not contaminate exact verification, and independent verification gaps are not hidden by dependency recovery.
+- Eight validated gap references to one prepared cause produce one blocker with all eight group occurrences and original sources. Different causes never merge merely because their rule matches.
+- Recoverable imports identify the consumer, specifier, affected axes, next analysis and completion condition with suggestedOwner=agent. Human decisions require distinct choices and a reason evidence alone cannot decide.
+
+- Evidence incomplete, dirty worktree, pending coverage, artifact trust, review gaps, verifier uncertainty and decision coverage are retained independently of disposition. Confirmed/refuted findings and neutral observations are not blockers. Same-cause aggregation preserves each affected group/path/detail and all source references.
 - 결정적 BLK ID와 정확한 원인별 중복 제거는 모든 출처를 보존한다. 동일 path의 다른 규칙을 합치지 않으며, 독립 출처의 상충하는 해소 제안은 분류 필요로 남긴다.
 - 별도 보고서에는 전 항목의 질문·현재 모르는 것·필요 증거·다음 행동·담당 제안·해소 조건·원본 참조가 있다. report/comment 앞부분은 같은 ID의 최대 5개 요약과 잔여 수·전체 위치를 표시한다. missing metadata를 구체적인 해결책으로 꾸미지 않는다.
 - actor 설명은 비실행 데이터로 escape하고 canonical artifact/anchor만 탐색 링크로 만든다. 사람 확인이나 안내문 편집만으로 판정을 해제하지 않으며 필요한 새 근거의 검증으로 재판정한다.
@@ -290,4 +297,4 @@
 
 ## Last Updated
 
-2026-09-08
+2026-09-10 — Separate diagnostic impact, review completeness and evidence recovery from defect disposition.

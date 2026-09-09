@@ -28,6 +28,7 @@ export function loadSealGroupEvidence(
   paths: ReviewStatePaths,
   groups: readonly ReviewGroup[],
   sourceHash: string,
+  diagnostics?: import('../../../../../types/toolEnvelope.js').ToolDiagnostic[],
 ): SealGroupEvidence[] {
   return groups.map((group) => {
     const issueSet = new Set<ReviewTrustIssue>();
@@ -80,6 +81,7 @@ export function loadSealGroupEvidence(
               group,
               reviewValidation!.round,
               opinionSourceHash!,
+              diagnostics,
             ),
             [],
           )
@@ -97,6 +99,8 @@ export function loadSealGroupEvidence(
             group,
           );
         verify = JSON.parse(verifyBytes) as VerifyOpinion;
+        if (verify.sourceHash !== opinionSourceHash)
+          issueSet.add('source identity mismatch');
         if (group.opinionPaths && review)
           verify = {
             ...verify,
@@ -126,6 +130,6 @@ export function loadSealGroupEvidence(
       review = null;
       verify = null;
     }
-    return { group, review, verify, issues: [...issueSet] };
+    return { group, review, verify, sourceHash, issues: [...issueSet] };
   });
 }

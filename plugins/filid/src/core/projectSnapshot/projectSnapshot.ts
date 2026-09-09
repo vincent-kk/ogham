@@ -79,7 +79,7 @@ export async function createProjectSnapshot(
     ? await collectEntryPointSurfaces(tree, adapterResolution.adapters)
     : { diagnostics: [], filePaths: [] };
   const dependencies = axes.dependencies
-    ? await collectDependencyReferences(adapterResolution)
+    ? await collectDependencyReferences(adapterResolution, projectRoot)
     : {
         certainty: 'unsupported' as const,
         diagnostics: [],

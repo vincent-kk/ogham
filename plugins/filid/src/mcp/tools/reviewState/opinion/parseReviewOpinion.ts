@@ -40,6 +40,7 @@ const REVIEW_FINDING_SCHEMA = z
 /** Structural schema for one reviewer evidence gap. */
 const REVIEW_GAP_SCHEMA = z
   .object({
+    causeId: z.string().trim().min(1).max(200).optional(),
     path: z.string(),
     rule: z.string(),
     detail: z.string(),

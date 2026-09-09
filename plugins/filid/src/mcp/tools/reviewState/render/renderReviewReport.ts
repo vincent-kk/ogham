@@ -30,8 +30,12 @@ export function renderReviewReport(input: ReviewRenderInput): string {
     `| source_hash | ${input.evidence.sourceHash} |`,
     `| snapshot_hash | ${input.evidence.snapshotHash} |`,
     `| evidence_complete | ${String(input.evidence.evidenceComplete)} |`,
+    `| review_complete | ${String(input.fold.reviewComplete)} |`,
     `| structure_status | ${input.evidence.structureStatus} |`,
     `| verification_status | ${input.evidence.verificationStatus} |`,
+    `| dependencies_certainty | ${input.evidence.analysisAxes?.dependencies ?? 'unknown (legacy evidence)'} |`,
+    `| verification_certainty | ${input.evidence.analysisAxes?.verification ?? 'unknown (legacy evidence)'} |`,
+    '| structure_status_composition | Aggregate of structure, dependencies, verification and diagnostic uncertainty |',
     `| worktree | ${input.evidence.worktree} |`,
   ].join('\n');
 
@@ -39,7 +43,8 @@ export function renderReviewReport(input: ReviewRenderInput): string {
     '---',
     'review_schema: 7',
     `verdict: ${input.fold.verdict}`,
-    ...(input.fold.verdict === 'INCONCLUSIVE'
+    `review_complete: ${input.fold.reviewComplete}`,
+    ...(input.fold.blockers.length > 0
       ? [`blockers_report: ${REVIEW_STATE_FILE_NAMES.BLOCKERS}`]
       : []),
     `branch: ${input.branchName}`,
@@ -54,7 +59,7 @@ export function renderReviewReport(input: ReviewRenderInput): string {
     '',
     `# Cross-Review — ${input.branchName}`,
     '',
-    ...(input.fold.verdict === 'INCONCLUSIVE'
+    ...(input.fold.blockers.length > 0
       ? [renderBlockerSummary(input, 'report'), '']
       : []),
     '## Scope',

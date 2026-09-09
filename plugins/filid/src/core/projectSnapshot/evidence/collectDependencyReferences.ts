@@ -1,3 +1,7 @@
+import { createHash } from 'node:crypto';
+
+import { portableRelative } from '@ogham/cross-platform';
+
 import type {
   AdapterResolution,
   DependencyReference,
@@ -16,6 +20,7 @@ export interface CollectedDependencyReferences {
 
 export async function collectDependencyReferences(
   resolution: AdapterResolution,
+  projectRoot: string,
 ): Promise<CollectedDependencyReferences> {
   const diagnostics: SnapshotDiagnostic[] = [];
   const filePaths = [...resolution.ownership.keys()].sort();
@@ -39,6 +44,17 @@ export async function collectDependencyReferences(
             code: 'unresolved-local-dependency',
             message: `Could not resolve ${reference.rawSpecifier} from ${filePath}.`,
             path: filePath,
+            affects: ['dependencies', 'boundaries'],
+            specifier: reference.rawSpecifier,
+            causeId: createHash('sha256')
+              .update(
+                JSON.stringify([
+                  'unresolved-local-dependency',
+                  portableRelative(projectRoot, filePath),
+                  reference.rawSpecifier,
+                ]),
+              )
+              .digest('hex'),
           });
     } catch (error) {
       certainty = 'indeterminate';
@@ -46,6 +62,15 @@ export async function collectDependencyReferences(
         code: 'dependency-analysis-failed',
         message: error instanceof Error ? error.message : String(error),
         path: filePath,
+        affects: ['dependencies', 'boundaries'],
+        causeId: createHash('sha256')
+          .update(
+            JSON.stringify([
+              'dependency-analysis-failed',
+              portableRelative(projectRoot, filePath),
+            ]),
+          )
+          .digest('hex'),
       });
     }
   }

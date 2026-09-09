@@ -43,6 +43,10 @@ export function joinDecisions(
         : [];
     const combined = [...deterministic, ...(verify?.decisions ?? [])];
     const findingIds = (review?.findings ?? []).map(({ id }) => id);
+    const decisionCoverageValid = hasExactDecisionCoverage(
+      [...evidence.group.candidateIds, ...findingIds],
+      combined.map(({ findingId }) => findingId),
+    );
     expectedIds.push(...findingIds);
     decisionIds.push(...combined.map(({ findingId }) => findingId));
     if (
@@ -79,7 +83,9 @@ export function joinDecisions(
         lines: finding.lines,
         rule: finding.rule,
         message: finding.message,
-        verdict: decision?.verdict ?? 'INDETERMINATE',
+        verdict: decisionCoverageValid
+          ? (decision?.verdict ?? 'INDETERMINATE')
+          : 'INDETERMINATE',
         decisionEvidence: decision?.evidence ?? '',
         decisionReason: decision?.reason ?? 'missing decision',
         findingEvidence: finding.evidence,
@@ -111,7 +117,9 @@ export function joinDecisions(
         lines: 'unknown',
         rule: candidate.rule,
         message: candidate.message,
-        verdict: decision?.verdict ?? 'INDETERMINATE',
+        verdict: decisionCoverageValid
+          ? (decision?.verdict ?? 'INDETERMINATE')
+          : 'INDETERMINATE',
         decisionEvidence: decision?.evidence ?? '',
         decisionReason: decision?.reason ?? 'missing decision',
         findingEvidence: null,
@@ -173,6 +181,12 @@ export function joinDecisions(
       detail: REVIEW_DECISION_COVERAGE_MISMATCH,
       affectsVerdict: true,
     });
+    for (const decision of decisions)
+      if (
+        expectedIds.filter((id) => id === decision.id).length !== 1 ||
+        decisionIds.filter((id) => id === decision.id).length !== 1
+      )
+        decision.verdict = 'INDETERMINATE';
   }
   return {
     coverageIssues,

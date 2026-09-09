@@ -38,7 +38,7 @@ interface CreateSealedReviewPayloadInput {
   summary: ReviewSealSummary;
   /** Whether the verdict produced a fix-request artifact. */
   hasFixRequests: boolean;
-  /** Trusted blocker path for a new INCONCLUSIVE seal, otherwise null. */
+  /** Trusted blocker path for a seal with unresolved evidence, otherwise null. */
   blockersPath: string | null;
 }
 
@@ -58,6 +58,9 @@ export function createSealedReviewPayload(
       action: input.input.action,
       disposition: REVIEW_STATE_DISPOSITIONS.SEALED,
       verdict: input.summary.verdict,
+      ...(input.summary.reviewComplete !== undefined
+        ? { reviewComplete: input.summary.reviewComplete }
+        : {}),
       filesTotal: input.summary.filesTotal,
       filesReviewed: input.summary.filesReviewed,
       filesSkipped: input.summary.filesSkipped,

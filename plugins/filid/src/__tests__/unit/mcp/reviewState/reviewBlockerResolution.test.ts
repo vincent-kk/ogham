@@ -57,6 +57,7 @@ describe('review blocker resolution', () => {
           ? {
               humanReason:
                 'The intended contract has two valid interpretations.',
+              options: ['Preserve current behavior', 'Adopt the new contract'],
             }
           : {}),
       };

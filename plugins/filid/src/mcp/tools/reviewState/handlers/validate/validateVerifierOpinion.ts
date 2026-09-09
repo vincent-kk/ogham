@@ -54,6 +54,7 @@ export function validateVerifierOpinion(
         sourceHash: state.sourceHash,
         units: group.units,
         policy: group,
+        diagnostics: state.scope.diagnostics,
       },
       [],
     )

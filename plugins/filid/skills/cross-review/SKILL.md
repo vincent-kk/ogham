@@ -73,7 +73,7 @@ After each actor completes, validate that handoff through `review_state` with `a
 
 Call `review_state({ action: "seal", projectRoot: PROJECT_ROOT, branchName: BRANCH, baseRef: BASE_REF })`. Continue only when `status: ok` and `summary.disposition: sealed`; otherwise report diagnostics and stop without a terminal verdict.
 
-Use only `data.reportPath`, `data.blockersPath`, `data.fixRequestsPath`, `data.prCommentPath`, and `data.sessionPath` as the sealed artifact locations. `data.blockersPath` is non-null only for a new-format INCONCLUSIVE seal; a current-policy legacy cache may return null and must not be rewritten.
+Use only returned artifact paths. `data.blockersPath` may accompany REQUEST_CHANGES as well as INCONCLUSIVE; legacy caches can return null and must not be rewritten. `summary.reviewComplete=false` means more evidence work remains, not that a human must decide.
 
 ## Step 5 — Publish
 
@@ -84,7 +84,7 @@ Use the PR result from Step 1:
 - PR access unavailable: skip and record `pr-comment: unavailable`.
 - Posting fails: record `pr-comment: failed: <reason>`.
 
-Comment absence or failure never changes the sealed verdict. For `APPROVED` or `REQUEST_CHANGES`, emit exactly the first two lines of the example, substituting the verdict and `posted`, `unavailable`, or `failed: <reason>` for `none` when applicable. For `INCONCLUSIVE`, add `review-blockers: <data.blockersPath>` as the third line, or `review-blockers: unavailable (legacy)` only when the successful cached seal returned null:
+Comment absence or failure never changes the verdict. Report the verdict, review completeness, human-decision requirement and agent next action from the sealed comment. Include `pr-comment` status and the returned blocker path whenever non-null. For legacy INCONCLUSIVE caches without a sidecar, report `review-blockers: unavailable (legacy)`. Do not ask the user to resolve agent-owned evidence gaps.
 
 ```text
 Review verdict: INCONCLUSIVE
@@ -96,7 +96,7 @@ review-blockers: <returned path>
 
 - `--base REF`: explicit committed comparison base, overriding PR metadata. Without it, use the PR base branch when a PR exists, otherwise the existing automatic default.
 - `--effort auto|low|medium|high`: explicit input overrides project/user `review.effort`, then defaults to `auto`. Auto selects low for at least `review.autoLowEffortGroupThreshold` reviewable groups (default 16), otherwise medium; skipped files and candidate-only groups do not count. Low/medium/high allow at most 1/2/3 reviewer rounds. This controls Filid rounds, independently of the host model's reasoning-effort setting.
-- Medium/high allow a risk-marked or indeterminate first review one follow-up; medium also follows new assigned errors, high also new warnings. Risk alone or repeated gaps never trigger round 3. Low reviews every group once and starts risk-marked groups at strong. Other first reviews and verifiers use efficient; follow-ups use strong. Use only returned handoffs; unresolved gaps remain INCONCLUSIVE.
+- Medium/high allow one follow-up for risk or an indeterminate first review; new assigned errors (medium) or warnings (high) can also trigger it. Repeated gaps never trigger round 3. Low uses one round, strong for risk-marked groups; other first reviews and verifiers use efficient, follow-ups strong. Use only returned handoffs. Gaps retain reviewComplete=false, independently of confirmed corrections.
 - `--force`: preserve previous artifacts and prepare a fresh generation for all files only after all prior actors have finished; default off. It restarts review work and incurs its cost.
 - `--cleanup`: delete only this branch's review directory, then stop; default off.
 

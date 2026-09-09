@@ -16,6 +16,7 @@ Own committed-change review preparation, file-level reuse, bounded reviewer roun
 ### Always do
 
 - Recheck committed inputs before accepting validation or publishing a verdict.
+- Keep defect disposition, review completeness and attention routing independent.
 - Retain unchanged file results independently of their original batch peers.
 - Require completed, validated reviewer and verifier artifacts for reuse.
 - Preserve unresolved findings until current verification explicitly resolves them.

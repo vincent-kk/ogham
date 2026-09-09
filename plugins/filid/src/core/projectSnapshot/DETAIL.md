@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- Dependency diagnostics carry stable consumer/specifier cause identity, the unresolved specifier, and explicit dependencies/boundaries impact. Value/type imports of the same target share an identity. Independent verification remains exact when its own evidence is exact; unspecified impact remains unknown.
+
 - 등록된 structure/verification adapter와 config v2로 하나의 `ProjectSnapshot`을 만든다.
 - 호출자는 수집할 증거 축(entry surface, dependency, verification)을 고를 수 있고 기본값은 전부 수집이다. tree와 문서 증거는 축이 아니라 언제나 수집한다 — 나머지 축이 그 위에서만 의미를 갖기 때문이다.
 - 수집하지 않은 축은 빈 값에 `unsupported` certainty로 남고, 무엇을 수집했는지는 `collectedAxes`가 말한다. 빈 결과와 미수집을 구분하는 근거는 이 필드 하나이며, 이를 읽지 않고 축을 신뢰하는 소비자는 계약을 어긴 것이다.
@@ -81,4 +83,4 @@
 
 ## Last Updated
 
-2026-08-16 — stale-path를 존재 주장 형태·조상 체인 해석으로 좁히고, History를 면제하고, derivable-structure를 섹션 단위 구체 규칙 우선으로 바꿨다.
+2026-09-10 — Separate diagnostic impact, review completeness and evidence recovery from defect disposition.

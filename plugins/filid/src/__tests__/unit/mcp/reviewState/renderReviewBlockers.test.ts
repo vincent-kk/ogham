@@ -13,7 +13,7 @@ describe('separate review blockers report', () => {
     const output = renderReviewBlockers(input)!;
     expect(output).toContain('blockers_schema: 1');
     expect(output).toContain('source_hash: "source-hash"');
-    expect(output).toContain('verdict: INCONCLUSIVE');
+    expect(output).toContain('verdict: REQUEST_CHANGES');
     for (const blocker of input.fold.blockers) {
       expect(output).toContain(`### ${blocker.id}\n`);
       expect(output).toContain(blocker.resolution.question);
@@ -51,7 +51,7 @@ describe('separate review blockers report', () => {
     );
     const commentSummary = comment.slice(
       comment.indexOf('### Review blockers'),
-      comment.indexOf('| Field | Value |'),
+      comment.indexOf('<details>'),
     );
     expect(reportSummary).toContain('4 more');
     expect(commentSummary).toContain('4 more');

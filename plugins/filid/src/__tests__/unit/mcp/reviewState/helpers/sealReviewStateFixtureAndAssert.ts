@@ -104,6 +104,7 @@ export async function sealReviewStateFixtureAndAssert(
   expect(Object.keys(sealed.summary).sort()).toEqual(
     [
       'action',
+      'reviewComplete',
       'reusedGroups',
       'reusedFiles',
       'reviewFiles',

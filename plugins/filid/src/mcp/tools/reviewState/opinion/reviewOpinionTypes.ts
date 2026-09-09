@@ -65,6 +65,8 @@ export interface ReviewFinding {
 
 /** Evidence the reviewer could not obtain for one path and rule. */
 export interface ReviewOpinionGap {
+  /** Existing prepared diagnostic cause, validated before cross-group aggregation. */
+  causeId?: string;
   /** Project-relative path whose evidence is incomplete. */
   path: string;
   /** Stable review rule identifier affected by the gap. */

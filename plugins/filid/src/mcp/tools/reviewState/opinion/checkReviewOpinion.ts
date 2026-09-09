@@ -167,6 +167,24 @@ export function checkReviewOpinion(
   }
 
   for (const gap of opinion.gaps) {
+    if (
+      gap.causeId &&
+      !options.diagnostics?.some(
+        (diagnostic) => diagnostic.causeId === gap.causeId,
+      )
+    )
+      problems.push({
+        code: 'gap-required',
+        path: gap.path,
+        detail: 'Gap causeId must reference a prepared diagnostic.',
+      });
+    if (options.diagnostics !== undefined && !gap.causeId && !gap.resolution)
+      problems.push({
+        code: 'gap-required',
+        path: gap.path,
+        detail:
+          'Gap requires a prepared causeId or resolution describing the missing observation, reason, next verification and completion condition.',
+      });
     const requiredFields = [
       ['path', gap.path],
       ['rule', gap.rule],

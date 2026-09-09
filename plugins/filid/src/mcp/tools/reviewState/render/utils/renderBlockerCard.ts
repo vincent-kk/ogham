@@ -17,6 +17,14 @@ export function renderBlockerCard(blocker: ReviewBlocker): string {
   return [
     `### ${blocker.id}`,
     '',
+    ...(blocker.causeId
+      ? [`Cause: ${escapeReviewBlockerText(blocker.causeId)}`, '']
+      : []),
+    ...blocker.occurrences.map(
+      (occurrence) =>
+        `- Affected: ${escapeReviewBlockerText(JSON.stringify(occurrence.scope))} — ${escapeReviewBlockerText(occurrence.detail)}`,
+    ),
+    '',
     ...proposals.flatMap((advice, index) => [
       ...(index > 0
         ? [`**Alternative ${index} — Conflicting proposals**`, '']
@@ -40,6 +48,9 @@ export function renderBlockerCard(blocker: ReviewBlocker): string {
       `**Next action** — ${escapeReviewBlockerText(advice.nextAction)}`,
       '',
       `**Proposed owner** — ${advice.suggestedOwner}${advice.humanReason ? `: ${escapeReviewBlockerText(advice.humanReason)}` : ''}`,
+      ...(advice.options ?? []).map(
+        (option) => `- Choice: ${escapeReviewBlockerText(option)}`,
+      ),
       '',
       `**Completion condition** — ${escapeReviewBlockerText(advice.doneWhen)}`,
       '',

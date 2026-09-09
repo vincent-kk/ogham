@@ -16,7 +16,7 @@ export function renderBlockerSummary(
   input: ReviewRenderInput,
   destination: 'report' | 'comment',
 ): string {
-  if (input.fold.verdict !== 'INCONCLUSIVE') return '';
+  if (input.fold.blockers.length === 0) return '';
   const blockers = sortReviewBlockers(input.fold.blockers);
   const path = normalize(
     portableJoin(input.reviewDirectory, REVIEW_STATE_FILE_NAMES.BLOCKERS),

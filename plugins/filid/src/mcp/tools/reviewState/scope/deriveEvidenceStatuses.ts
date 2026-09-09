@@ -45,6 +45,10 @@ export function deriveEvidenceStatuses(
     mutableDiagnostics.filter((diagnostic) => !isFindingDiagnostic(diagnostic)),
   );
   return {
+    analysisAxes: {
+      dependencies: snapshot.dependencyGraph.certainty,
+      verification: scopedVerificationCertainty,
+    },
     structure,
     verification,
     evidenceComplete: isConclusive(structure) && isConclusive(verification),

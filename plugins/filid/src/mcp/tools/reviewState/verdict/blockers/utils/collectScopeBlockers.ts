@@ -13,7 +13,48 @@ export function collectScopeBlockers(
 ): ReviewBlockerCause[] {
   const causes: ReviewBlockerCause[] = [];
   const scope = { path: null, groupId: null, findingId: null, rule: null };
-  if (!evidence.evidenceComplete)
+  const diagnostics = evidence.diagnostics ?? [];
+  for (const [index, diagnostic] of diagnostics.entries())
+    causes.push({
+      causeId: diagnostic.causeId,
+      kind: 'analysis-incomplete',
+      scope: { ...scope, path: diagnostic.path ?? null, rule: diagnostic.code },
+      detail: diagnostic.message,
+      sources: [
+        {
+          artifactPath: 'review-state.json',
+          pointer: `/scope/diagnostics/${index}`,
+        },
+        { artifactPath: 'evidence.md', anchor: 'diagnostics' },
+      ],
+      adviceSource: 'deterministic',
+      resolution: {
+        question: diagnostic.specifier
+          ? `Can ${diagnostic.path} resolve ${diagnostic.specifier}?`
+          : `Can ${diagnostic.code} be evaluated conclusively?`,
+        evidenceNeeded: [
+          diagnostic.message,
+          `Affected analysis: ${diagnostic.affects?.join(', ') || 'unknown; establish diagnostic impact before claiming completeness'}`,
+        ],
+        nextAction: diagnostic.specifier
+          ? `Restore the intended import target ${diagnostic.specifier} consumed by ${diagnostic.path}; rerun dependencies and boundaries analysis on the corrected source.`
+          : `Inspect ${diagnostic.path ?? 'the project'} for ${diagnostic.code}; obtain the missing observation and rerun ${diagnostic.affects?.join(', ') || 'the affected analysis'}. If unsupported, record the missing capability and its limitation.`,
+        doneWhen:
+          'A fresh snapshot resolves this diagnostic and conclusively evaluates its affected analysis axes.',
+        suggestedOwner: 'agent',
+      },
+    });
+  const unexplainedVerification =
+    !['ok', 'violations'].includes(evidence.verificationStatus) &&
+    !diagnostics.some(
+      (diagnostic) =>
+        !diagnostic.affects?.length ||
+        diagnostic.affects.includes('verification'),
+    );
+  if (
+    !evidence.evidenceComplete &&
+    (diagnostics.length === 0 || unexplainedVerification)
+  )
     causes.push({
       kind: 'analysis-incomplete',
       scope,
@@ -24,12 +65,15 @@ export function collectScopeBlockers(
       ],
       adviceSource: 'deterministic',
       resolution: {
-        question: 'Which analysis evidence is still inconclusive?',
+        question: unexplainedVerification
+          ? 'Which verification evidence is still inconclusive?'
+          : 'Which analysis evidence is still inconclusive?',
         evidenceNeeded: [
           'The incomplete analysis statuses and their diagnostics',
         ],
-        nextAction:
-          'Inspect the recorded diagnostics and obtain the missing evidence within the permitted review scope.',
+        nextAction: unexplainedVerification
+          ? 'Inspect verification file counting and contract-link evidence; identify unsupported adapter capabilities and rerun verification independently of dependency recovery.'
+          : 'Inspect the recorded diagnostics and obtain the missing evidence within the permitted review scope.',
         doneWhen:
           'A new evidence collection conclusively evaluates the affected analysis.',
         suggestedOwner: 'agent',

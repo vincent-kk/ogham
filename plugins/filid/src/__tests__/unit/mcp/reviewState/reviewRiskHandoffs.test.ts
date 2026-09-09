@@ -138,6 +138,13 @@ describe('risk-sensitive review handoffs', () => {
                     path: 'src/value.ts',
                     rule: 'DEF-1',
                     detail: 'Evidence remains unavailable.',
+                    resolution: {
+                      question: 'What do consumers require?',
+                      evidenceNeeded: ['Consumer contract'],
+                      nextAction: 'Inspect the consumer contract.',
+                      doneWhen: 'Consumer expectations are verified.',
+                      suggestedOwner: 'agent',
+                    },
                   },
                 ],
               }
@@ -324,6 +331,13 @@ describe('risk-sensitive review handoffs', () => {
                       path: 'src/value.ts',
                       rule: 'DEF-1',
                       detail: 'Consumer evidence is unavailable.',
+                      resolution: {
+                        question: 'What do consumers require?',
+                        evidenceNeeded: ['Consumer contract'],
+                        nextAction: 'Inspect the consumer contract.',
+                        doneWhen: 'Consumer expectations are verified.',
+                        suggestedOwner: 'agent',
+                      },
                     },
                   ],
                 }

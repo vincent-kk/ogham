@@ -33,6 +33,12 @@ export interface ToolDiagnostic {
   code: string;
   message: string;
   path?: string;
+  /** Explicit affected analysis axes; absence means unknown impact. */
+  affects?: readonly ('dependencies' | 'boundaries' | 'verification')[];
+  /** Producer-owned identity shared by repeated observations of one cause. */
+  causeId?: string;
+  /** Unresolved dependency target as written by the consumer. */
+  specifier?: string;
 }
 
 /** Handler-level payload before common envelope materialization. */

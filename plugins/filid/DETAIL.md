@@ -5,7 +5,7 @@
 - Filid는 INTENT.md와 DETAIL.md의 의도, 경계, 현재 계약을 관리한다.
 - Filid는 FCA 노드, 어댑터가 보고한 진입점, 외부 import 경계와 실제 의존 DAG를 검사한다.
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
-- Filid의 cross-review는 `review_state prepare`가 변경 roster·FCA 후보를 선별·청킹·그룹화하고 규칙·diff·brief를 물질화하며, 그룹별 actor가 JSON opinion과 verification을 쓴다. Claude와 Codex 모두 일반 서브에이전트로 같은 흐름을 실행한다. 이전 검증 이후 커밋 내용이나 적용 판단 입력이 바뀐 파일만 추가 검토하며 무변경 파일의 원본 의견을 보존한다. `validate`가 의견을 검사하고 `seal`이 검증된 hash만 결정적으로 fold·렌더링한다. INCONCLUSIVE 원인과 해소 제안은 일반 finding·coverage와 분리해 별도 보고서로 제공하며 코드는 수정하지 않는다.
+- Cross-review prepares committed evidence, validates ordinary actor opinions and deterministically seals trusted results without changing code. Defect disposition and reviewComplete are independent; blocker reports retain evidence recovery and human decisions alongside confirmed corrections.
 - cross-review는 일반 첫 reviewer와 verifier에 효율 모델을 사용한다. 기본 동시성 8·1024줄·자동 최대 32파일로 그룹을 구성하며 기본 전체 그룹 상한 64를 배정 전에 검사한다. 기본 auto는 reviewable group이 설정 threshold(기본 16) 이상이면 low, 미만이면 medium을 선택한다. low는 전체 그룹을 한 번씩 검토하며 위험 그룹은 첫 회부터 상위 모델을 사용한다. medium/high는 위험·불확실성과 신규 finding에 따라 남은 예산에서 후속 검토한다. 전체 roster와 완전한 opinion 예시를 brief마다 반복하지 않고 미리 쓴 reviewer skeleton을 재사용한다. 적용 규칙·전체 diff·독립 verifier·불확실성 판정은 유지한다.
 - `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `fractal_inspect` `resolve` 결과의 `data.results[].summary.chainPaths` 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
 - `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 PR 본문의 `FCA Handoff`에 `unresolved-path`로 기록하고 계속한다.
@@ -26,7 +26,7 @@
 - `fractal_inspect`의 `resolve` action은 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
 - merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3과 handoff 블록 §7, review report와 PR comment는 `skills/cross-review/report-formats.md`, fix request의 여덟 필드 블록은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 스킬 실행에 필요한 형식은 스킬 폴더 안에 두며 플러그인 내부 INTENT/DETAIL을 색인하지 않는다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
-- cross-review의 resumable·cached 산출물은 `review_schema: 7`, state schema 2와 `validationPolicyVersion: 2`를 선언한다. schema v1과 파일별 입력 기록이 없는 legacy는 명시 force로 새 기준점을 준비하며, schema 2의 구형·미지원 검증 정책은 `review-validation-policy-outdated`로 차단하고 기존 파일을 보존한다. 명시 force만 같은 source를 새 검증 정책으로 재준비한다. 위치 미확정 지적은 독립 검증하며, 삭제 파일의 인용은 committed diff의 삭제 전 코드에서 가져온다. HEAD의 파일 부재만으로 삭제 결함을 반박하지 않는다. 새 INCONCLUSIVE seal은 identity-bound `review-blockers.md`와 nullable `ReviewSealData.blockersPath`를 제공한다. 현재 정책의 marker 없는 legacy seal은 null로 읽고, marker가 있는 sidecar 유실·불일치는 자동 force 없이 진단한다.
+- Cross-review retains review_schema 7, state schema 2 and validationPolicyVersion 2. Optional diagnostics, analysisAxes and reviewComplete preserve legacy reading; old policy still requires explicit fresh preparation. New incomplete seals, including REQUEST_CHANGES, retain identity-bound review-blockers.md. Missing or mismatched marked sidecars stop cache reuse.
 - fix request는 검증 가능한 원 claim을 포함하며, resolve가 만든 accepted FIX ID는 revalidate에서 해당 canonical request의 Severity, Category, Path, Rule, Claim, Evidence, Consequence, Recommended Action과 정확히 결합된다.
 - interactive resolve는 항목별 질문을 반복하지 않는다. 전체 sheet 뒤 한 batch decision round에서 추천안 일괄 적용, 전체 적용, ID별 적용·논의·warning 생략·근거 있는 거부를 받고, 논의가 남으면 미결 항목만 다시 묶는다. `--auto`도 같은 sheet와 원래 추천을 보여 주되 decision만 전부 자동 선택하고 질문하지 않는다.
 - `cross-review`와 `revalidate`는 브랜치에 pull request가 있을 때 판정을 PR 코멘트로 남긴다. PR이 없으면 남기지 않으며, 코멘트 부재는 실패가 아니다. 코멘트 형식은 각각 `skills/cross-review/report-formats.md`와 `skills/revalidate/reference.md` §4가 정의한다 — 판정표는 접힘 밖, 본문은 접힘 안, 호스트 코멘트 크기 상한 안에 들어가고, 같은 표제의 기존 코멘트는 새로 달지 않고 갱신한다.
@@ -52,9 +52,9 @@
 
 - 구조 변경 API는 계획과 검증만 제공하고 프로젝트 파일을 수정하지 않는다.
 - cross-review는 변경 범위에 한해 결함·보안·성능·유지보수·테스트·문서·FCA 계약을 판정하고, 모든 후보 finding을 독립 검증한다.
-- cross-review는 현재 사용자 지시에 안정 ID를 부여해 reviewer와 verifier가 같은 authoritative requirement를 독립 확인하게 하고, 정상적인 in-scope evidence gap은 reviewed coverage와 별개로 언제나 `INCONCLUSIVE`로 판정한다.
+- Current user requirements retain stable IDs for independent review. A source-matched trusted confirmed defect requires REQUEST_CHANGES even with gaps; reviewComplete remains false. Without confirmed defects an incomplete review is INCONCLUSIVE; only complete review can be APPROVED.
 - cross-review는 review schema 7·state schema 2·현재 검증 정책을 만족한 resumable·cached 산출물만 반환한다. prepared effective effort는 최초 배정부터 고정하며, reviewable COMPLETE opinion은 nonblank checked 및 그룹 정책상 필수인 riskPlan을 요구한다.
-- INCONCLUSIVE blocker는 사람 판단 요청·증거 보강·분류 필요로 나뉘며 질문·필요 증거·다음 행동·담당 제안·완료 조건과 원본 출처를 일반 finding·coverage보다 먼저 보여 준다. 담당 제안은 권한이나 배정이 아니다.
+- Blockers distinguish human decisions, agent evidence recovery and triage. PR comments lead with confirmed count, review completeness, human-decision requirement and agent next action. Explicit diagnostic causes aggregate affected groups, paths, original descriptions and sources; rule IDs alone never merge causes.
 - reviewable unit의 configured group cap, skipped roster의 가시성과 validate hash handoff 중 어느 것도 편의를 위해 완화하지 않는다.
 
 ### AC-root-pr-comment — 판정의 PR 전달
@@ -134,4 +134,4 @@
 
 ## Last Updated
 
-2026-09-10
+2026-09-10 — Separate diagnostic impact, review completeness and evidence recovery from defect disposition.

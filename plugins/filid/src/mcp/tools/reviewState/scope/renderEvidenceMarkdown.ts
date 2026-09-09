@@ -60,7 +60,7 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
       : model.diagnostics
           .map(
             (diagnostic) =>
-              `- ${renderMarkdownCodeCell(diagnostic.code)} — ${escapeMarkdownCell(diagnostic.message)}${diagnostic.path ? ` (${renderMarkdownCodeCell(diagnostic.path)})` : ''}`,
+              `- ${renderMarkdownCodeCell(diagnostic.code)} — ${escapeMarkdownCell(diagnostic.message)}${diagnostic.path ? ` (${renderMarkdownCodeCell(diagnostic.path)})` : ''}; impact: ${escapeMarkdownCell(diagnostic.affects?.join(', ') || 'unknown')}${diagnostic.causeId ? `; causeId: ${renderMarkdownCodeCell(diagnostic.causeId)}` : ''}${diagnostic.specifier ? `; target: ${renderMarkdownCodeCell(diagnostic.specifier)}` : ''}`,
           )
           .join('\n');
   return [
@@ -72,6 +72,12 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
       `evidence_complete: ${model.evidenceComplete}`,
       `structure_status: ${model.structure}`,
       `verification_status: ${model.verification}`,
+      ...(model.analysisAxes
+        ? [
+            `dependencies_certainty: ${model.analysisAxes.dependencies}`,
+            `verification_certainty: ${model.analysisAxes.verification}`,
+          ]
+        : []),
       `worktree: ${model.worktree}`,
       `created_at: ${model.createdAt}`,
       '---',

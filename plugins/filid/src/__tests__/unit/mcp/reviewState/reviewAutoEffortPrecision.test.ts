@@ -65,6 +65,13 @@ describe('automatic low precision protections', () => {
               path: 'src/value.ts',
               rule: 'DEF-1',
               detail: 'Consumer evidence is unavailable.',
+              resolution: {
+                question: 'What do consumers require?',
+                evidenceNeeded: ['Consumer contract'],
+                nextAction: 'Inspect the consumer contract.',
+                doneWhen: 'Consumer expectations are verified.',
+                suggestedOwner: 'agent',
+              },
             },
           ];
         }

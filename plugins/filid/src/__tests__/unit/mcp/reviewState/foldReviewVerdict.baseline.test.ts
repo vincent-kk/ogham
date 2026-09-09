@@ -28,7 +28,9 @@ describe('foldReviewVerdict baseline replay', () => {
       );
       const before = JSON.stringify(input);
       const result = foldReviewVerdict(input);
-      expect(result.verdict).toBe(expected.verdict);
+      expect(result.verdict).toBe(
+        run === 'f' ? 'REQUEST_CHANGES' : expected.verdict,
+      );
       expect(new Set(result.confirmed.map(({ id }) => id))).toEqual(
         expected.confirmedIds,
       );
@@ -38,7 +40,8 @@ describe('foldReviewVerdict baseline replay', () => {
       expect(JSON.stringify(input)).toBe(before);
       if (run === 'f') {
         expect(input.evidence.evidenceComplete).toBe(false);
-        expect(result.verdict).toBe('INCONCLUSIVE');
+        expect(result.verdict).toBe('REQUEST_CHANGES');
+        expect(result.reviewComplete).toBe(false);
       }
     },
   );

@@ -1,6 +1,7 @@
 import type { ToolStatus } from '../../../../types/toolEnvelope.js';
 import type { ReviewReuseSummary } from '../state/reviewIncrementalTypes.js';
 import type {
+  ReviewEvidenceStatuses,
   ReviewScopeFile,
   WorktreeDisposition,
 } from '../state/reviewStateTypes.js';
@@ -8,6 +9,7 @@ import type { ReviewVerdictFold } from '../verdict/reviewVerdictTypes.js';
 
 /** Prepared evidence fields repeated in canonical sealed artifacts. */
 export interface ReviewRenderEvidence {
+  analysisAxes?: ReviewEvidenceStatuses['analysisAxes'];
   /** Immutable committed-source identity captured by prepare. */
   sourceHash: string;
   /** FCA snapshot identity captured with the changed roster. */

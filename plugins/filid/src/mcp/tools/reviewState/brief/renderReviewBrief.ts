@@ -60,6 +60,7 @@ function renderReviewResolutionContract(): string {
     actionContract,
     `suggestedOwner=${suggestedOwner.options.join('|')}`,
     `humanReason?≤${requireNonblankStringLimit(humanReason.unwrap().minLength, humanReason.unwrap().maxLength, 'humanReason')}(human:required)`,
+    'options?=2..5×≤300(human:required)',
   ].join(',');
 }
 
@@ -194,7 +195,7 @@ export function renderReviewBrief(
     'Use prewritten JSON skeleton; keep keys/units',
     '- files: result=reviewed|skipped; skipped needs reason; retain chunk ("k/n" or null).',
     '- checked: COMPLETE=>nonempty nonblank-string[]',
-    `- gaps: []|[{path,rule,detail,resolution?:{${renderReviewResolutionContract()}}}]; text nonblank; advice only.`,
+    `- gaps: []|[{path,rule,detail,causeId?,resolution?:{${renderReviewResolutionContract()}}}]; nonblank.`,
     `- findings: [{id:R${input.group.id}-NNN,severity:error|warning,category:bug|security|performance|maintainability|test|documentation|contract|structure|verification,path,existingCode,lines,rule,message,evidence,consequence,recommendedAction}]; nonblank text; assigned path; lines=range|unknown.`,
     '',
   ].join('\n');

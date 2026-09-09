@@ -1,4 +1,7 @@
-import type { ToolStatus } from '../../../../types/toolEnvelope.js';
+import type {
+  ToolDiagnostic,
+  ToolStatus,
+} from '../../../../types/toolEnvelope.js';
 import type {
   ReviewFindingCategory,
   ReviewOpinion,
@@ -25,11 +28,14 @@ export type ReviewVerdict = NonNullable<ReviewStateRecord['verdict']>;
 export type ReviewTrustIssue =
   | 'review rounds incomplete'
   | 'artifact not validated'
+  | 'source identity mismatch'
   | 'artifact modified after validation'
   | 'verifier decided a superseded opinion';
 
 /** One group paired with only the artifacts that passed the seal trust checks. */
 export interface SealGroupEvidence {
+  /** Current source binding verified by the artifact loader, including retained-file reuse. */
+  sourceHash?: string;
   /** Deterministic prepared group metadata. */
   group: ReviewGroup;
   /** Trusted merged reviewer opinion, or null when unavailable. */
@@ -178,6 +184,8 @@ export interface ReviewBlockerSource {
 
 /** One typed cause before exact deduplication, routing, and stable ID assignment. */
 export interface ReviewBlockerCause {
+  /** Validated prepared diagnostic identity; never inferred from prose. */
+  causeId?: string;
   /** Source condition, never inferred by matching display text. */
   kind: ReviewBlockerKind;
   /** Scope copied from the evidence producing the cause. */
@@ -199,6 +207,8 @@ export interface ReviewBlocker extends Omit<
 > {
   /** Deterministic identifier shared by all outputs of this review. */
   id: string;
+  /** Every affected scope and original description, including shared causes. */
+  occurrences: { scope: ReviewBlockerScope; detail: string }[];
   /** Human attention category, not execution authority. */
   attention: 'human-decision' | 'evidence-recovery' | 'triage';
   /** Validated proposal or explicitly labelled missing/conflicting-advice fallback. */
@@ -211,6 +221,8 @@ export interface ReviewBlocker extends Omit<
 
 /** Immutable evidence identity and completeness fields consumed by the fold. */
 export interface ReviewVerdictEvidence {
+  /** Prepared non-finding diagnostics; absent in legacy records. */
+  diagnostics?: readonly ToolDiagnostic[];
   /** Hash of the committed changed-file blobs. */
   sourceHash: string;
   /** Hash of the structural snapshot used for evidence. */
@@ -241,6 +253,8 @@ export interface FoldReviewVerdictInput {
 
 /** Canonical fold result shared by every seal renderer and response. */
 export interface ReviewVerdictFold {
+  /** Whether all evidence and coverage obligations are conclusive. */
+  reviewComplete: boolean;
   /** Final ordered-table verdict. */
   verdict: ReviewVerdict;
   /** Verdict-blocking questions separated from decisions and neutral observations. */
@@ -267,6 +281,7 @@ export interface ReviewVerdictFold {
 
 /** Persisted summary restored from canonical sealed artifacts. */
 export interface ReviewSealSummary {
+  reviewComplete?: boolean;
   /** Final verdict persisted by the sealed state. */
   verdict: ReviewVerdict;
   /** Number of roster rows represented by the sealed report. */

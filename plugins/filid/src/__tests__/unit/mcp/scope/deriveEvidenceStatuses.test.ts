@@ -37,10 +37,43 @@ const SNAPSHOT: ProjectSnapshot = {
 };
 
 describe('deriveEvidenceStatuses', () => {
+  it('keeps dependency-only diagnostics out of exact verification', () => {
+    const result = deriveEvidenceStatuses(
+      SNAPSHOT,
+      [
+        {
+          code: 'unresolved-local-dependency',
+          message: 'Missing ./moved.js',
+          path: '/project/src/a.ts',
+          affects: ['dependencies', 'boundaries'],
+        },
+      ],
+      0,
+      0,
+      ANALYSIS_CERTAINTIES.EXACT,
+    );
+    expect(result.verification).toBe(TOOL_STATUSES.OK);
+    expect(result.structure).toBe(TOOL_STATUSES.INDETERMINATE);
+    expect(result.evidenceComplete).toBe(false);
+  });
+
+  it('preserves unknown diagnostic impact as verification uncertainty', () => {
+    expect(
+      deriveEvidenceStatuses(
+        SNAPSHOT,
+        [{ code: 'unknown', message: 'Unknown impact' }],
+        0,
+        0,
+        ANALYSIS_CERTAINTIES.EXACT,
+      ).verification,
+    ).toBe(TOOL_STATUSES.INDETERMINATE);
+  });
+
   it('uses scoped verification certainty for both evidence statuses', () => {
     expect(
       deriveEvidenceStatuses(SNAPSHOT, [], 0, 0, ANALYSIS_CERTAINTIES.EXACT),
     ).toEqual({
+      analysisAxes: { dependencies: 'exact', verification: 'exact' },
       structure: TOOL_STATUSES.OK,
       verification: TOOL_STATUSES.OK,
       evidenceComplete: true,

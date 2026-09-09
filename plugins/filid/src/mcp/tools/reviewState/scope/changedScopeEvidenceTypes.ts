@@ -28,6 +28,8 @@ export interface CollectChangedScopeEvidenceInput {
 
 /** Complete scope facts consumed by the remaining prepare stages. */
 export interface CollectedChangedScopeEvidence {
+  /** Normalized non-finding diagnostics persisted with the prepared snapshot. */
+  evidenceDiagnostics: ToolDiagnostic[];
   /** Snapshot identity shared by every FCA observation in this collection. */
   snapshotHash: string;
   /** Whether both structure and verification evidence are conclusive. */
@@ -39,7 +41,10 @@ export interface CollectedChangedScopeEvidence {
   /** Digest of the complete sorted dirty-path set. */
   dirtyPathsHash: string;
   /** Per-axis structure and verification statuses. */
-  statuses: Pick<ReviewEvidenceStatuses, 'structure' | 'verification'>;
+  statuses: Pick<
+    ReviewEvidenceStatuses,
+    'structure' | 'verification' | 'analysisAxes'
+  >;
   /** Full committed roster enriched with review selection facts. */
   files: ReviewScopeFile[];
   /** Non-informational FCA findings requiring verifier decisions. */

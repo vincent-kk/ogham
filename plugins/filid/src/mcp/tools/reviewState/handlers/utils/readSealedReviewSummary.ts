@@ -58,6 +58,9 @@ export function readSealedReviewSummary(
   );
   return {
     verdict,
+    ...(frontmatter.has('review_complete')
+      ? { reviewComplete: frontmatter.get('review_complete') === 'true' }
+      : {}),
     filesTotal,
     filesReviewed,
     filesSkipped,

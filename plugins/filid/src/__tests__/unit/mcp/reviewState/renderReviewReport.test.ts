@@ -39,6 +39,7 @@ describe('renderReviewReport', () => {
     expect(frontmatter).toEqual([
       'review_schema: 7',
       'verdict: REQUEST_CHANGES',
+      'review_complete: false',
       'branch: feature/render-v7',
       'base_ref: main',
       'source_hash: source-hash-v7',

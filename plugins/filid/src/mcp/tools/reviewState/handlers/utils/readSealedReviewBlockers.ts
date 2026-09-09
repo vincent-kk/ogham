@@ -39,7 +39,7 @@ export function readSealedReviewBlockers(
       ? invalidBlockerStatus(paths.reportPath)
       : { blockersPath: null, diagnostic: null };
   const marker = reportMetadata.get('blockers_report');
-  if (state.verdict !== 'INCONCLUSIVE')
+  if (state.verdict === 'APPROVED')
     return marker === undefined
       ? { blockersPath: null, diagnostic: null }
       : invalidBlockerStatus(paths.reportPath);
@@ -65,7 +65,7 @@ export function readSealedReviewBlockers(
     metadata.get('snapshot_hash') !==
       JSON.stringify(state.scope.snapshotHash) ||
     metadata.get('branch') !== JSON.stringify(state.branchName) ||
-    metadata.get('verdict') !== 'INCONCLUSIVE'
+    metadata.get('verdict') !== state.verdict
   )
     return invalidBlockerStatus(paths.blockersPath);
   return { blockersPath: paths.blockersPath, diagnostic: null };

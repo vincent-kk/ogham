@@ -295,7 +295,7 @@ describe('renderReviewBrief', () => {
     expect(output).toContain('nonblank text');
     expect(output).toContain('checked: COMPLETE=>nonempty nonblank-string[]');
     expect(output).toContain(
-      'gaps: []|[{path,rule,detail,resolution?:{question≤240,evidenceNeeded=1..5×≤300,nextAction/doneWhen≤600,suggestedOwner=agent|human|unknown,humanReason?≤400(human:required)}}]; text nonblank; advice only.',
+      'gaps: []|[{path,rule,detail,causeId?,resolution?:{question≤240,evidenceNeeded=1..5×≤300,nextAction/doneWhen≤600,suggestedOwner=agent|human|unknown,humanReason?≤400(human:required),options?=2..5×≤300(human:required)}}]; nonblank.',
     );
   });
 });

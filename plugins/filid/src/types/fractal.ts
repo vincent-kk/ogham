@@ -176,6 +176,9 @@ export interface SnapshotDiagnostic {
   code: string;
   message: string;
   path?: string;
+  affects?: readonly ('dependencies' | 'boundaries' | 'verification')[];
+  causeId?: string;
+  specifier?: string;
 }
 
 export interface LegacyCriteriaLedgerEvidence {

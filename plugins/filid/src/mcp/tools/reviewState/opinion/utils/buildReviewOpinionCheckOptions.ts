@@ -12,6 +12,7 @@ export function buildReviewOpinionCheckOptions(
   group: ReviewGroup,
   round: number,
   sourceHash: string,
+  diagnostics?: CheckReviewOpinionOptions['diagnostics'],
 ): CheckReviewOpinionOptions {
   return {
     group: group.id,
@@ -19,5 +20,6 @@ export function buildReviewOpinionCheckOptions(
     sourceHash,
     units: group.opinionUnits ?? group.units,
     policy: group,
+    diagnostics,
   };
 }

@@ -143,9 +143,7 @@ describe('review finding location uncertainty', () => {
       // Deleting the fixture's only source leaves structure evidence indeterminate.
       if (kind === 'deleted') expect(state.scope.evidenceComplete).toBe(false);
       expect(sealed.summary.verdict).toBe(
-        kind === 'unmatched' || kind === 'deleted'
-          ? 'INCONCLUSIVE'
-          : 'REQUEST_CHANGES',
+        kind === 'unmatched' ? 'INCONCLUSIVE' : 'REQUEST_CHANGES',
       );
     },
   );

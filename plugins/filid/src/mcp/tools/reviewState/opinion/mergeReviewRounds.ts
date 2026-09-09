@@ -80,7 +80,7 @@ export function mergeReviewRounds(
 
   const gaps = new Map<string, ReviewOpinionGap>();
   for (const gap of [...prior.gaps, ...current.gaps]) {
-    const key = JSON.stringify([gap.path, gap.rule, gap.detail]);
+    const key = JSON.stringify([gap.causeId, gap.path, gap.rule, gap.detail]);
     if (!gaps.has(key) || gap.resolution !== undefined)
       gaps.set(key, { ...gap });
   }

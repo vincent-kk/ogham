@@ -96,7 +96,7 @@ describe('renderVerifyBrief', () => {
       '`verdict` must be `CONFIRMED`, `REFUTED`, or `INDETERMINATE`.',
     );
     expect(output).toContain(
-      'resolution?: {question, evidenceNeeded, nextAction, doneWhen, suggestedOwner, humanReason?}',
+      'resolution?: {question, evidenceNeeded, nextAction, doneWhen, suggestedOwner, humanReason?, options?}',
     );
     expect(output).toContain('only with an INDETERMINATE decision or opinion');
   });

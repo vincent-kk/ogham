@@ -23,6 +23,7 @@ const ADVICE = {
   doneWhen: 'The chosen contract has been verified.',
   suggestedOwner: 'human' as const,
   humanReason: 'Two supported contracts differ in behavior.',
+  options: ['Preserve current behavior', 'Adopt the new contract'],
 };
 
 describe('review blocker projection', () => {
@@ -130,7 +131,8 @@ describe('review blocker projection', () => {
       },
     ];
     const fold = foldReviewVerdict(input);
-    expect(fold.verdict).toBe('INCONCLUSIVE');
+    expect(fold.verdict).toBe('REQUEST_CHANGES');
+    expect(fold.reviewComplete).toBe(false);
     expect(fold.confirmed).toHaveLength(1);
     expect(fold.blockers).toMatchObject([
       {

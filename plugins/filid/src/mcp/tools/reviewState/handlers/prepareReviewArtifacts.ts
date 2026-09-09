@@ -371,6 +371,7 @@ export async function prepareReviewArtifacts(
     ...policy,
     groups,
     scope: {
+      diagnostics: collected.evidenceDiagnostics,
       snapshotHash: collected.snapshotHash,
       evidenceComplete: collected.evidenceComplete,
       worktree: collected.worktree,

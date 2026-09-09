@@ -54,7 +54,7 @@ Require matching snapshot hashes, deduplicate overlapping findings, preserve all
 Use:
 
 - `PASS` only for exact, diagnostic-free, finding-free evidence
-- `FAIL` when a canonical violation is confirmed
+- `FAIL` when a canonical violation is confirmed; report analysis completeness separately. This matches cross-review's REQUEST_CHANGES with reviewComplete=false when trusted defects coexist with gaps. Incomplete analysis never implies a human choice: report recoverable evidence as agent work, and human decisions only with concrete options and a reason.
 - `INDETERMINATE` when unsupported or ambiguous evidence prevents a reliable verdict and no confirmed violation already determines failure
 
 End with `Scan complete: <N> findings`.

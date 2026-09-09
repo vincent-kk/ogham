@@ -35,12 +35,14 @@ export async function collectChangedScopeEvidence(
   );
 
   return {
+    evidenceDiagnostics: computed.evidenceDiagnostics,
     snapshotHash: computed.snapshotHash,
     evidenceComplete: computed.evidenceComplete,
     worktree: computed.worktree,
     dirtyPaths: computed.dirtyPaths,
     dirtyPathsHash: computed.dirtyPathsHash,
     statuses: {
+      analysisAxes: computed.statuses.analysisAxes,
       structure: computed.statuses.structure,
       verification: computed.statuses.verification,
     },

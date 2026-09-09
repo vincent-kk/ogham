@@ -45,7 +45,8 @@ describe('foldReviewVerdict coverage regression', () => {
     input.groups[0]!.review!.files[0]!.result = 'skipped';
     input.groups[0]!.review!.files[0]!.reason = 'Need a runtime fixture';
     const result = foldReviewVerdict(input);
-    expect(result.verdict).toBe('INCONCLUSIVE');
+    expect(result.verdict).toBe('REQUEST_CHANGES');
+    expect(result.reviewComplete).toBe(false);
     expect(result.checklist[0]).toMatchObject({
       result: 'pending',
       reason: 'reviewer skipped: Need a runtime fixture',
@@ -63,7 +64,8 @@ describe('foldReviewVerdict coverage regression', () => {
     ];
     group.review!.files[0]!.chunk = '1/2';
     const missing = foldReviewVerdict(input);
-    expect(missing.verdict).toBe('INCONCLUSIVE');
+    expect(missing.verdict).toBe('REQUEST_CHANGES');
+    expect(missing.reviewComplete).toBe(false);
     expect(
       missing.checklist.filter((row) => row.path === unit.path),
     ).toHaveLength(1);

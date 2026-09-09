@@ -63,6 +63,7 @@ export async function rebuildPriorReviewOpinion(
           sourceHash: input.state.sourceHash,
           units: input.group.units,
           policy: input.group,
+          diagnostics: input.state.scope.diagnostics,
         },
         problems,
       )

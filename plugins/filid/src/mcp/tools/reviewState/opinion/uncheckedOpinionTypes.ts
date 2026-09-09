@@ -1,3 +1,4 @@
+import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import type { ReviewGroup, ReviewUnit } from '../state/reviewGroupTypes.js';
 import type { ReviewValidationProblem } from '../state/reviewStateTypes.js';
 
@@ -89,6 +90,8 @@ export type OpinionParseResult<T> =
 
 /** Expected identity and unit roster for reviewer validation. */
 export interface CheckReviewOpinionOptions {
+  /** Prepared diagnostic causes. Undefined retains legacy artifact readability. */
+  diagnostics?: readonly ToolDiagnostic[];
   /** Prepared requirements; never inferred from the actor's own opinion. */
   policy: Pick<ReviewGroup, 'planRequired' | 'riskReasons'>;
   /** Prepared review group identifier. */
