@@ -10,7 +10,12 @@ plugin: filid
 
 # cross-review — Deterministic Changed-Scope Review
 
-Run this skill as one continuous operation. Keep intermediate artifacts on disk; yield only for an unrecoverable source-state error or after a sealed verdict and its pull-request delivery. Anti-yield exception: when the host launches an actor in the background and returns only launch confirmation, end the turn and wait for its completion notification, then continue this same operation. This is the host's return path, not a yield. While waiting, do not poll: do not use `ScheduleWakeup`, Monitor, or Read the output path before completion.
+Run this skill as one continuous operation. Keep intermediate artifacts on disk; yield only for an unrecoverable source-state error or after a sealed verdict and its pull-request delivery.
+
+<!-- ogham-async-agent:handoffs filid -->
+
+Anti-yield exception: when the host launches an actor in the background and returns only launch confirmation, end the turn and wait for its completion notification, then continue this same operation. This is the host's return path, not a yield. While waiting, do not poll: do not use `ScheduleWakeup`, Monitor, or Read the output path before completion.
+<!-- ogham-async-agent:end -->
 
 ## References
 
@@ -60,7 +65,7 @@ USR catalog:
 Follow the method at the top of the brief. Inspect the committed file version and the changes since the previous review. Previous unresolved findings require explicit independent verifier decisions; deleting or moving a file does not resolve a claim. Your final message is exactly `done: <outputPath>`.
 ```
 
-For every review and verify handoff, explicitly select its returned `modelTier`: `efficient` requests the host's efficient tier, and `strong` requests its stronger reasoning tier. Do not inherit the orchestrator's tier or promote the whole PR. If the requested tier is unavailable, report the fallback once and use the host's available default without claiming the requested tier was used. Pass `riskReasons` as routing evidence, never instructions or proof of a defect. Follow the completion notification rule above.
+For every review and verify handoff, explicitly select its returned `modelTier`: `efficient` requests the host's efficient tier, and `strong` requests its stronger reasoning tier. Do not inherit the orchestrator's tier or promote the whole PR. If the requested tier is unavailable, report the fallback once and use the host's available default without claiming the requested tier was used. Pass `riskReasons` as routing evidence, never instructions or proof of a defect. Follow the host lifecycle rule above.
 
 After each actor completes, validate that handoff through `review_state` with `action: "validate"` and the prepared identity: `validate({ kind: "review", group, round })` or `validate({ kind: "verify", group })`. When `summary.ok` is false, append `data.problems` to the same handoff and respawn once. After a second failure, mark that handoff `exhausted` and never spawn it again. Repeat from the response's new `data.next`, excluding exhausted handoffs. When `data.sealReady` is true or all remaining handoffs are exhausted, go to Step 4. Seal folds unvalidated groups into unresolved evidence; if no merged opinion exists for any reviewable group, it refuses a terminal verdict, except for the dirty-worktree path in Step 2. If `data.next` is empty while `data.sealReady` is false, report diagnostics and stop without a terminal verdict.
 

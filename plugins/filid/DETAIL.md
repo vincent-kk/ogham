@@ -21,6 +21,7 @@
 
 ## API Contracts
 
+- Cross-review keeps Claude's completion-notification lifecycle in the canonical skill. An explicit handoffs marker selects a Codex-only paragraph that keeps the parent turn active through child completion, validation, subsequent review/verify handoffs, and the existing seal/delivery or diagnostic stop conditions.
 - 공개 MCP 도구는 `project_setup`, `fractal_inspect`, `restructure`, `review_state`의 4개다.
 - `fractal_inspect`의 `resolve` action은 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
@@ -133,4 +134,4 @@
 
 ## Last Updated
 
-2026-09-08
+2026-09-10

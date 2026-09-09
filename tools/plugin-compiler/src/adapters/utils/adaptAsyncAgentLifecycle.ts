@@ -1,11 +1,12 @@
 import { AsyncAgentLifecycleError } from "./asyncAgentLifecycleError.js";
 import { PERSONA_SUBDIR } from "./injectSpawnProtocol.js";
 import { renderCodexAsyncAgentBlock } from "./renderCodexAsyncAgentBlock.js";
+import { renderCodexHandoffLoop } from "./renderCodexHandoffLoop.js";
 
 // Loaded by buildCodexSkills; marker placement selects the Claude-visible text
 // that the generated Codex skill replaces with its explicit child lifecycle.
 const BLOCK_PATTERN =
-  /<!-- ogham-async-agent:(spawn|join) ([a-z][a-z0-9-]*):([a-z][a-z0-9-]*) -->\r?\n[\s\S]*?\r?\n<!-- ogham-async-agent:end -->/g;
+  /<!-- ogham-async-agent:(spawn|join|handoffs) ([a-z][a-z0-9-]*)(?::([a-z][a-z0-9-]*))? -->\r?\n[\s\S]*?\r?\n<!-- ogham-async-agent:end -->/g;
 const OPEN_MARKER_PATTERN = /<!-- ogham-async-agent:(?!end\b)[^>]*-->/g;
 const END_MARKER_PATTERN = /<!-- ogham-async-agent:end -->/g;
 
@@ -28,14 +29,28 @@ export function adaptAsyncAgentLifecycle(
   const personaFiles = new Set<string>();
   const depth = relativeSkillPath.split("/").length - 1;
   const personaRoot = `${"../".repeat(depth)}${PERSONA_SUBDIR}`;
+  let hasHandoffs = false;
 
   for (const match of matches) {
-    const phase = match[1] as "spawn" | "join";
+    const phase = match[1] as "spawn" | "join" | "handoffs";
     const markerPlugin = match[2];
     const agentId = match[3];
     if (markerPlugin !== pluginName)
       throw new AsyncAgentLifecycleError(
         `async-agent marker in ${relativeSkillPath} must name plugin ${pluginName}`,
+      );
+
+    if (phase === "handoffs") {
+      if (agentId || hasHandoffs)
+        throw new AsyncAgentLifecycleError(
+          `async-agent handoffs in ${relativeSkillPath} requires one block without an agent persona`,
+        );
+      hasHandoffs = true;
+      continue;
+    }
+    if (!agentId)
+      throw new AsyncAgentLifecycleError(
+        `async-agent ${phase} in ${relativeSkillPath} requires an agent persona`,
       );
 
     const role = `${markerPlugin}:${agentId}`;
@@ -53,16 +68,19 @@ export function adaptAsyncAgentLifecycle(
 
   let adapted = content;
   for (const match of [...matches].reverse()) {
-    const phase = match[1] as "spawn" | "join";
+    const phase = match[1] as "spawn" | "join" | "handoffs";
     const markerPlugin = match[2];
     const agentId = match[3];
     const start = match.index ?? 0;
-    const replacement = renderCodexAsyncAgentBlock(
-      phase,
-      markerPlugin,
-      agentId,
-      `${personaRoot}/${agentId}.md`,
-    );
+    const replacement =
+      phase === "handoffs"
+        ? renderCodexHandoffLoop()
+        : renderCodexAsyncAgentBlock(
+            phase,
+            markerPlugin,
+            agentId,
+            `${personaRoot}/${agentId}.md`,
+          );
     adapted = `${adapted.slice(0, start)}${replacement}${adapted.slice(start + match[0].length)}`;
   }
 

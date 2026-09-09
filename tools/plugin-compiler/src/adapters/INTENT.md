@@ -17,7 +17,7 @@ facts 를 호스트 어댑터 파일 내용으로 변환한다. Codex 훅 capabi
 - 키 순서를 코드에서 고정 — 동일 facts 는 바이트 동일 출력(stableJson 전제).
 - 생성 MCP 선언마다 `OGHAM_HOST` 마커를 env 에 병합 (codex/agy).
 - Claude 훅 정본은 그대로 두고, Codex에서 의미가 없는 이벤트·exact tool matcher만 생성 사본에서 제거.
-- Claude skill의 marker 내부 기본 문단은 그대로 두고, Codex variant에서만 explicit spawn/join 문단으로 치환한다. 불완전한 marker나 없는 persona는 조용히 통과시키지 않는다.
+- Preserve Claude's marked paragraphs; replace them only in Codex variants with explicit spawn/join or persona-free handoff waiting. Reject malformed markers and missing personas when the selected lifecycle requires one.
 
 ### Ask first
 
