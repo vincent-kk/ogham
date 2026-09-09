@@ -63,7 +63,7 @@
       "description": "Direction-only structure rules: dependencies form a DAG, depth is a toll, cohesion splits and complexity compresses.",
       "grounding": "This rule rests on properties every codebase has: files have sizes and paths, and symbols reference one another.",
       "recommended": false,
-      "templateHash": "2c9ccbd751c825fa14ec2450b54a1489843f67c938019996fd35336170529d43"
+      "templateHash": "4fb7e3054005fa71516d51f37187614587470dafba73c1e72cefafa2516f7c7d"
     },
     {
       "id": "seiri_function-boundaries",
