@@ -56,7 +56,7 @@ For each candidate, in order:
 2. Independently reproduce the failure or degradation from code, callers, consumers, evidence, and the authoritative user requirement when the rule is `USR-NNN`. The reviewer's conclusion is not proof.
 3. Use `REFUTED` only when a current code or canonical evidence line literally contradicts the claim. An absent file or excerpt alone does not refute a deletion defect.
 4. Never refute memory safety, concurrency, declaration-to-wiring consistency, behavior or compatibility changes, or public-contract violations without that literal contradiction.
-5. Use `INDETERMINATE` when obtainable evidence neither reproduces nor contradicts the claim. An INDETERMINATE decision or whole opinion may add resolution advice with `question`, `evidenceNeeded`, `nextAction`, `doneWhen`, `suggestedOwner` (`agent`, `human`, or `unknown`), and `humanReason` when the suggestion is human; it is a proposal, not an assignment.
+5. Use INDETERMINATE when evidence cannot confirm or refute. Add resolution with question, evidenceNeeded, nextAction, doneWhen and suggestedOwner. Human requires humanReason plus 2–5 distinct options; agent recovery needs evidence, not a human choice. Unsupported analysis names the missing capability. Advice grants no authority.
 6. Cite the independently inspected line or row and give one falsifiable reason.
 
 ## Constraints
