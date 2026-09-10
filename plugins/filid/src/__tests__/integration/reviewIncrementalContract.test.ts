@@ -19,7 +19,7 @@ describe('ordinary incremental review wiring', () => {
     const manifest = JSON.parse(
       readFileSync(join(root, '.codex-plugin/plugin.json'), 'utf8'),
     );
-    expect(manifest.skills).toBe('./skills/');
+    expect(manifest.skills).toBe('./.codex-plugin/skills/');
     for (const relative of [
       'skills/cross-review/SKILL.md',
       join(manifest.skills, 'cross-review/SKILL.md'),
