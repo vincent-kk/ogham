@@ -1,15 +1,10 @@
-## Endpoints
+# project
 
-| Operation     | HTTP | Cloud Endpoint                                 | Server Endpoint                        |
-| ------------- | ---- | ---------------------------------------------- | -------------------------------------- |
-| List projects | GET  | `/rest/api/3/project`                          | `/rest/api/2/project`                  |
-| Get project   | GET  | `/rest/api/3/project/{key}`                    | `/rest/api/2/project/{key}`            |
-| Issue types   | GET  | `/rest/api/3/issuetype/project?projectId={id}` | `/rest/api/2/project/{key}/statuses`   |
-| Components    | GET  | `/rest/api/3/project/{key}/components`         | `/rest/api/2/project/{key}/components` |
-| Versions      | GET  | `/rest/api/3/project/{key}/versions`           | `/rest/api/2/project/{key}/versions`   |
-
-## MCP Tool Mapping
-
-| Operation      | MCP Tool                             | Method | Notes     |
-| -------------- | ------------------------------------ | ------ | --------- |
-| All operations | `mcp__plugin_atlassian_tools__fetch` | GET    | Read-only |
+| Operation      | Method | Endpoint                               | Notes                                                                                                                      |
+| -------------- | ------ | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| List projects  | GET    | `/project`                             | Cloud also has paginated `/project/search`                                                                                 |
+| Get project    | GET    | `/project/{projectIdOrKey}`            | `expand: ["issueTypes", "lead"]`                                                                                           |
+| Issue types    | GET    | `/project/{projectIdOrKey}/statuses`   | Issue types with their workflow statuses; on Cloud, `GET /issuetype/project` with `query_params: { projectId }` also works |
+| Components     | GET    | `/project/{projectIdOrKey}/components` |                                                                                                                            |
+| Versions       | GET    | `/project/{projectIdOrKey}/versions`   |                                                                                                                            |
+| Create version | POST   | `/version`                             | `{ name, projectId, released?, releaseDate? }`                                                                             |

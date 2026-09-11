@@ -1,20 +1,8 @@
-## Endpoints
+# development-info
 
-| Operation   | HTTP | Endpoint                                                                                |
-| ----------- | ---- | --------------------------------------------------------------------------------------- |
-| Dev summary | GET  | `/rest/dev-status/1.0/issue/summary?issueId={id}`                                       |
-| Dev detail  | GET  | `/rest/dev-status/1.0/issue/detail?issueId={id}&applicationType={type}&dataType={type}` |
+Read-only. Requires the numeric issue `id` (from `GET /issue/{key}`), not the key.
 
-## Parameters
-
-| Parameter       | Type   | Required | Description                             |
-| --------------- | ------ | -------- | --------------------------------------- |
-| issueId         | string | Y        | Issue ID (not key)                      |
-| applicationType | string | N        | Filter: GitHub, Bitbucket, etc.         |
-| dataType        | string | N        | Filter: repository, branch, pullrequest |
-
-## MCP Tool Mapping
-
-| Operation      | MCP Tool                             | Method | Notes                                  |
-| -------------- | ------------------------------------ | ------ | -------------------------------------- |
-| All operations | `mcp__plugin_atlassian_tools__fetch` | GET    | Read-only. Requires issue ID, not key. |
+| Operation | Method | Endpoint                                                                               | Notes                                                                                                    |
+| --------- | ------ | -------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Summary   | GET    | `/rest/dev-status/1.0/issue/summary?issueId={id}`                                      | Counts of branches, commits, PRs                                                                         |
+| Detail    | GET    | `/rest/dev-status/1.0/issue/detail?issueId={id}&applicationType={app}&dataType={type}` | `applicationType`: `GitHub`, `bitbucket`, `stash`, … · `dataType`: `repository`, `branch`, `pullrequest` |

@@ -1,21 +1,10 @@
-## Endpoints
+# worklog
 
-| Operation     | HTTP | Cloud Endpoint                    | Server Endpoint                   |
-| ------------- | ---- | --------------------------------- | --------------------------------- |
-| List worklogs | GET  | `/rest/api/3/issue/{key}/worklog` | `/rest/api/2/issue/{key}/worklog` |
-| Add worklog   | POST | `/rest/api/3/issue/{key}/worklog` | `/rest/api/2/issue/{key}/worklog` |
+| Operation      | Method | Endpoint                    | Notes                                                                                   |
+| -------------- | ------ | --------------------------- | --------------------------------------------------------------------------------------- |
+| List worklogs  | GET    | `/issue/{key}/worklog`      |                                                                                         |
+| Add worklog    | POST   | `/issue/{key}/worklog`      | `{ timeSpentSeconds, started, comment? }` — `started` as `YYYY-MM-DDTHH:mm:ss.sss+0000` |
+| Update worklog | PUT    | `/issue/{key}/worklog/{id}` | Same fields                                                                             |
+| Delete worklog | DELETE | `/issue/{key}/worklog/{id}` |                                                                                         |
 
-## Parameters
-
-| Parameter        | Type       | Required | Description       |
-| ---------------- | ---------- | -------- | ----------------- |
-| timeSpentSeconds | number     | Y        | Time in seconds   |
-| started          | string     | Y        | ISO 8601 datetime |
-| comment          | ADF/string | N        | Worklog comment   |
-
-## MCP Tool Mapping
-
-| Operation | MCP Tool                             | Method | Notes |
-| --------- | ------------------------------------ | ------ | ----- |
-| List      | `mcp__plugin_atlassian_tools__fetch` | GET    |       |
-| Add       | `mcp__plugin_atlassian_tools__fetch` | POST   |       |
+`comment` is not markdown-converted (only `body`/`description` are). Server/DC: plain text. Cloud: an ADF object — build it with the `convert` tool (`markdown` → `adf`) or omit the comment.

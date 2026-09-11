@@ -1,28 +1,10 @@
-## Endpoints
+# search
 
-| Operation    | HTTP | Cloud Endpoint           | Server Endpoint              |
-| ------------ | ---- | ------------------------ | ---------------------------- |
-| Search (JQL) | POST | `/rest/api/3/search/jql` | —                            |
-| Search (JQL) | GET  | —                        | `/rest/api/2/search?jql=...` |
+Path and method differ per deployment and are not translated — send the full path.
 
-## Parameters
+| Deployment | Method | Endpoint                 | Request                                                                                                                |
+| ---------- | ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Cloud      | POST   | `/rest/api/3/search/jql` | Body `{ jql, fields?, maxResults?, nextPageToken? }` — cursor pagination                                               |
+| Server/DC  | GET    | `/rest/api/2/search`     | `query_params: { jql, fields?, maxResults?, startAt? }` — all values strings, `fields` comma-joined; offset pagination |
 
-| Parameter     | Type     | Required | Description             |
-| ------------- | -------- | -------- | ----------------------- |
-| jql           | string   | Y        | JQL query string        |
-| fields        | string[] | N        | Fields to include       |
-| maxResults    | number   | N        | Page size (default: 50) |
-| startAt       | number   | N        | Offset (Server only)    |
-| nextPageToken | string   | N        | Cursor (Cloud only)     |
-
-## Cloud vs Server Branching
-
-- **Cloud**: POST with JQL in body, cursor-based pagination
-- **Server**: GET with JQL in query param, offset-based pagination
-
-## MCP Tool Mapping
-
-| Operation       | MCP Tool                             | Method | Notes               |
-| --------------- | ------------------------------------ | ------ | ------------------- |
-| Search (Cloud)  | `mcp__plugin_atlassian_tools__fetch` | POST   | JQL in request body |
-| Search (Server) | `mcp__plugin_atlassian_tools__fetch` | GET    | JQL in query_params |
+Default page size 50. Request only the `fields` you need; issues with ADF descriptions gain a `description_markdown` twin in the response.

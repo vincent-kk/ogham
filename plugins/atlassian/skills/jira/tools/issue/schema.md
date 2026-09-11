@@ -1,91 +1,60 @@
-# issue — Schema Reference
+# issue
 
-Issue CRUD, bulk create, and changelog operations.
+| Operation                    | Method | Endpoint                                                      | Notes                                                                                                                                                 |
+| ---------------------------- | ------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Get issue                    | GET    | `/issue/{issueIdOrKey}`                                       | `query_params.fields` (comma list, `*all`), `expand: ["renderedFields", "changelog", "editmeta", "transitions", "names", "schema"]`                   |
+| Create issue                 | POST   | `/issue`                                                      | `content_format: "markdown"` for `fields.description`                                                                                                 |
+| Update issue                 | PUT    | `/issue/{issueIdOrKey}`                                       | `fields` and/or `update`; to silence mail append `?notifyUsers=false` to the path (`query_params` is dropped on PUT)                                  |
+| Delete issue                 | DELETE | `/issue/{issueIdOrKey}`                                       | `query_params: { deleteSubtasks: "true" }` when it has sub-tasks                                                                                      |
+| Assign                       | PUT    | `/issue/{issueIdOrKey}/assignee`                              | Body: user object (below)                                                                                                                             |
+| Bulk create                  | POST   | `/issue/bulk`                                                 | `{ issueUpdates: [{ fields }, …] }`, max 50. Nested descriptions are not markdown-converted: pre-convert with the `convert` tool or create one by one |
+| Changelog                    | GET    | `/issue/{issueIdOrKey}/changelog`                             | `startAt`, `maxResults` (≤100)                                                                                                                        |
+| Create metadata: issue types | GET    | `/issue/createmeta/{projectIdOrKey}/issuetypes`               | Paginated                                                                                                                                             |
+| Create metadata: fields      | GET    | `/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` | DC < 8.4 has only flat `GET /issue/createmeta`                                                                                                        |
+| Edit metadata                | GET    | `/issue/{issueIdOrKey}/editmeta`                              |                                                                                                                                                       |
+| Archive                      | PUT    | `/issue/{issueIdOrKey}/archive`                               | Cloud only                                                                                                                                            |
 
-## Endpoints
+## Create / update body
 
-| Operation                         | HTTP   | Cloud Endpoint                                                           | Server Endpoint                                                          |
-| --------------------------------- | ------ | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| Get issue                         | GET    | `/rest/api/3/issue/{issueIdOrKey}`                                       | `/rest/api/2/issue/{issueIdOrKey}`                                       |
-| Create issue                      | POST   | `/rest/api/3/issue`                                                      | `/rest/api/2/issue`                                                      |
-| Update issue                      | PUT    | `/rest/api/3/issue/{issueIdOrKey}`                                       | `/rest/api/2/issue/{issueIdOrKey}`                                       |
-| Delete issue                      | DELETE | `/rest/api/3/issue/{issueIdOrKey}`                                       | `/rest/api/2/issue/{issueIdOrKey}`                                       |
-| Bulk create                       | POST   | `/rest/api/3/issue/bulk`                                                 | `/rest/api/2/issue/bulk`                                                 |
-| Get changelog                     | GET    | `/rest/api/3/issue/{issueIdOrKey}/changelog`                             | `/rest/api/2/issue/{issueIdOrKey}/changelog`                             |
-| Get create metadata (issue types) | GET    | `/rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes`               | `/rest/api/2/issue/createmeta/{projectIdOrKey}/issuetypes`               |
-| Get create metadata (fields)      | GET    | `/rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` | `/rest/api/2/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` |
-| Get edit metadata                 | GET    | `/rest/api/3/issue/{issueIdOrKey}/editmeta`                              | `/rest/api/2/issue/{issueIdOrKey}/editmeta`                              |
-| Assign issue                      | PUT    | `/rest/api/3/issue/{issueIdOrKey}/assignee`                              | `/rest/api/2/issue/{issueIdOrKey}/assignee`                              |
-| Archive issue                     | PUT    | `/rest/api/3/issue/{issueIdOrKey}/archive`                               | —                                                                        |
+`{ fields: { … }, update?: { … } }`
 
-Create metadata is scoped: enumerate a project's issue types first, then fetch field metadata per issue type. Responses are paginated on both platforms. Server/DC releases older than 8.4 (EOL) lack the scoped endpoints and expose only the flat `GET /rest/api/2/issue/createmeta`.
+| Field                       | Value                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------- |
+| `project` (create)          | `{ key }` or `{ id }`                                                           |
+| `issuetype` (create)        | `{ name }` or `{ id }`                                                          |
+| `summary` (create)          | string                                                                          |
+| `description`               | Markdown string with `content_format: "markdown"`                               |
+| `assignee`, `reporter`      | Cloud `{ accountId }`; Server/DC `{ name }`                                     |
+| `priority`                  | `{ name }` or `{ id }`                                                          |
+| `labels`                    | `string[]`                                                                      |
+| `components`, `fixVersions` | `[{ name }]` or `[{ id }]`                                                      |
+| `duedate`                   | `YYYY-MM-DD`                                                                    |
+| `parent`                    | `{ key }` (sub-tasks, or child of an epic on Cloud)                             |
+| `customfield_NNNNN`         | Shape from create/edit metadata — see [Field value shapes](#field-value-shapes) |
 
-## Parameters
+Server/DC: the issue's `comment` field never carries reply-plugin replies — see `tools/comment/schema.md`.
 
-### Get Issue
+## Field formatting
 
-| Parameter       | Type     | Required | Description                                                                 |
-| --------------- | -------- | -------- | --------------------------------------------------------------------------- |
-| `issueIdOrKey`  | string   | yes      | Issue ID (e.g., `10001`) or key (e.g., `PROJ-123`)                          |
-| `fields`        | string[] | no       | Comma-separated list of fields to return; `*all` for all fields             |
-| `fieldsByKeys`  | boolean  | no       | Use field keys instead of IDs when `true`                                   |
-| `expand`        | string   | no       | `renderedFields`, `names`, `schema`, `transitions`, `changelog`, `editmeta` |
-| `properties`    | string[] | no       | Entity property keys to include                                             |
-| `updateHistory` | boolean  | no       | Add to user's recent issues when `true`                                     |
+`content_format: "markdown"` converts `description`, `body`, and `fields.description`: ADF on Cloud, wiki markup on Server/DC. Other fields are sent as given.
 
-### Create / Update Issue
+### Wiki markup (Server/DC) escaping
 
-| Parameter            | Type       | Required     | Description                                                               |
-| -------------------- | ---------- | ------------ | ------------------------------------------------------------------------- |
-| `fields`             | object     | yes          | Map of field IDs to values                                                |
-| `fields.summary`     | string     | yes (create) | Issue summary / title                                                     |
-| `fields.issuetype`   | object     | yes (create) | `{ id: "10001" }` or `{ name: "Bug" }`                                    |
-| `fields.project`     | object     | yes (create) | `{ id: "10000" }` or `{ key: "PROJ" }`                                    |
-| `fields.description` | ADF/string | no           | Cloud: ADF object; Server: Wiki markup string                             |
-| `fields.assignee`    | object     | no           | Cloud: `{ accountId: "..." }`; Server: `{ name: "..." }`                  |
-| `fields.priority`    | object     | no           | `{ name: "High" }` or `{ id: "2" }`                                       |
-| `fields.labels`      | string[]   | no           | Array of label strings                                                    |
-| `fields.components`  | object[]   | no           | `[{ id: "10000" }]` or `[{ name: "UI" }]`                                 |
-| `fields.fixVersions` | object[]   | no           | `[{ id: "10001" }]` or `[{ name: "v1.0" }]`                               |
-| `fields.duedate`     | string     | no           | ISO 8601 date: `"2024-12-31"`                                             |
-| `fields.parent`      | object     | no           | `{ key: "PROJ-100" }` for sub-tasks                                       |
-| `update`             | object     | no           | Field update instructions for atomic operations (e.g., add/remove labels) |
-| `notifyUsers`        | boolean    | no           | Send email notifications when `true` (default: `true`)                    |
+The markdown→wiki converter escapes wiki specials (`[ ] { } | * _ - + ^ ~ !`) in plain text, inline code, and bold/italic/strike, so `[0]`, `{timeout}`, `a|b` render literally. Markdown escapes (`\[`) pass through.
 
-### Bulk Create
+Not protected — keep such content in fenced code blocks or rephrase:
 
-| Parameter      | Type     | Required | Description                                |
-| -------------- | -------- | -------- | ------------------------------------------ |
-| `issueUpdates` | object[] | yes      | Array of issue objects, each with `fields` |
+- Link labels and image alt text (wiki cannot escape inside `[alias|url]` / `!url|alt=x!`)
+- Doubled markers `{{` and `??`
+- Backslash runs — `\\` is a forced line break in wiki markup (UNC paths)
 
-### Get Changelog
+## Field value shapes
 
-| Parameter      | Type    | Required | Description                                 |
-| -------------- | ------- | -------- | ------------------------------------------- |
-| `issueIdOrKey` | string  | yes      | Issue ID or key                             |
-| `startAt`      | integer | no       | Pagination offset (default: 0)              |
-| `maxResults`   | integer | no       | Max items per page (default: 100, max: 100) |
-
-## Cloud vs Server Branching
-
-| Feature            | Cloud (v3)                                  | Server/DC (v2)         |
-| ------------------ | ------------------------------------------- | ---------------------- |
-| Description format | ADF (Atlassian Document Format) JSON object | Wiki markup string     |
-| Assignee field     | `{ accountId: "5b10..." }`                  | `{ name: "username" }` |
-| Reporter field     | `{ accountId: "5b10..." }`                  | `{ name: "username" }` |
-| Archive endpoint   | `/rest/api/3/issue/{key}/archive`           | Not available          |
-| Bulk create max    | 50 issues per request                       | 50 issues per request  |
-
-## MCP Tool Mapping
-
-| Operation                         | MCP Tool                             | Method | Notes                                                                                                                        |
-| --------------------------------- | ------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| Get issue                         | `mcp__plugin_atlassian_tools__fetch` | GET    | Server/DC: the `comment` field holds standard comments only — read comments via `comment_thread` (`tools/comment/schema.md`) |
-| Create issue                      | `mcp__plugin_atlassian_tools__fetch` | POST   |                                                                                                                              |
-| Update issue                      | `mcp__plugin_atlassian_tools__fetch` | PUT    |                                                                                                                              |
-| Delete issue                      | `mcp__plugin_atlassian_tools__fetch` | DELETE |                                                                                                                              |
-| Bulk create                       | `mcp__plugin_atlassian_tools__fetch` | POST   | POST to `/issue/bulk`                                                                                                        |
-| Get changelog                     | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/{key}/changelog`                                                                                              |
-| Get create metadata (issue types) | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/createmeta/{project}/issuetypes`                                                                              |
-| Get create metadata (fields)      | `mcp__plugin_atlassian_tools__fetch` | GET    | GET to `/issue/createmeta/{project}/issuetypes/{issueTypeId}`                                                                |
-| Assign issue                      | `mcp__plugin_atlassian_tools__fetch` | PUT    | PUT to `/issue/{key}/assignee`                                                                                               |
+| Kind          | Cloud                                                                                                  | Server/DC               |
+| ------------- | ------------------------------------------------------------------------------------------------------ | ----------------------- |
+| User          | `{ accountId }`                                                                                        | `{ name }` or `{ key }` |
+| Date          | `YYYY-MM-DD`                                                                                           | same                    |
+| Datetime      | `YYYY-MM-DDTHH:mm:ss.sssZ`                                                                             | same                    |
+| Single select | `{ value }` or `{ id }`                                                                                | same                    |
+| Multi select  | `[{ value }, …]`                                                                                       | same                    |
+| Custom field  | `customfield_NNNNN` — read its schema from create/edit metadata (above) or `GET /field` before writing |                         |

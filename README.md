@@ -149,7 +149,7 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 | Component | Count | Examples                                                                                                           |
 | --------- | ----- | ------------------------------------------------------------------------------------------------------------------ |
 | Skills    | 5     | `/atlassian:setup`, `/atlassian:jira`, `/atlassian:confluence`, `/atlassian:download`, `/atlassian:media-analysis` |
-| MCP Tools | 4     | `fetch`, `convert`, `auth-check`, `setup`                                                                          |
+| MCP Tools | 5     | `fetch`, `convert`, `auth_check`, `setup`, `comment_thread`                                                        |
 | Agents    | 3     | jira, confluence, media (multimodal keyframe analysis)                                                             |
 | Hooks     | 0     | —                                                                                                                  |
 
@@ -159,7 +159,7 @@ Teams using Jira and Confluence pay a context tax: dozens of tool schemas bloat 
 - **Lazy reference loading** — API capsules load tool schemas only when needed, keeping the context window small
 - **Multi-format conversion** — Built-in ADF / Storage / Wiki ↔ Markdown converter ported from the Python `mcp-atlassian` source
 - **Multimodal media analysis** — Media agent extracts keyframes from images / videos / GIFs and runs semantic scene analysis
-- **Auth coverage** — Basic (email + token), PAT (Server / DC), OAuth 2.0 (3LO) for both Cloud and Server / DC instances
+- **Auth coverage** — Basic (email + API token on Cloud, username + password on Server / DC) and PAT (Server / DC)
 
 ```
 # Configure Jira / Confluence credentials

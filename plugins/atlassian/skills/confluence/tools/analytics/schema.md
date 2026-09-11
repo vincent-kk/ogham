@@ -1,20 +1,8 @@
-## Endpoints
+# analytics
 
-Analytics is Cloud-only. MCP raises an explicit error on Server/DC.
+Cloud only — the MCP layer rejects `/analytics` on Server/DC. `service: "confluence"`.
 
-| Operation  | HTTP | Endpoint                        |
-| ---------- | ---- | ------------------------------- |
-| Page views | GET  | `/analytics/content/{id}/views` |
-
-## Parameters
-
-| Parameter | Type   | Required | Description         |
-| --------- | ------ | -------- | ------------------- |
-| fromDate  | string | N        | ISO 8601 start date |
-| toDate    | string | N        | ISO 8601 end date   |
-
-## MCP Tool Mapping
-
-| Operation | MCP Tool                             | Method | Notes                                         |
-| --------- | ------------------------------------ | ------ | --------------------------------------------- |
-| Get views | `mcp__plugin_atlassian_tools__fetch` | GET    | Cloud only — DC returns "Cloud V2 only" error |
+| Operation  | Method | Endpoint                          | Notes                                       |
+| ---------- | ------ | --------------------------------- | ------------------------------------------- |
+| Page views | GET    | `/analytics/content/{id}/views`   | `query_params: { fromDate?: "YYYY-MM-DD" }` |
+| Viewers    | GET    | `/analytics/content/{id}/viewers` | Distinct viewer count; same params          |

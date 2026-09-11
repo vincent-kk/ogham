@@ -1,33 +1,18 @@
-## Endpoints
+# agile
 
-| Operation      | HTTP  | Endpoint                                  |
-| -------------- | ----- | ----------------------------------------- |
-| List boards    | GET   | `/rest/agile/1.0/board`                   |
-| Get board      | GET   | `/rest/agile/1.0/board/{boardId}`         |
-| Board issues   | GET   | `/rest/agile/1.0/board/{boardId}/issue`   |
-| List sprints   | GET   | `/rest/agile/1.0/board/{boardId}/sprint`  |
-| Get sprint     | GET   | `/rest/agile/1.0/sprint/{sprintId}`       |
-| Sprint issues  | GET   | `/rest/agile/1.0/sprint/{sprintId}/issue` |
-| Create sprint  | POST  | `/rest/agile/1.0/sprint`                  |
-| Update sprint  | PATCH | `/rest/agile/1.0/sprint/{sprintId}`       |
-| Move to sprint | POST  | `/rest/agile/1.0/sprint/{sprintId}/issue` |
-| Get epic       | GET   | `/rest/agile/1.0/epic/{epicId}`           |
-| Epic issues    | GET   | `/rest/agile/1.0/epic/{epicId}/issue`     |
-| Move to epic   | POST  | `/rest/agile/1.0/epic/{epicId}/issue`     |
+Same paths on Cloud and Server/DC; sent verbatim.
 
-## Parameters
-
-| Parameter | Type   | Required       | Description |
-| --------- | ------ | -------------- | ----------- |
-| boardId   | number | Y (board ops)  | Board ID    |
-| sprintId  | number | Y (sprint ops) | Sprint ID   |
-| epicId    | number | Y (epic ops)   | Epic ID     |
-
-## MCP Tool Mapping
-
-| Operation     | MCP Tool                             | Method | Notes                |
-| ------------- | ------------------------------------ | ------ | -------------------- |
-| List/Get      | `mcp__plugin_atlassian_tools__fetch` | GET    |                      |
-| Create        | `mcp__plugin_atlassian_tools__fetch` | POST   |                      |
-| Update sprint | `mcp__plugin_atlassian_tools__fetch` | PATCH  | Partial update       |
-| Move issues   | `mcp__plugin_atlassian_tools__fetch` | POST   | Issues array in body |
+| Operation      | Method | Endpoint                                  | Notes                                                                           |
+| -------------- | ------ | ----------------------------------------- | ------------------------------------------------------------------------------- |
+| List boards    | GET    | `/rest/agile/1.0/board`                   | `projectKeyOrId`, `type` (`scrum`/`kanban`)                                     |
+| Get board      | GET    | `/rest/agile/1.0/board/{boardId}`         |                                                                                 |
+| Board issues   | GET    | `/rest/agile/1.0/board/{boardId}/issue`   | `jql` filter allowed                                                            |
+| List sprints   | GET    | `/rest/agile/1.0/board/{boardId}/sprint`  | `state` (`active`/`future`/`closed`)                                            |
+| Get sprint     | GET    | `/rest/agile/1.0/sprint/{sprintId}`       |                                                                                 |
+| Sprint issues  | GET    | `/rest/agile/1.0/sprint/{sprintId}/issue` |                                                                                 |
+| Create sprint  | POST   | `/rest/agile/1.0/sprint`                  | `{ name, originBoardId, startDate?, endDate? }`                                 |
+| Update sprint  | PATCH  | `/rest/agile/1.0/sprint/{sprintId}`       | Partial; `state: "active"` starts, `"closed"` completes                         |
+| Move to sprint | POST   | `/rest/agile/1.0/sprint/{sprintId}/issue` | `{ issues: ["KEY-1", …] }`                                                      |
+| Get epic       | GET    | `/rest/agile/1.0/epic/{epicId}`           |                                                                                 |
+| Epic issues    | GET    | `/rest/agile/1.0/epic/{epicId}/issue`     |                                                                                 |
+| Move to epic   | POST   | `/rest/agile/1.0/epic/{epicId}/issue`     | `{ issues: [...] }`; on Cloud team-managed projects set `fields.parent` instead |

@@ -1,50 +1,51 @@
 ---
 name: media-analysis
 user-invocable: true
-description: 'Analyze media attachments from Confluence/Jira — downloads images/videos/GIFs, extracts keyframes via scene-sieve, and runs semantic analysis with the media agent. Use when asked to "analyze media" or "미디어 분석".'
+description: 'Download Jira/Confluence images, videos, or GIFs, extract frames with scene-sieve, and optionally analyze them with the media agent. Use for "analyze media" (any language), or when a screen recording or GIF must be understood.'
 argument-hint: "<url-or-path> [--analyze] [--preset NAME] [--force]"
-version: "1.0.0"
+version: "1.2.0"
 complexity: moderate
 plugin: atlassian
 ---
 
-# media-analysis — Media Download & Analysis
+# media-analysis
 
-Download images, videos, and GIFs from Atlassian sources or local paths. For video/GIF files, extracts visually meaningful keyframes via scene-sieve and runs semantic analysis through the `media` subagent to produce a structured analysis.json.
-
-## When to Use This Skill
-
-- User wants to understand visual content attached to Confluence pages or Jira issues
-- Downloading and analyzing screen recordings, demo videos, or GIF animations
-- Extracting keyframes from video attachments for LLM comprehension
-- Pre-processing media before running digest or validation workflows
+Resolve media to an image path or extracted frames; optionally ask the media agent for a text analysis.
 
 ## Arguments
 
+- `<url-or-path>` - Atlassian attachment URL or local file.
+- `--analyze` - analyze extracted frames.
+- `--preset <name>` - override intent-based selection.
+- `--force` - bypass cached analysis.
+
+## Layout
+
 ```
-/atlassian:media-analysis <url-or-path> [--analyze] [--preset <name>] [--force]
-
-<url-or-path>  : Confluence attachment URL, Jira attachment URL, or local file path
---analyze      : For video/GIF, run scene-sieve extraction + `media` analysis
---preset       : scene-sieve preset override (default: auto-detect from extension/duration)
---force        : Force re-analysis even if cached analysis.json exists
+.temp/<namespace>/<filename>             downloaded file
+.temp/<namespace>/<filename>.analysis/   frames/ and analysis.json
 ```
 
-## References
+Use the download skill's namespace; local files use `local` and retain their original path.
 
-- [workflow.md](./references/workflow.md) — Complete Workflow (Steps 1-5): input resolution, download, probe, image handling, video/GIF handling
-- [preset-selection.md](./references/preset-selection.md) — Preset Auto-Selection: priority rules, intent override keywords, file structure
-- [tools.md](./references/tools.md) — Tools Used, Agent Spawn & Caching: atlassian MCP tools, `media` agent details, cache behavior
-- [scripts/probe.mjs](./scripts/probe.mjs) — Video probe + preset auto-selection script (run before extraction, cross-platform)
-- [presets/index.md](./presets/index.md) — Decision matrix and summary table for preset selection
-  - [short-clip.md](./presets/short-clip.md) — <= 30s clips
-  - [medium-video.md](./presets/medium-video.md) — 30s-5min videos
-  - [long-video.md](./presets/long-video.md) — 5-30min videos
-  - [very-long.md](./presets/very-long.md) — > 30min videos
-  - [gif.md](./presets/gif.md) — GIF animations
-  - [quick-glance.md](./presets/quick-glance.md) — Fast summary
-  - [detailed.md](./presets/detailed.md) — Thorough analysis
-  - [hq-capture.md](./presets/hq-capture.md) — High-quality screenshots
-  - [inspection.md](./presets/inspection.md) — Visual bug detection
-  - [screen-recording.md](./presets/screen-recording.md) — UI walkthroughs
-- [reference.md](./references/reference.md) — Complete flag reference (14 flags), JSON output schemas, error codes, troubleshooting
+## Workflow
+
+1. Atlassian URL: download per the `download` skill and keep `saved_to`; local path: use as-is.
+2. Run `node "<skill-dir>/scripts/probe.mjs" "<file>" [preset]`. Pass the `--preset` value, or choose `quick-glance`, `detailed`, `hq-capture`, `inspection`, or `screen-recording` from the user's intent. Otherwise the probe picks by extension and duration. `scripts/probe.mjs` owns the preset definitions. Continue only when JSON `ok` is true; treat `preset` and `command`/`argv` as the source of truth and surface a non-null `warning`.
+3. If `probe.type === "image"`, return the path for multimodal Read and stop.
+4. Reuse `analysis.json` when present, `--force` is absent, and its `preset` equals the selected one; return its summary and stop.
+5. Run `argv` (or `command`) with `-o "<analysis-dir>/frames"`. Keep `--json` and parse `ok` before continuing.
+6. Without `--analyze`, return the frames directory and count. Otherwise spawn `media` with the absolute frames directory, `.metadata.json`, original path, preset name, `analysis.json` target, and user's purpose; relay only its text summary.
+
+## Failure rules
+
+- Inspect the structured error before retrying.
+- Rejected flag: run `npx -y @lumy-pack/scene-sieve --describe` and adapt to the reported interface.
+- Timeout or memory pressure: retry once with `--max-frames 100 --concurrency 1` and lower scale.
+- No video stream: report it.
+
+## Boundaries
+
+- Never modify the source media.
+- Nothing under `.temp/` is deleted without the user's consent.
+- `npx -y` follows the host approval policy.

@@ -1,22 +1,12 @@
-## Endpoints
+# search
 
-CQL search uses the V1 content-search endpoint on both Cloud and Server/DC (Atlassian kept the v1 search alive even after v1 deprecation). Send the V1 path directly — no V2 logical equivalent.
+CQL search is a V1 endpoint on both deployments; send the full path with `service: "confluence"`.
 
-| Operation  | HTTP | Endpoint                  |
-| ---------- | ---- | ------------------------- |
-| CQL Search | GET  | `/content/search?cql=...` |
+| Deployment | Method | Endpoint                        | Request                                                               |
+| ---------- | ------ | ------------------------------- | --------------------------------------------------------------------- |
+| Cloud      | GET    | `/wiki/rest/api/content/search` | `query_params: { cql, limit?, start?, expand? }` — all values strings |
+| Server/DC  | GET    | `/rest/api/content/search`      | same                                                                  |
 
-## Parameters
+Default `limit` 25. `expand: "body.storage,version,space"` when content is needed. Response `results[]` with `_links.next` for paging.
 
-| Parameter | Type   | Required | Description                    |
-| --------- | ------ | -------- | ------------------------------ |
-| cql       | string | Y        | CQL query                      |
-| limit     | number | N        | Results per page (default: 25) |
-| start     | number | N        | Offset for pagination          |
-| expand    | string | N        | Fields to expand               |
-
-## MCP Tool Mapping
-
-| Operation | MCP Tool                             | Method | Notes                 |
-| --------- | ------------------------------------ | ------ | --------------------- |
-| Search    | `mcp__plugin_atlassian_tools__fetch` | GET    | CQL in `query_params` |
+CQL notes: `space = "KEY"`, `type = page`, `title ~ "text"`, `text ~ "text"`, `label = "x"`, `ancestor = <pageId>` (any depth), `lastmodified >= now("-7d")`, `creator = currentUser()`.

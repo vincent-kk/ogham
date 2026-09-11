@@ -48,7 +48,7 @@ Unlike standard MCP servers that dump tools into the LLM context, this plugin us
 /atlassian:setup
 ```
 
-Configures authentication (Basic, PAT, OAuth 2.0) and connection details for your Jira/Confluence Cloud or Server/DC instances. Uses a local web server for a seamless setup experience.
+Configures authentication (Basic with email + API token or username + password, PAT for Server/DC) and connection details for your Jira/Confluence Cloud or Server/DC instances. Uses a local web server for a seamless setup experience.
 
 ### Jira Operations
 
@@ -95,7 +95,7 @@ The plugin uses a 4-layer architecture to maximize efficiency and reliability:
 
 | Skill                       | Scope      | What it does                                                                 |
 | --------------------------- | ---------- | ---------------------------------------------------------------------------- |
-| `/atlassian:setup`          | Common     | Auth and connection management (Basic, PAT, OAuth 2.0)                       |
+| `/atlassian:setup`          | Common     | Auth and connection management (Basic, PAT)                                  |
 | `/atlassian:download`       | Common     | Unified attachment download for both platforms                               |
 | `/atlassian:media-analysis` | Common     | Download + multimodal analysis of attached images/videos/GIFs                |
 | `/atlassian:jira`           | Jira       | Jira API domain router (15 domains including issue, search, agile, etc.)     |
@@ -134,14 +134,14 @@ Credentials are never written to stdout or log output.
 
 For technical details and architectural decisions, see the [`.metadata/atlassian/`](../../.metadata/atlassian/) directory:
 
-| Document                                                          | Content                                                      |
-| ----------------------------------------------------------------- | ------------------------------------------------------------ |
-| [INDEX](../../.metadata/atlassian/INDEX.md)                       | Architecture overview and layer responsibilities             |
-| [plugin-structure](../../.metadata/atlassian/plugin-structure.md) | Directory layout and plugin configuration                    |
-| [auth-ui](../../.metadata/atlassian/auth-ui.md)                   | Setup web server and HTML form design                        |
-| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md)       | 4 Core MCP tools (`fetch`, `convert`, `auth_check`, `setup`) |
-| [dev/skills](../../.metadata/atlassian/dev/skills.md)             | 5 Skills and lazy reference loading mapping                  |
-| [dev/agents](../../.metadata/atlassian/dev/agents.md)             | Jira and Confluence agent domain logic                       |
+| Document                                                          | Content                                                                        |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| [INDEX](../../.metadata/atlassian/INDEX.md)                       | Architecture overview and layer responsibilities                               |
+| [plugin-structure](../../.metadata/atlassian/plugin-structure.md) | Directory layout and plugin configuration                                      |
+| [auth-ui](../../.metadata/atlassian/auth-ui.md)                   | Setup web server and HTML form design                                          |
+| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md)       | 5 Core MCP tools (`fetch`, `convert`, `auth_check`, `setup`, `comment_thread`) |
+| [dev/skills](../../.metadata/atlassian/dev/skills.md)             | 5 Skills and lazy reference loading mapping                                    |
+| [dev/agents](../../.metadata/atlassian/dev/agents.md)             | Jira and Confluence agent domain logic                                         |
 
 [Korean documentation (README-ko_kr.md)](./README-ko_kr.md) is also available.
 

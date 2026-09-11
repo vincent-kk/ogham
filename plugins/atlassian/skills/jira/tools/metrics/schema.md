@@ -1,22 +1,11 @@
-## Endpoints
+# metrics
 
-Metrics are calculated from issue changelog data, not a dedicated API.
+No dedicated API — derive from the changelog: `GET /issue/{key}` with `expand: ["changelog"]` (inline, ≤100 histories) or `GET /issue/{key}/changelog` (paginated).
 
-| Operation        | HTTP | Cloud Endpoint                             | Server Endpoint                            |
-| ---------------- | ---- | ------------------------------------------ | ------------------------------------------ |
-| Get changelog    | GET  | `/rest/api/3/issue/{key}/changelog`        | `/rest/api/2/issue/{key}/changelog`        |
-| Get with history | GET  | `/rest/api/3/issue/{key}?expand=changelog` | `/rest/api/2/issue/{key}?expand=changelog` |
+| Metric          | Computation                                                                |
+| --------------- | -------------------------------------------------------------------------- |
+| Cycle time      | First `status` change into an in-progress category → last change into Done |
+| Lead time       | `fields.created` → last change into Done                                   |
+| Status duration | Sum of intervals between consecutive `status` items, per status            |
 
-## Calculated Metrics
-
-| Metric          | Calculation                                    |
-| --------------- | ---------------------------------------------- |
-| Cycle time      | Time from first "In Progress" to "Done" status |
-| Lead time       | Time from creation to "Done" status            |
-| Status duration | Time spent in each status                      |
-
-## MCP Tool Mapping
-
-| Operation     | MCP Tool                             | Method | Notes                                |
-| ------------- | ------------------------------------ | ------ | ------------------------------------ |
-| Get changelog | `mcp__plugin_atlassian_tools__fetch` | GET    | Use expand=changelog for inline data |
+Status categories come from `fields.status.statusCategory.key` (`new`, `indeterminate`, `done`); use them rather than status names.

@@ -1,16 +1,10 @@
-## Endpoints
+# comment
 
-V2-style logical paths only — MCP rewrites to V1/DC form (including `type: 'comment'` injection on POST).
+`service: "confluence"` on every call.
 
-| Operation            | HTTP | Endpoint                                                                  |
-| -------------------- | ---- | ------------------------------------------------------------------------- |
-| List footer comments | GET  | `/pages/{id}/footer-comments`                                             |
-| List inline comments | GET  | `/pages/{id}/inline-comments` (Cloud V2 only — DC returns explicit error) |
-| Add footer comment   | POST | `/footer-comments`                                                        |
-
-## MCP Tool Mapping
-
-| Operation | MCP Tool                             | Method | Notes                                                                                                                                                                               |
-| --------- | ------------------------------------ | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| List      | `mcp__plugin_atlassian_tools__fetch` | GET    |                                                                                                                                                                                     |
-| Add       | `mcp__plugin_atlassian_tools__fetch` | POST   | `content_format: "markdown"`. Body: `{ body: "markdown", pageId: "{id}" }` — MCP auto-converts `pageId` → V1 `container: { id, type: 'page' }` on DC, and injects `type: 'comment'` |
+| Operation            | Method | Endpoint                      | Notes                                                                                                                    |
+| -------------------- | ------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| List footer comments | GET    | `/pages/{id}/footer-comments` | Cloud: `query_params: { "body-format": "storage" }`; DC: `expand: ["body.storage"]`                                      |
+| Add footer comment   | POST   | `/footer-comments`            | `{ pageId, body: "<markdown>" }` with `content_format: "markdown"`. DC: `pageId → container`, `type: "comment"` injected |
+| Reply to comment     | POST   | `/footer-comments`            | Cloud: add `parentCommentId`; DC: `{ container: { id: pageId, type: "page" }, ancestors: [{ id: parentId }], body }`     |
+| List inline comments | GET    | `/pages/{id}/inline-comments` | Cloud only. On DC this path is not rewritten and 404s                                                                    |

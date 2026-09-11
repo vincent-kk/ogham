@@ -2,57 +2,63 @@
 name: setup
 user-invocable: true
 disable-model-invocation: true
-description: "Configure Jira and Confluence authentication and connection settings — Basic Auth, PAT, and OAuth 2.0 for Cloud and Server/DC."
+description: "Configure or test the Jira/Confluence connection — site URL and Basic (email + API token, username + password) or PAT credentials for Cloud and Server/DC, through a local browser wizard. Use for first-time setup, HTTP 401 recovery, or /atlassian:setup --test."
 argument-hint: "[--test] [--reset]"
-version: "0.1.0"
+version: "0.2.1"
 complexity: moderate
 plugin: atlassian
 ---
 
 # setup
 
-Authentication and connection management for Atlassian products.
+Credentials are collected in a browser page served on `127.0.0.1`, never in chat — do not ask the user for URLs, tokens, or passwords.
 
-## When to Use
+## Flow
 
-- First-time setup of Jira/Confluence connection
-- Re-authentication after 401 errors
-- Changing connection settings (URL, auth type, credentials)
-- Testing connection status
+| Invocation | Action                                                                                                                                                                |
+| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--test`   | `mcp__plugin_atlassian_tools__auth_check` with `connection_test: true`; report per-site `connection.success`, `message`, `latency_ms`, and the Jira `user`. No wizard |
+| `--reset`  | `mcp__plugin_atlassian_tools__setup` with `mode: "new"` — opens the wizard; the configuration is replaced when the user saves                                         |
+| no flag    | Follow [Authentication check](#authentication-check); not configured → `setup` with `mode: "new"`; configured → confirm, then `mode: "edit"`                          |
 
-## Setup Flow
+The setup tool opens the browser and returns once the wizard saves successfully (Save & Close also shuts the local server down) or, as a failure, after 5 minutes without activity. `mode` only labels the result message. On success report `config_path` verbatim (it reflects the user/project scope chosen in the browser); on failure report the message and never guess a path.
 
-1. Parse arguments and dispatch:
-   - `--test` → call `mcp__plugin_atlassian_tools__auth_check` with `connection_test: true` and report status. Skip the wizard.
-   - `--reset` → call `mcp__plugin_atlassian_tools__setup` with `mode: "new"` (overwrites existing configuration).
-   - No flags → call `mcp__plugin_atlassian_tools__auth_check` first; if `authenticated: false` invoke `mcp__plugin_atlassian_tools__setup` with `mode: "new"`, if `authenticated: true` confirm with the user before invoking `mode: "edit"` (see [`auth-check.md`](../.shared/auth-check.md) Setup Skill Flow).
-2. The setup tool launches a local web server and opens the browser automatically (skipped for `--test`)
-3. The web UI handles the entire flow: URL input, environment detection, auth method selection, credential collection, connection testing, and saving
-4. Report the result to the user based on the MCP tool response
+## Authentication check
 
-**Do NOT** ask the user for URL, auth type, or credentials via chat — the web UI handles all of this.
+For the no-flag flow, call `mcp__plugin_atlassian_tools__auth_check` with `connection_test: true`.
 
-## Auth Types
+- `authenticated: false` → run the wizard.
+- `authenticated: true` → show the configured sites and ask before reconfiguring, in the user's language:
 
-| Method          | Cloud             | Server/DC             | Config Value |
-| --------------- | ----------------- | --------------------- | ------------ |
-| Basic Auth      | email + API token | username + password   | `basic`      |
-| PAT             | —                 | personal access token | `pat`        |
-| OAuth 2.0 (3LO) | Supported         | Supported             | `oauth`      |
+  ```
+  The following Atlassian sites are configured:
+  - Jira: {base_url} ({user.displayName}, {user.emailAddress})
+  - Confluence: {base_url}
+  Replace this configuration?
+  ```
 
-## 401 Recovery
+Response: `{ authenticated, services: { jira?: Site[], confluence?: Site[] } }`. `authenticated` means "at least one site is configured", not that credentials are valid.
 
-Authoritative recovery protocol — router skills (`jira`, `confluence`) defer here.
+`Site`: `{ configured, base_url, connection?: { success, message, latency_ms }, user?: { displayName, emailAddress } | null }`. `connection` is present only with `connection_test: true`; `user` is filled only for Jira on a successful test. Credentials never appear in the response.
 
-1. If OAuth: attempt token refresh first
-2. If refresh fails or non-OAuth: trigger this skill for re-authentication
-3. After re-auth: retry the original request once
+On a successful test, `connection.message` reads `Connected to <service> (Cloud | Server)`, reporting the detected deployment.
 
-## References
+## Auth methods
 
-- `../.shared/auth-check.md` — Pre-flight authentication check
-- `../.shared/environment-detection.md` — Cloud vs Server/DC detection
-- `../.shared/mcp-tools.md` — Available MCP tools (uses `mcp__plugin_atlassian_tools__setup` tool)
-- `references/auth-types.md` — Detailed auth type comparison and selection guide
-- `references/setup-flow.md` — Step-by-step setup wizard
-- `references/errors.md` — Setup-specific error handling and troubleshooting
+Two credential slots per site, chosen implicitly in the wizard: a username makes it Basic, an empty username makes the token a Bearer PAT.
+
+| Deployment | Basic               | Bearer                |
+| ---------- | ------------------- | --------------------- |
+| Cloud      | email + API token   | —                     |
+| Server/DC  | username + password | personal access token |
+
+Base URL is the site root (`https://x.atlassian.net`, `https://jira.example.com/jira`) — never append `/wiki`. Cloud API tokens are issued at `https://id.atlassian.com/manage-profile/security/api-tokens`.
+
+## Errors
+
+| Symptom                       | Meaning                                                                 |
+| ----------------------------- | ----------------------------------------------------------------------- |
+| `ENOTFOUND` / `ECONNREFUSED`  | Hostname or network (VPN, firewall) — fix the URL or connectivity       |
+| 401 on test                   | Wrong credentials — re-enter the token/password                         |
+| 403 with CAPTCHA (Server/DC)  | Too many failed logins — sign in once in a browser to clear it          |
+| Self-signed certificate error | Certificate must be trusted by the OS/Node; the wizard cannot bypass it |

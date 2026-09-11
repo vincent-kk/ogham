@@ -1,17 +1,9 @@
-## Endpoints
+# link
 
-| Operation      | HTTP   | Cloud Endpoint                       | Server Endpoint                      |
-| -------------- | ------ | ------------------------------------ | ------------------------------------ |
-| Get link types | GET    | `/rest/api/3/issueLinkType`          | `/rest/api/2/issueLinkType`          |
-| Create link    | POST   | `/rest/api/3/issueLink`              | `/rest/api/2/issueLink`              |
-| Delete link    | DELETE | `/rest/api/3/issueLink/{linkId}`     | `/rest/api/2/issueLink/{linkId}`     |
-| Remote links   | GET    | `/rest/api/3/issue/{key}/remotelink` | `/rest/api/2/issue/{key}/remotelink` |
-| Create remote  | POST   | `/rest/api/3/issue/{key}/remotelink` | `/rest/api/2/issue/{key}/remotelink` |
-
-## MCP Tool Mapping
-
-| Operation        | MCP Tool                             | Method | Notes |
-| ---------------- | ------------------------------------ | ------ | ----- |
-| Get types/remote | `mcp__plugin_atlassian_tools__fetch` | GET    |       |
-| Create           | `mcp__plugin_atlassian_tools__fetch` | POST   |       |
-| Delete           | `mcp__plugin_atlassian_tools__fetch` | DELETE |       |
+| Operation          | Method | Endpoint                  | Notes                                                                       |
+| ------------------ | ------ | ------------------------- | --------------------------------------------------------------------------- |
+| Link types         | GET    | `/issueLinkType`          | Names for `type.name` (e.g. `Blocks`, `Relates`)                            |
+| Create link        | POST   | `/issueLink`              | `{ type: { name }, inwardIssue: { key }, outwardIssue: { key }, comment? }` |
+| Delete link        | DELETE | `/issueLink/{linkId}`     | `linkId` from `fields.issuelinks[].id`                                      |
+| Remote links       | GET    | `/issue/{key}/remotelink` |                                                                             |
+| Create remote link | POST   | `/issue/{key}/remotelink` | `{ object: { url, title }, globalId? }`                                     |

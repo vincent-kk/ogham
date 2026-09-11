@@ -1,23 +1,10 @@
-## Endpoints
+# space
 
-V2-style logical paths only — MCP rewrites to `/space` on Server/DC.
+Logical paths; `service: "confluence"`.
 
-| Operation   | HTTP | Endpoint       |
-| ----------- | ---- | -------------- |
-| List spaces | GET  | `/spaces`      |
-| Get space   | GET  | `/spaces/{id}` |
+| Operation   | Method | Endpoint       | Notes                                                                                                         |
+| ----------- | ------ | -------------- | ------------------------------------------------------------------------------------------------------------- |
+| List spaces | GET    | `/spaces`      | `query_params: { type?: "global" \| "personal", limit? }`; Cloud pages by `_links.next` cursor, DC by `start` |
+| Get space   | GET    | `/spaces/{id}` | `{id}` is the numeric id on Cloud and the space key on Server/DC — no translation between the two             |
 
-In the `{id}` segment, send the **numeric space ID for Cloud V2** or the **space key for Server/DC**. MCP does not auto-translate between the two — the identifier the user already knows is passed verbatim.
-
-## Parameters
-
-| Parameter | Type   | Required | Description              |
-| --------- | ------ | -------- | ------------------------ |
-| type      | string | N        | Filter: global, personal |
-| limit     | number | N        | Results per page         |
-
-## MCP Tool Mapping
-
-| Operation      | MCP Tool                             | Method | Notes     |
-| -------------- | ------------------------------------ | ------ | --------- |
-| All operations | `mcp__plugin_atlassian_tools__fetch` | GET    | Read-only |
+To find a Cloud space id from its key: `GET /spaces` with `query_params: { keys: "KEY" }`.

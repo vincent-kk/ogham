@@ -1,32 +1,27 @@
-## Endpoints
+# page
 
-V2-style logical paths only — MCP rewrites to `/rest/api/content/...` on Server/DC automatically.
+Logical paths; `service: "confluence"` on every call.
 
-| Operation   | HTTP   | Endpoint      |
-| ----------- | ------ | ------------- |
-| Get page    | GET    | `/pages/{id}` |
-| Create page | POST   | `/pages`      |
-| Update page | PUT    | `/pages/{id}` |
-| Delete page | DELETE | `/pages/{id}` |
+| Operation       | Method | Endpoint                                 | Notes                                                                                                           |
+| --------------- | ------ | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Get page        | GET    | `/pages/{id}`                            | Cloud: `query_params: { "body-format": "storage" }`; DC: `expand: ["body.storage", "version", "ancestors"]`     |
+| Create page     | POST   | `/pages`                                 | Body below; `content_format: "markdown"`                                                                        |
+| Update page     | PUT    | `/pages/{id}`                            | Body below; `content_format: "markdown"`; `version.number` = current + 1                                        |
+| Delete page     | DELETE | `/pages/{id}`                            | Confirm first when the page has children                                                                        |
+| Children        | GET    | `/pages/{id}/children`                   |                                                                                                                 |
+| Descendants     | GET    | `/pages/{id}/descendants`                | Cloud: cursor-paginated, `depth` param; DC: `/content/{id}/descendant/page`                                     |
+| Ancestors       | GET    | `/pages/{id}`                            | Cloud: walk `parentId` upward; DC: `expand: ["ancestors"]`                                                      |
+| Move            | PUT    | `/pages/{id}/move/{position}/{targetId}` | DC only (`before` · `after` · `append`). Cloud: update the page with a new `parentId`                           |
+| Versions        | GET    | `/pages/{id}/versions`                   |                                                                                                                 |
+| Restore version | POST   | `/pages/{id}/versions`                   | DC only: `{ operationKey: "restore", params: { versionNumber } }`. Cloud: re-send the old body as a new version |
 
-## Body Fields
+## Bodies
 
-V2-style flat field names. MCP rewrites envelope on DC: `spaceId → space.key`, `parentId → ancestors: [{ id }]`, injects `type: 'page'`, strips V2-only `status`.
+Create (both deployments): `{ spaceId, title, body: "<markdown>", parentId?, status?: "current" }` — `spaceId` is the numeric space id on Cloud and the space key on DC. On DC the MCP layer maps `spaceId → space.key`, `parentId → ancestors`, injects `type: "page"`, drops `status`.
 
-| Field            | Type   | Required          | Description                                                                          |
-| ---------------- | ------ | ----------------- | ------------------------------------------------------------------------------------ |
-| `spaceId`        | string | Y (create)        | Space identifier — numeric ID for Cloud V2, space key for DC                         |
-| `title`          | string | Y (create)        | Page title                                                                           |
-| `body`           | string | Y (create/update) | Markdown content — pair with `content_format: "markdown"` to auto-convert to storage |
-| `version.number` | number | Y (update)        | Current version + 1                                                                  |
-| `parentId`       | string | N                 | Parent page identifier (V2 flat) — auto-converted to V1 `ancestors` on DC            |
-| `status`         | string | N                 | `current` (V2 only — stripped on DC)                                                 |
+Update: the MCP layer does not fill in required fields on PUT, so send the deployment's full shape:
 
-## MCP Tool Mapping
+- Cloud: `{ id, status: "current", title, body: "<markdown>", version: { number } }`
+- DC: `{ type: "page", title, body: "<markdown>", version: { number } }`
 
-| Operation | MCP Tool                             | Method | Notes                                                                        |
-| --------- | ------------------------------------ | ------ | ---------------------------------------------------------------------------- |
-| Get       | `mcp__plugin_atlassian_tools__fetch` | GET    | Use V2 query param `body-format=storage` or V1 `expand=body.storage,version` |
-| Create    | `mcp__plugin_atlassian_tools__fetch` | POST   | `content_format: "markdown"`                                                 |
-| Update    | `mcp__plugin_atlassian_tools__fetch` | PUT    | Must include `version.number`                                                |
-| Delete    | `mcp__plugin_atlassian_tools__fetch` | DELETE | Confirm if child pages exist                                                 |
+`version.number` is read from the page immediately before the update; on 409 re-read and retry (max 3).

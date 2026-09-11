@@ -1,87 +1,83 @@
 ---
 name: confluence
 user-invocable: true
-description: "Routes Confluence REST API operations — page CRUD, CQL search, space/comment/attachment/label/analytics/user management on Cloud and Server/DC. Use for any Confluence read, write, or search request."
-version: "0.1.0"
+description: "Confluence REST API router — page CRUD and hierarchy, CQL search, spaces, footer/inline comments, labels, attachment listing, analytics, user lookup on Cloud and Server/DC. Use for any Confluence request or Confluence page URL; attachment downloads go to the download skill."
+version: "0.2.1"
 complexity: complex
 plugin: atlassian
 ---
 
 # confluence
 
-Confluence REST API domain router. Resolves the correct endpoint, parameters, and MCP tool for any Confluence operation.
+Resolves a Confluence request to an endpoint and an `mcp__plugin_atlassian_tools__fetch` call. Parameters: [`mcp-tools.md`](../.shared/mcp-tools.md). Errors: [`error-handling.md`](../.shared/error-handling.md).
 
-## Execution Model
+## Execution model
 
-**Main agent executes directly** for simple operations:
+Execute directly for single-call work (one page, one search, one comment, one label change). Spawn the `confluence` agent for multi-page work (bulk create/update, tree moves), chains across domains (create + label + comment), or repeated 409/400 recovery.
 
-- Single page read (`GET /pages/{id}`)
-- Single CQL search
-- Single comment read/add
-- Single label add/remove
-- Single attachment download
+## Call contract
 
-**Spawn `confluence` agent** only for complex multi-step workflows:
+1. Read `tools/<domain>/schema.md` for the domain in play — nothing else up front.
+2. **Every call carries `service: "confluence"`.** When omitted, only paths containing `/wiki/` or `/download/attachments/`, or starting with `/api/v2/`, are detected as Confluence; everything else, including logical `/pages/{id}` and `/spaces`, goes to Jira.
+3. Send V2-style logical paths for supported operations; use [Endpoint routing](#endpoint-routing) for deployment rules. Operations that only exist in V1 (CQL search, labels write, user lookup, DC-only endpoints) use the full path each schema gives.
+4. Send page/comment bodies as Markdown with `content_format: "markdown"`; it becomes the storage-format envelope for the deployment. Reading: ask for `body-format=storage` (Cloud) or `expand=body.storage` (DC) and convert with `mcp__plugin_atlassian_tools__convert` (`storage` → `markdown`) when the user needs text.
+5. Page update needs the current `version.number + 1`; 409 → re-read and resend, at most 3 times.
+6. Recovery for other statuses follows [`error-handling.md`](../.shared/error-handling.md#errors).
 
-- Multi-page operations (bulk create/update, page tree manipulation)
-- Version conflict resolution chains (fetch → increment → retry on 409)
-- Cross-domain chained operations (create page + attach + label + comment)
-- Storage format troubleshooting (400 errors from malformed XHTML)
+## Endpoint routing
 
-### Direct Execution Steps (Main Agent)
+Deployment is decided by hostname: `*.atlassian.net` → Cloud, anything else → Server/DC. The stored site config carries the result; branch only where these rules require it.
 
-1. Read `tools/<domain>/schema.md` for the needed domain
-2. Call `mcp__plugin_atlassian_tools__fetch` with the V2-style logical endpoint (no `/wiki/...` or `/rest/api/...` prefix)
-3. Use `content_format: "markdown"` when sending page body content (auto-converts to Storage Format)
-4. On 401: ask the user "Atlassian 인증이 필요합니다. 설정을 진행하시겠습니까?" — on agreement invoke `setup` skill and retry once; on decline abort with guidance message
+| Path shape                                              | Cloud                        | Server/DC                            |
+| ------------------------------------------------------- | ---------------------------- | ------------------------------------ |
+| Logical `/pages/{id}`, `/spaces`, `/footer-comments`, … | `/wiki/api/v2` + path        | `/rest/api` + rewritten path (below) |
+| Starts with `/rest/`, `/wiki/`, `/secure/`, `/plugins/` | Verbatim                     | Verbatim                             |
+| Starts with `/download/`                                | `/wiki` + path               | Verbatim                             |
+| Absolute URL of a configured site                       | Base stripped, then as above | Same                                 |
 
-**Endpoint dispatch is handled by the MCP layer.** Skills do not branch on Cloud V1/V2/Server. Just send V2-style logical paths (e.g. `/pages/{id}`, `/spaces`, `/footer-comments`) and MCP rewrites to the correct physical path per deployment.
+Cloud V1 endpoints are written in full: `/wiki/rest/api/…`; a bare `/rest/api/…` leaves the site root without `/wiki`. On Server/DC, V1 paths start with `/rest/api/…`.
 
-## When to Use
+Confluence Cloud `base_url` is the site root (`https://x.atlassian.net`), without `/wiki`; including it makes every call `/wiki/wiki/…`. A DC context path (e.g. `https://host/confluence`) lives in `base_url` only; never repeat it in the endpoint.
 
-- Create, read, update, or delete Confluence pages
-- Search Confluence content with CQL
-- Manage spaces, comments, attachments, and labels
-- Look up user information or page analytics
+### Server/DC rewriting
 
-## Tool Domains
+Applied only to `service: "confluence"` on Server/DC, before the `/rest/api` prefix. Matching is by exact segment count.
 
-| Domain       | Description                                                       |
-| ------------ | ----------------------------------------------------------------- |
-| `page`       | Page CRUD, hierarchy navigation, and version management           |
-| `search`     | CQL-based full-text and metadata search across spaces             |
-| `space`      | Space listing, metadata retrieval, and space lookup               |
-| `comment`    | Footer comments and inline comments (inline is Cloud-only via V2) |
-| `attachment` | Upload and download file attachments on pages                     |
-| `label`      | Add, list, and remove labels on pages                             |
-| `analytics`  | Page view statistics — Cloud only                                 |
-| `user`       | Current user info and user search by account ID or query          |
+| Logical (V2)                        | DC (V1)                             |
+| ----------------------------------- | ----------------------------------- |
+| `/pages` · `/footer-comments`       | `/content`                          |
+| `/pages/{id}` · `/attachments/{id}` | `/content/{id}`                     |
+| `/pages/{id}/children`              | `/content/{id}/child/page`          |
+| `/pages/{id}/descendants`           | `/content/{id}/descendant/page`     |
+| `/pages/{id}/footer-comments`       | `/content/{id}/child/comment`       |
+| `/pages/{id}/attachments`           | `/content/{id}/child/attachment`    |
+| `/pages/{id}/labels`                | `/content/{id}/label`               |
+| `/pages/{id}/properties`            | `/content/{id}/property`            |
+| `/pages/{id}/versions`              | `/content/{id}/version`             |
+| `/pages/{id}/move/{pos}/{target}`   | `/content/{id}/move/{pos}/{target}` |
+| `/spaces` · `/spaces/{id}`          | `/space` · `/space/{id}`            |
+| `/users/current`                    | `/user/current`                     |
 
-## Routing Protocol
+Body rewriting on DC (every matched logical route, any method): `spaceId → space.key`, `parentId → ancestors: [{ id }]`, `pageId → container: { id, type: "page" }` (footer-comments only), `status` dropped, and the body object is shallow-copied (an array body becomes an object). `type: "page" | "comment"` is injected only on POST to `/pages` and `/footer-comments`.
 
-1. Identify the domain from the user's request (page / search / space / etc.)
-2. Read `tools/<domain>/schema.md` ONLY when needed — do not preload all schemas
-3. Compose the V2-style logical endpoint (MCP dispatches to Cloud V2 / V1 / Server/DC automatically)
-4. Call the appropriate MCP tool with resolved parameters
+- V2-only prefixes `/inline-comments`, `/whiteboards`, `/databases`, `/embeds`, `/analytics` are rejected on DC with an explicit error.
+- Any other unmatched logical path (e.g. `/pages/{id}/labels/{label}`, `/pages/{id}/inline-comments`) is sent as `/rest/api/<path>` and 404s — use the V1 form directly on DC.
 
-## Permission Boundaries
+Cloud-only: inline comments, analytics, whiteboards/databases/embeds.
 
-- Read operations: require `read:confluence-content.all` scope (Cloud) or View permission (Server/DC)
-- Write operations: require `write:confluence-content` scope (Cloud) or Edit permission (Server/DC)
-- Admin operations (space management): require `manage:confluence-configuration` (Cloud)
-- Analytics: Cloud only — requires analytics feature enabled on instance
+## Domains
 
-## Auth Recovery
+| Domain       | Covers                                                         |
+| ------------ | -------------------------------------------------------------- |
+| `page`       | Page CRUD, children/ancestors/descendants, move, versions      |
+| `search`     | CQL search (V1 on both deployments)                            |
+| `space`      | Space list/get — numeric id on Cloud, key on Server/DC         |
+| `comment`    | Footer comments; inline comments Cloud only                    |
+| `attachment` | List/delete; download via `download` skill; upload unsupported |
+| `label`      | List (logical) / add, remove (V1 paths)                        |
+| `analytics`  | Page views — Cloud only                                        |
+| `user`       | Current user, user search (V1 paths)                           |
 
-No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth-check.md`](../.shared/auth-check.md).
+## Identity and deployment
 
-## References
-
-- `../.shared/auth-check.md` — Pre-flight authentication check
-- `../.shared/error-handling.md` — HTTP error handling protocol
-- `../.shared/environment-detection.md` — Cloud vs Server/DC detection and API versioning
-- `../.shared/mcp-tools.md` — Available MCP tools and usage
-- `tools/<domain>/schema.md` — Domain-specific endpoint schemas (lazy load on demand)
-- `tools/page/hierarchy.md` — Ancestors, descendants, page tree traversal
-- `tools/page/version.md` — Version management rules (mandatory `version.number` on update)
-- `tools/search/cql-guide.md` — CQL syntax, operators, and examples
+Cloud identifies users by `accountId`; Server/DC by `userKey`/`username`. Confluence page URLs: `/wiki/spaces/{KEY}/pages/{id}/…` (Cloud) or `/pages/viewpage.action?pageId={id}` (DC) → page id.

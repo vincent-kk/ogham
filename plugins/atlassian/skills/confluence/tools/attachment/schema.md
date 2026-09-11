@@ -1,19 +1,11 @@
-## Endpoints
+# attachment
 
-V2-style logical paths — MCP rewrites to V1/DC form automatically.
+`service: "confluence"` on every call.
 
-| Operation | HTTP   | Endpoint                                                                        |
-| --------- | ------ | ------------------------------------------------------------------------------- |
-| List      | GET    | `/pages/{id}/attachments`                                                       |
-| Upload    | POST   | `/pages/{id}/attachments`                                                       |
-| Delete    | DELETE | `/attachments/{attachmentId}` (MCP rewrites to `/content/{attachmentId}` on DC) |
-| Download  | GET    | Via download link returned from list/get                                        |
+| Operation | Method | Endpoint                      | Notes                                                                                         |
+| --------- | ------ | ----------------------------- | --------------------------------------------------------------------------------------------- |
+| List      | GET    | `/pages/{id}/attachments`     | Cloud: `downloadLink` per item; DC: `_links.download`                                         |
+| Download  | GET    | the download link             | Relative `/download/attachments/…` works as-is on both deployments — use the `download` skill |
+| Delete    | DELETE | `/attachments/{attachmentId}` | DC: rewritten to `/content/{attachmentId}`                                                    |
 
-## MCP Tool Mapping
-
-| Operation | MCP Tool                             | Method | Notes                                                             |
-| --------- | ------------------------------------ | ------ | ----------------------------------------------------------------- |
-| List      | `mcp__plugin_atlassian_tools__fetch` | GET    |                                                                   |
-| Upload    | `mcp__plugin_atlassian_tools__fetch` | POST   | `content_type: "multipart/form-data"` (XSRF header auto-attached) |
-| Delete    | `mcp__plugin_atlassian_tools__fetch` | DELETE |                                                                   |
-| Download  | `mcp__plugin_atlassian_tools__fetch` | GET    | `accept_format: "raw"`, prefer `download` skill                   |
+Upload is not supported: the fetch tool cannot send multipart bodies. Tell the user to attach the file in the Confluence UI.

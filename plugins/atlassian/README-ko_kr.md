@@ -48,7 +48,7 @@ claude --plugin-dir ./plugins/atlassian
 /atlassian:setup
 ```
 
-Jira 및 Confluence의 Cloud 또는 Server/DC 인스턴스에 대한 인증(Basic, PAT, OAuth 2.0) 및 연결 정보를 설정합니다. 로컬 웹 서버를 띄워 편리한 설정 UI를 제공합니다.
+Jira 및 Confluence의 Cloud 또는 Server/DC 인스턴스에 대한 인증(Basic: 이메일 + API 토큰 또는 사용자명 + 비밀번호, Server/DC용 PAT) 및 연결 정보를 설정합니다. 로컬 웹 서버를 띄워 편리한 설정 UI를 제공합니다.
 
 ### Jira 작업
 
@@ -95,7 +95,7 @@ Jira 이슈 PROJ-456의 세부 내용을 읽고 Confluence에 릴리스 노트�
 
 | 스킬                        | 범위       | 설명                                                                |
 | --------------------------- | ---------- | ------------------------------------------------------------------- |
-| `/atlassian:setup`          | 공통       | 인증 및 연결 관리 (Basic, PAT, OAuth 2.0)                           |
+| `/atlassian:setup`          | 공통       | 인증 및 연결 관리 (Basic, PAT)                                      |
 | `/atlassian:download`       | 공통       | Jira/Confluence 통합 첨부파일 다운로드                              |
 | `/atlassian:media-analysis` | 공통       | 첨부 이미지/영상/GIF 다운로드 + 멀티모달 분석                       |
 | `/atlassian:jira`           | Jira       | Jira API 도메인 라우터 (이슈, 검색, 애자일 등 15개 도메인)          |
@@ -134,14 +134,14 @@ TypeScript 5.7, @modelcontextprotocol/sdk, esbuild, Vitest, Zod
 
 기술적 세부사항 및 아키텍처 결정 사항은 [`.metadata/atlassian/`](../../.metadata/atlassian/) 디렉토리를 참조하세요:
 
-| 문서                                                              | 내용                                                            |
-| ----------------------------------------------------------------- | --------------------------------------------------------------- |
-| [INDEX](../../.metadata/atlassian/INDEX.md)                       | 아키텍처 개요 및 계층별 역할                                    |
-| [plugin-structure](../../.metadata/atlassian/plugin-structure.md) | 디렉토리 구조 및 플러그인 설정                                  |
-| [auth-ui](../../.metadata/atlassian/auth-ui.md)                   | 설정용 웹 서버 및 HTML 폼 설계                                  |
-| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md)       | 4개의 핵심 MCP 도구 (`fetch`, `convert`, `auth_check`, `setup`) |
-| [dev/skills](../../.metadata/atlassian/dev/skills.md)             | 5개의 스킬 및 지연 참조 로딩 매핑 구조                          |
-| [dev/agents](../../.metadata/atlassian/dev/agents.md)             | Jira 및 Confluence 에이전트 도메인 로직                         |
+| 문서                                                              | 내용                                                                              |
+| ----------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| [INDEX](../../.metadata/atlassian/INDEX.md)                       | 아키텍처 개요 및 계층별 역할                                                      |
+| [plugin-structure](../../.metadata/atlassian/plugin-structure.md) | 디렉토리 구조 및 플러그인 설정                                                    |
+| [auth-ui](../../.metadata/atlassian/auth-ui.md)                   | 설정용 웹 서버 및 HTML 폼 설계                                                    |
+| [dev/mcp-tools](../../.metadata/atlassian/dev/mcp-tools.md)       | 5개의 핵심 MCP 도구 (`fetch`, `convert`, `auth_check`, `setup`, `comment_thread`) |
+| [dev/skills](../../.metadata/atlassian/dev/skills.md)             | 5개의 스킬 및 지연 참조 로딩 매핑 구조                                            |
+| [dev/agents](../../.metadata/atlassian/dev/agents.md)             | Jira 및 Confluence 에이전트 도메인 로직                                           |
 
 [English documentation (README.md)](./README.md) is also available.
 

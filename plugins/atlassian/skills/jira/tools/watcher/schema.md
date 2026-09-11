@@ -1,15 +1,9 @@
-## Endpoints
+# watcher
 
-| Operation      | HTTP   | Cloud Endpoint                                    | Server Endpoint                                    |
-| -------------- | ------ | ------------------------------------------------- | -------------------------------------------------- |
-| Get watchers   | GET    | `/rest/api/3/issue/{key}/watchers`                | `/rest/api/2/issue/{key}/watchers`                 |
-| Add watcher    | POST   | `/rest/api/3/issue/{key}/watchers`                | `/rest/api/2/issue/{key}/watchers`                 |
-| Remove watcher | DELETE | `/rest/api/3/issue/{key}/watchers?accountId={id}` | `/rest/api/2/issue/{key}/watchers?username={name}` |
+| Operation      | Method | Endpoint                | Cloud                         | Server/DC                    |
+| -------------- | ------ | ----------------------- | ----------------------------- | ---------------------------- |
+| List watchers  | GET    | `/issue/{key}/watchers` |                               |                              |
+| Add watcher    | POST   | `/issue/{key}/watchers` | `body: "\"<accountId>\""`     | `body: "\"<username>\""`     |
+| Remove watcher | DELETE | `/issue/{key}/watchers` | `query_params: { accountId }` | `query_params: { username }` |
 
-## MCP Tool Mapping
-
-| Operation | MCP Tool                             | Method | Notes                                               |
-| --------- | ------------------------------------ | ------ | --------------------------------------------------- |
-| Get       | `mcp__plugin_atlassian_tools__fetch` | GET    |                                                     |
-| Add       | `mcp__plugin_atlassian_tools__fetch` | POST   | Body: accountId string (Cloud) or username (Server) |
-| Remove    | `mcp__plugin_atlassian_tools__fetch` | DELETE | Via query parameter                                 |
+The add body is a JSON string literal. String bodies are sent verbatim, so include the surrounding quotes in the string you pass.

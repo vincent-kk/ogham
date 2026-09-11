@@ -1,18 +1,9 @@
-## Endpoints
+# user
 
-| Operation    | HTTP | Cloud Endpoint                      | Server Endpoint                        |
-| ------------ | ---- | ----------------------------------- | -------------------------------------- |
-| Current user | GET  | `/rest/api/3/myself`                | `/rest/api/2/myself`                   |
-| Search users | GET  | `/rest/api/3/user/search?query={q}` | `/rest/api/2/user/search?username={q}` |
-| Get user     | GET  | `/rest/api/3/user?accountId={id}`   | `/rest/api/2/user?key={key}`           |
+| Operation    | Method | Endpoint       | Cloud                         | Server/DC                                 |
+| ------------ | ------ | -------------- | ----------------------------- | ----------------------------------------- |
+| Current user | GET    | `/myself`      |                               |                                           |
+| Search users | GET    | `/user/search` | `query_params: { query }`     | `query_params: { username }`              |
+| Get user     | GET    | `/user`        | `query_params: { accountId }` | `query_params: { key }` or `{ username }` |
 
-## Cloud vs Server Branching
-
-- **Cloud**: Users identified by `accountId`
-- **Server**: Users identified by `name` or `key`
-
-## MCP Tool Mapping
-
-| Operation      | MCP Tool                             | Method | Notes     |
-| -------------- | ------------------------------------ | ------ | --------- |
-| All operations | `mcp__plugin_atlassian_tools__fetch` | GET    | Read-only |
+Assignable users for an issue or project: `GET /user/assignable/search` with `issueKey` or `project`.

@@ -1,18 +1,10 @@
-## Endpoints
+# field
 
-| Operation         | HTTP | Cloud Endpoint                                                           | Server Endpoint                                                          |
-| ----------------- | ---- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
-| List fields       | GET  | `/rest/api/3/field`                                                      | `/rest/api/2/field`                                                      |
-| Field options     | GET  | `/rest/api/3/field/{fieldId}/context/{contextId}/option`                 | Not available                                                            |
-| Issue type fields | GET  | `/rest/api/3/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` | `/rest/api/2/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` |
+| Operation             | Method | Endpoint                                                      | Notes                                                        |
+| --------------------- | ------ | ------------------------------------------------------------- | ------------------------------------------------------------ |
+| List fields           | GET    | `/field`                                                      | id, name, schema of every system and custom field            |
+| Fields for issue type | GET    | `/issue/createmeta/{projectIdOrKey}/issuetypes/{issueTypeId}` | Allowed values per field — read before writing custom fields |
+| List field options    | GET    | `/field/{fieldId}/context/{contextId}/option`                 | Cloud only                                                   |
+| Add field options     | POST   | `/field/{fieldId}/context/{contextId}/option`                 | Cloud only. `{ options: [{ value }] }`                       |
 
-## Cloud vs Server Branching
-
-- **Cloud**: Field Options API available for custom field option management
-- **Server**: No Field Options API. Use issue create metadata instead.
-
-## MCP Tool Mapping
-
-| Operation      | MCP Tool                             | Method | Notes                      |
-| -------------- | ------------------------------------ | ------ | -------------------------- |
-| All operations | `mcp__plugin_atlassian_tools__fetch` | GET    | Read-only metadata queries |
+Server/DC has no field options API — allowed values come from create/edit metadata only.

@@ -1,22 +1,10 @@
-## Endpoints
+# transition
 
-| Operation       | HTTP | Cloud Endpoint                        | Server Endpoint                       |
-| --------------- | ---- | ------------------------------------- | ------------------------------------- |
-| Get transitions | GET  | `/rest/api/3/issue/{key}/transitions` | `/rest/api/2/issue/{key}/transitions` |
-| Do transition   | POST | `/rest/api/3/issue/{key}/transitions` | `/rest/api/2/issue/{key}/transitions` |
+Status is changed only through transitions; `fields.status` is read-only.
 
-## Parameters
+| Operation      | Method | Endpoint                   | Notes                                                                                       |
+| -------------- | ------ | -------------------------- | ------------------------------------------------------------------------------------------- |
+| List available | GET    | `/issue/{key}/transitions` | `expand: ["transitions.fields"]` shows fields a transition requires (e.g. `resolution`)     |
+| Perform        | POST   | `/issue/{key}/transitions` | `{ transition: { id }, fields?, update? }` — `id` from the list; add required fields inline |
 
-| Parameter     | Type   | Required | Description                    |
-| ------------- | ------ | -------- | ------------------------------ |
-| issueIdOrKey  | string | Y        | Issue key or ID                |
-| transition.id | string | Y        | Transition ID (for POST)       |
-| fields        | object | N        | Required fields for transition |
-| update        | object | N        | Update operations              |
-
-## MCP Tool Mapping
-
-| Operation       | MCP Tool                             | Method | Notes                             |
-| --------------- | ------------------------------------ | ------ | --------------------------------- |
-| Get transitions | `mcp__plugin_atlassian_tools__fetch` | GET    | Query available transitions first |
-| Do transition   | `mcp__plugin_atlassian_tools__fetch` | POST   | Must include transition.id        |
+If the requested target status is not in the list, report the available ones instead of guessing an id.

@@ -118,7 +118,7 @@ describe("setup MCP completion", () => {
 
   it("setup skill reports only the MCP-owned config_path", () => {
     const reference = readFileSync(
-      join(packageRoot, "skills", "setup", "references", "setup-flow.md"),
+      join(packageRoot, "skills", "setup", "SKILL.md"),
       "utf8",
     );
     expect(reference).toContain("config_path");

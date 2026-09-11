@@ -1,71 +1,51 @@
-## Endpoints
+# comment
 
-| Operation      | HTTP   | Cloud Endpoint                         | Server Endpoint                        |
-| -------------- | ------ | -------------------------------------- | -------------------------------------- |
-| List comments  | GET    | `/rest/api/3/issue/{key}/comment`      | `/rest/api/2/issue/{key}/comment`      |
-| Get comment    | GET    | `/rest/api/3/issue/{key}/comment/{id}` | `/rest/api/2/issue/{key}/comment/{id}` |
-| Add comment    | POST   | `/rest/api/3/issue/{key}/comment`      | `/rest/api/2/issue/{key}/comment`      |
-| Update comment | PUT    | `/rest/api/3/issue/{key}/comment/{id}` | `/rest/api/2/issue/{key}/comment/{id}` |
-| Delete comment | DELETE | `/rest/api/3/issue/{key}/comment/{id}` | `/rest/api/2/issue/{key}/comment/{id}` |
+| Operation      | Method | Endpoint                    | Notes                                                                                       |
+| -------------- | ------ | --------------------------- | ------------------------------------------------------------------------------------------- |
+| List comments  | GET    | `/issue/{key}/comment`      | Cloud. On Server/DC use `comment_thread` (below)                                            |
+| Get comment    | GET    | `/issue/{key}/comment/{id}` | Both deployments; the target of `focusedCommentId` URLs                                     |
+| Add comment    | POST   | `/issue/{key}/comment`      | `{ body }` with `content_format: "markdown"`; JSM visibility: [JSM comments](#jsm-comments) |
+| Update comment | PUT    | `/issue/{key}/comment/{id}` | `{ body }`                                                                                  |
+| Delete comment | DELETE | `/issue/{key}/comment/{id}` |                                                                                             |
 
-## Parameters
+## comment_thread (Server/DC)
 
-| Parameter | Type       | Required   | Description                                 |
-| --------- | ---------- | ---------- | ------------------------------------------- |
-| body      | ADF/string | Y (create) | Comment body. Cloud: ADF. Server: text/wiki |
+`mcp__plugin_atlassian_tools__comment_thread` (Codex: `mcp__atlassian__comment_thread`) lists comments and merges replies stored by third-party reply plugins when the site has a saved profile. Cloud sites are rejected — use `fetch` there. For JSM customer-visible comments, see [JSM comments](#jsm-comments).
 
-## Cloud vs Server Branching
+| Parameter                    | Mode         | Notes                                                                    |
+| ---------------------------- | ------------ | ------------------------------------------------------------------------ |
+| `mode`                       | all          | `read` (default) · `scan` · `probe` · `save_profile`                     |
+| `base_url`                   | all          | Site selector when several Jira sites are configured                     |
+| `issue_key`                  | read         | Required                                                                 |
+| `start_at`, `max_results`    | read         | Present → one page (≤100); absent → all pages (cap 1000, with a warning) |
+| `expand`                     | read         | Passed to the comment list (e.g. `renderedBody`)                         |
+| `jql`, `max_issues`          | scan         | Issues whose changelog carries `Comment` items (default 100, cap 500)    |
+| `sample_issue_key`           | probe        | An issue that has at least one standard comment                          |
+| `profile`, `proposal_digest` | save_profile | Exactly the probe's proposal; digest required for `pattern: "changelog"` |
 
-- **Cloud**: body is ADF JSON. Use `content_format: "markdown"` for auto-conversion
-- **Server**: body is plain text or wiki markup
+Fields belonging to another mode are validation errors, not ignored.
 
-## MCP Tool Mapping
-
-The table uses the Claude/agy full form. On Codex, use `mcp__atlassian__<tool>`.
-
-| Operation          | MCP Tool                                      | Method | Notes                                                                                                                          |
-| ------------------ | --------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------ |
-| List (Cloud) / Get | `mcp__plugin_atlassian_tools__fetch`          | GET    | Single comment (`focusedCommentId`) always uses fetch on both deployments                                                      |
-| List (Server/DC)   | `mcp__plugin_atlassian_tools__comment_thread` | —      | `mode: "read"` (default). Returns standard comments plus reply-plugin replies merged from the changelog; see `reply-plugin.md` |
-| Add                | `mcp__plugin_atlassian_tools__fetch`          | POST   | Use content_format: "markdown"                                                                                                 |
-| Update             | `mcp__plugin_atlassian_tools__fetch`          | PUT    |                                                                                                                                |
-| Delete             | `mcp__plugin_atlassian_tools__fetch`          | DELETE |                                                                                                                                |
-
-## URL Patterns
-
-| URL Pattern                                             | Route To                                     |
-| ------------------------------------------------------- | -------------------------------------------- |
-| `...atlassian.net/browse/KAN-27?focusedCommentId=10110` | `GET /rest/api/3/issue/KAN-27/comment/10110` |
-| `...atlassian.net/browse/KAN-27?focusedId=10110`        | `GET /rest/api/3/issue/KAN-27/comment/10110` |
-
-## Reply-plugin threads (Server/DC only)
-
-Third-party reply plugins store replies outside the standard comment API. On Server/DC, list comments with `mcp__plugin_atlassian_tools__comment_thread` (Claude/agy) or `mcp__atlassian__comment_thread` (Codex) instead of `fetch`; Cloud sites are rejected by the tool — keep using `fetch` there. JSM customer-visible comments on DC stay on the Service Desk API (`jsm-comment.md`).
-
-| Parameter                    | Mode         | Type     | Description                                                                  |
-| ---------------------------- | ------------ | -------- | ---------------------------------------------------------------------------- |
-| `mode`                       | all          | string   | `read` (default) · `scan` · `probe` · `save_profile`                         |
-| `base_url`                   | all          | string   | Site selector when several Jira sites are configured                         |
-| `issue_key`                  | read         | string   | Issue whose thread to return                                                 |
-| `start_at`, `max_results`    | read         | number   | Present → one page like `fetch`; absent → all pages (cap 1000, warning)      |
-| `expand`                     | read         | string[] | Passed to the comment list request (e.g. `renderedBody`)                     |
-| `jql`, `max_issues`          | scan         | —        | Report issues whose changelog carries `Comment` items (default 100, cap 500) |
-| `sample_issue_key`           | probe        | string   | An issue the user knows has replies                                          |
-| `profile`, `proposal_digest` | save_profile | —        | Exactly the probe's proposal; digest required for `pattern: "changelog"`     |
-
-`read` returns `{ issue, thread[], warnings[], complete, profile, hint? }`. `complete: false` means the changelog was truncated (replies missing); `"unknown"` means it was unavailable. `hint` is present only when the site has no profile — run the check below once, then continue in `reply-plugin.md`.
+`read` returns `{ issue, thread[], warnings[], complete, profile, hint? }`; replies hang under their root comment as `thread[].replies[]`. `complete: false` — changelog truncated, replies may be missing; `"unknown"` — changelog unavailable. `hint` is present only when the site has no profile: run the check below once, then continue in `reply-plugin.md`.
 
 ## Thread clues (Server/DC, `read` returned `hint`)
 
-No profile means only standard comments came back; if the site runs a reply plugin, its replies are missing. Decide once per issue from what is already in context — the check itself sends no request:
+Without a profile only standard comments came back; if the site runs a reply plugin its replies are missing. Decide once per issue from what is already in context — the check sends no request:
 
-| Clue                                                                                                   | Where to look                             |
-| ------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| The request concerns replies, threads, who answered whom, or the whole conversation (요약·정리·digest) | the user's message                        |
-| A comment reads as an answer to text absent from `thread[]` (quotes an unseen message, "Re:", 위 답글) | `thread[].body`                           |
-| A changelog already fetched for this issue has an item with `field: "Comment"`                         | a prior `fetch … expand=changelog` result |
-| The user names a reply plugin or says replies are missing                                              | the user's message                        |
+| Clue                                                                                                         | Where to look                             |
+| ------------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| The request concerns replies, threads, who answered whom, or the whole conversation (summary, digest)        | the user's message                        |
+| A comment reads as an answer to text absent from `thread[]` (quotes an unseen message, "Re:", "reply above") | `thread[].body`                           |
+| A changelog already fetched for this issue has an item with `field: "Comment"`                               | a prior `fetch … expand=changelog` result |
+| The user names a reply plugin or says replies are missing                                                    | the user's message                        |
 
-- Any clue and `thread.length > 0` → call `comment_thread` with `mode: "probe", sample_issue_key: <the issue just read>` once (read-only; nothing is written), then continue at `reply-plugin.md` step 4.
-- No clue → add one sentence to the answer: this site has no reply-plugin profile, so plugin replies (if any) are not included; offer the probe. Do not probe.
-- Run the check at most once per issue per conversation. A non-null `profile` in any later `read` ends it for the site.
+- Any clue and `thread.length > 0` → `mode: "probe", sample_issue_key: <the issue just read>` (read-only), then `reply-plugin.md` step 4.
+- No clue → one sentence in the answer: the site has no reply-plugin profile, so plugin replies (if any) are not included; offer the probe. Do not probe.
+- At most once per issue per conversation. A non-null `profile` in any later `read` ends it for the site.
+
+## JSM comments
+
+Customer-visible vs internal is a Service Desk concept, not comment `visibility`. Use the Service Desk API on both deployments:
+
+`POST /rest/servicedeskapi/request/{issueIdOrKey}/comment` with `{ body: "<plain text>", public: true | false }`.
+
+`body` is a plain string here — do not set `content_format: "markdown"` (on Cloud it would turn `body` into ADF, which this API rejects).

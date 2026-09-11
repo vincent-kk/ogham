@@ -1,31 +1,45 @@
-# MCP Tools
+# MCP Fetch Contract
 
-All Atlassian operations route through these 5 MCP tools:
+## Tool list
 
-The table uses the Claude/agy full form. On Codex, use `mcp__atlassian__<tool>` instead (for example, `mcp__atlassian__comment_thread`).
+Five tools, registered by the plugin MCP server. Names below are the Claude/agy form; the Codex adapter registers the same server as `atlassian`, so there the tools appear as `mcp__atlassian__<tool>`.
 
-| Tool                                               | HTTP Method               | Purpose                                                                                                          |
-| -------------------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `mcp__plugin_atlassian_tools__fetch`               | GET/POST/PUT/PATCH/DELETE | HTTP requests — resource retrieval, creation, modification, deletion                                             |
-| `mcp__plugin_atlassian_tools__convert`             | —                         | ADF / Storage Format ↔ Markdown conversion                                                                       |
-| `mcp__plugin_atlassian_tools__auth_check`          | —                         | Authentication status check and optional connectivity test                                                       |
-| `mcp__plugin_atlassian_tools__setup`               | —                         | Authentication and connection configuration                                                                      |
-| `mcp__plugin_atlassian_tools__comment_thread` | —                         | Jira Server/DC comment thread with reply-plugin replies merged from the changelog (read/scan/probe/save_profile) |
+| Tool                                          | Purpose                                                                                                               |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `mcp__plugin_atlassian_tools__fetch`          | HTTP request to a configured site — prefix attachment, deployment rewriting, body/response conversion                 |
+| `mcp__plugin_atlassian_tools__convert`        | Local conversion: adf↔markdown, storage↔markdown, markdown→wiki, adf↔storage                                          |
+| `mcp__plugin_atlassian_tools__auth_check`     | Configured sites and optional live connection test — see [`setup`](../setup/SKILL.md#authentication-check)            |
+| `mcp__plugin_atlassian_tools__setup`          | Browser-based setup wizard — used only by the `setup` skill                                                           |
+| `mcp__plugin_atlassian_tools__comment_thread` | Jira Server/DC comments with reply-plugin replies merged in — see [`comment schema`](../jira/tools/comment/schema.md) |
 
-## Tool Usage by Skill
+## Fetch parameters
 
-| Skill        | Tools Used                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------- |
-| `jira`       | `mcp__plugin_atlassian_tools__fetch`, `mcp__plugin_atlassian_tools__comment_thread` (DC comment listing) |
-| `confluence` | `mcp__plugin_atlassian_tools__fetch`, `mcp__plugin_atlassian_tools__convert`                                  |
-| `download`   | `mcp__plugin_atlassian_tools__fetch` (with `method: "GET"` and `accept_format: "raw"`)                        |
-| `setup`      | `mcp__plugin_atlassian_tools__auth_check`, `mcp__plugin_atlassian_tools__setup`                               |
+| Parameter        | Type                           | Notes                                                                                                                                                                                                                    |
+| ---------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `method`         | `GET POST PUT PATCH DELETE`    | Required                                                                                                                                                                                                                 |
+| `endpoint`       | string                         | Required. Logical or pass-through path; routing is defined in the selected service's skill                                                                                                                               |
+| `service`        | `jira \| confluence`           | Explicit service selector; omission and detection rules are in [`Confluence`](../confluence/SKILL.md#call-contract)                                                                                                      |
+| `base_url`       | url                            | Site selector when several sites of one service are configured                                                                                                                                                           |
+| `body`           | object \| string               | POST/PUT/PATCH only; GET/DELETE with a body is rejected                                                                                                                                                                  |
+| `query_params`   | Record<string,string>          | GET/DELETE only — silently dropped on POST/PUT/PATCH (put them in the path instead)                                                                                                                                      |
+| `expand`         | string[]                       | GET only; joined with commas into `expand=`. Overrides `query_params.expand`                                                                                                                                             |
+| `headers`        | Record<string,string>          | Extra headers                                                                                                                                                                                                            |
+| `accept_format`  | `json` (default) \| `raw`      | `json`: ADF `description`/`body` fields in GET responses gain a `*_markdown` twin. `raw`: no post-processing; use with `save_to_path`                                                                                    |
+| `content_format` | `json` (default) \| `markdown` | POST/PUT/PATCH only. `markdown` converts `description`, `body`, and `fields.description` to the site's native format; see the selected service's skill for that format                                                   |
+| `content_type`   | string                         | POST only; sets `Content-Type`                                                                                                                                                                                           |
+| `save_to_path`   | string                         | GET only. Always resolved under `<project>/.temp/`; `..` segments and paths outside the project are rejected. Downloads afresh and overwrites; returns `{ saved_to, size_bytes, content_type }` with `saved_to` absolute |
 
-The general skills (`jira`, `confluence`, `download`) reach `mcp__plugin_atlassian_tools__auth_check` only transitively when invoking `setup` on HTTP 401 — they never call it directly per the [optimistic execution protocol](./auth-check.md#general-skills-flow-jira-confluence-download).
+## Automatic behavior
 
-## Multipart Upload
+- `X-Atlassian-Token: no-check` is added to multipart POSTs and to every non-GET request on Server/DC.
+- 429 and 5xx are retried up to 3 times (honoring `Retry-After`, 10 s cap) before the response reaches you.
+- **No attachment upload.** The tool sends JSON or string bodies only; there is no multipart encoding or local file reading.
+- Router skills (`jira`, `confluence`, `download`) execute optimistically, with no pre-flight call.
 
-For attachment uploads via `mcp__plugin_atlassian_tools__fetch` with `method: "POST"`:
+## Response envelope
 
-- `content_type: "multipart/form-data"` — set in tool params
-- `X-Atlassian-Token: nocheck` — auto-added by the fetch tool for multipart requests (not caller responsibility)
+- Success: `{ success: true, status, data }`.
+- HTTP error: `{ success: false, status, data: null, error: { code, message, retryable, reauth_required?, details } }` — `error.reauth_required: true` appears only on 401.
+- Handler rejection (no configuration, GET with body, unsupported deployment endpoint, …): tool error text `Error: <message>`.
+
+Failures: see `error-handling.md`.

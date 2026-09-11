@@ -1,17 +1,11 @@
-## Endpoints
+# label
 
-V2-style logical paths — MCP rewrites `/pages/{id}/labels` to `/content/{id}/label` on DC. Cloud V2 has only GET on the labels endpoint; POST/DELETE writes will surface as 404/405 from the V2 API on Cloud — use update-via-page or call the V1 path directly on Cloud V1 if needed.
+`service: "confluence"` on every call. Writes are V1-only, so they use full paths (`/wiki/rest/api/…` on Cloud, `/rest/api/…` on Server/DC).
 
-| Operation    | HTTP   | Endpoint                                               |
-| ------------ | ------ | ------------------------------------------------------ |
-| List labels  | GET    | `/pages/{id}/labels`                                   |
-| Add labels   | POST   | `/pages/{id}/labels` (DC only — Cloud V2 has no write) |
-| Remove label | DELETE | `/pages/{id}/labels/{label}` (DC only)                 |
+| Operation    | Method | Endpoint                                                                      | Notes                                              |
+| ------------ | ------ | ----------------------------------------------------------------------------- | -------------------------------------------------- |
+| List labels  | GET    | `/pages/{id}/labels`                                                          | Logical path                                       |
+| Add labels   | POST   | Cloud `/wiki/rest/api/content/{id}/label` · DC `/rest/api/content/{id}/label` | Body `[{ "prefix": "global", "name": "<label>" }]` |
+| Remove label | DELETE | Cloud `/wiki/rest/api/content/{id}/label` · DC `/rest/api/content/{id}/label` | `query_params: { name: "<label>" }`                |
 
-## MCP Tool Mapping
-
-| Operation | MCP Tool                             | Method | Notes                         |
-| --------- | ------------------------------------ | ------ | ----------------------------- |
-| Get       | `mcp__plugin_atlassian_tools__fetch` | GET    |                               |
-| Add       | `mcp__plugin_atlassian_tools__fetch` | POST   | Body: `[{ "name": "label" }]` |
-| Remove    | `mcp__plugin_atlassian_tools__fetch` | DELETE |                               |
+Do not send the array body through the logical `/pages/{id}/labels` path on DC — the body rewriter would turn the array into an object.

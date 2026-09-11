@@ -1,79 +1,37 @@
 ---
 name: download
 user-invocable: false
-description: 'Download and upload file attachments on Jira issues and Confluence pages by direct URL or issue key/page ID lookup, saved under .temp/. Use when asked to download an attachment or "첨부파일 다운로드".'
+description: 'Download a Jira or Confluence attachment to .temp/ by direct URL, issue key + filename, or page id + filename. Use for "download the attachment" in any language; upload is not supported.'
 argument-hint: "<issue-key|page-id|url> [--filename <name>]"
-version: "0.1.0"
+version: "0.2.1"
 complexity: simple
 plugin: atlassian
 ---
 
 # download
 
-Unified attachment download for both Jira and Confluence.
+One `mcp__plugin_atlassian_tools__fetch` call per file: `method: "GET"`, `accept_format: "raw"`, `save_to_path: ".temp/<namespace>/<filename>"`. Parameters: [`mcp-tools.md`](../.shared/mcp-tools.md).
 
-## When to Use
+## Namespace
 
-- Download attachment by direct URL
-- Download attachment by issue key/page ID + filename
-- Retrieve image attachment metadata
-- Save attachments to local filesystem
+| Source                     | `save_to_path`                          |
+| -------------------------- | --------------------------------------- |
+| Jira issue `KAN-27`        | `.temp/KAN-27/<filename>`               |
+| Jira comment `10110` on it | `.temp/KAN-27_comment-10110/<filename>` |
+| Confluence page `12345`    | `.temp/confluence-12345/<filename>`     |
 
-## Operations
+Every call downloads afresh and overwrites the target; there is no cache. The result is `data: { saved_to, size_bytes, content_type }` — use `saved_to` (absolute) in later steps rather than rebuilding the path.
 
-### Download Attachment
+## Resolving the URL
 
-```
-Tool: fetch (method: GET)
-Params:
-  endpoint: <attachment URL or API path>
-  service: <jira | confluence>  # required for Confluence links without /wiki/
-  accept_format: "raw"
-  save_to_path: ".temp/{issueKey}/{filename}"
-```
+- **Direct URL** (`…/secure/attachment/{id}/{name}`, `…/wiki/download/attachments/{pageId}/{name}`, `…/rest/api/3/attachment/content/{id}`): pass it as `endpoint` verbatim. Add `service: "confluence"` for Confluence links that lack `/wiki/`.
+- **Jira issue + filename**: `GET /issue/{key}` with `query_params: { fields: "attachment" }`, find the entry in `fields.attachment[]` by `filename`, download its `content` URL. On Server/DC prefer `content` (`/secure/attachment/…`) over `/rest/api/2/attachment/content/{id}`, which some versions lack.
+- **Confluence page + filename**: `GET /pages/{pageId}/attachments` with `service: "confluence"`, match `title`, download `downloadLink` (Cloud) or `_links.download` (DC). Relative `/download/attachments/…` links work as-is on both deployments.
 
-### Get Attachment Metadata (Jira)
+## Errors
 
-```
-Tool: fetch (method: GET)
-Params:
-  endpoint: /rest/api/{version}/issue/{issueKey}
-  query_params: { fields: "attachment" }
-```
+401 → [`error-handling.md`](../.shared/error-handling.md#401-recovery). 403 → the user lacks browse/view permission on the container; do not retry. 404 on a rest attachment-content URL on Server/DC → fall back to the `content` URL from issue metadata. Other statuses → [`error-handling.md`](../.shared/error-handling.md).
 
-### Get Attachment Metadata (Confluence)
+## Upload
 
-```
-Tool: fetch (method: GET)
-Params:
-  endpoint: /wiki/rest/api/content/{pageId}/child/attachment
-```
-
-## Namespace Path Convention
-
-Organize downloads by source context. Every call downloads afresh and overwrites the target — the tool never serves a previously saved file.
-
-| Source                       | save_to_path pattern                    |
-| ---------------------------- | --------------------------------------- |
-| Jira issue `KAN-27`          | `.temp/KAN-27/<filename>`               |
-| Jira issue + comment `10110` | `.temp/KAN-27_comment-10110/<filename>` |
-| Confluence page ID `12345`   | `.temp/confluence-12345/<filename>`     |
-
-## Download Flow
-
-1. Derive namespace from source context (issue key, comment ID, page ID)
-2. Construct `save_to_path`: `.temp/<namespace>/<filename>`
-3. Call fetch — the tool always downloads and overwrites the target file
-4. Returns `{ saved_to, size_bytes, content_type }`; `saved_to` is the resolved path under `.temp/`
-
-## Auth Recovery
-
-No pre-flight auth check. Attempt operations directly and handle HTTP 401 per [`auth-check.md`](../.shared/auth-check.md).
-
-## References
-
-- `../.shared/auth-check.md` — Pre-flight authentication check
-- `../.shared/error-handling.md` — HTTP error handling protocol
-- `../.shared/mcp-tools.md` — Available MCP tools (uses `mcp__plugin_atlassian_tools__fetch` with `method: "GET"` and `accept_format: "raw"`)
-- `references/download-flow.md` — Detailed download and upload specs
-- `references/errors.md` — Download-specific error handling
+Not supported — the fetch tool has no multipart encoding. Tell the user to attach files in the Jira/Confluence UI.
