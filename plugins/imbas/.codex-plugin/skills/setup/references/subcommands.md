@@ -18,7 +18,7 @@
 ## set-language <field> <lang>
 
 1. Validate field is one of: `documents`, `skills`, `issue_content`, `reports`.
-2. Call `mcp__plugin_imbas_tools__config_set` with `updates: { "language.<field>": "<lang>" }` and `scope: "user"` — language is a personal preference unless the user asks to pin it for the repository.
+2. Call `mcp__plugin_imbas_tools__config_set` with `updates: { "language.<field>": "<lang>" }` and `scope: "project"`. Use `scope: "user"` only when the user explicitly requests a global language setting.
 3. Display updated language settings.
 
 ## refresh-cache [KEY]
