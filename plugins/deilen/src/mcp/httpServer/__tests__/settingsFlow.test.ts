@@ -57,6 +57,7 @@ describe("settings flow", () => {
     expect(html).not.toContain('"__DEILEN_STATE__"');
     expect(html).toContain('"state"');
     expect(html).toContain('"overridden"');
+    expect(html).toContain('"initialScope":"project"');
   });
 
   it("round-trips the user layer", async () => {

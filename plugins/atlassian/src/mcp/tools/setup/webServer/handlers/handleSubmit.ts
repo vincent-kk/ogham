@@ -140,9 +140,6 @@ export async function handleSubmit(
     }
   }
 
-  // The page names the layer; connection setup defaults to `user` because a
-  // site and account are a person's, and only a repository that deliberately
-  // points elsewhere writes the project layer.
   const scope = readScope(rawBody);
   const scopeState = await ctx.saveConfig(scope, newConfig);
   await ctx.saveCredentials(newCredentials);
@@ -163,8 +160,8 @@ export async function handleSubmit(
   if (rawBody.closeAfter !== false) void ctx.closeServer();
 }
 
-/** The layer the page asked for, defaulting to the personal one. */
+/** Default to project; only an explicit user selection permits global writes. */
 function readScope(data: unknown): "user" | "project" {
-  if (typeof data !== "object" || data === null) return "user";
-  return (data as { scope?: unknown }).scope === "project" ? "project" : "user";
+  if (typeof data !== "object" || data === null) return "project";
+  return (data as { scope?: unknown }).scope === "user" ? "user" : "project";
 }

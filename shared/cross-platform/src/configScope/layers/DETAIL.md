@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 초기 설정 범위는 `resolveInitialConfigScope` 한 곳에서 결정한다. project 원문이 있으면 project, user 원문만 있으면 user, 둘 다 없으면 project다. 빈 객체도 존재하는 설정이다.
+
 - user와 project 두 config 레이어 파일의 절대 경로를 정하고, 읽고, 한 레이어를
   원자적으로 교체하고, 소비자가 한 번에 조회할 `ConfigScopeState` 로 조립한다.
 - 좌표 계산과 디스크 조회를 분리한다 — `resolveConfigLayers` 는 파일을 보지 않는다.
@@ -11,6 +13,8 @@
 - `node:fs` / `node:path` 를 직접 호출하지 않는다.
 
 ## API Contracts
+
+- `resolveInitialConfigScope(layers: { user: object | null; project: object | null }): ConfigScope`는 디스크 조회·변경 없이 초기 선택만 반환한다. 서버가 `initialScope`로 페이지에 전달하고 이후 사용자 선택은 페이지가 보존한다.
 
 외부 소비자는 `@ogham/cross-platform` 패키지 루트에서 이 API를 가져온다.
 
@@ -38,6 +42,11 @@ project 경로는 `null` 이고, 그 상태는 "이 워크스페이스에는 pro
 병합 사이에 낄 단계가 없는 소비자는 이 함수 하나로 끝낸다.
 
 ## Acceptance Criteria
+
+### LAYERS-5 — 초기 범위 판단 공유
+
+- 최초 실행은 project이고, user만 존재하면 user, project가 존재하면 두 레이어 동시 존재 여부와 관계없이 project다.
+- 페이지는 원문 존재 여부를 재판단하지 않고 서버가 전달한 `initialScope`를 사용한다.
 
 ### LAYERS-1 — 좌표는 파일을 보지 않고 정해진다
 

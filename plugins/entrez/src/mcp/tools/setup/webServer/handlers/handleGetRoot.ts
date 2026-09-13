@@ -1,5 +1,6 @@
 import type { ServerResponse } from "node:http";
 
+import { resolveInitialConfigScope } from "@ogham/cross-platform";
 import { escapeJsonForHtml } from "@ogham/http-kit";
 
 import type { RouteContext } from "../routing/routeContext.js";
@@ -20,9 +21,11 @@ export async function handleGetRoot(
   // will write, say whether a project layer is even available, and re-seat the
   // form on the layer it names. The top-level fields stay the effective view —
   // `configByScope.project` is the same document under a name the toggle reads.
+  const scope = ctx.loadConfigScope();
   const status = {
     ...buildStatus(configByScope.project, credentials),
-    scope: ctx.loadConfigScope(),
+    scope,
+    initialScope: resolveInitialConfigScope(scope.layers),
     configByScope: {
       user: buildStatus(configByScope.user, credentials),
       project: buildStatus(configByScope.project, credentials),

@@ -1,3 +1,5 @@
+import { resolveInitialConfigScope } from '@ogham/cross-platform';
+
 import { loadConfigScope } from '../../../../core/infra/configLoader/index.js';
 import {
   getRuleDocsChannel,
@@ -37,17 +39,15 @@ export function buildSettingsState(
   pluginRoot: string,
 ): SettingsPageState {
   const scope = loadConfigScope(projectRoot);
-  // `scripts/app.js` opens its toggle on the same reading of the same
-  // snapshot; the page cannot import this, so the two restate one rule.
-  const active: SeiriConfigScope =
-    scope.layers.project === null ? 'user' : 'project';
+  const initialScope = resolveInitialConfigScope(scope.layers);
   return {
     projectRoot,
+    initialScope,
     configExists: scope.layers.project !== null,
     scope,
     ruleDocs: {
       pluginRootResolved: true,
-      scope: active,
+      scope: initialScope,
       layers: {
         user: ruleDocLayer(projectRoot, pluginRoot, 'user'),
         project: ruleDocLayer(projectRoot, pluginRoot, 'project'),

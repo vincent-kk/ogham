@@ -16,8 +16,8 @@ export interface PruneResult {
 
 // Normalize the on-disk config and, when it differs from its current contents,
 // rewrite it — dropping keys no longer in the schema (e.g. a removed provider),
-// migrating legacy shapes, and filling missing defaults. Invoked when settings
-// is opened so /setup leaves config.json at the current schema. Never throws: a
+// migrating legacy shapes, and filling missing defaults. Retained as an explicit
+// maintenance API; opening settings never invokes it. Never throws: a
 // missing, corrupt, or invalid file is left untouched and defaults are returned.
 export async function pruneConfigFile(): Promise<PruneResult> {
   let rawText: string;

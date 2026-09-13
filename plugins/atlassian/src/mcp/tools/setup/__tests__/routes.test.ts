@@ -56,14 +56,20 @@ function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
       "<html><script>window.__SETTINGS_STATE__ = '__SETTINGS_STATE__';</script></html>",
     loadConfig,
     loadConfigScope: vi.fn().mockReturnValue({
-      paths: { user: "/tmp/user/config.json", project: null },
+      paths: {
+        user: "/tmp/user/config.json",
+        project: "/tmp/project/.atlassian/config.json",
+      },
       layers: { user: null, project: null },
       effective: {},
       overridden: [],
       warnings: [],
     }),
     saveConfig: vi.fn().mockResolvedValue({
-      paths: { user: "/tmp/user/config.json", project: null },
+      paths: {
+        user: "/tmp/user/config.json",
+        project: "/tmp/project/.atlassian/config.json",
+      },
       layers: { user: null, project: null },
       effective: {},
       overridden: [],
@@ -146,6 +152,7 @@ describe("createRouteHandler", () => {
     expect(text).toContain("window.__SETTINGS_STATE__ = {");
     expect(text).not.toContain("'__SETTINGS_STATE__'");
     expect(text).toContain("<html>");
+    expect(extractSetupState(text).initialScope).toBe("project");
   });
 
   it("GET / — edit mode payload에 저장된 고급 설정과 마스킹 정보가 포함됨", async () => {
@@ -320,11 +327,15 @@ describe("createRouteHandler", () => {
     const { server: s, baseUrl } = await startTestServer(ctx);
     server = s;
 
-    const res = await postJson(withToken(baseUrl, "/submit"), VALID_JIRA_FORM);
+    const res = await postJson(withToken(baseUrl, "/submit"), {
+      ...VALID_JIRA_FORM,
+      scope: "user",
+    });
     expect(res.status).toBe(200);
     const data = await readJson(res);
     expect(data.success).toBe(true);
     expect(data.config_path).toBe("/tmp/user/config.json");
+    expect(ctx.saveConfig).toHaveBeenCalledWith("user", expect.any(Object));
     expect(ctx.saveConfig).toHaveBeenCalledOnce();
     expect(ctx.saveCredentials).toHaveBeenCalledOnce();
     expect(ctx.completeSetup).toHaveBeenCalledWith("/tmp/user/config.json");
@@ -368,7 +379,7 @@ describe("createRouteHandler", () => {
     expect(ctx.completeSetup).not.toHaveBeenCalled();
   });
 
-  it("POST /submit — project scope reports the saved project path", async () => {
+  it("POST /submit — omitted scope reports the saved project path", async () => {
     const ctx = makeContext({
       saveConfig: vi.fn().mockResolvedValue({
         paths: {
@@ -386,11 +397,11 @@ describe("createRouteHandler", () => {
 
     const res = await postJson(withToken(baseUrl, "/submit"), {
       ...VALID_JIRA_FORM,
-      scope: "project",
       closeAfter: false,
     });
     const data = await readJson(res);
     expect(data.config_path).toBe("/tmp/project/.atlassian/config.json");
+    expect(ctx.saveConfig).toHaveBeenCalledWith("project", expect.any(Object));
     expect(ctx.completeSetup).toHaveBeenCalledWith(
       "/tmp/project/.atlassian/config.json",
     );

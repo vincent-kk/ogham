@@ -27,6 +27,7 @@ const HTML =
 
 let dir: string;
 let configPath: string;
+let projectPath: string;
 let credPath: string;
 let handle: SetupServerHandle;
 let base: string;
@@ -35,6 +36,7 @@ let lastTested: SetupFormData | null;
 beforeEach(async () => {
   dir = await mkdtemp(join(tmpdir(), "entrez-setup-"));
   configPath = join(dir, "config.json");
+  projectPath = join(dir, ".entrez", "config.json");
   credPath = join(dir, "credentials.json");
   lastTested = null;
 
@@ -53,7 +55,7 @@ beforeEach(async () => {
       }),
       loadCredentials: () => loadCredentials(credPath),
       saveConfig: (scope, c) =>
-        saveConfig(scope, c, { user: configPath, project: null }),
+        saveConfig(scope, c, { user: configPath, project: projectPath }),
       saveCredentials: (c) => saveCredentials(c, credPath),
       testConnection: async (data): Promise<ConnectionTestResult> => {
         lastTested = data;
@@ -101,6 +103,7 @@ describe("setup web server", () => {
     const html = await res.text();
     expect(res.status).toBe(200);
     expect(html).toContain("window.__ENTREZ_STATE__ =");
+    expect(html).toContain('"initialScope":"project"');
     expect(html).not.toContain("STORED");
     expect(html).toContain("•"); // api_key shown masked, not the real value
   });
@@ -151,7 +154,7 @@ describe("setup web server", () => {
   });
 
   it("saves config + credentials on POST /submit; key not in response", async () => {
-    const res = await postJson("/submit", VALID);
+    const res = await postJson("/submit", { ...VALID, scope: "user" });
     const body = (await res.json()) as { success: boolean };
     expect(res.status).toBe(200);
     expect(body.success).toBe(true);
@@ -160,6 +163,17 @@ describe("setup web server", () => {
     const cfg = await loadConfig({ user: configPath, project: null });
     expect(cfg?.tool).toBe(ENTREZ_TOOL_NAME);
     expect((await loadCredentials(credPath)).api_key).toBe("SECRETKEY");
+  });
+
+  it("saves only project config when scope is omitted", async () => {
+    const res = await postJson("/submit", VALID);
+    expect(res.status).toBe(200);
+    expect(JSON.parse(await readFile(projectPath, "utf8")).tool).toBe(
+      ENTREZ_TOOL_NAME,
+    );
+    await expect(readFile(configPath, "utf8")).rejects.toMatchObject({
+      code: "ENOENT",
+    });
   });
 
   // Split from the save assertions so Windows keeps them: stat there reports
@@ -173,7 +187,11 @@ describe("setup web server", () => {
   );
 
   it("keeps the server open after a plain Save (closeAfter: false)", async () => {
-    const res = await postJson("/submit", { ...VALID, closeAfter: false });
+    const res = await postJson("/submit", {
+      ...VALID,
+      scope: "user",
+      closeAfter: false,
+    });
     expect(res.status).toBe(200);
     expect((await loadConfig({ user: configPath, project: null }))?.tool).toBe(
       ENTREZ_TOOL_NAME,

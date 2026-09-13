@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- setup 하위 명령과 헤드리스 설정은 project 범위를 기본으로 사용하며, user 전역 변경은 사용자가 명시적으로 요청한 경우에만 수행한다.
+
 - 패키지는 기획자 사이드 파이프라인 `refine → estimate(skip 가능) → split` 을 스킬·에이전트·MCP 서버 세 표면으로 배송한다.
 - phase 진행의 정본은 `.imbas/<PROJECT_REF>/runs/<run_id>/state.json` 이고, 이슈 생성 진행의 정본은 stories 매니페스트의 `issue_ref`·`status` 다. 두 정본을 한 곳으로 합치지 않는다.
 - provider 는 `jira` · `github` · `local` 셋이다. 한 스킬 실행이 provider X 를 대상으로 하면 `references/Y/**` 를 읽지 않는다 — provider 별 계약이 서로 새면 실행 결과가 대상 트래커와 어긋난다.
@@ -37,4 +39,4 @@
 
 ## Last Updated
 
-2026-08-06 — v2 재편(기획자 사이드 전환, MCP 9 도구, phase `refine/estimate/split`)에 맞춰 패키지 루트 계약을 최초 문서화했다.
+2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.

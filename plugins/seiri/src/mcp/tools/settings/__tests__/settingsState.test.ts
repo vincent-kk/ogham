@@ -1,7 +1,7 @@
 import { execSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vitest';
@@ -24,8 +24,10 @@ const userRulesDir = join(process.env.CLAUDE_CONFIG_DIR ?? '', 'rules');
  */
 describe('settings state layer', () => {
   const tempDirs: string[] = [];
+  const userFiles: string[] = [];
 
   afterEach(() => {
+    for (const path of userFiles.splice(0)) rmSync(path, { force: true });
     for (const dir of tempDirs.splice(0))
       rmSync(dir, { recursive: true, force: true });
     rmSync(userRulesDir, { recursive: true, force: true });
@@ -54,13 +56,30 @@ describe('settings state layer', () => {
     expect(state.ruleDocs.scope).toBe('project');
   });
 
-  it('opens on the user layer when the project stores no dial', () => {
+  it('opens on the project layer when the project stores no dial', () => {
     const repoRoot = seedRepo(null);
 
     const state = buildSettingsState(repoRoot, pluginRoot);
 
     expect(state.configExists).toBe(false);
+    expect(state.initialScope).toBe('project');
+    expect(state.ruleDocs.scope).toBe('project');
+  });
+
+  it('opens on an existing user layer until the project has its own config', () => {
+    const repoRoot = seedRepo(null);
+    const userPath = buildSettingsState(repoRoot, pluginRoot).scope.paths.user;
+    userFiles.push(userPath);
+    mkdirSync(dirname(userPath), { recursive: true });
+    writeFileSync(userPath, JSON.stringify({ intervention: 'advisory' }));
+
+    const state = buildSettingsState(repoRoot, pluginRoot);
+    expect(state.initialScope).toBe('user');
     expect(state.ruleDocs.scope).toBe('user');
+
+    const projectState = buildSettingsState(seedRepo('standard'), pluginRoot);
+    expect(projectState.initialScope).toBe('project');
+    expect(projectState.ruleDocs.scope).toBe('project');
   });
 
   it('names each layer its own channel, not the active one twice', () => {

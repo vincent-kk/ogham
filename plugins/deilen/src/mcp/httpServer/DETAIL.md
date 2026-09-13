@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 설정 페이지에 `initialScope`를 주입한다. 공통 `resolveInitialConfigScope`가 project 설정 존재 → user 설정 존재 → 최초 project 순으로 결정하며, 페이지가 조건을 중복하지 않는다.
+
 - 첫 `render_viewer`/`open_settings` 에서 1회 기동, 이후 재사용(싱글톤).
 - 기동 시 프로젝트 스코프 해시를 1회 확정 — Claude 는 `process.cwd()`, 그 외 호스트는 도구 인자 `project_root`(부재 시 actionable throw, `process.cwd()` 폴백 금지).
 - 리스너 수명 = serving 세션. 이 프로세스가 만든 세션이 하나라도 `serving` 이거나 collect 대기가 진행 중이면 idle 타이머는 재무장만 한다. 세션이 모두 닫힌 뒤(제출·dismiss·`close_viewer`·TTL 정리) 마지막 활동으로부터 `idle_shutdown_minutes`(기본 1분) 가 지나면 종료한다. 뷰어 heartbeat 는 종료 판정의 근거가 아니라 페이지 쪽 세션 상태 확인(`/api/ping` 404 → submit 비활성)이다.

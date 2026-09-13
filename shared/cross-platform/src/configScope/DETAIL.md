@@ -14,6 +14,8 @@
 
 ## API Contracts
 
+- 초기 설정 범위는 `resolveInitialConfigScope`가 project 존재 → user 존재 → 최초 project 순으로 결정한다. 서버는 결과를 `initialScope`로 주입하며, 페이지별 판단 분기는 두지 않는다.
+
 외부 소비자는 `@ogham/cross-platform` 패키지 루트 하나에서 이 fractal의 공개
 심볼을 가져온다. `index.ts`, `merge/`, `layers/`의 중간 배럴은 패키지 내부 조직과
 루트 재노출을 위해 남아 있으며 `package.json`의 별도 공개 주소가 아니다.

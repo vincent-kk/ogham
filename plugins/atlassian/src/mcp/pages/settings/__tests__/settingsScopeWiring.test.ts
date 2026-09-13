@@ -1,9 +1,25 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { runInNewContext } from "node:vm";
 
 import { describe, expect, it } from "vitest";
 
 const SETTINGS_DIR = join(import.meta.dirname, "..");
+
+it("uses the server initial scope without judging config layers", () => {
+  const app = readFileSync(join(SETTINGS_DIR, "scripts/app.js"), "utf8");
+  const declaration = app.match(/var configScope = [^;]+;/)?.[0];
+  expect(declaration).toBeDefined();
+  for (const initialScope of ["project", "user"]) {
+    const injected = { initialScope };
+    expect(
+      runInNewContext(declaration + "configScope", {
+        state: injected,
+        injected,
+      }),
+    ).toBe(initialScope);
+  }
+});
 const WEB_SERVER_DIR = join(
   import.meta.dirname,
   "../../../tools/setup/webServer",
@@ -47,7 +63,10 @@ describe("config scope wiring between the settings server and its page", () => {
       "utf8",
     );
 
-    expect(handler).toContain("scope: ctx.loadConfigScope()");
+    expect(handler).toContain("const scope = ctx.loadConfigScope()");
+    expect(handler).toContain(
+      "initialScope: resolveInitialConfigScope(scope.layers)",
+    );
   });
 
   it("injects one prefill view per layer and re-seats the form on the toggle", () => {

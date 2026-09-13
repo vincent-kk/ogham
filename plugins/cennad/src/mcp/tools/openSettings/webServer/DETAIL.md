@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 설정 페이지에 `initialScope`를 주입한다. 공통 `resolveInitialConfigScope`가 project 설정 존재 → user 설정 존재 → 최초 project 순으로 결정하며, 페이지가 조건을 중복하지 않는다.
+
 - `127.0.0.1` 에만 바인딩하고 5분 idle 에 자동 종료한다.
 - 검증 순서는 공유 `@ogham/http-kit` 을 따른다: loopback Host(DNS rebinding 차단) → one-time token → POST Origin(CSRF) → `application/json` 강제.
 - 토큰·Origin 검증을 이 모듈에서 재구현하지 않는다.

@@ -34,7 +34,10 @@ function makeContext(overrides: Partial<RouteContext> = {}): RouteContext {
       "<html><script>window.__SETTINGS_STATE__ = '__SETTINGS_STATE__';</script></html>",
     loadConfig: vi.fn().mockResolvedValue({}),
     saveConfig: vi.fn().mockResolvedValue({
-      paths: { user: "/tmp/user/config.json", project: null },
+      paths: {
+        user: "/tmp/user/config.json",
+        project: "/tmp/project/.atlassian/config.json",
+      },
       layers: { user: null, project: null },
       effective: {},
       overridden: [],

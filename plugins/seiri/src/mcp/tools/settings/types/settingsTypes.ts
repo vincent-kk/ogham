@@ -26,7 +26,8 @@ export interface RuleDocLayerState {
 /** State injected into the settings page as `__SEIRI_STATE__`. */
 export interface SettingsPageState {
   projectRoot: string;
-  /** True when the project layer holds a dial — what the page edits by default. */
+  initialScope: SeiriConfigScope;
+  /** True when the project layer holds a dial. */
   configExists: boolean;
   /**
    * Per-layer dials and which one is overriding. The page seats the dial from

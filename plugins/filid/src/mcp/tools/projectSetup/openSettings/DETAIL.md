@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 설정 페이지에 `initialScope`를 주입한다. 공통 `resolveInitialConfigScope`가 project 설정 존재 → user 설정 존재 → 최초 project 순으로 결정하며, 페이지가 조건을 중복하지 않는다.
+
 - Start or reuse a token-protected loopback settings server for one project.
 - Concurrent calls share the in-flight startup. A different project waits for startup and replacement; an older server's close callback cannot clear its successor.
 - Load config v2, or the in-memory v1 migration result with diagnostics, into the page state.

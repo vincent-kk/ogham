@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 서버가 공통 `resolveInitialConfigScope`로 계산한 `initialScope`를 초기 선택으로 사용한다. project 설정이 있으면 project, user 설정만 있으면 user, 둘 다 없으면 project다. 페이지는 이 조건을 재판단하지 않는다.
+
 - `open_settings` 가 여는 설정 페이지 프런트엔드다. `.imbas/config.json` 전체(provider, project 참조, 라이프사이클 라벨 6종, 언어 4종, LLM 모델, estimation 계수, provider별 고급 섹션)를 한 폼에서 편집한다.
 - 세션만 아는 데이터(가용 provider, 감지된 repo, Jira 프로젝트 목록)는 페이지가 조회하지 않는다. LLM 이 `bootstrap` 인자로 주입한다.
 - 편집 대상 계층은 `#config_scope` 라디오(user/project)가 정한다. 폼은 `configByScope[scope]` 로 다시 앉고, `/save` 는 `scope` 를 실어 그 계층만 덮어쓴다.
@@ -19,10 +21,15 @@
 
 - 서버와의 계약은 두 엔드포인트뿐이다: `POST /save`, `POST /close`. 두 요청 모두 `location.search` 에서 읽은 서버 발급 토큰을 `?token=` 으로 부착한다.
 - `/save` 페이로드는 `scope` 와 config 본문, 그리고 config 가 아닌 부수 의사(`options.provision_labels`)를 함께 싣는다. 스키마 정본은 `src/types/settings.ts` 다.
-- `scope.layers.project` 가 없으면 project 옵션은 disabled 이고 폼은 user 계층으로 연다.
+- project 옵션은 `scope.paths.project`가 없을 때만 disabled이다. 설정 파일 부재는 프로젝트 설정 생성을 막지 않는다.
 - 저장 성공 시 복귀 안내 후 탭을 자동으로 닫아 도구의 long-poll 을 해소한다. dirty 상태 이탈은 `beforeunload` 로 확인한다.
 
 ## Acceptance Criteria
+
+### AC-settings-project-default — 프로젝트 기본 범위
+
+- 서버의 `initialScope`가 user와 project 어느 값이든 페이지가 그대로 선택한다.
+- 사용자가 범위를 바꾸면 해당 계층을 편집·저장하며, 상태 재수신은 이 선택을 덮어쓰지 않는다.
 
 ### AC-settings-english-only — 영문 전용 UI
 
@@ -37,7 +44,7 @@
 ### AC-settings-scope-roundtrip — 계층 왕복
 
 - `/save` 요청 본문에 `scope` 필드가 항상 포함된다.
-- `scope.layers.project` 가 없는 상태로 로드하면 project 라디오가 disabled 이고 선택 계층이 user 다.
+- `scope.layers.project`가 없어도 프로젝트 경로가 있으면 project 라디오가 선택되고 활성화된다.
 
 ### AC-settings-preserve-hidden — 미노출 값 보존
 
@@ -50,4 +57,4 @@
 
 ## Last Updated
 
-2026-08-06 — 계층 선택(`#config_scope`)과 미노출 값 보존을 포함한 설정 페이지 계약을 최초 문서화했다.
+2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.

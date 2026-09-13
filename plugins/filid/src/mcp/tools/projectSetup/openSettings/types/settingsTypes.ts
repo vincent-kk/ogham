@@ -1,4 +1,4 @@
-import type { ConfigScopeState } from '@ogham/cross-platform';
+import type { ConfigScope, ConfigScopeState } from '@ogham/cross-platform';
 import { z } from 'zod';
 
 import {
@@ -24,6 +24,7 @@ export interface RuleDocsLayerSnapshot {
 /** State injected into the settings page as `__FILID_STATE__`. */
 export interface SettingsPageState {
   projectRoot: string;
+  initialScope: ConfigScope;
   configExists: boolean;
   /**
    * The config each layer resolves to. The page seats its form — and starts

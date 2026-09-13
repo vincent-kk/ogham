@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 설정 화면을 열거나 재사용하는 것만으로 user 설정 파일을 정리하거나 다시 쓰지 않는다. 설정 변경은 명시적인 저장 선택을 따른다.
+
 - `127.0.0.1` 전용 HTTP 서버를 띄우고 one-time token 으로 보호된 폼을 브라우저에 노출한다.
 - 5분 idle 또는 사용자의 "Save & Close" 액션에서 자동 종료한다.
 - 설정 HTML 은 런타임에 `public/settings.html` 에서 읽는다(번들 미포함).
@@ -12,6 +14,10 @@
 - `webServer/` — 로컬 HTTP 서버와 라우트.
 
 ## Acceptance Criteria
+
+### AC-open-preserves-user-config — 열기 시 전역 설정 보존
+
+- 구형 키가 있는 user 설정도 화면 열기·재사용 후 원문 바이트가 동일하다.
 
 ### AC-loopback-only — 바인딩 격리
 
@@ -27,4 +33,4 @@
 
 ## Last Updated
 
-2026-07-30 — 설정 UI 기동 계약을 문서화했다.
+2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.

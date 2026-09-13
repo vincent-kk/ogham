@@ -1,6 +1,7 @@
 import type { ServerResponse } from 'node:http';
 import { dirname } from 'node:path';
 
+import { resolveInitialConfigScope } from '@ogham/cross-platform';
 import { escapeJsonForHtml } from '@ogham/http-kit';
 
 import type { RouteContext } from '../routing/routeContext.js';
@@ -24,6 +25,7 @@ export async function handleGetRoot(
     config: configByScope.project,
     configByScope,
     scope,
+    initialScope: resolveInitialConfigScope(scope.layers),
     activeHome: dirname(scope.paths.user),
   });
   const html = ctx.settingsHtml.replace(

@@ -516,7 +516,7 @@
     layers: { user: null, project: null },
     overridden: [],
   };
-  var configScope = scopeState.layers.project === null ? "user" : "project";
+  var configScope = injected.initialScope;
 
   /**
    * The prefill view the chosen layer edits.

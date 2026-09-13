@@ -50,9 +50,6 @@ export async function handleSubmit(
     return;
   }
 
-  // The page names the layer; `user` is the default because tool and contact
-  // email are a person's, and only a repository that deliberately declares its
-  // own writes the project layer.
   await ctx.saveConfig(readScope(raw), {
     tool: ENTREZ_TOOL_NAME,
     email: data.email,
@@ -74,8 +71,8 @@ export async function handleSubmit(
   if (closeAfter) void ctx.closeServer();
 }
 
-/** The layer the page asked for, defaulting to the personal one. */
+/** Default to project; only an explicit user selection permits global writes. */
 function readScope(raw: unknown): "user" | "project" {
-  if (typeof raw !== "object" || raw === null) return "user";
-  return (raw as { scope?: unknown }).scope === "project" ? "project" : "user";
+  if (typeof raw !== "object" || raw === null) return "project";
+  return (raw as { scope?: unknown }).scope === "user" ? "user" : "project";
 }

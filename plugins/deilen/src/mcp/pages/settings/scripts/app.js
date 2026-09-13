@@ -20,7 +20,7 @@ let state = injected.state || {
   overridden: [],
   warnings: [],
 };
-let scope = state.paths.project === null ? "user" : "project";
+let scope = injected.initialScope;
 /** Paths the project layer currently overrides. Editing a field adds to it. */
 let overridden = new Set(state.overridden);
 
@@ -189,7 +189,6 @@ function renderScope() {
 function adoptState(next) {
   state = next;
   overridden = new Set(next.overridden);
-  if (state.paths.project === null) scope = "user";
   renderScope();
 }
 

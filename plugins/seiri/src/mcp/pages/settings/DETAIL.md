@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 서버가 공통 `resolveInitialConfigScope`로 계산한 `initialScope`를 초기 선택으로 사용한다. project 설정이 있으면 project, user 설정만 있으면 user, 둘 다 없으면 project다. 페이지는 이 조건을 재판단하지 않는다.
+
 - 폼은 두 가지를 한 화면에서 정한다: 배포할 규칙 선택과 훅 workflow mode. mode는 `off`·`advisory`·`standard`·`strict` 네 값이고, 새 설정의 기본 `off`는 `Skills only`로 표시한다.
 - `Skills only`는 스킬 설치·명시 호출을 유지하고 훅 context·상태 변경·wire 응답을 없앤다는 뜻이다. 다른 세 값은 기존 다이얼 의미를 유지한다.
 - `scope`(user/project) 는 결정 하나다 — 다이얼이 저장될 레이어와 규칙이 배포될 레이어를 함께 정한다.
@@ -21,6 +23,11 @@
 - 서버 주입 상태로 현재 배포 상태·드리프트·다이얼 계층을 받는다.
 
 ## Acceptance Criteria
+
+### AC-settings-project-default — 프로젝트 기본 범위
+
+- 서버의 `initialScope`가 user와 project 어느 값이든 페이지가 그대로 선택한다.
+- 사용자가 범위를 바꾸면 해당 계층을 편집·저장하며, 상태 재수신은 이 선택을 덮어쓰지 않는다.
 
 ### AC-single-scope-decision — 단일 스코프 결정
 
@@ -48,4 +55,4 @@
 
 ## Last Updated
 
-2026-09-03 — `Skills only` 기본 mode와 네 값 radio 계약을 추가했다.
+2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.

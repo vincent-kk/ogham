@@ -267,7 +267,7 @@
     layers: { user: null, project: null },
     overridden: [],
   };
-  var configScope = scopeState.layers.project === null ? "user" : "project";
+  var configScope = state.initialScope;
 
   function renderScope() {
     var host = document.getElementById("config_scope");

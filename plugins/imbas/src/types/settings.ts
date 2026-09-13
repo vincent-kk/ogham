@@ -2,7 +2,7 @@
  * @file settings.ts
  * @description Zod schemas and types for the open_settings page contract
  */
-import type { ConfigScopeState } from '@ogham/cross-platform';
+import type { ConfigScope, ConfigScopeState } from '@ogham/cross-platform';
 import { z } from 'zod';
 
 import { ImbasConfigSchema } from './config.js';
@@ -31,6 +31,7 @@ export type SettingsBootstrap = z.infer<typeof SettingsBootstrapSchema>;
 /** State injected into the settings page as `__IMBAS_STATE__`. */
 export interface SettingsPageState {
   projectRoot: string;
+  initialScope: ConfigScope;
   configExists: boolean;
   /**
    * The config each layer resolves to. The page seats its form — and starts

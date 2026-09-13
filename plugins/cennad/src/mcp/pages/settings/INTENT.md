@@ -5,7 +5,7 @@
 ## Conventions
 
 - 외부 CDN·이미지 의존 금지 (빌드 시 단일 HTML); token 은 URL 쿼리 `?token=<...>` 에서 읽어 동일 origin XHR 에 재전달; POST body 는 항상 `Content-Type: application/json`; CSS 변수로 다크 모드 토큰화
-- `#config_scope` 라디오(user/project)가 편집 대상 계층을 정한다 — 폼은 configuration-read 응답의 `configByScope[scope]` 로 다시 앉고 save 요청은 `scope` 를 실어 그 계층만 덮어쓴다. 현재 결정 중인 계층으로 열리며, project 파일이 없으면 해당 옵션은 disabled
+- The `#config_scope` radio controls `configByScope[scope]` prefill and the save scope. It uses the server-provided initialScope: existing project, otherwise existing user, otherwise project. Project is disabled only when its path is unavailable, not when its config file is missing. Adopting server state preserves the selection.
 - user artifact 안내의 active home은 초기 page 응답이 `__CENNAD_STATE__.activeHome`으로 주입한 런타임 경로를 `textContent`로 표시한다. 프런트엔드는 호스트 루트를 다시 계산하지 않는다
 - tier 는 `apex`/`high`/`mid`/`low` 4종이며 provider 마다 4행 모두 노출 — apex 도 다른 tier 와 동등하게 임의 model/effort 를 매핑할 수 있다 (기본값만 최상위)
 - "CLI liveness limits" 섹션: 기본값으로 충분한 설정이라 `<details class="limits">` 로 **접힌 채** 두고, summary 우측에 현재 유효값을 사람이 읽는 단위로 표시한다(`renderTimeoutSummary`). 내용은 idle(무출력) 1개 + tier 별 ceiling 4개, **분 단위 입력**이며 `minutesFromMs`/`msFromMinutes` 한 쌍만 ms 변환을 안다. 저장 형식은 `timeouts.{idle_ms, hard_cap_ms.<tier>}` (구 `spawn_timeout_ms` 는 폐기)

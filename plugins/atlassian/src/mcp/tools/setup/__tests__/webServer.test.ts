@@ -157,7 +157,11 @@ describe("startSetupServer", () => {
     const first = await fetch(submitUrl, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...VALID_JIRA_FORM, closeAfter: false }),
+      body: JSON.stringify({
+        ...VALID_JIRA_FORM,
+        scope: "user",
+        closeAfter: false,
+      }),
     });
     expect(first.status).toBe(500);
     const stillPending = await Promise.race([
@@ -169,7 +173,11 @@ describe("startSetupServer", () => {
     const second = await fetch(submitUrl, {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ...VALID_JIRA_FORM, closeAfter: false }),
+      body: JSON.stringify({
+        ...VALID_JIRA_FORM,
+        scope: "user",
+        closeAfter: false,
+      }),
     });
     expect(second.status).toBe(200);
     await expect(handle.completion).resolves.toMatchObject({

@@ -1,6 +1,6 @@
 ## Purpose
 
-config 로드·저장 담당. user(`CENNAD_HOME/config.json`)와 project(`<workspace>/.cennad/config.json`) 두 레이어이며 project 가 user 를 재정의한다. save 는 호출자가 지목한 한 레이어에만 간다. `CENNAD_CONFIG_PATH` 가 있으면 해당 cennad 전용 디렉터리를 active home 으로 사용한다. active config 가 없거나 JSON/object 로 읽을 수 없고 active home 이 기본 home 이 아니면 `pluginCache('cennad')/config.json` 만 읽기 전용 fallback source 로 시도한다. fallback 은 파일을 생성·복사하지 않으며 save 는 항상 active `CONFIG_PATH` 로 간다. Zod 검증 실패와 merge/normalize 가능 구형 config 는 `DEFAULT_CONFIG`/normalize 경로로 처리한다. legacy 정수 비율 → enabled flag 마이그레이션, `/setup` 진입 시 `pruneConfigFile` 로 구 키 제거·기본값 보완, `model_map` deep merge(`mergeModelMap`) 포함.
+Owns config loading and persistence across user and project layers; project overrides user, and saving targets only the selected layer. `CENNAD_CONFIG_PATH` selects the active user home. Missing or unreadable active config may use the default home as a read-only fallback; fallback never creates or copies files. Invalid config degrades to defaults, while readable legacy shapes normalize in memory, including integer ratios and model maps. Opening setup never rewrites user config; `pruneConfigFile` remains an explicit maintenance API.
 
 ## Structure
 
@@ -29,7 +29,7 @@ config 로드·저장 담당. user(`CENNAD_HOME/config.json`)와 project(`<works
 - Zod 검증 실패 시 DEFAULT_CONFIG fallback + logger.warn 기록
 - `CLAUDE_PLUGIN_DATA`/`CLAUDE_PLUGIN_DADA` 는 home 결정이나 fallback source 로 사용하지 않음
 - 검증은 **병합 결과에만** 호출자가 수행 — project 레이어는 재정의한 키만 담아 단독으로 스키마를 통과할 수 없다. `saveConfig` 는 검증하지 않는 영속 프리미티브이며, 유일한 호출자인 `/save` 핸들러가 병합 미리보기를 검증하고 실패 시 호출하지 않는다
-- `/setup` 진입 시 `pruneConfigFile` 로 제거된 provider 키·legacy 값 정리 후 DEFAULT_CONFIG 보완
+- Normalize setup reads in memory; write user config only through an explicitly selected user save or maintenance call.
 
 ### Ask first
 

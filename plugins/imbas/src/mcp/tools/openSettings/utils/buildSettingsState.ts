@@ -1,5 +1,7 @@
 import { basename } from 'node:path';
 
+import { resolveInitialConfigScope } from '@ogham/cross-platform';
+
 import {
   loadConfigByScope,
   loadConfigScope,
@@ -25,6 +27,7 @@ export async function buildSettingsState(
     .toUpperCase();
   return {
     projectRoot,
+    initialScope: resolveInitialConfigScope(scope.layers),
     // The project layer's presence, not the file's — a workspace with only a
     // user layer has a usable config but nothing committed here yet.
     configExists: scope.layers.project !== null,

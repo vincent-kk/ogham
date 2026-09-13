@@ -1,3 +1,5 @@
+import { resolveInitialConfigScope } from '@ogham/cross-platform';
+
 import { getDefaultAdapterIds } from '../../../../../adapters/index.js';
 import {
   createDefaultConfig,
@@ -30,6 +32,7 @@ export function buildSettingsState(projectRoot: string): SettingsPageState {
   const scope = loadConfigScope(projectRoot);
   return {
     projectRoot,
+    initialScope: resolveInitialConfigScope(scope.layers),
     configExists: scope.layers.project !== null,
     configByScope: {
       // A user layer that holds nothing falls back to the shipped defaults —

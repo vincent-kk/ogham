@@ -55,7 +55,7 @@
     layers: { user: null, project: null },
     overridden: [],
   };
-  var scope = scopeState.layers.project === null ? 'user' : 'project';
+  var scope = state.initialScope;
 
   // Both layers arrive up front so moving the toggle can redraw without a
   // round trip. The server resolves each channel, because on a Codex host it

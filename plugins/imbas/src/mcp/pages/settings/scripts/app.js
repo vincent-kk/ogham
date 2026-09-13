@@ -60,9 +60,7 @@
     layers: { user: null, project: null },
     overridden: [],
   };
-  // Open on the layer that is currently deciding, so pressing Save without
-  // touching the toggle rewrites the file the config already came from.
-  var scope = scopeState.layers.project === null ? 'user' : 'project';
+  var scope = state.initialScope;
 
   function renderScope() {
     var host = $('config_scope');

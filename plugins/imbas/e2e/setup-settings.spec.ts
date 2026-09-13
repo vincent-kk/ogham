@@ -320,14 +320,17 @@ test('a pending call reuses the running session and keeps the same URL', async (
   await expect(page.locator('.brand-name')).toHaveText('imbas');
 });
 
-test('default user scope saves to the user layer, not the project', async ({
+test('explicit user scope saves to the user layer, not the project', async ({
   page,
 }) => {
   const url = await openSession(projectDir);
   const waiting = longPoll(projectDir);
 
   await page.goto(url);
-  // Fresh project → the form opens on the user scope by default.
+  await expect(
+    page.locator('#config_scope input[value="project"]'),
+  ).toBeChecked();
+  await page.locator('#config_scope input[value="user"]').locator('..').click();
   await expect(page.locator('#config_scope input[value="user"]')).toBeChecked();
   await page.locator('#jira-project-select').selectOption('KAN');
   await page.getByRole('button', { name: 'Save & Close' }).click();

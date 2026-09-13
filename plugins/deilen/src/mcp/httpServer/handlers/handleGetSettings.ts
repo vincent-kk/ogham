@@ -1,5 +1,6 @@
 import type { ServerResponse } from "node:http";
 
+import { resolveInitialConfigScope } from "@ogham/cross-platform";
 import { escapeJsonForHtml } from "@ogham/http-kit";
 
 import { DEILEN_STATE_PLACEHOLDER_PATTERN } from "../constants/patterns.js";
@@ -15,11 +16,13 @@ export function handleGetSettings(
   context: RouteContext,
   response: ServerResponse,
 ): void {
+  const state = context.loadConfigState();
   const html = context
     .loadSettingsHtml()
     .replace(DEILEN_STATE_PLACEHOLDER_PATTERN, () =>
       escapeJsonForHtml({
-        state: context.loadConfigState(),
+        state,
+        initialScope: resolveInitialConfigScope(state.layers),
         token: context.token,
       }),
     );

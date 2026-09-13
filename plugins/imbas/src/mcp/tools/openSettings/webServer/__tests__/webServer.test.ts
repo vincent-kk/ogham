@@ -15,6 +15,7 @@ const DEFAULT_CONFIG = ImbasConfigSchema.parse({});
 
 const STATE: SettingsPageState = {
   projectRoot: '/tmp/project',
+  initialScope: 'project',
   configExists: true,
   configByScope: { user: DEFAULT_CONFIG, project: DEFAULT_CONFIG },
   scope: {

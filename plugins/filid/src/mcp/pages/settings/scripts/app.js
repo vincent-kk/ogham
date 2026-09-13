@@ -30,7 +30,7 @@
   };
   // Opens on the layer that is currently deciding, so pressing Save without
   // touching the toggle rewrites the file the config already came from.
-  var scope = scopeState.layers.project === null ? 'user' : 'project';
+  var scope = state.initialScope;
 
   // One normalized config per layer, so moving the toggle re-seats the form
   // without a round trip. The server normalizes both — this page has neither

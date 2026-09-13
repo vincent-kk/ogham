@@ -1,9 +1,10 @@
-import { readFile, rm } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   CENNAD_HOME,
+  CONFIG_PATH,
   SETTINGS_SERVER_PATH,
 } from '../../../../constants/paths.js';
 import { handleOpenSettings } from '../openSettings.js';
@@ -75,5 +76,17 @@ describe('handleOpenSettings', () => {
     expect(third.reused).toBe(false);
 
     await closeViaHttp(third.url);
+  });
+
+  it('preserves user config bytes when opening and reusing settings', async () => {
+    await mkdir(CENNAD_HOME, { recursive: true });
+    const original = '{ "legacy_setup_key": true }\n';
+    await writeFile(CONFIG_PATH, original, 'utf8');
+    const opened = await handleOpenSettings({});
+    await handleOpenSettings({});
+    expect(await readFile(CONFIG_PATH, 'utf8')).toBe(original);
+    const html = await (await fetch(opened.url)).text();
+    expect(html).toContain('"initialScope":"user"');
+    await closeViaHttp(opened.url);
   });
 });

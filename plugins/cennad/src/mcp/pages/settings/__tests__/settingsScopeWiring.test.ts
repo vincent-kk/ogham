@@ -1,9 +1,28 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { runInNewContext } from 'node:vm';
 
 import { describe, expect, it } from 'vitest';
 
 const SETTINGS_DIR = join(import.meta.dirname, '..');
+
+it('uses the server initial scope without judging config layers', () => {
+  const app = readFileSync(join(SETTINGS_DIR, 'scripts/app.js'), 'utf8');
+  const adopt = app.slice(
+    app.indexOf('function adoptScopeState('),
+    app.indexOf('function renderScope()'),
+  );
+  for (const initialScope of ['project', 'user']) {
+    const context = {
+      scope: null,
+      scopeState: {},
+      initialScope,
+      renderScope() {},
+    };
+    runInNewContext(adopt + '; adoptScopeState({}, initialScope);', context);
+    expect(context.scope).toBe(initialScope);
+  }
+});
 const HANDLERS_DIR = join(
   import.meta.dirname,
   '../../../tools/openSettings/webServer/handlers',
@@ -11,6 +30,22 @@ const HANDLERS_DIR = join(
 
 const readSettingsFile = (path: string) =>
   readFileSync(join(SETTINGS_DIR, path), 'utf8');
+
+it('keeps the selected scope when configuration state arrives', () => {
+  const app = readSettingsFile('scripts/app.js');
+  const adopt = app.slice(
+    app.indexOf('function adoptScopeState('),
+    app.indexOf('function renderScope()'),
+  );
+  for (const scope of ['project', 'user']) {
+    const context = { scope, scopeState: {}, renderScope() {} };
+    runInNewContext(
+      adopt + '; adoptScopeState({ layers: { project: null } });',
+      context,
+    );
+    expect(context.scope).toBe(scope);
+  }
+});
 
 // The server states one half of this contract and the page the other. The page
 // is a standalone browser script — nothing at build time connects the two, so

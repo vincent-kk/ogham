@@ -1,5 +1,6 @@
 import type { ServerResponse } from 'node:http';
 
+import { resolveInitialConfigScope } from '@ogham/cross-platform';
 import { sendJson } from '@ogham/http-kit';
 
 import type { RouteContext } from '../routing/routeContext.js';
@@ -9,5 +10,9 @@ import type { RouteContext } from '../routing/routeContext.js';
  * overrode. The page needs all of it to draw the scope toggle and badges.
  */
 export function handleGetConfig(ctx: RouteContext, res: ServerResponse): void {
-  sendJson(res, 200, { state: ctx.loadConfigState() });
+  const state = ctx.loadConfigState();
+  sendJson(res, 200, {
+    state,
+    initialScope: resolveInitialConfigScope(state.layers),
+  });
 }

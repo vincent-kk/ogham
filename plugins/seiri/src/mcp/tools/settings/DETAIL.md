@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- `initialScope`는 공통 `resolveInitialConfigScope`로 결정한다. project 존재 → user 존재 → 최초 project 순이며, `ruleDocs.scope`도 같은 초기값을 쓴다.
+
 - 단일 도구가 `open`·`status`·`manifest`·`plan`·`sync`·`config` 여섯 `action` 을 제공한다.
 - `open` 은 로컬 설정 폼을 띄우고 bounded long-poll 로 저장·닫힘을 기다리며 서버는 `127.0.0.1` 에만 바인딩한다.
 - 로컬 서버 가드는 `@ogham/http-kit` 을 재사용하고 토큰·Origin 검증을 재구현하지 않는다.
@@ -50,4 +52,4 @@
 
 ## Last Updated
 
-2026-09-05 — 설정 페이지·헤드리스 동기화·다이얼을 `settings` 한 도구의 `action` 계약으로 통합했다.
+2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.

@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- setup 제출에서 `scope`가 생략되면 `project`에 저장한다. `user` 저장은 명시적 선택에 한하며, 인증정보는 기존 별도 저장 계약을 따른다.
+
 - `127.0.0.1` 에만 바인딩하고 5분 무활동에 자동 종료한다.
 - 가드는 공유 `@ogham/http-kit` 을 쓴다: loopback Host(DNS rebinding 차단) → 토큰 → POST Origin(CSRF) → Content-Type 순서다. 이 검증을 여기서 재구현하지 않는다.
 - 상태 주입은 XSS 방어를 거친다.
@@ -16,6 +18,10 @@
 - 라우트 — 설정 폼 조회, 연결 테스트, 저장. 성공 저장 응답은 선택 scope의 resolver-owned `config_path`를 포함한다.
 
 ## Acceptance Criteria
+
+### AC-submit-project-default — 제출 기본 범위
+
+- scope 생략과 명시적 project는 프로젝트 설정에 저장하고, 명시적 user만 전역 설정에 저장한다.
 
 ### AC-guard-order — 가드 순서
 
@@ -36,4 +42,4 @@
 
 ## Last Updated
 
-2026-08-23 — 재시도 가능한 저장 completion과 선택 scope 경로 계약을 추가했다.
+2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.

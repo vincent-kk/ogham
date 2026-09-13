@@ -17,6 +17,8 @@ user와 project 두 config 레이어 파일의 좌표를 정하고, 읽고, 쓰�
 
 ## Conventions
 
+- Own the pure initial-scope decision shared by settings servers; pages receive its result and preserve subsequent user selection.
+
 - `../merge`는 진입점으로, `../../paths`·`../../filesystem`은 concrete 모듈로
   소비한다 — 이 그래프는 훅 번들에 실리므로 배럴 유입이 크기 가드를 깨뜨린다.
 - 좌표 계산과 디스크 조회를 분리한다 — `resolveConfigLayers`는 파일을 안 본다.

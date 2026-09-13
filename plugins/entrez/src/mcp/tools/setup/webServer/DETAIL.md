@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- setup 제출에서 `scope`가 생략되면 `project`에 저장한다. `user` 저장은 명시적 선택에 한하며, 인증정보는 기존 별도 저장 계약을 따른다.
+
 - `127.0.0.1` 임의 포트에만 바인딩한다. 기동마다 토큰을 새로 발급한다.
 - 모든 라우트는 가드를 통과한다: loopback Host → `?token=` → POST 의 loopback Origin 과 `application/json`.
 - 라우트는 넷뿐이다: `/`(폼), `/status`, `/test`(도달성 probe), `/submit`(저장 후 종료).
@@ -18,6 +20,10 @@
 - `utils/` — `maskApiKey`·`buildStatus`·`buildPathSuggestions`.
 
 ## Acceptance Criteria
+
+### AC-submit-project-default — 제출 기본 범위
+
+- scope 생략과 명시적 project는 프로젝트 설정에 저장하고, 명시적 user만 전역 설정에 저장한다.
 
 ### AC-loopback-only — 바인딩 격리
 
@@ -41,4 +47,4 @@
 
 ## Last Updated
 
-2026-07-30 — 설정 서버의 가드·수명주기 계약을 문서화했다.
+2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.

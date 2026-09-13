@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 설정 페이지에 `initialScope`를 주입한다. 공통 `resolveInitialConfigScope`가 project 설정 존재 → user 설정 존재 → 최초 project 순으로 결정하며, 페이지가 조건을 중복하지 않는다.
+
 - MCP 도구 `open_settings` 의 핸들러다. 등록은 `mcp/server` 가 `wrapHandler` 로 감싸며, 이 도구만 MCP 요청의 `extra.signal` 을 받아 대기 중 취소를 관측한다.
 - 대기는 반드시 유한하다. `wait_seconds` 를 `[1, MAX_WAIT_SECONDS]` 로 클램프하고 기본값은 `DEFAULT_WAIT_SECONDS` 다 — 무한 대기는 세션을 붙잡는다.
 - 상한이 지나도 폼을 닫지 않는다. `pending` 은 "아직"이라는 답이며, 같은 세션에서 다시 호출해 대기를 이어 간다. setup 워크플로가 같은 턴에서 캐시 채우기로 넘어갈 수 있는 이유다.

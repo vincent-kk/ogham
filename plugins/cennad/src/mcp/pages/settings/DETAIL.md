@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 서버가 공통 `resolveInitialConfigScope`로 계산한 `initialScope`를 초기 선택으로 사용한다. project 설정이 있으면 project, user 설정만 있으면 user, 둘 다 없으면 project다. 페이지는 이 조건을 재판단하지 않는다.
+
 - provider 활성화·비율, tier 별 모델·effort, preamble, recency factor 를 한 폼에서 정한다.
 - 모델·effort 선택지는 `agyModels`·`codexModels` 카탈로그에서 온다. **codex 는 모델이 광고하지 않은 effort 를 거부하므로 둘을 짝으로 노출한다.**
 - 모든 요청에 `?token=` 을 부착하고 POST 본문은 JSON 이다.
@@ -14,6 +16,11 @@
 - 소비 라우트: `GET /`, `GET /config`, `GET /provider-status`, `POST /save`, `POST /close`.
 
 ## Acceptance Criteria
+
+### AC-settings-project-default — 프로젝트 기본 범위
+
+- 서버의 `initialScope`가 user와 project 어느 값이든 페이지가 그대로 선택한다.
+- 사용자가 범위를 바꾸면 해당 계층을 편집·저장하며, 상태 재수신은 이 선택을 덮어쓰지 않는다.
 
 ### AC-model-effort-pairing — 모델·effort 짝 노출
 
@@ -37,4 +44,4 @@
 
 ## Last Updated
 
-2026-08-23 — 호스트별 active home 주입과 생성 산출물 동기화 계약을 추가했다.
+2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.

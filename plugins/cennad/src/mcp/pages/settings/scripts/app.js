@@ -1516,7 +1516,7 @@
     layers: { user: null, project: null },
     overridden: [],
   };
-  var scope = 'user';
+  var scope = null;
   // One normalized document per layer, so moving the toggle re-seats the form
   // without a round trip. The server normalizes both — this page knows neither
   // the schema nor the defaults, and a merge assembled here would put a value
@@ -1540,12 +1540,10 @@
     if (view !== null) applyConfig(view);
   }
 
-  function adoptScopeState(next) {
+  function adoptScopeState(next, initialScope) {
     if (!next || typeof next !== 'object') return;
     scopeState = next;
-    // Open on the layer that is currently deciding, so pressing Save without
-    // touching the toggle rewrites the file the config already came from.
-    scope = scopeState.layers && scopeState.layers.project ? 'project' : 'user';
+    if (scope === null) scope = initialScope;
     renderScope();
   }
 
@@ -1638,9 +1636,7 @@
     )
       activeHome.textContent = raw.activeHome;
     if (raw.configByScope) configByScope = raw.configByScope;
-    // Adopting the state picks the layer, so the view to seat is settled by
-    // the time the form is filled.
-    if (raw.scope) adoptScopeState(raw.scope);
+    if (raw.scope) adoptScopeState(raw.scope, raw.initialScope);
     var config =
       viewForScope() || (raw.config && raw.config.ratio ? raw.config : null);
     if (config === null) return false;
@@ -1685,7 +1681,7 @@
       var res = await fetch(withToken('/config'));
       if (!res.ok) throw new Error('HTTP ' + res.status);
       var body = await res.json();
-      adoptScopeState(body.state);
+      adoptScopeState(body.state, body.initialScope);
       // Reached only when the inline slot was missing. `/config` carries the
       // raw merge and no per-layer views, so the toggle cannot re-seat the
       // form on this path — it stays on what is in effect.

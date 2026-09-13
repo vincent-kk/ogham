@@ -23,6 +23,7 @@ const EMPTY_SYNC = {
 
 const STATE: SettingsPageState = {
   projectRoot: '/tmp/project',
+  initialScope: 'project',
   configExists: true,
   configByScope: {
     user: {

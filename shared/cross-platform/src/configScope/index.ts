@@ -2,6 +2,7 @@ export {
   buildConfigScopeState,
   readConfigLayers,
   resolveConfigLayers,
+  resolveInitialConfigScope,
   writeConfigLayer,
 } from "./layers/index.js";
 export {

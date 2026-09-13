@@ -43,6 +43,7 @@ export { buildConfigScopeState } from "./configScope/layers/operations/buildConf
 export { readConfigLayers } from "./configScope/layers/operations/readConfigLayers.js";
 export { resolveConfigLayers } from "./configScope/layers/operations/resolveConfigLayers.js";
 export { writeConfigLayer } from "./configScope/layers/operations/writeConfigLayer.js";
+export { resolveInitialConfigScope } from "./configScope/layers/utils/resolveInitialConfigScope.js";
 export { clearConfigPaths } from "./configScope/merge/operations/clearConfigPaths.js";
 export { listOverriddenPaths } from "./configScope/merge/operations/listOverriddenPaths.js";
 export { mergeConfigLayers } from "./configScope/merge/operations/mergeConfigLayers.js";

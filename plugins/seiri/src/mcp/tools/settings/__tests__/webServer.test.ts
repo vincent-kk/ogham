@@ -100,6 +100,7 @@ beforeEach(async () => {
     settingsHtml: '<html><body>"__SEIRI_STATE__"</body></html>',
     loadState: () => ({
       projectRoot: workspace,
+      initialScope: 'project',
       configExists: false,
       config: { intervention: 'advisory' },
       scope: {

@@ -124,6 +124,7 @@ describe('settings web server', () => {
     expect(res.status).toBe(200);
     expect(await res.json()).toEqual({
       state: stateOf(DEFAULT_CONFIG as unknown as Record<string, unknown>),
+      initialScope: 'user',
     });
   });
 
@@ -134,6 +135,7 @@ describe('settings web server', () => {
     const html = await res.text();
     expect(html).toContain('"ratio"');
     expect(html).toContain('"activeHome":"/tmp/user"');
+    expect(html).toContain('"initialScope":"user"');
     expect(html).not.toContain('__CENNAD_STATE__');
   });
 
