@@ -14,6 +14,7 @@
 - entry point의 named exports, direct declarations와 certainty를 lexical scan으로 판정한다.
 - static/dynamic import와 re-export 중 project-internal dependency를 추출하고 local specifier를 정규화한다.
 - package-level external dependency는 project DAG 후보에서 제외하고, 해석할 수 없는 local dependency는 `resolvedPath: null`로 보존한다.
+- local specifier의 마지막 접미사가 지원 source 확장자인 경우에만 확장자를 치환한다. `.helpers`, `.composition.fixtures` 같은 basename은 보존하며, 원래 경로와 directory index 탐색도 유지한다.
 - strings, comments와 template text 안의 가짜 syntax를 dependency나 export로 세지 않는다.
 - `import.meta`는 dependency가 아니다. `import` 뒤에 `.`이 오면 메타 속성 참조이므로 뒤따르는 문자열을 specifier로 읽지 않는다. 이를 구분하지 않으면 `join(dirname(fileURLToPath(import.meta.url)), '../..')` 같은 경로 계산이 해석 불가 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
 - re-export 탐지는 export 절 형태로 한정한다. `export {…} from`과 `export * [as x] from`(각각 `type` 접두 허용)에서 절이 닫히는 바로 그 위치의 `from` 식별자만 재export 키워드다. 위치를 보지 않고 뒤따르는 아무 `from` 토큰이나 채택하면, `from`이라는 파라미터를 쓰는 exported 함수의 다음 문자열 리터럴이 유령 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
@@ -54,6 +55,7 @@
 - override로 주입된 경로는 `module`이 아닌 kind로 보고하고, 같은 호출에서 실제 module index는 계속 `module`로 보고한다.
 - 주석과 문자열 안의 가짜 import/export를 무시한다.
 - 외부 package import는 project DAG를 indeterminate로 만들지 않으며 해석되지 않은 local import는 숨기지 않는다.
+- dotted basename은 지원 확장자를 덧붙여 해석하며, 짧은 이름의 형제 파일이 있어도 그 파일로 잘못 연결하지 않는다. 명시적 source 확장자 치환과 directory index 탐색을 유지한다.
 - `import.meta.url`을 쓰는 경로 계산은 dependency로 잡히지 않는다.
 - `from`이라는 파라미터를 쓰는 exported 함수는 re-export dependency를 만들지 않고, `export * from`·`export * as ns from`·`export type {…} from`은 계속 추출된다.
 
@@ -89,4 +91,4 @@
 
 ## Last Updated
 
-2026-09-06
+2026-09-16

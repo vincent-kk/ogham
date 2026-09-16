@@ -14,7 +14,9 @@ function resolveSpecifier(
   if (!specifier.startsWith('.') && !specifier.startsWith('/')) return null;
   const unresolved = resolve(dirname(sourceFile), specifier);
   const extension = extname(unresolved);
-  const base = extension ? unresolved.slice(0, -extension.length) : unresolved;
+  const base = SOURCE_EXTENSIONS.some((candidate) => candidate === extension)
+    ? unresolved.slice(0, -extension.length)
+    : unresolved;
   const candidates = [
     unresolved,
     ...SOURCE_EXTENSIONS.map((candidate) => base + candidate),

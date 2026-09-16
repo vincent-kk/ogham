@@ -7,7 +7,7 @@
 - same-owner dependency는 evidence로 보존하지만 자기 cycle로 판정하지 않는다.
 - owner의 subtree 안에서 그 owner가 소유한 organ 파일을 참조한 evidence도 edge로 보존하지만 cycle adjacency에서는 제외한다. organ은 진입점을 갖지 않으므로 이 참조는 부모를 향하는 의존이 아니라 owner 내부 참조다. 승격하면 부모 배럴이 자식을 재수출하는 정상 FCA 형태가 순환으로 오판된다.
 - 검증 파일이 만든 참조도 edge로 보존하지만 cycle adjacency에서는 제외한다. 검증은 대상을 확인하는 행위이지 런타임 의존이 아니며, 한 테스트가 여러 모듈을 읽는 정상 형태가 순환으로 오판된다.
-- 분석 불가능한 dependency가 있으면 certainty를 indeterminate로 보존한다.
+- DAG 대상인 production dependency가 미해소이거나 source/target owner를 찾지 못하면 certainty를 indeterminate로 보존한다. adapter가 확정한 verification 참조는 DAG 대상이 아니므로 이 두 조건으로 graph certainty를 낮추지 않는다. 수집기의 미해소 진단은 그대로 남으며, 시작 certainty의 분석 실패·ownership 불확정·unsupported도 그대로 보존한다.
 - Windows/POSIX path identity는 portable 비교로 판정하며 case/separator alias를 중복 owner나 별도 cycle node로 만들지 않는다.
 - cycle은 정렬된 strongly-connected component label이 아니라 첫 owner가 마지막에 반복되는 실제 directed closed route다. 각 cyclic component는 결정론적인 대표 route 하나를 반환한다.
 - owner·organ 후보 정렬은 조회 함수가 아니라 **호출자**가 소유한다. 조회는 참조 하나마다 수만 번 일어나고 후보 목록은 그 사이 바뀌지 않으므로, 조회마다 목록을 복사·정렬하면 비용이 후보 수와 참조 수의 곱으로 커진다. 정렬 결과는 같으므로 반환 graph는 달라지지 않는다.
@@ -38,7 +38,10 @@
 
 ### AC-dag-certainty — 억지 PASS 금지
 
-- unresolved internal dependency가 있으면 graph는 indeterminate다.
+- unresolved production dependency 또는 production 참조의 source/target owner 누락이 있으면 graph는 indeterminate다.
+- verification 참조만 미해소이거나 owner를 찾지 못하는 경우 exact DAG를 유지한다. 해석 가능한 verification edge evidence는 보존한다.
+- 같은 owner pair에 verification과 production 참조가 함께 있으면 production 참조가 만드는 순환을 감추지 않는다.
+- 입력 certainty가 indeterminate/unsupported이면 verification 제외로 exact가 되지 않는다.
 
 ### AC-dag-lookup-cost — 조회는 후보 수에 곱해지지 않는다
 
@@ -48,4 +51,4 @@
 
 ## Last Updated
 
-2026-07-29 — 후보 정렬 책임을 호출자로 옮기고 owner 해석 조회 비용을 계약에 넣었다.
+2026-09-16
