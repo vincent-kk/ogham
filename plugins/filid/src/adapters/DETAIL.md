@@ -10,6 +10,7 @@
 - 호출자가 제외 디렉터리 이름을 지정하면 그 이름을 세그먼트로 담은 path는 ownership 후보에서 먼저 빠진다. 제외된 path는 `unsupported`도 아니고 진단도 만들지 않는다 — 제외는 "소유자를 찾지 못했다"가 아니라 "증거 대상이 아니다"이므로, 진단으로 남기면 제외의 목적인 미해결 참조 제거가 이름만 바뀐 채 그대로 남는다.
 - explicit config의 미등록 adapter ID는 `unknown-adapter-id` validation 진단이다.
 - 새 생태계 지원은 adapter 등록으로 추가되며 core type, policy와 MCP schema를 바꾸지 않는다.
+- `DependencyReference.certainty`는 선택 필드이고 생략은 exact다. adapter는 토큰 경계를 믿을 수 없는 구간에서 찾았거나 그 뒤에 있어 실제 코드인지 확정할 수 없는 참조를 `indeterminate`로 표시한다. core는 그런 참조를 edge로 쓰지 않는다. 확정할 수 없는 참조를 exact edge로 쓰면 phantom 의존이 생기고, 버리면 숨은 의존이 조용히 사라진다.
 
 ## API Contracts
 

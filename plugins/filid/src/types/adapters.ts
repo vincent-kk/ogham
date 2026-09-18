@@ -13,6 +13,11 @@ export interface DependencyReference {
   rawSpecifier: string;
   resolvedPath: string | null;
   kind: 'static' | 'dynamic' | 're-export' | 'framework';
+  /**
+   * `indeterminate` when the adapter found the reference where it could not
+   * trust token boundaries, so it may not be code at all. Omitted means exact.
+   */
+  certainty?: AnalysisCertainty;
 }
 
 export interface EntryPointInspection {

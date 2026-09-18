@@ -11,6 +11,8 @@ import type {
   SnapshotDiagnostic,
 } from '../../../types/fractal.js';
 
+import { createDependencyDiagnostic } from './utils/createDependencyDiagnostic.js';
+
 export interface CollectedDependencyReferences {
   certainty: AnalysisCertainty;
   diagnostics: SnapshotDiagnostic[];
@@ -40,22 +42,25 @@ export async function collectDependencyReferences(
       references.push(...extracted);
       for (const reference of extracted)
         if (reference.resolvedPath === null)
-          diagnostics.push({
-            code: 'unresolved-local-dependency',
-            message: `Could not resolve ${reference.rawSpecifier} from ${filePath}.`,
-            path: filePath,
-            affects: ['dependencies', 'boundaries'],
-            specifier: reference.rawSpecifier,
-            causeId: createHash('sha256')
-              .update(
-                JSON.stringify([
-                  'unresolved-local-dependency',
-                  portableRelative(projectRoot, filePath),
-                  reference.rawSpecifier,
-                ]),
-              )
-              .digest('hex'),
-          });
+          diagnostics.push(
+            createDependencyDiagnostic(
+              'unresolved-local-dependency',
+              `Could not resolve ${reference.rawSpecifier} from ${filePath}.`,
+              projectRoot,
+              filePath,
+              reference.rawSpecifier,
+            ),
+          );
+        else if (reference.certainty === 'indeterminate')
+          diagnostics.push(
+            createDependencyDiagnostic(
+              'uncertain-local-dependency',
+              `Could not confirm ${reference.rawSpecifier} in ${filePath} as code: it sits where the lexer lost track or inside an unterminated literal.`,
+              projectRoot,
+              filePath,
+              reference.rawSpecifier,
+            ),
+          );
     } catch (error) {
       certainty = 'indeterminate';
       diagnostics.push({

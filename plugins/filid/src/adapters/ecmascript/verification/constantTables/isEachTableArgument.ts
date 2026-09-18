@@ -1,4 +1,4 @@
-import type { LexicalToken } from '../../structure/scanLexicalTokens.js';
+import type { LexicalToken } from '../../structure/lexing/lexicalToken.js';
 
 /** Accept a whole `.each` argument only for the counter's known case/suite APIs. */
 export function isEachTableArgument(

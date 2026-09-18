@@ -50,3 +50,10 @@ export const FRAMEWORK_ENTRY_BASENAMES = {
   nuxt: new Set(['app', 'error']),
   sveltekit: new Set(['+error', '+layout', '+page', '+server']),
 } as const;
+
+/**
+ * How deeply `${…}` template expressions nest before the scanner stops and
+ * reports the template as lost track, instead of recursing until the stack
+ * overflows.
+ */
+export const MAX_TEMPLATE_NESTING = 64;

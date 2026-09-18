@@ -10,6 +10,7 @@ import type {
   MoveInstruction,
   PlanValidationFinding,
 } from '../../../types/restructure.js';
+import { specifierDenotesDirectoryOf } from '../specifiers/specifierDenotesDirectoryOf.js';
 import { specifierDenotesPath } from '../specifiers/specifierDenotesPath.js';
 
 function hasRewriteEvidence(
@@ -21,11 +22,16 @@ function hasRewriteEvidence(
       (evidence) =>
         samePath(evidence.sourceFile, rewrite.consumerPath) &&
         evidence.rawSpecifier === rewrite.requiredSpecifier &&
-        specifierDenotesPath(
+        (specifierDenotesPath(
           evidence.sourceFile,
           evidence.rawSpecifier,
           evidence.resolvedPath,
-        ),
+        ) ||
+          specifierDenotesDirectoryOf(
+            evidence.sourceFile,
+            evidence.rawSpecifier,
+            evidence.resolvedPath,
+          ) !== null),
     ),
   );
 }

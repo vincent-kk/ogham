@@ -4,10 +4,8 @@ import { basename, extname } from 'node:path';
 import type { VerificationRole } from '../../../types/adapters.js';
 import { SOURCE_EXTENSIONS } from '../structure/ecmascriptConventions.js';
 
-import {
-  UNTERMINATED_LITERAL_REASON,
-  countSemanticCases,
-} from './countSemanticCases.js';
+import { countSemanticCases } from './countSemanticCases.js';
+import { showsVerificationSyntax } from './showsVerificationSyntax.js';
 
 /** The naming convention picks a candidate; it never confirms the role. */
 function candidateRole(filePath: string): VerificationRole | 'unsupported' {
@@ -23,22 +21,6 @@ function candidateRole(filePath: string): VerificationRole | 'unsupported' {
 }
 
 /**
- * A counted case, or uncertainty the counter traced to verification syntax it
- * could not resolve, means cases are here — uncountable is not absent. An
- * unterminated literal alone is not that: it only says the tokens are
- * unreliable, and JSX text or a nested template produces one in plain code.
- */
-function holdsCases(source: string): boolean {
-  const count = countSemanticCases(source);
-  return (
-    count.knownLowerBound > 0 ||
-    count.reasons.some(
-      (reason) => !reason.startsWith(UNTERMINATED_LITERAL_REASON),
-    )
-  );
-}
-
-/**
  * Resolve a verification role from the naming convention AND the file content.
  * Suffix alone would sell a boundary and DAG exemption for the price of a
  * rename: verification files are exempt from those rules, so `git mv x.ts
@@ -50,5 +32,9 @@ export function classifyVerificationPath(
 ): VerificationRole | 'unsupported' {
   const candidate = candidateRole(filePath);
   if (candidate === 'unsupported') return 'unsupported';
-  return holdsCases(readFileSync(filePath, 'utf8')) ? candidate : 'unsupported';
+  return showsVerificationSyntax(
+    countSemanticCases(readFileSync(filePath, 'utf8')),
+  )
+    ? candidate
+    : 'unsupported';
 }

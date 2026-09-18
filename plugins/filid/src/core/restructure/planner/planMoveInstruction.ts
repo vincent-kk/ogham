@@ -30,15 +30,16 @@ import { resolveUnitKind } from './resolveUnitKind.js';
  * Plan one placement request against a pre-move snapshot.
  * @param snapshot - Pre-move snapshot supplying tree, consumers and evidence
  * @param request - Source path plus optional consumers, contract intent and organ name
- * @param plannedMoves - Executable moves of the same plan; used only to place
- * rewritten consumers where the plan leaves them, never to choose the target
+ * @param orderedMoves - Executable moves of the same plan in execution order;
+ * used only for the final paths and ownership of rewrites, never to choose the
+ * target
  * @returns The normalized instruction, with `requiresDecision` set when evidence
  * cannot fix a name, contract or rewrite
  */
 export function planMoveInstruction(
   snapshot: ProjectSnapshot,
   request: PlacementRequest,
-  plannedMoves: readonly PlannedMove[] = [],
+  orderedMoves: readonly PlannedMove[] = [],
 ): MoveInstruction {
   const sourcePath = portableResolve(snapshot.projectRoot, request.sourcePath);
   const decisionReasons = new Set<RestructureDecisionReason>();
@@ -83,16 +84,14 @@ export function planMoveInstruction(
   const entryArtifact = required.artifacts.find(
     ({ role }) => role === REQUIRED_ARTIFACT_ROLES.ENTRY_POINT,
   );
-  const rewriteTarget =
+  const rewriteTargetPath =
     contractIntent === CONTRACT_INTENTS.INDEPENDENT && entryArtifact
       ? entryArtifact.path
       : target.targetPath;
   const imports = buildImportRewrites(
     snapshot,
-    sourcePath,
-    rewriteTarget,
-    consumers.paths,
-    plannedMoves,
+    { sourcePath, targetPath: target.targetPath, rewriteTargetPath },
+    orderedMoves,
   );
   imports.decisionReasons.forEach((reason) => decisionReasons.add(reason));
   const reasons = [...decisionReasons].sort();

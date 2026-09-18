@@ -239,9 +239,11 @@ describe('ecmascript semantic verification counting', () => {
     ).toMatchObject({ certainty: 'exact', exactCount: 1 });
   });
 
-  it('reports an unterminated string as indeterminate instead of absent', () => {
+  it('reports a case hidden behind an unterminated string as indeterminate', () => {
     expect(
-      countSemanticCases("const broken = 'open\nit('after', () => {});"),
+      countSemanticCases(
+        "render(<p>Don't</p>); it(title, () => {});\nit('after', () => {});",
+      ),
     ).toMatchObject({
       certainty: 'indeterminate',
       exactCount: undefined,

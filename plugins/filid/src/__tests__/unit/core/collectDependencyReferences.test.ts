@@ -25,7 +25,45 @@ function resolution(root: string, fail = false): AdapterResolution {
   } as unknown as AdapterResolution;
 }
 
+function uncertainResolution(root: string): AdapterResolution {
+  const path = `${root}/src/a.ts`;
+  const adapter = {
+    extractDependencies: async () => [
+      {
+        sourceFile: path,
+        rawSpecifier: './hidden.js',
+        resolvedPath: `${root}/src/hidden.ts`,
+        kind: 'dynamic',
+        certainty: 'indeterminate',
+      },
+    ],
+  };
+  return {
+    adapters: [adapter],
+    ownership: new Map([[path, { adapter }]]),
+    diagnostics: [],
+    claims: new Map(),
+    unsupportedPaths: [],
+  } as unknown as AdapterResolution;
+}
+
 describe('dependency diagnostic identity and impact', () => {
+  it('reports an adapter-uncertain reference as an uncertain-local-dependency diagnostic', async () => {
+    const result = await collectDependencyReferences(
+      uncertainResolution('/one'),
+      '/one',
+    );
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({
+        code: 'uncertain-local-dependency',
+        path: '/one/src/a.ts',
+        specifier: './hidden.js',
+        affects: ['dependencies', 'boundaries'],
+        causeId: expect.stringMatching(/^[a-f0-9]{64}$/),
+      }),
+    ]);
+  });
+
   it('shares a root-independent identity only for the same consumer and target', async () => {
     const first = await collectDependencyReferences(resolution('/one'), '/one');
     const second = await collectDependencyReferences(

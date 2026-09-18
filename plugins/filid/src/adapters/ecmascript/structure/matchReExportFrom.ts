@@ -1,4 +1,4 @@
-import type { LexicalToken } from './scanLexicalTokens.js';
+import type { LexicalToken } from './lexing/lexicalToken.js';
 
 function isFromKeyword(token: LexicalToken | undefined): boolean {
   return token?.kind === 'identifier' && token.value === 'from';

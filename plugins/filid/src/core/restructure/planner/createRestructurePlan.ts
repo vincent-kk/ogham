@@ -17,6 +17,8 @@ import type {
   RestructurePlanInput,
 } from '../../../types/restructure.js';
 
+import { markOrderConflict } from './markOrderConflict.js';
+import { orderPlannedMoves } from './orderPlannedMoves.js';
 import { planMoveInstruction } from './planMoveInstruction.js';
 
 function isExecutableMove(move: MoveInstruction): boolean {
@@ -27,20 +29,37 @@ export function createRestructurePlan(
   snapshot: ProjectSnapshot,
   input: RestructurePlanInput,
 ): RestructurePlan {
-  // Targets never depend on rewrites: the first pass fixes every executable
-  // move, the second rewrites each consumer where the whole plan leaves it.
-  const plannedMoves = input.requests
-    .map((request) => planMoveInstruction(snapshot, request))
-    .filter(isExecutableMove);
-  const instructions = input.requests.map((request) =>
-    planMoveInstruction(snapshot, request, plannedMoves),
+  // Targets never depend on rewrites: the first pass fixes the executable
+  // candidates, ordering drops the ones no order can run, and the second pass
+  // writes each rewrite against the layout the ordered moves leave.
+  const candidates = input.requests
+    .map((request, index) => ({
+      index,
+      move: planMoveInstruction(snapshot, request),
+    }))
+    .filter(({ move }) => isExecutableMove(move));
+  const { order, conflicts } = orderPlannedMoves(
+    candidates.map(({ move }) => move),
+    snapshot,
   );
-  const unresolved = instructions.filter((move) => move.requiresDecision);
+  const orderedMoves = order.map((position) => candidates[position].move);
+  const conflicted = new Set(
+    conflicts.map((position) => candidates[position].index),
+  );
+  const instructions = input.requests.map((request, index) => {
+    const move = planMoveInstruction(snapshot, request, orderedMoves);
+    return conflicted.has(index) ? markOrderConflict(move) : move;
+  });
+  const unresolved = instructions
+    .filter((move) => move.requiresDecision)
+    .map((move) => ({ ...move, affectedImports: [] }));
   const alreadyPlaced = instructions.filter(
     (move) =>
       !move.requiresDecision && samePath(move.sourcePath, move.targetPath),
   );
-  const moves = instructions.filter(isExecutableMove);
+  const moves = order.map(
+    (position) => instructions[candidates[position].index],
+  );
   const planHash = createHash(RESTRUCTURE_HASH_ALGORITHM)
     .update(snapshot.snapshotHash)
     .update(RESTRUCTURE_PLAN_HASH_SEPARATOR)

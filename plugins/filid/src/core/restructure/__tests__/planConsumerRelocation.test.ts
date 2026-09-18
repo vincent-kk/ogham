@@ -12,7 +12,7 @@ import type {
 import type { PlacementRequest } from '../../../types/restructure.js';
 import { buildFractalTree } from '../../tree/fractalTree/index.js';
 import type { NodeEntry } from '../../tree/fractalTree/index.js';
-import { relocateConsumerPath } from '../imports/relocateConsumerPath.js';
+import { relocateThroughMoves } from '../imports/relocateThroughMoves.js';
 import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
 
@@ -30,6 +30,9 @@ const PATHS = {
   OPS_TYPES: '/root/ops/types.ts',
   OPS_DELAY: '/root/ops/delay.ts',
   X_OPS_GUARD: '/root/x/ops/guard.ts',
+  CONTRACTS_INDEX: '/root/x/contracts/index.ts',
+  TIMING_OTHER: '/root/timing/other.ts',
+  SCHEDULING_OTHER: '/root/x/scheduling/other.ts',
 } as const;
 
 function fractal(path: string, name: string, peerFiles: string[]): NodeEntry {
@@ -148,6 +151,36 @@ const AFTER = snapshotOf(
   ],
 );
 
+/** `BEFORE` with one more import from `delay.ts` into the unmoved `contracts` organ. */
+function withDelayImport(
+  rawSpecifier: string,
+  resolvedPath: string,
+): ProjectSnapshot {
+  return {
+    ...BEFORE,
+    tree: buildFractalTree([
+      fractal(PATHS.ROOT, 'root', ['index.ts']),
+      fractal(PATHS.X, 'x', ['index.ts']),
+      organ(PATHS.CONTRACTS, 'contracts', ['index.ts', 'types.ts']),
+      organ(PATHS.SCHEDULING, 'scheduling', ['delay.ts']),
+    ]),
+    dependencyGraph: {
+      ...BEFORE.dependencyGraph,
+      edges: [
+        ...BEFORE.dependencyGraph.edges.slice(0, 1),
+        {
+          fromFractalPath: PATHS.X,
+          toFractalPath: PATHS.X,
+          evidence: [
+            evidence(PATHS.X_INDEX, './scheduling/delay.ts', PATHS.DELAY),
+            evidence(PATHS.DELAY, rawSpecifier, resolvedPath),
+          ],
+        },
+      ],
+    },
+  };
+}
+
 function internalMove(sourcePath: string): PlacementRequest {
   return { sourcePath, contractIntent: 'internal', organNameHint: 'ops' };
 }
@@ -229,18 +262,86 @@ describe('restructure rewrites consumers the same plan relocates', () => {
     });
   });
 
-  it('follows the deepest planned source when two moves contain a consumer', () => {
+  it('applies planned moves in execution order', () => {
+    const fileMove = { sourcePath: PATHS.DELAY, targetPath: PATHS.OPS_DELAY };
     const directoryMove = {
       sourcePath: PATHS.SCHEDULING,
       targetPath: '/root/timing',
     };
-    const fileMove = { sourcePath: PATHS.DELAY, targetPath: PATHS.OPS_DELAY };
 
-    expect(relocateConsumerPath(PATHS.DELAY, [directoryMove, fileMove])).toBe(
+    expect(relocateThroughMoves(PATHS.DELAY, [fileMove, directoryMove])).toBe(
       PATHS.OPS_DELAY,
     );
-    expect(relocateConsumerPath(PATHS.DELAY, [fileMove, directoryMove])).toBe(
-      PATHS.OPS_DELAY,
+    expect(
+      relocateThroughMoves(PATHS.SCHEDULING_OTHER, [fileMove, directoryMove]),
+    ).toBe(PATHS.TIMING_OTHER);
+    expect(
+      relocateThroughMoves(PATHS.DELAY, [fileMove, directoryMove], 1),
+    ).toBe('/root/timing/delay.ts');
+  });
+
+  it('lists the outgoing import of a moved file whose target stays', () => {
+    const delayMove = createRestructurePlan(BEFORE, {
+      path: PATHS.ROOT,
+      requests: [internalMove(PATHS.DELAY)],
+    }).moves[0];
+
+    expect(delayMove?.targetPath).toBe(PATHS.OPS_DELAY);
+    expect(delayMove?.affectedImports).toContainEqual({
+      consumerPath: PATHS.OPS_DELAY,
+      currentSpecifier: '../contracts/types.ts',
+      requiredSpecifier: '../x/contracts/types.ts',
+    });
+  });
+
+  it('rewrites an outgoing directory reference of a moved file', () => {
+    const plan = createRestructurePlan(
+      withDelayImport('../contracts', PATHS.CONTRACTS_INDEX),
+      { path: PATHS.ROOT, requests: [internalMove(PATHS.DELAY)] },
     );
+
+    expect(plan.unresolved).toEqual([]);
+    expect(plan.moves[0]?.affectedImports).toContainEqual({
+      consumerPath: PATHS.OPS_DELAY,
+      currentSpecifier: '../contracts',
+      requiredSpecifier: '../x/contracts',
+    });
+  });
+
+  it('leaves an outgoing absolute specifier without a rewrite or a decision', () => {
+    const plan = createRestructurePlan(
+      withDelayImport(PATHS.TYPES, PATHS.TYPES),
+      { path: PATHS.ROOT, requests: [internalMove(PATHS.DELAY)] },
+    );
+
+    expect(plan.unresolved).toEqual([]);
+    expect(
+      plan.moves[0]?.affectedImports.map(({ consumerPath }) => consumerPath),
+    ).not.toContain(PATHS.OPS_DELAY);
+  });
+
+  it('rewrites consumers outside an explicit consumer list', () => {
+    const typesMove = createRestructurePlan(BEFORE, {
+      path: PATHS.ROOT,
+      requests: [
+        { ...internalMove(PATHS.TYPES), consumerPaths: [PATHS.ROOT_INDEX] },
+      ],
+    }).moves[0];
+
+    expect(
+      typesMove?.affectedImports.map(({ consumerPath }) => consumerPath),
+    ).toEqual([PATHS.ROOT_INDEX, PATHS.X_INDEX, PATHS.DELAY]);
+  });
+
+  it('lists each import edge with a moving end exactly once', () => {
+    const rewrites = planBothFiles().moves.flatMap(
+      ({ affectedImports }) => affectedImports,
+    );
+
+    expect(
+      rewrites.filter(
+        ({ currentSpecifier }) => currentSpecifier === '../contracts/types.ts',
+      ),
+    ).toHaveLength(1);
   });
 });

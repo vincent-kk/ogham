@@ -69,6 +69,9 @@ export interface MoveInstruction {
 /** An executable move of a plan, against which rewrites relocate consumers the same plan moves. */
 export type PlannedMove = Pick<MoveInstruction, 'sourcePath' | 'targetPath'>;
 
+/** A move whose import rewrites are being built; consumers of a file unit load `rewriteTargetPath`, its entry point when it becomes an independent fractal. */
+export type RewriteUnit = PlannedMove & { rewriteTargetPath: string };
+
 export interface RestructurePlan {
   schemaVersion: 1;
   planId: string;

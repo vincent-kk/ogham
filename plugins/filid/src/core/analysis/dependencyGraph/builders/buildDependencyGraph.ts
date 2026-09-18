@@ -61,7 +61,9 @@ function isOwnedOrganReference(
  * Aggregate adapter dependency references into owner-level edges and cycles.
  * @param nodePaths Non-organ owner paths that can appear as graph nodes.
  * @param references Adapter-reported references; an unresolved production
- * reference makes the graph indeterminate rather than silently dropping out.
+ * reference, or any reference the adapter marks `indeterminate` (verification
+ * files included), makes the graph indeterminate rather than silently
+ * dropping out or becoming an edge.
  * @param certainty Starting certainty from the reference collector.
  * @param options Organ and verification paths excluded from cycle adjacency.
  * @returns Sorted edges with evidence, representative cycle routes and certainty.
@@ -96,6 +98,10 @@ export function buildDependencyGraph(
 
   for (const reference of references) {
     const isVerification = verificationPaths.has(reference.sourceFile);
+    if (reference.certainty === 'indeterminate') {
+      if (graphCertainty === 'exact') graphCertainty = 'indeterminate';
+      continue;
+    }
     if (reference.resolvedPath === null) {
       if (!isVerification && graphCertainty === 'exact')
         graphCertainty = 'indeterminate';

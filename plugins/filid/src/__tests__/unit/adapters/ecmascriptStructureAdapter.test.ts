@@ -364,6 +364,48 @@ describe('ecmascript structure adapter', () => {
     ]);
   });
 
+  it('reports an entry surface whose export hides behind an apostrophe as indeterminate', async () => {
+    const root = project();
+    const entry = write(
+      root,
+      'src/index.tsx',
+      "export const Note = () => <p>Don't</p>; export { hidden } from './hidden.js';\n",
+    );
+
+    const inspection =
+      await ecmascriptStructureAdapter.inspectEntryPoint(entry);
+
+    expect(inspection.certainty).toBe('indeterminate');
+  });
+
+  it('reports an entry surface whose export hides behind a quote mispaired after a URL as indeterminate', async () => {
+    const root = project();
+    const entry = write(
+      root,
+      'src/index.tsx',
+      "export const Note = () => <a href=\"https://x.dev\">Don't</a>; export { hidden } from './hidden.js';\n",
+    );
+
+    const inspection =
+      await ecmascriptStructureAdapter.inspectEntryPoint(entry);
+
+    expect(inspection.certainty).toBe('indeterminate');
+  });
+
+  it('distrusts an export the scan read as code inside a mispaired string', async () => {
+    const root = project();
+    const entry = write(
+      root,
+      'src/index.tsx',
+      "render(<p>I'm \"quoted\"</p>); f('x; export const zz = 1');\n",
+    );
+
+    const inspection =
+      await ecmascriptStructureAdapter.inspectEntryPoint(entry);
+
+    expect(inspection.certainty).toBe('indeterminate');
+  });
+
   it('enumerates named exports and detects direct declarations', async () => {
     const root = project();
     const entry = write(

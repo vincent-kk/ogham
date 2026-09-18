@@ -1,4 +1,4 @@
-import type { LexicalToken } from '../../structure/scanLexicalTokens.js';
+import type { LexicalToken } from '../../structure/lexing/lexicalToken.js';
 
 import { findConstantTableDeclaration } from './findConstantTableDeclaration.js';
 import { hasReadOnlyConstantTableUses } from './hasReadOnlyConstantTableUses.js';

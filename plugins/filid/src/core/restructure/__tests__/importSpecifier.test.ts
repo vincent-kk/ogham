@@ -50,6 +50,10 @@ function node(path: string, name: string, depth: number): FractalNode {
   };
 }
 
+function unit(sourcePath: string, targetPath: string) {
+  return { sourcePath, targetPath, rewriteTargetPath: targetPath };
+}
+
 function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
   return {
     schemaVersion: 1,
@@ -102,9 +106,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.SOURCE,
         },
       ]),
-      PATHS.SOURCE,
-      PATHS.TARGET,
-      [PATHS.FEATURE_A_FILE],
+      unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
     expect(result.decisionReasons).toEqual([]);
@@ -126,9 +128,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.SOURCE,
         },
       ]),
-      PATHS.SOURCE,
-      PATHS.TARGET,
-      [PATHS.FEATURE_A_FILE],
+      unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
     expect(result.decisionReasons).toEqual([]);
@@ -144,9 +144,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.DIRECTORY_INDEX,
         },
       ]),
-      PATHS.DIRECTORY_INDEX,
-      PATHS.TARGET,
-      [PATHS.FEATURE_A_FILE],
+      unit(PATHS.DIRECTORY_INDEX, PATHS.TARGET),
     );
 
     expect(result.rewrites).toEqual([]);
@@ -178,6 +176,39 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
             consumerPath: PATHS.FEATURE_A_FILE,
             currentSpecifier: '../lib/logger.js',
             requiredSpecifier: '../shared/logger.js',
+          },
+        ],
+        requiresDecision: false,
+        decisionReasons: [],
+      },
+    );
+
+    expect(findings).toEqual([]);
+  });
+
+  it('accepts a post-move directory reference as postcondition evidence', () => {
+    const findings = validateImportRewrites(
+      snapshotWith([
+        {
+          sourceFile: PATHS.TARGET,
+          rawSpecifier: '../featureA',
+          resolvedPath: PATHS.FEATURE_A_FILE,
+        },
+      ]),
+      {
+        sourcePath: PATHS.SOURCE,
+        targetPath: PATHS.TARGET,
+        unitKind: 'file',
+        targetNodeType: 'organ',
+        basis: 'lowest-common-fractal',
+        consumerPaths: [PATHS.FEATURE_A_FILE],
+        reason: 'moved',
+        requiredArtifacts: [],
+        affectedImports: [
+          {
+            consumerPath: PATHS.TARGET,
+            currentSpecifier: '../featureA',
+            requiredSpecifier: '../featureA',
           },
         ],
         requiresDecision: false,
@@ -235,9 +266,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.SOURCE_DIRECTORY,
         },
       ]),
-      PATHS.SOURCE_DIRECTORY,
-      PATHS.TARGET_DIRECTORY,
-      [PATHS.NESTED_CONSUMER],
+      unit(PATHS.SOURCE_DIRECTORY, PATHS.TARGET_DIRECTORY),
     );
 
     expect(result.rewrites).toEqual([]);
@@ -255,9 +284,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.SOURCE,
         },
       ]),
-      PATHS.SOURCE,
-      PATHS.TARGET,
-      [PATHS.FEATURE_A_FILE],
+      unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
     expect(result.rewrites).toEqual([]);

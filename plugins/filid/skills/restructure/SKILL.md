@@ -3,7 +3,7 @@ name: restructure
 user-invocable: true
 description: 'Create a read-only FCA placement plan, obtain approval, execute it via external file operations, and verify exact postconditions. Use when a unit belongs at another fractal or misplacement is flagged.'
 argument-hint: '[path] <placement requests> [--dry-run] [--auto-approve]'
-version: '1.1.0'
+version: '1.2.0'
 complexity: complex
 plugin: filid
 ---
@@ -27,7 +27,9 @@ Use `enrich-docs` when only documents need improvement.
 
 Translate explicit placement requests into `RestructurePlanInput` and call `restructure` with `action: "plan"`. Read the persisted artifact's `.data`; verify its artifact hash. Stop when the envelope is non-`ok` or the plan contains unresolved moves.
 
-A request whose computed target equals its current path arrives in `alreadyPlaced`, never in `moves`. Report it as already correctly placed, execute nothing for it, and do not treat it as a failure.
+A request whose computed target equals its current path arrives in `alreadyPlaced`, never in `moves`. Report it as already correctly placed, execute nothing for it, and do not treat it as a failure. Its `affectedImports` is empty; a directory move in the same plan may still carry it along.
+
+`moves` is an execution order. Each `targetPath` is where that move puts its unit when it runs, and a later move whose source holds that path carries it along. Every import rewrite names the consumer's final path and the specifier it needs after all moves. Moves no order can satisfy arrive in `unresolved` with `move-order-conflict`.
 
 The MCP call calculates consumer placement, LCA, target node type, required artifacts, and import rewrites. It does not modify the project tree.
 
@@ -41,7 +43,7 @@ Show the plan ID/hash and every Current/Target/Type/Basis/LCA decision, artifact
 
 ### 4. Execute outside MCP
 
-The calling environment updates DETAIL.md and boundary-changing INTENT.md first, then creates required artifacts, moves exact source paths, and applies listed imports. Use cross-platform path/file helpers and preserve unrelated changes.
+The calling environment updates DETAIL.md and boundary-changing INTENT.md first, then creates the required artifacts of `alreadyPlaced` entries. It runs `moves` in listed order — each move relocates its exact source path to its `targetPath` and then creates that move's required artifacts — and only after the last move applies the listed imports. Never reorder moves. Use cross-platform path/file helpers and preserve unrelated changes.
 
 Filid MCP never moves a file and never rewrites an import. This skill does not turn those operations into a generic MCP capability.
 

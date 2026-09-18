@@ -12,6 +12,7 @@ import {
   EXCLUDED_DIRECTORY_NAMES,
   SOURCE_EXTENSIONS,
 } from './ecmascriptConventions.js';
+import { hidesExport } from './entrySurface/hidesExport.js';
 import { extractDependencyReferences } from './extractDependencyReferences.js';
 import { findEntryPoints } from './findEntryPoints.js';
 import { inspectManifestEntry } from './inspectManifestEntry.js';
@@ -47,7 +48,8 @@ function discoverEcmascriptFiles(projectRoot: string): string[] {
 function inspectEntryPointSource(
   entryPointPath: string,
 ): Omit<EntryPointInspection, 'entryPoint'> {
-  const tokens = scanLexicalTokens(readFileSync(entryPointPath, 'utf8'));
+  const source = readFileSync(entryPointPath, 'utf8');
+  const tokens = scanLexicalTokens(source);
   const exportedNames = new Set<string>();
   let hasDirectDeclarations = false;
   let certainty: EntryPointInspection['certainty'] = 'exact';
@@ -107,6 +109,7 @@ function inspectEntryPointSource(
     }
   }
 
+  if (hidesExport(source, tokens)) certainty = 'indeterminate';
   return {
     exportedNames: [...exportedNames].sort(),
     hasDirectDeclarations,

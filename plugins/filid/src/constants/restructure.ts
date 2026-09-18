@@ -49,6 +49,7 @@ export const RESTRUCTURE_DECISION_REASONS = {
   CONSUMER_PATH_OUTSIDE_PROJECT: 'consumer-path-outside-project',
   DEPENDENCY_EVIDENCE_INDETERMINATE: 'dependency-evidence-indeterminate',
   INVALID_NAME_HINT: 'invalid-name-hint',
+  MOVE_ORDER_CONFLICT: 'move-order-conflict',
 } as const;
 
 export const RESTRUCTURE_VALIDATION_CODES = {

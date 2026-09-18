@@ -92,7 +92,7 @@ describe('ecmascript verification adapter', () => {
     );
   });
 
-  it('denies the role when an unterminated literal is the only uncertainty', async () => {
+  it('denies the role when a JSX apostrophe hides no case', async () => {
     const root = project();
     const renamed = write(
       root,

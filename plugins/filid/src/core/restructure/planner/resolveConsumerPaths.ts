@@ -1,32 +1,19 @@
 import {
   pathForCompare,
-  portableIsAbsolute,
-  portableRelative,
   portableResolve,
   samePath,
 } from '@ogham/cross-platform';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
-import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';
 import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type { RestructureDecisionReason } from '../../../types/restructure.js';
 import { resolveOwningFractal } from '../../analysis/lcaCalculator/index.js';
+import { isAtOrWithin } from '../imports/isAtOrWithin.js';
 
 export interface ConsumerPathResolution {
   paths: string[];
   decisionReasons: RestructureDecisionReason[];
-}
-
-function isAtOrWithin(parentPath: string, targetPath: string): boolean {
-  if (samePath(parentPath, targetPath)) return true;
-  const relative = portableRelative(parentPath, targetPath);
-  const comparable = pathForCompare(relative);
-  return (
-    comparable !== PORTABLE_PATH_MARKERS.PARENT &&
-    !comparable.startsWith(PORTABLE_PATH_MARKERS.PARENT_PREFIX) &&
-    !portableIsAbsolute(relative)
-  );
 }
 
 function dedupePaths(paths: string[]): string[] {

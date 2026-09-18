@@ -1,10 +1,14 @@
 import type { VerificationCaseCount } from '../../../types/adapters.js';
-import {
-  type LexicalToken,
-  scanLexicalTokens,
-} from '../structure/scanLexicalTokens.js';
+import { findHiddenMatches } from '../structure/lexing/findHiddenMatches.js';
+import { findUntrustedText } from '../structure/lexing/findUntrustedText.js';
+import type { LexicalToken } from '../structure/lexing/lexicalToken.js';
+import { scanLexicalTokens } from '../structure/scanLexicalTokens.js';
 
 import { resolveConstantTable } from './constantTables/resolveConstantTable.js';
+import {
+  LOST_TRACK_REASON,
+  UNCONFIRMED_CASE_REASON,
+} from './showsVerificationSyntax.js';
 
 interface StaticRows {
   exact: boolean;
@@ -16,11 +20,17 @@ const CASE_APIS = new Set(['it', 'specify', 'test']);
 const SUITE_APIS = new Set(['describe', 'suite']);
 const TABLE_APIS = new Set([...CASE_APIS, ...SUITE_APIS]);
 
-/**
- * Prefix of the reason an unterminated literal adds. That reason says the token
- * boundaries are unreliable, not that verification syntax was seen.
- */
-export const UNTERMINATED_LITERAL_REASON = 'unterminated literal';
+/** A case or suite call as raw text, e.g. `it(`, `test.each(`, even `it (please)` in prose; not preceded by a member dot. */
+const HIDDEN_CASE_PATTERN = new RegExp(
+  `(?<![\\w$.])(?:${[...TABLE_APIS].join('|')})\\s*(?:\\.\\s*[A-Za-z_$][\\w$]*\\s*)*\\(`,
+  'g',
+);
+
+/** A case or suite call that opens with a quoted title, as written code does (`it('…'`); prose rarely does. */
+const TITLED_CASE_PATTERN = new RegExp(
+  `(?<![\\w$.])(?:${[...TABLE_APIS].join('|')})(?:\\.[A-Za-z_$][\\w$]*)*\\(\\s*['"\`]`,
+  'g',
+);
 
 class SemanticCaseCounter {
   readonly tokens: LexicalToken[];
@@ -260,12 +270,31 @@ class SemanticCaseCounter {
     return -1;
   }
 
+  /**
+   * An unterminated literal makes the count uncountable when the scanner lost
+   * track, or when untrusted literal content holds raw case-call text.
+   * Otherwise it hid nothing and the count stays exact. Only a titled case
+   * call (`it('…'`) there is role evidence; prose like `it (please)` is not.
+   */
   private detectUnterminatedLiterals(): void {
-    for (const token of this.tokens)
-      if (token.unterminated)
-        this.reasons.add(
-          `${UNTERMINATED_LITERAL_REASON} at offset ${token.start}`,
-        );
+    const untrusted = findUntrustedText(this.source, this.tokens);
+    if (untrusted.lostTrackAt < Number.POSITIVE_INFINITY)
+      this.reasons.add(
+        `${LOST_TRACK_REASON} at offset ${untrusted.lostTrackAt}`,
+      );
+    for (const hit of findHiddenMatches(
+      this.source,
+      untrusted,
+      HIDDEN_CASE_PATTERN,
+      'afterFirstQuote',
+    ))
+      this.reasons.add(`${UNCONFIRMED_CASE_REASON} at offset ${hit.offset}`);
+    for (const hit of findHiddenMatches(
+      this.source,
+      untrusted,
+      TITLED_CASE_PATTERN,
+    ))
+      this.reasons.add(`titled case call hidden at offset ${hit.offset}`);
   }
 
   private detectAliases(): void {

@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Dependency diagnostics carry stable consumer/specifier cause identity, the unresolved specifier, and explicit dependencies/boundaries impact. Value/type imports of the same target share an identity. Independent verification remains exact when its own evidence is exact; unspecified impact remains unknown.
+- Dependency diagnostics carry stable consumer/specifier cause identity, the unresolved specifier, and explicit dependencies/boundaries impact. A reference the adapter marks `certainty: 'indeterminate'` produces an `uncertain-local-dependency` diagnostic under the same identity rule. Value/type imports of the same target share an identity. Independent verification remains exact when its own evidence is exact; unspecified impact remains unknown.
 
 - 등록된 structure/verification adapter와 config v2로 하나의 `ProjectSnapshot`을 만든다.
 - 호출자는 수집할 증거 축(entry surface, dependency, verification)을 고를 수 있고 기본값은 전부 수집이다. tree와 문서 증거는 축이 아니라 언제나 수집한다 — 나머지 축이 그 위에서만 의미를 갖기 때문이다.
@@ -78,6 +78,7 @@
 ### AC-snapshot-certainty — 불확실성 보존
 
 - unresolved local dependency가 있으면 graph certainty가 indeterminate다.
+- adapter가 indeterminate로 표시한 참조는 `uncertain-local-dependency` 진단을 남긴다.
 - 외부 package dependency는 project graph의 unresolved로 오인하지 않는다.
 - 선택 가능한 structure/verification adapter가 없으면 빈 exact PASS가 아니라 해당 분석 certainty가 `unsupported`다.
 

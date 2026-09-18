@@ -93,6 +93,66 @@ describe('ecmascript lexical scanning of regex literals and strings', () => {
     expect(scanLexicalTokens('"open')[0]).toMatchObject({ unterminated: true });
   });
 
+  it('keeps token boundaries after a nested template', () => {
+    expect(
+      scanLexicalTokens('const s = `a${`b${c}`}d`; next').map(
+        ({ kind }) => kind,
+      ),
+    ).toEqual([
+      'identifier',
+      'identifier',
+      'punctuation',
+      'template',
+      'punctuation',
+      'identifier',
+    ]);
+  });
+
+  it('skips a regex, quotes and backticks inside a template expression', () => {
+    expect(
+      shapes(
+        "const s = `${v.replace(/`/g, '\"')}|${c ? '`' : \"'\"}`; next",
+      ).slice(-3),
+    ).toEqual([
+      expect.stringMatching(/^template:/),
+      'punctuation:;',
+      'identifier:next',
+    ]);
+  });
+
+  it('keeps object braces and a nested template inside one expression', () => {
+    expect(
+      scanLexicalTokens('const s = `${f({ a: { b: `x` } })}y`; next').map(
+        ({ kind }) => kind,
+      ),
+    ).toEqual([
+      'identifier',
+      'identifier',
+      'punctuation',
+      'template',
+      'punctuation',
+      'identifier',
+    ]);
+  });
+
+  it('marks a template unterminated when its expression loses track', () => {
+    const template = scanLexicalTokens(
+      "function label(x) {\n  return `${x ? <b>Don't</b> : null}`;\n}\nnext",
+    ).find(({ kind }) => kind === 'template');
+
+    expect(template).toMatchObject({ unterminated: true });
+  });
+
+  it('skips a shebang line', () => {
+    expect(shapes("#!/usr/bin/env node --x='a'\nconst next = 1;")).toEqual([
+      'identifier:const',
+      'identifier:next',
+      'punctuation:=',
+      'number:1',
+      'punctuation:;',
+    ]);
+  });
+
   it.each(['\n', '\r\n'])(
     'keeps a %j line continuation inside a terminated string',
     (lineBreak) => {

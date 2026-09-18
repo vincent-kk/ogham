@@ -1,108 +1,52 @@
-import {
-  pathForCompare,
-  portableDirname,
-  portableJoin,
-  portableRelative,
-  samePath,
-} from '@ogham/cross-platform';
+import { pathForCompare, samePath } from '@ogham/cross-platform';
 
-import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';
-import {
-  RESTRUCTURE_DECISION_REASONS,
-  RESTRUCTURE_PLAN_HASH_SEPARATOR,
-} from '../../../constants/restructure.js';
+import { RESTRUCTURE_PLAN_HASH_SEPARATOR } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
   ImportRewrite,
   ImportRewriteBuildResult,
   PlannedMove,
-  RestructureDecisionReason,
+  RewriteUnit,
 } from '../../../types/restructure.js';
-import { applySpecifierExtension } from '../specifiers/applySpecifierExtension.js';
-import { specifierDenotesPath } from '../specifiers/specifierDenotesPath.js';
 
-import { isAtOrWithin } from './isAtOrWithin.js';
-import { relocateConsumerPath } from './relocateConsumerPath.js';
+import { collectIncomingRewrites } from './collectIncomingRewrites.js';
+import { collectOutgoingRewrites } from './collectOutgoingRewrites.js';
 
 /**
- * Derive the import edits that keep every consumer of `sourcePath` pointing at
- * it once it sits at `targetPath`.
- * @param snapshot - Pre-move snapshot whose dependency evidence names the consumers
- * @param sourcePath - Absolute path of the unit being moved
- * @param targetPath - Absolute path consumers must reference afterwards
- * @param consumerPaths - Consumer files whose evidence is rewritten
- * @param plannedMoves - Executable moves of the same plan; a consumer they
- * relocate is rewritten at, and relative to, its post-plan path
- * @returns Path-like rewrites, plus a decision reason for any consumer
- * reference that is not an exact path-like specifier
+ * Derive the import edits a moved unit owns, and the reasons its imports
+ * cannot be rewritten exactly.
+ *
+ * Both judgement sets — imports into the unit and imports out of it — are
+ * checked independently of move order, ownership and consumer lists, so the
+ * reasons are the same whichever moves share the plan. A unit that stays in
+ * place breaks no import and is not judged.
+ * @param snapshot - Pre-move snapshot whose dependency evidence names every consumer
+ * @param unit - Source, target and the path consumers load after the move
+ * @param orderedMoves - Executable moves of the plan in execution order; when
+ * empty the unit is taken to move alone
+ * @returns Owned rewrites with final consumer paths and specifiers, sorted by
+ * consumer, plus decision reasons
  */
 export function buildImportRewrites(
   snapshot: ProjectSnapshot,
-  sourcePath: string,
-  targetPath: string,
-  consumerPaths: string[],
-  plannedMoves: readonly PlannedMove[] = [],
+  unit: RewriteUnit,
+  orderedMoves: readonly PlannedMove[] = [],
 ): ImportRewriteBuildResult {
-  const consumerIdentities = new Set(consumerPaths.map(pathForCompare));
-  const sourceIsDirectory = [...snapshot.tree.nodes.values()].some((node) =>
-    samePath(node.path, sourcePath),
-  );
+  if (samePath(unit.sourcePath, unit.targetPath))
+    return { rewrites: [], decisionReasons: [] };
+  const moves = orderedMoves.length > 0 ? orderedMoves : [unit];
+  const incoming = collectIncomingRewrites(snapshot, unit, moves);
+  const outgoing = collectOutgoingRewrites(snapshot, unit, moves);
   const rewrites = new Map<string, ImportRewrite>();
-  const reasons = new Set<RestructureDecisionReason>();
-
-  for (const edge of snapshot.dependencyGraph.edges)
-    for (const evidence of edge.evidence) {
-      if (!consumerIdentities.has(pathForCompare(evidence.sourceFile)))
-        continue;
-      const referencesSource =
-        samePath(evidence.resolvedPath, sourcePath) ||
-        (sourceIsDirectory && isAtOrWithin(sourcePath, evidence.resolvedPath));
-      if (!referencesSource) continue;
-      const exactPathLike = specifierDenotesPath(
-        evidence.sourceFile,
-        evidence.rawSpecifier,
-        evidence.resolvedPath,
-      );
-      if (!exactPathLike) {
-        reasons.add(RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED);
-        continue;
-      }
-
-      const relocatedPath = samePath(evidence.resolvedPath, sourcePath)
-        ? targetPath
-        : portableJoin(
-            targetPath,
-            portableRelative(sourcePath, evidence.resolvedPath),
-          );
-      const consumerPath = relocateConsumerPath(
-        evidence.sourceFile,
-        plannedMoves,
-      );
-      let requiredSpecifier = applySpecifierExtension(
-        portableRelative(portableDirname(consumerPath), relocatedPath),
-        evidence.rawSpecifier,
-      );
-      if (
-        !pathForCompare(requiredSpecifier).startsWith(
-          PORTABLE_PATH_MARKERS.PARENT_PREFIX,
-        )
-      )
-        requiredSpecifier =
-          PORTABLE_PATH_MARKERS.CURRENT_PREFIX + requiredSpecifier;
-      const rewrite: ImportRewrite = {
-        consumerPath,
-        currentSpecifier: evidence.rawSpecifier,
-        requiredSpecifier,
-      };
-      rewrites.set(
-        [
-          pathForCompare(rewrite.consumerPath),
-          rewrite.currentSpecifier,
-          rewrite.requiredSpecifier,
-        ].join(RESTRUCTURE_PLAN_HASH_SEPARATOR),
-        rewrite,
-      );
-    }
+  for (const rewrite of [...incoming.rewrites, ...outgoing.rewrites])
+    rewrites.set(
+      [
+        pathForCompare(rewrite.consumerPath),
+        rewrite.currentSpecifier,
+        rewrite.requiredSpecifier,
+      ].join(RESTRUCTURE_PLAN_HASH_SEPARATOR),
+      rewrite,
+    );
 
   return {
     rewrites: [...rewrites.values()].sort(
@@ -111,6 +55,8 @@ export function buildImportRewrites(
           pathForCompare(right.consumerPath),
         ) || left.currentSpecifier.localeCompare(right.currentSpecifier),
     ),
-    decisionReasons: [...reasons],
+    decisionReasons: [
+      ...new Set([...incoming.decisionReasons, ...outgoing.decisionReasons]),
+    ],
   };
 }

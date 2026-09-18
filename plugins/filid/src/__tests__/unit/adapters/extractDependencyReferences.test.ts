@@ -14,6 +14,147 @@ beforeEach(() => {
 
 afterEach(() => rmSync(root, { recursive: true, force: true }));
 
+describe('dependency certainty around unterminated literals', () => {
+  it('marks an import inside a swallowed span indeterminate', async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    writeFileSync(join(root, 'b.ts'), 'export const b = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "const s = <p>Don't</p>; const lazy = () => import('./a.ts');\nimport { b } from './b.ts';\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([
+      { rawSpecifier: './b.ts', certainty: undefined },
+      { rawSpecifier: './a.ts', certainty: 'indeterminate' },
+    ]);
+  });
+
+  it('marks an import hidden behind a quote mispaired after a URL indeterminate', async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "const n = <a href=\"https://x.dev\">Don't</a>; import { a } from './a.ts';\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([{ rawSpecifier: './a.ts', certainty: 'indeterminate' }]);
+  });
+
+  it('marks an import after a quote glued to a non-ASCII word indeterminate', async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "const n = <p>café'</p>; import('./a.ts'); const m = <p>é'</p>;\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([{ rawSpecifier: './a.ts', certainty: 'indeterminate' }]);
+  });
+
+  it('marks an import after a quote glued to an astral word indeterminate', async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "const n = <p>caf\u{2070E}'</p>; import('./a.ts'); const m = <p>\u{2070E}'</p>;\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([{ rawSpecifier: './a.ts', certainty: 'indeterminate' }]);
+  });
+
+  it('marks an import on the line a stray string continues onto indeterminate', async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "render(<p>Don't</p>); f('q'); s = \"a\\\nb\"; import('./a.ts');\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([{ rawSpecifier: './a.ts', certainty: 'indeterminate' }]);
+  });
+
+  it("keeps an import before the line's first quote exact", async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "import('./a.ts'); const s = \"x\"; render(<p>Don't</p>);\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([{ rawSpecifier: './a.ts', certainty: undefined }]);
+  });
+
+  it('distrusts an import the scan read as code inside a mispaired string', async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      'render(<p>I\'m "quoted"</p>); f(\'import("./a.ts")\');\n',
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([{ rawSpecifier: './a.ts', certainty: 'indeterminate' }]);
+  });
+
+  it("reports a code-read import after the line's first quote once, as indeterminate", async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "const s = \"x\"; import('./a.ts'); render(<p>Don't</p>);\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([{ rawSpecifier: './a.ts', certainty: 'indeterminate' }]);
+  });
+
+  it('marks references after a lost boundary indeterminate', async () => {
+    writeFileSync(join(root, 'c.ts'), 'export const c = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "const t = `${a ? <b>Don't</b> : b}`;\nimport { c } from './c.ts';\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty }) => ({ rawSpecifier, certainty }),
+      ),
+    ).toEqual([{ rawSpecifier: './c.ts', certainty: 'indeterminate' }]);
+  });
+});
+
 describe('local dependency filename resolution regressions', () => {
   it.each([
     ['./SchemaNodePropsFlow.helpers', 'SchemaNodePropsFlow.helpers.tsx'],

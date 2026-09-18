@@ -1,4 +1,4 @@
-import type { LexicalToken } from '../../structure/scanLexicalTokens.js';
+import type { LexicalToken } from '../../structure/lexing/lexicalToken.js';
 
 /** A one-parameter arrow cannot receive map's original array argument. */
 export function isReadOnlyMapCall(

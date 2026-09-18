@@ -47,6 +47,38 @@ describe('DAG certainty excludes adapter-classified verification references', ()
     },
   );
 
+  it('keeps an adapter-uncertain production reference out of edges', () => {
+    const graph = buildDependencyGraph(
+      ['/project/a', '/project/b'],
+      [
+        {
+          ...reference,
+          resolvedPath: '/project/b/entry.unit',
+          certainty: 'indeterminate',
+        },
+      ],
+    );
+    expect(graph.edges).toEqual([]);
+    expect(graph.certainty).toBe('indeterminate');
+  });
+
+  it('lets an adapter-uncertain verification reference make the graph indeterminate', () => {
+    const graph = buildDependencyGraph(
+      ['/project/a', '/project/b'],
+      [
+        {
+          ...reference,
+          resolvedPath: '/project/b/entry.unit',
+          certainty: 'indeterminate',
+        },
+      ],
+      'exact',
+      { verificationPaths: [sourceFile] },
+    );
+    expect(graph.edges).toEqual([]);
+    expect(graph.certainty).toBe('indeterminate');
+  });
+
   it('does not grant an exemption based on a test filename alone', () => {
     expect(
       buildDependencyGraph(
