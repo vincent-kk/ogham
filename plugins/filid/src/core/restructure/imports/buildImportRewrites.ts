@@ -1,7 +1,6 @@
 import {
   pathForCompare,
   portableDirname,
-  portableIsAbsolute,
   portableJoin,
   portableRelative,
   samePath,
@@ -16,27 +15,33 @@ import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
   ImportRewrite,
   ImportRewriteBuildResult,
+  PlannedMove,
   RestructureDecisionReason,
 } from '../../../types/restructure.js';
 import { applySpecifierExtension } from '../specifiers/applySpecifierExtension.js';
 import { specifierDenotesPath } from '../specifiers/specifierDenotesPath.js';
 
-function isAtOrWithin(parentPath: string, targetPath: string): boolean {
-  if (samePath(parentPath, targetPath)) return true;
-  const relative = portableRelative(parentPath, targetPath);
-  const comparable = pathForCompare(relative);
-  return (
-    comparable !== PORTABLE_PATH_MARKERS.PARENT &&
-    !comparable.startsWith(PORTABLE_PATH_MARKERS.PARENT_PREFIX) &&
-    !portableIsAbsolute(relative)
-  );
-}
+import { isAtOrWithin } from './isAtOrWithin.js';
+import { relocateConsumerPath } from './relocateConsumerPath.js';
 
+/**
+ * Derive the import edits that keep every consumer of `sourcePath` pointing at
+ * it once it sits at `targetPath`.
+ * @param snapshot - Pre-move snapshot whose dependency evidence names the consumers
+ * @param sourcePath - Absolute path of the unit being moved
+ * @param targetPath - Absolute path consumers must reference afterwards
+ * @param consumerPaths - Consumer files whose evidence is rewritten
+ * @param plannedMoves - Executable moves of the same plan; a consumer they
+ * relocate is rewritten at, and relative to, its post-plan path
+ * @returns Path-like rewrites, plus a decision reason for any consumer
+ * reference that is not an exact path-like specifier
+ */
 export function buildImportRewrites(
   snapshot: ProjectSnapshot,
   sourcePath: string,
   targetPath: string,
   consumerPaths: string[],
+  plannedMoves: readonly PlannedMove[] = [],
 ): ImportRewriteBuildResult {
   const consumerIdentities = new Set(consumerPaths.map(pathForCompare));
   const sourceIsDirectory = [...snapshot.tree.nodes.values()].some((node) =>
@@ -69,22 +74,23 @@ export function buildImportRewrites(
             targetPath,
             portableRelative(sourcePath, evidence.resolvedPath),
           );
+      const consumerPath = relocateConsumerPath(
+        evidence.sourceFile,
+        plannedMoves,
+      );
       let requiredSpecifier = applySpecifierExtension(
-        portableRelative(portableDirname(evidence.sourceFile), relocatedPath),
+        portableRelative(portableDirname(consumerPath), relocatedPath),
         evidence.rawSpecifier,
       );
-      const comparableRequired = pathForCompare(requiredSpecifier);
       if (
-        pathForCompare(evidence.rawSpecifier).startsWith(
-          PORTABLE_PATH_MARKERS.CURRENT_PREFIX,
-        ) &&
-        !comparableRequired.startsWith(PORTABLE_PATH_MARKERS.CURRENT_PREFIX) &&
-        !comparableRequired.startsWith(PORTABLE_PATH_MARKERS.PARENT_PREFIX)
+        !pathForCompare(requiredSpecifier).startsWith(
+          PORTABLE_PATH_MARKERS.PARENT_PREFIX,
+        )
       )
         requiredSpecifier =
           PORTABLE_PATH_MARKERS.CURRENT_PREFIX + requiredSpecifier;
       const rewrite: ImportRewrite = {
-        consumerPath: evidence.sourceFile,
+        consumerPath,
         currentSpecifier: evidence.rawSpecifier,
         requiredSpecifier,
       };

@@ -12,27 +12,35 @@ import {
 } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
+  MoveInstruction,
   RestructurePlan,
   RestructurePlanInput,
 } from '../../../types/restructure.js';
 
 import { planMoveInstruction } from './planMoveInstruction.js';
 
+function isExecutableMove(move: MoveInstruction): boolean {
+  return !move.requiresDecision && !samePath(move.sourcePath, move.targetPath);
+}
+
 export function createRestructurePlan(
   snapshot: ProjectSnapshot,
   input: RestructurePlanInput,
 ): RestructurePlan {
+  // Targets never depend on rewrites: the first pass fixes every executable
+  // move, the second rewrites each consumer where the whole plan leaves it.
+  const plannedMoves = input.requests
+    .map((request) => planMoveInstruction(snapshot, request))
+    .filter(isExecutableMove);
   const instructions = input.requests.map((request) =>
-    planMoveInstruction(snapshot, request),
+    planMoveInstruction(snapshot, request, plannedMoves),
   );
   const unresolved = instructions.filter((move) => move.requiresDecision);
-  const resolved = instructions.filter((move) => !move.requiresDecision);
-  const alreadyPlaced = resolved.filter((move) =>
-    samePath(move.sourcePath, move.targetPath),
+  const alreadyPlaced = instructions.filter(
+    (move) =>
+      !move.requiresDecision && samePath(move.sourcePath, move.targetPath),
   );
-  const moves = resolved.filter(
-    (move) => !samePath(move.sourcePath, move.targetPath),
-  );
+  const moves = instructions.filter(isExecutableMove);
   const planHash = createHash(RESTRUCTURE_HASH_ALGORITHM)
     .update(snapshot.snapshotHash)
     .update(RESTRUCTURE_PLAN_HASH_SEPARATOR)

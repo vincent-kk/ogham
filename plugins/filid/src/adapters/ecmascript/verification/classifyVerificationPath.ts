@@ -4,7 +4,10 @@ import { basename, extname } from 'node:path';
 import type { VerificationRole } from '../../../types/adapters.js';
 import { SOURCE_EXTENSIONS } from '../structure/ecmascriptConventions.js';
 
-import { countSemanticCases } from './countSemanticCases.js';
+import {
+  UNTERMINATED_LITERAL_REASON,
+  countSemanticCases,
+} from './countSemanticCases.js';
 
 /** The naming convention picks a candidate; it never confirms the role. */
 function candidateRole(filePath: string): VerificationRole | 'unsupported' {
@@ -20,13 +23,19 @@ function candidateRole(filePath: string): VerificationRole | 'unsupported' {
 }
 
 /**
- * An exact count of zero is the one reading that means "no cases here". Any
- * lesser certainty means the counter saw verification syntax it could not
- * resolve — uncountable is not absent.
+ * A counted case, or uncertainty the counter traced to verification syntax it
+ * could not resolve, means cases are here — uncountable is not absent. An
+ * unterminated literal alone is not that: it only says the tokens are
+ * unreliable, and JSX text or a nested template produces one in plain code.
  */
 function holdsCases(source: string): boolean {
   const count = countSemanticCases(source);
-  return count.knownLowerBound > 0 || count.certainty !== 'exact';
+  return (
+    count.knownLowerBound > 0 ||
+    count.reasons.some(
+      (reason) => !reason.startsWith(UNTERMINATED_LITERAL_REASON),
+    )
+  );
 }
 
 /**

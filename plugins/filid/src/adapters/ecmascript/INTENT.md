@@ -7,7 +7,7 @@
 ## Conventions
 
 - 이 디렉터리가 확장자, entry filename, package/framework 이름과 test syntax의 유일한 출처다.
-- 문자열·주석·괄호 nesting을 구분하는 작은 lexical scanner를 공유한다.
+- 문자열·정규식 리터럴·주석·괄호 nesting을 구분하는 작은 lexical scanner를 공유한다.
 - 정적 확정이 불가능하면 indeterminate를 반환한다.
 
 ## Boundaries

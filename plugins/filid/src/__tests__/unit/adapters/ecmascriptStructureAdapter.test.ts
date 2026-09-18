@@ -334,6 +334,36 @@ describe('ecmascript structure adapter', () => {
     ]);
   });
 
+  it('extracts dependencies that follow a regex literal holding quotes', async () => {
+    const root = project();
+    write(root, 'src/a.ts', 'export const a = 1;');
+    write(root, 'src/b.ts', 'export const b = 2;');
+    const source = write(
+      root,
+      'src/source.ts',
+      [
+        "import { a } from './a.ts';",
+        'export const Q = /["\']/;',
+        "export { b } from './b.ts';",
+        "export const lazy = () => import('./a.ts');",
+      ].join('\n'),
+    );
+
+    const dependencies =
+      await ecmascriptStructureAdapter.extractDependencies(source);
+
+    expect(dependencies.map((item) => item.rawSpecifier)).toEqual([
+      './a.ts',
+      './b.ts',
+      './a.ts',
+    ]);
+    expect(dependencies.map((item) => item.kind)).toEqual([
+      'static',
+      're-export',
+      'dynamic',
+    ]);
+  });
+
   it('enumerates named exports and detects direct declarations', async () => {
     const root = project();
     const entry = write(

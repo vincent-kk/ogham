@@ -11,6 +11,7 @@ import type { FractalNode, ProjectSnapshot } from '../../../types/fractal.js';
 import type {
   MoveInstruction,
   PlacementRequest,
+  PlannedMove,
   RestructureDecisionReason,
 } from '../../../types/restructure.js';
 import {
@@ -25,9 +26,19 @@ import { resolveConsumerPaths } from './resolveConsumerPaths.js';
 import { resolveContractIntent } from './resolveContractIntent.js';
 import { resolveUnitKind } from './resolveUnitKind.js';
 
+/**
+ * Plan one placement request against a pre-move snapshot.
+ * @param snapshot - Pre-move snapshot supplying tree, consumers and evidence
+ * @param request - Source path plus optional consumers, contract intent and organ name
+ * @param plannedMoves - Executable moves of the same plan; used only to place
+ * rewritten consumers where the plan leaves them, never to choose the target
+ * @returns The normalized instruction, with `requiresDecision` set when evidence
+ * cannot fix a name, contract or rewrite
+ */
 export function planMoveInstruction(
   snapshot: ProjectSnapshot,
   request: PlacementRequest,
+  plannedMoves: readonly PlannedMove[] = [],
 ): MoveInstruction {
   const sourcePath = portableResolve(snapshot.projectRoot, request.sourcePath);
   const decisionReasons = new Set<RestructureDecisionReason>();
@@ -81,6 +92,7 @@ export function planMoveInstruction(
     sourcePath,
     rewriteTarget,
     consumers.paths,
+    plannedMoves,
   );
   imports.decisionReasons.forEach((reason) => decisionReasons.add(reason));
   const reasons = [...decisionReasons].sort();

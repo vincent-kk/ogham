@@ -16,6 +16,12 @@ const CASE_APIS = new Set(['it', 'specify', 'test']);
 const SUITE_APIS = new Set(['describe', 'suite']);
 const TABLE_APIS = new Set([...CASE_APIS, ...SUITE_APIS]);
 
+/**
+ * Prefix of the reason an unterminated literal adds. That reason says the token
+ * boundaries are unreliable, not that verification syntax was seen.
+ */
+export const UNTERMINATED_LITERAL_REASON = 'unterminated literal';
+
 class SemanticCaseCounter {
   readonly tokens: LexicalToken[];
   readonly reasons = new Set<string>();
@@ -26,6 +32,7 @@ class SemanticCaseCounter {
   }
 
   count(): VerificationCaseCount {
+    this.detectUnterminatedLiterals();
     this.detectAliases();
     this.scanRange(0, this.tokens.length, 1);
     const certainty =
@@ -251,6 +258,14 @@ class SemanticCaseCounter {
       }
     }
     return -1;
+  }
+
+  private detectUnterminatedLiterals(): void {
+    for (const token of this.tokens)
+      if (token.unterminated)
+        this.reasons.add(
+          `${UNTERMINATED_LITERAL_REASON} at offset ${token.start}`,
+        );
   }
 
   private detectAliases(): void {

@@ -66,6 +66,9 @@ export interface MoveInstruction {
   decisionReasons: RestructureDecisionReason[];
 }
 
+/** An executable move of a plan, against which rewrites relocate consumers the same plan moves. */
+export type PlannedMove = Pick<MoveInstruction, 'sourcePath' | 'targetPath'>;
+
 export interface RestructurePlan {
   schemaVersion: 1;
   planId: string;

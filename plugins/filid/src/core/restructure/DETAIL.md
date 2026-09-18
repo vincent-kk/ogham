@@ -9,6 +9,9 @@
 - 의미 organ 이름, adapter-derived entry path 또는 exact path-like import rewrite가 없으면 추측하지 않고 decision reason을 반환한다.
 - specifier가 resolved file을 가리키는지는 **마지막 세그먼트의 확장자를 제거한 형태**로 판정한다. 소스 확장자를 그대로 적을 수 없는 생태계 관례(TypeScript ESM이 `.ts` 파일을 `.js`로 참조, 확장자 생략)를 exact evidence로 인정하기 위해서다. stem이 다르면(디렉터리 index 참조 등) 여전히 decision reason이다.
 - rewrite 결과는 소비자가 쓰던 확장자 표기를 보존한다. core는 어느 확장자가 유효한지 알지 못하며, 원래 specifier의 표기를 그대로 되돌려 준다.
+- 계산된 specifier는 항상 path-like다. `../`로 시작하지 않는 상대 경로에는 `./`를 붙인다. 붙이지 않으면 `types.ts` 같은 bare specifier가 되어 package import로 해석된다.
+- rewrite는 계획 전체가 실행된 뒤의 소비자 위치를 기준으로 한다. 소비자가 같은 계획의 실행 가능한 move(자기 자신의 디렉터리 move 포함)의 source이거나 그 아래에 있으면, `consumerPath`는 그 move의 target 쪽 새 경로이고 `requiredSpecifier`도 새 디렉터리에서 계산한다. source가 겹치면 가장 깊은 source를 가진 move를 따른다. 옛 경로로 남기면 계획대로 실행한 결과가 postcondition에서 `import-rewrite-missing`으로 실패하고, 실행자는 이미 없는 파일을 편집하게 된다.
+- `consumerPaths`와 LCA는 실행 전 snapshot의 소비자 증거로 계산한다. 소비자의 새 위치는 다른 move의 target에 달려 있고, 그 target은 다시 자기 소비자에 달려 있다. 새 위치로 배치를 다시 계산하면 수렴이 보장되지 않는다.
 - 계산된 target이 source와 같으면 옮길 것이 없다. 그런 instruction은 `moves`가 아니라 `alreadyPlaced`로 분리한다. postcondition은 두 갈래를 다르게 본다 — `moves`에는 source 부재까지, `alreadyPlaced`에는 source 부재만 뺀 나머지 전부를 요구한다. 그래야 "source 부재"와 "target 존재"가 같은 경로에 동시에 요구되지 않으면서, 계획 밖 경로에 착지한 유닛도 통과하지 못한다.
 - 요청을 조용히 버리지 않는다. 이미 제자리인 유닛도 계산된 LCA·basis·consumer와 남은 required artifact를 그대로 실은 instruction으로 돌려준다.
 - validation은 post-execution snapshot만으로 exact target, source 부재, artifact, entry point, import boundary와 DAG를 검사한다. import rewrite 대조도 계획 산출과 같은 stem 판정을 쓴다.
@@ -16,9 +19,10 @@
 
 ## API Contracts
 
-- `createRestructurePlan(snapshot, input): RestructurePlan` — deterministic plan ID, snapshot timestamp, 실행 가능한 moves, alreadyPlaced, unresolved와 summary 반환. 분류 순서는 unresolved → alreadyPlaced → moves다.
-- `planMoveInstruction(snapshot, request): MoveInstruction` — 한 request의 normalized source/target, basis, LCA와 decision 상태 계산.
-- `buildImportRewrites(snapshot, sourcePath, targetPath, consumerPaths): ImportRewriteBuildResult` — source를 exact하게 가리키는 path-like evidence만 target 기준으로 변환하고 나머지는 decision reason으로 반환.
+- `createRestructurePlan(snapshot, input): RestructurePlan` — deterministic plan ID, snapshot timestamp, 실행 가능한 moves, alreadyPlaced, unresolved와 summary 반환. 분류 순서는 unresolved → alreadyPlaced → moves다. target은 rewrite에 의존하지 않으므로, 첫 계산으로 실행 가능한 move를 확정한 뒤 그 move들을 넘겨 rewrite를 다시 계산한다.
+- `planMoveInstruction(snapshot, request, plannedMoves?): MoveInstruction` — 한 request의 normalized source/target, basis, LCA와 decision 상태 계산. `plannedMoves`는 rewrite의 소비자 재배치에만 쓴다.
+- `buildImportRewrites(snapshot, sourcePath, targetPath, consumerPaths, plannedMoves?): ImportRewriteBuildResult` — source를 exact하게 가리키는 path-like evidence만 target 기준으로 변환하고 나머지는 decision reason으로 반환. 소비자는 `plannedMoves`로 재배치한 경로에 기록한다.
+- `relocateConsumerPath(path, plannedMoves): string` — 가장 깊은 source가 `path`를 포함하는 move의 target 쪽 경로. 해당 move가 없으면 `path` 그대로.
 - `stripPathExtension(path): string` — 마지막 세그먼트의 확장자 하나를 제거한 경로. 디렉터리 구분자, dot-prefixed 이름과 dot만으로 이루어진 상대 마커는 건드리지 않는다.
 - `specifierDenotesPath(consumerFile, rawSpecifier, resolvedPath): boolean` — path-like specifier가 stem 기준으로 resolved file을 가리키는지 판정.
 - `applySpecifierExtension(candidate, rawSpecifier): string` — 계산된 specifier에 원래 specifier의 확장자 표기를 되돌려 준다.
@@ -48,11 +52,23 @@
 - `summary.moveCount`는 그런 요청을 세지 않고 `alreadyPlacedCount`가 센다.
 - decision이 필요한 요청은 target이 source와 같아도 `unresolved`에 남는다.
 
+### AC-restructure-plan-relocation — 같은 계획이 옮기는 소비자
+
+- 서로 import하는 두 파일을 한 계획으로 옮기면, 옮겨지는 소비자의 rewrite는 새 소비자 경로와 새 디렉터리 기준 specifier를 가진다.
+- 그 계획대로 실행한 post snapshot의 postcondition은 finding이 없다.
+- 디렉터리 move 안의 소비자는 새 경로에서 기존 상대 specifier를 유지한다.
+- 옮겨지는 소비자도 `consumerPaths`에는 실행 전 경로로 남는다.
+- 같은 디렉터리로 모이는 target에 대한 specifier는 `./`로 시작한다.
+
 ### AC-restructure-validation — 실행 이탈 검출
 
 - stale snapshot은 precondition FAIL이다.
 - 남은 source, 누락/다른 target, node type, artifact, entry point, import rewrite/boundary와 cycle 또는 non-exact DAG는 postcondition FAIL이다.
 
+## History
+
+- 2026-09-19 — rewrite 소비자를 계획 전체 실행 뒤의 위치로 재배치했다. move마다 따로 계산하던 rewrite가 같은 계획으로 옮겨지는 소비자의 옛 경로를 가리켜, 올바르게 실행한 계획이 postcondition에서 실패하고 있었다. LCA 재계산은 target끼리 서로 의존해 수렴을 보장할 수 없어 실행 전 증거에 남겼다.
+
 ## Last Updated
 
-2026-07-28 — `alreadyPlaced`도 source 부재만 면제하고 exact target·node type·artifact·import rewrite를 요구하며, dot만으로 이루어진 상대 마커를 확장자로 읽지 않는다.
+2026-09-19

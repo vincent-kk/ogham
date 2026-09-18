@@ -16,6 +16,8 @@
 - package-level external dependency는 project DAG 후보에서 제외하고, 해석할 수 없는 local dependency는 `resolvedPath: null`로 보존한다.
 - local specifier의 마지막 접미사가 지원 source 확장자인 경우에만 확장자를 치환한다. `.helpers`, `.composition.fixtures` 같은 basename은 보존하며, 원래 경로와 directory index 탐색도 유지한다.
 - strings, comments와 template text 안의 가짜 syntax를 dependency나 export로 세지 않는다.
+- 정규식 리터럴 본문은 문자열이 아니다. `/`는 직전 유의미 토큰이 없을 때, `)`·`]`·`}`를 제외한 구두점일 때, 또는 피연산자 자리를 여는 키워드(`return`, `typeof`, `case`, `do`, `else`, `in`, `of`, `new`, `delete`, `void`, `throw`, `instanceof`, `yield`, `await`)일 때 정규식을 연다. 단 `<`에 바로 붙은 `/`(`</tag>` 닫는 태그)와 피연산자에 붙은 후위 `!`·`++`·`--` 뒤의 `/`는 정규식을 열지 않는다. lexer가 식별자로 읽지 않는 ASCII 밖 식별자 문자(`\p{ID_Continue}`) 뒤의 `/`와, `.` 뒤에 와서 속성 이름이 된 키워드 뒤의 `/`도 나눗셈이다. 본문은 이스케이프와 문자 클래스를 추적해 닫는 `/`와 플래그까지 `regex` 토큰 하나로 소비하고, 같은 줄에서 닫히지 않으면(이스케이프 뒤 줄바꿈 포함) 구두점 `/`로 되돌린다. 이를 구분하지 않으면 `/["']/`의 따옴표가 가짜 문자열을 열어 뒤따르는 case 선언과 import를 삼킨다. 반대로 닫는 태그나 후위 연산자 뒤의 나눗셈을 정규식으로 읽으면 같은 줄의 구분자와 따옴표를 삼킨다.
+- `'`·`"` 문자열은 이스케이프되지 않은 줄바꿈에서 끝난다. 줄 이음 이스케이프는 LF와 CRLF를 모두 한 단위로 건너뛴다. 줄바꿈에서 끝난 문자열과 파일 끝까지 닫히지 않은 문자열·template 토큰은 `unterminated`로 표시한다. 닫는 따옴표를 찾아 여러 줄을 넘어가면 이후 코드와 문자열의 경계가 뒤바뀐다.
 - `import.meta`는 dependency가 아니다. `import` 뒤에 `.`이 오면 메타 속성 참조이므로 뒤따르는 문자열을 specifier로 읽지 않는다. 이를 구분하지 않으면 `join(dirname(fileURLToPath(import.meta.url)), '../..')` 같은 경로 계산이 해석 불가 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
 - re-export 탐지는 export 절 형태로 한정한다. `export {…} from`과 `export * [as x] from`(각각 `type` 접두 허용)에서 절이 닫히는 바로 그 위치의 `from` 식별자만 재export 키워드다. 위치를 보지 않고 뒤따르는 아무 `from` 토큰이나 채택하면, `from`이라는 파라미터를 쓰는 exported 함수의 다음 문자열 리터럴이 유령 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
 - `.each`와 호출 괄호 사이의 TypeScript 타입 인자 목록은 table이 아니다. `it.each<T>([…])`에서 `<…>`를 건너뛰고 그 뒤의 정적 table을 읽는다. 건너뛰지 않으면 정적 배열 리터럴이 동적 table로 잡혀 파일 전체의 case count가 `indeterminate`가 된다 — 타입 인자는 row 수에 아무 영향이 없다.
@@ -23,13 +25,14 @@
 - 같은 파일에서 사용보다 앞에 선언한 최상위 단일 `const NAME = [...]` table을 제한적으로 해석한다. 초기값은 직접 배열 리터럴이며 선택적인 `as const` 뒤에서 선언이 끝나야 한다. `as const`만으로 런타임 불변성을 가정하지 않는다.
 - 상수 table의 모든 이름 사용을 확인한다. 지원하는 `.each`의 직접 인자, `for (const element of NAME)`, 단일 요소 인자를 받는 arrow callback의 표준 `.map`만 허용한다. 변경, alias, 외부 전달, export, 이름 가려짐 또는 그 밖의 사용은 indeterminate로 남긴다. `eval`·`Function` identifier가 있는 소스도 동적 접근을 배제할 수 없어 지원하지 않는다. import·중첩 선언·동적 초기값·범용 스코프 해석은 지원하지 않는다.
 - 지원 불가능한 alias·동적 표현은 unsupported/indeterminate evidence를 남긴다.
+- case 계수는 `unterminated` 토큰을 만나면 indeterminate를 반환한다. 토큰 경계를 믿을 수 없는 파일을 exact로 세면 cap이 거짓 통과한다.
 - verification 동작은 작업 2의 15/32와 contract-marker 계약을 구현한다.
-- verification role은 **파일명 접미사가 후보를 고르고 파일 내용이 확정한다.** `.spec`/`.test` stem은 후보일 뿐이며, 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`다. 접미사만으로 역할을 주면 프로덕션 파일을 `x.spec.ts`로 개명하는 것만으로 boundary와 DAG 면제를 얻는다 — 개명은 증거가 아니다.
+- verification role은 **파일명 접미사가 후보를 고르고 파일 내용이 확정한다.** `.spec`/`.test` stem은 후보일 뿐이며, 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`다. 접미사만으로 역할을 주면 프로덕션 파일을 `x.spec.ts`로 개명하는 것만으로 boundary와 DAG 면제를 얻는다 — 개명은 증거가 아니다. 닫히지 않은 literal이 만든 indeterminate는 검증 구문을 봤다는 증거가 아니므로 role을 주지 않는다. 그런 literal은 JSX 텍스트의 아포스트로피나 중첩 template처럼 프로덕션 코드에도 흔하다.
 
 ## API Contracts
 
 - `ecmascriptStructureAdapter: StructureAdapter` — registry에 등록되는 초기 structure adapter.
-- `scanLexicalTokens(source)` — comment/string/template와 delimiter nesting을 보존한 lexical token stream.
+- `scanLexicalTokens(source)` — comment/string/template/regex와 delimiter nesting을 보존한 lexical token stream. 닫히지 않은 문자열·template 토큰은 `unterminated: true`를 가진다.
 - `extractDependencyReferences(filePath)` — adapter 중립 `DependencyReference[]`.
 - `findEntryPoints(directoryPath, overrides?)` — module/executable/framework/manifest/configured descriptor 배열.
 - `ecmascriptVerificationAdapter` — spec/test role, semantic case count와 contract group marker를 분석하는 초기 verification adapter.
@@ -58,6 +61,7 @@
 - dotted basename은 지원 확장자를 덧붙여 해석하며, 짧은 이름의 형제 파일이 있어도 그 파일로 잘못 연결하지 않는다. 명시적 source 확장자 치환과 directory index 탐색을 유지한다.
 - `import.meta.url`을 쓰는 경로 계산은 dependency로 잡히지 않는다.
 - `from`이라는 파라미터를 쓰는 exported 함수는 re-export dependency를 만들지 않고, `export * from`·`export * as ns from`·`export type {…} from`은 계속 추출된다.
+- 따옴표를 담은 정규식 리터럴 뒤의 re-export와 dynamic import도 추출된다.
 
 ### AC-ecmascript-portability — 외부 parser 불필요
 
@@ -73,16 +77,20 @@
 - 배열 값의 문자열이 괄호나 쉼표여도 문법 구분자로 취급하지 않고 한 행으로 계수한다.
 - 상수 table의 길이를 확신할 수 없는 변경·참조 전달·이름 가려짐·동적 초기값은 indeterminate로 보존한다.
 - 동적 table, alias와 알 수 없는 문법은 indeterminate이며 skip, todo와 property declaration은 각각 1 case다.
+- 따옴표를 담은 정규식 리터럴 앞뒤의 case를 모두 exact count에 반영한다. 나눗셈 `/`(후위 `!`·`++`·`--` 뒤 포함)와 `</` 닫는 태그는 정규식을 열지 않으므로, 한 줄짜리 JSX table도 행 수대로 센다.
+- 닫히지 않은 문자열이 있는 파일은 exact 0이 아니라 indeterminate이며, 그 줄 뒤의 case는 known lower bound에 남는다.
 
 ### AC-ecmascript-verification-role — 내용이 역할을 확정한다
 
 - `.spec`/`.test` 접미사와 지원 확장자를 가진 파일만 후보가 된다.
 - 후보 중 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`이며 `discover()` 결과에서 빠진다 — 따라서 boundary·DAG 면제를 받지 못한다.
-- case를 담은 후보는 종전대로 `.spec` → `spec-document`, `.test` → `test-record`다.
-- count가 `indeterminate`인 후보는 verification으로 남는다. 셀 수 없는 것과 없는 것은 다르다.
+- case를 담은 후보는 종전대로 `.spec` → `spec-document`, `.test` → `test-record`다. 정규식 리터럴이 짝 없는 따옴표를 담아도 역할은 유지된다.
+- 검증 구문 때문에 count가 `indeterminate`인 후보는 verification으로 남는다. 셀 수 없는 것과 없는 것은 다르다.
+- 인식된 case가 없고 불확실성이 닫히지 않은 literal뿐인 후보는 `unsupported`다.
 
 ## History
 
+- 2026-09-19 — lexer에 정규식 리터럴 상태를 추가하고 `'`·`"` 문자열을 줄바꿈에서 끝냈다. `/["']/` 같은 정규식의 따옴표가 여러 줄짜리 가짜 문자열을 열어 case와 import를 삼키면서도 exact로 보고되고 있었다. 정규식 판정이 틀리는 드문 문맥에 대비해, 닫히지 않은 literal은 case 계수를 indeterminate로 만든다. 다만 그것만으로 role을 주면 개명 면제가 다시 열리므로 role 판정에서는 제외했다.
 - 2026-09-06 — 최상위 const 배열 참조의 제한적 해석을 추가했다. 공급자 목록을 여러 테스트에서 공유하는 정적 table을 계수하되, 선언의 길이만 믿지 않고 허용한 사용 형태를 확인한다.
 - 2026-09-06 — spread를 바깥 배열 table의 행 확장 위치에서만 미확정으로 취급한다. 배열 원문 전체의 `...`를 찾는 방식은 행 내부 객체 속성 확장까지 동적 행으로 오인했다.
 - 2026-08-23 — `.each`와 호출 괄호 사이의 TypeScript 타입 인자 목록을 건너뛰도록 정적 table 판정을 고쳤다. 타입 인자는 row 수를 바꾸지 않는데도 table을 못 읽게 만들어 파일 전체를 indeterminate로 떨어뜨리고 있었다.
@@ -91,4 +99,4 @@
 
 ## Last Updated
 
-2026-09-16
+2026-09-19

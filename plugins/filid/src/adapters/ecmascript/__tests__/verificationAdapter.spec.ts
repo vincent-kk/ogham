@@ -76,6 +76,39 @@ describe('ecmascript verification adapter', () => {
     );
   });
 
+  it('keeps the role of a test holding a regex literal with an unpaired quote', async () => {
+    const root = project();
+    const quoted = write(
+      root,
+      'src/two.test.ts',
+      "const QUOTE = /[\"']/;\n\ntest('case 1', () => { assert.ok(QUOTE.test('\"')); });\ntest('case 2', () => { assert.ok(true); });\n",
+    );
+
+    expect(await ecmascriptVerificationAdapter.classify(quoted)).toBe(
+      'test-record',
+    );
+    expect(await ecmascriptVerificationAdapter.discover(root)).toContain(
+      quoted,
+    );
+  });
+
+  it('denies the role when an unterminated literal is the only uncertainty', async () => {
+    const root = project();
+    const renamed = write(
+      root,
+      'src/Note.test.tsx',
+      "export const Note = () => <p>Don't {dep}</p>;\n",
+    );
+
+    // An apostrophe in JSX text must not buy the exemption a rename cannot.
+    expect(await ecmascriptVerificationAdapter.classify(renamed)).toBe(
+      'unsupported',
+    );
+    expect(await ecmascriptVerificationAdapter.discover(root)).not.toContain(
+      renamed,
+    );
+  });
+
   it('returns unsupported for an unknown verification file', async () => {
     expect(await ecmascriptVerificationAdapter.classify('/p/a.contract')).toBe(
       'unsupported',

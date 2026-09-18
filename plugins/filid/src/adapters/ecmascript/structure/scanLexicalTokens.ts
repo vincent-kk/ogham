@@ -1,5 +1,9 @@
+import { opensRegexLiteral } from './literals/opensRegexLiteral.js';
+import { readQuotedLiteral } from './literals/readQuotedLiteral.js';
+import { readRegexLiteral } from './literals/readRegexLiteral.js';
+
 export type LexicalTokenKind =
-  'identifier' | 'number' | 'punctuation' | 'string' | 'template';
+  'identifier' | 'number' | 'punctuation' | 'regex' | 'string' | 'template';
 
 export interface LexicalToken {
   kind: LexicalTokenKind;
@@ -9,34 +13,12 @@ export interface LexicalToken {
   parenDepth: number;
   braceDepth: number;
   bracketDepth: number;
+  /** Set on a string or template the source never closes: every later token boundary is a guess. */
+  unterminated?: true;
 }
 
 function isIdentifierStart(character: string): boolean {
   return /[A-Za-z_$]/.test(character);
-}
-
-function readQuoted(
-  source: string,
-  start: number,
-  quote: string,
-): { end: number; value: string; dynamicTemplate: boolean } {
-  let cursor = start + 1;
-  let value = '';
-  let dynamicTemplate = false;
-  while (cursor < source.length) {
-    const character = source[cursor];
-    if (character === '\\') {
-      if (cursor + 1 < source.length) value += source[cursor + 1];
-      cursor += 2;
-      continue;
-    }
-    if (quote === '`' && character === '$' && source[cursor + 1] === '{')
-      dynamicTemplate = true;
-    if (character === quote) return { end: cursor + 1, value, dynamicTemplate };
-    value += character;
-    cursor += 1;
-  }
-  return { end: source.length, value, dynamicTemplate: true };
 }
 
 export function scanLexicalTokens(source: string): LexicalToken[] {
@@ -70,8 +52,29 @@ export function scanLexicalTokens(source: string): LexicalToken[] {
     }
 
     const tokenDepth = { parenDepth, braceDepth, bracketDepth };
+    if (
+      character === '/' &&
+      opensRegexLiteral(
+        cursor,
+        tokens[tokens.length - 1],
+        tokens[tokens.length - 2],
+      )
+    ) {
+      const end = readRegexLiteral(source, cursor);
+      if (end >= 0) {
+        tokens.push({
+          kind: 'regex',
+          value: source.slice(cursor, end),
+          start: cursor,
+          end,
+          ...tokenDepth,
+        });
+        cursor = end;
+        continue;
+      }
+    }
     if (character === "'" || character === '"' || character === '`') {
-      const quoted = readQuoted(source, cursor, character);
+      const quoted = readQuotedLiteral(source, cursor, character);
       tokens.push({
         kind:
           character === '`' && quoted.dynamicTemplate ? 'template' : 'string',
@@ -79,6 +82,7 @@ export function scanLexicalTokens(source: string): LexicalToken[] {
         start: cursor,
         end: quoted.end,
         ...tokenDepth,
+        ...(quoted.terminated ? {} : { unterminated: true as const }),
       });
       cursor = quoted.end;
       continue;

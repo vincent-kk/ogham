@@ -185,6 +185,70 @@ describe('ecmascript semantic verification counting', () => {
     ).toMatchObject({ certainty: 'exact', exactCount: 1 });
   });
 
+  it('counts cases on both sides of a regex literal whose class holds quotes', () => {
+    expect(
+      countSemanticCases(
+        [
+          "test('case 1', () => { assert.ok(true); });",
+          "test('case 2', () => { assert.ok(true); });",
+          '',
+          'const IMPORT_PATTERN = /from\\s+["\']node:https?["\']/;',
+          '',
+          "test('case 3', () => { assert.match(\"from 'node:http'\", IMPORT_PATTERN); });",
+          "test('case 4', () => { assert.ok(true); });",
+          "test('case 5', () => { assert.ok(true); });",
+        ].join('\n'),
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 5 });
+  });
+
+  it('counts cases after a regex literal holding one unpaired quote', () => {
+    expect(
+      countSemanticCases(
+        [
+          'const QUOTE = /["\']/;',
+          '',
+          "test('case 1', () => { assert.ok(QUOTE.test('\"')); });",
+          "test('case 2', () => { assert.ok(true); });",
+        ].join('\n'),
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
+
+  it('reads a regex literal after a keyword and a slash inside its class', () => {
+    expect(
+      countSemanticCases(
+        "function pattern() { return /[/'\"]+/g; }\nit('after', () => {});",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 1 });
+  });
+
+  it('counts a one-line JSX each table row by row', () => {
+    expect(
+      countSemanticCases(
+        "it.each([<b>x</b>, <i>y</i>, <u>z</u>])('r %#', (n) => {});",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 3 });
+  });
+
+  it('keeps division from opening a regex literal', () => {
+    expect(
+      countSemanticCases(
+        "const half = total / 2; it('between', () => {}); const third = total / 3;",
+      ),
+    ).toMatchObject({ certainty: 'exact', exactCount: 1 });
+  });
+
+  it('reports an unterminated string as indeterminate instead of absent', () => {
+    expect(
+      countSemanticCases("const broken = 'open\nit('after', () => {});"),
+    ).toMatchObject({
+      certainty: 'indeterminate',
+      exactCount: undefined,
+      knownLowerBound: 1,
+    });
+  });
+
   it('multiplies cases inside a static parameterized suite with a type argument', () => {
     expect(
       countSemanticCases(
