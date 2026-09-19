@@ -1,0 +1,181 @@
+{
+  "incremental": {
+    "version": 2,
+    "headCommit": "bc34202be896ef823d55029b9ad7e8f242d7f502",
+    "userInstructions": "",
+    "changeContext": null,
+    "pluginRoot": "<ROOT1>",
+    "environmentHash": "c9d3de2cffa6b2976417f2c0efd3d6afce0a9912ac6b82f4da6538e3fe246924",
+    "decisions": [
+      {
+        "group": "01",
+        "previousGroup": null,
+        "disposition": "new",
+        "reasons": []
+      }
+    ],
+    "summary": {
+      "reusedFiles": 0,
+      "reviewFiles": 1,
+      "reusedGroups": 0,
+      "rerunGroups": 0,
+      "newGroups": 1,
+      "removedGroups": 0,
+      "bookkeepingGroups": 0,
+      "remainingMaxReviewerHandoffs": 1
+    }
+  },
+  "generationId": "<GENERATION>",
+  "schemaVersion": 2,
+  "validationPolicyVersion": 2,
+  "projectRoot": "<ROOT0>",
+  "branchName": "feature/review-flow",
+  "normalizedBranch": "feature-review-flow-2e365613ffba42eb360cbdad7cd561ee3e975c5b9d31ceee76372df880e8545e",
+  "baseRef": "main",
+  "baseCommit": "8d7f840812d5c261ec95c7ce2dda493775a6f1b2",
+  "sourceHash": "35f98f22d490d4ec086c3b2daf01bd7bfde64e71639675ef7b4bf6c0a7df90ab",
+  "fileHashes": {
+    "src/value.ts": "44439d586e1d6f28c15c50f049a1dd236a64c2c6",
+    "yarn.lock": "ff7c672efdc2dfe502bf9d6801aa0871231dc9ef"
+  },
+  "phase": "sealed",
+  "preparedAt": "<CREATED_AT>",
+  "effort": "low",
+  "effortMode": "low",
+  "effortReason": "fixed",
+  "autoLowEffortGroupThreshold": 16,
+  "groups": [
+    {
+      "input": {
+        "schemaVersion": 1,
+        "assignment": [
+          {
+            "path": "src/value.ts",
+            "change": "M",
+            "chunk": null,
+            "owner": null
+          }
+        ],
+        "sourceHash": "4b5bcd6df69211e7657f58099b6bff4d0fe1b3d2cddbecf658621cf3f364c1d3",
+        "rulesHash": "1bbd3583200e806f23b0bfee438344bfbc5a9b936a133f1dfed4b16c23a60551",
+        "evidenceHash": "db5bc133d5fb55c79f888fa083e061a891aebdcd6cb50acf26116a656b204988",
+        "contextHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "policyHash": "d6b0a505ee9a3719da737d0c61e698e3076645f86bf4f71cb82e0caa3e8ca28c",
+        "groupKey": "820b80fc4bb485838302d9ce5df1143e8df89ea39f9deacec2b71f13eb63f344",
+        "preparedInputHash": "db1d2ac988b49f0669b5b9bf535ddaf0e3a61c299af246f6af8c4d873c17bc4c"
+      },
+      "fileInputs": {
+        "src/value.ts": {
+          "schemaVersion": 1,
+          "assignment": [
+            {
+              "path": "@file",
+              "change": "M",
+              "chunk": null,
+              "owner": null
+            }
+          ],
+          "sourceHash": "a0a69bbbbd11123cbff0bfc70376c1997f87829880e43f4ccb4706fd378b9f78",
+          "rulesHash": "085015e382b50f6d743ad55815e8fbd7a7752717918bd35aee9f664bf8e7026a",
+          "evidenceHash": "643d5437104296e21d906ecb15b2c96ad278f20cfc4af53b12bb6069bd853726",
+          "contextHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "policyHash": "d6b0a505ee9a3719da737d0c61e698e3076645f86bf4f71cb82e0caa3e8ca28c",
+          "groupKey": "f343677d74317125f6efc5dba7d5d3ee4882f55e64129457f105e9012da33e56",
+          "preparedInputHash": "4eebd9b96ae7652228e0aad28e9a877f9679b7e473fb6fac98c95c8eaf62ec1c"
+        }
+      },
+      "priorFindings": [],
+      "id": "01",
+      "units": [
+        {
+          "path": "src/value.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 1,
+              "oldEnd": 1,
+              "newStart": 1,
+              "newEnd": 1
+            }
+          ],
+          "diffPath": "diffs/01/01-value.ts.diff"
+        }
+      ],
+      "churn": 2,
+      "planRequired": false,
+      "dependsOn": [],
+      "candidateIds": [],
+      "briefPath": "briefs/review-01.md",
+      "coreBriefByteLength": 5920,
+      "skeletonPath": "opinions/review-01.r1.json",
+      "opinionPath": "opinions/review-01.json",
+      "verifyBriefPath": "briefs/verify-01.md",
+      "verifyPath": "opinions/verify-01.json",
+      "rounds": 1,
+      "riskReasons": [],
+      "validated": {
+        "review": {
+          "round": 1,
+          "sha256": "3d11b1499a1f83581f04cbdf05a11f7d2c0ff588092c48f17737d6d654278eaa",
+          "complete": true
+        },
+        "verify": {
+          "sha256": "2bb0e90d33d476512fc6295c16db1aab87227dac14ec04b38524cd4dfb349ea7",
+          "reviewSha256": "3d11b1499a1f83581f04cbdf05a11f7d2c0ff588092c48f17737d6d654278eaa"
+        }
+      }
+    }
+  ],
+  "scope": {
+    "diagnostics": [],
+    "snapshotHash": "310e5bc9971df4bdc1a55507cdbc17cbaa1b65c1cb629e96186ffac2699e06f3",
+    "evidenceComplete": true,
+    "worktree": "clean",
+    "dirtyPaths": [],
+    "dirtyPathsHash": "1788f993b4772e3516f5409992386cee14668f98ca23773646f1670a8ffaf8d9",
+    "statuses": {
+      "analysisAxes": {
+        "dependencies": "exact",
+        "verification": "exact"
+      },
+      "structure": "ok",
+      "verification": "ok"
+    },
+    "files": [
+      {
+        "path": "src/value.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": null,
+        "skipReason": null,
+        "rules": [
+          "default"
+        ],
+        "repositoryRules": []
+      },
+      {
+        "path": "yarn.lock",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "lockfile",
+        "owner": null,
+        "skipReason": "lockfile",
+        "rules": [],
+        "repositoryRules": []
+      }
+    ],
+    "candidates": [],
+    "informational": [],
+    "outOfScopeCount": 0,
+    "infoCount": 0
+  },
+  "verdict": "INCONCLUSIVE",
+  "sealedAt": "<SEALED_AT>"
+}
