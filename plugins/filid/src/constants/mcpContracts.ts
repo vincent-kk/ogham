@@ -1,3 +1,4 @@
+import { FACTS_TOOL_DESCRIPTION } from './facts.js';
 import { RULE_SCOPES } from './ruleScopes.js';
 
 /** Name advertised by the Filid MCP server. */
@@ -175,4 +176,5 @@ export const MCP_TOOL_DESCRIPTIONS = {
     'Plan a read-only placement move, then check its preconditions and postconditions around an external actor.',
   REVIEW_STATE:
     'Manage cross-review artifact lifecycle state, collect changed-scope FCA evidence, and generate the PR handoff section.',
+  FACTS: FACTS_TOOL_DESCRIPTION,
 } as const;

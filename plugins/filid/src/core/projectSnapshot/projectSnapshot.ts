@@ -17,7 +17,7 @@ import {
   type FilidConfig,
   resolveLanguage,
 } from '../infra/configLoader/index.js';
-import { scanProject } from '../tree/fractalTree/index.js';
+import { scanFileSetOptions, scanProject } from '../tree/fractalTree/index.js';
 import { analyzeVerification } from '../verification/index.js';
 
 import { collectDependencyReferences } from './evidence/collectDependencyReferences.js';
@@ -72,9 +72,8 @@ export async function createProjectSnapshot(
     ]),
   );
   const tree = await scanProject(root, {
-    maxDepth: Number.MAX_SAFE_INTEGER,
+    ...scanFileSetOptions(config),
     additionalOrganNames: config.structure?.additionalOrganNames,
-    additionalExcludedDirectories,
     structureAdapters,
     entryPointOverrides: config.structure?.entryPointOverrides,
     structureOwnership,

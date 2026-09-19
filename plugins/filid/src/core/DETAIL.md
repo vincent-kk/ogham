@@ -11,6 +11,7 @@
 - placement는 소비자 owner의 lowest common fractal을 사용해 읽기 전용 move plan과 pre/postcondition을 만든다.
 - 불확실한 adapter 분석은 `indeterminate` 또는 `unsupported`이며 PASS가 아니다.
 - core는 특정 언어 파일명·확장자·framework·테스트 호출 리터럴을 포함하지 않는다.
+- core는 에이전트가 제출한 파일별 사실을 보관한다. 소스 파일은 hash 계산과 문자열 존재 확인에만 byte로 읽고 구문으로 해석하지 않으며, 어떤 명령도 실행하지 않는다. 계약은 `facts/DETAIL.md`에 있다.
 
 ## API Contracts
 
@@ -21,6 +22,8 @@
 - `validatePlanPreconditions(snapshot, plan)` / `validatePlanPostconditions(snapshot, plan)` — hash와 exact target·boundary·DAG 검사.
 - `analyzeVerification(input): Promise<VerificationProjectAnalysis>` — 역할, case count, contract link와 certainty 산출.
 - `evaluateRules(input, rules?, options?): RuleEvaluationResult` — 15개 FCA rule 결과 반환.
+- `listScannedFilePaths(projectRoot, options?): Promise<string[]>` — snapshot이 고르는 파일 집합을 평면 목록으로. `core/tree/fractalTree`가 소유한다.
+- facts 표면(`computeResolutionEpoch`, `validateFactsRecord`, `classifyFactsFile`, `selectUnknownFiles`, 저장소 접근자)은 `core/facts` entry point가 소유한다. 이 단계에서 snapshot은 사실을 읽지 않는다 — 분석 경로의 동작은 사실 유무와 무관하다.
 - built-in IDs: `intent-document-contract`, `detail-document-contract`, `organ-no-intentmd`, `entry-point-surface`, `module-entry-point`, `max-depth`, `circular-dependency`, `pure-function-isolation`, `zero-peer-file`, `external-import-boundary`, `spec-document-case-cap`, `test-record-case-cap`, `spec-fragmentation`, `spec-contract-link`, `legacy-criteria-ledger`.
 
 ## Acceptance Criteria
@@ -43,4 +46,4 @@
 
 ## Last Updated
 
-2026-07-26 — Filid 1.0 snapshot, rule, context와 placement 계약으로 재구성했다.
+2026-09-20 — 제출된 사실을 보관하는 `facts` 책임과 평면 경로 목록을 core 계약에 더했다.

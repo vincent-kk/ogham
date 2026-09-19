@@ -6,3 +6,5 @@ export { getDescendants } from './treeBuilder/getDescendants.js';
 export { getFractalsUnderOrgans } from './treeBuilder/getFractalsUnderOrgans.js';
 export { scanProject } from './scanner/scanProject.js';
 export { shouldExclude } from './scanner/shouldExclude.js';
+export { listScannedFilePaths } from './scanner/listScannedFilePaths.js';
+export { scanFileSetOptions } from './scanner/scanFileSetOptions.js';

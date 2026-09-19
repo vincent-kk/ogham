@@ -70,7 +70,7 @@ interface ToolResultEnvelope<Summary, Data> {
 
 ---
 
-## MCP 도구 4개
+## MCP 도구 5개
 
 | 도구              | action                                               | 기본 반환                  |
 | ----------------- | ---------------------------------------------------- | -------------------------- |
@@ -78,6 +78,7 @@ interface ToolResultEnvelope<Summary, Data> {
 | `fractal_inspect` | scan/validate/verification/resolve                   | FCA inspection 결과        |
 | `restructure`     | plan/precondition/postcondition                      | plan 또는 validation 결과  |
 | `review_state`    | prepare/checkpoint/validate/seal/cleanup/assess      | review artifact 상태       |
+| `facts`           | status/submit                                        | 사실 상태 또는 제출 결과   |
 
 ### fractal_inspect — scan
 
@@ -302,6 +303,60 @@ interface ReviewSealData {
 ### project_setup — rules actions
 
 status / manifest에서 plugin root를 해석하지 못한 경우는 `ok`가 아니라 `unsupported`와 안정적 diagnostic을 반환한다.
+
+### facts — status
+
+```typescript
+interface FactsStatusInput {
+  action: "status";
+  path: string;
+}
+
+interface FactsStatusSummary {
+  projectState: "facts-uninitialized" | "ready";
+  resolutionEpoch: string;
+  coveredFiles: number;
+  exact: number;
+  missing: number;
+  needsResolution: number;
+  uncertain: number;
+  toolError: number;
+  unsupported: number;
+  outputRequirement: string;
+}
+```
+
+`data`는 상태별 경로 목록을 `{ paths, truncated }`로 싣는다: `missing`, `needsResolution`, `uncertain`, `toolError`, `rejected`, `unadjudicated`. 목록은 상한까지만 인라인하고 나머지는 `truncated`로 센다.
+
+`facts.covers`가 없으면 `projectState`는 `facts-uninitialized`이고 status는 `ok`가 아니라 `unsupported`다. **참조 기반 판정의 부재를 통과로 읽지 않는다.**
+
+### facts — submit
+
+```typescript
+interface FactsSubmitInput {
+  action: "submit";
+  path: string;
+  file: string;             // 추출 산출물(JSON `FileFacts[]`)의 절대 경로
+  resolutionEpoch: string;
+}
+
+interface FactsSubmitSummary {
+  resolutionEpoch: string;
+  accepted: number;
+  removed: number;
+  rejectedRecords: number;
+  rejectedClaims: number;
+  epochMoved: boolean;
+}
+```
+
+- `file`은 절대 경로이고 **정규화한 실제 위치가 프로젝트 트리 밖**인 일반 파일이어야 하며 크기 상한 안이어야 한다. 경로를 먼저 정규화하므로 `$TMPDIR`처럼 symlink를 거쳐 프로젝트 밖에 닿는 경로는 통과하고, symlink로 프로젝트 안에 닿는 경로는 거절된다. 서버가 여는 모든 파일은 `O_NONBLOCK`이라 FIFO나 장치 파일은 서버를 멈추지 않고 거절된다.
+- `facts status`의 `outputRequirement`는 경로가 아니라 **조건 문장**이다. 서버의 임시 디렉터리는 샌드박스 에이전트가 쓸 수 없으므로 서버는 디렉터리를 권하지 않는다.
+- 레코드의 `provenance.resolutionInputs`는 **그 레코드만** 묶는다. 제출 시 현재 hash와 다르면 그 레코드가 거부되고, 나중에 달라지면 그 파일만 `needs-resolution`이 된다. 프로젝트 epoch에는 들어가지 않으므로 한 배치를 받아들여도 다음 배치의 epoch가 움직이지 않는다.
+- epoch 검사는 **호출 전체에 all-or-nothing**이다. 다르면 아무것도 저장하지 않고 `facts-epoch-moved`와 새 epoch, `added`·`removed`·바뀐 해석 입력을 돌려준다.
+- 같은 epoch 안에서 여러 번 호출할 수 있고 각 호출은 자기가 실은 파일의 레코드만 교체한다. 상한 초과는 `facts-file-too-large`와 분할 제출 안내다.
+- schema 오류는 **JSON pointer만** 돌려준다. 값도, 그 항목이 주장한 `path`도 싣지 않는다.
+- **레코드를 지우는 action은 없다.** 트리에서 사라지거나 범위에서 빠진 파일의 레코드는 다음 `submit`이 지운다.
 
 ---
 
@@ -699,6 +754,10 @@ interface FilidConfigV2 {
     additionalAllowedPeers?: AllowedPeerOverride[];
     entryPointOverrides?: Record<string, string[]>;
   };
+  facts?: {
+    covers?: string[];
+    excludes?: string[];
+  };
 }
 
 interface RuleOverride {
@@ -719,6 +778,7 @@ interface AllowedPeerOverride {
 - `entryPointOverrides`의 key는 **adapter ID**다. core가 파일명 의미를 해석하지 않고 해당 어댑터에 전달한다. 주입된 경로는 `kind: "executable"`로 보고되므로 **노드 분류를 바꾸지 않는다.** `zero-peer-file`과 `entry-point-surface`의 입력일 뿐이다.
 - v1 config는 읽을 때 메모리에서 v2로 변환하고 `config-migration-required` 진단을 낸다. **자동으로 파일을 쓰지 않는다.**
 - 스키마는 `strict`다. 알 수 없는 key는 무시되지 않고 거부된다.
+- `facts.covers`는 **양성 선언**이다. 없으면 프로젝트는 `facts-uninitialized`이고 참조 기반 판정은 통과가 아니라 그 상태를 돌려준다. 제출은 이 범위를 넓히지 못한다.
 
 ---
 

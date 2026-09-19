@@ -17,6 +17,8 @@ import { buildReviewOpinion } from '../unit/mcp/reviewState/helpers/buildReviewO
 import { createReviewStateSealFixture } from '../unit/mcp/reviewState/helpers/createReviewStateSealFixture.js';
 import { readPreparedReviewState } from '../unit/mcp/reviewState/helpers/readPreparedReviewState.js';
 
+import { FACTS_OUTPUT_REQUIREMENT } from '../../constants/facts.js';
+
 import { connectTestClient } from './helpers/connectTestClient.js';
 
 const EXPECTED_TOOL_NAMES = [
@@ -24,6 +26,7 @@ const EXPECTED_TOOL_NAMES = [
   'fractal_inspect',
   'restructure',
   'review_state',
+  'facts',
 ] as const;
 
 const REMOVED_TOOL_NAMES = [
@@ -145,7 +148,7 @@ describe('Filid 1.0 MCP tool surface', () => {
     },
   );
 
-  it('registers exactly the four action-dispatched tool names', () => {
+  it('registers exactly the five action-dispatched tool names', () => {
     const registered = collectRegisteredToolNames();
     expect(new Set(registered)).toEqual(new Set(EXPECTED_TOOL_NAMES));
     expect(registered).toHaveLength(EXPECTED_TOOL_NAMES.length);
@@ -160,6 +163,28 @@ describe('Filid 1.0 MCP tool surface', () => {
     const registered = new Set(collectRegisteredToolNames());
     for (const name of REMOVED_TOOL_NAMES)
       expect(registered.has(name)).toBe(false);
+  });
+
+  it('advertises the submission path rule facts actually enforces', async () => {
+    const connection = await connectTestClient(createServer());
+    try {
+      const tools = await connection.client.listTools();
+      const schema = tools.tools.find(({ name }) => name === 'facts')
+        ?.inputSchema as
+        | { properties?: { file?: { description?: string } } }
+        | undefined;
+      const description = schema?.properties?.file?.description ?? '';
+
+      // The guard canonicalises first and then judges the real location, so a
+      // symlinked ancestor is fine. Advertising the opposite sent callers to a
+      // directory they could not use; these two assertions are what keeps the
+      // advertised rule and FACTS_OUTPUT_REQUIREMENT from drifting apart again.
+      expect(description).toContain(FACTS_OUTPUT_REQUIREMENT);
+      expect(description).not.toMatch(/no component .* symbolic link/i);
+      expect(description).not.toMatch(/recommended output directory/i);
+    } finally {
+      await connection.close();
+    }
   });
 
   it('advertises literal cleanup confirmation for review_state', async () => {

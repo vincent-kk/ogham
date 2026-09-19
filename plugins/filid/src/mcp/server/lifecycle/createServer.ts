@@ -11,6 +11,10 @@ import {
   STRUCTURE_VALIDATION_SCOPES,
   VERIFICATION_SCAN_DETAILS,
 } from '../../../constants/mcpContracts.js';
+import {
+  FACTS_ACTIONS,
+  FACTS_OUTPUT_REQUIREMENT,
+} from '../../../constants/facts.js';
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { CONTRACT_INTENTS } from '../../../constants/restructure.js';
 import {
@@ -21,8 +25,10 @@ import {
   REVIEW_VALIDATE_KINDS,
 } from '../../../constants/reviewState.js';
 import { VERSION } from '../../../version.js';
+import type { FactsResult } from '../../tools/facts/index.js';
 import type { FractalInspectResult } from '../../tools/fractalInspect/index.js';
 import {
+  handleFacts,
   handleFractalInspect,
   handleProjectSetup,
   handleRestructure,
@@ -451,6 +457,45 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .describe('cleanup only: required, since cleanup deletes artifacts.'),
 });
 
+const FACTS_FILE_SCHEMA = z
+  .string()
+  .describe(
+    `submit only: absolute path of the extraction output, a JSON array of FileFacts records. The path is resolved through any symbolic links and its real location must be a regular file outside the project tree. ${FACTS_OUTPUT_REQUIREMENT}`,
+  );
+const FACTS_EPOCH_SCHEMA = z
+  .string()
+  .describe(
+    'submit only: the resolutionEpoch the batch was extracted against, as facts status returned it. A stale value stores nothing and returns the current epoch with the paths that moved.',
+  );
+
+const FACTS_INPUT_SCHEMA = z.discriminatedUnion('action', [
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.STATUS),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.SUBMIT),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      file: FACTS_FILE_SCHEMA,
+      resolutionEpoch: FACTS_EPOCH_SCHEMA,
+    })
+    .strict(),
+]);
+
+const FACTS_ADVERTISED_INPUT_SCHEMA = z.object({
+  action: z
+    .nativeEnum(FACTS_ACTIONS)
+    .describe(
+      'status reports which files filid holds facts for and what it is waiting for; submit takes one batch of extracted facts and replaces the records for the files it carries.',
+    ),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  file: FACTS_FILE_SCHEMA.optional(),
+  resolutionEpoch: FACTS_EPOCH_SCHEMA.optional(),
+});
+
 const MCP_SERVER_INFO = {
   name: MCP_SERVER_NAME,
   version: VERSION,
@@ -474,6 +519,11 @@ const RESTRUCTURE_TOOL_CONFIG = {
 const REVIEW_STATE_TOOL_CONFIG = {
   description: MCP_TOOL_DESCRIPTIONS.REVIEW_STATE,
   inputSchema: deferInputValidation(REVIEW_STATE_ADVERTISED_INPUT_SCHEMA),
+};
+
+const FACTS_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.FACTS,
+  inputSchema: deferInputValidation(FACTS_ADVERTISED_INPUT_SCHEMA),
 };
 
 /** Wrapped project-setup handler registered as the single five-action surface. */
@@ -512,6 +562,13 @@ const REVIEW_STATE_HANDLER = wrapHandler<
   handleReviewState(input),
 );
 
+/** Wrapped facts handler registered as the two-action submitted-facts surface. */
+const FACTS_HANDLER = wrapHandler<
+  typeof FACTS_INPUT_SCHEMA,
+  FactsResult['summary'],
+  FactsResult['data']
+>(McpToolName.FACTS, FACTS_INPUT_SCHEMA, (input) => handleFacts(input));
+
 /**
  * Creates a Filid MCP server with every supported tool registered.
  *
@@ -540,6 +597,7 @@ export function createServer(): McpServer {
     REVIEW_STATE_TOOL_CONFIG,
     REVIEW_STATE_HANDLER,
   );
+  server.registerTool(McpToolName.FACTS, FACTS_TOOL_CONFIG, FACTS_HANDLER);
 
   return server;
 }

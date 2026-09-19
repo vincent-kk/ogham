@@ -75,6 +75,20 @@ const ReviewConfigSchema = z
       : {}),
   }));
 
+/**
+ * Optional facts scope stored in Filid configuration.
+ *
+ * `covers` is a positive declaration: without it the project is
+ * `facts-uninitialized` and no reference-based judgement runs, so dropping it
+ * changes which files are analysed at all rather than loosening a check.
+ */
+const FactsConfigSchema = z
+  .object({
+    covers: z.array(z.string().min(1)).optional(),
+    excludes: z.array(z.string().min(1)).optional(),
+  })
+  .strict();
+
 /** Strict schema for the merged Filid v2 configuration. */
 export const FilidConfigSchema = z
   .object({
@@ -84,6 +98,7 @@ export const FilidConfigSchema = z
     rules: z.record(z.string(), RuleOverrideSchema),
     structure: StructureConfigSchema.optional(),
     review: ReviewConfigSchema.optional(),
+    facts: FactsConfigSchema.optional(),
   })
   .strict();
 

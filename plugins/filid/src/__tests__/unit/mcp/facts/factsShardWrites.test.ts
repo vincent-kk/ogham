@@ -1,0 +1,210 @@
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { FACTS_DIAGNOSTIC_CODES } from '../../../../constants/facts.js';
+import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { resolveFactsStorePaths } from '../../../../core/facts/index.js';
+import { handleFacts } from '../../../../mcp/tools/facts/index.js';
+import type { FactsSubmitSummary } from '../../../../mcp/tools/facts/index.js';
+
+import {
+  cleanupFactsProjects,
+  createFactsProject,
+} from './helpers/createFactsProject.js';
+import type { FactsProject } from './helpers/createFactsProject.js';
+
+/**
+ * Every shard write the tool performs, and whether it is allowed to land.
+ *
+ * The module is mocked rather than the filesystem so the assertion is about the
+ * batching the tool does — one write per shard — which no on-disk state reveals.
+ */
+const shardWrites = vi.hoisted(() => ({
+  names: [] as string[],
+  failAll: false,
+}));
+
+vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import('../../../../core/facts/index.js')>();
+  return {
+    ...actual,
+    writeFactsShardFile: (
+      directory: string,
+      shardFileName: string,
+      entries: Record<string, unknown>,
+      expectedDigest: string | null,
+    ): boolean => {
+      shardWrites.names.push(shardFileName);
+      if (shardWrites.failAll) return false;
+      return actual.writeFactsShardFile(
+        directory,
+        shardFileName,
+        entries,
+        expectedDigest,
+      );
+    },
+  };
+});
+
+const ORIGINAL_CONFIG_DIR = process.env.CLAUDE_CONFIG_DIR;
+
+const CONFIG = JSON.stringify({
+  version: '2.0',
+  adapters: { mode: 'auto', enabled: [] },
+  rules: {},
+  facts: { covers: ['src/**'] },
+});
+
+/** Files that land in one shard are unknown up front, so use many. */
+const SOURCE_FILES = Array.from({ length: 24 }, (_, index) => index);
+
+let stateRoot: string;
+let project: FactsProject;
+
+beforeEach(() => {
+  shardWrites.names = [];
+  shardWrites.failAll = false;
+  stateRoot = mkdtempSync(join(tmpdir(), 'filid-facts-shard-'));
+  process.env.CLAUDE_CONFIG_DIR = stateRoot;
+  project = createFactsProject({
+    '.filid/config.json': CONFIG,
+    ...Object.fromEntries(
+      SOURCE_FILES.map((index) => [
+        `src/file${index}.ts`,
+        `export const value${index} = ${index};\n`,
+      ]),
+    ),
+  });
+});
+
+afterEach(() => {
+  if (ORIGINAL_CONFIG_DIR === undefined) delete process.env.CLAUDE_CONFIG_DIR;
+  else process.env.CLAUDE_CONFIG_DIR = ORIGINAL_CONFIG_DIR;
+  rmSync(stateRoot, { recursive: true, force: true });
+  cleanupFactsProjects();
+});
+
+/**
+ * Read the project's current resolution epoch.
+ * @returns The epoch as `status` reports it.
+ */
+async function currentEpoch(): Promise<string> {
+  const result = await handleFacts({ action: 'status', path: project.root });
+  return (result.summary as { resolutionEpoch: string }).resolutionEpoch;
+}
+
+/**
+ * Submit records for every source file in one batch.
+ * @param epoch Epoch to submit against; defaults to the current one.
+ * @returns The submit summary, envelope status and diagnostic codes.
+ */
+async function submitAll(epoch?: string): Promise<{
+  summary: FactsSubmitSummary;
+  status: string;
+  codes: string[];
+}> {
+  const resolutionEpoch = epoch ?? (await currentEpoch());
+  const file = project.submission(
+    `batch-${Math.random().toString(36).slice(2)}.json`,
+    JSON.stringify(
+      SOURCE_FILES.map((index) => project.facts(`src/file${index}.ts`)),
+    ),
+  );
+  const result = await handleFacts({
+    action: 'submit',
+    path: project.root,
+    file,
+    resolutionEpoch,
+  });
+  return {
+    summary: result.summary as FactsSubmitSummary,
+    status: result.status,
+    codes: result.diagnostics.map((diagnostic) => diagnostic.code),
+  };
+}
+
+/**
+ * Record two epoch movements so the drift counter holds a sequence.
+ * @param stale An epoch already out of date.
+ */
+async function driveDrift(stale: string): Promise<void> {
+  for (const name of ['a', 'b']) {
+    project.write(`src/moved-${name}.ts`, 'export const moved = 1;\n');
+    await submitAll(stale);
+  }
+}
+
+/**
+ * The epoch sequence the drift counter currently holds.
+ * @returns Stored epochs, or an empty list when no counter file exists.
+ */
+function storedDrift(): string[] {
+  try {
+    return (
+      JSON.parse(
+        readFileSync(resolveFactsStorePaths(project.root).driftPath, 'utf8'),
+      ) as { epochs: string[] }
+    ).epochs;
+  } catch {
+    return [];
+  }
+}
+
+describe('facts submit shard batching', () => {
+  it('writes each touched shard exactly once for a whole batch', async () => {
+    const result = await submitAll();
+
+    expect(result.summary.accepted).toBe(SOURCE_FILES.length);
+    expect(shardWrites.names).toHaveLength(new Set(shardWrites.names).size);
+    expect(shardWrites.names.length).toBeLessThan(SOURCE_FILES.length);
+  });
+
+  it('groups records that share a shard into that one write', async () => {
+    const paths = resolveFactsStorePaths(project.root);
+    const shards = SOURCE_FILES.map((index) =>
+      paths.shardFileName(paths.pathDigest(`src/file${index}.ts`)),
+    );
+
+    await submitAll();
+
+    expect(new Set(shardWrites.names)).toEqual(new Set(shards));
+  });
+});
+
+describe('facts submit under a lost compare-and-set', () => {
+  it('reports facts-record-changed and stores nothing', async () => {
+    shardWrites.failAll = true;
+
+    const result = await submitAll();
+
+    expect(result.summary.accepted).toBe(0);
+    expect(result.status).toBe(TOOL_STATUSES.INDETERMINATE);
+    expect(result.codes).toEqual([FACTS_DIAGNOSTIC_CODES.RECORD_CHANGED]);
+  });
+
+  it('leaves the drift counter alone when nothing landed', async () => {
+    await driveDrift(await currentEpoch());
+    const recorded = storedDrift();
+    expect(recorded.length).toBe(2);
+    shardWrites.failAll = true;
+
+    const result = await submitAll();
+
+    expect(result.summary.accepted).toBe(0);
+    expect(storedDrift()).toEqual(recorded);
+  });
+
+  it('clears the drift counter when records do land', async () => {
+    await driveDrift(await currentEpoch());
+    expect(storedDrift().length).toBe(2);
+
+    const result = await submitAll();
+
+    expect(result.summary.accepted).toBe(SOURCE_FILES.length);
+    expect(storedDrift()).toEqual([]);
+  });
+});
