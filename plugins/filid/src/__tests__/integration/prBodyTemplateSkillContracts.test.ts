@@ -72,15 +72,12 @@ describe('PR body template skill contracts', () => {
       'boundary',
       'test',
       'behavior',
-    ]) {
+    ])
       expect(pullRequestReference).toContain(`\`${kind}\``);
-    }
   });
 
   it('delegates handoff rendering without body folding or character budgets', () => {
-    const stage3 = pullRequest
-      .split('## Stage 3')[1]
-      .split('## Stage 4')[0];
+    const stage3 = pullRequest.split('## Stage 3')[1].split('## Stage 4')[0];
 
     expect(pullRequestReference).not.toContain('Fold order:');
     expect(pullRequestReference).not.toContain('8000');
@@ -99,9 +96,8 @@ describe('PR body template skill contracts', () => {
       '--screenshot',
       '--focus',
       '--notes',
-    ]) {
+    ])
       expect(options).toContain(`\`${option}`);
-    }
     expect(pullRequest).toContain("version: '2.3.0'");
   });
 
