@@ -134,8 +134,8 @@ export interface RestructurePlanSummary {
   organsCreated: number;
   alreadyPlacedCount: number;
   decisionsRequired: number;
-  /** Sum of `delegatedImports` over the plan's moves. */
-  delegatedImportCount: number;
+  /** Sum of `affectedImports` over the plan's moves. */
+  affectedImportCount: number;
   /** The caller's next step, chosen from the plan status and contents. */
   nextAction: string;
 }

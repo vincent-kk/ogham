@@ -19,17 +19,17 @@ import { keepsRelativeLocation } from './keepsRelativeLocation.js';
 import { relocateThroughMoves } from './relocateThroughMoves.js';
 
 /**
- * Rewrites and delegations for imports that load a file inside the moved unit.
+ * Required and preserved import requirements for imports that load a file inside the moved unit.
  *
  * An entry is emitted only when this unit is the first move to carry the
- * imported file, and it points the consumer's final path at the file's final
- * path. An import whose specifier denotes its file is rewritten; any other is
- * delegated to the caller, or preserved when the moves keep the file at the
- * same place relative to the consumer.
+ * imported file, and it requires the consumer's final path to load the file's
+ * final path. An import whose specifier denotes its file carries a suggested
+ * specifier; any other carries none, or is preserved when the moves keep the
+ * file at the same place relative to the consumer.
  * @param snapshot - Pre-move snapshot
  * @param unit - The moved unit
  * @param orderedMoves - Executable moves in execution order, holding `unit`
- * @returns Owned rewrites, delegated imports and preserved imports
+ * @returns Owned import requirements and preserved imports
  */
 export function collectIncomingRewrites(
   snapshot: ProjectSnapshot,
@@ -42,11 +42,7 @@ export function collectIncomingRewrites(
   const unitIndex = orderedMoves.findIndex(({ sourcePath }) =>
     samePath(sourcePath, unit.sourcePath),
   );
-  const result: ImportRewriteBuildResult = {
-    rewrites: [],
-    delegated: [],
-    preserved: [],
-  };
+  const result: ImportRewriteBuildResult = { required: [], preserved: [] };
 
   for (const edge of snapshot.dependencyGraph.edges)
     for (const evidence of edge.evidence) {
@@ -76,6 +72,11 @@ export function collectIncomingRewrites(
         orderedMoves,
         unitIndex + 1,
       );
+      const requirement = {
+        consumerPath,
+        currentSpecifier: evidence.rawSpecifier,
+        requiredResolvedPath: finalPath,
+      };
       if (
         !specifierDenotesPath(
           evidence.sourceFile,
@@ -89,17 +90,12 @@ export function collectIncomingRewrites(
           consumerPath,
           finalPath,
         );
-        (kept ? result.preserved : result.delegated).push({
-          consumerPath,
-          currentSpecifier: evidence.rawSpecifier,
-          requiredResolvedPath: finalPath,
-        });
+        (kept ? result.preserved : result.required).push(requirement);
         continue;
       }
-      result.rewrites.push({
-        consumerPath,
-        currentSpecifier: evidence.rawSpecifier,
-        requiredSpecifier: formatRequiredSpecifier(
+      result.required.push({
+        ...requirement,
+        suggestedSpecifier: formatRequiredSpecifier(
           consumerPath,
           finalPath,
           evidence.rawSpecifier,

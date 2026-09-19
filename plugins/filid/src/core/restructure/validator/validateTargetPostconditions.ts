@@ -1,5 +1,6 @@
 import {
   RESTRUCTURE_NODE_TYPES,
+  RESTRUCTURE_UNIT_KINDS,
   RESTRUCTURE_VALIDATION_CODES,
 } from '../../../constants/restructure.js';
 import type { FractalNode, ProjectSnapshot } from '../../../types/fractal.js';
@@ -8,10 +9,10 @@ import type {
   PlanValidationFinding,
 } from '../../../types/restructure.js';
 
+import type { RequiredLoads } from './collectRequiredLoads.js';
 import { resolveTargetNode } from './resolveTargetNode.js';
 import { snapshotContainsPath } from './snapshotContainsPath.js';
-import { validateDelegatedImports } from './validateDelegatedImports.js';
-import { validateImportRewrites } from './validateImportRewrites.js';
+import { validateImportRequirements } from './validateImportRequirements.js';
 import { validateRequiredArtifacts } from './validateRequiredArtifacts.js';
 
 /** The next action for a target that classifies as another node type than the plan requires. */
@@ -29,14 +30,24 @@ function typeMismatchAction(node: FractalNode, expected: string): string {
  * An instruction whose target equals its source has nothing to move, so that
  * one assertion is the only one that cannot apply to it. The rest still can,
  * and without them an actor who lands the unit somewhere the plan never named
- * passes a check whose whole purpose is the exact target.
+ * passes a check whose whole purpose is the exact target. A directory unit
+ * whose target exists only as a plain file has no node to check, so it is missing.
+ * @param snapshot - Post-execution snapshot
+ * @param move - The instruction with its target and artifacts at final paths
+ * @param requiredLoads - Files the whole plan requires of each consumer
+ * @returns Findings for the target, its node type, artifacts and import requirements
  */
 export function validateTargetPostconditions(
   snapshot: ProjectSnapshot,
   move: MoveInstruction,
+  requiredLoads: RequiredLoads,
 ): PlanValidationFinding[] {
   const findings: PlanValidationFinding[] = [];
-  if (!snapshotContainsPath(snapshot, move.targetPath))
+  const targetNode = resolveTargetNode(snapshot, move);
+  if (
+    !snapshotContainsPath(snapshot, move.targetPath) ||
+    (move.unitKind !== RESTRUCTURE_UNIT_KINDS.FILE && targetNode === null)
+  )
     findings.push({
       code: RESTRUCTURE_VALIDATION_CODES.TARGET_MISSING,
       message: `${move.targetPath} does not exist after execution.`,
@@ -44,7 +55,6 @@ export function validateTargetPostconditions(
       path: move.targetPath,
       sourcePath: move.sourcePath,
     });
-  const targetNode = resolveTargetNode(snapshot, move);
   if (targetNode && targetNode.type !== move.targetNodeType)
     findings.push({
       code: RESTRUCTURE_VALIDATION_CODES.TARGET_NODE_TYPE_MISMATCH,
@@ -55,8 +65,7 @@ export function validateTargetPostconditions(
     });
   findings.push(
     ...validateRequiredArtifacts(move, targetNode),
-    ...validateImportRewrites(snapshot, move),
-    ...validateDelegatedImports(snapshot, move),
+    ...validateImportRequirements(snapshot, move, requiredLoads),
   );
   return findings;
 }

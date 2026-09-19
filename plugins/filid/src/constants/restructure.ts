@@ -1,6 +1,6 @@
 import { NODE_TYPES } from './nodeTypes.js';
 
-export const RESTRUCTURE_SCHEMA_VERSION = 2 as const;
+export const RESTRUCTURE_SCHEMA_VERSION = 3 as const;
 export const RESTRUCTURE_PLAN_ID_PREFIX = 'filid-restructure';
 export const RESTRUCTURE_PLAN_HASH_SEPARATOR = '\0';
 export const RESTRUCTURE_HASH_ALGORITHM = 'sha256';
@@ -60,8 +60,8 @@ export const RESTRUCTURE_VALIDATION_CODES = {
   TARGET_NODE_TYPE_MISMATCH: 'target-node-type-mismatch',
   REQUIRED_ARTIFACT_MISSING: 'required-artifact-missing',
   ENTRY_POINT_MISSING: 'entry-point-missing',
+  ENTRY_POINT_SURFACE_UNSUPPORTED: 'entry-point-surface-unsupported',
   IMPORT_REWRITE_MISSING: 'import-rewrite-missing',
-  DELEGATED_IMPORT_MISSING: 'delegated-import-missing',
   PRESERVED_IMPORT_BROKEN: 'preserved-import-broken',
   IMPORT_BOUNDARY_VIOLATION: 'import-boundary-violation',
   DEPENDENCY_CYCLE: 'dependency-cycle',
@@ -85,7 +85,7 @@ export const RESTRUCTURE_REASON_BY_BASIS = {
   [PLACEMENT_BASES.BOUNDARY_RULE]: RESTRUCTURE_REASON_TEXT.DECISION_REQUIRED,
 } as const;
 
-/** Snapshot diagnostic code of a local import that resolves to no file; postcondition reads it for delegated imports. */
+/** Snapshot diagnostic code of a local import that resolves to no file; postcondition reads it for import requirements. */
 export const UNRESOLVED_IMPORT_DIAGNOSTIC_CODE = 'unresolved-local-dependency';
 
 /** Summary next actions of the restructure plan action, chosen by status and plan contents. */
@@ -99,13 +99,13 @@ export const RESTRUCTURE_PLAN_NEXT_ACTIONS = {
   NOTHING_TO_MOVE:
     "Nothing to move. Call precondition with this plan's artifact path, create any missing requiredArtifacts of the alreadyPlaced requests, then call postcondition to confirm each one is in place.",
   READY:
-    "Call restructure precondition with this plan's artifact path. After approval, run moves in listed order — creating each move's requiredArtifacts — then apply affectedImports, rewrite each delegatedImports entry yourself so it loads its requiredResolvedPath, and call postcondition.",
+    "Call restructure precondition with this plan's artifact path. After approval, run moves in listed order — creating each move's requiredArtifacts — then change each affectedImports entry so it loads its requiredResolvedPath — its suggestedSpecifier when present, otherwise a relative path-like specifier you write — and call postcondition.",
 } as const;
 
 /** Summary next actions of the plan validation actions, keyed by action and then by status. */
 export const RESTRUCTURE_VALIDATION_NEXT_ACTIONS = {
   precondition: {
-    ok: "Present the plan for approval. Then run moves in listed order — creating each move's requiredArtifacts — apply affectedImports, rewrite each delegatedImports entry yourself, and call postcondition with the same artifact.",
+    ok: "Present the plan for approval. Then run moves in listed order — creating each move's requiredArtifacts — change each affectedImports entry so it loads its requiredResolvedPath (use suggestedSpecifier when present), and call postcondition with the same artifact.",
     violations: "Do not execute this plan: follow each finding's nextAction.",
     indeterminate:
       "Do not execute this plan: this response carries diagnostics (evidence gaps, document findings or configuration warnings). Follow each diagnostic's nextAction and each finding's nextAction, then create a new plan.",

@@ -19,6 +19,7 @@ import type {
   MoveInstruction,
   RestructurePlan,
 } from '../../../types/restructure.js';
+import { computeSnapshotHash } from '../../projectSnapshot/index.js';
 import { buildFractalTree } from '../../tree/fractalTree/index.js';
 import type { NodeEntry } from '../../tree/fractalTree/index.js';
 import {
@@ -71,8 +72,9 @@ type GraphState = (typeof GRAPH_STATES)[keyof typeof GRAPH_STATES];
 
 const CREATED_AT = '2026-07-27T00:00:00.000Z';
 const PLAN_SNAPSHOT_HASH = 'before-hash';
+/** Hash of an empty read set: the fixture plans read no file on disk. */
+const MATCHING_READ_HASH = computeSnapshotHash(PATHS.ROOT, []);
 const POST_SNAPSHOT_HASH = 'after-hash';
-const REQUIRED_SPECIFIER = '../model/value.unit';
 const EXPECTED_CYCLE = [PATHS.B, PATHS.FRACTAL, PATHS.B];
 
 const ORGAN_MOVE: MoveInstruction = {
@@ -86,7 +88,6 @@ const ORGAN_MOVE: MoveInstruction = {
   reason: 'fixture organ move',
   requiredArtifacts: [],
   affectedImports: [],
-  delegatedImports: [],
   preservedImports: [],
   requiresDecision: false,
   decisionReasons: [],
@@ -120,7 +121,6 @@ const FRACTAL_MOVE: MoveInstruction = {
   reason: 'fixture fractal move',
   requiredArtifacts: FRACTAL_ARTIFACTS,
   affectedImports: [],
-  delegatedImports: [],
   preservedImports: [],
   requiresDecision: false,
   decisionReasons: [],
@@ -133,7 +133,8 @@ const IMPORT_MOVE: MoveInstruction = {
     {
       consumerPath: PATHS.CONSUMER,
       currentSpecifier: '../a/value.unit',
-      requiredSpecifier: REQUIRED_SPECIFIER,
+      requiredResolvedPath: PATHS.TARGET,
+      suggestedSpecifier: '../model/value.unit',
     },
   ],
 };
@@ -141,13 +142,16 @@ const IMPORT_MOVE: MoveInstruction = {
 function makePlan(
   move: MoveInstruction = ORGAN_MOVE,
   projectRoot: string = PATHS.ROOT,
-  snapshotHash: string = PLAN_SNAPSHOT_HASH,
+  readHash: string = MATCHING_READ_HASH,
 ): RestructurePlan {
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     planId: 'fixture-plan',
     projectRoot,
-    snapshotHash,
+    snapshotHash: PLAN_SNAPSHOT_HASH,
+    readPaths: [],
+    probePaths: [],
+    readHash,
     createdAt: CREATED_AT,
     moves: [move],
     alreadyPlaced: [],
@@ -160,7 +164,7 @@ function makePlan(
         move.targetNodeType === RESTRUCTURE_NODE_TYPES.ORGAN ? 1 : 0,
       alreadyPlacedCount: 0,
       decisionsRequired: 0,
-      delegatedImportCount: 0,
+      affectedImportCount: move.affectedImports.length,
     },
   };
 }
@@ -328,8 +332,11 @@ describe('restructure plan validation', () => {
     expect(result).toEqual({ valid: true, findings: [] });
   });
 
-  it('rejects a stale snapshot hash', () => {
-    const result = validatePlanPreconditions(makeSnapshot(), makePlan());
+  it('rejects drift in the files the plan read', () => {
+    const result = validatePlanPreconditions(
+      makeSnapshot(),
+      makePlan(ORGAN_MOVE, PATHS.ROOT, 'stale-read-hash'),
+    );
     expect(findingCodes(result)).toContain(
       RESTRUCTURE_VALIDATION_CODES.SNAPSHOT_HASH_MISMATCH,
     );
@@ -455,7 +462,10 @@ describe('restructure plan validation', () => {
 
   it('tells the caller to create a new plan when the snapshot is stale', () => {
     const finding = findingOf(
-      validatePlanPreconditions(makeSnapshot(), makePlan()),
+      validatePlanPreconditions(
+        makeSnapshot(),
+        makePlan(ORGAN_MOVE, PATHS.ROOT, 'stale-read-hash'),
+      ),
       RESTRUCTURE_VALIDATION_CODES.SNAPSHOT_HASH_MISMATCH,
     );
     expect(finding.nextAction).toContain('Create a new plan');
@@ -473,13 +483,13 @@ describe('restructure plan validation', () => {
     expect(finding.nextAction).toContain(`ends at exactly ${PATHS.TARGET}`);
   });
 
-  it('names the consumer and both specifiers of an unapplied rewrite', () => {
+  it('names the consumer, the file it must load and the suggestion of an unapplied import', () => {
     const finding = findingOf(
       validatePlanPostconditions(makeSnapshot(), makePlan(IMPORT_MOVE)),
       RESTRUCTURE_VALIDATION_CODES.IMPORT_REWRITE_MISSING,
     );
     expect(finding.nextAction).toContain(
-      `In ${PATHS.CONSUMER}, replace the import "../a/value.unit" with "${REQUIRED_SPECIFIER}"`,
+      `In ${PATHS.CONSUMER}, change the import "../a/value.unit" so it loads ${PATHS.TARGET}, for example "../model/value.unit"`,
     );
   });
 

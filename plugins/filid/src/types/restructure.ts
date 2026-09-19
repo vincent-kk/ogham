@@ -38,14 +38,19 @@ export interface RestructureDecision {
   nextAction: string;
 }
 
-/** An import filid cannot rewrite; the caller writes the specifier and postcondition checks where it resolves. */
-export interface DelegatedImport {
+/** One import the moves affect; postcondition judges it only by the file the consumer's reference resolves to. */
+export interface ImportRequirement {
   /** Consumer file after every move. */
   consumerPath: string;
   /** Specifier the consumer holds before the moves. */
   currentSpecifier: string;
-  /** File the rewritten import must load after every move. */
+  /** File the import must load after every move. */
   requiredResolvedPath: string;
+  /**
+   * Proposed path-like specifier, present only when the current specifier names the file
+   * or its enclosing directory; never used to validate. Without it the caller writes the specifier.
+   */
+  suggestedSpecifier?: string;
 }
 
 /** Why no execution order can run a move: its cycle group's cause, a self-containing move, or a directory emptied by inner moves. */
@@ -68,18 +73,12 @@ export interface RequiredArtifact {
   adapterId?: string;
 }
 
-export interface ImportRewrite {
-  consumerPath: string;
-  currentSpecifier: string;
-  requiredSpecifier: string;
-}
-
+/** Import requirements one moved unit owns. */
 export interface ImportRewriteBuildResult {
-  rewrites: ImportRewrite[];
-  /** Imports the caller rewrites because no path-like specifier denotes their file. */
-  delegated: DelegatedImport[];
-  /** Imports filid cannot rewrite whose relative position the moves keep, so they still resolve. */
-  preserved: DelegatedImport[];
+  /** Imports that must change to load their required file, with a suggestion when one can be synthesized. */
+  required: ImportRequirement[];
+  /** Imports without a suggestion whose relative position the moves keep, so they still resolve. */
+  preserved: ImportRequirement[];
 }
 
 export interface PlacementRequest {
@@ -104,11 +103,10 @@ export interface MoveInstruction {
   lowestCommonFractalPath?: string;
   reason: string;
   requiredArtifacts: RequiredArtifact[];
-  affectedImports: ImportRewrite[];
-  /** Imports the caller rewrites itself; empty in `alreadyPlaced` and `unresolved`. */
-  delegatedImports: DelegatedImport[];
-  /** Unrewritable imports the moves keep resolving; postcondition checks them, the caller does nothing. */
-  preservedImports: DelegatedImport[];
+  /** Imports the caller changes after every move; empty in `alreadyPlaced` and `unresolved`. */
+  affectedImports: ImportRequirement[];
+  /** Imports the moves keep resolving; postcondition checks them, the caller does nothing. */
+  preservedImports: ImportRequirement[];
   requiresDecision: boolean;
   decisionReasons: RestructureDecisionReason[];
   /** One explanation per entry of `decisionReasons`, in the same order. */
@@ -126,6 +124,12 @@ export interface RestructurePlan {
   planId: string;
   projectRoot: string;
   snapshotHash: string;
+  /** Files whose bytes the import requirements come from — move sources, their consumers and what they import — sorted. */
+  readPaths: string[];
+  /** Paths whose state decided placement — each target and the documents of every source and target ancestor — sorted; each may not exist. */
+  probePaths: string[];
+  /** Hash of the `readPaths` bytes and the `probePaths` states; precondition recomputes it to detect drift that matters to the plan. */
+  readHash: string;
   createdAt: string;
   moves: MoveInstruction[];
   alreadyPlaced: MoveInstruction[];
@@ -136,8 +140,8 @@ export interface RestructurePlan {
     organsCreated: number;
     alreadyPlacedCount: number;
     decisionsRequired: number;
-    /** Sum of `delegatedImports` over `moves`. */
-    delegatedImportCount: number;
+    /** Sum of `affectedImports` over `moves`. */
+    affectedImportCount: number;
   };
 }
 

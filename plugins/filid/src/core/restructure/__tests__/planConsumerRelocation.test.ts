@@ -193,7 +193,7 @@ function planBothFiles() {
 }
 
 describe('restructure rewrites consumers the same plan relocates', () => {
-  it('rewrites a moved consumer at its new path with a specifier from there', () => {
+  it('requires a moved consumer at its new path with a suggestion from there', () => {
     const typesMove = planBothFiles().moves.find(
       (move) => move.sourcePath === PATHS.TYPES,
     );
@@ -203,17 +203,20 @@ describe('restructure rewrites consumers the same plan relocates', () => {
       {
         consumerPath: PATHS.ROOT_INDEX,
         currentSpecifier: './x/contracts/types.ts',
-        requiredSpecifier: './ops/types.ts',
+        requiredResolvedPath: PATHS.OPS_TYPES,
+        suggestedSpecifier: './ops/types.ts',
       },
       {
         consumerPath: PATHS.OPS_DELAY,
         currentSpecifier: '../contracts/types.ts',
-        requiredSpecifier: './types.ts',
+        requiredResolvedPath: PATHS.OPS_TYPES,
+        suggestedSpecifier: './types.ts',
       },
       {
         consumerPath: PATHS.X_INDEX,
         currentSpecifier: './contracts/types.ts',
-        requiredSpecifier: '../ops/types.ts',
+        requiredResolvedPath: PATHS.OPS_TYPES,
+        suggestedSpecifier: '../ops/types.ts',
       },
     ]);
   });
@@ -258,7 +261,8 @@ describe('restructure rewrites consumers the same plan relocates', () => {
     expect(plan.moves[0]?.affectedImports).toContainEqual({
       consumerPath: PATHS.X_OPS_GUARD,
       currentSpecifier: './types.ts',
-      requiredSpecifier: './types.ts',
+      requiredResolvedPath: '/root/x/ops/types.ts',
+      suggestedSpecifier: './types.ts',
     });
   });
 
@@ -290,11 +294,12 @@ describe('restructure rewrites consumers the same plan relocates', () => {
     expect(delayMove?.affectedImports).toContainEqual({
       consumerPath: PATHS.OPS_DELAY,
       currentSpecifier: '../contracts/types.ts',
-      requiredSpecifier: '../x/contracts/types.ts',
+      requiredResolvedPath: PATHS.TYPES,
+      suggestedSpecifier: '../x/contracts/types.ts',
     });
   });
 
-  it('rewrites an outgoing directory reference of a moved file', () => {
+  it('suggests an outgoing directory reference of a moved file', () => {
     const plan = createRestructurePlan(
       withDelayImport('../contracts', PATHS.CONTRACTS_INDEX),
       { path: PATHS.ROOT, requests: [internalMove(PATHS.DELAY)] },
@@ -304,7 +309,8 @@ describe('restructure rewrites consumers the same plan relocates', () => {
     expect(plan.moves[0]?.affectedImports).toContainEqual({
       consumerPath: PATHS.OPS_DELAY,
       currentSpecifier: '../contracts',
-      requiredSpecifier: '../x/contracts',
+      requiredResolvedPath: PATHS.CONTRACTS_INDEX,
+      suggestedSpecifier: '../x/contracts',
     });
   });
 

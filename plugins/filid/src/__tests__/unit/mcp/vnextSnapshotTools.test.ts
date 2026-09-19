@@ -25,6 +25,7 @@ import {
   TOOL_PERSISTENCE,
   TOOL_STATUSES,
 } from '../../../constants/toolEnvelope.js';
+import { computeSnapshotHash } from '../../../core/projectSnapshot/index.js';
 import { handleContextResolve } from '../../../mcp/tools/fractalInspect/contextResolve/index.js';
 import { handleFractalScan } from '../../../mcp/tools/fractalInspect/fractalScan/index.js';
 import { handleStructureValidate } from '../../../mcp/tools/fractalInspect/structureValidate/index.js';
@@ -176,6 +177,9 @@ const VALID_RESTRUCTURE_PLAN: RestructurePlan = {
   planId: 'filid-restructure-test',
   projectRoot: PROJECT_ROOT,
   snapshotHash: SNAPSHOT.snapshotHash,
+  readPaths: [],
+  probePaths: [],
+  readHash: computeSnapshotHash(PROJECT_ROOT, []),
   createdAt: '2026-07-27T00:00:00.000Z',
   moves: [],
   alreadyPlaced: [],
@@ -186,7 +190,7 @@ const VALID_RESTRUCTURE_PLAN: RestructurePlan = {
     organsCreated: 0,
     alreadyPlacedCount: 0,
     decisionsRequired: 0,
-    delegatedImportCount: 0,
+    affectedImportCount: 0,
   },
 };
 

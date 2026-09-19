@@ -1,4 +1,4 @@
-import { pathForCompare, samePath } from '@ogham/cross-platform';
+import { samePath } from '@ogham/cross-platform';
 
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
@@ -12,8 +12,9 @@ import { collectOutgoingRewrites } from './collectOutgoingRewrites.js';
 import { sortUniqueImports } from './sortUniqueImports.js';
 
 /**
- * Derive the import edits a moved unit owns: rewrites filid writes, imports it
- * delegates to the caller, and imports the moves keep resolving.
+ * Derive the import requirements a moved unit owns — each with the file it must
+ * load after every move and, when one can be synthesized, a suggested specifier —
+ * and the imports the moves keep resolving.
  *
  * Imports never block a move. A unit that stays in place breaks no import and
  * owns none.
@@ -21,8 +22,8 @@ import { sortUniqueImports } from './sortUniqueImports.js';
  * @param unit - Source, target and the path consumers load after the move
  * @param orderedMoves - Executable moves of the plan in execution order; when
  * empty the unit is taken to move alone
- * @returns Owned rewrites, delegated imports and preserved imports with final
- * consumer paths, each sorted by consumer and specifier without duplicates
+ * @returns Owned requirements and preserved imports with final consumer paths,
+ * each sorted by consumer and specifier without duplicates
  */
 export function buildImportRewrites(
   snapshot: ProjectSnapshot,
@@ -30,22 +31,15 @@ export function buildImportRewrites(
   orderedMoves: readonly PlannedMove[] = [],
 ): ImportRewriteBuildResult {
   if (samePath(unit.sourcePath, unit.targetPath))
-    return { rewrites: [], delegated: [], preserved: [] };
+    return { required: [], preserved: [] };
   const moves = orderedMoves.length > 0 ? orderedMoves : [unit];
   const incoming = collectIncomingRewrites(snapshot, unit, moves);
   const outgoing = collectOutgoingRewrites(snapshot, unit, moves);
   return {
-    rewrites: sortUniqueImports(
-      [...incoming.rewrites, ...outgoing.rewrites],
-      ({ requiredSpecifier }) => requiredSpecifier,
-    ),
-    delegated: sortUniqueImports(
-      [...incoming.delegated, ...outgoing.delegated],
-      ({ requiredResolvedPath }) => pathForCompare(requiredResolvedPath),
-    ),
-    preserved: sortUniqueImports(
-      [...incoming.preserved, ...outgoing.preserved],
-      ({ requiredResolvedPath }) => pathForCompare(requiredResolvedPath),
-    ),
+    required: sortUniqueImports([...incoming.required, ...outgoing.required]),
+    preserved: sortUniqueImports([
+      ...incoming.preserved,
+      ...outgoing.preserved,
+    ]),
   };
 }

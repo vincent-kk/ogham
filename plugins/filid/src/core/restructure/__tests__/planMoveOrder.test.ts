@@ -173,14 +173,16 @@ describe('restructure orders overlapping moves for automatic execution', () => {
         {
           consumerPath: P.X_INDEX,
           currentSpecifier: './sched/delay.ts',
-          requiredSpecifier: './ops/delay.ts',
+          requiredResolvedPath: '/root/x/ops/delay.ts',
+          suggestedSpecifier: './ops/delay.ts',
         },
       ],
       [
         {
           consumerPath: P.ROOT_INDEX,
           currentSpecifier: './x/sched/other.ts',
-          requiredSpecifier: './timing/other.ts',
+          requiredResolvedPath: '/root/timing/other.ts',
+          suggestedSpecifier: './timing/other.ts',
         },
       ],
     ]);
@@ -471,7 +473,8 @@ describe('restructure orders overlapping moves for automatic execution', () => {
       {
         consumerPath: P.ROOT_INDEX,
         currentSpecifier: './x/sched/a.ts',
-        requiredSpecifier: './svc/a.ts',
+        requiredResolvedPath: '/root/svc/a.ts',
+        suggestedSpecifier: './svc/a.ts',
       },
     ]);
   });

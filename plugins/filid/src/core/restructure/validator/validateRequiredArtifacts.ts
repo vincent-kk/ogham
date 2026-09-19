@@ -5,7 +5,10 @@ import {
   REQUIRED_ARTIFACT_ROLES,
   RESTRUCTURE_VALIDATION_CODES,
 } from '../../../constants/restructure.js';
-import type { FractalNode } from '../../../types/fractal.js';
+import type {
+  EntryPointDescriptor,
+  FractalNode,
+} from '../../../types/fractal.js';
 import type {
   MoveInstruction,
   PlanValidationFinding,
@@ -27,11 +30,17 @@ function documentExists(
   );
 }
 
-function entryPointExists(
+/**
+ * The entry point of the target node that satisfies a required entry-point artifact.
+ * @param node - Target node after execution
+ * @param artifact - Required entry-point artifact
+ * @returns The matching adapter-reported entry point, or undefined when none exists
+ */
+function findEntryPoint(
   node: FractalNode,
   artifact: RequiredArtifact,
-): boolean {
-  return node.entryPoints.some(
+): EntryPointDescriptor | undefined {
+  return node.entryPoints.find(
     (entryPoint) =>
       samePath(entryPoint.path, artifact.path) &&
       (!artifact.adapterId || entryPoint.adapterId === artifact.adapterId),
@@ -44,8 +53,19 @@ export function validateRequiredArtifacts(
 ): PlanValidationFinding[] {
   if (!targetNode) return [];
   return move.requiredArtifacts.flatMap<PlanValidationFinding>((artifact) => {
-    if (artifact.role === REQUIRED_ARTIFACT_ROLES.ENTRY_POINT)
-      return entryPointExists(targetNode, artifact)
+    if (artifact.role === REQUIRED_ARTIFACT_ROLES.ENTRY_POINT) {
+      const entryPoint = findEntryPoint(targetNode, artifact);
+      if (entryPoint?.surface === 'unsupported')
+        return [
+          {
+            code: RESTRUCTURE_VALIDATION_CODES.ENTRY_POINT_SURFACE_UNSUPPORTED,
+            message: `Adapter ${entryPoint.adapterId} cannot inspect the exports of the entry point ${artifact.path}, so the postcondition cannot confirm it exposes the unit.`,
+            nextAction: `Tell the user that ${artifact.path} exists but its exports cannot be verified by filid, and let them confirm by hand that it exports the unit's public surface; the finding clears only once an adapter that enumerates this entry point's surface is enabled.`,
+            path: artifact.path,
+            sourcePath: move.sourcePath,
+          },
+        ];
+      return entryPoint
         ? []
         : [
             {
@@ -58,6 +78,7 @@ export function validateRequiredArtifacts(
               sourcePath: move.sourcePath,
             },
           ];
+    }
     return documentExists(targetNode, artifact)
       ? []
       : [

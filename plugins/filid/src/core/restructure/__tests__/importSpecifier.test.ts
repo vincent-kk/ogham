@@ -11,7 +11,7 @@ import type {
 import { buildImportRewrites } from '../imports/buildImportRewrites.js';
 import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { stripPathExtension } from '../specifiers/stripPathExtension.js';
-import { validateImportRewrites } from '../validator/validateImportRewrites.js';
+import { validateImportRequirements } from '../validator/validateImportRequirements.js';
 
 const PATHS = {
   ROOT: '/root',
@@ -95,8 +95,8 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
   };
 }
 
-describe('import specifier rewrites under ecosystem extension conventions', () => {
-  it('rewrites a .js specifier that resolves to a .ts source', () => {
+describe('suggested specifiers under ecosystem extension conventions', () => {
+  it('suggests a .js specifier for one that resolves to a .ts source', () => {
     const result = buildImportRewrites(
       snapshotWith([
         {
@@ -108,12 +108,12 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
       unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
-    expect(result.delegated).toEqual([]);
-    expect(result.rewrites).toEqual([
+    expect(result.required).toEqual([
       {
         consumerPath: PATHS.FEATURE_A_FILE,
         currentSpecifier: '../lib/logger.js',
-        requiredSpecifier: '../shared/logger.js',
+        requiredResolvedPath: PATHS.TARGET,
+        suggestedSpecifier: '../shared/logger.js',
       },
     ]);
   });
@@ -130,11 +130,10 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
       unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
-    expect(result.delegated).toEqual([]);
-    expect(result.rewrites[0]?.requiredSpecifier).toBe('../shared/logger');
+    expect(result.required[0]?.suggestedSpecifier).toBe('../shared/logger');
   });
 
-  it('delegates a directory-index specifier to the caller', () => {
+  it('requires a directory-index specifier without a suggestion', () => {
     const result = buildImportRewrites(
       snapshotWith([
         {
@@ -146,8 +145,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
       unit(PATHS.DIRECTORY_INDEX, PATHS.TARGET),
     );
 
-    expect(result.rewrites).toEqual([]);
-    expect(result.delegated).toEqual([
+    expect(result.required).toEqual([
       {
         consumerPath: PATHS.FEATURE_A_FILE,
         currentSpecifier: '../lib',
@@ -156,8 +154,8 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
     ]);
   });
 
-  it('accepts a post-move .js specifier as postcondition evidence', () => {
-    const findings = validateImportRewrites(
+  it('accepts a post-move .js specifier that resolves to the required file', () => {
+    const findings = validateImportRequirements(
       snapshotWith([
         {
           sourceFile: PATHS.FEATURE_A_FILE,
@@ -178,22 +176,23 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           {
             consumerPath: PATHS.FEATURE_A_FILE,
             currentSpecifier: '../lib/logger.js',
-            requiredSpecifier: '../shared/logger.js',
+            requiredResolvedPath: PATHS.TARGET,
+            suggestedSpecifier: '../shared/logger.js',
           },
         ],
-        delegatedImports: [],
         preservedImports: [],
         requiresDecision: false,
         decisionReasons: [],
         decisions: [],
       },
+      new Map(),
     );
 
     expect(findings).toEqual([]);
   });
 
-  it('accepts a post-move directory reference as postcondition evidence', () => {
-    const findings = validateImportRewrites(
+  it('accepts a post-move directory reference that resolves to the required file', () => {
+    const findings = validateImportRequirements(
       snapshotWith([
         {
           sourceFile: PATHS.TARGET,
@@ -214,15 +213,16 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           {
             consumerPath: PATHS.TARGET,
             currentSpecifier: '../featureA',
-            requiredSpecifier: '../featureA',
+            requiredResolvedPath: PATHS.FEATURE_A_FILE,
+            suggestedSpecifier: '../featureA',
           },
         ],
-        delegatedImports: [],
         preservedImports: [],
         requiresDecision: false,
         decisionReasons: [],
         decisions: [],
       },
+      new Map(),
     );
 
     expect(findings).toEqual([]);
@@ -278,8 +278,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
       unit(PATHS.SOURCE_DIRECTORY, PATHS.TARGET_DIRECTORY),
     );
 
-    expect(result.rewrites).toEqual([]);
-    expect(result.delegated).toEqual([]);
+    expect(result.required).toEqual([]);
     expect(result.preserved).toEqual([
       {
         consumerPath: '/root/shared/deep/consumer.ts',
@@ -289,7 +288,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
     ]);
   });
 
-  it('delegates a bare package specifier instead of rewriting it', () => {
+  it('requires a bare package specifier without a suggestion', () => {
     const result = buildImportRewrites(
       snapshotWith([
         {
@@ -301,8 +300,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
       unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
-    expect(result.rewrites).toEqual([]);
-    expect(result.delegated).toEqual([
+    expect(result.required).toEqual([
       {
         consumerPath: PATHS.FEATURE_A_FILE,
         currentSpecifier: '@scope/logger',

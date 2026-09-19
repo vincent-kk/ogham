@@ -77,21 +77,27 @@ async function planSharedUnitMove() {
 
 /**
  * Carry out a plan's moves and import rewrites the way an external actor would.
- * @param plan Plan whose moves and `affectedImports` are applied in order.
+ * @param plan Plan whose moves and suggested `affectedImports` are applied in order.
  * @returns Nothing; the project tree holds the executed plan.
+ * @throws When an affected import carries no suggested specifier to apply.
  */
 function executePlan(plan: RestructurePlan): void {
   for (const move of plan.moves) {
     mkdirSync(dirname(move.targetPath), { recursive: true });
     renameSync(move.sourcePath, move.targetPath);
-    for (const rewrite of move.affectedImports)
+    for (const rewrite of move.affectedImports) {
+      if (!rewrite.suggestedSpecifier)
+        throw new Error(
+          `The fixture plan left ${rewrite.consumerPath} "${rewrite.currentSpecifier}" without a suggested specifier.`,
+        );
       writeFileSync(
         rewrite.consumerPath,
         readFileSync(rewrite.consumerPath, 'utf8').replace(
           `'${rewrite.currentSpecifier}'`,
-          `'${rewrite.requiredSpecifier}'`,
+          `'${rewrite.suggestedSpecifier}'`,
         ),
       );
+    }
   }
 }
 
@@ -125,15 +131,17 @@ describe('restructure plan → precondition → postcondition round trip', () =>
           {
             consumerPath: join(projectRoot, 'domain/a/use.ts'),
             currentSpecifier: './value.js',
-            requiredSpecifier: '../model/value.js',
+            requiredResolvedPath: join(projectRoot, 'domain/model/value.ts'),
+            suggestedSpecifier: '../model/value.js',
           },
           {
             consumerPath: join(projectRoot, 'domain/b/use.ts'),
             currentSpecifier: '../a/value.js',
-            requiredSpecifier: '../model/value.js',
+            requiredResolvedPath: join(projectRoot, 'domain/model/value.ts'),
+            suggestedSpecifier: '../model/value.js',
           },
         ],
-        delegatedImports: [],
+        preservedImports: [],
         requiresDecision: false,
       },
     ]);

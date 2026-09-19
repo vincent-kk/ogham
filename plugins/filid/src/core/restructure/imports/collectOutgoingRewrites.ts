@@ -16,19 +16,19 @@ import { keepsRelativeLocation } from './keepsRelativeLocation.js';
 import { relocateThroughMoves } from './relocateThroughMoves.js';
 
 /**
- * Rewrites and delegations for imports that a file inside the moved unit
+ * Import requirements for imports that a file inside the moved unit
  * makes to a file outside it.
  *
  * An absolute specifier survives the consumer's move and needs nothing. An
  * entry is emitted only when this unit is the first move to carry the
  * importing file and no move carries the imported one — otherwise the
- * imported file's own move lists it. A file or directory reference is
- * rewritten; any other is delegated to the caller, or preserved when the
+ * imported file's own move lists it. A file or directory reference carries a
+ * suggested specifier; any other carries none, or is preserved when the
  * consumer's move keeps the imported file at the same relative place.
  * @param snapshot - Pre-move snapshot
  * @param unit - The moved unit
  * @param orderedMoves - Executable moves in execution order, holding `unit`
- * @returns Owned rewrites, delegated imports and preserved imports
+ * @returns Owned import requirements and preserved imports
  */
 export function collectOutgoingRewrites(
   snapshot: ProjectSnapshot,
@@ -38,11 +38,7 @@ export function collectOutgoingRewrites(
   const unitIndex = orderedMoves.findIndex(({ sourcePath }) =>
     samePath(sourcePath, unit.sourcePath),
   );
-  const result: ImportRewriteBuildResult = {
-    rewrites: [],
-    delegated: [],
-    preserved: [],
-  };
+  const result: ImportRewriteBuildResult = { required: [], preserved: [] };
 
   for (const edge of snapshot.dependencyGraph.edges)
     for (const evidence of edge.evidence) {
@@ -73,6 +69,11 @@ export function collectOutgoingRewrites(
             evidence.rawSpecifier,
             evidence.resolvedPath,
           );
+      const requirement = {
+        consumerPath,
+        currentSpecifier: evidence.rawSpecifier,
+        requiredResolvedPath: evidence.resolvedPath,
+      };
       if (!denotesFile && directory === null) {
         const kept = keepsRelativeLocation(
           evidence.sourceFile,
@@ -80,17 +81,12 @@ export function collectOutgoingRewrites(
           consumerPath,
           evidence.resolvedPath,
         );
-        (kept ? result.preserved : result.delegated).push({
-          consumerPath,
-          currentSpecifier: evidence.rawSpecifier,
-          requiredResolvedPath: evidence.resolvedPath,
-        });
+        (kept ? result.preserved : result.required).push(requirement);
         continue;
       }
-      result.rewrites.push({
-        consumerPath,
-        currentSpecifier: evidence.rawSpecifier,
-        requiredSpecifier: formatRequiredSpecifier(
+      result.required.push({
+        ...requirement,
+        suggestedSpecifier: formatRequiredSpecifier(
           consumerPath,
           directory ?? evidence.resolvedPath,
           evidence.rawSpecifier,

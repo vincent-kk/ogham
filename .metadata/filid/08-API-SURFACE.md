@@ -216,6 +216,8 @@ type RestructureValidationInput = {
 
 두 action은 canonical full-payload artifact의 `data`에서 `RestructurePlan`을 읽고 summary에 canonical 여섯 scope를 보고한다.
 
+`projectRoot`가 절대 경로가 아니거나 `readPaths`·`probePaths`에 `projectRoot` 밖 경로(경로 문자열로, 또는 symlink를 따라간 실제 위치로)가 있는 artifact는 아무 파일도 읽기 전에 `plan-artifact-invalid`로 거절한다. precondition은 `path`와 `projectRoot`가 다르면 아무것도 읽지 않고 `project-root-mismatch`만 반환한다.
+
 ### fractal_inspect — verification
 
 ```typescript
@@ -516,10 +518,11 @@ interface RequiredArtifact {
   adapterId?: string;
 }
 
-interface ImportRewrite {
+interface ImportRequirement {
   consumerPath: string;
   currentSpecifier: string;
-  requiredSpecifier: string;
+  requiredResolvedPath: string; // the file the import must load after every move; the only thing postcondition checks
+  suggestedSpecifier?: string; // present only when the current specifier names the file or its directory
 }
 
 interface MoveInstruction {
@@ -532,25 +535,21 @@ interface MoveInstruction {
   lowestCommonFractalPath?: string;
   reason: string;
   requiredArtifacts: RequiredArtifact[];
-  affectedImports: ImportRewrite[];
-  delegatedImports: DelegatedImport[]; // imports filid cannot rewrite; the caller writes them
-  preservedImports: DelegatedImport[]; // imports that keep resolving; postcondition still checks them
+  affectedImports: ImportRequirement[]; // imports the caller changes after every move
+  preservedImports: ImportRequirement[]; // imports that keep resolving; postcondition still checks them
   requiresDecision: boolean;
   decisionReasons: string[];
   decisions: { reason: string; message: string; nextAction: string }[];
 }
 
-interface DelegatedImport {
-  consumerPath: string;
-  currentSpecifier: string;
-  requiredResolvedPath: string;
-}
-
 interface RestructurePlan {
-  schemaVersion: 2;
+  schemaVersion: 3;
   planId: string;
   projectRoot: string;
   snapshotHash: string;
+  readPaths: string[]; // move sources, their consumers and the files they import (bytes hashed)
+  probePaths: string[]; // each target and INTENT.md/DETAIL.md of every source and target ancestor (state hashed; may not exist)
+  readHash: string; // precondition recomputes it over readPaths and probePaths
   createdAt: string;
   moves: MoveInstruction[];
   alreadyPlaced: MoveInstruction[];
@@ -561,7 +560,7 @@ interface RestructurePlan {
     organsCreated: number;
     alreadyPlacedCount: number;
     decisionsRequired: number;
-    delegatedImportCount: number;
+    affectedImportCount: number;
   };
 }
 
@@ -582,9 +581,10 @@ interface PlanValidationResult {
 - 모든 machine path는 **정규화된 절대 경로**다. 비교·containment·relative/join/ resolve는 `@ogham/cross-platform`의 portable API를 쓴다.
 - `requiredArtifacts`는 역할과 실제 경로를 함께 반환한다. **core DTO에는 특정 언어의 진입점 파일명이 없다.**
 - 새 fractal의 entry point artifact는 snapshot에 이미 보존된 adapter-reported entry point 경로 형태에서만 파생한다. exact evidence가 없으면 이름을 추측하지 않고 해당 move를 unresolved로 반환한다.
-- `affectedImports.requiredSpecifier`는 현재 raw specifier가 source machine path를 지시하는 path-like evidence일 때만 산출한다. 일치는 **마지막 세그먼트의 확장자를 제거한 stem**으로 판정한다 — TypeScript ESM이 `.ts` 파일을 `.js`로 참조하고 bundler 해석이 확장자를 생략하듯, specifier에 소스 확장자를 그대로 적을 수 없는 생태계가 있기 때문이다. byte 단위로 비교하면 그런 생태계에서는 rewrite가 하나도 나오지 않는다.
-- 산출된 specifier는 **소비자가 쓰던 확장자 표기를 보존한다.** core는 어느 확장자가 유효한지 알지 못하므로 원래 표기를 되돌려 준다. stem이 어긋나는 디렉터리 index 참조는 `delegatedImports`로 호출자에게 넘기고, postcondition이 해석 결과로 확인한다.
-- 계산된 target이 source와 같으면 `moves`가 아니라 `alreadyPlaced`로 간다. 옮길 것이 없는 요청이며, postcondition은 `alreadyPlaced`에 source 부재만 면제하고 exact target·node type·artifact·import rewrite는 그대로 요구한다 — "source 부재"와 "target 존재"가 한 경로에 동시에 요구되지 않으면서, 계획이 지명한 적 없는 경로에 착지한 유닛도 잡힌다. 요청은 버려지지 않고 계산된 LCA·basis·consumer를 그대로 실어 돌려준다.
+- import 변경 요구는 해석 결과(`requiredResolvedPath`)로 표현하고, postcondition은 소비자의 참조가 그 파일로 해석되는지만 본다. 문자열·stem·디렉터리 포함 비교는 하지 않는다 — 같은 이름의 파일이 디렉터리 index를 가로채도 specifier가 같다는 이유로 통과하던 거짓 통과를 막기 위해서다. `affectedImports`와 `preservedImports`는 같은 술어를 쓴다: 그 파일로 해석되는 참조가 하나 이상 있고, `currentSpecifier`로 남은 참조는 전부 그 파일이나 계획이 같은 소비자에게 요구한 다른 파일로 해석되며, unresolved로 남지 않아야 한다. 호출자가 쓴 specifier는 따지지 않는다.
+- `suggestedSpecifier`는 현재 raw specifier가 대상 파일 또는 그 엄밀한 상위 디렉터리를 가리키는 path-like evidence일 때만 싣는 제안이다. 일치는 **마지막 세그먼트의 확장자를 제거한 stem**으로 판정한다 — TypeScript ESM이 `.ts` 파일을 `.js`로 참조하고 bundler 해석이 확장자를 생략하듯, specifier에 소스 확장자를 그대로 적을 수 없는 생태계가 있기 때문이다. 제안은 **소비자가 쓰던 확장자 표기를 보존한다.** stem이 어긋나는 디렉터리 index 참조는 제안 없이 싣고 호출자가 specifier를 쓴다.
+- precondition은 `readPaths`의 byte와 `probePaths`의 상태(`missing | file | directory`, file이면 내용)로 다시 계산한 hash를 `readHash`와 비교한다. target 자리의 사전 점유나 조상 디렉터리의 `INTENT.md`·`DETAIL.md` 생성·변경도 불일치다. 두 집합 밖의 편집은 계획을 stale로 만들지 않는다.
+- 계산된 target이 source와 같으면 `moves`가 아니라 `alreadyPlaced`로 간다. 옮길 것이 없는 요청이며, postcondition은 `alreadyPlaced`에 source 부재만 면제하고 exact target·node type·artifact·import 요구는 그대로 요구한다 — "source 부재"와 "target 존재"가 한 경로에 동시에 요구되지 않으면서, 계획이 지명한 적 없는 경로에 착지한 유닛도 잡힌다. 요청은 버려지지 않고 계산된 LCA·basis·consumer를 그대로 실어 돌려준다.
 
 ### 문서 (`types/documents.ts`)
 

@@ -73,7 +73,7 @@ function snapshotOf(
     schemaVersion: 1,
     projectRoot: P.ROOT,
     outputLanguage: 'Korean',
-    snapshotHash: 'delegation-fixture',
+    snapshotHash: 'unsuggested-imports-fixture',
     tree: buildFractalTree(entries),
     dependencyGraph: {
       nodePaths: entries.map(({ path }) => path),
@@ -134,17 +134,17 @@ function findingOf(snapshot: ProjectSnapshot, code: string) {
   );
 }
 
-describe('restructure delegates imports it cannot rewrite', () => {
-  it('delegates a directory-index reference instead of leaving the move unresolved', () => {
+describe('restructure leaves imports it cannot suggest to the caller', () => {
+  it('requires a directory-index reference without a suggestion instead of leaving the move unresolved', () => {
     expect(PLAN.unresolved).toEqual([]);
-    expect(PLAN.moves[0]?.delegatedImports).toStrictEqual([
+    expect(PLAN.moves[0]?.affectedImports).toStrictEqual([
       {
         consumerPath: P.APP_INDEX,
         currentSpecifier: '../feature',
         requiredResolvedPath: P.MOVED_INDEX,
       },
     ]);
-    expect(PLAN.summary.delegatedImportCount).toBe(1);
+    expect(PLAN.summary.affectedImportCount).toBe(1);
   });
 
   it('preserves a directory reference inside the moved directory', () => {
@@ -157,7 +157,7 @@ describe('restructure delegates imports it cannot rewrite', () => {
     ]);
   });
 
-  it('clears delegated and preserved imports from a move left unresolved', () => {
+  it('clears affected and preserved imports from a move left unresolved', () => {
     const conflicted = createRestructurePlan(BEFORE, {
       path: P.ROOT,
       requests: [{ sourcePath: P.FEATURE }, { sourcePath: P.FEATURE }],
@@ -165,7 +165,7 @@ describe('restructure delegates imports it cannot rewrite', () => {
 
     expect(conflicted.unresolved.length).toBeGreaterThan(0);
     for (const move of conflicted.unresolved) {
-      expect(move.delegatedImports).toStrictEqual([]);
+      expect(move.affectedImports).toStrictEqual([]);
       expect(move.preservedImports).toStrictEqual([]);
     }
   });
@@ -185,7 +185,7 @@ describe('restructure delegates imports it cannot rewrite', () => {
 
     const result = collectOutgoingRewrites(snapshot, unit, [unit]);
 
-    expect(result.delegated).toStrictEqual([]);
+    expect(result.required).toStrictEqual([]);
     expect(result.preserved).toStrictEqual([
       {
         consumerPath: unit.targetPath,
@@ -195,7 +195,7 @@ describe('restructure delegates imports it cannot rewrite', () => {
     ]);
   });
 
-  it('delegates an outgoing import whose target changes its relative place', () => {
+  it('requires an outgoing import whose target changes its relative place, without a suggestion', () => {
     const consumer = '/root/app/x/feature.ts';
     const shared = '/root/app/shared.ts';
     const unit = {
@@ -211,7 +211,7 @@ describe('restructure delegates imports it cannot rewrite', () => {
     const result = collectOutgoingRewrites(snapshot, unit, [unit]);
 
     expect(result.preserved).toStrictEqual([]);
-    expect(result.delegated).toStrictEqual([
+    expect(result.required).toStrictEqual([
       {
         consumerPath: unit.targetPath,
         currentSpecifier: '#shared',
@@ -220,7 +220,7 @@ describe('restructure delegates imports it cannot rewrite', () => {
     ]);
   });
 
-  it('passes the postcondition once the caller rewrites the delegated import', () => {
+  it('passes the postcondition once the caller rewrites the unsuggested import', () => {
     const after = snapshotOf(MOVED_TREE, [
       edge(P.APP, P.MOVED, P.APP_INDEX, './feature', P.MOVED_INDEX),
       PARTS_EDGE,
@@ -232,7 +232,7 @@ describe('restructure delegates imports it cannot rewrite', () => {
     });
   });
 
-  it('names the consumer and the file it must load when the delegated import stays broken', () => {
+  it('names the consumer and the file it must load when the unsuggested import stays broken', () => {
     const after = snapshotOf(
       MOVED_TREE,
       [PARTS_EDGE],
@@ -248,17 +248,17 @@ describe('restructure delegates imports it cannot rewrite', () => {
     );
     const finding = findingOf(
       after,
-      RESTRUCTURE_VALIDATION_CODES.DELEGATED_IMPORT_MISSING,
+      RESTRUCTURE_VALIDATION_CODES.IMPORT_REWRITE_MISSING,
     );
 
     expect(finding?.message).toBe(
       `${P.APP_INDEX} still holds the unresolved import "../feature".`,
     );
-    expect(finding?.nextAction).toContain(`in ${P.APP_INDEX}`);
+    expect(finding?.nextAction).toContain(`In ${P.APP_INDEX}`);
     expect(finding?.nextAction).toContain(`so it loads ${P.MOVED_INDEX}`);
   });
 
-  it('reports a delegated import the caller pointed at another file', () => {
+  it('reports an unsuggested import the caller pointed at another file', () => {
     const after = snapshotOf(MOVED_TREE, [
       edge(
         P.APP,
@@ -271,9 +271,33 @@ describe('restructure delegates imports it cannot rewrite', () => {
     ]);
 
     expect(
-      findingOf(after, RESTRUCTURE_VALIDATION_CODES.DELEGATED_IMPORT_MISSING)
+      findingOf(after, RESTRUCTURE_VALIDATION_CODES.IMPORT_REWRITE_MISSING)
         ?.message,
     ).toBe(`No import in ${P.APP_INDEX} loads ${P.MOVED_INDEX}.`);
+  });
+
+  it('reports an unsuggested import whose old specifier still loads another file beside a rewritten one', () => {
+    const intercepting = '/root/feature.ts';
+    const after = snapshotOf(
+      [
+        fractal(P.ROOT, 'root', ['feature.ts']),
+        fractal(P.APP, 'app', []),
+        fractal(P.MOVED, 'feature', []),
+        fractal(P.MOVED_PARTS, 'parts', []),
+      ],
+      [
+        edge(P.APP, P.MOVED, P.APP_INDEX, './feature', P.MOVED_INDEX),
+        edge(P.APP, P.ROOT, P.APP_INDEX, '../feature', intercepting),
+        PARTS_EDGE,
+      ],
+    );
+
+    expect(
+      findingOf(after, RESTRUCTURE_VALIDATION_CODES.IMPORT_REWRITE_MISSING)
+        ?.message,
+    ).toBe(
+      `The import "../feature" in ${P.APP_INDEX} loads ${intercepting} instead of ${P.MOVED_INDEX} after the moves.`,
+    );
   });
 
   it('reports a preserved import that a same-named sibling file intercepts', () => {
@@ -315,10 +339,7 @@ describe('restructure delegates imports it cannot rewrite', () => {
       ],
     );
 
-    expect(validatePlanPostconditions(after, PLAN)).toEqual({
-      valid: true,
-      findings: [],
-    });
+    expect(validatePlanPostconditions(after, PLAN).findings).toEqual([]);
   });
 
   it('reports a preserved import the caller rewrote to another file', () => {
@@ -389,6 +410,8 @@ describe('restructure delegates imports it cannot rewrite', () => {
     expect(
       findingOf(after, RESTRUCTURE_VALIDATION_CODES.PRESERVED_IMPORT_BROKEN)
         ?.message,
-    ).toContain('a file with the same name now takes precedence');
+    ).toBe(
+      `The import "./parts" in ${P.MOVED_INDEX} loads ${P.SHADOW} instead of ${P.MOVED_PARTS_INDEX} after the moves.`,
+    );
   });
 });

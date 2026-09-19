@@ -27,6 +27,7 @@
 - `createProjectSnapshot(projectRoot, registry, config, options?): Promise<ProjectSnapshot>` — read-only snapshot을 생성한다. `options.axes`로 축을 부분 지정하면 지정하지 않은 축은 수집한다.
 - `SnapshotAxisSelection` — `entrySurfaces`, `dependencies`, `verification` 세 boolean. `ProjectSnapshot.collectedAxes`에 그대로 실린다.
 - `computeSnapshotHash(projectRoot, filePaths, inputs?)` — 정렬된 relative path, content와 supplemental input의 SHA-256을 반환한다.
+- `resolveHashFile(projectRoot, filePath): HashFile` — hash 대상 경로를 project root 기준 `{ absolutePath, relativePath }`로 정규화한다. 경로가 root 밖이면 던진다. 판정은 경로 문자열로만 하며 symlink는 따라가지 않는다. `computeSnapshotHash`와, 파일 내용이 아닌 경로 상태를 hash에 섞는 호출자(restructure의 probe)가 같은 containment를 쓰게 하려고 공개한다.
 - graph evidence는 source file, raw specifier와 resolved target을 보존한다.
 
 ## Acceptance Criteria
@@ -86,4 +87,4 @@
 
 ## Last Updated
 
-2026-09-19 — Diagnostics carry `nextAction`; a non-exact dependency graph always has an explaining diagnostic.
+2026-09-20 — `resolveHashFile` joins the public surface so path-state hash inputs share the root containment of `computeSnapshotHash`.

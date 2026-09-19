@@ -118,8 +118,7 @@ export function planMoveInstruction(
       ? RESTRUCTURE_REASON_TEXT.DECISION_REQUIRED
       : RESTRUCTURE_REASON_BY_BASIS[target.basis],
     requiredArtifacts: required.artifacts,
-    affectedImports: imports.rewrites,
-    delegatedImports: imports.delegated,
+    affectedImports: imports.required,
     preservedImports: imports.preserved,
     requiresDecision,
     decisionReasons: reasons,

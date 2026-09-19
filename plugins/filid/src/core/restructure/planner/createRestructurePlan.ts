@@ -17,6 +17,9 @@ import type {
   RestructurePlanInput,
 } from '../../../types/restructure.js';
 
+import { collectPlanProbePaths } from './collectPlanProbePaths.js';
+import { collectPlanReadPaths } from './collectPlanReadPaths.js';
+import { computePlanReadHash } from './computePlanReadHash.js';
 import { markOrderConflict } from './markOrderConflict.js';
 import { orderPlannedMoves } from './orderPlannedMoves.js';
 import { planMoveInstruction } from './planMoveInstruction.js';
@@ -66,7 +69,6 @@ export function createRestructurePlan(
     .map((move) => ({
       ...move,
       affectedImports: [],
-      delegatedImports: [],
       preservedImports: [],
     }));
   const alreadyPlaced = instructions.filter(
@@ -75,6 +77,12 @@ export function createRestructurePlan(
   );
   const moves = order.map(
     (position) => instructions[candidates[position].index],
+  );
+  const readPaths = collectPlanReadPaths(snapshot, moves);
+  const probePaths = collectPlanProbePaths(
+    snapshot.projectRoot,
+    moves,
+    readPaths,
   );
   const planHash = createHash(RESTRUCTURE_HASH_ALGORITHM)
     .update(snapshot.snapshotHash)
@@ -86,6 +94,9 @@ export function createRestructurePlan(
     planId: `${RESTRUCTURE_PLAN_ID_PREFIX}-${planHash}`,
     projectRoot: snapshot.projectRoot,
     snapshotHash: snapshot.snapshotHash,
+    readPaths,
+    probePaths,
+    readHash: computePlanReadHash(snapshot.projectRoot, readPaths, probePaths),
     createdAt: snapshot.createdAt,
     moves,
     alreadyPlaced,
@@ -100,8 +111,8 @@ export function createRestructurePlan(
       ).length,
       alreadyPlacedCount: alreadyPlaced.length,
       decisionsRequired: unresolved.length,
-      delegatedImportCount: moves.reduce(
-        (count, move) => count + move.delegatedImports.length,
+      affectedImportCount: moves.reduce(
+        (count, move) => count + move.affectedImports.length,
         0,
       ),
     },
