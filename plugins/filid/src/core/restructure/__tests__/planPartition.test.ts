@@ -90,6 +90,7 @@ const SNAPSHOT: ProjectSnapshot = {
       },
     ],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture-adapter'],

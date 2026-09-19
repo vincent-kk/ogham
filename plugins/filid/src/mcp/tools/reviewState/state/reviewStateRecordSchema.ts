@@ -146,26 +146,26 @@ const ReviewScopeInformationalSchema = z
   .strict();
 
 /** Strict persisted prepare-scope snapshot schema. */
+/** Strict persisted non-finding diagnostic schema. */
+const StoredDiagnosticSchema = z
+  .object({
+    code: z.string(),
+    message: z.string(),
+    /** Absent for a diagnostic recorded before filid attached next actions. */
+    nextAction: z.string().optional(),
+    path: z.string().optional(),
+    causeId: z.string().optional(),
+    specifier: z.string().optional(),
+    affects: z
+      .array(z.enum(['dependencies', 'boundaries', 'verification']))
+      .optional(),
+  })
+  .strict();
+
 const ReviewScopeSchema = z
   .object({
-    diagnostics: z
-      .array(
-        z
-          .object({
-            code: z.string(),
-            message: z.string(),
-            /** Absent for a diagnostic recorded before filid attached next actions. */
-            nextAction: z.string().optional(),
-            path: z.string().optional(),
-            causeId: z.string().optional(),
-            specifier: z.string().optional(),
-            affects: z
-              .array(z.enum(['dependencies', 'boundaries', 'verification']))
-              .optional(),
-          })
-          .strict(),
-      )
-      .optional(),
+    diagnostics: z.array(StoredDiagnosticSchema).optional(),
+    outOfScopeDiagnostics: z.array(StoredDiagnosticSchema).optional(),
     snapshotHash: z.string(),
     evidenceComplete: z.boolean(),
     worktree: z.nativeEnum(WORKTREE_DISPOSITIONS),

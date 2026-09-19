@@ -30,6 +30,8 @@ export interface CollectChangedScopeEvidenceInput {
 export interface CollectedChangedScopeEvidence {
   /** Normalized non-finding diagnostics persisted with the prepared snapshot. */
   evidenceDiagnostics: ToolDiagnostic[];
+  /** Normalized non-finding diagnostics of unknown files outside the review scope; they block nothing. */
+  outOfScopeDiagnostics: ToolDiagnostic[];
   /** Snapshot identity shared by every FCA observation in this collection. */
   snapshotHash: string;
   /** Whether both structure and verification evidence are conclusive. */
@@ -68,7 +70,7 @@ export interface ComputedChangedScopeEvidence extends Omit<
   statuses: ReviewEvidenceStatuses;
   /** All violations excluded from changed scope. */
   outOfScope: ReviewScopeViolation[];
-  /** Non-finding diagnostics normalized for persisted or returned evidence. */
+  /** Non-finding diagnostics inside the review scope, normalized for persisted or returned evidence. */
   evidenceDiagnostics: ToolDiagnostic[];
   /** Effective rule scope indexed by rule identifier. */
   ruleScopeById: ReadonlyMap<string, RuleScope>;

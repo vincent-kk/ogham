@@ -79,6 +79,7 @@ function snapshotOf(
       nodePaths: entries.map(({ path }) => path),
       edges,
       cycles: [],
+      unknownFiles: [],
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture'],
@@ -229,6 +230,8 @@ describe('restructure leaves imports it cannot suggest to the caller', () => {
     expect(validatePlanPostconditions(after, PLAN)).toEqual({
       valid: true,
       findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
     });
   });
 

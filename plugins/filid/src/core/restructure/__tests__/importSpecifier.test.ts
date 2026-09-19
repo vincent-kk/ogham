@@ -80,6 +80,7 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
         },
       ],
       cycles: [],
+      unknownFiles: [],
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture-adapter'],

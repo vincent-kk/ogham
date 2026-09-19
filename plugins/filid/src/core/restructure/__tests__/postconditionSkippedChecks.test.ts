@@ -79,6 +79,7 @@ function snapshotOf(entries: NodeEntry[]): ProjectSnapshot {
       nodePaths: entries.map(({ path }) => path),
       edges: [],
       cycles: [],
+      unknownFiles: [],
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture'],
@@ -142,6 +143,8 @@ function planOf(moves: MoveInstruction[]): RestructurePlan {
     moves,
     alreadyPlaced: [],
     unresolved: [],
+    unknownFiles: { relevant: [], other: [] },
+    baseline: { cycles: [], boundaryViolations: [] },
     summary: {
       moveCount: moves.length,
       fractalsCreated: 0,

@@ -145,7 +145,7 @@ function makePlan(
   readHash: string = MATCHING_READ_HASH,
 ): RestructurePlan {
   return {
-    schemaVersion: 3,
+    schemaVersion: 4,
     planId: 'fixture-plan',
     projectRoot,
     snapshotHash: PLAN_SNAPSHOT_HASH,
@@ -156,6 +156,8 @@ function makePlan(
     moves: [move],
     alreadyPlaced: [],
     unresolved: [],
+    unknownFiles: { relevant: [], other: [] },
+    baseline: { cycles: [], boundaryViolations: [] },
     summary: {
       moveCount: 1,
       fractalsCreated:
@@ -267,6 +269,15 @@ function graphFor(state: GraphState): DependencyGraph {
     nodePaths: [PATHS.ROOT, PATHS.DOMAIN, PATHS.A, PATHS.B, PATHS.FRACTAL],
     edges: boundaryEdges,
     cycles: state === GRAPH_STATES.CYCLE ? [EXPECTED_CYCLE] : [],
+    unknownFiles:
+      state === GRAPH_STATES.INDETERMINATE
+        ? [
+            {
+              path: 'domain/b/use.unit',
+              causes: ['uncertain-local-dependency'],
+            },
+          ]
+        : [],
     certainty:
       state === GRAPH_STATES.INDETERMINATE
         ? ANALYSIS_CERTAINTIES.INDETERMINATE
@@ -329,7 +340,12 @@ describe('restructure plan validation', () => {
       ),
       makePlan(),
     );
-    expect(result).toEqual({ valid: true, findings: [] });
+    expect(result).toEqual({
+      valid: true,
+      findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
+    });
   });
 
   it('rejects drift in the files the plan read', () => {

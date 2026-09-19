@@ -7,6 +7,7 @@
 - 한 snapshot selection에서 각 adapter의 detect/discovery evidence를 한 번만 수집한다.
 - 같은 파일을 같은 confidence로 소유한다고 주장하는 adapter가 둘 이상이면 `ambiguous-adapter-claim` 진단이다.
 - 소유 adapter가 없는 파일은 `unsupported`이며 성공으로 숨기지 않는다.
+- structure adapter는 선택 메서드 `discoverSourceTree`로 소스 파일과 discovery가 따라가지 않은 symlink를 한 번의 순회에서 함께 보고할 수 있다. `resolveAdapters`는 이 메서드가 있으면 이것만 부르고, 없으면 `discoverSourceFiles`를 부르고 링크를 비워 둔다. 링크 목록은 제외 디렉터리를 거르고 정렬해 `unfollowedLinks`로 돌려준다. 따라가지 않은 링크에는 제외 판정이 링크 자신의 이름(마지막 구성요소)도 본다. 링크는 따라가지 않으므로 그 이름이 곧 디렉터리 이름 자리이고, 그 이름을 제외 목록에 넣는 것이 진단이 권하는 해소 방법이다. 따라가지 않은 symlink가 진단 없이 빠지면 그 너머의 소비자가 그래프에서 조용히 사라진다.
 - 호출자가 제외 디렉터리 이름을 지정하면 그 이름을 세그먼트로 담은 path는 ownership 후보에서 먼저 빠진다. 제외된 path는 `unsupported`도 아니고 진단도 만들지 않는다 — 제외는 "소유자를 찾지 못했다"가 아니라 "증거 대상이 아니다"이므로, 진단으로 남기면 제외의 목적인 미해결 참조 제거가 이름만 바뀐 채 그대로 남는다.
 - explicit config의 미등록 adapter ID는 `unknown-adapter-id` validation 진단이다.
 - 새 생태계 지원은 adapter 등록으로 추가되며 core type, policy와 MCP schema를 바꾸지 않는다.
@@ -15,11 +16,11 @@
 ## API Contracts
 
 - `createAdapterRegistry(initial?)` — 중복 ID를 거부하고 structure/verification registry를 만든다.
-- `resolveAdapters(projectRoot, adapters, options?)` — active claims, path ownership, unsupported paths와 diagnostics를 반환한다. `options.requestedPaths`는 discovery 결과 대신 판정할 path 집합이고, `options.excludedDirectoryNames`는 두 경로 모두에서 걸러낼 디렉터리 이름이다.
+- `resolveAdapters(projectRoot, adapters, options?)` — active claims, path ownership, unsupported paths, unfollowed links와 diagnostics를 반환한다. `options.requestedPaths`는 discovery 결과 대신 판정할 path 집합이고, `options.excludedDirectoryNames`는 두 경로 모두에서 걸러낼 디렉터리 이름이다.
 - `AdapterRegistry.registerStructure` / `registerVerification` — ID별 adapter 등록.
 - `AdapterRegistry.selectStructure` / `selectVerification` — detect 없이 explicit ID validation과 등록 candidate 선택만 수행한다.
 - `AdapterRegistry.resolveStructure` / `resolveVerification` — detect confidence가 양수인 adapter를 confidence 내림차순으로 반환.
-- `StructureAdapter`는 source discovery, adapter별 entry point override 해석, entry point inspection, dependency extraction, framework peer 판정과 entry point 제안을 제공한다.
+- `StructureAdapter`는 source discovery, 따라가지 않은 symlink 보고(선택), adapter별 entry point override 해석, entry point inspection, dependency extraction, framework peer 판정과 entry point 제안을 제공한다.
 - `VerificationAdapter`는 verification file discovery, role, semantic case count와 DETAIL contract group marker를 제공한다.
 
 ## Acceptance Criteria

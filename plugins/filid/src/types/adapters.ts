@@ -33,6 +33,15 @@ export interface StructureAdapter {
   id: string;
   detect(projectRoot: string): Promise<AdapterClaim>;
   discoverSourceFiles(projectRoot: string): Promise<string[]>;
+  /**
+   * Source files and, from the same walk, the symbolic links discovery skipped
+   * whose real location is outside `projectRoot`; `files` equals
+   * `discoverSourceFiles`. Optional: an adapter that follows or never meets
+   * links omits it, and ownership then calls `discoverSourceFiles`.
+   */
+  discoverSourceTree?(
+    projectRoot: string,
+  ): Promise<{ files: string[]; unfollowedLinks: string[] }>;
   findEntryPoints(
     directoryPath: string,
     overrides?: readonly string[],
@@ -78,6 +87,8 @@ export interface AdapterResolution {
   claims: Map<string, AdapterClaim>;
   ownership: Map<string, AdapterOwnership>;
   unsupportedPaths: string[];
+  /** Symbolic links discovery did not follow whose real location is outside the root; sorted. */
+  unfollowedLinks: string[];
   diagnostics: AdapterDiagnostic[];
 }
 

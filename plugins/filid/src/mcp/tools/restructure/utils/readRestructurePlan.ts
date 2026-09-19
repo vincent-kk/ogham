@@ -2,6 +2,7 @@ import {
   pathForCompare,
   portableIsAbsolute,
   portableRelative,
+  portableResolve,
   readUtf8FileIfExistsSync,
 } from '@ogham/cross-platform';
 import { z } from 'zod';
@@ -24,6 +25,8 @@ import {
 import { isPhysicallyWithin } from '../../../../core/restructure/index.js';
 import type { RestructurePlan } from '../../../../types/restructure.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
+
+import { isStoredPlanArtifact } from './isStoredPlanArtifact.js';
 
 const REQUIRED_ARTIFACT_SCHEMA = z.object({
   role: z.nativeEnum(REQUIRED_ARTIFACT_ROLES),
@@ -78,6 +81,22 @@ function staysInsideRoot(projectRoot: string, path: string): boolean {
   );
 }
 
+const UNKNOWN_FILE_SCHEMA = z.object({
+  path: z.string(),
+  causes: z.array(z.string()),
+});
+
+const PLAN_BASELINE_SCHEMA = z.object({
+  cycles: z.array(z.array(z.string())),
+  boundaryViolations: z.array(
+    z.object({
+      ruleId: z.string(),
+      consumerPath: z.string(),
+      importedPath: z.string(),
+    }),
+  ),
+});
+
 const RESTRUCTURE_PLAN_SCHEMA = z
   .object({
     schemaVersion: z.literal(RESTRUCTURE_SCHEMA_VERSION),
@@ -91,6 +110,11 @@ const RESTRUCTURE_PLAN_SCHEMA = z
     moves: z.array(MOVE_INSTRUCTION_SCHEMA),
     alreadyPlaced: z.array(MOVE_INSTRUCTION_SCHEMA).default([]),
     unresolved: z.array(MOVE_INSTRUCTION_SCHEMA),
+    unknownFiles: z.object({
+      relevant: z.array(UNKNOWN_FILE_SCHEMA),
+      other: z.array(UNKNOWN_FILE_SCHEMA),
+    }),
+    baseline: PLAN_BASELINE_SCHEMA,
     summary: z.object({
       moveCount: z.number(),
       fractalsCreated: z.number(),
@@ -107,15 +131,45 @@ const RESTRUCTURE_PLAN_SCHEMA = z
         path: ['projectRoot'],
         message: 'projectRoot is not an absolute path.',
       });
-    for (const field of ['readPaths', 'probePaths'] as const)
-      plan[field].forEach((path, index) => {
-        if (!staysInsideRoot(plan.projectRoot, path))
-          context.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: [field, index],
-            message: `${field} lists a path outside projectRoot.`,
-          });
-      });
+    const listed: [string, (string | number)[]][] = [
+      ...plan.readPaths.map((path, index): [string, (string | number)[]] => [
+        path,
+        ['readPaths', index],
+      ]),
+      ...plan.probePaths.map((path, index): [string, (string | number)[]] => [
+        path,
+        ['probePaths', index],
+      ]),
+      ...plan.baseline.cycles.flatMap((route, cycle) =>
+        route.map((path, index): [string, (string | number)[]] => [
+          path,
+          ['baseline', 'cycles', cycle, index],
+        ]),
+      ),
+      ...plan.baseline.boundaryViolations.flatMap((violation, index) =>
+        (['consumerPath', 'importedPath'] as const).map(
+          (key): [string, (string | number)[]] => [
+            violation[key],
+            ['baseline', 'boundaryViolations', index, key],
+          ],
+        ),
+      ),
+      ...(['relevant', 'other'] as const).flatMap((group) =>
+        plan.unknownFiles[group].map(
+          (file, index): [string, (string | number)[]] => [
+            portableResolve(plan.projectRoot, file.path),
+            ['unknownFiles', group, index, 'path'],
+          ],
+        ),
+      ),
+    ];
+    for (const [path, issuePath] of listed)
+      if (!staysInsideRoot(plan.projectRoot, path))
+        context.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: issuePath,
+          message: `${issuePath.join('.')} lists a path outside projectRoot.`,
+        });
   });
 
 const TOOL_DIAGNOSTIC_SCHEMA = z.object({
@@ -147,9 +201,11 @@ const PLAN_ARTIFACT_SCHEMA = z.union([
  * @returns The validated restructure plan contained by the artifact.
  * @throws {ToolDiagnosticError} `plan-path-not-absolute` for a relative path,
  * `plan-artifact-not-found` when no file exists there, and
- * `plan-artifact-invalid` when the file is not a plan of this schema version
- * or lists a read or probe path outside its project root — by the path string,
- * or through a symbolic link — so no such path is ever opened.
+ * `plan-artifact-invalid` when the file is not an artifact the plan action
+ * stored unchanged (outside the restructure store, or content not matching its
+ * digest name), is not a plan of this schema version, or lists a path outside
+ * its project root — by the path string, or through a symbolic link — so no
+ * such path is ever opened.
  */
 export function readRestructurePlan(planPath: string): RestructurePlan {
   if (!portableIsAbsolute(planPath))
@@ -164,6 +220,12 @@ export function readRestructurePlan(planPath: string): RestructurePlan {
       RESTRUCTURE_PLAN_ERROR_CODES.PLAN_ARTIFACT_NOT_FOUND,
       `No plan artifact exists at ${planPath}.`,
       RESTRUCTURE_PLAN_ERROR_NEXT_ACTIONS.PLAN_ARTIFACT_NOT_FOUND,
+    );
+  if (!isStoredPlanArtifact(planPath, source))
+    throw new ToolDiagnosticError(
+      RESTRUCTURE_PLAN_ERROR_CODES.PLAN_ARTIFACT_INVALID,
+      `${planPath} is not a plan artifact as the plan action stored it: it lies outside the restructure artifact store, or its content no longer matches its digest name.`,
+      RESTRUCTURE_PLAN_ERROR_NEXT_ACTIONS.PLAN_ARTIFACT_UNTRUSTED,
     );
   let plan: RestructurePlan;
   try {

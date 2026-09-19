@@ -7,9 +7,12 @@ import type {
   PlanValidationResult,
   RestructurePlan,
 } from '../../../types/restructure.js';
+import { collectRelevanceUnits } from '../planner/collectRelevanceUnits.js';
 import { computePlanReadHash } from '../planner/computePlanReadHash.js';
 import { isDirectoryReadError } from '../planner/isDirectoryReadError.js';
 import { isMissingPathError } from '../planner/isMissingPathError.js';
+import { partitionPlanUnknownFiles } from '../planner/partitionPlanUnknownFiles.js';
+import { readUnknownFileText } from '../planner/readUnknownFileText.js';
 
 /**
  * Whether what the plan read differs from the project now.
@@ -39,12 +42,17 @@ function readHashDrifted(plan: RestructurePlan): boolean {
  * ancestor) — so an unrelated edit does not stale the plan.
  * @param snapshot - Snapshot taken just before execution
  * @param plan - Plan about to run
+ * @param readFileText - Text of an unknown file by project-relative path, or null
  * @returns A different project root alone — nothing is read for a plan of
- * another root — or findings for drift in `readPaths` or `probePaths`, and unresolved requests
+ * another root — or findings for drift in `readPaths` or `probePaths` and
+ * unresolved requests, with the current unknown files split by relevance to
+ * the plan's units; `preexisting` is always empty
  */
 export function validatePlanPreconditions(
   snapshot: ProjectSnapshot,
   plan: RestructurePlan,
+  readFileText: (relativePath: string) => string | null = (relativePath) =>
+    readUnknownFileText(snapshot.projectRoot, relativePath),
 ): PlanValidationResult {
   if (!samePath(snapshot.projectRoot, plan.projectRoot))
     return {
@@ -57,6 +65,8 @@ export function validatePlanPreconditions(
           path: plan.projectRoot,
         },
       ],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
     };
   const findings: PlanValidationFinding[] = [];
   if (readHashDrifted(plan))
@@ -76,5 +86,21 @@ export function validatePlanPreconditions(
         'Settle each unresolved entry by its decisions[].nextAction, then create a new plan. A plan with unresolved requests never executes.',
       path: plan.projectRoot,
     });
-  return { valid: findings.length === 0, findings };
+  const relevance = collectRelevanceUnits(snapshot.tree, [
+    ...plan.moves,
+    ...plan.alreadyPlaced,
+    ...plan.unresolved,
+  ]);
+  const { relevant, other } = partitionPlanUnknownFiles(
+    snapshot,
+    relevance.targets,
+    relevance.consumerPaths,
+    readFileText,
+  );
+  return {
+    valid: findings.length === 0,
+    findings,
+    preexisting: [],
+    unknownFiles: { relevant, other },
+  };
 }

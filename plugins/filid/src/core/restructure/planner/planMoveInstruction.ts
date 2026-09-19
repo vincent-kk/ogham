@@ -6,14 +6,23 @@ import {
   RESTRUCTURE_DECISION_REASONS,
   RESTRUCTURE_REASON_BY_BASIS,
   RESTRUCTURE_REASON_TEXT,
+  RESTRUCTURE_UNIT_KINDS,
 } from '../../../constants/restructure.js';
-import type { FractalNode, ProjectSnapshot } from '../../../types/fractal.js';
+import type {
+  FractalNode,
+  ProjectSnapshot,
+  UnknownFile,
+} from '../../../types/fractal.js';
 import type {
   MoveInstruction,
   PlacementRequest,
   PlannedMove,
   PlanningDecisionReason,
 } from '../../../types/restructure.js';
+import {
+  type RelevanceTarget,
+  classifyRelevanceTarget,
+} from '../../analysis/dependencyGraph/index.js';
 import {
   findLowestCommonFractal,
   resolveOwningFractal,
@@ -31,6 +40,7 @@ import { resolveUnitKind } from './resolveUnitKind.js';
  * Plan one placement request against a pre-move snapshot.
  * @param snapshot - Pre-move snapshot supplying tree, consumers and evidence
  * @param request - Source path plus optional consumers, contract intent and organ name
+ * @param unknownFilesFor - Unknown files related to a unit, judged by the plan's relevance filter
  * @param orderedMoves - Executable moves of the same plan in execution order;
  * used only for the final paths and ownership of rewrites, never to choose the
  * target
@@ -40,9 +50,19 @@ import { resolveUnitKind } from './resolveUnitKind.js';
 export function planMoveInstruction(
   snapshot: ProjectSnapshot,
   request: PlacementRequest,
+  unknownFilesFor: (target: RelevanceTarget) => UnknownFile[],
   orderedMoves: readonly PlannedMove[] = [],
 ): MoveInstruction {
   const sourcePath = portableResolve(snapshot.projectRoot, request.sourcePath);
+  const unitKind = resolveUnitKind(snapshot, sourcePath);
+  const relatedUnknownFiles = unknownFilesFor({
+    path: sourcePath,
+    kind: classifyRelevanceTarget(
+      snapshot.tree,
+      sourcePath,
+      unitKind !== RESTRUCTURE_UNIT_KINDS.FILE,
+    ),
+  });
   const decisionReasons = new Set<PlanningDecisionReason>();
   const sourceOwner = resolveOwningFractal(snapshot.tree, sourcePath);
   if (!sourceOwner)
@@ -52,6 +72,7 @@ export function planMoveInstruction(
   const consumers = resolveConsumerPaths(
     snapshot,
     sourcePath,
+    relatedUnknownFiles,
     request.consumerPaths,
   );
   consumers.decisionReasons.forEach((reason) => decisionReasons.add(reason));
@@ -66,7 +87,6 @@ export function planMoveInstruction(
     sourcePath,
     request.contractIntent,
   );
-  const unitKind = resolveUnitKind(snapshot, sourcePath);
   const target = buildTargetCandidate(
     sourcePath,
     unitKind,
@@ -100,7 +120,7 @@ export function planMoveInstruction(
     projectRoot: snapshot.projectRoot,
     sourcePath,
     placementPath: placementFractal.path,
-    graphCertainty: snapshot.dependencyGraph.certainty,
+    relatedUnknownFiles,
     organNameHint: request.organNameHint,
     outsideConsumerPaths: consumers.outsidePaths,
     entryForms: required.entryForms,

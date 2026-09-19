@@ -2,6 +2,8 @@ import { createHash } from 'node:crypto';
 
 import { portableRelative } from '@ogham/cross-platform';
 
+import { DEPENDENCY_DIAGNOSTIC_CODES } from '../../../constants/dependencyDiagnosticCodes.js';
+import { toProjectRelativePath } from '../../../lib/toProjectRelativePath.js';
 import type {
   AdapterResolution,
   DependencyReference,
@@ -9,17 +11,32 @@ import type {
 import type {
   AnalysisCertainty,
   SnapshotDiagnostic,
+  UnknownFile,
 } from '../../../types/fractal.js';
 
 import { createDependencyDiagnostic } from './utils/createDependencyDiagnostic.js';
+import { createUnfollowedLinkDiagnostic } from './utils/createUnfollowedLinkDiagnostic.js';
 
 export interface CollectedDependencyReferences {
+  /** `unsupported` without an active structure adapter, `exact` otherwise; uncertainty lives in `unknownFiles`. */
   certainty: AnalysisCertainty;
   diagnostics: SnapshotDiagnostic[];
   filePaths: string[];
   references: DependencyReference[];
+  /** Files whose uncertainty arose outside their references: ownership conflicts, read failures, unfollowed links. */
+  unknownFiles: UnknownFile[];
 }
 
+/**
+ * Collect every local dependency reference the resolved adapters report.
+ *
+ * Uncertainty the references cannot carry is attributed to its file:
+ * ownership diagnostics, a file the adapter could not read, and a symbolic
+ * link discovery did not follow each become an `unknownFiles` entry.
+ * @param resolution Adapter ownership of the project's source files.
+ * @param projectRoot Root the file paths are made relative to.
+ * @returns References, their diagnostics, the hashed file list and the attributed files.
+ */
 export async function collectDependencyReferences(
   resolution: AdapterResolution,
   projectRoot: string,
@@ -27,12 +44,24 @@ export async function collectDependencyReferences(
   const diagnostics: SnapshotDiagnostic[] = [];
   const filePaths = [...resolution.ownership.keys()].sort();
   const references: DependencyReference[] = [];
-  let certainty: AnalysisCertainty =
-    resolution.adapters.length === 0
-      ? 'unsupported'
-      : resolution.diagnostics.length > 0
-        ? 'indeterminate'
-        : 'exact';
+  const unknownFiles: UnknownFile[] = [
+    ...resolution.diagnostics.flatMap(({ code, path }) =>
+      path
+        ? [{ path: toProjectRelativePath(projectRoot, path), causes: [code] }]
+        : [],
+    ),
+    ...resolution.unfollowedLinks.map((path) => ({
+      path: toProjectRelativePath(projectRoot, path),
+      causes: [DEPENDENCY_DIAGNOSTIC_CODES.SYMLINK_NOT_FOLLOWED],
+    })),
+  ];
+  diagnostics.push(
+    ...resolution.unfollowedLinks.map((path) =>
+      createUnfollowedLinkDiagnostic(projectRoot, path),
+    ),
+  );
+  const certainty: AnalysisCertainty =
+    resolution.adapters.length === 0 ? 'unsupported' : 'exact';
 
   if (resolution.adapters.length === 0) {
     diagnostics.push({
@@ -43,7 +72,7 @@ export async function collectDependencyReferences(
         'Filid ships only the ecmascript adapter; if adapters.mode is "explicit", check that adapters.enabled lists it. For other languages, report dependency, boundary and DAG results as unsupported, never as passing.',
       affects: ['dependencies', 'boundaries'],
     });
-    return { certainty, diagnostics, filePaths, references };
+    return { certainty, diagnostics, filePaths, references, unknownFiles };
   }
 
   for (const filePath of filePaths) {
@@ -76,10 +105,13 @@ export async function collectDependencyReferences(
             ),
           );
     } catch (error) {
-      certainty = 'indeterminate';
+      unknownFiles.push({
+        path: toProjectRelativePath(projectRoot, filePath),
+        causes: [DEPENDENCY_DIAGNOSTIC_CODES.ANALYSIS_FAILED],
+      });
       const rawMessage = error instanceof Error ? error.message : String(error);
       diagnostics.push({
-        code: 'dependency-analysis-failed',
+        code: DEPENDENCY_DIAGNOSTIC_CODES.ANALYSIS_FAILED,
         message: `Could not read the dependencies of ${filePath}: ${rawMessage}`,
         nextAction:
           "Check that the file is readable source text, then run again; if it repeats, report this message to the user. The file's dependencies are unknown until then.",
@@ -97,5 +129,5 @@ export async function collectDependencyReferences(
     }
   }
 
-  return { certainty, diagnostics, filePaths, references };
+  return { certainty, diagnostics, filePaths, references, unknownFiles };
 }

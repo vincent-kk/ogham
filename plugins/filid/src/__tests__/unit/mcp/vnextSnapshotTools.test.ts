@@ -1,7 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-
-import { portableJoin, readUtf8FileIfExistsSync } from '@ogham/cross-platform';
+import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
@@ -39,6 +36,8 @@ import type { RestructurePlanSummary } from '../../../types/report.js';
 import type { RestructurePlan } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
 
+import { persistPlanArtifact } from './helpers/persistPlanArtifact.js';
+
 const PROJECT_ROOT = '/project';
 const FEATURE_ROOT = '/project/feature';
 const SOURCE_PATH = '/project/feature/source.unit';
@@ -46,7 +45,6 @@ const CONSUMER_PATH = '/project/feature/consumer.unit';
 const VERIFICATION_PATH = '/project/feature/contract.unit';
 const UNKNOWN_PATH = '/project/feature/unknown.unit';
 const EXPECTED_DATA_MESSAGE = 'expected tool data';
-const PLAN_FILE_NAME = 'plan.json';
 const EXPECTED_VERIFICATION_SUMMARY = {
   fileCount: 1,
   specDocument: {
@@ -137,6 +135,7 @@ const SNAPSHOT: ProjectSnapshot = {
     nodePaths: [PROJECT_ROOT, FEATURE_ROOT],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture-adapter'],
@@ -184,6 +183,8 @@ const VALID_RESTRUCTURE_PLAN: RestructurePlan = {
   moves: [],
   alreadyPlaced: [],
   unresolved: [],
+  unknownFiles: { relevant: [], other: [] },
+  baseline: { cycles: [], boundaryViolations: [] },
   summary: {
     moveCount: 0,
     fractalsCreated: 0,
@@ -364,49 +365,39 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
     expect(result.data).toHaveProperty('result');
   });
 
-  it('reads an external plan artifact without changing it', async () => {
-    const planDirectory = portableJoin(
-      tmpdir(),
-      `filid-plan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    );
-    const planPath = portableJoin(planDirectory, PLAN_FILE_NAME);
+  it('reads a stored plan artifact without changing it', async () => {
     const planSource = JSON.stringify(VALID_RESTRUCTURE_PLAN);
-    mkdirSync(planDirectory, { recursive: true });
-    writeFileSync(planPath, planSource, 'utf8');
-    try {
-      const result = await validateRestructurePlan({
-        action: RESTRUCTURE_ACTIONS.PRECONDITION,
-        path: PROJECT_ROOT,
-        planPath,
-      });
+    const planPath = persistPlanArtifact(VALID_RESTRUCTURE_PLAN);
+    const result = await validateRestructurePlan({
+      action: RESTRUCTURE_ACTIONS.PRECONDITION,
+      path: PROJECT_ROOT,
+      planPath,
+    });
 
-      expect(result.data).toEqual({ valid: true, findings: [] });
-      expect(readUtf8FileIfExistsSync(planPath)).toBe(planSource);
-    } finally {
-      rmSync(planDirectory, { recursive: true, force: true });
-    }
+    expect(result.data).toEqual({
+      valid: true,
+      findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
+    });
+    expect(readUtf8FileIfExistsSync(planPath)).toBe(planSource);
   });
 
   it('reads a restructure plan from a persisted full tool payload', async () => {
-    const planDirectory = portableJoin(
-      tmpdir(),
-      `filid-payload-plan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    );
-    const planPath = portableJoin(planDirectory, PLAN_FILE_NAME);
     const planSource = JSON.stringify(PERSISTED_PLAN_PAYLOAD);
-    mkdirSync(planDirectory, { recursive: true });
-    writeFileSync(planPath, planSource, 'utf8');
-    try {
-      const result = await validateRestructurePlan({
-        action: RESTRUCTURE_ACTIONS.PRECONDITION,
-        path: PROJECT_ROOT,
-        planPath,
-      });
+    const planPath = persistPlanArtifact(PERSISTED_PLAN_PAYLOAD);
+    const result = await validateRestructurePlan({
+      action: RESTRUCTURE_ACTIONS.PRECONDITION,
+      path: PROJECT_ROOT,
+      planPath,
+    });
 
-      expect(result.data).toEqual({ valid: true, findings: [] });
-      expect(readUtf8FileIfExistsSync(planPath)).toBe(planSource);
-    } finally {
-      rmSync(planDirectory, { recursive: true, force: true });
-    }
+    expect(result.data).toEqual({
+      valid: true,
+      findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
+    });
+    expect(readUtf8FileIfExistsSync(planPath)).toBe(planSource);
   });
 });

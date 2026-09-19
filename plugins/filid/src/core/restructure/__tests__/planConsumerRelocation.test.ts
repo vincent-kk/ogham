@@ -79,6 +79,7 @@ function snapshotOf(
       nodePaths: [PATHS.ROOT, PATHS.X],
       edges,
       cycles: [],
+      unknownFiles: [],
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture-adapter'],
@@ -225,6 +226,8 @@ describe('restructure rewrites consumers the same plan relocates', () => {
     expect(validatePlanPostconditions(AFTER, planBothFiles())).toEqual({
       valid: true,
       findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
     });
   });
 

@@ -1,6 +1,6 @@
 import { NODE_TYPES } from './nodeTypes.js';
 
-export const RESTRUCTURE_SCHEMA_VERSION = 3 as const;
+export const RESTRUCTURE_SCHEMA_VERSION = 4 as const;
 
 /** Analysis axes a restructure plan and its validations rest on; a diagnostic affecting neither leaves their status conclusive. */
 export const RESTRUCTURE_ANALYSIS_AXES = [
@@ -133,4 +133,6 @@ export const RESTRUCTURE_PLAN_ERROR_NEXT_ACTIONS = {
     'Pass the artifact path that the plan action returned; if that artifact is gone, create a new plan.',
   PLAN_ARTIFACT_INVALID:
     'Create a new plan with this filid version and validate its artifact; never edit a plan artifact by hand.',
+  PLAN_ARTIFACT_UNTRUSTED:
+    'Create a new plan and pass the artifact path the plan action returned, unchanged; never edit, copy or move a plan artifact.',
 } as const;

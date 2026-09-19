@@ -1,7 +1,7 @@
-import { ANALYSIS_AXES } from '../../constants/analysisAxes.js';
 import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
 import { resolveAdapters } from '../../adapters/index.js';
+import { ANALYSIS_AXES } from '../../constants/analysisAxes.js';
 import { ALL_SNAPSHOT_AXES } from '../../constants/snapshotAxes.js';
 import type { AdapterRegistry } from '../../types/adapters.js';
 import type {
@@ -30,6 +30,7 @@ import { resolveSnapshotOwner } from './evidence/resolveSnapshotOwner.js';
 import { snapshotStructureInput } from './evidence/snapshotStructureInput.js';
 import { createDependencyDiagnostic } from './evidence/utils/createDependencyDiagnostic.js';
 import { computeSnapshotHash } from './snapshotHash/computeSnapshotHash.js';
+import { omitUnknownFiles } from './snapshotHash/omitUnknownFiles.js';
 
 /** Options narrowing what a snapshot collects. */
 export interface CreateProjectSnapshotOptions {
@@ -90,6 +91,7 @@ export async function createProjectSnapshot(
         diagnostics: [],
         filePaths: [],
         references: [],
+        unknownFiles: [],
       };
   const verificationClaims = axes.verification
     ? await collectVerificationClaims(root, selectedAdapters.verification)
@@ -125,6 +127,8 @@ export async function createProjectSnapshot(
         dependencies.references,
         dependencies.certainty,
         {
+          projectRoot: root,
+          unknownFiles: dependencies.unknownFiles,
           organPaths: [...tree.nodes.values()]
             .filter((node) => node.type === 'organ')
             .map((node) => node.path),
@@ -135,6 +139,7 @@ export async function createProjectSnapshot(
         nodePaths: [],
         edges: [],
         cycles: [],
+        unknownFiles: [],
         certainty: 'unsupported' as const,
       };
   const unownedDependencyDiagnostics = axes.dependencies
@@ -192,7 +197,8 @@ export async function createProjectSnapshot(
     [
       { schemaVersion: 1, config, adapterIds },
       snapshotStructureInput(tree),
-      dependencyGraph,
+      // `unknownFiles` is left out: the diagnostics below already decide it.
+      omitUnknownFiles(dependencyGraph),
       verification,
       diagnostics,
       // A full-axis snapshot keeps the hash it had before axes existed; only a

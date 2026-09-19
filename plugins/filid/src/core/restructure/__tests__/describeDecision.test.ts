@@ -1,7 +1,6 @@
 // filid:contract AC-restructure-guidance
 import { describe, expect, it } from 'vitest';
 
-import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
 import type { PlanningDecisionReason } from '../../../types/restructure.js';
 import { describeDecision } from '../planner/describeDecision.js';
@@ -10,7 +9,9 @@ const CONTEXT = {
   projectRoot: '/root',
   sourcePath: '/root/x/unit.ts',
   placementPath: '/root/x',
-  graphCertainty: ANALYSIS_CERTAINTIES.INDETERMINATE,
+  relatedUnknownFiles: [
+    { path: 'x/note.unit', causes: ['uncertain-local-dependency'] },
+  ],
   organNameHint: '.',
   outsideConsumerPaths: ['/elsewhere/use.ts', '/other/use.ts'],
   entryForms: ['index.ts', 'main.ts'],

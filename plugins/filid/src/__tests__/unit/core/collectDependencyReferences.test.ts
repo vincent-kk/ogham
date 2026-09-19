@@ -22,6 +22,7 @@ function resolution(root: string, fail = false): AdapterResolution {
     diagnostics: [],
     claims: new Map(),
     unsupportedPaths: [],
+    unfollowedLinks: [],
   } as unknown as AdapterResolution;
 }
 
@@ -44,6 +45,7 @@ function uncertainResolution(root: string): AdapterResolution {
     diagnostics: [],
     claims: new Map(),
     unsupportedPaths: [],
+    unfollowedLinks: [],
   } as unknown as AdapterResolution;
 }
 
@@ -81,6 +83,7 @@ describe('dependency diagnostic identity and impact', () => {
       diagnostics: [],
       claims: new Map(),
       unsupportedPaths: [],
+      unfollowedLinks: [],
     } as unknown as AdapterResolution;
     const result = await collectDependencyReferences(empty, '/one');
     expect(result.certainty).toBe('unsupported');
@@ -115,7 +118,9 @@ describe('dependency diagnostic identity and impact', () => {
       resolution('/one', true),
       '/one',
     );
-    expect(result.certainty).toBe('indeterminate');
+    expect(result.unknownFiles).toEqual([
+      { path: 'src/a.ts', causes: ['dependency-analysis-failed'] },
+    ]);
     expect(result.diagnostics[0]).toMatchObject({
       code: 'dependency-analysis-failed',
       affects: ['dependencies', 'boundaries'],

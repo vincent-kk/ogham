@@ -22,6 +22,7 @@ const SNAPSHOT: ProjectSnapshot = {
     nodePaths: [],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: [],
@@ -52,6 +53,7 @@ describe('deriveEvidenceStatuses', () => {
       0,
       0,
       ANALYSIS_CERTAINTIES.EXACT,
+      ANALYSIS_CERTAINTIES.EXACT,
     );
     expect(result.verification).toBe(TOOL_STATUSES.OK);
     expect(result.structure).toBe(TOOL_STATUSES.INDETERMINATE);
@@ -73,13 +75,21 @@ describe('deriveEvidenceStatuses', () => {
         0,
         0,
         ANALYSIS_CERTAINTIES.EXACT,
+        ANALYSIS_CERTAINTIES.EXACT,
       ).verification,
     ).toBe(TOOL_STATUSES.INDETERMINATE);
   });
 
   it('uses scoped verification certainty for both evidence statuses', () => {
     expect(
-      deriveEvidenceStatuses(SNAPSHOT, [], 0, 0, ANALYSIS_CERTAINTIES.EXACT),
+      deriveEvidenceStatuses(
+        SNAPSHOT,
+        [],
+        0,
+        0,
+        ANALYSIS_CERTAINTIES.EXACT,
+        ANALYSIS_CERTAINTIES.EXACT,
+      ),
     ).toEqual({
       analysisAxes: { dependencies: 'exact', verification: 'exact' },
       structure: TOOL_STATUSES.OK,

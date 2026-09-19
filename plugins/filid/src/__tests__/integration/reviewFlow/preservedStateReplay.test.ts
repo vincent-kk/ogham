@@ -3,7 +3,10 @@ import { fileURLToPath } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
+import {
+  handleReviewState,
+  observeReviewGroupInputs,
+} from '../../../mcp/tools/reviewState/index.js';
 import { readReviewState } from '../../../mcp/tools/reviewState/state/readReviewState.js';
 import { resolveReviewStatePaths } from '../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 import type { ReviewStateRecord } from '../../../mcp/tools/reviewState/state/reviewStateTypes.js';
@@ -175,5 +178,57 @@ describe('state prepared by S0 code replays on the current code', () => {
     const report = readFileSync(reportPath, 'utf8');
     const unresolved = report.slice(report.indexOf('## Unresolved Evidence'));
     expect(unresolved).toContain('config-warning');
+  });
+
+  it('validates and seals a stored graph-uncertainty candidate the earlier code wrote, without stale inputs', async () => {
+    const { statePath } = resolveReviewStatePaths(
+      restored.projectRoot,
+      PINNED_REVIEW_BRANCH,
+    );
+    let recorded: ReviewStateRecord | undefined;
+    editPersistedReviewState(
+      restored.projectRoot,
+      PINNED_REVIEW_BRANCH,
+      (state) => {
+        state.scope.candidates.push({
+          id: 'FCA-003',
+          source: 'structure',
+          scope: 'dag',
+          category: 'structure',
+          severity: 'warning',
+          path: 'src/alpha',
+          rule: 'circular-dependency',
+          message:
+            'Dependency graph certainty is indeterminate; cycles through unconfirmed references may be missing.',
+          certainty: 'indeterminate',
+        });
+        recorded = state;
+      },
+    );
+    if (!recorded?.incremental) throw new Error('state has no recipe');
+    const recipe = recorded.incremental;
+    const groups = await observeReviewGroupInputs(
+      recorded,
+      resolveReviewStatePaths(restored.projectRoot, PINNED_REVIEW_BRANCH),
+      recipe.userInstructions,
+      recipe.changeContext ?? undefined,
+      recipe.pluginRoot,
+    );
+    editPersistedReviewState(
+      restored.projectRoot,
+      PINNED_REVIEW_BRANCH,
+      (state) => {
+        state.groups = groups;
+      },
+    );
+    expect(readFileSync(statePath, 'utf8')).toContain('FCA-003');
+    await completeIncrementalReview(restored.projectRoot);
+    const sealed = await handleReviewState({
+      action: 'seal',
+      projectRoot: restored.projectRoot,
+      branchName: PINNED_REVIEW_BRANCH,
+    });
+    expect(sealed).toMatchObject({ status: 'ok', diagnostics: [] });
+    expect(sealed.summary).toMatchObject({ disposition: 'sealed' });
   });
 });

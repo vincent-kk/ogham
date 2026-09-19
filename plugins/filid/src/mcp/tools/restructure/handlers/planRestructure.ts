@@ -16,6 +16,7 @@ import type { RestructurePlanInput } from '../../../../types/restructure.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 import { affectsAnalysisAxis } from '../../utils/affectsAnalysisAxis.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
+import { isAttributedToUnknownFile } from '../../utils/isAttributedToUnknownFile.js';
 
 /**
  * Builds and persists a read-only placement plan from one project snapshot.
@@ -23,7 +24,9 @@ import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
  * @param input - Project root and placement requests to evaluate.
  * @returns The bounded summary with the caller's next step, and the
  * artifact-eligible restructure plan; an unsupported dependency graph makes the
- * status `unsupported` before any other evidence is weighed.
+ * status `unsupported` before any other evidence is weighed. Unknown files
+ * unrelated to the plan, and the diagnostics that explain them, leave the
+ * status alone.
  */
 export async function planRestructure(
   input: RestructurePlanInput,
@@ -35,9 +38,15 @@ export async function planRestructure(
     certainty === ANALYSIS_CERTAINTIES.UNSUPPORTED
       ? TOOL_STATUSES.UNSUPPORTED
       : plan.unresolved.length > 0 ||
-          certainty === ANALYSIS_CERTAINTIES.INDETERMINATE ||
-          context.diagnostics.some((diagnostic) =>
-            affectsAnalysisAxis(diagnostic, RESTRUCTURE_ANALYSIS_AXES),
+          plan.unknownFiles.relevant.length > 0 ||
+          context.diagnostics.some(
+            (diagnostic) =>
+              affectsAnalysisAxis(diagnostic, RESTRUCTURE_ANALYSIS_AXES) &&
+              !isAttributedToUnknownFile(
+                diagnostic,
+                plan.unknownFiles.other,
+                context.snapshot.projectRoot,
+              ),
           )
         ? TOOL_STATUSES.INDETERMINATE
         : TOOL_STATUSES.OK;

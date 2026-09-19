@@ -4,6 +4,7 @@
 
 - adapter는 현재 생태계 source file과 package/framework evidence를 탐지한다.
 - source discovery는 git이 무시하고 추적하지도 않는 파일을 제외한다. 이 결과가 dependency와 verification evidence의 입력이므로, 무시되는 build 산출물이 discovery에 남으면 DAG와 verification 계약이 산출물을 대상으로 판정한다. git이 없거나 project root가 work tree 밖이면 제외 없이 전부 탐지한다.
+- source discovery는 symlink를 따라가지 않는다. `discoverSourceTree()`는 소스 파일과 함께, 같은 순회에서 건너뛴 symlink 중 실제 위치가 project root 밖인 것을 돌려준다. 대상은 소스 확장자를 가진 파일 symlink와 제외 이름이 아닌 디렉터리 symlink다. root 안을 가리키는 symlink는 대상이 실제 경로로 이미 탐지되므로 돌려주지 않고, 끊어진 symlink와 loop는 분석할 내용이 없으므로 돌려주지 않는다. 무시·제외 규칙은 source discovery와 같다.
 - module, executable, framework과 manifest entry point를 exact path와 adapter ID로 보고한다.
 - 디렉터리에 `package.json`이 있으면 그것을 `kind: 'manifest'` entry point로 보고한다. 이 생태계에서 패키지의 공개 표면을 선언하는 자리는 `exports`·`main`·`bin`이고, 배럴이 없는 패키지 루트도 그 선언으로 소비자를 받는다 — 진입점이 없는 것이 아니라 module 파일이 아닌 곳에 있는 것이다. 상위 디렉터리의 `package.json`은 대상이 아니다(그건 framework 탐지용 조회다).
 - manifest는 `kind: 'module'`이 아니다. module은 분류기가 읽는 유일한 kind이므로, manifest가 module이면 `package.json`을 가진 모든 디렉터리가 fractal이 된다 — 저장소 루트까지 포함해서다. `surface`는 선언을 열거할 수 있으므로 `enumerated`이고, `framework`의 `opaque`를 쓰면 패키지 루트마다 영구 `entry-point-surface` 경고가 생긴다.
@@ -60,6 +61,7 @@
 - package 또는 지원 source evidence가 있으면 양수 confidence를 반환한다.
 - 알 수 없는 파일만 있는 project는 ownership을 주장하지 않는다.
 - git이 무시하는 source file은 `discoverSourceFiles()` 결과에 없고, ignore pattern에 걸려도 추적되는 파일은 남는다. git이 없으면 전부 남는다.
+- root 밖을 가리키는 소스 파일 symlink와 디렉터리 symlink는 `discoverSourceFiles()`에 없고 `discoverSourceTree()`의 `unfollowedLinks`에 있다. `discoverSourceTree()`의 `files`는 `discoverSourceFiles()`와 같다. root 안을 가리키는 symlink는 둘 다에 없다.
 
 ### AC-ecmascript-structure — entry와 dependency
 

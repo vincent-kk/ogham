@@ -14,6 +14,8 @@ interface ClaimedAdapter {
   adapter: StructureAdapter;
   claim: AdapterClaim;
   files: Map<string, string>;
+  /** Links the adapter's discovery skipped, as it reported them. */
+  links: string[];
 }
 
 /** Per-call narrowing of what ownership resolution judges. */
@@ -35,11 +37,15 @@ export interface ResolveAdaptersOptions {
  * project's structure.
  * @param projectRoot Absolute root every candidate path is measured against.
  * @param excludedDirectoryNames Directory names to drop; empty disables the filter.
+ * @param judgesLastSegment Whether the last segment counts as a directory
+ *   name too: true for an unfollowed link, whose own name stands where a
+ *   directory would.
  * @returns Predicate over absolute candidate paths.
  */
 function createExclusionFilter(
   projectRoot: string,
   excludedDirectoryNames: readonly string[],
+  judgesLastSegment = false,
 ): (absolutePath: string) => boolean {
   if (excludedDirectoryNames.length === 0) return () => false;
   const excluded = new Set(excludedDirectoryNames);
@@ -50,7 +56,7 @@ function createExclusionFilter(
     absolutePath
       .split(PATH_SEPARATOR)
       .filter(Boolean)
-      .slice(rootSegmentCount, -1)
+      .slice(rootSegmentCount, judgesLastSegment ? undefined : -1)
       .some((segment) => excluded.has(segment));
 }
 
@@ -61,6 +67,11 @@ export async function resolveAdapters(
 ): Promise<AdapterResolution> {
   const { requestedPaths, excludedDirectoryNames = [] } = options;
   const isExcluded = createExclusionFilter(projectRoot, excludedDirectoryNames);
+  const isExcludedLink = createExclusionFilter(
+    projectRoot,
+    excludedDirectoryNames,
+    true,
+  );
   const detected = await Promise.all(
     adapters.map(async (adapter) => ({
       adapter,
@@ -77,13 +88,19 @@ export async function resolveAdapters(
   const claimed: ClaimedAdapter[] = await Promise.all(
     active.map(async ({ adapter, claim }) => {
       const files = new Map<string, string>();
-      for (const path of await adapter.discoverSourceFiles(projectRoot)) {
+      const tree = adapter.discoverSourceTree
+        ? await adapter.discoverSourceTree(projectRoot)
+        : {
+            files: await adapter.discoverSourceFiles(projectRoot),
+            unfollowedLinks: [],
+          };
+      for (const path of tree.files) {
         const absolutePath = portableResolve(projectRoot, path);
         if (isExcluded(absolutePath)) continue;
         const key = pathForCompare(absolutePath);
         if (!files.has(key)) files.set(key, absolutePath);
       }
-      return { adapter, claim, files };
+      return { adapter, claim, files, links: tree.unfollowedLinks };
     }),
   );
   const requested = new Map<string, string>();
@@ -141,11 +158,23 @@ export async function resolveAdapters(
     ownership.set(path, { adapter, claim });
   }
 
+  const unfollowedLinks = claimed
+    .flatMap(({ links }) => links)
+    .map((path) => portableResolve(projectRoot, path))
+    .filter((path) => !isExcludedLink(path));
+
   return {
     adapters: active.map(({ adapter }) => adapter),
     claims: new Map(active.map(({ adapter, claim }) => [adapter.id, claim])),
     ownership,
     unsupportedPaths,
+    unfollowedLinks: [
+      ...new Map(
+        unfollowedLinks.map((path) => [pathForCompare(path), path]),
+      ).values(),
+    ].sort((left, right) =>
+      pathForCompare(left).localeCompare(pathForCompare(right)),
+    ),
     diagnostics,
   };
 }

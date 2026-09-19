@@ -88,6 +88,7 @@ function makeSnapshot(tree: FractalTree) {
       nodePaths: [...tree.nodes.keys()],
       edges: [],
       cycles: [],
+      unknownFiles: [],
       certainty: 'exact' as const,
     },
   };

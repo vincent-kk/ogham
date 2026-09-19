@@ -251,6 +251,8 @@ export interface ReviewEvidenceModel extends ReviewEvidenceStatuses {
   informational: readonly ReviewScopeInformational[];
   outOfScope: readonly ReviewScopeViolation[];
   diagnostics: readonly ToolDiagnostic[];
+  /** Rendered in their own section only when non-empty. */
+  outOfScopeDiagnostics: readonly ToolDiagnostic[];
 }
 
 /** Dirty paths grouped by class, with the disposition they add up to. */
@@ -411,6 +413,8 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
   scope: {
     /** Prepared non-finding diagnostics, absent in legacy records. */
     diagnostics?: StoredToolDiagnostic[];
+    /** Diagnostics of unknown files outside the review scope; absent when none, and in legacy records, which keep every diagnostic in `diagnostics`. */
+    outOfScopeDiagnostics?: StoredToolDiagnostic[];
     /** FCA snapshot identity used to render evidence. */
     snapshotHash: string;
     /** Whether both structure and verification evidence are conclusive. */

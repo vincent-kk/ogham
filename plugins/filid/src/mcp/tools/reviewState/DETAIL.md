@@ -17,12 +17,20 @@
 
 - `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`, `handoff` 일곱 action만 지원한다.
 - `prepare`는 merge-base와 committed changed-file blob으로 source hash를 계산하고 변경 roster·FCA 증거·review group을 한 snapshot에서 만든다. 모든 canonical artifact를 먼저 쓴 뒤 `ReviewStateRecord` v2를 마지막에 한 번 atomic 저장한다.
-- `handoff`는 prepare와 같은 규칙으로 base와 설정을 해석하고 같은 snapshot의 changed-scope finding을 골라 분류·상한을 적용한 `## FCA Handoff` 섹션을 `<reviewDirectory>/handoff.md`에 쓴다. caller `entries`의 `note`·`ruleId`·`path`는 도구가 상한에 맞춰 자른다. `Counts:`와 응답 `data.counts`는 machine block 상한 전에 완전한 handoff를 집계하며, scan-level non-finding 진단은 envelope에 유지하면서 `indeterminate` claim으로도 기록한다. state와 `evidence.md`는 쓰지 않고, 렌더 결과를 `parseHandoffBlock`으로 자체 검증한다. validation 실패는 `snapshotHash: null`, `documentSync: failed`, `handoff-validate` 합성 항목으로 기록한다.
+- `handoff`는 prepare와 같은 규칙으로 base와 설정을 해석하고 같은 snapshot의 changed-scope finding을 골라 분류·상한을 적용한 `## FCA Handoff` 섹션을 `<reviewDirectory>/handoff.md`에 쓴다. caller `entries`의 `note`·`ruleId`·`path`는 도구가 상한에 맞춰 자른다. `Counts:`와 응답 `data.counts`는 machine block 상한 전에 완전한 handoff를 집계하며, 리뷰 범위 안의 scan-level non-finding 진단은 envelope에 유지하면서 `indeterminate` claim으로도 기록한다. 범위는 prepare와 같은 규칙으로 정한다. state와 `evidence.md`는 쓰지 않고, 렌더 결과를 `parseHandoffBlock`으로 자체 검증한다. validation 실패는 `snapshotHash: null`, `documentSync: failed`, `handoff-validate` 합성 항목으로 기록한다.
 - `prepare`는 `changeContext` 안의 `<!-- filid:handoff v1 -->` 블록을 절단 전에 추출해 zod 스키마로 검증하고, 각 review brief에 `## FCA Handoff` 섹션으로 그룹별 행을 싣는다. machine block은 유일한 구조화 handoff carrier이며, 잘못된 marker block의 `review-handoff-invalid` 진단은 path `.`인 `indeterminate` 행으로 바뀌어 모든 brief에 나타난다. 사람이 읽는 표는 입력이나 복구 경로가 아니다. 블록은 canonical evidence가 아니라 검증할 주장이다. 원문 changeContext는 입력 재관측을 위해 recipe에 저장한다.
 - roster는 NUL-safe Git name-status와 numstat에서 A/M/D·owner·churn·binary를 보존하고 `fileHashes` key 집합과 정확히 일치해야 한다. 다르면 축소하지 않고 internal error다.
 - FCA 후보는 같은 snapshot에서 변경 path·그 ancestor·owner와 교차하는 structure/verification finding만 `(path, rule, message)`로 중복 제거하고 정렬해 `FCA-NNN`을 부여한다. 같은 key는 error severity가 이기며 info는 informational 관측으로 남는다. verification violation은 count의 certainty를 handoff seed까지 보존한다.
-- project-root finding은 ancestor만으로 교차하지 않고 root owner가 같은 때만 포함한다. verification status에는 같은 path·owner 또는 owner 아래 변경과 교차하는 verification file만 반영하지만 graph certainty와 non-finding diagnostic은 project-wide다.
-- `evidence.md`는 schema 7 frontmatter와 Changed Scope, Candidates, Informational, Out-of-scope Observations, Diagnostics를 atomic하게 기록한다. 범위 밖 finding은 source·rule·severity별 count로만 남기고 finding diagnostic은 중복 기록하지 않는다.
+- project-root finding은 ancestor만으로 교차하지 않고 root owner가 같은 때만 포함한다. verification status에는 같은 path·owner 또는 owner 아래 변경과 교차하는 verification file만 반영한다.
+- dependency certainty와 non-finding diagnostic은 **리뷰 범위**로 거른다. 리뷰 범위는 다음의 합집합이다.
+  - 변경 파일
+  - 그래프 edge 증거에서 변경 파일이 가리키는 파일과 변경 파일을 가리키는 파일
+  - 변경 파일의 이름이 경로 토큰으로 나오는 `unknownFiles`. 이름은 restructure와 같은 규칙이다: 일반 파일은 stem, module entry는 부모 디렉터리 이름이고 그 서브트리 안은 관련이다.
+  - symlink 항목(`symlink-not-followed`)
+- 위 셋째 조건이 필요한 이유는 `unknownFiles`는 자기 참조를 확정하지 못했으므로 "가리키는 파일" 쪽을 닫을 수 없기 때문이다. restructure와 같은 거름망(`partitionUnknownFiles`)을 쓰고, 증명이 아니라는 한계도 같다. 범위 안 `unknownFiles`가 없으면 `analysisAxes.dependencies`는 `exact`다.
+- 범위 밖 `unknownFiles`에 귀속된 진단(경로와 코드가 그 파일의 원인과 맞는 것)은 구조 상태와 `scope.diagnostics`(blocker 원천)에서 빠진다. 대신 `scope.outOfScopeDiagnostics`(선택 필드)에 싣고 evidence.md의 Out-of-scope Diagnostics에 적는다. 이 필드가 없는 옛 state는 모든 진단이 `scope.diagnostics`에 있으므로 판정이 바뀌지 않는다. - 그래프 certainty 때문에 나오는 "분석이 indeterminate" 부류의 규칙 결과(`circular-dependency`, `external-import-boundary`, `pure-function-isolation`에서 `certainty`가 `exact`가 아닌 것)는 리뷰 범위의 기준으로 후보를 만든다. 범위 안 `unknownFiles`가 비어 있으면 후보가 되지 않는다. 비어 있지 않으면 message 끝에 범위 안 파일의 상대 경로 목록(정렬)을 붙여 후보로 만든다. validate·scan의 프로젝트 전체 보고는 그대로다.
+  - 진행 중인 state는 stale이 되지 않는다. validate·checkpoint·seal은 저장된 후보로 hash를 계산하기 때문이다(`observeReviewGroupInputs`). 업그레이드 뒤 다음 prepare에서 이 후보를 갖고 있던 group만 한 번 새 generation이 된다.
+- `evidence.md`는 schema 7 frontmatter와 Changed Scope, Candidates, Informational, Out-of-scope Observations, Diagnostics, Out-of-scope Diagnostics(있을 때만)를 atomic하게 기록한다. 범위 밖 finding은 source·rule·severity별 count로만 남기고 finding diagnostic은 중복 기록하지 않는다.
 - prepare는 dirty path를 `clean | documents-only | generated-only | source-dirty`로 관측하되 판정하지 않는다. 응답용 path 목록은 상한을 두지만 state의 dirty 관측은 안내용이며 미커밋 변경만으로 파일별 리뷰를 무효화하지 않는다. documents-only와 source-dirty도 artifact를 만들고 최종 fold에서 inconclusive가 된다.
 - 생성물과 모듈 문서가 함께 dirty이면 documents-only로 분류하여 문서 변경을 inconclusive 근거로 유지한다. source-dirty가 최우선이며 generated-only는 문서와 소스 변경이 모두 없을 때만 적용한다.
 - 미추적 경로는 파일별로 관측하며 review 산출물 하위만 제외한다. 상위 `.filid` 디렉터리에 있는 일반 미커밋 파일은 dirty evidence에 남긴다.
@@ -55,7 +63,7 @@
 - `review-worktree-stale`은 prepare를 권하지 않는다. prepare는 `cached`를 돌려주고 다음 seal도 stale이기 때문이다. 되돌리면 sealed verdict가 복원되고, 커밋하면 새 cross-review가 필요하다.
 - 사용자나 설치 상태로 고칠 수 있는 오류 대부분(repository rule 파일·body, 설치된 rule map과 actor method, config, 읽을 수 없는 저장 상태)과 일부 호출자 입력 오류는 전용 코드와 `nextAction`을 가진다. 나머지는 plain `Error`로 남아 `toolError`의 일반 `nextAction`을 받는다. 내부 불변식, 그리고 봉인된 상태의 validate·`projectRoot`·`changeContext`·validate group·round 인자 오류 같은 호출자 오류와 Deliverable 섹션이 없는 설치된 verifier method가 여기에 속한다.
 - 저장 상태의 `scope.diagnostics`는 `nextAction`과 `affects`가 선택 필드라, 스키마 버전을 올리지 않고 이전 상태도 읽는다. `affects`가 없는 저장 진단은 모든 축에 영향을 주는 것으로 읽어 진행 중인 리뷰의 판정을 바꾸지 않는다. `affects: []` 진단은 blocker가 되지 않고 verdict의 unresolved 표에 `affectsVerdict: false`로만 남는다.
-- prepare는 `outOfScope`와 `scope.diagnostics`를 결정적으로 정렬한다. 둘 다 hash 입력이 아니다.
+- prepare는 `outOfScope`, `scope.diagnostics`, `scope.outOfScopeDiagnostics`를 결정적으로 정렬한다. 셋 다 hash 입력이 아니다.
 - 다음 generation을 만들지 판단할 때 후보 목록은 서수 `FCA-NNN` id를 뺀 내용의 multiset으로 비교한다. severity·certainty 등 내용이 바뀌거나 후보가 생기거나 사라지면 새 generation이다.
 - `observeReviewGroupInputs`의 hash 입력(후보, 기록된 handoff, group 단위, `fileInputs`)은 persisted state의 순서를 따른다. 이 순서나 직렬화를 바꾸면 진행 중인 generation이 전부 `review-inputs-stale`이 되므로 불변식으로 유지한다.
 - prepare가 공유 snapshot 진단을 실을 때는 리뷰 문맥 문장을 앞에 두고 원래 `nextAction`을 `Outside this review:` 뒤로 보낸다. 리뷰 도중 소스나 입력을 고치면 리뷰가 stale이 되기 때문이다. config 진단은 축에 영향을 선언하면 리뷰를 완료로 보고하지 말라는 문장을, `affects: []`면 남은 설정으로 진행했다는 문장을 받는다.
@@ -223,6 +231,7 @@
 
 ### AC-review-blockers — 분리된 보류 원인과 해소 안내
 
+- An `indeterminate` file outside the review scope does not make the review INCONCLUSIVE; the same file inside the scope does.
 - Prepared diagnostics preserve original dependency/verification certainty separately from aggregate structure status. Dependency-only diagnostics do not contaminate exact verification, and independent verification gaps are not hidden by dependency recovery.
 - Eight validated gap references to one prepared cause produce one blocker with all eight group occurrences and original sources. Different causes never merge merely because their rule matches.
 - Recoverable imports identify the consumer, specifier, affected axes, next analysis and completion condition with suggestedOwner=agent. Human decisions require distinct choices and a reason evidence alone cannot decide.

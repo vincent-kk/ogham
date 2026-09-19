@@ -1,49 +1,18 @@
-import { existsSync, readFileSync, readdirSync } from 'node:fs';
-import { basename, dirname, extname, join } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
+import { basename, dirname, join } from 'node:path';
 
-import { createIgnoreFilter } from '../../../lib/createIgnoreFilter.js';
 import type {
   EntryPointInspection,
   StructureAdapter,
 } from '../../../types/adapters.js';
 
-import {
-  ECMASCRIPT_ADAPTER_ID,
-  EXCLUDED_DIRECTORY_NAMES,
-  SOURCE_EXTENSIONS,
-} from './ecmascriptConventions.js';
+import { walkSourceTree } from './discovery/walkSourceTree.js';
+import { ECMASCRIPT_ADAPTER_ID } from './ecmascriptConventions.js';
 import { hidesExport } from './entrySurface/hidesExport.js';
 import { extractDependencyReferences } from './extractDependencyReferences.js';
 import { findEntryPoints } from './findEntryPoints.js';
 import { inspectManifestEntry } from './inspectManifestEntry.js';
 import { scanLexicalTokens } from './scanLexicalTokens.js';
-
-function discoverEcmascriptFiles(projectRoot: string): string[] {
-  const isIgnored = createIgnoreFilter(projectRoot);
-  const files: string[] = [];
-  const visit = (directoryPath: string): void => {
-    const entries = readdirSync(directoryPath, { withFileTypes: true }).sort(
-      (left, right) => left.name.localeCompare(right.name),
-    );
-    for (const entry of entries) {
-      const path = join(directoryPath, entry.name);
-      if (isIgnored(path)) continue;
-      if (entry.isDirectory()) {
-        if (!EXCLUDED_DIRECTORY_NAMES.has(entry.name)) visit(path);
-        continue;
-      }
-      if (
-        entry.isFile() &&
-        SOURCE_EXTENSIONS.includes(
-          extname(entry.name) as (typeof SOURCE_EXTENSIONS)[number],
-        )
-      )
-        files.push(path);
-    }
-  };
-  visit(projectRoot);
-  return files;
-}
 
 function inspectEntryPointSource(
   entryPointPath: string,
@@ -123,7 +92,7 @@ export const ecmascriptStructureAdapter: StructureAdapter = {
     const evidence: string[] = [];
     for (const filename of ['package.json', 'tsconfig.json', 'jsconfig.json'])
       if (existsSync(join(projectRoot, filename))) evidence.push(filename);
-    const files = discoverEcmascriptFiles(projectRoot);
+    const { files } = walkSourceTree(projectRoot);
     if (files.length > 0)
       evidence.push(
         ...files.slice(0, 3).map((path) => path.slice(projectRoot.length + 1)),
@@ -135,7 +104,10 @@ export const ecmascriptStructureAdapter: StructureAdapter = {
     };
   },
   async discoverSourceFiles(projectRoot) {
-    return discoverEcmascriptFiles(projectRoot);
+    return walkSourceTree(projectRoot).files;
+  },
+  async discoverSourceTree(projectRoot) {
+    return walkSourceTree(projectRoot);
   },
   async findEntryPoints(directoryPath, overrides) {
     return findEntryPoints(directoryPath, overrides);

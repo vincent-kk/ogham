@@ -27,6 +27,7 @@ import type { PlacementRequest } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
 import { writeSharedUnitRestructureProject } from '../../integration/reviewFlow/helpers/writeSharedUnitRestructureProject.js';
 
+import { persistPlanArtifact } from './helpers/persistPlanArtifact.js';
 import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewStateFixtureFile.js';
 
 /**
@@ -66,14 +67,15 @@ async function persistPlan(requests: PlacementRequest[]): Promise<string> {
 }
 
 /**
- * Rewrite fields of the persisted plan, the way a forged artifact would.
+ * Rewrite fields of the persisted plan and store the result under its digest
+ * name, so the reader's inner defenses — not the store check — judge it.
  * @param fields Plan fields to overwrite.
- * @returns Nothing; the artifact at `planPath` holds the forged plan.
+ * @returns Nothing; `planPath` names the stored forged artifact.
  */
 function forgePlan(fields: Record<string, unknown>): void {
   const artifact = JSON.parse(readFileSync(planPath, 'utf8'));
   Object.assign(artifact.data, fields);
-  writeFileSync(planPath, JSON.stringify(artifact));
+  planPath = persistPlanArtifact(artifact);
 }
 
 /**
@@ -185,12 +187,11 @@ describe('restructure precondition reads only what the plan read', () => {
   it('rejects a schema 2 plan artifact and asks for a new plan', async () => {
     const artifact = JSON.parse(readFileSync(planPath, 'utf8'));
     artifact.data.schemaVersion = 2;
-    writeFileSync(planPath, JSON.stringify(artifact));
     await expect(
       handleRestructure({
         action: 'precondition',
         path: projectRoot,
-        planPath,
+        planPath: persistPlanArtifact(artifact),
       }),
     ).rejects.toMatchObject({
       code: 'plan-artifact-invalid',
@@ -270,7 +271,7 @@ describe('restructure precondition never reads outside the project root', () => 
     expect(await preconditionCodes(planPath)).toEqual([]);
   });
 
-  it('rejects an honest plan whose target turned into an outward link, and a new plan clears it', async ({
+  it('rejects an honest plan whose target turned into an outward link, and a new plan is read but held by that link', async ({
     skip,
   }) => {
     linkOrSkip(outsideDirectory, join(projectRoot, 'domain/model'), skip);
@@ -285,7 +286,8 @@ describe('restructure precondition never reads outside the project root', () => 
         organNameHint: 'model',
       },
     ]);
-    expect(await preconditionCodes(newPlan)).toEqual([]);
+    // The outward link is an unfollowed symlink the plan treats as related, so consumers stay undecided.
+    expect(await preconditionCodes(newPlan)).toEqual(['unresolved-decisions']);
   });
 
   it('plans around a symbolic link loop at a probe path and leaves the probe out', async ({

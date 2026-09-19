@@ -309,6 +309,7 @@ describe('fractal-validator', () => {
         nodePaths: ['/app/left', '/app/right'],
         edges: [],
         cycles: [['/app/left', '/app/right']],
+        unknownFiles: [],
         certainty: 'exact',
       };
 
@@ -326,6 +327,7 @@ describe('fractal-validator', () => {
         nodePaths: ['/app'],
         edges: [],
         cycles: [],
+        unknownFiles: [],
         certainty: 'indeterminate',
       };
 

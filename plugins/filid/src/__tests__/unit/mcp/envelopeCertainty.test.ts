@@ -65,6 +65,7 @@ const EXACT_SNAPSHOT: ProjectSnapshot = {
     nodePaths: [],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: [],

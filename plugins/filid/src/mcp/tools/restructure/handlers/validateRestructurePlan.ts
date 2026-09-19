@@ -17,7 +17,9 @@ import type { PlanValidationResult } from '../../../../types/restructure.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 import { affectsAnalysisAxis } from '../../utils/affectsAnalysisAxis.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
+import { isAttributedToUnknownFile } from '../../utils/isAttributedToUnknownFile.js';
 import type { RestructureInput } from '../types/restructureTypes.js';
+import { describeKnownEdgesPostcondition } from '../utils/describeKnownEdgesPostcondition.js';
 import { readRestructurePlan } from '../utils/readRestructurePlan.js';
 
 type RestructureValidationInput = Extract<
@@ -34,7 +36,10 @@ type RestructureValidationInput = Extract<
  *
  * @param input - Validation action, project root, and absolute plan path.
  * @returns The canonical six-scope plan-validation result, with the caller's
- * next step chosen by action and status.
+ * next step chosen by action and status. Unknown files related to the plan,
+ * or a restructure-axis diagnostic not explained by an unrelated unknown file,
+ * make the status `indeterminate`. A passing postcondition beside unrelated
+ * unknown files says it holds on the known edges only.
  */
 export async function validateRestructurePlan(
   input: RestructureValidationInput,
@@ -46,13 +51,21 @@ export async function validateRestructurePlan(
     input.action === RESTRUCTURE_ACTIONS.PRECONDITION
       ? validatePlanPreconditions(context.snapshot, plan)
       : validatePlanPostconditions(context.snapshot, plan);
-  const status = context.diagnostics.some((diagnostic) =>
-    affectsAnalysisAxis(diagnostic, RESTRUCTURE_ANALYSIS_AXES),
-  )
-    ? TOOL_STATUSES.INDETERMINATE
-    : result.valid
-      ? TOOL_STATUSES.OK
-      : TOOL_STATUSES.VIOLATIONS;
+  const status =
+    result.unknownFiles.relevant.length > 0 ||
+    context.diagnostics.some(
+      (diagnostic) =>
+        affectsAnalysisAxis(diagnostic, RESTRUCTURE_ANALYSIS_AXES) &&
+        !isAttributedToUnknownFile(
+          diagnostic,
+          result.unknownFiles.other,
+          context.snapshot.projectRoot,
+        ),
+    )
+      ? TOOL_STATUSES.INDETERMINATE
+      : result.valid
+        ? TOOL_STATUSES.OK
+        : TOOL_STATUSES.VIOLATIONS;
   return {
     projectRoot: context.snapshot.projectRoot,
     status,
@@ -65,7 +78,12 @@ export async function validateRestructurePlan(
       passed: result.valid ? 1 : 0,
       failed: result.valid ? 0 : 1,
       skipped: 0,
-      nextAction: RESTRUCTURE_VALIDATION_NEXT_ACTIONS[input.action][status],
+      nextAction:
+        input.action === RESTRUCTURE_ACTIONS.POSTCONDITION &&
+        status === TOOL_STATUSES.OK &&
+        result.unknownFiles.other.length > 0
+          ? describeKnownEdgesPostcondition(result.unknownFiles.other.length)
+          : RESTRUCTURE_VALIDATION_NEXT_ACTIONS[input.action][status],
     },
     data: result,
     diagnostics: context.diagnostics,

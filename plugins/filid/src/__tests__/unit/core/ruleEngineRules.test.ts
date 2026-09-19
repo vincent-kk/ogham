@@ -71,6 +71,7 @@ function makeSnapshot(
       nodePaths: [...tree.nodes.keys()],
       edges: [],
       cycles: [],
+      unknownFiles: [],
       certainty: 'exact' as const,
     },
     ...overrides,
@@ -396,6 +397,7 @@ describe('rule-engine (rules)', () => {
             },
           ],
           cycles: [[one.path, two.path, one.path]],
+          unknownFiles: [],
           certainty: 'exact',
         },
       });
@@ -425,6 +427,7 @@ describe('rule-engine (rules)', () => {
           nodePaths: [one.path, two.path],
           edges: [],
           cycles: [[one.path, two.path]],
+          unknownFiles: [],
           certainty: 'indeterminate',
         },
       });
@@ -479,6 +482,7 @@ describe('rule-engine (rules)', () => {
             },
           ],
           cycles: [],
+          unknownFiles: [],
           certainty: 'exact',
         },
       });
@@ -508,6 +512,7 @@ describe('rule-engine (rules)', () => {
           nodePaths: [pure.path],
           edges: [],
           cycles: [],
+          unknownFiles: [],
           certainty: 'indeterminate',
         },
       });
@@ -564,6 +569,7 @@ describe('rule-engine (rules)', () => {
             },
           ],
           cycles: [],
+          unknownFiles: [],
           certainty: 'indeterminate',
         },
       });

@@ -31,11 +31,13 @@ export async function collectChangedScopeEvidence(
       informational: computed.informational,
       outOfScope: computed.outOfScope,
       diagnostics: computed.evidenceDiagnostics,
+      outOfScopeDiagnostics: computed.outOfScopeDiagnostics,
     }),
   );
 
   return {
     evidenceDiagnostics: computed.evidenceDiagnostics,
+    outOfScopeDiagnostics: computed.outOfScopeDiagnostics,
     snapshotHash: computed.snapshotHash,
     evidenceComplete: computed.evidenceComplete,
     worktree: computed.worktree,

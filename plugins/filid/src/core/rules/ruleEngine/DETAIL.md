@@ -11,6 +11,7 @@
 - exception과 allowed-peer scope는 portable separator/case path identity로 평가한다.
 - `legacy-criteria-ledger`는 project granularity로 snapshot evidence를 평가하고 root DETAIL migration target을 suggestion으로 반환한다.
 - `organ-no-intentmd`는 **조용히 승격된 organ**을 보고한다. 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`는 실제 snapshot에서 성립할 수 없다. 대신 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `additionalOrganNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우 — DETAIL.md도 module 진입점도 없는 상태 — 를 `warning`으로 낸다. 둘 중 하나라도 있으면 승격이 의도된 것이므로 침묵한다.
+- `external-import-boundary` 위반은 import가 풀리는 파일을 `importedPath`에 싣는다. restructure postcondition이 위반의 신원(rule, 소비자, 대상)을 계획 시점 기준선과 비교할 때 쓴다.
 - `external-import-boundary`는 대상이 organ 파일이면 진입점 경유가 아니라 **소비자 위치**로 판정한다. organ은 진입점을 갖지 않으므로 경유할 대상이 없다.
 
   | 소비자 위치         | 참조 경로            | 판정                             |

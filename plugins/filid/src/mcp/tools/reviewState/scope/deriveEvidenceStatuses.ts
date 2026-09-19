@@ -21,6 +21,7 @@ function isConclusive(status: ReviewEvidenceStatuses['structure']): boolean {
  * @param structureViolationCount Retained changed-scope structure row count.
  * @param verificationViolationCount Retained changed-scope verification row count.
  * @param scopedVerificationCertainty Verification certainty within changed scope.
+ * @param scopedDependencyCertainty Dependency certainty within the review scope.
  * @returns Structure and verification statuses plus aggregate completeness.
  */
 export function deriveEvidenceStatuses(
@@ -29,6 +30,7 @@ export function deriveEvidenceStatuses(
   structureViolationCount: number,
   verificationViolationCount: number,
   scopedVerificationCertainty: AnalysisCertainty,
+  scopedDependencyCertainty: AnalysisCertainty,
 ): ReviewEvidenceStatuses {
   const mutableDiagnostics = [...diagnostics];
   const structure = resolveFractalScanStatus(
@@ -36,6 +38,7 @@ export function deriveEvidenceStatuses(
       snapshot,
       mutableDiagnostics,
       scopedVerificationCertainty,
+      scopedDependencyCertainty,
     ),
     structureViolationCount,
   );
@@ -46,7 +49,7 @@ export function deriveEvidenceStatuses(
   );
   return {
     analysisAxes: {
-      dependencies: snapshot.dependencyGraph.certainty,
+      dependencies: scopedDependencyCertainty,
       verification: scopedVerificationCertainty,
     },
     structure,

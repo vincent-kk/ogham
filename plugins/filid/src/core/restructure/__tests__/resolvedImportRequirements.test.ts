@@ -72,6 +72,7 @@ function snapshotOf(
       nodePaths: [P.ROOT, P.APP],
       edges: [{ fromFractalPath: P.APP, toFractalPath: P.APP, evidence }],
       cycles: [],
+      unknownFiles: [],
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture'],

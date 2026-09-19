@@ -1,5 +1,5 @@
 import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
-import type { AnalysisCertainty } from '../../../types/fractal.js';
+import type { UnknownFile } from '../../../types/fractal.js';
 import type {
   PlanningDecisionReason,
   RestructureDecision,
@@ -14,8 +14,8 @@ export interface DecisionContext {
   sourcePath: string;
   /** Fractal the unit is placed under: the consumers' lowest common fractal, else the source owner, else the root. */
   placementPath: string;
-  /** Certainty of the snapshot's dependency graph. */
-  graphCertainty: AnalysisCertainty;
+  /** Unknown files related to the unit, whose unconfirmed references may hide consumers. */
+  relatedUnknownFiles: readonly UnknownFile[];
   /** The request's organ name hint, when it gave one. */
   organNameHint?: string;
   /** Requested consumer paths ignored because no fractal owns them. */
@@ -55,9 +55,9 @@ const DECISION_SENTENCES: Record<
   [RESTRUCTURE_DECISION_REASONS.DEPENDENCY_EVIDENCE_INDETERMINATE]: (
     context,
   ) => ({
-    message: `The project's dependency graph is ${context.graphCertainty}, so the consumers found for ${context.sourcePath} may be incomplete; the envelope diagnostics say why.`,
+    message: `${context.relatedUnknownFiles.length} file(s) related to ${context.sourcePath} have unconfirmed references, so the consumers found for it may be incomplete: ${context.relatedUnknownFiles.map(({ path, causes }) => `${path} (${causes.join(', ')})`).join('; ')}. The envelope diagnostics say why.`,
     nextAction:
-      "Follow each diagnostic's nextAction until the graph is exact, then create a new plan. Filid cannot verify a restructure while the graph is not exact, so passing consumerPaths alone does not unblock it.",
+      'Follow the nextAction of each diagnostic on those files until none of them is unknown, then create a new plan. Filid cannot verify a restructure while a related file is unknown, so passing consumerPaths alone does not unblock it.',
   }),
   [RESTRUCTURE_DECISION_REASONS.CONTRACT_INTENT_UNKNOWN]: (context) => ({
     message: `Filid cannot tell whether ${context.sourcePath} is internal to its consumers or an independent module: the request gave no contractIntent, and the unit is not already a fractal with INTENT.md, DETAIL.md and an entry point.`,

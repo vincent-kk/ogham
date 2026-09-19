@@ -98,6 +98,7 @@ const SNAPSHOT: ProjectSnapshot = {
     nodePaths: [PROJECT_ROOT, FEATURE_ROOT, SIBLING_ROOT],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture-adapter'],

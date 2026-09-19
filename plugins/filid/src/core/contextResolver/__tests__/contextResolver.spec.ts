@@ -261,6 +261,7 @@ describe('context resolver', () => {
         nodePaths: [projectRoot, feature],
         edges: [],
         cycles: [],
+        unknownFiles: [],
         certainty: 'exact',
       },
       adapterIds: [],

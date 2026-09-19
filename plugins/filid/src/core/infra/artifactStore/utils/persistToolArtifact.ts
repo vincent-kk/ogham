@@ -9,7 +9,6 @@ import {
 
 import type { McpToolName } from '../../../../constants/mcpToolNames.js';
 import {
-  TOOL_ARTIFACT_DIRECTORY,
   TOOL_ARTIFACT_EPHEMERAL,
   TOOL_ARTIFACT_FILE_SUFFIX,
   TOOL_ARTIFACT_HASH_ALGORITHM,
@@ -21,6 +20,8 @@ import {
 import type { ToolArtifact } from '../../../../types/toolEnvelope.js';
 import { writeArtifactAtomic } from '../operations/writeArtifactAtomic.js';
 
+import { resolveToolArtifactDirectory } from './resolveToolArtifactDirectory.js';
+
 export function persistToolArtifact(
   toolName: McpToolName,
   serializedPayload: string,
@@ -30,9 +31,7 @@ export function persistToolArtifact(
     .digest(TOOL_ARTIFACT_HASH_ENCODING);
   const cacheRoot = portableResolve(pluginCache(TOOL_ARTIFACT_PLUGIN_NAME));
   const artifactPath = resolveContainedPath(
-    cacheRoot,
-    TOOL_ARTIFACT_DIRECTORY,
-    toolName,
+    resolveToolArtifactDirectory(toolName),
     `${sha256}${TOOL_ARTIFACT_FILE_SUFFIX}`,
   );
   assertNoSymlinkDescendantsSync(cacheRoot, artifactPath);

@@ -45,7 +45,9 @@ export {
   buildDAG,
   buildDependencyGraph,
   detectCycles,
+  classifyRelevanceTarget,
   getDirectDependencies,
+  partitionUnknownFiles,
   topologicalSort,
 } from './analysis/dependencyGraph/index.js';
 export {

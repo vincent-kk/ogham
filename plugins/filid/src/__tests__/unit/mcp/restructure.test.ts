@@ -79,6 +79,7 @@ const SNAPSHOT: ProjectSnapshot = {
     nodePaths: [PROJECT_ROOT],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture-adapter'],
@@ -175,13 +176,23 @@ describe('restructure action dispatcher', () => {
       mode: STRUCTURE_VALIDATION_MODES.PLAN_PRECONDITION,
       scopes: STRUCTURE_VALIDATION_SCOPE_VALUES,
     });
-    expect(precondition.data).toEqual({ valid: true, findings: [] });
+    expect(precondition.data).toEqual({
+      valid: true,
+      findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
+    });
     expect(postcondition.status).toBe(TOOL_STATUSES.OK);
     expect(postcondition.summary).toMatchObject({
       mode: STRUCTURE_VALIDATION_MODES.PLAN_POSTCONDITION,
       scopes: STRUCTURE_VALIDATION_SCOPE_VALUES,
     });
-    expect(postcondition.data).toEqual({ valid: true, findings: [] });
+    expect(postcondition.data).toEqual({
+      valid: true,
+      findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
+    });
     expect(plan.summary.nextAction).toContain('Nothing to move');
     expect(precondition.summary.nextAction).toContain(
       'Present the plan for approval',

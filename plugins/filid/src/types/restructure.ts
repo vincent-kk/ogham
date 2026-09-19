@@ -9,6 +9,8 @@ import type {
   RESTRUCTURE_VALIDATION_CODES,
 } from '../constants/restructure.js';
 
+import type { UnknownFilePartition } from './fractal.js';
+
 type ValueOf<T> = T[keyof T];
 
 export type PlacementBasis = ValueOf<typeof PLACEMENT_BASES>;
@@ -124,7 +126,7 @@ export interface RestructurePlan {
   planId: string;
   projectRoot: string;
   snapshotHash: string;
-  /** Files whose bytes the import requirements come from — move sources, their consumers and what they import — sorted. */
+  /** Files whose bytes the plan read — move sources, their consumers, what they import, and the unknown files the relevance filter read — sorted. */
   readPaths: string[];
   /** Paths whose state decided placement — each target and the documents of every source and target ancestor — sorted; each may not exist. */
   probePaths: string[];
@@ -134,6 +136,10 @@ export interface RestructurePlan {
   moves: MoveInstruction[];
   alreadyPlaced: MoveInstruction[];
   unresolved: MoveInstruction[];
+  /** Unknown files of the plan-time graph; `relevant` ones make the plan indeterminate. */
+  unknownFiles: UnknownFilePartition;
+  /** Cycles and boundary violations before execution; postcondition reports them as `preexisting`. */
+  baseline: PlanBaseline;
   summary: {
     moveCount: number;
     fractalsCreated: number;
@@ -154,7 +160,34 @@ export interface PlanValidationFinding {
   sourcePath?: string;
 }
 
+/** A boundary violation's identity: the rule, the importing file and the file it loads. */
+export interface PlanBaselineViolation {
+  /** Rule that reported the violation, e.g. `external-import-boundary`. */
+  ruleId: string;
+  /** Absolute path of the file holding the import. */
+  consumerPath: string;
+  /** Absolute path of the file the import loads. */
+  importedPath: string;
+}
+
+/** What the plan-time snapshot already violated, compared after execution. */
+export interface PlanBaseline {
+  /** Cycle routes of the plan-time graph, each closed by its first owner. */
+  cycles: string[][];
+  /**
+   * Identity of each import-boundary violation the plan-time snapshot held; a
+   * postcondition violation matching one after relocation through the moves is
+   * `preexisting`, and one without an identity is always a finding.
+   */
+  boundaryViolations: PlanBaselineViolation[];
+}
+
 export interface PlanValidationResult {
+  /** True when `findings` is empty; `preexisting` alone never fails. */
   valid: boolean;
   findings: PlanValidationFinding[];
+  /** Cycles and boundary violations the plan-time baseline already held, as full records. Always empty for precondition. */
+  preexisting: PlanValidationFinding[];
+  /** Unknown files of the checked snapshot, split by relevance to the plan's units. */
+  unknownFiles: UnknownFilePartition;
 }

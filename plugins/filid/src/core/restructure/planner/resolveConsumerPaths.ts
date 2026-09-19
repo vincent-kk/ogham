@@ -4,9 +4,8 @@ import {
   samePath,
 } from '@ogham/cross-platform';
 
-import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
-import type { ProjectSnapshot } from '../../../types/fractal.js';
+import type { ProjectSnapshot, UnknownFile } from '../../../types/fractal.js';
 import type { PlanningDecisionReason } from '../../../types/restructure.js';
 import { resolveOwningFractal } from '../../analysis/lcaCalculator/index.js';
 import { isAtOrWithin } from '../imports/isAtOrWithin.js';
@@ -26,9 +25,19 @@ function dedupePaths(paths: string[]): string[] {
   );
 }
 
+/**
+ * Consumers that place a unit: the requested ones, or the graph's.
+ * @param snapshot Pre-move snapshot.
+ * @param sourcePath Absolute source of the unit.
+ * @param relatedUnknownFiles Unknown files related to the unit; any of them may
+ *   hide a consumer the graph does not show.
+ * @param requestedPaths Caller's consumers, used as given when present.
+ * @returns Owned consumer paths, the dropped ones and the decision reasons.
+ */
 export function resolveConsumerPaths(
   snapshot: ProjectSnapshot,
   sourcePath: string,
+  relatedUnknownFiles: readonly UnknownFile[],
   requestedPaths?: string[],
 ): ConsumerPathResolution {
   const reasons = new Set<PlanningDecisionReason>();
@@ -38,7 +47,7 @@ export function resolveConsumerPaths(
       portableResolve(snapshot.projectRoot, path),
     );
   else {
-    if (snapshot.dependencyGraph.certainty !== ANALYSIS_CERTAINTIES.EXACT)
+    if (relatedUnknownFiles.length > 0)
       reasons.add(
         RESTRUCTURE_DECISION_REASONS.DEPENDENCY_EVIDENCE_INDETERMINATE,
       );

@@ -374,6 +374,9 @@ export async function prepareReviewArtifacts(
     groups,
     scope: {
       diagnostics: collected.evidenceDiagnostics,
+      ...(collected.outOfScopeDiagnostics.length > 0
+        ? { outOfScopeDiagnostics: collected.outOfScopeDiagnostics }
+        : {}),
       snapshotHash: collected.snapshotHash,
       evidenceComplete: collected.evidenceComplete,
       worktree: collected.worktree,

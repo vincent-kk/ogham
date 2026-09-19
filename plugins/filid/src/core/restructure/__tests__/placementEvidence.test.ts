@@ -82,6 +82,7 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
       nodePaths: [P.APP, P.B],
       edges: [{ fromFractalPath: P.APP, toFractalPath: P.APP, evidence }],
       cycles: [],
+      unknownFiles: [],
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture'],

@@ -5,12 +5,15 @@
 - Dependency diagnostics carry stable consumer/specifier cause identity, the unresolved specifier, and explicit dependencies/boundaries impact. A reference the adapter marks `certainty: 'indeterminate'` produces an `uncertain-local-dependency` diagnostic under the same identity rule. Value/type imports of the same target share an identity. Independent verification remains exact when its own evidence is exact.
 - Every diagnostic declares `affects`, the analysis axes (`dependencies`, `boundaries`, `verification`) whose conclusions it can change; `[]` means none. A producer narrows the list only where the code shows the other axes cannot change: dependency references affect dependencies and boundaries; entry-point surface failures affect boundaries (entry-point and node rules have no axis of their own); adapter selection, structure ownership and verification discovery failures affect all three, since classification and the verification set feed every axis.
 - The document-contract messages (a missing INTENT.md or DETAIL.md, a stale path token) name the node by its project-root-relative POSIX path, `.` for the root, so the review candidates built from them hash the same wherever the repository sits. Evidence diagnostics keep absolute paths in their messages; they are not hashed.
-- Every diagnostic carries a `nextAction`, stated by its producer. A non-exact dependency graph always has an explaining diagnostic: owner-less references produce `unowned-local-dependency` (judged with the graph builder's own order and exemptions), and a project with no active structure adapter produces `dependency-adapter-unavailable`.
+- Every diagnostic carries a `nextAction`, stated by its producer. A non-exact dependency graph always has an explaining diagnostic, and every such diagnostic names a file that the graph lists in `unknownFiles` with the diagnostic code as a cause: owner-less references produce `unowned-local-dependency` (judged with the graph builder's own order and exemptions), and a project with no active structure adapter produces `dependency-adapter-unavailable`.
 
 - 등록된 structure/verification adapter와 config v2로 하나의 `ProjectSnapshot`을 만든다.
 - 호출자는 수집할 증거 축(entry surface, dependency, verification)을 고를 수 있고 기본값은 전부 수집이다. tree와 문서 증거는 축이 아니라 언제나 수집한다 — 나머지 축이 그 위에서만 의미를 갖기 때문이다.
 - 수집하지 않은 축은 빈 값에 `unsupported` certainty로 남고, 무엇을 수집했는지는 `collectedAxes`가 말한다. 빈 결과와 미수집을 구분하는 근거는 이 필드 하나이며, 이를 읽지 않고 축을 신뢰하는 소비자는 계약을 어긴 것이다.
 - 축 선택은 snapshot hash 입력에 포함한다. 축이 다른 두 snapshot이 같은 hash를 갖지 않는다.
+- dependency 수집기는 참조 밖에서 찾은 불확실성도 파일에 귀속해 graph builder에 넘긴다: 읽기 실패(`dependency-analysis-failed`), adapter ownership 진단(`ambiguous-adapter-claim`, `unsupported`), structure adapter가 따라가지 않은 symlink(`symlink-not-followed`). 수집기 자체의 certainty는 adapter가 없을 때 `unsupported`, 그 밖에는 `exact`다.
+- symlink는 따라가지 않는다. 실제 위치가 project root 밖인 symlink(adapter가 소스로 볼 파일, 또는 디렉터리)는 `symlink-not-followed` 진단(`affects: ['dependencies', 'boundaries']`)과 `unknownFiles` 항목이 된다. 진단의 다음 행동은 먼저 정확한 설정 편집을 말한다: `structure.additionalExcludedDirectories`에 링크 이름을 그대로 넣으면 그 링크는 목록에서 빠진다. 사용자 동의가 필요한 갈래(링크를 실제 파일로 바꾸거나 옮기기)는 그 뒤에 둔다. 내용은 읽지 않는다. root 안을 가리키는 symlink는 대상이 이미 그 실제 경로로 분석되므로 싣지 않는다. 끊어진 symlink와 loop는 분석할 내용이 없으므로 싣지 않는다.
+- snapshot hash 입력의 dependency graph에서는 `unknownFiles`를 뺀다. 그 목록은 hash에 이미 들어가는 `diagnostics`의 경로와 코드로 정해진다. 그래서 목록을 도입해도 같은 프로젝트의 hash가 바뀌지 않는다.
 - snapshot은 tree, owner-level dependency graph, verification, adapter IDs, diagnostics, output language, legacy criteria evidence와 content-derived hash를 함께 가진다.
 - ambiguous/unsupported ownership, unresolved local dependency와 문서 위반은 숨기지 않는다.
 - 문서 evidence 수집이 두 파생 검사를 함께 낸다: 존재 주장 형태(말미 `/` 디렉터리 표기 또는 basename에 `.`)이고 home(`~`)·변수(`$`) 표기가 아닌 상대 경로 토큰이 해석 기준 어디에서도 존재하지 않으면 `stale-path` warning, INTENT 한 섹션이 직계 children(4개 이상일 때) 절반 이상을 나열하면 `derivable-structure` warning. 해석 기준은 node 디렉터리부터 project root까지의 조상 체인이되 `..` 포함 토큰은 node 디렉터리 하나뿐이고, 말미 `/` 토큰은 디렉터리로만 충족된다. 면책 섹션·`## History`·`## Last Updated`·`## Dependencies`·fence 내부는 제외하고, 같은 섹션에 `derivable-structure`가 있으면 그 섹션의 `derivable-content`를 대체한다(구체 규칙 우선).
@@ -81,7 +84,9 @@
 
 ### AC-snapshot-certainty — 불확실성 보존
 
-- unresolved local dependency가 있으면 graph certainty가 indeterminate다.
+- unresolved local dependency가 있으면 그 파일이 `unknownFiles`에 들어가고 graph certainty가 indeterminate다.
+- 파일 하나를 읽지 못해도 graph 전체가 아니라 그 파일이 `unknownFiles`에 들어간다.
+- 실제 위치가 root 밖인 symlink 소비자는 조용히 빠지지 않고 `symlink-not-followed` 진단과 `unknownFiles` 항목을 남긴다.
 - adapter가 indeterminate로 표시한 참조는 `uncertain-local-dependency` 진단을 남긴다.
 - 외부 package dependency는 project graph의 unresolved로 오인하지 않는다.
 - 선택 가능한 structure/verification adapter가 없으면 빈 exact PASS가 아니라 해당 분석 certainty가 `unsupported`이고, dependency 축은 `dependency-adapter-unavailable` 진단 하나를 남긴다.
@@ -89,4 +94,4 @@
 
 ## Last Updated
 
-2026-09-20 — `resolveHashFile` joins the public surface so path-state hash inputs share the root containment of `computeSnapshotHash`.
+2026-09-20 — dependency uncertainty is attributed to files (`unknownFiles`); unfollowed symlinks are reported instead of dropped.

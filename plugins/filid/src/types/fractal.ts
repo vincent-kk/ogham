@@ -166,10 +166,33 @@ export interface DependencyGraphEdge {
   evidence: DependencyEvidence[];
 }
 
+/**
+ * A file whose references the analysis could not confirm, with the diagnostic
+ * codes that explain why. Conclusions that need an absence (no cycle, no
+ * boundary violation) hold only where no related file is listed.
+ */
+export interface UnknownFile {
+  /** Project-relative POSIX path. */
+  path: string;
+  /** Sorted, unique diagnostic codes attributed to the file. */
+  causes: string[];
+}
+
+/** Unknown files split by whether they bear on the units under judgement. */
+export interface UnknownFilePartition {
+  /** Files that block a conclusion about those units. */
+  relevant: UnknownFile[];
+  /** Files reported as information only. */
+  other: UnknownFile[];
+}
+
 export interface DependencyGraph {
   nodePaths: string[];
   edges: DependencyGraphEdge[];
   cycles: string[][];
+  /** Files whose references are unconfirmed, sorted by path. */
+  unknownFiles: UnknownFile[];
+  /** Display value derived from `unknownFiles`; `unsupported` when no adapter read the project. */
   certainty: AnalysisCertainty;
 }
 

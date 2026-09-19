@@ -15,6 +15,7 @@ const EMPTY_MODEL = {
   informational: [],
   outOfScope: [],
   diagnostics: [],
+  outOfScopeDiagnostics: [],
 } as const;
 
 describe('renderEvidenceMarkdown', () => {

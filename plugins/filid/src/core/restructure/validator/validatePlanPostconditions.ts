@@ -4,6 +4,9 @@ import type {
   RestructurePlan,
 } from '../../../types/restructure.js';
 import { isAtOrWithin } from '../imports/isAtOrWithin.js';
+import { collectRelevanceUnits } from '../planner/collectRelevanceUnits.js';
+import { partitionPlanUnknownFiles } from '../planner/partitionPlanUnknownFiles.js';
+import { readUnknownFileText } from '../planner/readUnknownFileText.js';
 
 import { collectRequiredLoads } from './collectRequiredLoads.js';
 import { finalizeMoveTarget } from './finalizeMoveTarget.js';
@@ -20,14 +23,21 @@ import { validateTargetPostconditions } from './validateTargetPostconditions.js'
  * final target is that path; a target inside it excuses only the files it
  * holds, and an ancestor target excuses nothing left behind. `alreadyPlaced` is exempt from the source-absence
  * assertion and from nothing else: its unit still has to sit at its final
- * path, so it runs the target half of the same postcondition.
+ * path, so it runs the target half of the same postcondition. Boundary
+ * violations and cycles the plan-time baseline already held are reported as
+ * `preexisting`, and only unknown files related to the plan's units — sources,
+ * final targets and required consumers — block its absence conclusions.
  * @param snapshot - Post-execution snapshot
  * @param plan - The plan the actor carried out
- * @returns Every instruction, boundary and DAG finding; valid when none
+ * @param readFileText - Text of an unknown file by project-relative path, or null
+ * @returns Every instruction, boundary and DAG finding, the pre-existing
+ * records and the unknown files by relevance; valid when there is no finding
  */
 export function validatePlanPostconditions(
   snapshot: ProjectSnapshot,
   plan: RestructurePlan,
+  readFileText: (relativePath: string) => string | null = (relativePath) =>
+    readUnknownFileText(snapshot.projectRoot, relativePath),
 ): PlanValidationResult {
   const finalMoves = plan.moves.map((move, index) =>
     finalizeMoveTarget(move, plan.moves, index + 1),
@@ -56,9 +66,30 @@ export function validatePlanPostconditions(
       validateTargetPostconditions(snapshot, move, requiredLoads),
     ),
   ];
-  findings.push(
-    ...validateBoundaryPostconditions(snapshot),
-    ...validateDependencyPostconditions(snapshot),
+  const relevance = collectRelevanceUnits(snapshot.tree, [
+    ...finalMoves,
+    ...finalPlaced,
+  ]);
+  const unknownFiles = partitionPlanUnknownFiles(
+    snapshot,
+    relevance.targets,
+    relevance.consumerPaths,
+    readFileText,
   );
-  return { valid: findings.length === 0, findings };
+  const boundaries = validateBoundaryPostconditions(snapshot, plan);
+  const dependencies = validateDependencyPostconditions(
+    snapshot,
+    plan,
+    unknownFiles.relevant,
+  );
+  findings.push(...boundaries.findings, ...dependencies.findings);
+  return {
+    valid: findings.length === 0,
+    findings,
+    preexisting: [...boundaries.preexisting, ...dependencies.preexisting],
+    unknownFiles: {
+      relevant: unknownFiles.relevant,
+      other: unknownFiles.other,
+    },
+  };
 }

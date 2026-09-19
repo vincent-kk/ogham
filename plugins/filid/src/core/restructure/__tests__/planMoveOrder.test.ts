@@ -106,6 +106,7 @@ function snapshotOf(
       nodePaths: [P.ROOT, P.X],
       edges: [{ fromFractalPath: P.ROOT, toFractalPath: P.ROOT, evidence }],
       cycles: [],
+      unknownFiles: [],
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture'],
@@ -211,6 +212,8 @@ describe('restructure orders overlapping moves for automatic execution', () => {
     expect(validatePlanPostconditions(after, result)).toEqual({
       valid: true,
       findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
     });
   });
 
@@ -243,6 +246,8 @@ describe('restructure orders overlapping moves for automatic execution', () => {
     expect(validatePlanPostconditions(after, result)).toEqual({
       valid: true,
       findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
     });
   });
 
@@ -435,6 +440,8 @@ describe('restructure orders overlapping moves for automatic execution', () => {
     expect(validatePlanPostconditions(after, result)).toEqual({
       valid: true,
       findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
     });
   });
 

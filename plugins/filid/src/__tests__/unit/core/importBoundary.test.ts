@@ -93,6 +93,7 @@ const snapshot: ProjectSnapshot = {
     nodePaths: ['/project', '/project/left', '/project/right'],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: 'exact',
   },
   adapterIds: ['fixture'],

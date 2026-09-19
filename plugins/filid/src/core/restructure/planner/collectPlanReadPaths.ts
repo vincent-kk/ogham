@@ -7,16 +7,20 @@ import { isAtOrWithin } from '../imports/isAtOrWithin.js';
 import { sortUniquePaths } from './sortUniquePaths.js';
 
 /**
- * The files whose bytes the plan's import requirements come from: every file
- * inside a move source, every consumer that imports one, and every file a
- * moved file imports. Placement inputs are the probe set's, not this one's.
+ * The files whose bytes the plan read: every file inside a move source, every
+ * consumer that imports one, every file a moved file imports, and every
+ * unknown file the relevance filter read — a token appearing in one later
+ * would change the plan's premise. Placement inputs are the probe set's, not
+ * this one's.
  * @param snapshot - Pre-move snapshot supplying the tree and dependency evidence
  * @param moves - Executable moves of the plan
+ * @param unknownFilePaths - Absolute paths of the unknown files the relevance filter read
  * @returns Absolute paths inside the project root, sorted and without duplicates
  */
 export function collectPlanReadPaths(
   snapshot: ProjectSnapshot,
   moves: readonly PlannedMove[],
+  unknownFilePaths: readonly string[],
 ): string[] {
   const moved = (path: string) =>
     moves.some(({ sourcePath }) => isAtOrWithin(sourcePath, path));
@@ -32,7 +36,7 @@ export function collectPlanReadPaths(
       ...(moved(sourceFile) ? [resolvedPath] : []),
     ]);
   return sortUniquePaths(
-    [...sourceFiles, ...referenced].filter((path) =>
+    [...sourceFiles, ...referenced, ...unknownFilePaths].filter((path) =>
       isAtOrWithin(snapshot.projectRoot, path),
     ),
   );
