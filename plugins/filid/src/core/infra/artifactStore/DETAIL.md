@@ -5,7 +5,7 @@
 - artifact와 MCP inline 응답은 Map/Set 정규화를 포함한 같은 compact JSON serializer를 사용한다.
 - 실제 compact inline envelope가 UTF-8 16 KiB 이하일 때만 data를 inline한다.
 - budget 초과 또는 `persistence: always`면 full `ToolPayload` JSON을 plugin cache의 content-addressed absolute path에 atomic 저장한다.
-- persisted envelope는 inline data를 생략하고 artifact metadata를 반환하며, diagnostics 때문에 budget을 넘으면 full diagnostics는 artifact에 보존하고 inline에는 artifact를 가리키는 bounded diagnostic 하나만 둔다. 그 진단의 `nextAction`은 artifact의 diagnostics 배열을 읽고 항목마다 `nextAction`을 따르라고 안내한다.
+- persisted envelope는 inline data를 생략하고 artifact metadata를 반환하며, diagnostics 때문에 budget을 넘으면 full diagnostics는 artifact에 보존하고 inline에는 artifact를 가리키는 bounded diagnostic 하나만 둔다. 그 진단의 `nextAction`은 artifact의 diagnostics 배열을 읽고 항목마다 `nextAction`을 따르라고 안내한다. 그 진단의 `affects`는 대체한 진단들의 `affects` 합집합이다. 요약 때문에 영향 선언이 사라지지 않게 하기 위해서다.
 - bounded diagnostic까지 적용한 summary와 metadata가 budget을 넘으면 full artifact를 쓴 뒤 stable contract error를 반환한다.
 - 같은 content는 같은 SHA-256 path를 사용하며 metadata가 실제 bytes와 일치한다.
 - artifact cache root 아래 기존 symlink descendant를 통과해 쓰지 않는다.

@@ -1,3 +1,4 @@
+import { ANALYSIS_AXES } from '../../../constants/analysisAxes.js';
 import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
 import type { VerificationAdapter } from '../../../types/adapters.js';
@@ -50,6 +51,7 @@ export async function collectVerificationClaims(
       diagnostics.push({
         code: 'verification-discovery-failed',
         message: `Verification file discovery failed: ${error instanceof Error ? error.message : String(error)}`,
+        affects: ANALYSIS_AXES,
         nextAction:
           'Run again; if it repeats, report this message to the user. Verification evidence stays indeterminate until discovery succeeds.',
       });
@@ -74,6 +76,7 @@ export async function collectVerificationClaims(
         code: 'ambiguous-adapter-claim',
         message: `Equal-confidence verification adapters claim ${path}: ${adapterIds.join(', ')}.`,
         path,
+        affects: ANALYSIS_AXES,
         nextAction:
           'Set adapters.mode to "explicit" and list exactly one of these adapters in adapters.enabled in .filid/config.json, then run again.',
       });

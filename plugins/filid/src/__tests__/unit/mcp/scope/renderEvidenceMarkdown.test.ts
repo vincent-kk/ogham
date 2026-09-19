@@ -26,6 +26,7 @@ describe('renderEvidenceMarkdown', () => {
           code: 'a`b',
           message: 'diagnostic',
           path: '`c``d`',
+          affects: ['dependencies', 'boundaries', 'verification'],
           nextAction: 'Fix it.',
         },
       ],
@@ -110,5 +111,21 @@ describe('renderEvidenceMarkdown', () => {
     );
     expect(output).not.toContain('src/a.ts');
     expect(output).not.toContain('second verification row');
+  });
+
+  it('renders affects [] as impact none, not unknown', () => {
+    const output = renderEvidenceMarkdown({
+      ...EMPTY_MODEL,
+      diagnostics: [
+        {
+          code: 'config-warning',
+          message: 'dropped exempt list',
+          affects: [],
+          nextAction: 'Fix it.',
+        },
+      ],
+    });
+    expect(output).toContain('impact: none');
+    expect(output).not.toContain('impact: unknown');
   });
 });

@@ -1,3 +1,4 @@
+import { ANALYSIS_AXES } from '../../../../constants/analysisAxes.js';
 import {
   TOOL_ARTIFACT_DIAGNOSTIC_CODE,
   TOOL_ARTIFACT_DIAGNOSTIC_MESSAGE,
@@ -26,6 +27,9 @@ export function fitToolEnvelopeToBudget<Summary>(
         code: TOOL_ARTIFACT_DIAGNOSTIC_CODE,
         message: TOOL_ARTIFACT_DIAGNOSTIC_MESSAGE,
         path: envelope.artifact?.path,
+        affects: ANALYSIS_AXES.filter((axis) =>
+          envelope.diagnostics.some(({ affects }) => affects.includes(axis)),
+        ),
         nextAction: TOOL_ARTIFACT_DIAGNOSTIC_NEXT_ACTION,
       },
     ],

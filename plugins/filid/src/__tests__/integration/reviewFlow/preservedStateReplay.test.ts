@@ -1,4 +1,4 @@
-import { rmSync } from 'node:fs';
+import { readFileSync, rmSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -12,6 +12,7 @@ import { completeIncrementalReview } from '../../unit/mcp/reviewState/helpers/co
 import { writeReviewStateFixtureJson } from '../../unit/mcp/reviewState/helpers/writeReviewStateFixtureJson.js';
 
 import { PINNED_REVIEW_BRANCH } from './helpers/createPinnedReviewRepository.js';
+import { editPersistedReviewState } from './helpers/editPersistedReviewState.js';
 import { restoreHostPluginRoot } from './helpers/restoreHostPluginRoot.js';
 import { restorePreservedReviewState } from './helpers/restorePreservedReviewState.js';
 import { runPinnedReviewGit } from './helpers/runPinnedReviewGit.js';
@@ -45,6 +46,20 @@ afterEach(() => {
   rmSync(restored.pluginRoot, { recursive: true, force: true });
   restoreHostPluginRoot(originalPluginRoot);
 });
+
+/**
+ * The artifact paths a seal response carries.
+ * @param sealed Result of the seal action.
+ * @returns The report path and the blockers path, null when nothing blocks.
+ */
+function sealedPaths(sealed: Awaited<ReturnType<typeof handleReviewState>>): {
+  reportPath: string;
+  blockersPath: string | null;
+} {
+  if (!sealed.data || !('blockersPath' in sealed.data))
+    throw new Error('seal returned no artifact paths');
+  return sealed.data;
+}
 
 describe('state prepared by S0 code replays on the current code', () => {
   it('rebuilds the exact commits the preserved state was prepared against', () => {
@@ -105,5 +120,60 @@ describe('state prepared by S0 code replays on the current code', () => {
       confirmed: 2,
       reviewComplete: true,
     });
+  });
+
+  it('seals a stored diagnostic without affects as a blocker, the way it was written', async () => {
+    editPersistedReviewState(
+      restored.projectRoot,
+      PINNED_REVIEW_BRANCH,
+      (state) => {
+        state.scope.diagnostics = [
+          {
+            code: 'unresolved-local-dependency',
+            message: 'Cannot resolve ./moved.js from src/alpha/value.ts',
+            path: 'src/alpha/value.ts',
+          },
+        ];
+      },
+    );
+    await completeIncrementalReview(restored.projectRoot);
+    const sealed = await handleReviewState({
+      action: 'seal',
+      projectRoot: restored.projectRoot,
+      branchName: PINNED_REVIEW_BRANCH,
+    });
+    const { blockersPath } = sealedPaths(sealed);
+    expect(blockersPath).toEqual(expect.any(String));
+    expect(readFileSync(String(blockersPath), 'utf8')).toContain(
+      'unresolved-local-dependency',
+    );
+  });
+
+  it('seals a stored diagnostic with affects [] as verdict-neutral evidence, not a blocker', async () => {
+    editPersistedReviewState(
+      restored.projectRoot,
+      PINNED_REVIEW_BRANCH,
+      (state) => {
+        state.scope.diagnostics = [
+          {
+            code: 'config-warning',
+            message:
+              'rules["zero-peer-file"].exempt: invalid glob syntax "[bad" (dropped)',
+            affects: [],
+          },
+        ];
+      },
+    );
+    await completeIncrementalReview(restored.projectRoot);
+    const sealed = await handleReviewState({
+      action: 'seal',
+      projectRoot: restored.projectRoot,
+      branchName: PINNED_REVIEW_BRANCH,
+    });
+    const { blockersPath, reportPath } = sealedPaths(sealed);
+    expect(blockersPath).toBeNull();
+    const report = readFileSync(reportPath, 'utf8');
+    const unresolved = report.slice(report.indexOf('## Unresolved Evidence'));
+    expect(unresolved).toContain('config-warning');
   });
 });

@@ -1,3 +1,4 @@
+import { ANALYSIS_AXES } from '../../../../constants/analysisAxes.js';
 import type { RuleOverride } from '../../../../types/rules.js';
 
 import type { AllowedPeerOverride, FilidConfig } from './configSchemas.js';
@@ -24,6 +25,7 @@ function discarded(path: string): ConfigDiagnostic {
     code: 'config-key-discarded',
     path,
     message: `Removed v1 config key was not migrated: ${path}`,
+    affects: ANALYSIS_AXES,
     nextAction: `Nothing to do unless you relied on ${path}: v2 has no such key. It disappears when the v2 configuration is saved.`,
   };
 }
@@ -41,6 +43,7 @@ export function migrateConfigV1(
       code: 'config-migration-required',
       message:
         'Config v1 was converted in memory; save through settings to persist v2.',
+      affects: [],
       nextAction:
         'Ask the user to open the filid settings page (project_setup action "settings") and save once; that writes the v2 configuration.',
     },

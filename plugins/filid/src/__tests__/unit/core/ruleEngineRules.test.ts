@@ -409,7 +409,7 @@ describe('rule-engine (rules)', () => {
         expect.objectContaining({
           ruleId: 'circular-dependency',
           path: one.path,
-          message: expect.stringContaining(two.path),
+          message: 'Dependency cycle: one -> two -> one',
           suggestion:
             'Break the cycle: move what both sides share into a unit they both import, or invert one edge behind an interface.',
         }),

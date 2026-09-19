@@ -48,6 +48,7 @@ export async function analyzeVerification(
 
   const analysis = evaluateVerificationPolicy(
     files,
+    input.projectRoot,
     resolveContractGroups(input.detailDocuments ?? []),
   );
   return analysis.certainty === 'exact' && input.discoveryCertainty

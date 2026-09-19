@@ -5,7 +5,9 @@
 - project config의 schema version은 `2.0`이며 문서 출력 언어, adapter 선택, rule override와 언어 중립 구조 옵션을 관리한다.
 - `language`는 문서 출력 언어일 뿐 프로그래밍 언어 선택값이 아니다.
 - adapter mode `auto`는 등록 adapter claim을 사용하고 `explicit`은 `enabled` ID만 사용한다. explicit의 빈 목록과 미등록 ID는 validation finding이다.
-- v1 config는 메모리에서 v2로 변환하고 `config-migration-required`와 제거된 key 진단을 반환한다. 사용자가 settings 저장을 승인하기 전에는 파일을 쓰지 않는다.
+- v1 config는 메모리에서 v2로 변환하고 `config-migration-required`와 제거된 key 진단을 반환한다. 사용자가 settings 저장을 승인하기 전에는 파일을 쓰지 않는다. `config-migration-required`는 값을 대응 v2 필드로 옮겼다는 알림이라 `affects: []`다. 제거된 v1 key(naming, route, complexity, promotion)는 v2에 대응 필드가 없어 소유자 정책을 잃은 것이므로 `config-key-discarded`는 세 축 전부다.
+- loader는 잘못된 값과 모르는 key를 버리고 계속한다. 버린 항목마다 경고와 그 config 경로(`key`)를 남긴다. 레이어를 읽지 못했거나 병합 결과가 다시 검증되지 않아 config 전체가 기본값으로 대체되면 `key`는 `null`이다. 도구는 이 경로로 경고의 `affects`를 정한다(`mcp/tools` DETAIL).
+- 주석성 key는 경고 없이 버린다: 어느 깊이에서든 스키마에 없는(unrecognized) `$schema`, `$comment`, 그리고 `_`로 시작하는 key. JSON에 주석이 없어 흔히 쓰이고 분석에는 쓰이지 않는다. 잘못된 값은 key 이름과 무관하게 언제나 경고한다 — `entryPointOverrides`처럼 사용자 경로가 key인 record에서는 `_`로 시작하는 key가 진짜 설정이다.
 - 기존 organ, depth, allowed peer와 entry point 설정은 대응하는 v2 필드로 옮긴다. naming, route, complexity, promotion 설정은 진단 후 버린다.
 - config discovery는 git/project root를 기준으로 하며 plugin 설치 경로를 project fallback으로 사용하지 않는다.
 - optional `review` 설정은 cross-review의 effort, group file·churn 상한, 전체 review group 예산, plan threshold, 병렬 상한과 lockfile basename을 선언한다. 숫자는 양의 정수만 허용하고 lockfile 중복은 loader가 제거한다.
@@ -48,7 +50,7 @@ interface FilidConfigV2 {
 }
 ```
 
-- `loadConfig(projectRoot)` — v2 config 또는 in-memory migrated v1, warnings와 diagnostics를 반환한다.
+- `loadConfig(projectRoot)` — v2 config 또는 in-memory migrated v1, warnings(`{ message, key }`)와 diagnostics를 반환한다.
 - `review`의 숫자 필드는 integer·positive, effort는 `auto | low | medium | high`, lockfile은 비어 있지 않은 basename 문자열 목록이다. 위반은 기존 config validation error 경로를 따르고, 생략한 값은 review constants에서 채운다.
 - review 기본값은 effort `auto`, auto low group threshold 16, maxGroups 64, group churn 1024, plan churn 50, concurrency 8이다. auto는 reviewable group이 threshold 이상이면 low, 미만이면 medium을 선택한다. `groupFileLimit` 생략은 변경 밀도에 따른 10~32 자동 상한이고 명시한 값은 고정 상한이다. prepare는 액터 배정 전에 reviewable 그룹 수를 검사하며 명시 `maxGroups`는 기본 상한을 덮어쓴다. lockfile 기본값은 npm·Yarn·pnpm·Bun·Cargo·Poetry·Pipenv·Composer·Bundler·Go·Gradle·Nix·Mix의 canonical lockfile basename이다.
 - `migrateConfigV1(input)` — source를 쓰지 않고 대응 필드와 discarded key 목록을 반환한다. 반환하는 각 `ConfigDiagnostic`은 `nextAction`을 담는다: `config-migration-required`는 설정 페이지에서 저장하라고, `config-key-discarded`는 그 키에 의존했을 때만 할 일이 있다고 알린다.

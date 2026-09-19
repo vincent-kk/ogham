@@ -244,6 +244,7 @@ describe('restructure action dispatcher', () => {
         {
           code: 'dependency-adapter-unavailable',
           message: 'fixture',
+          affects: ['dependencies', 'boundaries'],
           nextAction: 'fixture',
         },
       ],

@@ -1,3 +1,4 @@
+import { ANALYSIS_AXES } from '../../constants/analysisAxes.js';
 import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
 import { resolveAdapters } from '../../adapters/index.js';
@@ -156,6 +157,7 @@ export async function createProjectSnapshot(
       ({ code, message, path, nextAction }) => ({
         code,
         message,
+        affects: ANALYSIS_AXES,
         nextAction,
         ...(path ? { path } : {}),
       }),

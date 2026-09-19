@@ -115,6 +115,7 @@ describe('readChangeContext', () => {
         code: 'review-change-context-untemplated',
         message:
           'Change context has none of the headings ## Summary, ## Contract, or ## Review notes, so the whole text was used as change context.',
+        affects: [],
         nextAction: expect.any(String),
       },
     ]);
@@ -133,6 +134,7 @@ describe('readChangeContext', () => {
       {
         code: 'review-change-context-truncated',
         message: 'Change context was truncated to 3000 characters.',
+        affects: [],
         nextAction: expect.any(String),
       },
     ]);
@@ -162,6 +164,7 @@ describe('readChangeContext', () => {
         {
           code: 'review-change-context-truncated',
           message: 'Change context was truncated to 3000 characters.',
+          affects: [],
           nextAction: expect.any(String),
         },
       ],

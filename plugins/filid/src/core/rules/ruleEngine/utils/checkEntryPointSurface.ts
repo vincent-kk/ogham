@@ -1,6 +1,7 @@
 import { samePath } from '@ogham/cross-platform';
 
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
+import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
 
 export function checkEntryPointSurface(context: RuleContext): RuleViolation[] {
@@ -31,7 +32,7 @@ export function checkEntryPointSurface(context: RuleContext): RuleViolation[] {
       {
         ruleId: BUILTIN_RULE_IDS.ENTRY_POINT_SURFACE,
         severity: 'warning' as const,
-        message: `Public surface evidence is ${state} for "${entryPoint.path}".`,
+        message: `Public surface evidence is ${state} for "${toProjectRelativePath(context.tree.root, entryPoint.path)}".`,
         path: entryPoint.path,
         certainty,
         suggestion,

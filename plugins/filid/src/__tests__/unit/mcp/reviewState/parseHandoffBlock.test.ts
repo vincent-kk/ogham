@@ -67,6 +67,7 @@ describe('parseHandoffBlock', () => {
         {
           code: 'review-handoff-invalid',
           message: expect.any(String),
+          affects: [],
           nextAction: expect.any(String),
         },
       ],
@@ -86,6 +87,7 @@ describe('parseHandoffBlock', () => {
         {
           code: 'review-handoff-invalid',
           message: expect.stringContaining('recorded.0.class:'),
+          affects: [],
           nextAction: expect.any(String),
         },
       ],
@@ -105,6 +107,7 @@ describe('parseHandoffBlock', () => {
         {
           code: 'review-handoff-invalid',
           message: expect.stringContaining('recorded:'),
+          affects: [],
           nextAction: expect.any(String),
         },
       ],

@@ -54,8 +54,12 @@
 - 모든 payload 진단과 `ToolDiagnosticError`는 `nextAction`을 싣는다. 호출 action이나 값에 매이지 않는 공통 문장은 `REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS` 표에 두고, 그 밖의 문장은 생산 지점이 만든다. force를 권하는 안내는 사용자의 명시적 요청과 이전 actor 종료를 조건으로 건다.
 - `review-worktree-stale`은 prepare를 권하지 않는다. prepare는 `cached`를 돌려주고 다음 seal도 stale이기 때문이다. 되돌리면 sealed verdict가 복원되고, 커밋하면 새 cross-review가 필요하다.
 - 사용자나 설치 상태로 고칠 수 있는 오류 대부분(repository rule 파일·body, 설치된 rule map과 actor method, config, 읽을 수 없는 저장 상태)과 일부 호출자 입력 오류는 전용 코드와 `nextAction`을 가진다. 나머지는 plain `Error`로 남아 `toolError`의 일반 `nextAction`을 받는다. 내부 불변식, 그리고 봉인된 상태의 validate·`projectRoot`·`changeContext`·validate group·round 인자 오류 같은 호출자 오류와 Deliverable 섹션이 없는 설치된 verifier method가 여기에 속한다.
-- 저장 상태의 `scope.diagnostics`는 `nextAction`이 선택 필드라, 스키마 버전을 올리지 않고 이전 v2 상태도 읽는다.
-- prepare가 공유 snapshot 진단을 실을 때는 리뷰 문맥 문장을 앞에 두고 원래 `nextAction`을 `Outside this review:` 뒤로 보낸다. 리뷰 도중 소스나 입력을 고치면 리뷰가 stale이 되기 때문이다.
+- 저장 상태의 `scope.diagnostics`는 `nextAction`과 `affects`가 선택 필드라, 스키마 버전을 올리지 않고 이전 상태도 읽는다. `affects`가 없는 저장 진단은 모든 축에 영향을 주는 것으로 읽어 진행 중인 리뷰의 판정을 바꾸지 않는다. `affects: []` 진단은 blocker가 되지 않고 verdict의 unresolved 표에 `affectsVerdict: false`로만 남는다.
+- prepare는 `outOfScope`와 `scope.diagnostics`를 결정적으로 정렬한다. 둘 다 hash 입력이 아니다.
+- 다음 generation을 만들지 판단할 때 후보 목록은 서수 `FCA-NNN` id를 뺀 내용의 multiset으로 비교한다. severity·certainty 등 내용이 바뀌거나 후보가 생기거나 사라지면 새 generation이다.
+- `observeReviewGroupInputs`의 hash 입력(후보, 기록된 handoff, group 단위, `fileInputs`)은 persisted state의 순서를 따른다. 이 순서나 직렬화를 바꾸면 진행 중인 generation이 전부 `review-inputs-stale`이 되므로 불변식으로 유지한다.
+- prepare가 공유 snapshot 진단을 실을 때는 리뷰 문맥 문장을 앞에 두고 원래 `nextAction`을 `Outside this review:` 뒤로 보낸다. 리뷰 도중 소스나 입력을 고치면 리뷰가 stale이 되기 때문이다. config 진단은 축에 영향을 선언하면 리뷰를 완료로 보고하지 말라는 문장을, `affects: []`면 남은 설정으로 진행했다는 문장을 받는다.
+- evidence.md는 진단의 영향을 `impact:`로 적는다: 축 목록, `affects: []`는 `none`, `affects`가 없는 옛 진단은 `unknown`.
 
 ## API Contracts
 
@@ -299,7 +303,7 @@
 ## History
 
 - 2026-09-08 — action 범위 Git 질의 memoization, roster 단위 diff 일괄 읽기, base ref 후보 일괄 검증. 한 action이 같은 `ls-tree`·`merge-base`·`diff`·`log`를 group마다 다시 실행해 Windows CI에서 filid 테스트 시간의 대부분을 Git 프로세스 생성이 차지했다. 결과가 바뀔 수 없는 범위(하나의 action)에서만 공유하므로 관측 의미는 유지된다.
-- 2026-09-06 — 대형 brief 비용 기준은 동일한 644개 `.ts` 단위와 정본 default·fca·ecmascript 규칙으로 비교한다. 과거 renderer `8ed691301a894de3734391e2dbc4dd60c4f75f78`에 같은 입력을 넣어 얻은 981,364 bytes를 기준으로 고정했다. 서로 다른 규칙 payload를 비교하면 절감률을 증명할 수 없으므로 입력을 일치시키고, 정본 reviewer method와 중복되는 안내를 줄여 15% 절감 조건을 유지한다.
+- 2026-09-06 — 대형 brief 비용 기준은 동일한 644개 `.ts` 단위와 정본 default·fca·ecmascript 규칙으로 비교한다. 과거 renderer `8ed691301a894de3734391e2dbc4dd60c4f75f78`에 같은 입력을 넣어 얻은 981,364 bytes에서 그 시점 규칙 본문 기여분 529,736 bytes를 뺀 451,628 bytes를 기준으로 고정했다. 규칙 본문은 리뷰 내용이지 brief 구조가 아니어서 규칙 문서를 고칠 때마다 기준이 움직였기 때문이다. 측정 대상은 `rules: []`로 렌더한 brief overhead이고, 서로 다른 규칙 payload를 비교하면 절감률을 증명할 수 없으므로 입력을 일치시키며, 정본 reviewer method와 중복되는 안내를 줄여 15% 절감 조건을 유지한다.
 
 ## Last Updated
 

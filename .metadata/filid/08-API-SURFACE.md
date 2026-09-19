@@ -32,10 +32,13 @@ interface ToolArtifact {
   ephemeral: true;
 }
 
+type AnalysisAxis = "dependencies" | "boundaries" | "verification";
+
 interface ToolDiagnostic {
   code: string;
   message: string;
   path?: string;
+  affects: AnalysisAxis[]; // axes whose conclusions it can change; [] = none
   nextAction: string; // what the caller does next: the fix, the delegated step, or who decides
 }
 
@@ -57,6 +60,7 @@ interface ToolResultEnvelope<Summary, Data> {
 }
 ```
 
+- 모든 진단은 `affects`를 싣는다. structure·verification·restructure 판정은 그 축에 영향을 선언한 진단만 indeterminate 사유로 읽는다. `affects: []`는 판정을 바꾸지 않는다. `config-warning`은 버린 config 경로가 loosen-only 목록(`rules.*.exempt|enabled|severity`, `structure.additionalAllowedPeers`, `structure.generatedPaths`)에 있을 때만 `[]`이고, 그 밖의 잘못된 값·모르는 key·config 전체 fallback은 세 축 전부다. `$schema`, `$comment`, `_`로 시작하는 key는 경고 없이 무시한다. 저장된 review state의 진단은 `affects`가 없을 수 있고, 그때는 모든 축으로 읽는다.
 - 기본 inline 예산은 UTF-8 **16 KiB**(`TOOL_INLINE_BUDGET_BYTES`).
 - 초과 시 `data`를 빼고 전체 payload를 plugin cache의 `artifacts/<tool-name>/<sha256>.json`에 atomic write한다.
 - artifact와 inline text는 같은 compact serializer를 쓴다. `Map`/`Set` 정규화, byte 계산, SHA-256 입력이 모두 그 직렬화 결과 기준이다.
@@ -398,6 +402,7 @@ interface SnapshotDiagnostic {
   code: string;
   message: string;
   path?: string;
+  affects: AnalysisAxis[];
   nextAction: string;
 }
 

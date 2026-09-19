@@ -7,6 +7,7 @@
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로 평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag, verification을 지원한다.
 - rule exception과 indeterminate/unsupported evidence를 PASS로 숨기지 않는다.
+- violation `message`에 적는 경로는 project root 기준 POSIX 상대 경로다(root 자신은 `.`). `path` 필드는 절대 경로 그대로다. message는 review 후보로 hash되므로 저장소 위치에 따라 달라지면 안 된다. root는 `RuleContext.tree.root`나 snapshot의 `projectRoot`에서 읽는다(둘은 같은 값이다).
 - exception과 allowed-peer scope는 portable separator/case path identity로 평가한다.
 - `legacy-criteria-ledger`는 project granularity로 snapshot evidence를 평가하고 root DETAIL migration target을 suggestion으로 반환한다.
 - `organ-no-intentmd`는 **조용히 승격된 organ**을 보고한다. 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`는 실제 snapshot에서 성립할 수 없다. 대신 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `additionalOrganNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우 — DETAIL.md도 module 진입점도 없는 상태 — 를 `warning`으로 낸다. 둘 중 하나라도 있으면 승격이 의도된 것이므로 침묵한다.

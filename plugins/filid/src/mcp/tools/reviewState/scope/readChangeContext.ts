@@ -79,6 +79,7 @@ export async function readChangeContext(input: {
         code: REVIEW_STATE_DIAGNOSTIC_CODES.CHANGE_CONTEXT_UNTEMPLATED,
         message:
           'Change context has none of the headings ## Summary, ## Contract, or ## Review notes, so the whole text was used as change context.',
+        affects: [],
         nextAction:
           REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CHANGE_CONTEXT_UNTEMPLATED,
       });
@@ -106,6 +107,7 @@ export async function readChangeContext(input: {
     diagnostics.push({
       code: REVIEW_STATE_DIAGNOSTIC_CODES.CHANGE_CONTEXT_TRUNCATED,
       message: `Change context was truncated to ${REVIEW_CHANGE_CONTEXT_LIMIT} characters.`,
+      affects: [],
       nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CHANGE_CONTEXT_TRUNCATED,
     });
   return {

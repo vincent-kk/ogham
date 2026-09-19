@@ -44,6 +44,7 @@ const RULE_DOC_PLUGIN_ROOT_UNRESOLVED_NEXT_ACTION =
 const MUTATED_DIAGNOSTIC = {
   code: 'mutated-diagnostic',
   message: 'mutated diagnostic',
+  affects: [],
   nextAction: 'mutated next action',
 };
 const MUTATED_DIAGNOSTIC_MESSAGE = 'mutated diagnostic message';
@@ -124,6 +125,7 @@ const UNRESOLVED_RULE_STATUS_PAYLOAD = {
     {
       code: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_CODE,
       message: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_MESSAGE,
+      affects: [],
       nextAction: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_NEXT_ACTION,
     },
   ],
@@ -180,6 +182,7 @@ const UNRESOLVED_RULE_MANIFEST_PAYLOAD = {
     {
       code: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_CODE,
       message: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_MESSAGE,
+      affects: [],
       nextAction: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_NEXT_ACTION,
     },
   ],

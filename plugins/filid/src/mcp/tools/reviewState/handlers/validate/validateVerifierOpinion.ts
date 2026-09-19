@@ -88,6 +88,7 @@ export function validateVerifierOpinion(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.OPINION_INVALID,
           message: `Verifier output for group ${group.id} is missing at ${verifyPath}.`,
           path: verifyPath,
+          affects: [],
           nextAction: `Respawn this same handoff once so the actor writes ${verifyPath}. After a second failure mark the handoff exhausted and continue from data.next.`,
         },
       ],

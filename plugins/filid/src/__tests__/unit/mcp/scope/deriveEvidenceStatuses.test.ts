@@ -66,6 +66,7 @@ describe('deriveEvidenceStatuses', () => {
           {
             code: 'unknown',
             message: 'Unknown impact',
+            affects: ['dependencies', 'boundaries', 'verification'],
             nextAction: 'Report it.',
           },
         ],

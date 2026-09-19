@@ -10,13 +10,14 @@
 - 같은 최고 confidence의 adapter가 한 파일을 주장하면 `ambiguous-adapter-claim` 진단을 남기고 해당 파일을 policy 분석에서 제외한다.
 - snapshot이 제공한 discovery 결과는 절대 portable path로 정규화해 한 번만 소비하며, 동일 adapter의 중복 path는 한 claim으로 취급한다.
 - discovery 실패나 adapter 경합으로 일부 파일을 판정하지 못하면 project certainty는 `indeterminate`이며 빈 exact 분석으로 축소하지 않는다.
+- violation `message`에 적는 경로는 project root 기준 POSIX 상대 경로다. `path`와 `suggestion`은 그대로다.
 - `VerificationViolation.suggestion`은 필수다. count non-exact, cap 초과(spec·test 역할별로 다른 문장), group 미표시·미선언·분할 모두 다음 행동을 채운다.
 
 ## API Contracts
 
 - `analyzeVerification(input): Promise<VerificationProjectAnalysis>` — adapter evidence를 file analysis와 policy violation으로 조합한다.
-- `evaluateVerificationPolicy(files, contractGroups)` — 15/32와 spec 연결을 평가한다.
-- `findSpecFragmentation(files, contractGroups)` — 겹침, 누락과 알 수 없는 group finding을 만든다.
+- `evaluateVerificationPolicy(files, contractGroups, projectRoot)` — 15/32와 spec 연결을 평가한다.
+- `findSpecFragmentation(files, contractGroups, projectRoot)` — 겹침, 누락과 알 수 없는 group finding을 만든다. `projectRoot`는 message의 경로를 상대 경로로 적는 데만 쓴다.
 - `resolveContractGroups(detailDocuments)` — DETAIL의 안정 acceptance group을 owner별 index로 만든다.
 
 ## Acceptance Criteria

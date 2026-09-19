@@ -41,10 +41,10 @@ type PrepareSettingsInput =
 export function resolvePrepareSettings(input: PrepareSettingsInput) {
   const loaded = loadConfig(input.projectRoot);
   const validationFailure = loaded.warnings.find(
-    (warning) =>
-      warning.startsWith('invalid value at review') ||
-      warning.startsWith('config validation failed at review'),
-  );
+    ({ message }) =>
+      message.startsWith('invalid value at review') ||
+      message.startsWith('config validation failed at review'),
+  )?.message;
   if (validationFailure)
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.CONFIG_INVALID,

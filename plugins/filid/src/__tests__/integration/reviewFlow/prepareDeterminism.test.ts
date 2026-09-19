@@ -77,27 +77,12 @@ describe('prepare determinism across byte-identical repositories', () => {
     expect(second.normalized).toBe(first.normalized);
   });
 
-  // Candidate messages embed the absolute project root, and observeReviewGroupInputs hashes them into evidenceHash.
-  it('current behavior: evidenceHash and preparedInputHash depend on the absolute project root when candidates exist', async () => {
+  it('produces the same normalized state, hashes included, when FCA candidates exist', async () => {
     const first = await prepareIsolated(INTENT_GAP_REVIEW_REPOSITORY);
     const second = await prepareIsolated(INTENT_GAP_REVIEW_REPOSITORY);
     expect(first.state.scope.candidates).toHaveLength(2);
-    expect(first.state.scope.candidates[0].message).toContain(
-      first.state.projectRoot,
-    );
-    expect(second.state.sourceHash).toBe(first.state.sourceHash);
-    expect(second.state.scope.snapshotHash).toBe(
-      first.state.scope.snapshotHash,
-    );
-    const differing = new Set(
-      second.normalized
-        .split('\n')
-        .filter((line, index) => line !== first.normalized.split('\n')[index])
-        .map((line) => line.trim().split('"')[1]),
-    );
-    expect([...differing].sort()).toEqual([
-      'evidenceHash',
-      'preparedInputHash',
-    ]);
+    for (const { message } of first.state.scope.candidates)
+      expect(message).not.toContain(first.state.projectRoot);
+    expect(second.normalized).toBe(first.normalized);
   });
 });

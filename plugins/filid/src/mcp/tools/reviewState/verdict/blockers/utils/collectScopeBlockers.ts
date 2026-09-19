@@ -1,3 +1,5 @@
+import { ANALYSIS_AXES } from '../../../../../../constants/analysisAxes.js';
+import { affectsAnalysisAxis } from '../../../../utils/affectsAnalysisAxis.js';
 import type {
   ReviewBlockerCause,
   ReviewVerdictEvidence,
@@ -5,6 +7,9 @@ import type {
 
 /**
  * Preserve global analysis certainty and worktree constraints independently of findings.
+ *
+ * A diagnostic declaring `affects: []` changes no conclusion and raises no
+ * cause; the fold reports it as verdict-neutral evidence instead.
  * @param evidence Prepared scope statuses and committed-source identity.
  * @returns Typed global causes with bounded evidence-recovery advice.
  */
@@ -14,7 +19,11 @@ export function collectScopeBlockers(
   const causes: ReviewBlockerCause[] = [];
   const scope = { path: null, groupId: null, findingId: null, rule: null };
   const diagnostics = evidence.diagnostics ?? [];
-  for (const [index, diagnostic] of diagnostics.entries())
+  const blocking = diagnostics.filter((diagnostic) =>
+    affectsAnalysisAxis(diagnostic, ANALYSIS_AXES),
+  );
+  for (const [index, diagnostic] of diagnostics.entries()) {
+    if (!blocking.includes(diagnostic)) continue;
     causes.push({
       causeId: diagnostic.causeId,
       kind: 'analysis-incomplete',
@@ -44,16 +53,15 @@ export function collectScopeBlockers(
         suggestedOwner: 'agent',
       },
     });
+  }
   const unexplainedVerification =
     !['ok', 'violations'].includes(evidence.verificationStatus) &&
-    !diagnostics.some(
-      (diagnostic) =>
-        !diagnostic.affects?.length ||
-        diagnostic.affects.includes('verification'),
+    !blocking.some((diagnostic) =>
+      affectsAnalysisAxis(diagnostic, ['verification']),
     );
   if (
     !evidence.evidenceComplete &&
-    (diagnostics.length === 0 || unexplainedVerification)
+    (blocking.length === 0 || unexplainedVerification)
   )
     causes.push({
       kind: 'analysis-incomplete',

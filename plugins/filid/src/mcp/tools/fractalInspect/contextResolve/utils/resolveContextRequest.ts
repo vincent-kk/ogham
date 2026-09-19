@@ -41,6 +41,7 @@ export function resolveContextRequest(
           ? error.message
           : `Context target could not be resolved: ${targetPath}`,
       path: targetPath,
+      affects: [],
       nextAction: CONTEXT_RESOLVE_DIAGNOSTIC_NEXT_ACTIONS.TARGET_UNRESOLVED,
     };
     return {

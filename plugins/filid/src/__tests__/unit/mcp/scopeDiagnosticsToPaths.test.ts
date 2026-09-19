@@ -10,23 +10,27 @@ const INSIDE: ToolDiagnostic = {
   code: 'inside',
   message: 'under the scoped root',
   path: `${OWNER}/nested/source.unit`,
+  affects: ['dependencies', 'boundaries', 'verification'],
   nextAction: 'test next action',
 };
 const OUTSIDE: ToolDiagnostic = {
   code: 'outside',
   message: 'in an unrelated subtree',
   path: `${SIBLING}/source.unit`,
+  affects: ['dependencies', 'boundaries', 'verification'],
   nextAction: 'test next action',
 };
 const PATHLESS: ToolDiagnostic = {
   code: 'global',
   message: 'no path at all',
+  affects: ['dependencies', 'boundaries', 'verification'],
   nextAction: 'test next action',
 };
 const ANCESTOR_DOCUMENT: ToolDiagnostic = {
   code: 'ancestor-document',
   message: 'an ancestor document above the scoped root',
   path: '/project/INTENT.md',
+  affects: ['dependencies', 'boundaries', 'verification'],
   nextAction: 'test next action',
 };
 

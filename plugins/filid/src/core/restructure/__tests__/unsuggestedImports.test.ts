@@ -240,6 +240,7 @@ describe('restructure leaves imports it cannot suggest to the caller', () => {
         {
           code: 'unresolved-local-dependency',
           message: 'fixture',
+          affects: ['dependencies', 'boundaries'],
           nextAction: 'fixture',
           path: P.APP_INDEX,
           specifier: '../feature',
@@ -379,6 +380,7 @@ describe('restructure leaves imports it cannot suggest to the caller', () => {
         {
           code: 'unresolved-local-dependency',
           message: 'fixture',
+          affects: ['dependencies', 'boundaries'],
           nextAction: 'fixture',
           path: P.MOVED_INDEX,
           specifier: './parts',

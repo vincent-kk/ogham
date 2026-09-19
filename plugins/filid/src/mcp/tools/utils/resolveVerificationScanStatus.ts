@@ -5,13 +5,14 @@ import type {
   ToolStatus,
 } from '../../../types/toolEnvelope.js';
 
+import { affectsAnalysisAxis } from './affectsAnalysisAxis.js';
 import { isFindingDiagnostic } from './isFindingDiagnostic.js';
 
 /**
  * Resolve the verification scan status from certainty and retained evidence.
  * @param certainty Aggregate verification certainty.
  * @param violationCount Number of retained verification violations.
- * @param diagnostics Snapshot diagnostics that may make evidence incomplete.
+ * @param diagnostics Snapshot diagnostics; only those affecting `verification` make evidence incomplete.
  * @returns Public tool status for the verification evidence.
  */
 export function resolveVerificationScanStatus(
@@ -25,8 +26,7 @@ export function resolveVerificationScanStatus(
     certainty === ANALYSIS_CERTAINTIES.INDETERMINATE ||
     diagnostics.some(
       (d) =>
-        !isFindingDiagnostic(d) &&
-        (!d.affects?.length || d.affects.includes('verification')),
+        !isFindingDiagnostic(d) && affectsAnalysisAxis(d, ['verification']),
     )
   )
     return TOOL_STATUSES.INDETERMINATE;

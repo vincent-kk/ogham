@@ -4,6 +4,7 @@ import { REVIEW_STATE_DELETED_FILE_HASH } from '../../../../constants/reviewStat
 import { RULE_SCOPES } from '../../../../constants/ruleScopes.js';
 import { validateStructure } from '../../../../core/index.js';
 import { aggregateCertainty } from '../../../../core/verification/index.js';
+import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type { RuleScope } from '../../../../types/rules.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
 import { isFindingDiagnostic } from '../../utils/isFindingDiagnostic.js';
@@ -22,7 +23,7 @@ import { readReviewWorktree } from './readReviewWorktree.js';
 import { selectChangedScopeVerificationFiles } from './selectChangedScopeVerificationFiles.js';
 import { selectChangedScopeViolations } from './selectChangedScopeViolations.js';
 import { haveSameReviewPaths } from './utils/haveSameReviewPaths.js';
-import { toProjectRelativePath } from './utils/toProjectRelativePath.js';
+import { sortScopeDiagnostics } from './utils/sortScopeDiagnostics.js';
 
 /**
  * Compute committed roster and FCA evidence from one shared project snapshot.
@@ -132,16 +133,18 @@ export async function computeChangedScopeEvidence(
     retainedVerificationCount,
     scopedVerificationCertainty,
   );
-  const evidenceDiagnostics = context.diagnostics
-    .filter((diagnostic) => !isFindingDiagnostic(diagnostic))
-    .map((diagnostic) => ({
-      ...diagnostic,
-      ...(diagnostic.path
-        ? {
-            path: toProjectRelativePath(input.projectRoot, diagnostic.path),
-          }
-        : {}),
-    }));
+  const evidenceDiagnostics = sortScopeDiagnostics(
+    context.diagnostics
+      .filter((diagnostic) => !isFindingDiagnostic(diagnostic))
+      .map((diagnostic) => ({
+        ...diagnostic,
+        ...(diagnostic.path
+          ? {
+              path: toProjectRelativePath(input.projectRoot, diagnostic.path),
+            }
+          : {}),
+      })),
+  );
   return {
     snapshotHash: context.snapshot.snapshotHash,
     evidenceComplete: statuses.evidenceComplete,

@@ -56,6 +56,7 @@ export function readSealedReviewBlockers(
         code: REVIEW_STATE_DIAGNOSTIC_CODES.BLOCKERS_MISSING,
         message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.BLOCKERS_MISSING,
         path: paths.blockersPath,
+        affects: [],
         nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.BLOCKERS_MISSING,
       },
     };
@@ -79,6 +80,7 @@ function invalidBlockerStatus(path: string): SealedReviewBlockerStatus {
     code: REVIEW_STATE_DIAGNOSTIC_CODES.BLOCKERS_INVALID,
     message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.BLOCKERS_INVALID,
     path,
+    affects: [],
     nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.BLOCKERS_INVALID,
   };
   return {

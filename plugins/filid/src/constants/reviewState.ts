@@ -476,7 +476,9 @@ export const REVIEW_CONTEXT_NEXT_ACTIONS = {
   EVIDENCE:
     'Continue the review; seal carries this diagnostic into the review blockers with its own next action. Do not report the review as complete while it remains.',
   CONFIG_WARNING:
-    'Continue the review. Ask the user to fix or remove the named key in the filid config; the review used the remaining valid settings.',
+    'Continue the review; dropping this key changes no analysis conclusion. Ask the user to fix or remove the named key in the filid config; the review used the remaining valid settings.',
+  CONFIG_WARNING_BLOCKING:
+    'Continue the review; the dropped entry may have tightened the analysis, so seal carries this diagnostic into the review blockers with its own next action. Do not report the review as complete while it remains; ask the user to fix or remove the named key in the filid config.',
   CONFIG_MIGRATION_REQUIRED:
     'Continue the review. Ask the user to save the config through the filid settings flow to persist config v2.',
 } as const;

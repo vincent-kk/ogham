@@ -1,3 +1,4 @@
+import { ANALYSIS_AXES } from '../../../constants/analysisAxes.js';
 import type {
   AdapterRegistry,
   StructureAdapter,
@@ -17,6 +18,7 @@ function buildAdapterSelectionDiagnostic(message: string): SnapshotDiagnostic {
   return {
     code: unknownId ? 'unknown-adapter-id' : 'adapter-selection-failed',
     message,
+    affects: ANALYSIS_AXES,
     nextAction: unknownId
       ? 'Set adapters.enabled in .filid/config.json to adapter ids this filid version ships, or set adapters.mode to "auto", then run again.'
       : 'Check adapters in .filid/config.json, then run again; if it repeats, report this message to the user.',

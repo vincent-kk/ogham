@@ -6,7 +6,7 @@
 - plan은 같은 snapshot에서 placement evidence를 계산하고 크기와 무관하게 ephemeral artifact로 저장한다.
 - validation은 absolute `planPath`의 common payload 또는 bare plan을 read-only로 검사한다.
 - project source와 plan artifact를 수정하지 않는다.
-- 세 action의 summary는 status와 결과로 고른 다음 단계 `nextAction`을 싣는다: 실행 절차, `decisions`·진단·finding의 `nextAction`을 따를 것, 또는 완료 보고. graph가 `unsupported`인 plan은 진단보다 먼저 status `unsupported`로 정한다.
+- 세 action의 summary는 status와 결과로 고른 다음 단계 `nextAction`을 싣는다: 실행 절차, `decisions`·진단·finding의 `nextAction`을 따를 것, 또는 완료 보고. graph가 `unsupported`인 plan은 진단보다 먼저 status `unsupported`로 정한다. 그다음 `dependencies`나 `boundaries`에 영향을 선언한 진단(또는 `affects`가 없는 진단)이 있을 때만 `indeterminate`다. `affects: []`인 진단(예: 버려도 분석이 더 엄격해지기만 하는 config 항목의 `config-warning`)은 status를 바꾸지 않는다.
 - plan summary는 `alreadyPlacedCount`와 `affectedImportCount`(모든 move의 `affectedImports` 합)를 싣는다.
 - plan artifact schema는 3이다. import 요구가 `requiredResolvedPath`를 싣고 `readPaths`·`probePaths`·`readHash`가 precondition 기준이 되면서 모양이 바뀌었다. 옛 버전 artifact는 마이그레이션하지 않는다. artifact는 ephemeral이어서 계획을 다시 만드는 것으로 충분하다.
 - plan artifact는 호출자가 고칠 수 있는 입력이다. `projectRoot`가 절대 경로가 아니거나, `readPaths`·`probePaths`의 항목이 경로 문자열로 또는 symlink를 따라간 실제 위치로 `projectRoot` 밖이면 어떤 파일도 읽기 전에 `plan-artifact-invalid`로 거절한다. 실제 위치 판정은 core restructure의 `isPhysicallyWithin`을 쓴다. MCP 서버는 호출자의 sandbox 밖에서 돌아, 밖의 경로를 hash하면 finding 유무가 그 파일 내용의 오라클이 되기 때문이다. 오류는 어느 필드가 밖인지만 말하고 파일 내용은 싣지 않는다.

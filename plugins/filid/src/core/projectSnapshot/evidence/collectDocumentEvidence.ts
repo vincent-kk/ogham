@@ -5,6 +5,7 @@ import {
 } from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
+import { toProjectRelativePath } from '../../../lib/toProjectRelativePath.js';
 import type { BoundaryExemptionDeclaration } from '../../../types/documents.js';
 import type {
   DocumentContractFinding,
@@ -84,7 +85,7 @@ export function collectDocumentEvidence(
       findings.push({
         document: 'intent',
         rule: 'missing-document',
-        message: `${INTENT_MD} is required for ${node.type} node ${node.path}.`,
+        message: `${INTENT_MD} is required for ${node.type} node ${toProjectRelativePath(tree.root, node.path)}.`,
         severity: 'error',
       });
 
@@ -116,7 +117,7 @@ export function collectDocumentEvidence(
       findings.push({
         document: 'detail',
         rule: 'missing-document',
-        message: `${DETAIL_MD} is required for ${node.type} node ${node.path}.`,
+        message: `${DETAIL_MD} is required for ${node.type} node ${toProjectRelativePath(tree.root, node.path)}.`,
         severity: 'error',
       });
 
@@ -143,6 +144,7 @@ export function collectDocumentEvidence(
           code: `${finding.document}-document-contract`,
           message: finding.message,
           path,
+          affects: [],
           nextAction:
             finding.rule === 'missing-document'
               ? `Create ${path}; the enrich-docs skill drafts it from the module's evidence.`

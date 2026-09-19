@@ -145,16 +145,19 @@ describe('ecmascript verification adapter', () => {
       exactCount: 16,
       knownLowerBound: 16,
     });
-    const result = evaluateVerificationPolicy([
-      {
-        path,
-        adapterId: ecmascriptVerificationAdapter.id,
-        role: 'spec-document',
-        count,
-        ownerFractalPath: join(root, 'src'),
-        contractGroupIds: [],
-      },
-    ]);
+    const result = evaluateVerificationPolicy(
+      [
+        {
+          path,
+          adapterId: ecmascriptVerificationAdapter.id,
+          role: 'spec-document',
+          count,
+          ownerFractalPath: join(root, 'src'),
+          contractGroupIds: [],
+        },
+      ],
+      root,
+    );
     expect(result.violations).toContainEqual(
       expect.objectContaining({ ruleId: 'spec-document-case-cap' }),
     );

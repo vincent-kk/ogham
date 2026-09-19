@@ -1,6 +1,12 @@
 import { NODE_TYPES } from './nodeTypes.js';
 
 export const RESTRUCTURE_SCHEMA_VERSION = 3 as const;
+
+/** Analysis axes a restructure plan and its validations rest on; a diagnostic affecting neither leaves their status conclusive. */
+export const RESTRUCTURE_ANALYSIS_AXES = [
+  'dependencies',
+  'boundaries',
+] as const;
 export const RESTRUCTURE_PLAN_ID_PREFIX = 'filid-restructure';
 export const RESTRUCTURE_PLAN_HASH_SEPARATOR = '\0';
 export const RESTRUCTURE_HASH_ALGORITHM = 'sha256';

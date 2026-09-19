@@ -136,6 +136,7 @@ export async function validateReviewRound(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.OPINION_INVALID,
           message: `Review round ${round} output for group ${group.id} is missing at ${roundPath}.`,
           path: roundPath,
+          affects: [],
           nextAction: `Respawn this same handoff once so the actor writes ${roundPath}. After a second failure mark the handoff exhausted and continue from data.next.`,
         },
       ],

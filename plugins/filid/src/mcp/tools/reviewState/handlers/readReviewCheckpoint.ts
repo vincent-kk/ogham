@@ -65,6 +65,7 @@ export async function readReviewCheckpoint(
             ? REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_SCHEMA_MISMATCH
             : REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_MISSING,
           path: paths.statePath,
+          affects: [],
           nextAction: schemaMismatch
             ? 'Stop without a verdict: this review state cannot be read. Ask the user whether to start a fresh review with /filid:cross-review --force.'
             : 'Stop without a verdict: no prepared review exists for this branch. Run /filid:cross-review to prepare and seal a review before resolving or revalidating.',
@@ -99,6 +100,7 @@ export async function readReviewCheckpoint(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.SOURCE_HASH_STALE,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SOURCE_HASH_STALE,
           path: paths.statePath,
+          affects: [],
           nextAction:
             'In revalidate this is expected after corrections, so continue. In resolve, stop and run /filid:cross-review again so the review covers the current commits.',
         },
@@ -123,6 +125,7 @@ export async function readReviewCheckpoint(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.REPORT_MISSING,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.REPORT_MISSING,
           path: paths.reportPath,
+          affects: [],
           nextAction:
             'Stop and run /filid:cross-review again; it re-seals the report from the validated opinions without new actor work.',
         },

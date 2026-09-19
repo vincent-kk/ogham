@@ -28,12 +28,14 @@ const DOCUMENT_FINDING_DIAGNOSTICS: ToolDiagnostic[] = [
     code: BUILTIN_RULE_IDS.INTENT_DOCUMENT_CONTRACT,
     message: DOCUMENT_FINDING_MESSAGE,
     path: DOCUMENT_PATH,
+    affects: [],
     nextAction: 'test next action',
   },
   {
     code: BUILTIN_RULE_IDS.DETAIL_DOCUMENT_CONTRACT,
     message: DOCUMENT_FINDING_MESSAGE,
     path: DOCUMENT_PATH,
+    affects: [],
     nextAction: 'test next action',
   },
 ];
@@ -43,6 +45,7 @@ const CONFIG_WARNING_DIAGNOSTICS: ToolDiagnostic[] = [
     code: SNAPSHOT_TOOL_DIAGNOSTIC_CODES.CONFIG_WARNING,
     message: CONFIG_WARNING_MESSAGE,
     path: PROJECT_ROOT,
+    affects: ['dependencies', 'boundaries', 'verification'],
     nextAction: 'test next action',
   },
 ];
@@ -174,4 +177,21 @@ describe('envelope certainty', () => {
       ),
     ).toBe(TOOL_STATUSES.VIOLATIONS);
   });
+
+  it.each([
+    [[], TOOL_STATUSES.VIOLATIONS],
+    [
+      ['dependencies', 'boundaries', 'verification'],
+      TOOL_STATUSES.INDETERMINATE,
+    ],
+  ] as const)(
+    'maps project validation beside a config-warning with affects %j to %s',
+    (affects, status) => {
+      expect(
+        resolveProjectValidationStatus(DOCUMENT_VIOLATION_REPORT, [
+          { ...CONFIG_WARNING_DIAGNOSTICS[0]!, affects },
+        ]),
+      ).toBe(status);
+    },
+  );
 });

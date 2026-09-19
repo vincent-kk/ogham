@@ -1,4 +1,5 @@
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
+import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
 
 export function checkDependencyCycles(context: RuleContext): RuleViolation[] {
@@ -19,7 +20,7 @@ export function checkDependencyCycles(context: RuleContext): RuleViolation[] {
   const cycles: RuleViolation[] = graph.cycles.map((cycle) => ({
     ruleId: BUILTIN_RULE_IDS.CIRCULAR_DEPENDENCY,
     severity: 'error' as const,
-    message: `Dependency cycle: ${cycle.join(' -> ')}`,
+    message: `Dependency cycle: ${cycle.map((path) => toProjectRelativePath(snapshot.projectRoot, path)).join(' -> ')}`,
     path: cycle[0] ?? snapshot.projectRoot,
     certainty: 'exact' as const,
     suggestion:

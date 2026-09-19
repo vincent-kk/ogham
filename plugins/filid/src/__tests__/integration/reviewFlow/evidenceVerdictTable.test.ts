@@ -80,13 +80,31 @@ describe('config-warning end to end', () => {
   });
   afterEach(() => disposeReviewStateSealFixture(fixture));
 
+  // An unknown key may have been meant to tighten the analysis, so its warning affects every axis;
+  // a dropped exempt list only makes the analysis stricter, so its warning affects none.
   it.each([
-    { unknownKey: false, verdict: 'APPROVED', complete: true },
-    { unknownKey: true, verdict: 'INCONCLUSIVE', complete: false },
+    {
+      label: 'no extra entry',
+      extra: null,
+      verdict: 'APPROVED',
+      complete: true,
+    },
+    {
+      label: 'an unknown key',
+      extra: { unknownSetting: true },
+      verdict: 'INCONCLUSIVE',
+      complete: false,
+    },
+    {
+      label: 'an invalid exempt list',
+      extra: { rules: { 'zero-peer-file': { exempt: 'src/**' } } },
+      verdict: 'APPROVED',
+      complete: true,
+    },
   ])(
-    'current behavior: unknown config key=$unknownKey seals $verdict for a clean, finding-free review',
-    async ({ unknownKey, verdict, complete }) => {
-      if (unknownKey)
+    'a config with $label seals $verdict for a clean, finding-free review',
+    async ({ extra, verdict, complete }) => {
+      if (extra)
         writeFileSync(
           join(fixture.projectRoot, '.filid/config.json'),
           JSON.stringify({
@@ -94,7 +112,7 @@ describe('config-warning end to end', () => {
             adapters: { mode: 'auto', enabled: [] },
             rules: {},
             review: { groupFileLimit: 1 },
-            unknownSetting: true,
+            ...extra,
           }),
         );
       const prepared = await handleReviewState({
@@ -107,7 +125,7 @@ describe('config-warning end to end', () => {
       const state = readPreparedReviewState(prepared);
       expect(
         prepared.diagnostics.some(({ code }) => code === 'config-warning'),
-      ).toBe(unknownKey);
+      ).toBe(extra !== null);
       expect(state.scope.evidenceComplete).toBe(complete);
       expect(state.scope.statuses.structure).toBe(
         complete ? 'ok' : 'indeterminate',

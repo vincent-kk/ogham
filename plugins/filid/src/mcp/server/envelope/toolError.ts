@@ -1,3 +1,4 @@
+import { ANALYSIS_AXES } from '../../../constants/analysisAxes.js';
 import {
   TOOL_CONTENT_TYPES,
   TOOL_ERROR_DIAGNOSTIC_CODE,
@@ -37,6 +38,7 @@ export function toolError(error: unknown, code?: string) {
       {
         code: diagnosticCode,
         message,
+        affects: ANALYSIS_AXES,
         nextAction,
       },
     ],

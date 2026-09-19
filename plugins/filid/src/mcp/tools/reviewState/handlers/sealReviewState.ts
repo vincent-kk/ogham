@@ -84,6 +84,7 @@ export async function sealReviewState(
             ? REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_SCHEMA_MISMATCH
             : REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_MISSING,
           path: paths.statePath,
+          affects: [],
           nextAction: schemaMismatch
             ? "Do not publish a verdict. Ask the user whether to start a fresh review; only on the user's request, and after all prior actors finish, call prepare with force: true, because prepare without force refuses this state with review-incremental-bootstrap-required."
             : 'Do not publish a verdict: report this and stop. A new /filid:cross-review run prepares and reviews this branch from the start.',
@@ -109,6 +110,7 @@ export async function sealReviewState(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.SOURCE_HASH_STALE,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SOURCE_HASH_STALE,
           path: paths.statePath,
+          affects: [],
           nextAction:
             'Do not publish a verdict: report this and stop. A new /filid:cross-review run prepares the current commits and reuses validated opinions for unchanged files.',
         },
@@ -139,6 +141,7 @@ export async function sealReviewState(
             code: REVIEW_STATE_DIAGNOSTIC_CODES.WORKTREE_STALE,
             message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.WORKTREE_STALE,
             path: paths.statePath,
+            affects: [],
             nextAction:
               'Do not publish the earlier verdict: report this and stop. Reverting the uncommitted changes makes seal return the sealed verdict again; committing them needs a new /filid:cross-review run.',
           },
@@ -160,6 +163,7 @@ export async function sealReviewState(
             code: REVIEW_STATE_DIAGNOSTIC_CODES.REPORT_MISSING,
             message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.REPORT_MISSING,
             path: paths.reportPath,
+            affects: [],
             nextAction:
               'Do not publish a verdict: report this and stop. A new /filid:cross-review run restores the report from the validated opinions without new reviewer work.',
           },
@@ -198,6 +202,7 @@ export async function sealReviewState(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.SESSION_MISSING,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SESSION_MISSING,
           path: paths.sessionPath,
+          affects: [],
           nextAction:
             'Do not publish a verdict: report this and stop. A new /filid:cross-review run restores the session artifact and keeps validated progress.',
         },
@@ -232,6 +237,7 @@ export async function sealReviewState(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.OPINIONS_MISSING,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.OPINIONS_MISSING,
           path: paths.opinionsDirectory,
+          affects: [],
           nextAction:
             'Do not publish a verdict: report this and stop. No reviewable group has a merged opinion; a new /filid:cross-review run dispatches the pending reviewer handoffs.',
         },

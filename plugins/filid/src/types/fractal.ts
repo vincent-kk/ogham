@@ -5,6 +5,7 @@
  * FractalTree는 프로젝트 디렉토리를 계층적 노드 그래프로 표현하며,
  * 각 노드(FractalNode)는 자신의 분류 타입(CategoryType)과 부모/자식 관계를 보유한다.
  */
+import type { ANALYSIS_AXES } from '../constants/analysisAxes.js';
 import type { ANALYSIS_CERTAINTIES } from '../constants/analysisCertainties.js';
 
 import type { BoundaryExemptionDeclaration } from './documents.js';
@@ -172,11 +173,15 @@ export interface DependencyGraph {
   certainty: AnalysisCertainty;
 }
 
+/** An analysis axis whose conclusions a diagnostic can change. */
+export type AnalysisAxis = (typeof ANALYSIS_AXES)[number];
+
 export interface SnapshotDiagnostic {
   code: string;
   message: string;
   path?: string;
-  affects?: readonly ('dependencies' | 'boundaries' | 'verification')[];
+  /** Axes whose conclusions this diagnostic can change; `[]` means none. */
+  affects: readonly AnalysisAxis[];
   causeId?: string;
   specifier?: string;
   /** What the caller does next; carried into the tool diagnostic unchanged. */

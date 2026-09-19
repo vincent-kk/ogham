@@ -107,6 +107,7 @@ export {
   writeConfig,
 } from './infra/configLoader/index.js';
 export type {
+  ConfigWarning,
   FilidConfig,
   InitResult,
   RuleDocEntry,

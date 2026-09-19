@@ -3,7 +3,10 @@ import {
   RESTRUCTURE_VALIDATION_MODE_BY_ACTION,
   STRUCTURE_VALIDATION_SCOPE_VALUES,
 } from '../../../../constants/mcpContracts.js';
-import { RESTRUCTURE_VALIDATION_NEXT_ACTIONS } from '../../../../constants/restructure.js';
+import {
+  RESTRUCTURE_ANALYSIS_AXES,
+  RESTRUCTURE_VALIDATION_NEXT_ACTIONS,
+} from '../../../../constants/restructure.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import {
   validatePlanPostconditions,
@@ -12,6 +15,7 @@ import {
 import type { RestructureValidationSummary } from '../../../../types/report.js';
 import type { PlanValidationResult } from '../../../../types/restructure.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
+import { affectsAnalysisAxis } from '../../utils/affectsAnalysisAxis.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
 import type { RestructureInput } from '../types/restructureTypes.js';
 import { readRestructurePlan } from '../utils/readRestructurePlan.js';
@@ -42,12 +46,13 @@ export async function validateRestructurePlan(
     input.action === RESTRUCTURE_ACTIONS.PRECONDITION
       ? validatePlanPreconditions(context.snapshot, plan)
       : validatePlanPostconditions(context.snapshot, plan);
-  const status =
-    context.diagnostics.length > 0
-      ? TOOL_STATUSES.INDETERMINATE
-      : result.valid
-        ? TOOL_STATUSES.OK
-        : TOOL_STATUSES.VIOLATIONS;
+  const status = context.diagnostics.some((diagnostic) =>
+    affectsAnalysisAxis(diagnostic, RESTRUCTURE_ANALYSIS_AXES),
+  )
+    ? TOOL_STATUSES.INDETERMINATE
+    : result.valid
+      ? TOOL_STATUSES.OK
+      : TOOL_STATUSES.VIOLATIONS;
   return {
     projectRoot: context.snapshot.projectRoot,
     status,

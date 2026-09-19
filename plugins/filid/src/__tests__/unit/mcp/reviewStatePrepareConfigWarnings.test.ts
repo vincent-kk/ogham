@@ -55,7 +55,7 @@ describe('review_state prepare config warning scope', () => {
       expect.objectContaining({
         code: 'config-warning',
         nextAction: expect.stringMatching(
-          /^Continue the review\. Ask the user to fix or remove the named key in the filid config; the review used the remaining valid settings\. Outside this review: \S/,
+          /^Continue the review; the dropped entry may have tightened the analysis, so seal carries this diagnostic into the review blockers with its own next action\. Do not report the review as complete while it remains; ask the user to fix or remove the named key in the filid config\. Outside this review: \S/,
         ),
       }),
     );

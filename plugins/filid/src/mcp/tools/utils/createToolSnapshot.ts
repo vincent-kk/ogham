@@ -20,6 +20,8 @@ import type {
 import type { Rule } from '../../../types/rules.js';
 import type { ToolDiagnostic } from '../../../types/toolEnvelope.js';
 
+import { configWarningAffects } from './configWarningAffects.js';
+
 export interface ToolSnapshotContext {
   snapshot: ProjectSnapshot;
   rules: Rule[];
@@ -69,10 +71,11 @@ export async function createToolSnapshot(
     { axes: options.axes },
   );
   const diagnostics: ToolDiagnostic[] = [
-    ...loaded.warnings.map((message) => ({
+    ...loaded.warnings.map(({ message, key }) => ({
       code: SNAPSHOT_TOOL_DIAGNOSTIC_CODES.CONFIG_WARNING,
       message,
       path: root,
+      affects: configWarningAffects(key),
       nextAction: SNAPSHOT_TOOL_DIAGNOSTIC_NEXT_ACTIONS.CONFIG_WARNING,
     })),
     ...loaded.diagnostics,

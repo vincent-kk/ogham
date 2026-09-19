@@ -5,6 +5,8 @@ import type {
   TOOL_STATUSES,
 } from '../constants/toolEnvelope.js';
 
+import type { AnalysisAxis } from './fractal.js';
+
 type ValueOf<T> = T[keyof T];
 
 /** Subset of MCP request metadata forwarded to tool handlers. */
@@ -33,8 +35,8 @@ export interface ToolDiagnostic {
   code: string;
   message: string;
   path?: string;
-  /** Explicit affected analysis axes; absence means unknown impact. */
-  affects?: readonly ('dependencies' | 'boundaries' | 'verification')[];
+  /** Axes whose conclusions this diagnostic can change; `[]` means none. */
+  affects: readonly AnalysisAxis[];
   /** Producer-owned identity shared by repeated observations of one cause. */
   causeId?: string;
   /** Unresolved dependency target as written by the consumer. */

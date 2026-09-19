@@ -53,13 +53,21 @@ function evaluateCaseCap(
   ];
 }
 
+/**
+ * Evaluate the per-file case caps and the spec-to-contract links of a project.
+ * @param files Analyzed verification files.
+ * @param projectRoot Absolute project root; messages name paths relative to it.
+ * @param contractGroups DETAIL acceptance groups declared per owner fractal.
+ * @returns Every file, every policy violation and the aggregate certainty.
+ */
 export function evaluateVerificationPolicy(
   files: readonly VerificationFileAnalysis[],
+  projectRoot: string,
   contractGroups: ContractGroupsByOwner = new Map(),
 ): VerificationProjectAnalysis {
   const violations = [
     ...files.flatMap(evaluateCaseCap),
-    ...findSpecFragmentation(files, contractGroups),
+    ...findSpecFragmentation(files, projectRoot, contractGroups),
   ];
   return {
     files: [...files],

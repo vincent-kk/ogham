@@ -49,7 +49,7 @@ describe('config-loader v2 sanitize and migration', () => {
 
     expect(config?.rules['zero-peer-file']).toEqual({ enabled: true });
     expect(
-      warnings.some((warning) => warning.includes('unknownPeerSetting')),
+      warnings.some(({ message: warning }) => warning.includes('unknownPeerSetting')),
     ).toBe(true);
     expect(diagnostics).toEqual([]);
   });
@@ -71,7 +71,7 @@ describe('config-loader v2 sanitize and migration', () => {
     ]);
     expect(
       warnings.some(
-        (warning) =>
+        ({ message: warning }) =>
           warning.includes('invalid glob syntax') &&
           warning.includes('[invalid'),
       ),
@@ -93,7 +93,7 @@ describe('config-loader v2 sanitize and migration', () => {
     expect(config?.rules['zero-peer-file']?.exempt).toEqual([
       'packages/legacy/**',
     ]);
-    expect(warnings.some((warning) => warning.includes('bare "**"'))).toBe(
+    expect(warnings.some(({ message: warning }) => warning.includes('bare "**"'))).toBe(
       true,
     );
   });
@@ -106,7 +106,7 @@ describe('config-loader v2 sanitize and migration', () => {
     expect('bogus' in (config ?? {})).toBe(false);
     expect('alsoBogus' in (config ?? {})).toBe(false);
     expect(
-      warnings.filter((warning) => warning.includes('(dropped')),
+      warnings.filter(({ message: warning }) => warning.includes('(dropped')),
     ).toHaveLength(2);
     expect(diagnostics).toEqual([]);
   });
@@ -122,7 +122,7 @@ describe('config-loader v2 sanitize and migration', () => {
     const { config, warnings } = loadConfig(tmpDir);
 
     expect(config?.rules['module-entry-point']).toEqual({ enabled: true });
-    expect(warnings.some((warning) => warning.includes('severity'))).toBe(true);
+    expect(warnings.some(({ message: warning }) => warning.includes('severity'))).toBe(true);
   });
 
   it('emits returned warnings through the config-loader logger in order', () => {
@@ -148,8 +148,8 @@ describe('config-loader v2 sanitize and migration', () => {
 
     expect(warnings.length).toBeGreaterThan(0);
     expect(loggedWarnings).toHaveLength(warnings.length);
-    warnings.forEach((warning, index) => {
-      expect(loggedWarnings[index]).toContain(warning);
+    warnings.forEach(({ message }, index) => {
+      expect(loggedWarnings[index]).toContain(message);
     });
   });
 

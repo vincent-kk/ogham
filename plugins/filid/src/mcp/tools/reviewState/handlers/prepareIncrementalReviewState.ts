@@ -37,6 +37,7 @@ import { observeReviewGroupInputs } from './utils/observeReviewGroupInputs.js';
 import { readReviewEnvironmentHash } from './utils/readReviewEnvironmentHash.js';
 import { readReviewRenames } from './utils/readReviewRenames.js';
 import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
+import { sameScopeCandidates } from './utils/sameScopeCandidates.js';
 import { selectReviewEffort } from './utils/selectReviewEffort.js';
 import { writeIncrementalReviewBriefs } from './utils/writeIncrementalReviewBriefs.js';
 
@@ -122,8 +123,7 @@ export async function prepareIncrementalReviewState(
     previous.sourceHash === state.sourceHash &&
     previous.incremental.environmentHash === environmentHash &&
     JSON.stringify(inputs(previous)) === JSON.stringify(inputs(state)) &&
-    JSON.stringify(previous.scope.candidates) ===
-      JSON.stringify(state.scope.candidates);
+    sameScopeCandidates(previous.scope.candidates, state.scope.candidates);
   if (
     sameInputs &&
     (previous.phase !== 'sealed' || existsSync(originPaths.reportPath))

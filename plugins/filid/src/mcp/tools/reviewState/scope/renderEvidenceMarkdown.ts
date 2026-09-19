@@ -60,7 +60,7 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
       : model.diagnostics
           .map(
             (diagnostic) =>
-              `- ${renderMarkdownCodeCell(diagnostic.code)} — ${escapeMarkdownCell(diagnostic.message)}${diagnostic.path ? ` (${renderMarkdownCodeCell(diagnostic.path)})` : ''}; impact: ${escapeMarkdownCell(diagnostic.affects?.join(', ') || 'unknown')}${diagnostic.causeId ? `; causeId: ${renderMarkdownCodeCell(diagnostic.causeId)}` : ''}${diagnostic.specifier ? `; target: ${renderMarkdownCodeCell(diagnostic.specifier)}` : ''}`,
+              `- ${renderMarkdownCodeCell(diagnostic.code)} — ${escapeMarkdownCell(diagnostic.message)}${diagnostic.path ? ` (${renderMarkdownCodeCell(diagnostic.path)})` : ''}; impact: ${escapeMarkdownCell(diagnostic.affects === undefined ? 'unknown' : diagnostic.affects.length === 0 ? 'none' : diagnostic.affects.join(', '))}${diagnostic.causeId ? `; causeId: ${renderMarkdownCodeCell(diagnostic.causeId)}` : ''}${diagnostic.specifier ? `; target: ${renderMarkdownCodeCell(diagnostic.specifier)}` : ''}`,
           )
           .join('\n');
   return [

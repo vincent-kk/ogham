@@ -5,6 +5,7 @@ import {
   samePath,
 } from '@ogham/cross-platform';
 
+import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type {
   FractalNode,
   ProjectSnapshot,
@@ -89,7 +90,7 @@ export function checkExternalImportBoundary(context: {
         violations.push({
           ruleId: RULE_ID,
           severity: 'error',
-          message: `Import "${evidence.rawSpecifier}" reaches organ "${organPath}" from outside its owner "${targetNode.path}".`,
+          message: `Import "${evidence.rawSpecifier}" reaches organ "${toProjectRelativePath(context.snapshot.projectRoot, organPath)}" from outside its owner "${toProjectRelativePath(context.snapshot.projectRoot, targetNode.path)}".`,
           path: evidence.sourceFile,
           suggestion:
             'Promote the organ to a fractal, move it to its consumers lowest common fractal, or declare the exemption with a reason under "## Boundary Exemptions" in the owner DETAIL.md.',

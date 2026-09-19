@@ -220,6 +220,7 @@ describe('common MCP tool envelope', () => {
         {
           code: LARGE_DIAGNOSTIC_CODE,
           message: LARGE_DIAGNOSTIC_MESSAGE,
+          affects: [],
           nextAction: 'Read the artifact.',
         },
       ],
@@ -240,6 +241,7 @@ describe('common MCP tool envelope', () => {
         code: TOOL_ARTIFACT_DIAGNOSTIC_CODE,
         message: TOOL_ARTIFACT_DIAGNOSTIC_MESSAGE,
         path: parsed.artifact.path,
+        affects: [],
         nextAction: TOOL_ARTIFACT_DIAGNOSTIC_NEXT_ACTION,
       },
     ]);

@@ -73,4 +73,21 @@ describe('selectChangedScopeViolations', () => {
       outOfScope: [rootViolation],
     });
   });
+
+  it('sorts out-of-scope observations by path, rule and message whatever their input order', () => {
+    const result = selectChangedScopeViolations(
+      [
+        violation('src/zeta.ts'),
+        violation('src/alpha.ts'),
+        violation('src/mid.ts'),
+      ],
+      FILES,
+    );
+
+    expect(result.outOfScope.map(({ path }) => path)).toEqual([
+      'src/alpha.ts',
+      'src/mid.ts',
+      'src/zeta.ts',
+    ]);
+  });
 });

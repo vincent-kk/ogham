@@ -34,8 +34,13 @@ import type {
  * written before filid attached next actions must remain readable without a
  * schema bump.
  */
-export type StoredToolDiagnostic = Omit<ToolDiagnostic, 'nextAction'> & {
+export type StoredToolDiagnostic = Omit<
+  ToolDiagnostic,
+  'nextAction' | 'affects'
+> & {
   nextAction?: string;
+  /** Absent in a diagnostic persisted before producers declared impact; read as every axis. */
+  affects?: ToolDiagnostic['affects'];
 };
 
 /** Extracts the union of values exposed by a constant record. */

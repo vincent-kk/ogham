@@ -28,6 +28,7 @@ describe('toolError next action', () => {
     ).toStrictEqual({
       code: 'review-branch-unresolved',
       message: 'HEAD is detached.',
+      affects: ['dependencies', 'boundaries', 'verification'],
       nextAction: 'Pass branchName explicitly, then call again.',
     });
   });
@@ -40,6 +41,7 @@ describe('toolError next action', () => {
     ).toStrictEqual({
       code: TOOL_INPUT_DIAGNOSTIC_CODE,
       message: 'path: Required',
+      affects: ['dependencies', 'boundaries', 'verification'],
       nextAction: TOOL_INPUT_NEXT_ACTION,
     });
   });
@@ -48,6 +50,7 @@ describe('toolError next action', () => {
     expect(diagnosticOf(toolError(new TypeError('boom')))).toStrictEqual({
       code: TOOL_ERROR_DIAGNOSTIC_CODE,
       message: 'boom',
+      affects: ['dependencies', 'boundaries', 'verification'],
       nextAction: TOOL_ERROR_NEXT_ACTION,
     });
   });

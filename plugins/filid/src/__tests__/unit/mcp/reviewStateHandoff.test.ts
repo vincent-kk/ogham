@@ -521,6 +521,7 @@ describe('review_state handoff', () => {
             code: 'adapter-unsupported',
             message: 'Adapter evidence is unavailable.',
             path: 'src/value.ts',
+            affects: ['dependencies', 'boundaries', 'verification'],
             nextAction: 'Enable an adapter for this file.',
           },
         ],
@@ -542,6 +543,7 @@ describe('review_state handoff', () => {
       code: 'adapter-unsupported',
       message: 'Adapter evidence is unavailable.',
       path: 'src/value.ts',
+      affects: ['dependencies', 'boundaries', 'verification'],
       nextAction: 'Enable an adapter for this file.',
     });
     expect(parsed.handoff?.recorded).toContainEqual({
@@ -677,6 +679,7 @@ describe('review_state handoff', () => {
         {
           code: 'handoff-invalid',
           message: 'Schema mismatch at recorded.',
+          affects: [],
           nextAction: 'Regenerate the handoff block.',
         },
       ],

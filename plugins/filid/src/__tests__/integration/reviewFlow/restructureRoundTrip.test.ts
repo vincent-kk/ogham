@@ -204,8 +204,9 @@ describe('restructure plan → precondition → postcondition round trip', () =>
   });
 });
 
-describe('current behavior: a config-warning makes every restructure step INDETERMINATE', () => {
-  it('current behavior: plan is indeterminate with only a config-warning diagnostic', async () => {
+// An unknown key may have been meant to tighten the analysis, so its config-warning affects every axis.
+describe('an unknown config key keeps every restructure step indeterminate', () => {
+  it('plans with status indeterminate beside the config-warning', async () => {
     projectRoot = writeSharedUnitRestructureProject(CONFIG_WITH_UNKNOWN_KEY);
     const { plan, data } = await planSharedUnitMove();
     expect(plan.status).toBe('indeterminate');
@@ -216,7 +217,7 @@ describe('current behavior: a config-warning makes every restructure step INDETE
     expect(data.moves).toHaveLength(1);
   });
 
-  it('current behavior: precondition and postcondition are INDETERMINATE although the plan validates', async () => {
+  it('validates precondition and postcondition as indeterminate although the plan validates', async () => {
     projectRoot = writeSharedUnitRestructureProject(CONFIG_WITH_UNKNOWN_KEY);
     const { data, planPath } = await planSharedUnitMove();
     const before = await validate('precondition', planPath);

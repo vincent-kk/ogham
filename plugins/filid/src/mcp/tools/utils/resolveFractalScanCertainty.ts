@@ -1,3 +1,4 @@
+import { ANALYSIS_AXES } from '../../../constants/analysisAxes.js';
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import type {
   AnalysisCertainty,
@@ -5,6 +6,7 @@ import type {
 } from '../../../types/fractal.js';
 import type { ToolDiagnostic } from '../../../types/toolEnvelope.js';
 
+import { affectsAnalysisAxis } from './affectsAnalysisAxis.js';
 import { isFindingDiagnostic } from './isFindingDiagnostic.js';
 
 /**
@@ -12,7 +14,8 @@ import { isFindingDiagnostic } from './isFindingDiagnostic.js';
  * @param snapshot Snapshot whose graph and verification certainty are measured.
  * @param diagnostics Snapshot and config diagnostics attached to the envelope.
  * @param verificationCertainty Verification certainty for the requested scope.
- * @returns The aggregate certainty after excluding diagnostics that restate findings.
+ * @returns The aggregate certainty after excluding diagnostics that restate
+ *   findings or declare no affected axis (`affects: []`).
  */
 export function resolveFractalScanCertainty(
   snapshot: ProjectSnapshot,
@@ -28,7 +31,9 @@ export function resolveFractalScanCertainty(
   if (
     graphCertainty !== ANALYSIS_CERTAINTIES.EXACT ||
     verificationCertainty !== ANALYSIS_CERTAINTIES.EXACT ||
-    diagnostics.some((d) => !isFindingDiagnostic(d))
+    diagnostics.some(
+      (d) => !isFindingDiagnostic(d) && affectsAnalysisAxis(d, ANALYSIS_AXES),
+    )
   )
     return ANALYSIS_CERTAINTIES.INDETERMINATE;
   return ANALYSIS_CERTAINTIES.EXACT;

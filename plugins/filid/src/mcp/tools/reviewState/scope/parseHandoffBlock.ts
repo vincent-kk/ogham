@@ -29,6 +29,7 @@ function invalidDiagnostic(message: string): ToolDiagnostic {
   return {
     code: REVIEW_STATE_DIAGNOSTIC_CODES.HANDOFF_INVALID,
     message: `The PR body's filid:handoff block is invalid: ${message}`,
+    affects: [],
     nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.HANDOFF_INVALID,
   };
 }

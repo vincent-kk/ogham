@@ -1,5 +1,8 @@
 import { ANALYSIS_CERTAINTIES } from '../../../../constants/analysisCertainties.js';
-import { RESTRUCTURE_PLAN_NEXT_ACTIONS } from '../../../../constants/restructure.js';
+import {
+  RESTRUCTURE_ANALYSIS_AXES,
+  RESTRUCTURE_PLAN_NEXT_ACTIONS,
+} from '../../../../constants/restructure.js';
 import {
   TOOL_PERSISTENCE,
   TOOL_STATUSES,
@@ -11,6 +14,7 @@ import type {
 } from '../../../../types/report.js';
 import type { RestructurePlanInput } from '../../../../types/restructure.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
+import { affectsAnalysisAxis } from '../../utils/affectsAnalysisAxis.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
 
 /**
@@ -32,7 +36,9 @@ export async function planRestructure(
       ? TOOL_STATUSES.UNSUPPORTED
       : plan.unresolved.length > 0 ||
           certainty === ANALYSIS_CERTAINTIES.INDETERMINATE ||
-          context.diagnostics.length > 0
+          context.diagnostics.some((diagnostic) =>
+            affectsAnalysisAxis(diagnostic, RESTRUCTURE_ANALYSIS_AXES),
+          )
         ? TOOL_STATUSES.INDETERMINATE
         : TOOL_STATUSES.OK;
   const nextAction =
