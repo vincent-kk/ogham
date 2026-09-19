@@ -8,7 +8,7 @@ A cycle is two units pretending to be one — no reading order exists. Extract t
 
 ## 2. Group by purpose before minimizing depth
 
-Group related files in subdirectories named for their topic or responsibility, including inside directories such as `utils/` and `helpers/`. When adding a file, reuse its topic's directory or create one for a distinct responsibility. Flatten only levels that add no topic or ownership boundary; a single child alone is not a reason to collapse a directory.
+Group related files in subdirectories named for their topic or responsibility, including inside directories such as `utils/` and `helpers/`. When adding a file, reuse its topic's directory or create one for a distinct responsibility. Flatten only levels that add no topic, ownership or role boundary: a level that separates a directory's modules from the code supporting them earns its place even when it names no topic, and topic names continue inside it. A single child alone is not a reason to collapse a directory.
 
 ## 3. Cohesion splits, complexity compresses
 
@@ -16,4 +16,4 @@ Parts of a unit that share no state or purpose are several units — split where
 
 ---
 
-**This rule is working if:** directory names reveal responsibilities, call chains rarely reverse direction, and splits land at recognizable seams. **This rule is wrong for you if:** the tree is vendored or generated — a generator owns that structure; change the generator or leave it be (`seiri_context-efficiency` §1).
+**This rule is working if:** directory names reveal responsibilities, call chains rarely reverse direction, and splits land at recognizable seams. **This rule is wrong for you if:** the tree is vendored or generated — a generator owns that structure; change the generator or leave it be.

@@ -16,7 +16,7 @@ Avoid `common`, `misc`, `util2`, `temp`, `new`, `stuff`, `extra` and their kin �
 
 ## 4. Derived names follow their source
 
-Tests, specs, fixtures, and generated companions are named for what they verify or accompany, and rename with their source — a base name that matches nothing is a name trap (`seiri_agent-legible` §3).
+Tests, specs, fixtures, and generated companions are named for what they verify or accompany, and rename with their source — a base name that matches nothing is a name trap.
 
 ---
 

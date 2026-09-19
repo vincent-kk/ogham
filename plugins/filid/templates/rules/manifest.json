@@ -7,9 +7,9 @@
       "filename": "filid_fractal-boundaries.md",
       "required": true,
       "title": "Fractal Boundaries",
-      "description": "Node classification, entry-point surfaces, organ access, exemptions, and the acyclic dependency graph.",
+      "description": "Node classification, fractal ownership, entry-point surfaces, level legibility, organ access, exemptions, and the acyclic dependency graph.",
       "grounding": "This rule rests on properties every codebase has: directories contain files, and files reference one another.",
-      "templateHash": "b3bb8e82f14cab4b73c67143ca617f9e1efd2f5deba1e50d8cd1ad1ae863a459"
+      "templateHash": "1de7fe989f39f0807abd2bcabb7fe0063f719f00e1a1e4ef9bde5e101e0a728e"
     },
     {
       "id": "filid_module-documents",
@@ -25,18 +25,18 @@
       "filename": "filid_verification-records.md",
       "required": true,
       "title": "Verification Records",
-      "description": "Spec-document and test-record roles, the 15 and 32 case caps, counting rules, and DETAIL acceptance-group links.",
+      "description": "Spec-document and test-record roles, the 15 and 32 case caps, counting rules, DETAIL acceptance-group links, and where a verification file lives.",
       "grounding": "This rule rests on a property every codebase has: verification files exist, and their cases can be counted.",
-      "templateHash": "bf70fd28317a8339ec35aced1b411ffaf6ed84c71e69f9a37bc40955db6f0265"
+      "templateHash": "e78a91293607a22fea84cf47b1309241f17408fddaf3db687b252b8ddd42f94e"
     },
     {
       "id": "filid_code-placement",
       "filename": "filid_code-placement.md",
       "required": true,
       "title": "Code Placement",
-      "description": "Lowest-common-fractal placement, restructure plan preconditions and postconditions, the document-before-code workflow, and PR-seam Filid validation.",
+      "description": "Ownership-first and lowest-common-fractal placement, restructure plan preconditions and postconditions, the document-before-code workflow, and PR-seam Filid validation.",
       "grounding": "This rule rests on properties every codebase has: a unit has a location, and its consumers have locations too.",
-      "templateHash": "43b29eee8f9519716e68dfa7bf1286a6b7ecd8844ef51836ae2e561e226a0915"
+      "templateHash": "11b8ae6ed6f33d03094f480e7b539751158f7095d812bc0d0237bbc9b9b0898f"
     }
   ]
 }
