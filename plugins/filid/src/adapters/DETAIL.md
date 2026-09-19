@@ -12,6 +12,7 @@
 - explicit config의 미등록 adapter ID는 `unknown-adapter-id` validation 진단이다.
 - 새 생태계 지원은 adapter 등록으로 추가되며 core type, policy와 MCP schema를 바꾸지 않는다.
 - `DependencyReference.certainty`는 선택 필드이고 생략은 exact다. adapter는 토큰 경계를 믿을 수 없는 구간에서 찾았거나 그 뒤에 있어 실제 코드인지 확정할 수 없는 참조를 `indeterminate`로 표시한다. core는 그런 참조를 edge로 쓰지 않는다. 확정할 수 없는 참조를 exact edge로 쓰면 phantom 의존이 생기고, 버리면 숨은 의존이 조용히 사라진다.
+- `DependencyReference.sourceText`는 선택 필드다. adapter가 읽은 specifier(`rawSpecifier`, escape를 푼 값)가 소스에 적힌 literal과 다를 때만 구분자를 포함한 원문을 싣는다. 그 값은 파일 byte에 그대로 있으므로 facts 제출의 존재 확인이 이 원문으로 참조를 찾는다. core는 이 필드를 읽지 않는다.
 
 ## API Contracts
 

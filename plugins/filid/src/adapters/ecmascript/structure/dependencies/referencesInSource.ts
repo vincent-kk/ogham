@@ -96,9 +96,13 @@ export function referencesInSource(
       token.start > line.literals[0].start;
     const indeterminate =
       afterFirstQuote || token.start > untrusted.lostTrackAt;
+    const written = source.slice(dependency.start, dependency.end);
     references.push({
       sourceFile: filePath,
       rawSpecifier: dependency.value,
+      ...(written === `${written[0]}${dependency.value}${written[0]}`
+        ? {}
+        : { sourceText: written }),
       resolvedPath: resolveSpecifier(filePath, dependency.value),
       kind,
       ...(indeterminate

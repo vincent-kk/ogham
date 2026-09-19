@@ -491,6 +491,8 @@ interface DependencyReference {
   rawSpecifier: string;
   resolvedPath: string | null;
   kind: "static" | "dynamic" | "re-export" | "framework";
+  /** The literal as the source spells it, only when escapes make it differ from rawSpecifier. */
+  sourceText?: string;
 }
 
 interface EntryPointInspection {

@@ -10,6 +10,7 @@ import { checkDeclaredInputs } from './utils/checkDeclaredInputs.js';
 import { buildFactsRejection } from './utils/buildFactsRejection.js';
 import { hashProjectFile } from './utils/hashProjectFile.js';
 import { normalizeFileFacts } from './utils/normalizeFileFacts.js';
+import { splitSourceLines } from './utils/splitSourceLines.js';
 import { validateExportedNames } from './validateExportedNames.js';
 import { validateReferences } from './validateReferences.js';
 
@@ -75,7 +76,7 @@ export function validateFactsRecord(
         ),
       ],
     };
-  const lines = current.contents.toString('utf8').split(/\r\n|\r|\n/);
+  const lines = splitSourceLines(current.contents.toString('utf8'));
   const references = validateReferences(
     context,
     facts.references,

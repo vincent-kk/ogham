@@ -20,6 +20,12 @@ export interface DependencyReference {
   certainty?: AnalysisCertainty;
   /** 1-based line of the reference; set on `indeterminate` references so a reader can check that line. */
   line?: number;
+  /**
+   * The specifier literal exactly as the source spells it, delimiters included;
+   * set only when escapes make it differ from `rawSpecifier`, which holds the
+   * escape-reduced value and so may not occur in the file's bytes.
+   */
+  sourceText?: string;
 }
 
 export interface EntryPointInspection {
