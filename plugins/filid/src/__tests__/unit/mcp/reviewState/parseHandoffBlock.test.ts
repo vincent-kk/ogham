@@ -64,7 +64,11 @@ describe('parseHandoffBlock', () => {
       handoff: null,
       remainder: changeContext,
       diagnostics: [
-        { code: 'review-handoff-invalid', message: expect.any(String) },
+        {
+          code: 'review-handoff-invalid',
+          message: expect.any(String),
+          nextAction: expect.any(String),
+        },
       ],
     });
   });
@@ -82,6 +86,7 @@ describe('parseHandoffBlock', () => {
         {
           code: 'review-handoff-invalid',
           message: expect.stringContaining('recorded.0.class:'),
+          nextAction: expect.any(String),
         },
       ],
     });
@@ -100,6 +105,7 @@ describe('parseHandoffBlock', () => {
         {
           code: 'review-handoff-invalid',
           message: expect.stringContaining('recorded:'),
+          nextAction: expect.any(String),
         },
       ],
     });

@@ -19,6 +19,8 @@ export function checkVerificationPolicy(
             'Verification policy evaluation requires a project snapshot.',
           path: context.tree.root,
           certainty: 'indeterminate',
+          suggestion:
+            'Evaluate through fractal_inspect action "validate" or "verification", which build the verification evidence this rule needs.',
         },
       ];
     const findings = verification.violations.filter(
@@ -30,9 +32,11 @@ export function checkVerificationPolicy(
       {
         ruleId,
         severity: 'warning',
-        message: `Verification evidence is ${verification.certainty}.`,
+        message: `Verification evidence is ${verification.certainty}, so the ${ruleId} policy cannot be proven.`,
         path: context.snapshot!.projectRoot,
         certainty: verification.certainty,
+        suggestion:
+          'Call fractal_inspect action "verification" to see which files are not exact; each count reason names the line filid could not count.',
       },
     ];
   };

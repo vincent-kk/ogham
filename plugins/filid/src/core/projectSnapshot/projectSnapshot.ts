@@ -8,7 +8,10 @@ import type {
   SnapshotAxisSelection,
   SnapshotDiagnostic,
 } from '../../types/fractal.js';
-import { buildDependencyGraph } from '../analysis/dependencyGraph/index.js';
+import {
+  buildDependencyGraph,
+  findUnownedReferences,
+} from '../analysis/dependencyGraph/index.js';
 import {
   type FilidConfig,
   resolveLanguage,
@@ -24,6 +27,7 @@ import { collectVerificationClaims } from './evidence/collectVerificationClaims.
 import { resolveSnapshotAdapters } from './evidence/resolveSnapshotAdapters.js';
 import { resolveSnapshotOwner } from './evidence/resolveSnapshotOwner.js';
 import { snapshotStructureInput } from './evidence/snapshotStructureInput.js';
+import { createDependencyDiagnostic } from './evidence/utils/createDependencyDiagnostic.js';
 import { computeSnapshotHash } from './snapshotHash/computeSnapshotHash.js';
 
 /** Options narrowing what a snapshot collects. */
@@ -110,18 +114,20 @@ export async function createProjectSnapshot(
         discoveryCertainty: verificationClaims.certainty,
       })
     : { files: [], violations: [], certainty: 'unsupported' as const };
+  const ownerNodePaths = [...tree.nodes.values()]
+    .filter((node) => node.type !== 'organ')
+    .map((node) => node.path);
+  const verificationFilePaths = verification.files.map((file) => file.path);
   const dependencyGraph = axes.dependencies
     ? buildDependencyGraph(
-        [...tree.nodes.values()]
-          .filter((node) => node.type !== 'organ')
-          .map((node) => node.path),
+        ownerNodePaths,
         dependencies.references,
         dependencies.certainty,
         {
           organPaths: [...tree.nodes.values()]
             .filter((node) => node.type === 'organ')
             .map((node) => node.path),
-          verificationPaths: verification.files.map((file) => file.path),
+          verificationPaths: verificationFilePaths,
         },
       )
     : {
@@ -130,19 +136,37 @@ export async function createProjectSnapshot(
         cycles: [],
         certainty: 'unsupported' as const,
       };
+  const unownedDependencyDiagnostics = axes.dependencies
+    ? findUnownedReferences(ownerNodePaths, dependencies.references, {
+        verificationPaths: verificationFilePaths,
+      }).map(({ reference, unownedPath }) =>
+        createDependencyDiagnostic(
+          'unowned-local-dependency',
+          `${reference.rawSpecifier} in ${reference.sourceFile} resolves to ${reference.resolvedPath}, but no fractal owns ${unownedPath}, so the reference cannot enter the dependency graph.`,
+          `With the user's agreement, make a fractal own ${unownedPath} — an INTENT.md in its directory or an ancestor does that — or move the file under an existing fractal; the graph stays indeterminate until then. Otherwise report dependency results as indeterminate.`,
+          root,
+          reference.sourceFile,
+          reference.rawSpecifier,
+        ),
+      )
+    : [];
   const legacyCriteriaLedger = collectLegacyCriteriaLedger(root);
   const adapterDiagnostics: SnapshotDiagnostic[] =
-    adapterResolution.diagnostics.map(({ code, message, path }) => ({
-      code,
-      message,
-      ...(path ? { path } : {}),
-    }));
+    adapterResolution.diagnostics.map(
+      ({ code, message, path, nextAction }) => ({
+        code,
+        message,
+        nextAction,
+        ...(path ? { path } : {}),
+      }),
+    );
   const diagnostics = [
     ...selectedAdapters.diagnostics,
     ...adapterDiagnostics,
     ...documents.diagnostics,
     ...entryPoints.diagnostics,
     ...dependencies.diagnostics,
+    ...unownedDependencyDiagnostics,
     ...verificationClaims.diagnostics,
   ];
   const adapterIds = [

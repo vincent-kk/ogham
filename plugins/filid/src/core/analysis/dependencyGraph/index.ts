@@ -3,5 +3,6 @@ export { buildDependencyGraph } from './builders/buildDependencyGraph.js';
 export { resolveOwningOrganPath } from './builders/resolveOwningOrganPath.js';
 export { sortPathsDeepestFirst } from './builders/sortPathsDeepestFirst.js';
 export { detectCycles } from './cycles/detectCycles.js';
+export { findUnownedReferences } from './queries/findUnownedReferences.js';
 export { getDirectDependencies } from './queries/getDirectDependencies.js';
 export { topologicalSort } from './queries/topologicalSort.js';

@@ -132,7 +132,12 @@ export interface RestructurePlanSummary {
   moveCount: number;
   fractalsCreated: number;
   organsCreated: number;
+  alreadyPlacedCount: number;
   decisionsRequired: number;
+  /** Sum of `delegatedImports` over the plan's moves. */
+  delegatedImportCount: number;
+  /** The caller's next step, chosen from the plan status and contents. */
+  nextAction: string;
 }
 
 export type RestructurePlanData = RestructurePlan;
@@ -166,6 +171,11 @@ export interface StructureValidateSummary {
   failed: number;
   skipped: number;
 }
+
+/** Summary of a restructure precondition or postcondition, with the caller's next step. */
+export type RestructureValidationSummary = StructureValidateSummary & {
+  nextAction: string;
+};
 
 export type StructureValidateData = ValidationReport | PlanValidationResult;
 

@@ -86,8 +86,11 @@ const ORGAN_MOVE: MoveInstruction = {
   reason: 'fixture organ move',
   requiredArtifacts: [],
   affectedImports: [],
+  delegatedImports: [],
+  preservedImports: [],
   requiresDecision: false,
   decisionReasons: [],
+  decisions: [],
 };
 
 const FRACTAL_ARTIFACTS = [
@@ -117,8 +120,11 @@ const FRACTAL_MOVE: MoveInstruction = {
   reason: 'fixture fractal move',
   requiredArtifacts: FRACTAL_ARTIFACTS,
   affectedImports: [],
+  delegatedImports: [],
+  preservedImports: [],
   requiresDecision: false,
   decisionReasons: [],
+  decisions: [],
 };
 
 const IMPORT_MOVE: MoveInstruction = {
@@ -138,7 +144,7 @@ function makePlan(
   snapshotHash: string = PLAN_SNAPSHOT_HASH,
 ): RestructurePlan {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     planId: 'fixture-plan',
     projectRoot,
     snapshotHash,
@@ -154,6 +160,7 @@ function makePlan(
         move.targetNodeType === RESTRUCTURE_NODE_TYPES.ORGAN ? 1 : 0,
       alreadyPlacedCount: 0,
       decisionsRequired: 0,
+      delegatedImportCount: 0,
     },
   };
 }
@@ -287,6 +294,17 @@ function makeSnapshot(
     collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: CREATED_AT,
   };
+}
+
+function findingOf(
+  result: ReturnType<
+    typeof validatePlanPreconditions | typeof validatePlanPostconditions
+  >,
+  code: string,
+) {
+  const finding = result.findings.find((entry) => entry.code === code);
+  if (!finding) throw new Error(`expected a ${code} finding`);
+  return finding;
 }
 
 function findingCodes(
@@ -432,6 +450,36 @@ describe('restructure plan validation', () => {
     );
     expect(findingCodes(result)).toContain(
       RESTRUCTURE_VALIDATION_CODES.DEPENDENCY_CYCLE,
+    );
+  });
+
+  it('tells the caller to create a new plan when the snapshot is stale', () => {
+    const finding = findingOf(
+      validatePlanPreconditions(makeSnapshot(), makePlan()),
+      RESTRUCTURE_VALIDATION_CODES.SNAPSHOT_HASH_MISMATCH,
+    );
+    expect(finding.nextAction).toContain('Create a new plan');
+  });
+
+  it('names the exact target a missing landing must reach', () => {
+    const finding = findingOf(
+      validatePlanPostconditions(
+        makeSnapshot(POST_STATES.TARGET_MISSING),
+        makePlan(),
+      ),
+      RESTRUCTURE_VALIDATION_CODES.TARGET_MISSING,
+    );
+    expect(finding.message).toContain(PATHS.TARGET);
+    expect(finding.nextAction).toContain(`ends at exactly ${PATHS.TARGET}`);
+  });
+
+  it('names the consumer and both specifiers of an unapplied rewrite', () => {
+    const finding = findingOf(
+      validatePlanPostconditions(makeSnapshot(), makePlan(IMPORT_MOVE)),
+      RESTRUCTURE_VALIDATION_CODES.IMPORT_REWRITE_MISSING,
+    );
+    expect(finding.nextAction).toContain(
+      `In ${PATHS.CONSUMER}, replace the import "../a/value.unit" with "${REQUIRED_SPECIFIER}"`,
     );
   });
 

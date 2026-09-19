@@ -7,9 +7,12 @@ import {
   REVIEW_LOCKFILE_BASENAMES,
   REVIEW_MAX_GROUPS,
   REVIEW_PLAN_CHURN_LIMIT,
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
 } from '../../../../../constants/reviewState.js';
 import { loadConfig } from '../../../../../core/index.js';
 import { resolvePluginRoot } from '../../../../../core/infra/index.js';
+import { ToolDiagnosticError } from '../../../../errors/toolDiagnosticError.js';
 import type { ReviewStateInput } from '../../state/reviewStateTypes.js';
 
 /** Prepare input narrowed from the public review-state action union. */
@@ -43,7 +46,11 @@ export function resolvePrepareSettings(input: PrepareSettingsInput) {
       warning.startsWith('config validation failed at review'),
   );
   if (validationFailure)
-    throw new Error(`config validation failed: ${validationFailure}`);
+    throw new ToolDiagnosticError(
+      REVIEW_STATE_DIAGNOSTIC_CODES.CONFIG_INVALID,
+      `config validation failed: ${validationFailure}`,
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CONFIG_INVALID,
+    );
   const config = loaded.config;
   const review = config?.review;
   const requestedEffort = 'effort' in input ? input.effort : undefined;

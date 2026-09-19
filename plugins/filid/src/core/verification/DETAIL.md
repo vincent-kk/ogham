@@ -10,6 +10,7 @@
 - 같은 최고 confidence의 adapter가 한 파일을 주장하면 `ambiguous-adapter-claim` 진단을 남기고 해당 파일을 policy 분석에서 제외한다.
 - snapshot이 제공한 discovery 결과는 절대 portable path로 정규화해 한 번만 소비하며, 동일 adapter의 중복 path는 한 claim으로 취급한다.
 - discovery 실패나 adapter 경합으로 일부 파일을 판정하지 못하면 project certainty는 `indeterminate`이며 빈 exact 분석으로 축소하지 않는다.
+- `VerificationViolation.suggestion`은 필수다. count non-exact, cap 초과(spec·test 역할별로 다른 문장), group 미표시·미선언·분할 모두 다음 행동을 채운다.
 
 ## API Contracts
 

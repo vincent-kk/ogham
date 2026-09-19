@@ -137,11 +137,18 @@ export function collectDocumentEvidence(
       ...(boundaryExemptions ? { boundaryExemptions } : {}),
     };
     diagnostics.push(
-      ...findings.map((finding) => ({
-        code: `${finding.document}-document-contract`,
-        message: finding.message,
-        path: finding.document === 'intent' ? intentPath : detailPath,
-      })),
+      ...findings.map((finding) => {
+        const path = finding.document === 'intent' ? intentPath : detailPath;
+        return {
+          code: `${finding.document}-document-contract`,
+          message: finding.message,
+          path,
+          nextAction:
+            finding.rule === 'missing-document'
+              ? `Create ${path}; the enrich-docs skill drafts it from the module's evidence.`
+              : `Revise ${path} as the message states, keeping only the current contract; the enrich-docs skill repairs contract documents. Then run again.`,
+        };
+      }),
     );
   }
 

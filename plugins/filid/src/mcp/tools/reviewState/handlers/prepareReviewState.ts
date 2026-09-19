@@ -1,3 +1,7 @@
+import {
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
+} from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 import { readReviewState } from '../state/readReviewState.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
@@ -27,8 +31,9 @@ export async function prepareReviewState(
     !input.force
   )
     throw new ToolDiagnosticError(
-      'review-incremental-bootstrap-required',
-      'Use explicit force to preserve the legacy run and bootstrap observed inputs.',
+      REVIEW_STATE_DIAGNOSTIC_CODES.INCREMENTAL_BOOTSTRAP_REQUIRED,
+      `The review state at ${paths.statePath} predates incremental review or uses an unsupported schema, so it cannot be resumed.`,
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.INCREMENTAL_BOOTSTRAP_REQUIRED,
     );
   return prepareIncrementalReviewState(input, paths, previous);
 }

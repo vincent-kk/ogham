@@ -158,6 +158,8 @@ export function loadBuiltinRules(
                   'Import-boundary evaluation requires a project snapshot.',
                 path: context.tree.root,
                 certainty: 'indeterminate',
+                suggestion:
+                  'Evaluate through fractal_inspect action "validate" or "scan", which build the project snapshot this rule needs.',
               },
             ],
     },

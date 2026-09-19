@@ -44,6 +44,7 @@ describe('deriveEvidenceStatuses', () => {
         {
           code: 'unresolved-local-dependency',
           message: 'Missing ./moved.js',
+          nextAction: 'Fix the specifier.',
           path: '/project/src/a.ts',
           affects: ['dependencies', 'boundaries'],
         },
@@ -61,7 +62,13 @@ describe('deriveEvidenceStatuses', () => {
     expect(
       deriveEvidenceStatuses(
         SNAPSHOT,
-        [{ code: 'unknown', message: 'Unknown impact' }],
+        [
+          {
+            code: 'unknown',
+            message: 'Unknown impact',
+            nextAction: 'Report it.',
+          },
+        ],
         0,
         0,
         ANALYSIS_CERTAINTIES.EXACT,

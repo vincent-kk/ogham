@@ -28,11 +28,13 @@ const DOCUMENT_FINDING_DIAGNOSTICS: ToolDiagnostic[] = [
     code: BUILTIN_RULE_IDS.INTENT_DOCUMENT_CONTRACT,
     message: DOCUMENT_FINDING_MESSAGE,
     path: DOCUMENT_PATH,
+    nextAction: 'test next action',
   },
   {
     code: BUILTIN_RULE_IDS.DETAIL_DOCUMENT_CONTRACT,
     message: DOCUMENT_FINDING_MESSAGE,
     path: DOCUMENT_PATH,
+    nextAction: 'test next action',
   },
 ];
 
@@ -41,6 +43,7 @@ const CONFIG_WARNING_DIAGNOSTICS: ToolDiagnostic[] = [
     code: SNAPSHOT_TOOL_DIAGNOSTIC_CODES.CONFIG_WARNING,
     message: CONFIG_WARNING_MESSAGE,
     path: PROJECT_ROOT,
+    nextAction: 'test next action',
   },
 ];
 
@@ -82,6 +85,7 @@ const DOCUMENT_VIOLATION_REPORT: ValidationReport = {
         message: DOCUMENT_FINDING_MESSAGE,
         path: DOCUMENT_PATH,
         certainty: ANALYSIS_CERTAINTIES.EXACT,
+        suggestion: 'Revise the document as the message states.',
       },
     ],
     passed: 0,

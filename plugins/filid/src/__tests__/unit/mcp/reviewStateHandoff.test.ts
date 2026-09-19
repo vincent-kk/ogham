@@ -31,9 +31,10 @@ import { runReviewStateFixtureGit } from './reviewState/helpers/runReviewStateFi
 vi.mock(
   '../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js',
   async (importOriginal) => {
-    const actual = await importOriginal<
-      typeof import('../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js')
-    >();
+    const actual =
+      await importOriginal<
+        typeof import('../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js')
+      >();
     return {
       ...actual,
       computeChangedScopeEvidence: vi.fn(actual.computeChangedScopeEvidence),
@@ -44,9 +45,10 @@ vi.mock(
 vi.mock(
   '../../../mcp/tools/reviewState/scope/parseHandoffBlock.js',
   async (importOriginal) => {
-    const actual = await importOriginal<
-      typeof import('../../../mcp/tools/reviewState/scope/parseHandoffBlock.js')
-    >();
+    const actual =
+      await importOriginal<
+        typeof import('../../../mcp/tools/reviewState/scope/parseHandoffBlock.js')
+      >();
     return { ...actual, parseHandoffBlock: vi.fn(actual.parseHandoffBlock) };
   },
 );
@@ -519,6 +521,7 @@ describe('review_state handoff', () => {
             code: 'adapter-unsupported',
             message: 'Adapter evidence is unavailable.',
             path: 'src/value.ts',
+            nextAction: 'Enable an adapter for this file.',
           },
         ],
       };
@@ -539,6 +542,7 @@ describe('review_state handoff', () => {
       code: 'adapter-unsupported',
       message: 'Adapter evidence is unavailable.',
       path: 'src/value.ts',
+      nextAction: 'Enable an adapter for this file.',
     });
     expect(parsed.handoff?.recorded).toContainEqual({
       class: 'indeterminate',
@@ -594,7 +598,9 @@ describe('review_state handoff', () => {
       parsed.handoff?.recorded.find(
         (entry) => entry.ruleId === 'handoff-validate',
       )?.note,
-    ).toBe('Review base ref could not be resolved: refs/heads/missing');
+    ).toContain(
+      'Review base ref "refs/heads/missing" does not resolve to a commit',
+    );
     expect(parsed.handoff?.recorded.map((entry) => entry.ruleId)).toEqual([
       'z-caller',
       'a-caller',
@@ -668,7 +674,11 @@ describe('review_state handoff', () => {
       handoff: null,
       remainder: '',
       diagnostics: [
-        { code: 'handoff-invalid', message: 'Schema mismatch at recorded.' },
+        {
+          code: 'handoff-invalid',
+          message: 'Schema mismatch at recorded.',
+          nextAction: 'Regenerate the handoff block.',
+        },
       ],
     });
 

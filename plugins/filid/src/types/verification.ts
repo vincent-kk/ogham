@@ -25,6 +25,8 @@ export interface VerificationViolation {
   path: string;
   severity: 'error' | 'warning';
   message: string;
+  /** What to do about the violation: the fix, or who must decide. */
+  suggestion: string;
   /** Evidence certainty inherited from the analyzed case count. */
   certainty?: AnalysisCertainty;
 }

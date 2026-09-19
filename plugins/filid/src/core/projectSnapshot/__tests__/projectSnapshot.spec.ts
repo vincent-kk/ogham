@@ -405,7 +405,8 @@ describe('project snapshot', () => {
     expect(snapshot.diagnostics).toContainEqual(
       expect.objectContaining({
         code: 'verification-discovery-failed',
-        message: 'verification discovery failed',
+        message:
+          'Verification file discovery failed: verification discovery failed',
       }),
     );
     expect(snapshot.verification.certainty).toBe('indeterminate');

@@ -17,6 +17,7 @@ import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import {
   CONTRACT_INTENTS,
   RESTRUCTURE_NODE_TYPES,
+  RESTRUCTURE_PLAN_NEXT_ACTIONS,
   RESTRUCTURE_SCHEMA_VERSION,
 } from '../../../constants/restructure.js';
 import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
@@ -185,6 +186,7 @@ const VALID_RESTRUCTURE_PLAN: RestructurePlan = {
     organsCreated: 0,
     alreadyPlacedCount: 0,
     decisionsRequired: 0,
+    delegatedImportCount: 0,
   },
 };
 
@@ -199,6 +201,7 @@ const PERSISTED_PLAN_PAYLOAD: ToolPayload<
     planId: VALID_RESTRUCTURE_PLAN.planId,
     snapshotHash: VALID_RESTRUCTURE_PLAN.snapshotHash,
     ...VALID_RESTRUCTURE_PLAN.summary,
+    nextAction: RESTRUCTURE_PLAN_NEXT_ACTIONS.NOTHING_TO_MOVE,
   },
   data: VALID_RESTRUCTURE_PLAN,
   diagnostics: [],
@@ -242,11 +245,17 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
     mockedCreateToolSnapshot.mockResolvedValueOnce({
       ...TOOL_CONTEXT,
       diagnostics: [
-        { code: 'in-feature', message: 'inside', path: SOURCE_PATH },
+        {
+          code: 'in-feature',
+          message: 'inside',
+          path: SOURCE_PATH,
+          nextAction: 'test next action',
+        },
         {
           code: 'outside-feature',
           message: 'elsewhere in the project',
           path: `${PROJECT_ROOT}/other.unit`,
+          nextAction: 'test next action',
         },
       ],
     });

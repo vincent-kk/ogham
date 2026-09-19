@@ -154,6 +154,8 @@ const ReviewScopeSchema = z
           .object({
             code: z.string(),
             message: z.string(),
+            /** Absent for a diagnostic recorded before filid attached next actions. */
+            nextAction: z.string().optional(),
             path: z.string().optional(),
             causeId: z.string().optional(),
             specifier: z.string().optional(),

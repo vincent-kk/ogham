@@ -2,6 +2,7 @@ import type { DependencyReference } from '../../../../types/adapters.js';
 import { findHiddenMatches } from '../lexing/findHiddenMatches.js';
 import { findUntrustedText } from '../lexing/findUntrustedText.js';
 import type { LexicalToken } from '../lexing/lexicalToken.js';
+import { lineAt } from '../lexing/lineAt.js';
 import { matchReExportFrom } from '../matchReExportFrom.js';
 import { scanLexicalTokens } from '../scanLexicalTokens.js';
 
@@ -93,13 +94,18 @@ export function referencesInSource(
       line !== undefined &&
       line.literals.length > 0 &&
       token.start > line.literals[0].start;
+    const indeterminate =
+      afterFirstQuote || token.start > untrusted.lostTrackAt;
     references.push({
       sourceFile: filePath,
       rawSpecifier: dependency.value,
       resolvedPath: resolveSpecifier(filePath, dependency.value),
       kind,
-      ...(afterFirstQuote || token.start > untrusted.lostTrackAt
-        ? { certainty: 'indeterminate' as const }
+      ...(indeterminate
+        ? {
+            certainty: 'indeterminate' as const,
+            line: lineAt(source, token.start),
+          }
         : {}),
     });
   }
@@ -127,6 +133,7 @@ export function referencesInSource(
         resolvedPath: resolveSpecifier(filePath, specifier),
         kind,
         certainty: 'indeterminate',
+        line: lineAt(source, hit.offset),
       });
     }
   return references;

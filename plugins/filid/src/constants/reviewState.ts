@@ -368,6 +368,28 @@ export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   OPINION_INVALID: 'review-opinion-invalid',
   SESSION_MISSING: 'review-session-missing',
   RULE_MAP_MISSING: 'review-rule-map-missing',
+  /** Legacy or unreadable-schema state without explicit force. */
+  INCREMENTAL_BOOTSTRAP_REQUIRED: 'review-incremental-bootstrap-required',
+  /** Local review inputs (instructions, rules, actor methods) changed since prepare. */
+  INPUTS_STALE: 'review-inputs-stale',
+  /** Repository `.filid/review-rules.json` content or schema is invalid. */
+  REPOSITORY_RULES_INVALID: 'review-repository-rules-invalid',
+  /** A repository rule declares a body file that does not exist. */
+  REPOSITORY_RULE_BODY_MISSING: 'review-repository-rule-body-missing',
+  /** Installed built-in cross-review rule map is malformed. */
+  RULE_MAP_INVALID: 'review-rule-map-invalid',
+  /** A `review.*` config value fails schema validation. */
+  CONFIG_INVALID: 'review-config-invalid',
+  /** Persisted state JSON parses but fails the record schema. */
+  STATE_INVALID: 'review-state-invalid',
+  /** `changeContextPath` does not identify a readable regular file. */
+  CHANGE_CONTEXT_PATH_INVALID: 'review-change-context-path-invalid',
+  /** `changeContextPath` file exceeds the change-context byte limit. */
+  CHANGE_CONTEXT_TOO_LARGE: 'review-change-context-too-large',
+  /** `branchName` is empty, absolute, or contains a traversal segment. */
+  BRANCH_NAME_INVALID: 'review-branch-name-invalid',
+  /** `cleanup` was called without `confirm: true`. */
+  CLEANUP_CONFIRM_REQUIRED: 'review-cleanup-confirm-required',
 } as const;
 
 /** Human-readable counterparts for review-state diagnostic codes. */
@@ -376,7 +398,7 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   SOURCE_HASH_STALE:
     'Committed source content no longer matches the prepared review state.',
   WORKTREE_STALE:
-    'The worktree no longer matches the sealed review. Run prepare to refresh the generation.',
+    'Uncommitted worktree paths changed after this review was sealed, so the sealed verdict no longer describes the worktree.',
   REPORT_MISSING: 'The canonical review report is missing.',
   BLOCKERS_MISSING: 'The canonical review blocker report is missing.',
   BLOCKERS_INVALID:
@@ -387,6 +409,76 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   OPINION_INVALID: 'The review opinion is missing or invalid.',
   SESSION_MISSING: 'The prepared review session artifact is missing.',
   RULE_MAP_MISSING: 'The cross-review rule map is missing.',
+} as const;
+
+/**
+ * Next action attached where the calling action does not change the wording
+ * (`REVIEW_STATE_DIAGNOSTIC_CODES` key -> nextAction). Codes whose wording
+ * depends on the calling action or on values only the producer knows
+ * (`STATE_MISSING`, `STATE_SCHEMA_MISMATCH`, `SOURCE_HASH_STALE`,
+ * `REPORT_MISSING`, `OPINION_INVALID`, `INPUTS_STALE`, `WORKTREE_STALE`,
+ * `SESSION_MISSING`, `OPINIONS_MISSING`, `EFFORT_LOCKED`,
+ * `REPOSITORY_RULE_BODY_MISSING`) are built at their producer site instead and
+ * are not listed here. `PLUGIN_ROOT_UNAVAILABLE` is not a code:
+ * the rule-map and actor-method codes share it when no plugin root resolves.
+ */
+export const REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS = {
+  VALIDATION_POLICY_OUTDATED:
+    "Stop without dispatching actors or publishing a verdict, and ask the user whether to start a fresh review. Only on the user's explicit request, and after all prior actors finish, call prepare with force: true (/filid:cross-review --force); this repeats all review work.",
+  RULE_PATH_ESCAPE:
+    'Ask the user to make .filid/review-rules.json and its rule files regular files inside the repository. Then call review_state prepare again.',
+  ACTOR_METHOD_MISSING:
+    'Stop without dispatching actors or publishing a verdict. Ask the user to reinstall or update the filid plugin, whose installed cross-review actor files are incomplete, then retry the same call.',
+  RULE_MAP_MISSING:
+    'Stop without dispatching actors or publishing a verdict. Ask the user to reinstall or update the filid plugin, whose installed cross-review rule files are incomplete, then retry the same call.',
+  PLUGIN_ROOT_UNAVAILABLE:
+    'Stop without dispatching actors or publishing a verdict. Ask the user to reinstall or re-enable the filid plugin and restart the session so its MCP server receives the plugin root, then retry the same call.',
+  BRANCH_UNRESOLVED:
+    'Check out the branch under review, or call review_state again with branchName set to that branch. Ask the user which branch this review belongs to if it is unknown.',
+  INCREMENTAL_BOOTSTRAP_REQUIRED:
+    "Stop without dispatching actors or publishing a verdict, and ask the user whether to start a fresh review. Only on the user's explicit request, and after all prior actors finish, call prepare with force: true; the prior run is preserved and every file is reviewed again.",
+  BLOCKERS_MISSING:
+    "Stop without publishing or relying on the sealed verdict, and ask the user whether to start a fresh review. Only on the user's explicit request, and after all prior actors finish, call prepare with force: true (/filid:cross-review --force); never rewrite the seal.",
+  BLOCKERS_INVALID:
+    "Stop without publishing or relying on the sealed verdict, and ask the user whether to start a fresh review. Only on the user's explicit request, and after all prior actors finish, call prepare with force: true (/filid:cross-review --force); never rewrite the seal.",
+  GROUP_BUDGET_EXCEEDED:
+    'Stop without dispatching actors and ask the user to split the PR or raise review.maxGroups or the grouping limits in the filid config. After the user changes grouping limits, call prepare with force: true only if the user requests it; force never bypasses review.maxGroups.',
+  BASE_REF_UNRESOLVED:
+    'Run git fetch origin to refresh origin refs, then retry the same review_state call. If no base resolves, ask the user for an explicit base ref; never substitute the repository default.',
+  HANDOFF_INVALID:
+    'Continue the review; reviewers see the invalid block as an indeterminate FCA handoff finding. Report this to the user and suggest regenerating the handoff block with /filid:pull-request; a corrected PR body reaches briefs only through a later --force run.',
+  CHANGE_CONTEXT_UNTEMPLATED:
+    'Continue the review; no action is required. If the PR body should follow the filid template, suggest /filid:pull-request to the user; the new body reaches briefs only through a later --force run.',
+  CHANGE_CONTEXT_TRUNCATED:
+    "Continue the review; no action is required. To give reviewers the full context, ask the user to shorten the PR body's Summary, Contract, and Review notes sections, which reaches briefs only through a later --force run.",
+  REPOSITORY_RULES_INVALID:
+    'Ask the user to fix .filid/review-rules.json as the message describes. Then call review_state prepare again; while it is invalid, prepare, checkpoint, validate, and seal all fail.',
+  RULE_MAP_INVALID:
+    'Stop without dispatching actors or publishing a verdict. Ask the user to reinstall or update the filid plugin, whose installed cross-review rules.json is malformed, then retry the same call.',
+  CONFIG_INVALID:
+    'Ask the user to correct the named review setting in the filid config, then retry the same review_state call.',
+  STATE_INVALID:
+    "Stop without a verdict and ask the user whether to delete this branch's review directory with /filid:cross-review --cleanup, which discards its artifacts; then prepare again.",
+  CHANGE_CONTEXT_PATH_INVALID:
+    'Pass an absolute path to a readable regular file for changeContextPath, then call again.',
+  CHANGE_CONTEXT_TOO_LARGE:
+    'Shorten the file at changeContextPath below the change context file limit, or pass changeContext inline instead, then call again.',
+  BRANCH_NAME_INVALID:
+    'Pass a non-empty branchName with no path separator, traversal segment, or control character, then call again.',
+  CLEANUP_CONFIRM_REQUIRED:
+    "Pass confirm: true to cleanup only after the user explicitly agrees to discard this branch's review artifacts, then call again.",
+} as const;
+
+/** Sentence prefixed to a shared snapshot diagnostic's nextAction during a review. */
+export const REVIEW_CONTEXT_NEXT_ACTIONS = {
+  DOCUMENT_FINDING:
+    'Continue the review; this is an FCA document finding the review evaluates as a candidate, not missing evidence.',
+  EVIDENCE:
+    'Continue the review; seal carries this diagnostic into the review blockers with its own next action. Do not report the review as complete while it remains.',
+  CONFIG_WARNING:
+    'Continue the review. Ask the user to fix or remove the named key in the filid config; the review used the remaining valid settings.',
+  CONFIG_MIGRATION_REQUIRED:
+    'Continue the review. Ask the user to save the config through the filid settings flow to persist config v2.',
 } as const;
 
 /** Schema version rendered in canonical cross-review evidence. */

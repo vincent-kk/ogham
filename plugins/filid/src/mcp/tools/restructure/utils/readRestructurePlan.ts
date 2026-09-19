@@ -4,12 +4,13 @@ import {
 } from '@ogham/cross-platform';
 import { z } from 'zod';
 
-import { STRUCTURE_VALIDATION_ERROR_MESSAGES } from '../../../../constants/mcpContracts.js';
+import { RESTRUCTURE_PLAN_ERROR_CODES } from '../../../../constants/mcpContracts.js';
 import {
   PLACEMENT_BASES,
   REQUIRED_ARTIFACT_ROLES,
   RESTRUCTURE_DECISION_REASONS,
   RESTRUCTURE_NODE_TYPES,
+  RESTRUCTURE_PLAN_ERROR_NEXT_ACTIONS,
   RESTRUCTURE_SCHEMA_VERSION,
   RESTRUCTURE_UNIT_KINDS,
 } from '../../../../constants/restructure.js';
@@ -18,6 +19,7 @@ import {
   TOOL_STATUSES,
 } from '../../../../constants/toolEnvelope.js';
 import type { RestructurePlan } from '../../../../types/restructure.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 
 const REQUIRED_ARTIFACT_SCHEMA = z.object({
   role: z.nativeEnum(REQUIRED_ARTIFACT_ROLES),
@@ -31,6 +33,18 @@ const IMPORT_REWRITE_SCHEMA = z.object({
   requiredSpecifier: z.string(),
 });
 
+const DELEGATED_IMPORT_SCHEMA = z.object({
+  consumerPath: z.string(),
+  currentSpecifier: z.string(),
+  requiredResolvedPath: z.string(),
+});
+
+const RESTRUCTURE_DECISION_SCHEMA = z.object({
+  reason: z.nativeEnum(RESTRUCTURE_DECISION_REASONS),
+  message: z.string(),
+  nextAction: z.string(),
+});
+
 const MOVE_INSTRUCTION_SCHEMA = z.object({
   sourcePath: z.string(),
   targetPath: z.string(),
@@ -42,8 +56,11 @@ const MOVE_INSTRUCTION_SCHEMA = z.object({
   reason: z.string(),
   requiredArtifacts: z.array(REQUIRED_ARTIFACT_SCHEMA),
   affectedImports: z.array(IMPORT_REWRITE_SCHEMA),
+  delegatedImports: z.array(DELEGATED_IMPORT_SCHEMA),
+  preservedImports: z.array(DELEGATED_IMPORT_SCHEMA),
   requiresDecision: z.boolean(),
   decisionReasons: z.array(z.nativeEnum(RESTRUCTURE_DECISION_REASONS)),
+  decisions: z.array(RESTRUCTURE_DECISION_SCHEMA),
 });
 
 const RESTRUCTURE_PLAN_SCHEMA = z.object({
@@ -61,6 +78,7 @@ const RESTRUCTURE_PLAN_SCHEMA = z.object({
     organsCreated: z.number(),
     alreadyPlacedCount: z.number().default(0),
     decisionsRequired: z.number(),
+    delegatedImportCount: z.number(),
   }),
 });
 
@@ -91,19 +109,32 @@ const PLAN_ARTIFACT_SCHEMA = z.union([
  *
  * @param planPath - Absolute machine path to the JSON artifact.
  * @returns The validated restructure plan contained by the artifact.
- * @throws When the path is relative, absent, or does not contain a valid plan.
+ * @throws {ToolDiagnosticError} `plan-path-not-absolute` for a relative path,
+ * `plan-artifact-not-found` when no file exists there, and
+ * `plan-artifact-invalid` when the file is not a plan of this schema version.
  */
 export function readRestructurePlan(planPath: string): RestructurePlan {
   if (!portableIsAbsolute(planPath))
-    throw new Error(STRUCTURE_VALIDATION_ERROR_MESSAGES.PLAN_PATH_ABSOLUTE);
+    throw new ToolDiagnosticError(
+      RESTRUCTURE_PLAN_ERROR_CODES.PLAN_PATH_NOT_ABSOLUTE,
+      `planPath "${planPath}" is not an absolute path.`,
+      RESTRUCTURE_PLAN_ERROR_NEXT_ACTIONS.PLAN_PATH_NOT_ABSOLUTE,
+    );
   const source = readUtf8FileIfExistsSync(planPath);
   if (source === null)
-    throw new Error(
-      STRUCTURE_VALIDATION_ERROR_MESSAGES.PLAN_ARTIFACT_NOT_FOUND,
+    throw new ToolDiagnosticError(
+      RESTRUCTURE_PLAN_ERROR_CODES.PLAN_ARTIFACT_NOT_FOUND,
+      `No plan artifact exists at ${planPath}.`,
+      RESTRUCTURE_PLAN_ERROR_NEXT_ACTIONS.PLAN_ARTIFACT_NOT_FOUND,
     );
   try {
     return PLAN_ARTIFACT_SCHEMA.parse(JSON.parse(source));
-  } catch {
-    throw new Error(STRUCTURE_VALIDATION_ERROR_MESSAGES.PLAN_ARTIFACT_INVALID);
+  } catch (error) {
+    throw new ToolDiagnosticError(
+      RESTRUCTURE_PLAN_ERROR_CODES.PLAN_ARTIFACT_INVALID,
+      `${planPath} does not hold a restructure plan this filid version reads.`,
+      RESTRUCTURE_PLAN_ERROR_NEXT_ACTIONS.PLAN_ARTIFACT_INVALID,
+      { cause: error },
+    );
   }
 }

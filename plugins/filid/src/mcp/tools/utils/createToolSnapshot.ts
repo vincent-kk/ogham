@@ -1,7 +1,10 @@
 import { projectRoot } from '@ogham/cross-platform';
 
 import { createAdapterRegistry } from '../../../adapters/index.js';
-import { SNAPSHOT_TOOL_DIAGNOSTIC_CODES } from '../../../constants/mcpContracts.js';
+import {
+  SNAPSHOT_TOOL_DIAGNOSTIC_CODES,
+  SNAPSHOT_TOOL_DIAGNOSTIC_NEXT_ACTIONS,
+} from '../../../constants/mcpContracts.js';
 import {
   createDefaultConfig,
   createProjectSnapshot,
@@ -70,6 +73,7 @@ export async function createToolSnapshot(
       code: SNAPSHOT_TOOL_DIAGNOSTIC_CODES.CONFIG_WARNING,
       message,
       path: root,
+      nextAction: SNAPSHOT_TOOL_DIAGNOSTIC_NEXT_ACTIONS.CONFIG_WARNING,
     })),
     ...loaded.diagnostics,
     ...snapshot.diagnostics,

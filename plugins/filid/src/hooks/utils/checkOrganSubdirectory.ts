@@ -46,6 +46,7 @@ export function checkOrganSubdirectory(
 
   return [
     `Attempting to create a subdirectory inside organ directory "${organSegment}". ` +
-      `Organ directories should remain flat leaf compartments without nested subdirectories.`,
+      `Organ directories should stay flat compartments: put the files directly in "${organSegment}", ` +
+      `or, if they form their own module, create INTENT.md and an entry point in the new directory first so it classifies as a fractal.`,
   ];
 }

@@ -50,6 +50,12 @@ describe('unterminated literals: lost track versus hidden syntax', () => {
     ).toBe('test-record');
   });
 
+  it('names the line, not the offset, of a lost-track reason', () => {
+    const { reasons } = countSemanticCases(LOST_TEMPLATE_WITH_CASES);
+    expect(reasons.some((reason) => reason.includes('at line 2'))).toBe(true);
+    expect(reasons.some((reason) => reason.includes('at offset'))).toBe(false);
+  });
+
   it('reports a block comment opened inside a swallowed span as lost track', () => {
     expect(
       countSemanticCases(

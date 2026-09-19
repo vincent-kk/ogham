@@ -27,6 +27,8 @@ export function evaluateRule(
         message: `Rule evaluation is indeterminate: ${message}`,
         path: context.node.path,
         certainty: 'indeterminate',
+        suggestion:
+          "This is a filid rule failure, not a finding about the node: treat the rule's result as unknown. Run again; if it repeats, report this message to the user.",
       },
     ];
   }

@@ -1,8 +1,5 @@
 import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';
-import {
-  RESTRUCTURE_VALIDATION_CODES,
-  RESTRUCTURE_VALIDATION_MESSAGES,
-} from '../../../constants/restructure.js';
+import { RESTRUCTURE_VALIDATION_CODES } from '../../../constants/restructure.js';
 import { RULE_SCOPES } from '../../../constants/ruleScopes.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type { PlanValidationFinding } from '../../../types/restructure.js';
@@ -22,7 +19,8 @@ export function validateBoundaryPostconditions(
     )
     .map((violation) => ({
       code: RESTRUCTURE_VALIDATION_CODES.IMPORT_BOUNDARY_VIOLATION,
-      message: RESTRUCTURE_VALIDATION_MESSAGES.IMPORT_BOUNDARY_VIOLATION,
+      message: violation.message,
+      nextAction: violation.suggestion,
       path: violation.path,
     }));
 }

@@ -4,6 +4,7 @@ import {
   REVIEW_STATE_ACTIONS,
   REVIEW_STATE_ACTION_VALUES,
   REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_ERROR_MESSAGES,
 } from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
@@ -64,7 +65,8 @@ export async function dispatchReviewState(
   if (candidate.branchName === undefined && !branchName)
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.BRANCH_UNRESOLVED,
-      'The current Git branch could not be resolved. Supply branchName for a detached HEAD.',
+      `The current Git branch could not be resolved because HEAD in ${projectRoot} is detached.`,
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.BRANCH_UNRESOLVED,
     );
   const input = {
     ...candidate,
@@ -115,7 +117,11 @@ export async function dispatchReviewState(
       });
     case REVIEW_STATE_ACTIONS.CLEANUP:
       if (input.confirm !== true)
-        throw new Error(REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED);
+        throw new ToolDiagnosticError(
+          REVIEW_STATE_DIAGNOSTIC_CODES.CLEANUP_CONFIRM_REQUIRED,
+          REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED,
+          REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CLEANUP_CONFIRM_REQUIRED,
+        );
       return cleanupReviewState(input);
     case REVIEW_STATE_ACTIONS.ASSESS:
       return assessReviewState({

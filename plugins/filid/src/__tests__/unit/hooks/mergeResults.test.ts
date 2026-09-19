@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
+import { GENERIC_DENY_REASON } from '../../../constants/hookDefaults.js';
 import { mergeResults } from '../../../hooks/preToolUse/utils/mergeResults.js';
 import type { HookOutput } from '../../../types/hooks.js';
 
@@ -110,5 +111,16 @@ describe('mergeResults', () => {
     ]);
     expect(out.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(out.hookSpecificOutput?.permissionDecisionReason).toBeTruthy();
+  });
+
+  it('deny without a reason → falls back to the exact GENERIC_DENY_REASON text, telling the caller to stop and report rather than resubmit', () => {
+    const out = mergeResults([
+      { continue: true, hookSpecificOutput: { permissionDecision: 'deny' } },
+    ]);
+    expect(out.hookSpecificOutput?.permissionDecisionReason).toBe(
+      GENERIC_DENY_REASON,
+    );
+    expect(GENERIC_DENY_REASON).toContain('Stop and report this to the user');
+    expect(GENERIC_DENY_REASON).toContain('do not resubmit the call unchanged');
   });
 });

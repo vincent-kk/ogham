@@ -3,6 +3,7 @@ import {
   REVIEW_CHANGE_CONTEXT_LOG_LIMIT,
   REVIEW_CHANGE_CONTEXT_SECTIONS,
   REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
 } from '../../../../constants/reviewState.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import { executeReviewGit } from '../hash/executeReviewGit.js';
@@ -77,7 +78,9 @@ export async function readChangeContext(input: {
       diagnostics.push({
         code: REVIEW_STATE_DIAGNOSTIC_CODES.CHANGE_CONTEXT_UNTEMPLATED,
         message:
-          'Change context did not match any configured template section.',
+          'Change context has none of the headings ## Summary, ## Contract, or ## Review notes, so the whole text was used as change context.',
+        nextAction:
+          REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CHANGE_CONTEXT_UNTEMPLATED,
       });
   } else {
     const log = await executeReviewGit(input.projectRoot, [
@@ -103,6 +106,7 @@ export async function readChangeContext(input: {
     diagnostics.push({
       code: REVIEW_STATE_DIAGNOSTIC_CODES.CHANGE_CONTEXT_TRUNCATED,
       message: `Change context was truncated to ${REVIEW_CHANGE_CONTEXT_LIMIT} characters.`,
+      nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CHANGE_CONTEXT_TRUNCATED,
     });
   return {
     changeContext: sanitized.slice(0, REVIEW_CHANGE_CONTEXT_LIMIT),

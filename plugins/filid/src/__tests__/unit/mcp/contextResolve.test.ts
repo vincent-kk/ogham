@@ -21,15 +21,18 @@ const OWNER_DIAGNOSTIC: ToolDiagnostic = {
   code: 'owner-evidence',
   message: 'evidence inside the resolved owner',
   path: SOURCE_PATH,
+  nextAction: 'test next action',
 };
 const SIBLING_DIAGNOSTIC: ToolDiagnostic = {
   code: 'sibling-evidence',
   message: 'evidence in an unrelated subtree',
   path: SIBLING_SOURCE_PATH,
+  nextAction: 'test next action',
 };
 const GLOBAL_DIAGNOSTIC: ToolDiagnostic = {
   code: 'config-warning',
   message: 'evidence with no path',
+  nextAction: 'test next action',
 };
 
 function fractalNode(

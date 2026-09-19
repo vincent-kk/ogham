@@ -127,9 +127,11 @@ describe('seal current worktree', () => {
     });
     expect(repeated.summary.disposition).toBe('stale');
     expect(repeated.summary.verdict).toBeUndefined();
-    expect(repeated.diagnostics).toContainEqual(
-      expect.objectContaining({ code: 'review-worktree-stale' }),
+    const stale = repeated.diagnostics.find(
+      ({ code }) => code === 'review-worktree-stale',
     );
+    expect(stale?.nextAction).toContain('Reverting the uncommitted changes');
+    expect(`${stale?.message} ${stale?.nextAction}`).not.toMatch(/\bprepare\b/);
     expect(paths.map((path) => readFileSync(path, 'utf8'))).toEqual(bytes);
   });
 });

@@ -1,6 +1,9 @@
 import { portableResolve } from '@ogham/cross-platform';
 
-import { CONTEXT_RESOLVE_DIAGNOSTIC_CODES } from '../../../../../constants/mcpContracts.js';
+import {
+  CONTEXT_RESOLVE_DIAGNOSTIC_CODES,
+  CONTEXT_RESOLVE_DIAGNOSTIC_NEXT_ACTIONS,
+} from '../../../../../constants/mcpContracts.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
 import { resolveContext } from '../../../../../core/index.js';
 import type { ProjectSnapshot } from '../../../../../types/fractal.js';
@@ -38,6 +41,7 @@ export function resolveContextRequest(
           ? error.message
           : `Context target could not be resolved: ${targetPath}`,
       path: targetPath,
+      nextAction: CONTEXT_RESOLVE_DIAGNOSTIC_NEXT_ACTIONS.TARGET_UNRESOLVED,
     };
     return {
       index,

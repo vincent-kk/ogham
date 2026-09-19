@@ -113,7 +113,9 @@ describe('readChangeContext', () => {
     expect(result.diagnostics).toEqual([
       {
         code: 'review-change-context-untemplated',
-        message: 'Change context did not match any configured template section.',
+        message:
+          'Change context has none of the headings ## Summary, ## Contract, or ## Review notes, so the whole text was used as change context.',
+        nextAction: expect.any(String),
       },
     ]);
   });
@@ -131,6 +133,7 @@ describe('readChangeContext', () => {
       {
         code: 'review-change-context-truncated',
         message: 'Change context was truncated to 3000 characters.',
+        nextAction: expect.any(String),
       },
     ]);
   });
@@ -159,6 +162,7 @@ describe('readChangeContext', () => {
         {
           code: 'review-change-context-truncated',
           message: 'Change context was truncated to 3000 characters.',
+          nextAction: expect.any(String),
         },
       ],
     });

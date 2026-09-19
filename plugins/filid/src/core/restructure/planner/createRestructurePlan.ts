@@ -43,16 +43,32 @@ export function createRestructurePlan(
     snapshot,
   );
   const orderedMoves = order.map((position) => candidates[position].move);
-  const conflicted = new Set(
-    conflicts.map((position) => candidates[position].index),
+  const conflicted = new Map(
+    conflicts.map(({ index, cause, related }) => [
+      candidates[index].index,
+      {
+        cause,
+        relatedSources: related.map(
+          (position) => candidates[position].move.sourcePath,
+        ),
+      },
+    ]),
   );
   const instructions = input.requests.map((request, index) => {
     const move = planMoveInstruction(snapshot, request, orderedMoves);
-    return conflicted.has(index) ? markOrderConflict(move) : move;
+    const conflict = conflicted.get(index);
+    return conflict
+      ? markOrderConflict(move, conflict.cause, conflict.relatedSources)
+      : move;
   });
   const unresolved = instructions
     .filter((move) => move.requiresDecision)
-    .map((move) => ({ ...move, affectedImports: [] }));
+    .map((move) => ({
+      ...move,
+      affectedImports: [],
+      delegatedImports: [],
+      preservedImports: [],
+    }));
   const alreadyPlaced = instructions.filter(
     (move) =>
       !move.requiresDecision && samePath(move.sourcePath, move.targetPath),
@@ -84,6 +100,10 @@ export function createRestructurePlan(
       ).length,
       alreadyPlacedCount: alreadyPlaced.length,
       decisionsRequired: unresolved.length,
+      delegatedImportCount: moves.reduce(
+        (count, move) => count + move.delegatedImports.length,
+        0,
+      ),
     },
   };
 }

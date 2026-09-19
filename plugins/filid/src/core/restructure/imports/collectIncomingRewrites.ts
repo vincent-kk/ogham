@@ -4,13 +4,10 @@ import {
   samePath,
 } from '@ogham/cross-platform';
 
-import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
-  ImportRewrite,
   ImportRewriteBuildResult,
   PlannedMove,
-  RestructureDecisionReason,
   RewriteUnit,
 } from '../../../types/restructure.js';
 import { specifierDenotesPath } from '../specifiers/specifierDenotesPath.js';
@@ -18,19 +15,21 @@ import { specifierDenotesPath } from '../specifiers/specifierDenotesPath.js';
 import { findCarryingMoveIndex } from './findCarryingMoveIndex.js';
 import { formatRequiredSpecifier } from './formatRequiredSpecifier.js';
 import { isAtOrWithin } from './isAtOrWithin.js';
+import { keepsRelativeLocation } from './keepsRelativeLocation.js';
 import { relocateThroughMoves } from './relocateThroughMoves.js';
 
 /**
- * Rewrites for imports that load a file inside the moved unit.
+ * Rewrites and delegations for imports that load a file inside the moved unit.
  *
- * Every such import is judged, whoever the consumer is; an import that does
- * not denote its file exactly is a decision reason. A rewrite is emitted only
- * when this unit is the first move to carry the imported file, and it points
- * the consumer's final path at the file's final path.
+ * An entry is emitted only when this unit is the first move to carry the
+ * imported file, and it points the consumer's final path at the file's final
+ * path. An import whose specifier denotes its file is rewritten; any other is
+ * delegated to the caller, or preserved when the moves keep the file at the
+ * same place relative to the consumer.
  * @param snapshot - Pre-move snapshot
  * @param unit - The moved unit
  * @param orderedMoves - Executable moves in execution order, holding `unit`
- * @returns Owned rewrites and decision reasons
+ * @returns Owned rewrites, delegated imports and preserved imports
  */
 export function collectIncomingRewrites(
   snapshot: ProjectSnapshot,
@@ -43,8 +42,11 @@ export function collectIncomingRewrites(
   const unitIndex = orderedMoves.findIndex(({ sourcePath }) =>
     samePath(sourcePath, unit.sourcePath),
   );
-  const rewrites: ImportRewrite[] = [];
-  const reasons = new Set<RestructureDecisionReason>();
+  const result: ImportRewriteBuildResult = {
+    rewrites: [],
+    delegated: [],
+    preserved: [],
+  };
 
   for (const edge of snapshot.dependencyGraph.edges)
     for (const evidence of edge.evidence) {
@@ -52,18 +54,8 @@ export function collectIncomingRewrites(
         samePath(evidence.resolvedPath, unit.sourcePath) ||
         (sourceIsDirectory &&
           isAtOrWithin(unit.sourcePath, evidence.resolvedPath));
-      if (!importsUnit) continue;
       if (
-        !specifierDenotesPath(
-          evidence.sourceFile,
-          evidence.rawSpecifier,
-          evidence.resolvedPath,
-        )
-      ) {
-        reasons.add(RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED);
-        continue;
-      }
-      if (
+        !importsUnit ||
         unitIndex < 0 ||
         findCarryingMoveIndex(evidence.resolvedPath, orderedMoves) !== unitIndex
       )
@@ -79,17 +71,42 @@ export function collectIncomingRewrites(
         evidence.sourceFile,
         orderedMoves,
       );
-      rewrites.push({
+      const finalPath = relocateThroughMoves(
+        landedPath,
+        orderedMoves,
+        unitIndex + 1,
+      );
+      if (
+        !specifierDenotesPath(
+          evidence.sourceFile,
+          evidence.rawSpecifier,
+          evidence.resolvedPath,
+        )
+      ) {
+        const kept = keepsRelativeLocation(
+          evidence.sourceFile,
+          evidence.resolvedPath,
+          consumerPath,
+          finalPath,
+        );
+        (kept ? result.preserved : result.delegated).push({
+          consumerPath,
+          currentSpecifier: evidence.rawSpecifier,
+          requiredResolvedPath: finalPath,
+        });
+        continue;
+      }
+      result.rewrites.push({
         consumerPath,
         currentSpecifier: evidence.rawSpecifier,
         requiredSpecifier: formatRequiredSpecifier(
           consumerPath,
-          relocateThroughMoves(landedPath, orderedMoves, unitIndex + 1),
+          finalPath,
           evidence.rawSpecifier,
           'file',
         ),
       });
     }
 
-  return { rewrites, decisionReasons: [...reasons] };
+  return result;
 }

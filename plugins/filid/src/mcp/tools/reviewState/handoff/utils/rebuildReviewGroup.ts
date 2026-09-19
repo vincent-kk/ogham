@@ -76,7 +76,8 @@ export async function rebuildReviewGroup(
       if (!result.summary.ok)
         throw new ToolDiagnosticError(
           REVIEW_STATE_DIAGNOSTIC_CODES.OPINION_INVALID,
-          `Cannot recover invalid raw review round ${round} for group ${group.id}.`,
+          `Raw review round ${round} for group ${group.id} at ${raw.path} no longer passes validation, so the group's merged opinion cannot be rebuilt.`,
+          "Stop without dispatching actors or publishing a verdict. Ask the user whether to start a fresh review; only on the user's explicit request, and after all prior actors finish, call prepare with force: true, which repeats all review work.",
         );
       const persisted = readReviewState(paths.statePath);
       if (persisted === null || 'kind' in persisted)

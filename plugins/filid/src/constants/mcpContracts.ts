@@ -90,7 +90,14 @@ export const RULE_DOC_DIAGNOSTIC_CODES = {
 
 /** Stable diagnostic messages emitted by managed rule actions. */
 export const RULE_DOC_DIAGNOSTIC_MESSAGES = {
-  PLUGIN_ROOT_UNRESOLVED: 'Filid plugin root could not be resolved.',
+  PLUGIN_ROOT_UNRESOLVED:
+    'Filid plugin root could not be resolved, so managed rule documents cannot be read or synced.',
+} as const;
+
+/** Next actions of the managed rule diagnostics, keyed like their codes. */
+export const RULE_DOC_DIAGNOSTIC_NEXT_ACTIONS = {
+  PLUGIN_ROOT_UNRESOLVED:
+    'Run from an installed filid plugin, where the host sets CLAUDE_PLUGIN_ROOT, or reinstall the plugin, then retry; report to the user if it persists.',
 } as const;
 
 /** Stable trust-boundary errors owned by the rule-doc child. */
@@ -108,6 +115,12 @@ export const RULE_DOC_UNRESOLVED_MANIFEST_SKIPPED = [
   },
 ] as const;
 
+/** Diagnostic codes for caller-input errors normalized by rule-doc sync. */
+export const RULE_DOC_SYNC_DIAGNOSTIC_CODES = {
+  SELECTION_INVALID: 'setup-selection-invalid',
+  RESYNC_INVALID: 'setup-resync-invalid',
+} as const;
+
 /** Verification-document roles recognized by Filid. */
 export const VERIFICATION_ROLES = {
   SPEC_DOCUMENT: 'spec-document',
@@ -123,7 +136,15 @@ export const SNAPSHOT_TOOL_DIAGNOSTIC_CODES = {
 /** Stable diagnostic messages shared by snapshot-backed actions. */
 export const SNAPSHOT_TOOL_DIAGNOSTIC_MESSAGES = {
   VERIFICATION_PATH_NOT_FOUND:
-    'Requested path is absent from snapshot verification evidence.',
+    'Requested path is absent from snapshot verification evidence:',
+} as const;
+
+/** Next actions of the diagnostics shared by snapshot-backed actions. */
+export const SNAPSHOT_TOOL_DIAGNOSTIC_NEXT_ACTIONS = {
+  CONFIG_WARNING:
+    'Fix the entry the message names in the filid configuration layer that holds it (the project .filid/config.json or the user-level filid config); filid skipped it and used its default for this run.',
+  VERIFICATION_PATH_NOT_FOUND:
+    'Pass a verification file inside the project; call fractal_inspect with action "verification" and no filePaths to list the files filid recognizes.',
 } as const;
 
 /** Stable diagnostic codes emitted by context resolution. */
@@ -131,11 +152,17 @@ export const CONTEXT_RESOLVE_DIAGNOSTIC_CODES = {
   TARGET_UNRESOLVED: 'context-target-unresolved',
 } as const;
 
-/** Stable trust-boundary errors emitted while reading restructure plans. */
-export const STRUCTURE_VALIDATION_ERROR_MESSAGES = {
-  PLAN_PATH_ABSOLUTE: 'planPath must be an absolute machine path',
-  PLAN_ARTIFACT_NOT_FOUND: 'plan artifact does not exist',
-  PLAN_ARTIFACT_INVALID: 'plan artifact is not a valid RestructurePlan',
+/** Next actions of the context-resolution diagnostics, keyed like their codes. */
+export const CONTEXT_RESOLVE_DIAGNOSTIC_NEXT_ACTIONS = {
+  TARGET_UNRESOLVED:
+    "Pass a path inside the project's fractal tree, relative to path or absolute, then call again.",
+} as const;
+
+/** Stable diagnostic codes of the trust-boundary errors raised while reading restructure plans. */
+export const RESTRUCTURE_PLAN_ERROR_CODES = {
+  PLAN_PATH_NOT_ABSOLUTE: 'plan-path-not-absolute',
+  PLAN_ARTIFACT_NOT_FOUND: 'plan-artifact-not-found',
+  PLAN_ARTIFACT_INVALID: 'plan-artifact-invalid',
 } as const;
 
 /** Human-readable descriptions advertised for each public MCP tool. */

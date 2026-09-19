@@ -51,6 +51,14 @@ describe('review_state prepare config warning scope', () => {
       effort: 'medium',
       concurrency: 8,
     });
+    expect(result.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'config-warning',
+        nextAction: expect.stringMatching(
+          /^Continue the review\. Ask the user to fix or remove the named key in the filid config; the review used the remaining valid settings\. Outside this review: \S/,
+        ),
+      }),
+    );
   });
 
   it('rejects invalid review warnings after sanitization', async () => {

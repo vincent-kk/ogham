@@ -51,6 +51,8 @@ describe('verification policy', () => {
       expect.objectContaining({
         ruleId: 'spec-document-case-cap',
         severity: 'error',
+        suggestion:
+          'Split the spec document by contract group so each file stays within 15 cases, or merge cases that verify the same behavior.',
       }),
     );
   });

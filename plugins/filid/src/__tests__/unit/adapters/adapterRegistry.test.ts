@@ -87,6 +87,7 @@ describe('adapter registry', () => {
     expect(result.diagnostics).toContainEqual(
       expect.objectContaining({ code: 'unsupported', path: filePath }),
     );
+    expect(result.diagnostics[0]?.nextAction).toContain('no adapter');
   });
 
   it('reports equal-confidence ownership as ambiguous-adapter-claim', async () => {
@@ -108,6 +109,7 @@ describe('adapter registry', () => {
         adapterIds: ['first', 'second'],
       }),
     );
+    expect(result.diagnostics[0]?.nextAction).toContain('adapters.mode');
   });
 
   it('selects the higher-confidence owner and preserves claim evidence', async () => {

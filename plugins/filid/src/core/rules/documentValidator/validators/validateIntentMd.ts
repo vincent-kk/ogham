@@ -40,7 +40,7 @@ export function validateIntentMd(content: string): IntentMdValidation {
     if (!hasNeverDo) missing.push('Never do');
     violations.push({
       rule: 'missing-boundaries',
-      message: `INTENT.md is missing 3-tier boundary sections: ${missing.join(', ')}`,
+      message: `INTENT.md is missing 3-tier boundary sections: ${missing.join(', ')}. Add each as its own section listing the rules for that tier.`,
       severity: 'warning',
     });
   }

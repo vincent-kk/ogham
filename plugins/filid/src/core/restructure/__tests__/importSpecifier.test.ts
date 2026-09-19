@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
-import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
 import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import type {
   DependencyEvidence,
@@ -109,7 +108,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
       unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
-    expect(result.decisionReasons).toEqual([]);
+    expect(result.delegated).toEqual([]);
     expect(result.rewrites).toEqual([
       {
         consumerPath: PATHS.FEATURE_A_FILE,
@@ -131,11 +130,11 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
       unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
-    expect(result.decisionReasons).toEqual([]);
+    expect(result.delegated).toEqual([]);
     expect(result.rewrites[0]?.requiredSpecifier).toBe('../shared/logger');
   });
 
-  it('leaves a directory-index specifier unsupported', () => {
+  it('delegates a directory-index specifier to the caller', () => {
     const result = buildImportRewrites(
       snapshotWith([
         {
@@ -148,8 +147,12 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
     );
 
     expect(result.rewrites).toEqual([]);
-    expect(result.decisionReasons).toEqual([
-      RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED,
+    expect(result.delegated).toEqual([
+      {
+        consumerPath: PATHS.FEATURE_A_FILE,
+        currentSpecifier: '../lib',
+        requiredResolvedPath: PATHS.TARGET,
+      },
     ]);
   });
 
@@ -178,8 +181,11 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
             requiredSpecifier: '../shared/logger.js',
           },
         ],
+        delegatedImports: [],
+        preservedImports: [],
         requiresDecision: false,
         decisionReasons: [],
+        decisions: [],
       },
     );
 
@@ -211,8 +217,11 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
             requiredSpecifier: '../featureA',
           },
         ],
+        delegatedImports: [],
+        preservedImports: [],
         requiresDecision: false,
         decisionReasons: [],
+        decisions: [],
       },
     );
 
@@ -255,7 +264,7 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
     );
   });
 
-  it('leaves a bare parent-directory specifier unsupported', () => {
+  it('preserves a bare parent-directory specifier the directory move keeps valid', () => {
     // '..' 은 path-like 판정에서 탈락해야 한다. 통과시키면 stripPathExtension이
     // '..' 을 이름+확장자로 읽어 '../../shared.' 같은 specifier를 만들어 낸다.
     const result = buildImportRewrites(
@@ -270,12 +279,17 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
     );
 
     expect(result.rewrites).toEqual([]);
-    expect(result.decisionReasons).toEqual([
-      RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED,
+    expect(result.delegated).toEqual([]);
+    expect(result.preserved).toEqual([
+      {
+        consumerPath: '/root/shared/deep/consumer.ts',
+        currentSpecifier: '..',
+        requiredResolvedPath: PATHS.TARGET_DIRECTORY,
+      },
     ]);
   });
 
-  it('still rejects a bare package specifier', () => {
+  it('delegates a bare package specifier instead of rewriting it', () => {
     const result = buildImportRewrites(
       snapshotWith([
         {
@@ -288,8 +302,12 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
     );
 
     expect(result.rewrites).toEqual([]);
-    expect(result.decisionReasons).toEqual([
-      RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED,
+    expect(result.delegated).toEqual([
+      {
+        consumerPath: PATHS.FEATURE_A_FILE,
+        currentSpecifier: '@scope/logger',
+        requiredResolvedPath: PATHS.TARGET,
+      },
     ]);
   });
 });

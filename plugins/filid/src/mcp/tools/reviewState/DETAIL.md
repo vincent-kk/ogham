@@ -51,6 +51,12 @@
 - 판정 보류 원인과 해소 안내는 일반 finding·coverage와 분리한다. 같은 fold의 typed blocker를 별도 보고서와 report/comment 선두에서 표현하며 새 actor를 실행하거나 판정 정책·재시도·권한을 바꾸지 않는다. 담당 제안은 사람 판단 요청·증거 보강·분류 필요로 구분하며 배정이나 승인이 아니다.
 - `checkpoint`는 state와 group별 artifact 존재·신뢰를 읽고 handoff를 관측만 한다. `assess`는 dirty 경로, entry stage, base ref와 unpushed commit 수를 관측만 하고 state를 읽거나 쓰지 않는다. 재검증 보고서 frontmatter의 유일한 유효 전체 `head_sha`가 관측한 현재 Git HEAD와 일치하고, 기록된 `verdict`가 `PASS`, `FAIL`, `INCONCLUSIVE` 중 하나일 때만 완료 근거로 사용한다. `cleanup`은 literal `confirm: true` 뒤 해당 branch directory만 지운다.
 
+- 모든 payload 진단과 `ToolDiagnosticError`는 `nextAction`을 싣는다. 호출 action이나 값에 매이지 않는 공통 문장은 `REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS` 표에 두고, 그 밖의 문장은 생산 지점이 만든다. force를 권하는 안내는 사용자의 명시적 요청과 이전 actor 종료를 조건으로 건다.
+- `review-worktree-stale`은 prepare를 권하지 않는다. prepare는 `cached`를 돌려주고 다음 seal도 stale이기 때문이다. 되돌리면 sealed verdict가 복원되고, 커밋하면 새 cross-review가 필요하다.
+- 사용자나 설치 상태로 고칠 수 있는 오류 대부분(repository rule 파일·body, 설치된 rule map과 actor method, config, 읽을 수 없는 저장 상태)과 일부 호출자 입력 오류는 전용 코드와 `nextAction`을 가진다. 나머지는 plain `Error`로 남아 `toolError`의 일반 `nextAction`을 받는다. 내부 불변식, 그리고 봉인된 상태의 validate·`projectRoot`·`changeContext`·validate group·round 인자 오류 같은 호출자 오류와 Deliverable 섹션이 없는 설치된 verifier method가 여기에 속한다.
+- 저장 상태의 `scope.diagnostics`는 `nextAction`이 선택 필드라, 스키마 버전을 올리지 않고 이전 v2 상태도 읽는다.
+- prepare가 공유 snapshot 진단을 실을 때는 리뷰 문맥 문장을 앞에 두고 원래 `nextAction`을 `Outside this review:` 뒤로 보낸다. 리뷰 도중 소스나 입력을 고치면 리뷰가 stale이 되기 때문이다.
+
 ## API Contracts
 
 - TypeScript entry point는 handler와 MCP envelope 소비자가 사용하는 `ReviewStateResult`와 caller-entry 검증용 `REVIEW_HANDOFF_CALLER_ENTRY_SCHEMA`를 노출한다. 내부 opinion·group·state 타입은 외부 계약으로 재노출하지 않는다.

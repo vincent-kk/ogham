@@ -16,6 +16,8 @@ export function checkPureFunctionIsolation(
         message: `Isolation evidence is unavailable for pure-function node "${node.name}".`,
         path: node.path,
         certainty: 'indeterminate',
+        suggestion:
+          'Evaluate with a project snapshot so dependency evidence exists, or reclassify the node as an organ if its isolation cannot be proven.',
       },
     ];
   const violations: RuleViolation[] = snapshot.dependencyGraph.edges

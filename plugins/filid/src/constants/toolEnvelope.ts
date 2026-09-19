@@ -32,15 +32,24 @@ export const TOOL_ARTIFACT_TEXT_ENCODING = 'utf8';
 export const TOOL_ARTIFACT_EPHEMERAL = true as const;
 
 export const TOOL_ERROR_DIAGNOSTIC_CODE = 'tool-execution-error';
+/** Next action for a failure no tool contract classified. */
+export const TOOL_ERROR_NEXT_ACTION =
+  'Filid has no specific guidance for this error. If the message names an argument, path or configuration value you supplied, correct it and call again; otherwise retry once, and if it fails again, stop and report this message to the user.';
 /**
  * Input rejected by the tool's schema. Distinct from execution failure: the
  * caller can fix this one by resending, and it says nothing about whether the
  * ecosystem is supported — which is what the shared `unsupported` status means.
  */
 export const TOOL_INPUT_DIAGNOSTIC_CODE = 'tool-input-invalid';
+/** Next action for input the tool's schema rejected. */
+export const TOOL_INPUT_NEXT_ACTION =
+  "Fix the arguments the message names so they match the tool's input schema, then call again.";
 export const TOOL_ARTIFACT_DIAGNOSTIC_CODE = 'tool-diagnostics-in-artifact';
 export const TOOL_ARTIFACT_DIAGNOSTIC_MESSAGE =
   'Full diagnostics are available in the referenced artifact.';
+/** Next action for the one diagnostic that stands in for diagnostics over the inline budget. */
+export const TOOL_ARTIFACT_DIAGNOSTIC_NEXT_ACTION =
+  "The diagnostics exceeded the inline response budget: read the diagnostics array in the artifact at this path and follow each entry's nextAction.";
 export const TOOL_ERROR_SUMMARY = {
   failed: true,
 } as const;

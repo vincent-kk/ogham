@@ -39,6 +39,11 @@ export interface ToolDiagnostic {
   causeId?: string;
   /** Unresolved dependency target as written by the consumer. */
   specifier?: string;
+  /**
+   * What the caller does next: the fix to make, the step filid leaves to the
+   * caller, or who must decide.
+   */
+  nextAction: string;
 }
 
 /** Handler-level payload before common envelope materialization. */

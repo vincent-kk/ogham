@@ -3,7 +3,7 @@ name: scan
 user-invocable: true
 description: 'Run the single full-project FCA audit across snapshot structure, document and import boundaries, dependency DAG, and verification contracts. Use before review or integration, or as a health check.'
 argument-hint: '[path]'
-version: '2.1.0'
+version: '2.1.1'
 complexity: medium
 plugin: filid
 ---
@@ -49,7 +49,7 @@ Call `mcp__plugin_filid_tools__fractal_inspect` with `action: "verification"`, `
 
 ### Phase 4 — Consolidated Verdict
 
-Require matching snapshot hashes, deduplicate overlapping findings, preserve all diagnostics, and sort non-exact evidence before errors and warnings.
+Require matching snapshot hashes, deduplicate overlapping findings, preserve all diagnostics with their `nextAction`, and sort non-exact evidence before errors and warnings. Quotes filid cannot pair in prose (`Rock 'n' roll`, a quote after an emoji) go undetected, so read such lines near an import or a test case yourself.
 
 Use:
 

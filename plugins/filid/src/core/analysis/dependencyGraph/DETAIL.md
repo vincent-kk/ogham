@@ -18,6 +18,7 @@
 - `resolveOwningOrganPath(organPathsDeepestFirst, ownerPath, filePath): string | null` — `filePath`를 직접 담고 있으면서 `ownerPath` 안에 있는 가장 깊은 organ 경로. boundary rule이 organ 대상 여부와 면책 조회 키를 같은 규칙으로 얻는다. 첫 인자는 `sortPathsDeepestFirst`로 정렬해 넘긴다 — 정렬되지 않은 목록을 주면 가장 깊은 organ 대신 먼저 만난 organ을 반환한다.
 - `sortPathsDeepestFirst(paths): string[]` — 후보를 길이 내림차순으로 한 번 정렬한다. owner·organ 조회의 전제를 만드는 유일한 지점이다.
 - `detectCycles(graph): string[][]` — cyclic component마다 실제 edge로 연결되고 시작 owner로 닫히는 안정된 대표 경로 배열을 반환한다.
+- `findUnownedReferences(nodePaths, references, options?): UnownedReference[]` — `buildDependencyGraph`와 같은 순서·면제로 owner 없는 참조를 `{ reference, unownedPath }`로 돌려준다. 판정만 하고, 진단은 `projectSnapshot`이 만든다.
 - legacy `buildDAG`, `topologicalSort`, `getDirectDependencies`는 작업 8 정리 전 characterization 호환만 유지한다.
 
 ## Acceptance Criteria
@@ -36,6 +37,12 @@
 - 같은 owner pair의 여러 import는 한 edge의 정렬된 evidence로 집계된다.
 - logical owner path alias는 최초 canonical input path 하나로 집계된다.
 
+### AC-dag-unowned — owner 없는 참조의 판정
+
+- `findUnownedReferences`는 indeterminate·unresolved 참조를 owner 판정 전에 건너뛰고, 검증 파일이 만든 참조는 면제한다.
+- source owner가 없으면 source를, source owner는 있으나 target owner가 없으면 target을 `unownedPath`로 돌려준다.
+- 두 owner가 모두 있는 참조는 결과에 없다.
+
 ### AC-dag-certainty — 억지 PASS 금지
 
 - unresolved production dependency 또는 production 참조의 source/target owner 누락이 있으면 graph는 indeterminate다.
@@ -52,4 +59,4 @@
 
 ## Last Updated
 
-2026-09-16
+2026-09-19

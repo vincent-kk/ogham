@@ -12,7 +12,7 @@ import type {
   MoveInstruction,
   PlacementRequest,
   PlannedMove,
-  RestructureDecisionReason,
+  PlanningDecisionReason,
 } from '../../../types/restructure.js';
 import {
   findLowestCommonFractal,
@@ -22,6 +22,7 @@ import { buildImportRewrites } from '../imports/buildImportRewrites.js';
 
 import { buildRequiredArtifacts } from './buildRequiredArtifacts.js';
 import { buildTargetCandidate } from './buildTargetCandidate.js';
+import { describeDecision } from './describeDecision.js';
 import { resolveConsumerPaths } from './resolveConsumerPaths.js';
 import { resolveContractIntent } from './resolveContractIntent.js';
 import { resolveUnitKind } from './resolveUnitKind.js';
@@ -34,7 +35,7 @@ import { resolveUnitKind } from './resolveUnitKind.js';
  * used only for the final paths and ownership of rewrites, never to choose the
  * target
  * @returns The normalized instruction, with `requiresDecision` set when evidence
- * cannot fix a name, contract or rewrite
+ * cannot fix a name, contract or owner, and one explained decision per reason
  */
 export function planMoveInstruction(
   snapshot: ProjectSnapshot,
@@ -42,7 +43,7 @@ export function planMoveInstruction(
   orderedMoves: readonly PlannedMove[] = [],
 ): MoveInstruction {
   const sourcePath = portableResolve(snapshot.projectRoot, request.sourcePath);
-  const decisionReasons = new Set<RestructureDecisionReason>();
+  const decisionReasons = new Set<PlanningDecisionReason>();
   const sourceOwner = resolveOwningFractal(snapshot.tree, sourcePath);
   if (!sourceOwner)
     decisionReasons.add(
@@ -93,9 +94,17 @@ export function planMoveInstruction(
     { sourcePath, targetPath: target.targetPath, rewriteTargetPath },
     orderedMoves,
   );
-  imports.decisionReasons.forEach((reason) => decisionReasons.add(reason));
   const reasons = [...decisionReasons].sort();
   const requiresDecision = reasons.length > 0;
+  const decisionContext = {
+    projectRoot: snapshot.projectRoot,
+    sourcePath,
+    placementPath: placementFractal.path,
+    graphCertainty: snapshot.dependencyGraph.certainty,
+    organNameHint: request.organNameHint,
+    outsideConsumerPaths: consumers.outsidePaths,
+    entryForms: required.entryForms,
+  };
 
   return {
     sourcePath,
@@ -110,7 +119,12 @@ export function planMoveInstruction(
       : RESTRUCTURE_REASON_BY_BASIS[target.basis],
     requiredArtifacts: required.artifacts,
     affectedImports: imports.rewrites,
+    delegatedImports: imports.delegated,
+    preservedImports: imports.preserved,
     requiresDecision,
     decisionReasons: reasons,
+    decisions: reasons.map((reason) =>
+      describeDecision(reason, decisionContext),
+    ),
   };
 }

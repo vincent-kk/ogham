@@ -12,6 +12,7 @@ import type { SnapshotDiagnostic } from '../../../../types/fractal.js';
  * and value/type imports of one target share it.
  * @param code - Diagnostic code, e.g. `unresolved-local-dependency`
  * @param message - Human-readable explanation
+ * @param nextAction - What the caller does next
  * @param projectRoot - Root the file path is made relative to
  * @param filePath - File that holds the reference
  * @param specifier - Raw specifier of the reference
@@ -20,6 +21,7 @@ import type { SnapshotDiagnostic } from '../../../../types/fractal.js';
 export function createDependencyDiagnostic(
   code: string,
   message: string,
+  nextAction: string,
   projectRoot: string,
   filePath: string,
   specifier: string,
@@ -27,6 +29,7 @@ export function createDependencyDiagnostic(
   return {
     code,
     message,
+    nextAction,
     path: filePath,
     affects: ['dependencies', 'boundaries'],
     specifier,

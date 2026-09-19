@@ -3,6 +3,7 @@ import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import {
   REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_DIAGNOSTIC_MESSAGES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_FILE_NAMES,
 } from '../../../../../constants/reviewState.js';
 import type { ToolDiagnostic } from '../../../../../types/toolEnvelope.js';
@@ -55,6 +56,7 @@ export function readSealedReviewBlockers(
         code: REVIEW_STATE_DIAGNOSTIC_CODES.BLOCKERS_MISSING,
         message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.BLOCKERS_MISSING,
         path: paths.blockersPath,
+        nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.BLOCKERS_MISSING,
       },
     };
   const metadata = parseSealedReviewFrontmatter(artifact);
@@ -77,6 +79,7 @@ function invalidBlockerStatus(path: string): SealedReviewBlockerStatus {
     code: REVIEW_STATE_DIAGNOSTIC_CODES.BLOCKERS_INVALID,
     message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.BLOCKERS_INVALID,
     path,
+    nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.BLOCKERS_INVALID,
   };
   return {
     blockersPath: null,

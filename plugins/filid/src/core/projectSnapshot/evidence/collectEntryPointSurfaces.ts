@@ -33,6 +33,8 @@ export async function collectEntryPointSurfaces(
           code: 'entry-point-adapter-unavailable',
           message: `No active adapter can inspect ${entryPoint.path}.`,
           path: entryPoint.path,
+          nextAction:
+            "Enable an adapter for this file's language through adapters in .filid/config.json, or accept that its public surface is reported as unsupported.",
         });
         continue;
       }
@@ -49,8 +51,10 @@ export async function collectEntryPointSurfaces(
         });
         diagnostics.push({
           code: 'entry-point-inspection-failed',
-          message: error instanceof Error ? error.message : String(error),
+          message: `Could not inspect entry point ${entryPoint.path}: ${error instanceof Error ? error.message : String(error)}`,
           path: entryPoint.path,
+          nextAction:
+            'Check that the file is readable source text, then run again; its public surface stays indeterminate until then.',
         });
       }
     }

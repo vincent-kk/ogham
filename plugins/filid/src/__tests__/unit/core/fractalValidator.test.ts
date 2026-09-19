@@ -136,6 +136,7 @@ describe('fractal-validator', () => {
             severity: 'warning',
             message: 'Always fails',
             path: ctx.node.path,
+            suggestion: 'This is a test-only rule.',
           },
         ],
       };
@@ -163,6 +164,7 @@ describe('fractal-validator', () => {
             severity: 'error',
             message: 'Should not appear',
             path: '',
+            suggestion: 'This is a test-only rule.',
           },
         ],
       };
@@ -246,6 +248,7 @@ describe('fractal-validator', () => {
                   severity: 'error',
                   message: 'No index',
                   path: ctx.node.path,
+                  suggestion: 'This is a test-only rule.',
                 },
               ],
       };

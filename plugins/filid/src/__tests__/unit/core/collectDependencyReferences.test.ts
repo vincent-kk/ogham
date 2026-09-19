@@ -60,7 +60,32 @@ describe('dependency diagnostic identity and impact', () => {
         specifier: './hidden.js',
         affects: ['dependencies', 'boundaries'],
         causeId: expect.stringMatching(/^[a-f0-9]{64}$/),
+        nextAction: expect.stringContaining('line'),
       }),
+    ]);
+  });
+
+  it('reports an unresolved reference with a nextAction naming what to fix', async () => {
+    const result = await collectDependencyReferences(
+      resolution('/one'),
+      '/one',
+    );
+    expect(result.diagnostics[0]?.code).toBe('unresolved-local-dependency');
+    expect(result.diagnostics[0]?.nextAction).toContain('specifier');
+  });
+
+  it('reports no active structure adapter as dependency-adapter-unavailable', async () => {
+    const empty: AdapterResolution = {
+      adapters: [],
+      ownership: new Map(),
+      diagnostics: [],
+      claims: new Map(),
+      unsupportedPaths: [],
+    } as unknown as AdapterResolution;
+    const result = await collectDependencyReferences(empty, '/one');
+    expect(result.certainty).toBe('unsupported');
+    expect(result.diagnostics).toEqual([
+      expect.objectContaining({ code: 'dependency-adapter-unavailable' }),
     ]);
   });
 

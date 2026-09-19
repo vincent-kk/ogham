@@ -32,6 +32,9 @@ describe('structure-guard', () => {
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'reclassified from organ to fractal',
     );
+    expect(result.hookSpecificOutput?.additionalContext).toContain(
+      'Complete the fractal with DETAIL.md and an entry point, or remove INTENT.md to keep it an organ.',
+    );
   });
 
   it('should allow INTENT.md in nested organ directories with info', () => {

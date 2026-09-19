@@ -1,9 +1,6 @@
 import { samePath } from '@ogham/cross-platform';
 
-import {
-  RESTRUCTURE_VALIDATION_CODES,
-  RESTRUCTURE_VALIDATION_MESSAGES,
-} from '../../../constants/restructure.js';
+import { RESTRUCTURE_VALIDATION_CODES } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
   ImportRewrite,
@@ -46,7 +43,8 @@ export function validateImportRewrites(
       : [
           {
             code: RESTRUCTURE_VALIDATION_CODES.IMPORT_REWRITE_MISSING,
-            message: RESTRUCTURE_VALIDATION_MESSAGES.IMPORT_REWRITE_MISSING,
+            message: `${rewrite.consumerPath} has no import "${rewrite.requiredSpecifier}".`,
+            nextAction: `In ${rewrite.consumerPath}, replace the import "${rewrite.currentSpecifier}" with "${rewrite.requiredSpecifier}", then run postcondition again.`,
             path: rewrite.consumerPath,
             sourcePath: move.sourcePath,
           },

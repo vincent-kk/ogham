@@ -1,9 +1,7 @@
 import { pathForCompare, samePath } from '@ogham/cross-platform';
 
-import { RESTRUCTURE_PLAN_HASH_SEPARATOR } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
-  ImportRewrite,
   ImportRewriteBuildResult,
   PlannedMove,
   RewriteUnit,
@@ -11,21 +9,20 @@ import type {
 
 import { collectIncomingRewrites } from './collectIncomingRewrites.js';
 import { collectOutgoingRewrites } from './collectOutgoingRewrites.js';
+import { sortUniqueImports } from './sortUniqueImports.js';
 
 /**
- * Derive the import edits a moved unit owns, and the reasons its imports
- * cannot be rewritten exactly.
+ * Derive the import edits a moved unit owns: rewrites filid writes, imports it
+ * delegates to the caller, and imports the moves keep resolving.
  *
- * Both judgement sets — imports into the unit and imports out of it — are
- * checked independently of move order, ownership and consumer lists, so the
- * reasons are the same whichever moves share the plan. A unit that stays in
- * place breaks no import and is not judged.
+ * Imports never block a move. A unit that stays in place breaks no import and
+ * owns none.
  * @param snapshot - Pre-move snapshot whose dependency evidence names every consumer
  * @param unit - Source, target and the path consumers load after the move
  * @param orderedMoves - Executable moves of the plan in execution order; when
  * empty the unit is taken to move alone
- * @returns Owned rewrites with final consumer paths and specifiers, sorted by
- * consumer, plus decision reasons
+ * @returns Owned rewrites, delegated imports and preserved imports with final
+ * consumer paths, each sorted by consumer and specifier without duplicates
  */
 export function buildImportRewrites(
   snapshot: ProjectSnapshot,
@@ -33,30 +30,22 @@ export function buildImportRewrites(
   orderedMoves: readonly PlannedMove[] = [],
 ): ImportRewriteBuildResult {
   if (samePath(unit.sourcePath, unit.targetPath))
-    return { rewrites: [], decisionReasons: [] };
+    return { rewrites: [], delegated: [], preserved: [] };
   const moves = orderedMoves.length > 0 ? orderedMoves : [unit];
   const incoming = collectIncomingRewrites(snapshot, unit, moves);
   const outgoing = collectOutgoingRewrites(snapshot, unit, moves);
-  const rewrites = new Map<string, ImportRewrite>();
-  for (const rewrite of [...incoming.rewrites, ...outgoing.rewrites])
-    rewrites.set(
-      [
-        pathForCompare(rewrite.consumerPath),
-        rewrite.currentSpecifier,
-        rewrite.requiredSpecifier,
-      ].join(RESTRUCTURE_PLAN_HASH_SEPARATOR),
-      rewrite,
-    );
-
   return {
-    rewrites: [...rewrites.values()].sort(
-      (left, right) =>
-        pathForCompare(left.consumerPath).localeCompare(
-          pathForCompare(right.consumerPath),
-        ) || left.currentSpecifier.localeCompare(right.currentSpecifier),
+    rewrites: sortUniqueImports(
+      [...incoming.rewrites, ...outgoing.rewrites],
+      ({ requiredSpecifier }) => requiredSpecifier,
     ),
-    decisionReasons: [
-      ...new Set([...incoming.decisionReasons, ...outgoing.decisionReasons]),
-    ],
+    delegated: sortUniqueImports(
+      [...incoming.delegated, ...outgoing.delegated],
+      ({ requiredResolvedPath }) => pathForCompare(requiredResolvedPath),
+    ),
+    preserved: sortUniqueImports(
+      [...incoming.preserved, ...outgoing.preserved],
+      ({ requiredResolvedPath }) => pathForCompare(requiredResolvedPath),
+    ),
   };
 }

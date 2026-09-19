@@ -19,6 +19,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import {
+  TOOL_ARTIFACT_DIAGNOSTIC_CODE,
+  TOOL_ARTIFACT_DIAGNOSTIC_MESSAGE,
+  TOOL_ARTIFACT_DIAGNOSTIC_NEXT_ACTION,
   TOOL_ARTIFACT_HASH_ALGORITHM,
   TOOL_ARTIFACT_HASH_ENCODING,
   TOOL_INLINE_BUDGET_BYTES,
@@ -217,6 +220,7 @@ describe('common MCP tool envelope', () => {
         {
           code: LARGE_DIAGNOSTIC_CODE,
           message: LARGE_DIAGNOSTIC_MESSAGE,
+          nextAction: 'Read the artifact.',
         },
       ],
     };
@@ -231,6 +235,14 @@ describe('common MCP tool envelope', () => {
     ).toBeLessThanOrEqual(TOOL_INLINE_BUDGET_BYTES);
     expect(parsed.data).toBeUndefined();
     expect(parsed.diagnostics).not.toEqual(payload.diagnostics);
+    expect(parsed.diagnostics).toStrictEqual([
+      {
+        code: TOOL_ARTIFACT_DIAGNOSTIC_CODE,
+        message: TOOL_ARTIFACT_DIAGNOSTIC_MESSAGE,
+        path: parsed.artifact.path,
+        nextAction: TOOL_ARTIFACT_DIAGNOSTIC_NEXT_ACTION,
+      },
+    ]);
     expect(artifactPayload.diagnostics).toEqual(payload.diagnostics);
   });
 

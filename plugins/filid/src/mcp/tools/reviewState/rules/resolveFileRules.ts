@@ -1,3 +1,6 @@
+import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
+
 import { matchesReviewGlob as matchesGlob } from './matchesReviewGlob.js';
 import type {
   ResolveFileRulesInput,
@@ -44,8 +47,10 @@ export function resolveFileRules(input: ResolveFileRulesInput): string[] {
   }
   for (const override of input.overrides) {
     if (activeIds.has(override.id))
-      throw new Error(
-        `Repository review rule duplicates active id "${override.id}".`,
+      throw new ToolDiagnosticError(
+        REVIEW_STATE_DIAGNOSTIC_CODES.REPOSITORY_RULES_INVALID,
+        `Repository review rule "${override.id}" reuses the id of an active built-in rule.`,
+        `Ask the user to rename rule "${override.id}" in .filid/review-rules.json, or list the built-in id in its "replaces" array. Then call review_state prepare again.`,
       );
     active.push(override);
     activeIds.add(override.id);

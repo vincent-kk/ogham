@@ -36,6 +36,8 @@
   - 한계: 공백 뒤에서 짝수로 어긋난 따옴표(`Rock 'n' roll`)나, 줄 주석·정규식·template이 따옴표를 먹은 줄은 신뢰할 수 없는 줄로 잡히지 않는다.
 - case 계수는 경계 상실이나 숨은 case 구문이 있으면 indeterminate다. 토큰 경계를 믿을 수 없는 파일을 exact로 세면 cap이 거짓 통과한다.
 - 의존성 추출은 신뢰할 수 없는 텍스트에서 원문 패턴으로 찾은 참조(`from '…'`, `import('…')`, `import '…'`, `require('…')`)와 경계 상실 뒤의 본문 참조를 `certainty: 'indeterminate'`로 보고한다.
+- `certainty: 'indeterminate'`인 참조는 1부터 시작하는 `line`도 함께 보고한다. offset을 줄 번호로 바꾸는 계산은 `structure/lexing/lineAt.ts`의 `lineAt(source, offset)` 하나가 맡고, semantic case 계수 사유도 같은 도우미를 쓴다.
+- **탐지하지 못하는 lexer 한계.** 짝수로 어긋난 아포스트로피가 산문에 있을 때(`Rock 'n' roll`)나, 이모지 바로 뒤에 따옴표가 올 때는 lexer가 신뢰할 수 없는 줄로 잡지 못한다. 이런 문맥은 진단을 낼 수 없으므로 scan·restructure skill 문서가 LLM 호출자에게 직접 알린다.
 - entry point inspection은 경계 상실이나 숨은 `export`가 있으면 certainty를 indeterminate로 보고한다.
 - verification 동작은 작업 2의 15/32와 contract-marker 계약을 구현한다.
 - verification role은 **파일명 접미사가 후보를 고르고 파일 내용이 확정한다.** `.spec`/`.test` stem은 후보일 뿐이며, 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`다. 접미사만으로 역할을 주면 프로덕션 파일을 `x.spec.ts`로 개명하는 것만으로 boundary와 DAG 면제를 얻는다 — 개명은 증거가 아니다. 경계 상실만으로 생긴 indeterminate는 검증 구문을 봤다는 증거가 아니므로 role을 주지 않는다. 그런 literal은 JSX 텍스트의 아포스트로피처럼 프로덕션 코드에도 흔하다. 신뢰할 수 없는 텍스트에서 보인 case 호출 텍스트도 계수를 indeterminate로 만들 뿐 role의 증거는 아니다. JSX 텍스트의 `Don't touch it (please)`처럼 영어 문장이 case 호출로 읽히기 때문이다. 그 텍스트 안에서 제목을 가진 호출(`it('…'`, `test("…"`)만 role의 증거로 인정한다. 문자열이든 template이든 같다.
@@ -76,6 +78,7 @@
 - `from`이라는 파라미터를 쓰는 exported 함수는 re-export dependency를 만들지 않고, `export * from`·`export * as ns from`·`export type {…} from`은 계속 추출된다.
 - 따옴표를 담은 정규식 리터럴 뒤의 re-export와 dynamic import도 추출된다.
 - 신뢰할 수 없는 줄의 첫 따옴표 뒤 import(코드로 읽힌 것 포함)와 경계 상실 뒤의 import는 `certainty: 'indeterminate'`로 한 번만 보고한다. 첫 따옴표 앞에서 코드로 읽힌 import는 exact로 남는다.
+- `indeterminate` 참조는 1-based `line`을 함께 보고하고, 나머지 참조는 `line`을 싣지 않는다.
 - 숨은 `export`가 있는 entry point는 surface certainty가 indeterminate다.
 
 ### AC-ecmascript-portability — 외부 parser 불필요
@@ -109,6 +112,7 @@
 
 ## History
 
+- 2026-09-19 — indeterminate 참조와 semantic case 계수 사유가 byte offset 대신 1-based 줄 번호를 보고한다. LLM 호출자가 해당 줄을 직접 읽고 판단하게 하려면 offset보다 줄 번호가 필요하다.
 - 2026-09-19 — 닫히지 않은 literal 신호를 경계 상실과 숨은 구문으로 나누고, 의존성 추출과 entry surface까지 넓혔다. unterminated 토큰을 모두 불확정으로 보면 JSX 텍스트 아포스트로피 하나가 cap 판정과 DAG를 흐린다. 처음에는 삼킨 구간을 코드로 다시 lex했다. 그런데 그 텍스트 안의 정규식·주석·URL과 같은 줄의 잘못 짝지어진 따옴표가 반례를 계속 만들었고, 틀린 exact와 3차 비용이 나왔다. 그래서 신뢰할 수 없는 텍스트를 원문 패턴으로만 본다. 과보고는 받아들이고 틀린 exact는 만들지 않는다. template 표현식을 같은 scanner로 건너뛰게 해서 중첩 template의 경계 상실도 없앴다.
 - 2026-09-19 — lexer에 정규식 리터럴 상태를 추가하고 `'`·`"` 문자열을 줄바꿈에서 끝냈다. `/["']/` 같은 정규식의 따옴표가 여러 줄짜리 가짜 문자열을 열어 case와 import를 삼키면서도 exact로 보고되고 있었다. 정규식 판정이 틀리는 드문 문맥에 대비해, 닫히지 않은 literal은 case 계수를 indeterminate로 만든다. 다만 그것만으로 role을 주면 개명 면제가 다시 열리므로 role 판정에서는 제외했다.
 - 2026-09-06 — 최상위 const 배열 참조의 제한적 해석을 추가했다. 공급자 목록을 여러 테스트에서 공유하는 정적 table을 계수하되, 선언의 길이만 믿지 않고 허용한 사용 형태를 확인한다.

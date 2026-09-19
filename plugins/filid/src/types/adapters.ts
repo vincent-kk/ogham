@@ -18,6 +18,8 @@ export interface DependencyReference {
    * trust token boundaries, so it may not be code at all. Omitted means exact.
    */
   certainty?: AnalysisCertainty;
+  /** 1-based line of the reference; set on `indeterminate` references so a reader can check that line. */
+  line?: number;
 }
 
 export interface EntryPointInspection {
@@ -62,6 +64,8 @@ export interface AdapterDiagnostic {
   message: string;
   path?: string;
   adapterIds?: string[];
+  /** What the caller does next; carried into the snapshot diagnostic. */
+  nextAction: string;
 }
 
 export interface AdapterOwnership {

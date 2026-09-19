@@ -38,10 +38,13 @@ const MANIFEST_VERSION = '1';
 const FIXTURE_REASON = 'fixture';
 const RULE_DOC_PLUGIN_ROOT_UNRESOLVED_CODE = 'rule-docs-plugin-root-unresolved';
 const RULE_DOC_PLUGIN_ROOT_UNRESOLVED_MESSAGE =
-  'Filid plugin root could not be resolved.';
+  'Filid plugin root could not be resolved, so managed rule documents cannot be read or synced.';
+const RULE_DOC_PLUGIN_ROOT_UNRESOLVED_NEXT_ACTION =
+  'Run from an installed filid plugin, where the host sets CLAUDE_PLUGIN_ROOT, or reinstall the plugin, then retry; report to the user if it persists.';
 const MUTATED_DIAGNOSTIC = {
   code: 'mutated-diagnostic',
   message: 'mutated diagnostic',
+  nextAction: 'mutated next action',
 };
 const MUTATED_DIAGNOSTIC_MESSAGE = 'mutated diagnostic message';
 const SETTINGS_URL = 'http://127.0.0.1:3000/';
@@ -121,6 +124,7 @@ const UNRESOLVED_RULE_STATUS_PAYLOAD = {
     {
       code: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_CODE,
       message: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_MESSAGE,
+      nextAction: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_NEXT_ACTION,
     },
   ],
 };
@@ -176,6 +180,7 @@ const UNRESOLVED_RULE_MANIFEST_PAYLOAD = {
     {
       code: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_CODE,
       message: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_MESSAGE,
+      nextAction: RULE_DOC_PLUGIN_ROOT_UNRESOLVED_NEXT_ACTION,
     },
   ],
 };

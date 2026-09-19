@@ -160,4 +160,29 @@ describe('review validation policy compatibility', () => {
       2,
     );
   });
+
+  it('reads stored diagnostics recorded with and without a next action', async () => {
+    const prepared = await handleReviewState({
+      action: 'prepare',
+      projectRoot: fixture.projectRoot,
+      effort: 'low',
+    });
+    const state = JSON.parse(readFileSync(prepared.data.statePath, 'utf8'));
+    state.scope.diagnostics = [
+      { code: 'config-warning', message: 'recorded before next actions' },
+      {
+        code: 'config-warning',
+        message: 'recorded with a next action',
+        nextAction: 'Fix the entry the message names.',
+      },
+    ];
+    writeFileSync(prepared.data.statePath, JSON.stringify(state));
+
+    await expect(
+      handleReviewState({
+        action: 'checkpoint',
+        projectRoot: fixture.projectRoot,
+      }),
+    ).resolves.toBeDefined();
+  });
 });

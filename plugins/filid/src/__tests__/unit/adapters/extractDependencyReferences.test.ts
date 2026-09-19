@@ -224,4 +224,35 @@ describe('local dependency filename resolution regressions', () => {
       await ecmascriptStructureAdapter.extractDependencies(source),
     ).toMatchObject([{ resolvedPath: join(root, 'feature.js') }]);
   });
+
+  it('carries the 1-based line of an indeterminate reference', async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.tsx');
+    writeFileSync(
+      source,
+      "const first = 1;\nconst s = <p>Don't</p>; import('./a.ts');\n",
+    );
+
+    expect(
+      (await ecmascriptStructureAdapter.extractDependencies(source)).map(
+        ({ rawSpecifier, certainty, line }) => ({
+          rawSpecifier,
+          certainty,
+          line,
+        }),
+      ),
+    ).toEqual([
+      { rawSpecifier: './a.ts', certainty: 'indeterminate', line: 2 },
+    ]);
+  });
+
+  it('omits line on an exact reference', async () => {
+    writeFileSync(join(root, 'a.ts'), 'export const a = 1;');
+    const source = join(root, 'consumer.ts');
+    writeFileSync(source, "import { a } from './a.ts';\n");
+
+    const [reference] =
+      await ecmascriptStructureAdapter.extractDependencies(source);
+    expect(reference.line).toBeUndefined();
+  });
 });

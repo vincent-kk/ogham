@@ -4,7 +4,6 @@ import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
 import {
   REQUIRED_ARTIFACT_ROLES,
   RESTRUCTURE_VALIDATION_CODES,
-  RESTRUCTURE_VALIDATION_MESSAGES,
 } from '../../../constants/restructure.js';
 import type { FractalNode } from '../../../types/fractal.js';
 import type {
@@ -51,7 +50,10 @@ export function validateRequiredArtifacts(
         : [
             {
               code: RESTRUCTURE_VALIDATION_CODES.ENTRY_POINT_MISSING,
-              message: RESTRUCTURE_VALIDATION_MESSAGES.ENTRY_POINT_MISSING,
+              message: artifact.adapterId
+                ? `No entry point that adapter ${artifact.adapterId} recognizes exists at ${artifact.path}.`
+                : `No entry point exists at ${artifact.path}.`,
+              nextAction: `Create ${artifact.path} and export the unit's public surface from it, then run postcondition again.`,
               path: artifact.path,
               sourcePath: move.sourcePath,
             },
@@ -61,7 +63,8 @@ export function validateRequiredArtifacts(
       : [
           {
             code: RESTRUCTURE_VALIDATION_CODES.REQUIRED_ARTIFACT_MISSING,
-            message: RESTRUCTURE_VALIDATION_MESSAGES.REQUIRED_ARTIFACT_MISSING,
+            message: `${artifact.path} is missing after execution.`,
+            nextAction: `Create ${artifact.path} for the new fractal, then run postcondition again.`,
             path: artifact.path,
             sourcePath: move.sourcePath,
           },

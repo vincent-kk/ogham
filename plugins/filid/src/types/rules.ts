@@ -41,7 +41,8 @@ export interface RuleViolation {
   severity: RuleSeverity;
   message: string;
   path: string;
-  suggestion?: string;
+  /** What to do about the violation: the fix, or who must decide. */
+  suggestion: string;
   certainty?: AnalysisCertainty;
 }
 

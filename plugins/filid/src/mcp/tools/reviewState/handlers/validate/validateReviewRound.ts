@@ -5,7 +5,6 @@ import {
 
 import {
   REVIEW_STATE_DIAGNOSTIC_CODES,
-  REVIEW_STATE_DIAGNOSTIC_MESSAGES,
   REVIEW_STATE_JSON_INDENT,
   REVIEW_STATE_JSON_TRAILING_NEWLINE,
   REVIEW_VALIDATE_KINDS,
@@ -135,8 +134,9 @@ export async function validateReviewRound(
       diagnostics: [
         {
           code: REVIEW_STATE_DIAGNOSTIC_CODES.OPINION_INVALID,
-          message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.OPINION_INVALID,
+          message: `Review round ${round} output for group ${group.id} is missing at ${roundPath}.`,
           path: roundPath,
+          nextAction: `Respawn this same handoff once so the actor writes ${roundPath}. After a second failure mark the handoff exhausted and continue from data.next.`,
         },
       ],
       opinionPath,

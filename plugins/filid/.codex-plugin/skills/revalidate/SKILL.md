@@ -3,7 +3,7 @@ name: revalidate
 user-invocable: true
 description: 'Re-measure the post-correction delta against the recorded resolve baseline, judge every rejection justification, and issue the final PASS or FAIL. Use after resolve corrections are committed.'
 argument-hint: '[--base REF]'
-version: '1.1.0'
+version: '1.1.1'
 complexity: complex
 plugin: filid
 ---
@@ -145,7 +145,7 @@ PR comment: <posted|updated|none|unavailable|failed>
 ## Invariants
 
 - Status comes from re-measurement, never from the delta's file list alone.
-- `indeterminate` evidence never yields `PASS`.
+- `indeterminate` evidence never yields `PASS`; report each diagnostic's `nextAction` with it.
 - The baseline is `resolve_commit_sha` from `justifications.md`, never `HEAD~1` and never the review base.
 - Cleanup happens only on `PASS`, only with literal `confirm: true`, and only after the pull-request comment step has run.
 - This skill never edits source, never commits, and never pushes. The only pull-request action is posting or updating its own verdict comment.

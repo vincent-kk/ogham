@@ -5,6 +5,7 @@
 - 15개 내장 FCA 규칙의 정의·평가와 INTENT/DETAIL 문서 검증을 소유한다.
 - `ruleEngine/`이 규칙 roster와 평가를, `documentValidator/`가 문서 계약을, `fractalValidator/`가 노드 단위 구조 검증을 담당한다.
 - thrown check와 unsupported evidence는 PASS가 아니라 finding으로 변환된다.
+- `RuleViolation.suggestion`은 필수다. 모든 built-in check가 다음 행동을 채운다.
 
 ## API Contracts
 

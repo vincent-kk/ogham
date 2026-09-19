@@ -36,6 +36,7 @@ interface ToolDiagnostic {
   code: string;
   message: string;
   path?: string;
+  nextAction: string; // what the caller does next: the fix, the delegated step, or who decides
 }
 
 interface ToolPayload<Summary, Data> {
@@ -395,6 +396,7 @@ interface SnapshotDiagnostic {
   code: string;
   message: string;
   path?: string;
+  nextAction: string;
 }
 
 interface ProjectSnapshot {
@@ -531,12 +533,21 @@ interface MoveInstruction {
   reason: string;
   requiredArtifacts: RequiredArtifact[];
   affectedImports: ImportRewrite[];
+  delegatedImports: DelegatedImport[]; // imports filid cannot rewrite; the caller writes them
+  preservedImports: DelegatedImport[]; // imports that keep resolving; postcondition still checks them
   requiresDecision: boolean;
   decisionReasons: string[];
+  decisions: { reason: string; message: string; nextAction: string }[];
+}
+
+interface DelegatedImport {
+  consumerPath: string;
+  currentSpecifier: string;
+  requiredResolvedPath: string;
 }
 
 interface RestructurePlan {
-  schemaVersion: 1;
+  schemaVersion: 2;
   planId: string;
   projectRoot: string;
   snapshotHash: string;
@@ -550,12 +561,14 @@ interface RestructurePlan {
     organsCreated: number;
     alreadyPlacedCount: number;
     decisionsRequired: number;
+    delegatedImportCount: number;
   };
 }
 
 interface PlanValidationFinding {
   code: string;
   message: string;
+  nextAction: string;
   path?: string;
   sourcePath?: string;
 }
@@ -570,7 +583,7 @@ interface PlanValidationResult {
 - `requiredArtifacts`는 역할과 실제 경로를 함께 반환한다. **core DTO에는 특정 언어의 진입점 파일명이 없다.**
 - 새 fractal의 entry point artifact는 snapshot에 이미 보존된 adapter-reported entry point 경로 형태에서만 파생한다. exact evidence가 없으면 이름을 추측하지 않고 해당 move를 unresolved로 반환한다.
 - `affectedImports.requiredSpecifier`는 현재 raw specifier가 source machine path를 지시하는 path-like evidence일 때만 산출한다. 일치는 **마지막 세그먼트의 확장자를 제거한 stem**으로 판정한다 — TypeScript ESM이 `.ts` 파일을 `.js`로 참조하고 bundler 해석이 확장자를 생략하듯, specifier에 소스 확장자를 그대로 적을 수 없는 생태계가 있기 때문이다. byte 단위로 비교하면 그런 생태계에서는 rewrite가 하나도 나오지 않는다.
-- 산출된 specifier는 **소비자가 쓰던 확장자 표기를 보존한다.** core는 어느 확장자가 유효한지 알지 못하므로 원래 표기를 되돌려 준다. stem이 어긋나는 디렉터리 index 참조는 여전히 `import-rewrite-unsupported`다.
+- 산출된 specifier는 **소비자가 쓰던 확장자 표기를 보존한다.** core는 어느 확장자가 유효한지 알지 못하므로 원래 표기를 되돌려 준다. stem이 어긋나는 디렉터리 index 참조는 `delegatedImports`로 호출자에게 넘기고, postcondition이 해석 결과로 확인한다.
 - 계산된 target이 source와 같으면 `moves`가 아니라 `alreadyPlaced`로 간다. 옮길 것이 없는 요청이며, postcondition은 `alreadyPlaced`에 source 부재만 면제하고 exact target·node type·artifact·import rewrite는 그대로 요구한다 — "source 부재"와 "target 존재"가 한 경로에 동시에 요구되지 않으면서, 계획이 지명한 적 없는 경로에 착지한 유닛도 잡힌다. 요청은 버려지지 않고 계산된 LCA·basis·consumer를 그대로 실어 돌려준다.
 
 ### 문서 (`types/documents.ts`)

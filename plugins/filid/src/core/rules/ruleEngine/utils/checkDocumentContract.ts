@@ -36,6 +36,8 @@ export function checkDocumentContract(document: DocumentKind): Rule['check'] {
         document === 'intent'
           ? (node.documentEvidence?.intentPath ?? node.path)
           : (node.documentEvidence?.detailPath ?? node.path),
+      suggestion:
+        'Revise the document as the message states; the enrich-docs skill repairs contract documents.',
     }));
     if (
       node.type !== 'fractal' ||
@@ -49,6 +51,7 @@ export function checkDocumentContract(document: DocumentKind): Rule['check'] {
         severity: 'error',
         message: `Fractal "${node.name}" is missing its ${document} contract document.`,
         path: node.path,
+        suggestion: `Create the ${document} document for "${node.name}"; the enrich-docs skill drafts it from the module's evidence.`,
       },
       ...violations,
     ];

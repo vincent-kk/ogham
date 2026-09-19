@@ -2,6 +2,7 @@ import type { VerificationCaseCount } from '../../../types/adapters.js';
 import { findHiddenMatches } from '../structure/lexing/findHiddenMatches.js';
 import { findUntrustedText } from '../structure/lexing/findUntrustedText.js';
 import type { LexicalToken } from '../structure/lexing/lexicalToken.js';
+import { lineAt } from '../structure/lexing/lineAt.js';
 import { scanLexicalTokens } from '../structure/scanLexicalTokens.js';
 
 import { resolveConstantTable } from './constantTables/resolveConstantTable.js';
@@ -67,13 +68,13 @@ class SemanticCaseCounter {
         const body = this.findCallbackBody(rows.nextIndex, end);
         if (!body) {
           this.reasons.add(
-            `parameterized suite at offset ${token.start} has an unsupported callback shape`,
+            `parameterized suite at line ${lineAt(this.source, token.start)} has an unsupported callback shape`,
           );
           continue;
         }
         if (!rows.exact)
           this.reasons.add(
-            `parameterized suite at offset ${token.start} uses a dynamic table`,
+            `parameterized suite at line ${lineAt(this.source, token.start)} uses a dynamic table`,
           );
         this.scanRange(
           body.start,
@@ -87,7 +88,7 @@ class SemanticCaseCounter {
       if (!CASE_APIS.has(token.value)) continue;
       if (this.tokens[index - 1]?.value === '=') {
         this.reasons.add(
-          `case API at offset ${token.start} is assigned through an alias`,
+          `case API at line ${lineAt(this.source, token.start)} is assigned through an alias`,
         );
         continue;
       }
@@ -97,7 +98,7 @@ class SemanticCaseCounter {
         if (rows.exact) this.knownCount += multiplier * rows.count;
         else
           this.reasons.add(
-            `parameterized case at offset ${token.start} uses a dynamic table`,
+            `parameterized case at line ${lineAt(this.source, token.start)} uses a dynamic table`,
           );
         index = Math.max(index, rows.nextIndex - 1);
         continue;
@@ -280,7 +281,7 @@ class SemanticCaseCounter {
     const untrusted = findUntrustedText(this.source, this.tokens);
     if (untrusted.lostTrackAt < Number.POSITIVE_INFINITY)
       this.reasons.add(
-        `${LOST_TRACK_REASON} at offset ${untrusted.lostTrackAt}`,
+        `${LOST_TRACK_REASON} at line ${lineAt(this.source, untrusted.lostTrackAt)}`,
       );
     for (const hit of findHiddenMatches(
       this.source,
@@ -288,13 +289,17 @@ class SemanticCaseCounter {
       HIDDEN_CASE_PATTERN,
       'afterFirstQuote',
     ))
-      this.reasons.add(`${UNCONFIRMED_CASE_REASON} at offset ${hit.offset}`);
+      this.reasons.add(
+        `${UNCONFIRMED_CASE_REASON} at line ${lineAt(this.source, hit.offset)}`,
+      );
     for (const hit of findHiddenMatches(
       this.source,
       untrusted,
       TITLED_CASE_PATTERN,
     ))
-      this.reasons.add(`titled case call hidden at offset ${hit.offset}`);
+      this.reasons.add(
+        `titled case call hidden at line ${lineAt(this.source, hit.offset)}`,
+      );
   }
 
   private detectAliases(): void {

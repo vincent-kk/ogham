@@ -29,6 +29,15 @@ import type {
   ReviewReuseSummary,
 } from './reviewIncrementalTypes.js';
 
+/**
+ * Persisted diagnostic shape: `nextAction` is optional because review states
+ * written before filid attached next actions must remain readable without a
+ * schema bump.
+ */
+export type StoredToolDiagnostic = Omit<ToolDiagnostic, 'nextAction'> & {
+  nextAction?: string;
+};
+
 /** Extracts the union of values exposed by a constant record. */
 type ValueOf<T> = T[keyof T];
 
@@ -396,7 +405,7 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
   /** Complete prepare-time evidence and roster snapshot. */
   scope: {
     /** Prepared non-finding diagnostics, absent in legacy records. */
-    diagnostics?: ToolDiagnostic[];
+    diagnostics?: StoredToolDiagnostic[];
     /** FCA snapshot identity used to render evidence. */
     snapshotHash: string;
     /** Whether both structure and verification evidence are conclusive. */

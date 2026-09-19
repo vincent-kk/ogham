@@ -21,6 +21,7 @@ import { recoverReviewGroups } from '../handoff/recoverReviewGroups.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { collectChangedScopeEvidence } from '../scope/collectChangedScopeEvidence.js';
 import { readChangeContext } from '../scope/readChangeContext.js';
+import { applyReviewContextNextAction } from '../scope/utils/applyReviewContextNextAction.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { assertReviewValidationPolicy } from '../state/assertReviewValidationPolicy.js';
 import { clearStaleReviewArtifacts } from '../state/clearStaleReviewArtifacts.js';
@@ -114,6 +115,7 @@ export async function prepareReviewArtifacts(
       throw new ToolDiagnosticError(
         blockers.diagnostic.code,
         blockers.diagnostic.message,
+        blockers.diagnostic.nextAction,
       );
     return createPreparedReviewPayload({
       action: input.action,
@@ -395,7 +397,10 @@ export async function prepareReviewArtifacts(
     paths,
     status: TOOL_STATUSES.OK,
     state,
-    diagnostics: [...collected.diagnostics, ...context.diagnostics],
+    diagnostics: [
+      ...collected.diagnostics.map(applyReviewContextNextAction),
+      ...context.diagnostics,
+    ],
     concurrency: settings.concurrency,
     handoff: planNextHandoffs({
       state,

@@ -1,6 +1,6 @@
 /** reason 없이 deny된 pre-tool 훅 호출에 채워 넣는 fallback 사유. */
 export const GENERIC_DENY_REASON =
-  'A pre-tool hook denied this call without a specific reason.';
+  'A pre-tool hook denied this call without a specific reason. Stop and report this to the user; do not resubmit the call unchanged.';
 
 /** deny 사유 끝에 공통으로 붙는 retry·escalation 지시. */
 export const DENY_RETRY_GUIDANCE =

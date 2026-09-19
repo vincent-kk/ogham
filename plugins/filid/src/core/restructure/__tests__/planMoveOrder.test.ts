@@ -11,11 +11,13 @@ import type {
 } from '../../../types/fractal.js';
 import type {
   PlacementRequest,
+  RestructureDecision,
   RestructurePlan,
 } from '../../../types/restructure.js';
 import { buildFractalTree } from '../../tree/fractalTree/index.js';
 import type { NodeEntry } from '../../tree/fractalTree/index.js';
 import { createRestructurePlan } from '../planner/createRestructurePlan.js';
+import { describeOrderConflict } from '../planner/describeOrderConflict.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
 
 const P = {
@@ -38,6 +40,11 @@ const P = {
   LEGACY_DELAY: '/root/legacy/delay.ts',
   TIMING: '/root/timing',
   EMPTY: '/root/x/empty',
+  M1: '/root/x/m1',
+  M1_FILE: '/root/x/m1/f.ts',
+  M2: '/root/x/m2',
+  M2_FILE: '/root/x/m2/f.ts',
+  OPS_A: '/root/ops/a.ts',
 } as const;
 
 const CONFLICT = RESTRUCTURE_DECISION_REASONS.MOVE_ORDER_CONFLICT;
@@ -127,6 +134,18 @@ function plan(
 
 function order(result: RestructurePlan): string[] {
   return result.moves.map(({ sourcePath }) => sourcePath);
+}
+
+/** The `move-order-conflict` decision of the first unresolved request for `sourcePath`. */
+function conflictDecision(
+  result: RestructurePlan,
+  sourcePath: string,
+): RestructureDecision {
+  const decision = result.unresolved
+    .find((entry) => entry.sourcePath === sourcePath)
+    ?.decisions.find(({ reason }) => reason === CONFLICT);
+  if (!decision) throw new Error(`expected a conflict for ${sourcePath}`);
+  return decision;
 }
 
 function conflicts(result: RestructurePlan): string[] {
@@ -455,5 +474,123 @@ describe('restructure orders overlapping moves for automatic execution', () => {
         requiredSpecifier: './svc/a.ts',
       },
     ]);
+  });
+
+  it('asks for one request of a source requested twice', () => {
+    const result = plan(
+      snapshotOf(
+        [organ(P.SCHED, 'sched', ['delay.ts', 'other.ts'])],
+        [
+          edge(P.ROOT_INDEX, './x/sched/delay.ts', P.DELAY),
+          edge(P.ROOT_INDEX, './x/sched/other.ts', P.OTHER),
+        ],
+      ),
+      [move(P.DELAY, 'ops'), move(P.DELAY, 'legacy')],
+    );
+    const decision = conflictDecision(result, P.DELAY);
+
+    expect(decision.message).toContain('is requested more than once');
+    expect(decision.nextAction).toContain(`Keep one request for ${P.DELAY}`);
+  });
+
+  it('sends two files exchanging places to the user as a swap', () => {
+    const result = plan(
+      snapshotOf(
+        [organ(P.M1, 'm1', ['f.ts']), organ(P.M2, 'm2', ['f.ts'])],
+        [
+          edge(P.X_INDEX, './m1/f.ts', P.M1_FILE),
+          edge(P.X_INDEX, './m2/f.ts', P.M2_FILE),
+        ],
+      ),
+      [move(P.M1_FILE, 'm2'), move(P.M2_FILE, 'm1')],
+    );
+    const decision = conflictDecision(result, P.M1_FILE);
+
+    expect(decision.message).toContain(`(${P.M1_FILE}, ${P.M2_FILE})`);
+    expect(decision.nextAction).toContain('Ask the user how to stage');
+  });
+
+  it('gives every member of a cycle with one occupied landing the swap cause', () => {
+    const result = plan(
+      snapshotOf(
+        [organ(P.SCHED, 'sched', ['a.ts']), organ(P.OPS, 'ops', ['a.ts'])],
+        [
+          edge(P.ROOT_INDEX, './x/sched/a.ts', P.A_FILE),
+          edge(P.ROOT_INDEX, './ops/a.ts', P.OPS_A),
+        ],
+      ),
+      [move(P.SCHED, 'timing'), move(P.A_FILE, 'ops'), move(P.OPS_A, 'timing')],
+    );
+
+    expect(
+      [P.SCHED, P.A_FILE, P.OPS_A].map((source) =>
+        conflictDecision(result, source).nextAction.startsWith(
+          'Ask the user how to stage',
+        ),
+      ),
+    ).toEqual([true, true, true]);
+  });
+
+  it('splits an absorbing cycle so the enclosing directory move runs alone first', () => {
+    const result = plan(
+      snapshotOf(
+        [organ(P.SCHED, 'sched', ['delay.ts', 'other.ts'])],
+        [
+          edge(P.ROOT_INDEX, './x/sched/delay.ts', P.DELAY),
+          edge(P.ROOT_INDEX, './x/sched/other.ts', P.OTHER),
+        ],
+      ),
+      [move(P.DELAY, 'timing'), move(P.SCHED, 'timing')],
+    );
+
+    expect(
+      [P.DELAY, P.SCHED].map(
+        (source) => conflictDecision(result, source).nextAction,
+      ),
+    ).toEqual([
+      expect.stringContaining(`plan and execute the move of ${P.SCHED} alone`),
+      expect.stringContaining(`plan and execute the move of ${P.SCHED} alone`),
+    ]);
+  });
+
+  it('names the source and target of a move nested in itself', () => {
+    const result = plan(
+      snapshotOf(
+        [organ(P.SCHED, 'sched', []), organ(P.DEEP, 'deep', ['f.ts'])],
+        [edge(P.X_INDEX, './sched/deep/f.ts', P.DEEP_FILE)],
+      ),
+      [move(P.DEEP, 'sched')],
+    );
+
+    expect(conflictDecision(result, P.DEEP).message).toBe(
+      `${P.DEEP} and its target ${P.SCHED} contain each other, so the move cannot run.`,
+    );
+  });
+
+  it('has the caller check files filid cannot see before deleting an emptied directory', () => {
+    const result = plan(
+      snapshotOf(
+        [organ(P.SCHED, 'sched', ['delay.ts'])],
+        [edge(P.ROOT_INDEX, './x/sched/delay.ts', P.DELAY)],
+      ),
+      [move(P.SCHED, 'timing'), move(P.DELAY, 'ops')],
+    );
+    const decision = conflictDecision(result, P.SCHED);
+
+    expect(decision.message).toContain(`(${P.DELAY})`);
+    expect(decision.nextAction).toContain('excluded directories');
+  });
+
+  it('names the same move to run first from every member of a cycle no source encloses', () => {
+    const directory = { sourcePath: '/root/x', targetPath: '/root/x/y' };
+    const file = { sourcePath: '/root/q.ts', targetPath: '/root/x/y/q.ts' };
+    const fromDirectory = describeOrderConflict(directory, 'cycle', [
+      file.sourcePath,
+    ]);
+    const fromFile = describeOrderConflict(file, 'cycle', [
+      directory.sourcePath,
+    ]);
+
+    expect(fromDirectory.nextAction).toBe(fromFile.nextAction);
   });
 });

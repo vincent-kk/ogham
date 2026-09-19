@@ -21,7 +21,8 @@ export function checkIntentMdReclassification(
     dirSoFar = path.join(dirSoFar, segment);
     if (isOrganByStructure(dirSoFar)) {
       info.push(
-        `"${segment}" has been reclassified from organ to fractal by INTENT.md creation.`,
+        `"${segment}" has been reclassified from organ to fractal by INTENT.md creation. ` +
+          `Complete the fractal with DETAIL.md and an entry point, or remove INTENT.md to keep it an organ.`,
       );
       break;
     }

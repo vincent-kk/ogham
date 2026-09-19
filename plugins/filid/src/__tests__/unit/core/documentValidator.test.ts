@@ -75,6 +75,8 @@ describe('document-validator', () => {
         expect.objectContaining({
           rule: 'missing-boundaries',
           severity: 'warning',
+          message:
+            'INTENT.md is missing 3-tier boundary sections: Always do, Ask first, Never do. Add each as its own section listing the rules for that tier.',
         }),
       );
     });
@@ -192,6 +194,33 @@ describe('document-validator', () => {
         expect.objectContaining({
           rule: 'duplicate-id',
           severity: 'error',
+          message:
+            'Duplicate DETAIL acceptance group ID "AC-feature". Rename one group so every ID is unique.',
+        }),
+      );
+    });
+
+    it('should reject an Acceptance Criteria section with no groups', () => {
+      const content = [
+        '# Spec',
+        '## Requirements',
+        '- Feature A',
+        '## API Contracts',
+        '- `feature(): void`',
+        '## Acceptance Criteria',
+        '## Last Updated',
+        '2026-07-26',
+      ].join('\n');
+
+      const result = validateDetailMd(content);
+
+      expect(result.valid).toBe(false);
+      expect(result.violations).toContainEqual(
+        expect.objectContaining({
+          rule: 'missing-field',
+          severity: 'error',
+          message:
+            'DETAIL.md must declare at least one acceptance group. Add "### <stable-id> — <title>" under "## Acceptance Criteria".',
         }),
       );
     });

@@ -29,6 +29,7 @@ export function findSpecFragmentation(
           path: spec.path,
           severity: 'error',
           message: `Multiple spec documents owned by ${ownerPath} must declare at least one DETAIL acceptance group.`,
+          suggestion: `Mark each spec document with a "// filid:contract <group-id>" comment naming an acceptance group declared in ${ownerPath}/DETAIL.md.`,
         });
         continue;
       }
@@ -40,6 +41,7 @@ export function findSpecFragmentation(
             path: spec.path,
             severity: 'error',
             message: `Contract group "${groupId}" is not declared by ${ownerPath}/DETAIL.md.`,
+            suggestion: `Declare "### ${groupId} — <title>" under "## Acceptance Criteria" in ${ownerPath}/DETAIL.md, or correct the filid:contract comment in the spec.`,
           });
 
         const previousPath = claimedBy.get(groupId);
@@ -49,6 +51,7 @@ export function findSpecFragmentation(
             path: spec.path,
             severity: 'error',
             message: `Contract group "${groupId}" is split across ${previousPath} and ${spec.path}.`,
+            suggestion: `Keep contract group "${groupId}" in one spec document: move its cases into ${previousPath}, or split the group in ${ownerPath}/DETAIL.md.`,
           });
         else claimedBy.set(groupId, spec.path);
       }

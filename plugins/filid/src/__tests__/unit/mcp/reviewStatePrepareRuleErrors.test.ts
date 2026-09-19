@@ -13,6 +13,7 @@ import { describe, expect, it } from 'vitest';
 import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../constants/reviewState.js';
 import { toolError } from '../../../mcp/server/envelope/toolError.js';
 import { loadPrepareReviewRules } from '../../../mcp/tools/reviewState/handlers/utils/loadPrepareReviewRules.js';
+import { loadActorMethods } from '../../../mcp/tools/reviewState/rules/loadActorMethods.js';
 import { loadRepositoryRules } from '../../../mcp/tools/reviewState/rules/loadRepositoryRules.js';
 
 import { createReviewRulePluginRoot } from './reviewState/helpers/createReviewRulePluginRoot.js';
@@ -33,6 +34,22 @@ describe('prepare rule loading errors', () => {
     expect(JSON.parse(result.content[0].text)).toMatchObject({
       diagnostics: [{ code: REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_MISSING }],
     });
+  });
+
+  it('tells the caller to restart the session when the plugin root is unavailable', () => {
+    expect(() => loadPrepareReviewRules('/tmp/project', null)).toThrow(
+      expect.objectContaining({
+        nextAction: expect.stringContaining('restart the session'),
+      }),
+    );
+  });
+
+  it('tells the caller to restart the session when actor methods have no plugin root', () => {
+    expect(() => loadActorMethods(null)).toThrow(
+      expect.objectContaining({
+        nextAction: expect.stringContaining('restart the session'),
+      }),
+    );
   });
 
   it('preserves the escaping rule-path diagnostic through the MCP error envelope', () => {

@@ -96,7 +96,7 @@ describe('prepare review cost budget', () => {
           projectRoot: fixture.projectRoot,
           baseRef: 'main',
         }),
-      ).rejects.toThrow('review group budget exceeded');
+      ).rejects.toThrow('reviewer groups, exceeding review.maxGroups');
     },
   );
 });

@@ -15,6 +15,8 @@ export function checkLegacyCriteriaLedger(
         message: LEGACY_CRITERIA_LEDGER_RULE.SNAPSHOT_REQUIRED_MESSAGE,
         path: context.tree.root,
         certainty: ANALYSIS_CERTAINTIES.INDETERMINATE,
+        suggestion:
+          'Evaluate with a project snapshot (fractal_inspect action "validate") so ledger evidence exists.',
       },
     ];
   const evidence = snapshot.legacyCriteriaLedger;

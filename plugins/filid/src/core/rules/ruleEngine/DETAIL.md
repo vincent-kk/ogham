@@ -20,6 +20,7 @@
 - **소비자가 검증 파일이면 boundary를 적용하지 않는다.** 검증은 계약을 확인하는 행위이고, 내부 단위를 검사하려면 내부에 닿아야 한다. 이를 위해 진입점을 넓히면 소비자가 테스트뿐인 공개 심볼이 생겨 공개 계약이 오염된다 (`seiri_public-contract` §1). 판정 근거는 어댑터가 보고한 `snapshot.verification.files`이며, core는 파일명 패턴을 알지 못한다.
 - 대상이 fractal 내부 파일일 때도 같은 면책을 조회한다. 진입점을 경유할 수 **없는** 정당한 소비자가 존재하기 때문이다 — 표준 사례는 훅 번들이며, 배럴을 import하면 번들러가 배럴이 재노출하는 모듈 전체를 끌어온다. 면책이 없으면 기존 진입점 규칙 그대로 위반이다.
 - 면책은 소유 프랙탈 DETAIL.md의 `## Boundary Exemptions` 선언에서 온다 (`## Organ Exemptions`는 legacy 별칭으로 계속 인정한다). 선언된 `targetPath`가 대상 경로를 담고, `Direct import`가 allowed이며, consumer glob이 소비 파일에 매치하고, `Reason`이 비어 있지 않을 때만 통과시킨다.
+- 모든 violation은 `suggestion`을 채운다. `evaluateRule`은 rule 실행이 던졌을 때 재시도와 보고를 안내하고, snapshot 부재로 인한 indeterminate finding(`external-import-boundary`, `checkDependencyCycles`, `checkPureFunctionIsolation`, `checkVerificationPolicy`, `checkLegacyCriteriaLedger`)은 각자 필요한 `fractal_inspect` action을 안내한다. cycle과 graph 불확실성, entry-point surface의 세 상태(enumerated indeterminate·unsupported·opaque)도 각자 다음 행동을 담는다.
 
 ## API Contracts
 

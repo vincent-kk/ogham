@@ -49,7 +49,9 @@ export async function collectVerificationClaims(
       certainty = 'indeterminate';
       diagnostics.push({
         code: 'verification-discovery-failed',
-        message: error instanceof Error ? error.message : String(error),
+        message: `Verification file discovery failed: ${error instanceof Error ? error.message : String(error)}`,
+        nextAction:
+          'Run again; if it repeats, report this message to the user. Verification evidence stays indeterminate until discovery succeeds.',
       });
     }
 
@@ -72,6 +74,8 @@ export async function collectVerificationClaims(
         code: 'ambiguous-adapter-claim',
         message: `Equal-confidence verification adapters claim ${path}: ${adapterIds.join(', ')}.`,
         path,
+        nextAction:
+          'Set adapters.mode to "explicit" and list exactly one of these adapters in adapters.enabled in .filid/config.json, then run again.',
       });
       continue;
     }

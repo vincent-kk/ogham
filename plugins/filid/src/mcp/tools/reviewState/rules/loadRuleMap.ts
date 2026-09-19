@@ -6,6 +6,7 @@ import {
 
 import {
   REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_FILE_NAMES,
 } from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
@@ -20,6 +21,20 @@ const SUPPORTED_WHEN = new Set<string>([
   'owner',
 ]);
 
+const RULE_MAP_MISSING_NEXT_ACTION =
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.RULE_MAP_MISSING;
+const RULE_MAP_INVALID_NEXT_ACTION =
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.RULE_MAP_INVALID;
+
+/** Build the shared rule-map-invalid diagnostic error for one message. */
+function ruleMapInvalid(mapPath: string, detail: string): ToolDiagnosticError {
+  return new ToolDiagnosticError(
+    REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_INVALID,
+    `Installed cross-review rule map ${mapPath}: ${detail}`,
+    RULE_MAP_INVALID_NEXT_ACTION,
+  );
+}
+
 /**
  * Load and validate the canonical cross-review rule map and every rule body.
  * @param pluginRoot Resolved Filid plugin root, or null when unavailable.
@@ -29,7 +44,8 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
   if (pluginRoot === null)
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_MISSING,
-      'Cross-review rule map is missing: plugin root is unavailable.',
+      'Cross-review rule map cannot be loaded because the filid plugin root is unavailable (CLAUDE_PLUGIN_ROOT is unset and no plugin root was found).',
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.PLUGIN_ROOT_UNAVAILABLE,
     );
   const rulesDirectory = resolveContainedPath(
     pluginRoot,
@@ -47,15 +63,16 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_MISSING,
       `Cross-review rule map is missing: "${mapPath}".`,
+      RULE_MAP_MISSING_NEXT_ACTION,
     );
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch {
-    throw new Error(`Cross-review rule map is invalid JSON: "${mapPath}".`);
+    throw ruleMapInvalid(mapPath, 'is not valid JSON.');
   }
   if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed))
-    throw new Error('Cross-review rule map must be an object.');
+    throw ruleMapInvalid(mapPath, 'must be an object.');
   const map = parsed as Record<string, unknown>;
   if (
     Object.keys(map).some(
@@ -64,28 +81,33 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
     map.schema_version !== 1 ||
     !Array.isArray(map.rules)
   )
-    throw new Error(
-      'Cross-review rule map must use schema_version 1 and declare rules.',
+    throw ruleMapInvalid(
+      mapPath,
+      'must use schema_version 1 and declare rules.',
     );
   const ids = new Set<string>();
   return map.rules.map((value, index) => {
     if (!value || typeof value !== 'object' || Array.isArray(value))
-      throw new Error(`Review rule ${index} must be an object.`);
+      throw ruleMapInvalid(mapPath, `review rule ${index} must be an object.`);
     const rule = value as Record<string, unknown>;
     if (
       Object.keys(rule).some(
         (key) => !['id', 'always', 'match', 'when', 'file'].includes(key),
       )
     )
-      throw new Error(`Review rule ${index} has an unsupported field.`);
+      throw ruleMapInvalid(
+        mapPath,
+        `review rule ${index} has an unsupported field.`,
+      );
     if (
       typeof rule.id !== 'string' ||
       rule.id.trim() === '' ||
       typeof rule.file !== 'string' ||
       rule.file.trim() === ''
     )
-      throw new Error(
-        `Review rule ${index} requires non-empty id and file values.`,
+      throw ruleMapInvalid(
+        mapPath,
+        `review rule ${index} requires non-empty id and file values.`,
       );
     const selectorCount =
       Number(rule.always === true) +
@@ -95,28 +117,37 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
       selectorCount !== 1 ||
       (rule.always !== undefined && rule.always !== true)
     )
-      throw new Error(
-        `Review rule "${rule.id}" must declare exactly one supported selector.`,
+      throw ruleMapInvalid(
+        mapPath,
+        `review rule "${rule.id}" must declare exactly one supported selector.`,
       );
     if (
       rule.match !== undefined &&
       (!Array.isArray(rule.match) ||
         rule.match.some((item) => typeof item !== 'string' || item === ''))
     )
-      throw new Error(
-        `Review rule "${rule.id}" has an invalid match selector.`,
+      throw ruleMapInvalid(
+        mapPath,
+        `review rule "${rule.id}" has an invalid match selector.`,
       );
     if (
       rule.when !== undefined &&
       (typeof rule.when !== 'string' || !SUPPORTED_WHEN.has(rule.when))
     )
-      throw new Error(`Review rule "${rule.id}" has an invalid when selector.`);
+      throw ruleMapInvalid(
+        mapPath,
+        `review rule "${rule.id}" has an invalid when selector.`,
+      );
     if (!isBuiltinReviewRuleDefinition(rule))
-      throw new Error(`Review rule ${index} has an invalid definition.`);
+      throw ruleMapInvalid(
+        mapPath,
+        `review rule ${index} has an invalid definition.`,
+      );
     const definition = rule;
     if (ids.has(definition.id))
-      throw new Error(
-        `Cross-review rule map duplicates id "${definition.id}".`,
+      throw ruleMapInvalid(
+        mapPath,
+        `cross-review rule map duplicates id "${definition.id}".`,
       );
     ids.add(definition.id);
     const bodyPath = resolveContainedPath(rulesDirectory, definition.file);
@@ -125,7 +156,8 @@ export function loadRuleMap(pluginRoot: string | null): LoadedReviewRule[] {
     if (body === null)
       throw new ToolDiagnosticError(
         REVIEW_STATE_DIAGNOSTIC_CODES.RULE_MAP_MISSING,
-        `Cross-review rule body is missing for "${definition.id}".`,
+        `Cross-review rule body "${bodyPath}" is missing for built-in rule "${definition.id}".`,
+        RULE_MAP_MISSING_NEXT_ACTION,
       );
     return { ...definition, body };
   });

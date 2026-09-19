@@ -21,7 +21,14 @@ describe('renderEvidenceMarkdown', () => {
   it('uses a longer code delimiter when identifiers contain backticks', () => {
     const output = renderEvidenceMarkdown({
       ...EMPTY_MODEL,
-      diagnostics: [{ code: 'a`b', message: 'diagnostic', path: '`c``d`' }],
+      diagnostics: [
+        {
+          code: 'a`b',
+          message: 'diagnostic',
+          path: '`c``d`',
+          nextAction: 'Fix it.',
+        },
+      ],
     });
     expect(output).toContain('`` a`b ``');
     expect(output).toContain('``` `c``d` ```');

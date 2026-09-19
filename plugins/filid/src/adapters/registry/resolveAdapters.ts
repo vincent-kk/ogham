@@ -110,6 +110,8 @@ export async function resolveAdapters(
         code: 'unsupported',
         path,
         message: `No registered adapter owns ${path}`,
+        nextAction:
+          'Filid has no adapter for this file, so its imports and exports are not analyzed. If the file is source code the dependency graph needs, report the affected results as unsupported; otherwise nothing is needed.',
       });
       continue;
     }
@@ -129,6 +131,8 @@ export async function resolveAdapters(
         path,
         adapterIds,
         message: `Equal-confidence adapters claim ${path}: ${adapterIds.join(', ')}`,
+        nextAction:
+          'Set adapters.mode to "explicit" and list exactly one of these adapters in adapters.enabled in .filid/config.json, then run again.',
       });
       continue;
     }

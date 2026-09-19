@@ -410,6 +410,8 @@ describe('rule-engine (rules)', () => {
           ruleId: 'circular-dependency',
           path: one.path,
           message: expect.stringContaining(two.path),
+          suggestion:
+            'Break the cycle: move what both sides share into a unit they both import, or invert one edge behind an interface.',
         }),
       ]);
     });
@@ -609,6 +611,35 @@ describe('rule-engine (rules)', () => {
       const result = evaluateRules(snapshot, [rule]);
 
       expect(result.violations).toEqual([verificationFinding]);
+    });
+
+    it('should suggest named re-exports for an opaque entry-point surface', () => {
+      const node = makeNode({
+        type: 'fractal',
+        entryPoints: [
+          {
+            path: '/root/module/public.entry',
+            kind: 'module',
+            adapterId: 'test-structure',
+            surface: 'opaque',
+          },
+        ],
+      });
+      const tree = makeTree([node]);
+      const rule = loadBuiltinRules().find(
+        (candidate) => candidate.id === 'entry-point-surface',
+      )!;
+
+      const result = evaluateRules(makeSnapshot(tree), [rule]);
+
+      expect(result.violations).toEqual([
+        expect.objectContaining({
+          ruleId: 'entry-point-surface',
+          path: '/root/module/public.entry',
+          suggestion:
+            "The entry point's surface is a convention filid cannot enumerate, such as a wildcard or framework export. Replace the wildcard with named re-exports, or accept the warning when a framework owns the surface.",
+        }),
+      ]);
     });
   });
 });

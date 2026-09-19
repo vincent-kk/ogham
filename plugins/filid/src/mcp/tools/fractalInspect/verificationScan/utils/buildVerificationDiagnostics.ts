@@ -1,6 +1,7 @@
 import {
   SNAPSHOT_TOOL_DIAGNOSTIC_CODES,
   SNAPSHOT_TOOL_DIAGNOSTIC_MESSAGES,
+  SNAPSHOT_TOOL_DIAGNOSTIC_NEXT_ACTIONS,
 } from '../../../../../constants/mcpContracts.js';
 import type { ToolDiagnostic } from '../../../../../types/toolEnvelope.js';
 
@@ -19,8 +20,10 @@ export function buildVerificationDiagnostics(
     ...snapshotDiagnostics,
     ...missingPaths.map((path) => ({
       code: SNAPSHOT_TOOL_DIAGNOSTIC_CODES.VERIFICATION_PATH_NOT_FOUND,
-      message: SNAPSHOT_TOOL_DIAGNOSTIC_MESSAGES.VERIFICATION_PATH_NOT_FOUND,
+      message: `${SNAPSHOT_TOOL_DIAGNOSTIC_MESSAGES.VERIFICATION_PATH_NOT_FOUND} ${path}.`,
       path,
+      nextAction:
+        SNAPSHOT_TOOL_DIAGNOSTIC_NEXT_ACTIONS.VERIFICATION_PATH_NOT_FOUND,
     })),
   ];
 }

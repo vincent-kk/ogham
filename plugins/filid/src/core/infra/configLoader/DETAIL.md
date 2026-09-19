@@ -51,7 +51,7 @@ interface FilidConfigV2 {
 - `loadConfig(projectRoot)` — v2 config 또는 in-memory migrated v1, warnings와 diagnostics를 반환한다.
 - `review`의 숫자 필드는 integer·positive, effort는 `auto | low | medium | high`, lockfile은 비어 있지 않은 basename 문자열 목록이다. 위반은 기존 config validation error 경로를 따르고, 생략한 값은 review constants에서 채운다.
 - review 기본값은 effort `auto`, auto low group threshold 16, maxGroups 64, group churn 1024, plan churn 50, concurrency 8이다. auto는 reviewable group이 threshold 이상이면 low, 미만이면 medium을 선택한다. `groupFileLimit` 생략은 변경 밀도에 따른 10~32 자동 상한이고 명시한 값은 고정 상한이다. prepare는 액터 배정 전에 reviewable 그룹 수를 검사하며 명시 `maxGroups`는 기본 상한을 덮어쓴다. lockfile 기본값은 npm·Yarn·pnpm·Bun·Cargo·Poetry·Pipenv·Composer·Bundler·Go·Gradle·Nix·Mix의 canonical lockfile basename이다.
-- `migrateConfigV1(input)` — source를 쓰지 않고 대응 필드와 discarded key 목록을 반환한다.
+- `migrateConfigV1(input)` — source를 쓰지 않고 대응 필드와 discarded key 목록을 반환한다. 반환하는 각 `ConfigDiagnostic`은 `nextAction`을 담는다: `config-migration-required`는 설정 페이지에서 저장하라고, `config-key-discarded`는 그 키에 의존했을 때만 할 일이 있다고 알린다.
 - `createDefaultConfig(language?, adapterIds?)` — 15개 built-in rule을 roster 기본 severity 그대로 실은 v2 config를 auto adapter mode로 만든다. severity 정본은 `constants/builtinRuleSeverities`이며 이 함수는 그것을 옮겨 적을 뿐이다.
 - `initProject(projectRoot, options)` — 부재한 config만 생성하며 기존 파일을 덮어쓰지 않는다.
 - `syncRuleDocs(projectRoot, selection, options)` — `options.scope`가 정한 레이어의 managed rule channel을 동기화하고, 회수한 반대편 문서를 `result.otherScope`로 보고한다.
@@ -131,4 +131,5 @@ interface FilidConfigV2 {
 
 ## Last Updated
 
+2026-09-19 — `migrateConfigV1`의 `ConfigDiagnostic`이 `nextAction`을 필수로 담는다.
 2026-09-06 — review 그룹 예산·자동 크기 선택과 추가 위험 경로 계약을 갱신했다.

@@ -55,7 +55,7 @@ export function validateDetailAcceptanceGroups(
     if (seen.has(id)) {
       violations.push({
         rule: 'duplicate-id',
-        message: `Duplicate DETAIL acceptance group ID "${id}".`,
+        message: `Duplicate DETAIL acceptance group ID "${id}". Rename one group so every ID is unique.`,
         severity: 'error',
       });
       continue;
@@ -70,7 +70,8 @@ export function validateDetailAcceptanceGroups(
   )
     violations.push({
       rule: 'missing-field',
-      message: 'DETAIL.md must declare at least one acceptance group.',
+      message:
+        'DETAIL.md must declare at least one acceptance group. Add "### <stable-id> — <title>" under "## Acceptance Criteria".',
       severity: 'error',
     });
 

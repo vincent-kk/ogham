@@ -7,13 +7,15 @@ import {
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
-import type { RestructureDecisionReason } from '../../../types/restructure.js';
+import type { PlanningDecisionReason } from '../../../types/restructure.js';
 import { resolveOwningFractal } from '../../analysis/lcaCalculator/index.js';
 import { isAtOrWithin } from '../imports/isAtOrWithin.js';
 
 export interface ConsumerPathResolution {
   paths: string[];
-  decisionReasons: RestructureDecisionReason[];
+  /** Consumer paths dropped because no fractal of the project owns them. */
+  outsidePaths: string[];
+  decisionReasons: PlanningDecisionReason[];
 }
 
 function dedupePaths(paths: string[]): string[] {
@@ -29,7 +31,7 @@ export function resolveConsumerPaths(
   sourcePath: string,
   requestedPaths?: string[],
 ): ConsumerPathResolution {
-  const reasons = new Set<RestructureDecisionReason>();
+  const reasons = new Set<PlanningDecisionReason>();
   let paths: string[];
   if (requestedPaths)
     paths = requestedPaths.map((path) =>
@@ -47,21 +49,23 @@ export function resolveConsumerPaths(
       edge.evidence
         .filter(
           (evidence) =>
-            samePath(evidence.resolvedPath, sourcePath) ||
-            (sourceIsDirectory &&
-              isAtOrWithin(sourcePath, evidence.resolvedPath)),
+            (samePath(evidence.resolvedPath, sourcePath) ||
+              (sourceIsDirectory &&
+                isAtOrWithin(sourcePath, evidence.resolvedPath))) &&
+            !isAtOrWithin(sourcePath, evidence.sourceFile),
         )
         .map((evidence) => evidence.sourceFile),
     );
   }
 
   const normalized = dedupePaths(paths);
-  const owned = normalized.filter((path) => {
-    if (resolveOwningFractal(snapshot.tree, path)) return true;
+  const owned = normalized.filter((path) =>
+    resolveOwningFractal(snapshot.tree, path),
+  );
+  const outsidePaths = normalized.filter((path) => !owned.includes(path));
+  if (outsidePaths.length > 0)
     reasons.add(RESTRUCTURE_DECISION_REASONS.CONSUMER_PATH_OUTSIDE_PROJECT);
-    return false;
-  });
   if (owned.length === 0)
     reasons.add(RESTRUCTURE_DECISION_REASONS.CONSUMER_OWNER_REQUIRED);
-  return { paths: owned, decisionReasons: [...reasons] };
+  return { paths: owned, outsidePaths, decisionReasons: [...reasons] };
 }

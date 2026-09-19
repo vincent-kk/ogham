@@ -1,7 +1,4 @@
-import {
-  RESTRUCTURE_VALIDATION_CODES,
-  RESTRUCTURE_VALIDATION_MESSAGES,
-} from '../../../constants/restructure.js';
+import { RESTRUCTURE_VALIDATION_CODES } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
   MoveInstruction,
@@ -29,7 +26,8 @@ export function validateMovePostconditions(
   if (!sourceReoccupied && snapshotContainsPath(snapshot, move.sourcePath))
     findings.push({
       code: RESTRUCTURE_VALIDATION_CODES.SOURCE_STILL_PRESENT,
-      message: RESTRUCTURE_VALIDATION_MESSAGES.SOURCE_STILL_PRESENT,
+      message: `${move.sourcePath} still exists after execution.`,
+      nextAction: `Finish the move: relocate ${move.sourcePath} — do not copy it — to where the plan lists it, then run postcondition again.`,
       path: move.sourcePath,
       sourcePath: move.sourcePath,
     });

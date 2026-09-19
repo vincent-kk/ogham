@@ -18,6 +18,7 @@ export function assertPreparedEffortUnchanged(
   if (state.effort !== effort)
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.EFFORT_LOCKED,
-      `Prepared review effort is ${state.effort}; requested ${effort}. Continue with --effort ${state.effort}, or explicitly request --force after all prior actors finish to start a new review.`,
+      `Prepared review effort is ${state.effort}; this request resolves to ${effort} (from the effort argument or review.effort config).`,
+      `Stop without dispatching actors. Ask the user whether to resume with effort "${state.effort}" (call prepare with that effort) or start a fresh review with force: true after all prior actors finish, which repeats all review work.`,
     );
 }

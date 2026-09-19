@@ -14,14 +14,16 @@ import {
 } from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
+  PlanningDecisionReason,
   RequiredArtifact,
-  RestructureDecisionReason,
   RestructureNodeType,
 } from '../../../types/restructure.js';
 
 export interface RequiredArtifactResolution {
   artifacts: RequiredArtifact[];
-  decisionReasons: RestructureDecisionReason[];
+  /** Module entry paths, relative to their fractal, found in the project; sorted, empty unless the target is a fractal. */
+  entryForms: string[];
+  decisionReasons: PlanningDecisionReason[];
 }
 
 function isOwnedRelativePath(path: string): boolean {
@@ -39,13 +41,14 @@ export function buildRequiredArtifacts(
   targetNodeType: RestructureNodeType,
 ): RequiredArtifactResolution {
   if (targetNodeType !== RESTRUCTURE_NODE_TYPES.FRACTAL)
-    return { artifacts: [], decisionReasons: [] };
+    return { artifacts: [], entryForms: [], decisionReasons: [] };
   const entryForms = new Map<
     string,
     { relativePath: string; adapterId: string }
   >();
   for (const node of snapshot.tree.nodes.values())
     for (const entryPoint of node.entryPoints) {
+      if (entryPoint.kind !== 'module') continue;
       const relativePath = portableRelative(node.path, entryPoint.path);
       if (!isOwnedRelativePath(relativePath)) continue;
       entryForms.set(pathForCompare(relativePath), {
@@ -64,6 +67,11 @@ export function buildRequiredArtifacts(
       path: portableJoin(targetContainerPath, DETAIL_MD),
     },
   ];
+  const forms = [...entryForms.values()]
+    .map(({ relativePath }) => relativePath)
+    .sort((left, right) =>
+      pathForCompare(left).localeCompare(pathForCompare(right)),
+    );
   if (entryForms.size === 1) {
     const entry = entryForms.values().next().value;
     if (entry)
@@ -72,10 +80,11 @@ export function buildRequiredArtifacts(
         path: portableJoin(targetContainerPath, entry.relativePath),
         adapterId: entry.adapterId,
       });
-    return { artifacts, decisionReasons: [] };
+    return { artifacts, entryForms: forms, decisionReasons: [] };
   }
   return {
     artifacts,
+    entryForms: forms,
     decisionReasons: [
       RESTRUCTURE_DECISION_REASONS.ENTRY_POINT_EVIDENCE_REQUIRED,
     ],

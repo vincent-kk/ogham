@@ -40,6 +40,8 @@ export type {
   PlacementRequest,
   RestructurePlanInput,
   MoveInstruction,
+  RestructureDecision,
+  DelegatedImport,
   RestructurePlan,
   PlanValidationFinding,
   PlanValidationResult,

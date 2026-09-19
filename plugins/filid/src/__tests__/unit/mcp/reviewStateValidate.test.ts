@@ -148,6 +148,7 @@ describe('review_state validate v7', () => {
     expect(result.diagnostics).toContainEqual(
       expect.objectContaining({
         code: REVIEW_STATE_DIAGNOSTIC_CODES.STATE_MISSING,
+        nextAction: expect.stringMatching(/^Do not publish a verdict\./),
       }),
     );
   });

@@ -25,6 +25,8 @@ export interface ConfigDiagnostic {
     'config-migration-required' | 'config-key-discarded' | 'unknown-adapter-id';
   message: string;
   path?: string;
+  /** What the caller does next; carried into the tool diagnostic unchanged. */
+  nextAction: string;
 }
 
 export interface ConfigMigrationResult {
