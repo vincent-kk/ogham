@@ -18,16 +18,16 @@
       "description": "Inline comments are a capped last resort; declarations take the language's documentation form and state the current spec, never history.",
       "grounding": "This rule rests on properties every codebase has: the language provides a form for comments, and a comment sits beside the code it describes.",
       "recommended": true,
-      "templateHash": "0d2d9770d04aa8fb4dda7ec5d40320764431b36391bc5f810e537406c12aff77"
+      "templateHash": "a7001fb99fb097d5a2eae5abe94558f63203ee6f50ff3f34f23ac005f58d5b59"
     },
     {
       "id": "seiri_public-contract",
       "filename": "seiri_public-contract.md",
       "title": "Public Contract",
-      "description": "Keep a module's exports small, named, and enumerable — entry points declare, internals implement.",
+      "description": "Keep a module's exports small, named, and enumerable — entry points declare, internals implement, and a unit's path states its reach.",
       "grounding": "This rule rests on a property every codebase with a module system has: a distinction exists between what is public and what is internal.",
       "recommended": false,
-      "templateHash": "7c38cbd16687b1ebfd12d5090db6872dd9800bfddcf5ded22e4834e05c5347cd"
+      "templateHash": "30d6ba8bd3330350fdfe46279ae29fac0ff6990e8c4a113236eb40fc0e34abd5"
     },
     {
       "id": "seiri_test-validity",
@@ -54,7 +54,7 @@
       "description": "Mirror sibling conventions, name one concrete responsibility, and keep grab-bag files out of the tree.",
       "grounding": "This rule rests on properties every codebase has: files and symbols have names, and an existing style is already present — whatever it is.",
       "recommended": false,
-      "templateHash": "c3f048061d1dc810d21f047d4c281361c441a93c9ce0fc3c76048bd70f81af11"
+      "templateHash": "46f3f0968a248c7d2e18e2fefe426f74bea6472a493e6bed77d6e73798a8d553"
     },
     {
       "id": "seiri_structure",
@@ -63,7 +63,7 @@
       "description": "Direction-only structure rules: dependencies form a DAG, depth is a toll, cohesion splits and complexity compresses.",
       "grounding": "This rule rests on properties every codebase has: files have sizes and paths, and symbols reference one another.",
       "recommended": false,
-      "templateHash": "4fb7e3054005fa71516d51f37187614587470dafba73c1e72cefafa2516f7c7d"
+      "templateHash": "bf319386ac995052b30d3cfe7f4a23bad6fd4660a99fc1d6313a6d074b8e679b"
     },
     {
       "id": "seiri_function-boundaries",
@@ -72,7 +72,7 @@
       "description": "Functions compute from their parameters, effects stay at the edge, and one file exports one function.",
       "grounding": "This rule rests on properties every codebase has: functions take inputs and produce outputs, and they live in files with names.",
       "recommended": false,
-      "templateHash": "d2233bc22af3295afb75b1786d38303dd17023b6e9abea8c22e40fc5af243087"
+      "templateHash": "e0930f4c1bfa37d930c9e6b08260d98b1d4a911ed89d4276245e199ee893e4af"
     },
     {
       "id": "seiri_context-efficiency",

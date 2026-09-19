@@ -8,7 +8,7 @@ When the code changes, its comment changes in the same edit. No changelog lines,
 
 ## 2. An inline comment is a last resort — three lines at most, for what the code cannot say
 
-A truer name, a smaller function, or an extracted constant beats an explanation (`seiri_naming` §2, `seiri_structure` §3), and what a declaration needs said belongs in its documentation comment (§3). A comment that must sit on the code states only what the code itself cannot — the invariant no type can express, the workaround and its external trigger, the effect that lands elsewhere — and it stays within 3 lines. What the code already shows, no comment repeats: a paraphrase of the next line is a second copy that nothing checks and the next edit orphans (§1). There is no orientation exception: a line summarizing the block below it restates what reading the block shows, and it goes.
+A truer name, a smaller function, or an extracted constant beats an explanation, and what a declaration needs said belongs in its documentation comment (§3). A comment that must sit on the code states only what the code itself cannot — the invariant no type can express, the workaround and its external trigger, the effect that lands elsewhere — and it stays within 3 lines. What the code already shows, no comment repeats: a paraphrase of the next line is a second copy that nothing checks and the next edit orphans (§1). There is no orientation exception: a line summarizing the block below it restates what reading the block shows, and it goes.
 
 ## 3. A function's documentation comment names its parameters, its result, and its purpose
 

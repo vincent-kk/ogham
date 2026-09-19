@@ -19,7 +19,7 @@ Each request maps directly to the public `RestructurePlanInput` contract:
 }
 ```
 
-Use placement requests explicitly supplied by the user or copied from a previous Filid finding. Do not infer an `independent` or `internal` contract from a name. Omitted `consumerPaths` are resolved by the snapshot dependency graph.
+Use placement requests explicitly supplied by the user or copied from a previous Filid finding. Do not infer an `independent` or `internal` contract from a name. Omitted `consumerPaths` are resolved by the snapshot dependency graph, which counts every importer — including code that only constructs the unit and hands it on. When such wiring is among the importers, pass `consumerPaths` naming only the owners that use the unit; left in, wiring lifts the unit to the composition root.
 
 Call:
 

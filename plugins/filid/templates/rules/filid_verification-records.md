@@ -41,6 +41,10 @@ Curate by splitting and merging, never by discarding: split test-records by beha
 
 Splitting a file must not split a contract. Sibling spec-documents must not declare overlapping contract group sets, and one acceptance group is never split across files to evade the cap. When a fractal has more than one spec-document, it has a DETAIL document, and each spec-document declares at least one existing DETAIL acceptance group through the adapter-recognized `filid:contract <group-id>` marker.
 
+## 6. A verification file lives inside what it verifies
+
+It sits in the test directory — `__tests__/`, or the repository's own convention — of the nearest directory enclosing every unit it exercises: a fractal's for its contract, an organ's own for the organ's internals. It never moves outward to an ancestor's test directory; a package-root test directory verifies the root's own surface and nothing else. Fixtures sit with the tests that use them, and a unit that moves takes its verification with it.
+
 ---
 
-**This rule is working if:** every verification file's role is obvious from its content, and case counts are derivable without running anything. **This rule is wrong for you if:** the file is a throwaway probe that will never land in version control — then no cap applies, because there is no contract to keep.
+**This rule is working if:** every verification file's role is obvious from its content, its path names what it verifies, and case counts are derivable without running anything. **This rule is wrong for you if:** the file is a throwaway probe that will never land in version control — then no cap applies, because there is no contract to keep.
