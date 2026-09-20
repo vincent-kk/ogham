@@ -9,8 +9,14 @@ import { scanLexicalTokens } from '../scanLexicalTokens.js';
 import { dependencyStringAfter } from './dependencyStringAfter.js';
 import { resolveSpecifier } from './resolveSpecifier.js';
 
-/** Raw-text module references that untrusted literal content may hide. */
-const HIDDEN_REFERENCE_PATTERNS: readonly {
+/**
+ * Raw-text module references that untrusted literal content may hide.
+ *
+ * Exported for one consumer: the parity test that holds
+ * `FACTS_REFERENCE_LINE_PATTERNS` to the same set of lines while both copies
+ * exist. S4 removes this adapter, and that test and this export go with it.
+ */
+export const HIDDEN_REFERENCE_PATTERNS: readonly {
   kind: DependencyReference['kind'];
   pattern: RegExp;
 }[] = [

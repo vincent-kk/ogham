@@ -4,14 +4,21 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { FACTS_ADJUDICATION_STATES } from '../../constants/facts.js';
+import {
+  FACTS_ADJUDICATION_STATES,
+  FACTS_ATTESTATION_OUTCOMES,
+} from '../../constants/facts.js';
 import { McpToolName } from '../../constants/mcpToolNames.js';
 import { createServer } from '../../mcp/server/lifecycle/createServer.js';
 import type {
   FactsAdjudicateSummary,
   FactsCompareData,
+  FactsDiscardPendingSummary,
   FactsOpenItem,
+  FactsStatusData,
   FactsStatusSummary,
+  FactsSubmitData,
+  FactsSubmitSummary,
 } from '../../mcp/tools/facts/index.js';
 import {
   cleanupFactsProjects,
@@ -43,6 +50,7 @@ beforeEach(async () => {
   project = createFactsProject({
     'src/index.ts': `export { thing } from '${REFERENCE}';\n`,
     'src/thing.ts': 'export const thing = 1;\n',
+    'src/other.ts': 'export const other = 1;\n',
     '.filid/config.json': CONFIG,
   });
   connection = await connectTestClient(createServer());
@@ -109,6 +117,39 @@ async function submitEmptyRecord(): Promise<void> {
   });
 }
 
+/**
+ * Submit one attested record for `src/index.ts` under one actor.
+ * @param actor Who is claiming.
+ * @param target In-project path the reference resolves to.
+ * @returns The envelope, as the transport delivers it.
+ */
+async function attest(actor: string, target: string): Promise<Envelope> {
+  const status = await callFacts({ action: 'status', path: project.root });
+  return await callFacts({
+    action: 'submit',
+    path: project.root,
+    actor,
+    file: project.submission(
+      `attest-${Math.random().toString(36).slice(2)}.json`,
+      JSON.stringify([
+        project.facts('src/index.ts', {
+          references: [
+            { specifier: REFERENCE, kind: 'static', resolved: { path: target } },
+          ],
+          provenance: {
+            tool: 'reader',
+            version: '1.0.0',
+            command: 'read',
+            tier: 'attested',
+            resolutionInputs: [],
+          },
+        }),
+      ]),
+    ),
+    resolutionEpoch: (status.summary as FactsStatusSummary).resolutionEpoch,
+  });
+}
+
 describe('the facts tool across the MCP transport', () => {
   it('carries every compare and adjudicate argument through to the handler', async () => {
     await submitEmptyRecord();
@@ -161,6 +202,46 @@ describe('the facts tool across the MCP transport', () => {
     });
   });
 
+  it('carries an attested submission from first reader to confirmation', async () => {
+    const first = await attest('reader-a', 'src/thing.ts');
+    const waiting = await callFacts({ action: 'status', path: project.root });
+
+    const second = await attest('reader-b', 'src/thing.ts');
+    const settled = await callFacts({ action: 'status', path: project.root });
+
+    expect((first.summary as FactsSubmitSummary).attestationsPending).toBe(1);
+    // status alone has to say what is owed and who may not supply it.
+    expect((waiting.summary as FactsStatusSummary).attestationRequirement).toContain(
+      'DIFFERENT actor',
+    );
+    expect(
+      (waiting.data as FactsStatusData).pendingAttestations[0],
+    ).toMatchObject({ path: 'src/index.ts', actor: 'reader-a' });
+    expect((second.summary as FactsSubmitSummary).attestationsConfirmed).toBe(1);
+    expect((settled.summary as FactsStatusSummary).pendingAttestations).toBe(0);
+  });
+
+  it('carries discard-pending, including the paths that held nothing', async () => {
+    await attest('reader-a', 'src/thing.ts');
+    const refused = await attest('reader-b', 'src/other.ts');
+
+    const discarded = await callFacts({
+      action: 'discard-pending',
+      path: project.root,
+      sourcePaths: ['src/index.ts', 'src/thing.ts'],
+    });
+    const after = await callFacts({ action: 'status', path: project.root });
+
+    expect((refused.data as FactsSubmitData).attested[0]).toMatchObject({
+      outcome: FACTS_ATTESTATION_OUTCOMES.MISMATCH,
+    });
+    expect(discarded.summary as FactsDiscardPendingSummary).toMatchObject({
+      discarded: 1,
+      absent: 1,
+    });
+    expect((after.summary as FactsStatusSummary).pendingAttestations).toBe(0);
+  });
+
   it('advertises every one of those arguments, nested fields included', async () => {
     const { tools } = await connection.client.listTools();
     const facts = tools.find((tool) => tool.name === McpToolName.FACTS);
@@ -183,6 +264,7 @@ describe('the facts tool across the MCP transport', () => {
       'path',
       'resolutionEpoch',
       'sourcePath',
+      'sourcePaths',
     ]);
     expect(Object.keys(items.items?.properties ?? {}).sort()).toEqual([
       'decision',

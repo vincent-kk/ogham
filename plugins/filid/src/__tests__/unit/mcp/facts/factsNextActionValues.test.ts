@@ -8,6 +8,7 @@ import {
   FACTS_ADJUDICATION_ACTOR_CODE,
   FACTS_ADJUDICATION_STALE_CODE,
   FACTS_ADJUDICATION_STATES,
+  FACTS_REJECTION_CODES,
 } from '../../../../constants/facts.js';
 import { handleFacts } from '../../../../mcp/tools/facts/index.js';
 import type {
@@ -49,6 +50,7 @@ beforeEach(() => {
     'src/index.ts': BODY,
     'src/thing.ts': 'export const thing = 1;\n',
     'src/other.ts': 'export const other = 1;\n',
+    'src/vague.ts': `export { thing } from '${REFERENCE}';\n`,
     '.filid/config.json': CONFIG,
   });
 });
@@ -295,5 +297,111 @@ describe('the staleness flag after a partial re-judgement', () => {
       items.find((item) => item.reference === './other.js')
         ?.staleUnderNewContent,
     ).toBe(true);
+  });
+});
+
+/**
+ * Submit one record for a file, exactly as given.
+ * @param facts The record to submit.
+ * @param actor Who is claiming, when the record is attested.
+ * @returns Nothing; the store holds whatever the call accepted.
+ */
+async function submitRecord(facts: unknown, actor?: string): Promise<void> {
+  const before = await handleFacts({ action: 'status', path: project.root });
+  await handleFacts({
+    action: 'submit',
+    path: project.root,
+    file: project.submission(
+      `one-${Math.random().toString(36).slice(2)}.json`,
+      JSON.stringify([facts]),
+    ),
+    resolutionEpoch: (before.summary as FactsStatusSummary).resolutionEpoch,
+    ...(actor === undefined ? {} : { actor }),
+  });
+}
+
+describe('why a file is unsettled, from status alone', () => {
+  it('names the code and the action for a claim it refused', async () => {
+    // Re-extracting with the same tool reproduces this refusal exactly, so a
+    // session that cannot see WHY spends a whole round trip learning nothing.
+    await submitRecord(
+      project.facts('src/index.ts', {
+        references: [
+          {
+            specifier: './absent.js',
+            kind: 'static',
+            resolved: { path: 'src/thing.ts' },
+          },
+        ],
+      }),
+    );
+
+    const result = await handleFacts({ action: 'status', path: project.root });
+    const rejected = (result.data as FactsStatusData).rejected;
+
+    expect(rejected.items).toMatchObject([
+      {
+        path: 'src/index.ts',
+        code: FACTS_REJECTION_CODES.REFERENCE_ABSENT,
+        specifier: './absent.js',
+      },
+    ]);
+    expect(rejected.items[0]?.nextAction).toContain('attested');
+    expect(rejected.truncated).toBe(0);
+  });
+
+  it('accounts for every uncertain file in one of its cause lists', async () => {
+    await submitRecord(
+      project.facts('src/index.ts', {
+        references: [
+          {
+            specifier: './absent.js',
+            kind: 'static',
+            resolved: { path: 'src/thing.ts' },
+          },
+        ],
+      }),
+    );
+    await submitRecord(
+      project.facts('src/vague.ts', {
+        references: [
+          {
+            specifier: REFERENCE,
+            kind: 'static',
+            certainty: 'indeterminate',
+            resolved: { path: 'src/thing.ts' },
+          },
+        ],
+      }),
+    );
+    await submitRecord(
+      project.facts('src/thing.ts', {
+        references: [],
+        provenance: {
+          tool: 'reader',
+          version: '1',
+          command: 'read',
+          tier: 'attested',
+          resolutionInputs: [],
+        },
+      }),
+      'reader-a',
+    );
+
+    const result = await handleFacts({ action: 'status', path: project.root });
+    const data = result.data as FactsStatusData;
+    const explained = new Set([
+      ...data.rejected.items.map((item) => item.path),
+      ...data.indeterminate.paths,
+      ...data.unadjudicated.items.map((item) => item.path),
+      ...data.pendingAttestations.map((page) => page.path),
+    ]);
+
+    // A file reported as uncertain with no reason in the response is a stop
+    // with no next action — the shape of P5 failure this list exists to close.
+    expect(data.uncertain.paths).toHaveLength(3);
+    expect(data.uncertain.paths.filter((path) => !explained.has(path))).toEqual(
+      [],
+    );
   });
 });

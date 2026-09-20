@@ -1,4 +1,7 @@
-import { FACTS_ADJUDICATION_STATES } from '../../../../../constants/facts.js';
+import {
+  FACTS_ADJUDICATION_ORIGINS,
+  FACTS_ADJUDICATION_STATES,
+} from '../../../../../constants/facts.js';
 import {
   computeLineDigest,
   detectShrunkReferences,
@@ -27,12 +30,22 @@ function edgeKey(kind: string, reference: string, resolvedPath: string): string 
   return [kind, reference, resolvedPath].join(KEY_SEPARATOR);
 }
 
+/** What two attesters already agreed about, when this record is their record. */
+export interface AgreedNonReferences {
+  /** Lines both attesters read as non-references, mapped to the reason. */
+  nonReferences: ReadonlyMap<number, string>;
+  /** The actor that held the first attestation. */
+  actor: string;
+}
+
 /** One file's page after a replacement, and what the replacement did to it. */
 export interface SubmitSideTablePlan extends AdjudicationPageUpdate {
   /** Edges the replacement walked back, now awaiting judgement. */
   opened: number;
   /** Items the new record settled by carrying the edge after all. */
   closedByRecord: number;
+  /** Edges two attesters had already put down, recorded as dismissed. */
+  dismissedByAttesters: number;
 }
 
 /**
@@ -72,6 +85,11 @@ export interface SubmitSideTablePlan extends AdjudicationPageUpdate {
  * @param accepted - The record that replaced it.
  * @param current - The file's current digest and bytes.
  * @param sameEpoch - Whether both records were accepted at the same epoch.
+ * @param attested - What two attesters agreed about, when this record is the
+ * one their agreement confirmed. An edge it drops whose every occurrence sits
+ * on a line both of them called a non-reference is recorded as `dismissed`
+ * rather than opened: the same two pairs of eyes already read those lines, and
+ * asking two more to repeat the reading is the ceremony twice.
  * @returns The page this file should end up with, and the counts to report.
  */
 export function planSideTableForSubmit(
@@ -81,6 +99,7 @@ export function planSideTableForSubmit(
   accepted: FileFacts,
   current: Extract<ProjectFileDigest, { ok: true }>,
   sameEpoch: boolean,
+  attested?: AgreedNonReferences,
 ): SubmitSideTablePlan {
   const lines = current.contents.toString('utf8').split(/\r\n|\r|\n/);
   const carried = new Set(
@@ -113,6 +132,7 @@ export function planSideTableForSubmit(
     });
   const budget = new Map<string, number>();
   let opened = 0;
+  let dismissedByAttesters = 0;
   const claimCount = (facts: FileFacts | null, reference: string): number =>
     (facts?.references ?? []).filter(
       (candidate) => (candidate.sourceText ?? candidate.specifier) === reference,
@@ -137,27 +157,52 @@ export function planSideTableForSubmit(
         item.reference === shrunk.reference &&
         item.resolvedPath === shrunk.resolvedPath,
     );
+    const occurrences = locateSourceText(lines, shrunk.reference);
+    const settled =
+      attested !== undefined &&
+      occurrences.length > 0 &&
+      occurrences.every((line) => attested.nonReferences.has(line));
     const reopened: AdjudicationItem = {
       path: accepted.path,
       kind: shrunk.kind,
       reference: shrunk.reference,
       resolvedPath: shrunk.resolvedPath,
-      origin: shrunk.origin,
-      state: FACTS_ADJUDICATION_STATES.UNADJUDICATED,
+      origin: settled
+        ? FACTS_ADJUDICATION_ORIGINS.ATTESTED_NON_REFERENCE
+        : shrunk.origin,
+      state: settled
+        ? FACTS_ADJUDICATION_STATES.DISMISSED
+        : FACTS_ADJUDICATION_STATES.UNADJUDICATED,
       lineDigest: computeLineDigest(current.contents, shrunk.reference),
       contentHash: current.contentHash,
+      ...(settled
+        ? {
+            actor: (attested as AgreedNonReferences).actor,
+            reason: (attested as AgreedNonReferences).nonReferences.get(
+              occurrences[0] as number,
+            ) as string,
+          }
+        : {}),
     };
     if (at === -1) {
       items.push(reopened);
-      opened += 1;
+      if (settled) dismissedByAttesters += 1;
+      else opened += 1;
       continue;
     }
     if (items[at]?.state !== FACTS_ADJUDICATION_STATES.CLOSED_BY_RECORD)
       continue;
     items[at] = reopened;
-    opened += 1;
+    if (settled) dismissedByAttesters += 1;
+    else opened += 1;
   }
-  return { path: accepted.path, items, opened, closedByRecord };
+  return {
+    path: accepted.path,
+    items,
+    opened,
+    closedByRecord,
+    dismissedByAttesters,
+  };
 }
 
 /**

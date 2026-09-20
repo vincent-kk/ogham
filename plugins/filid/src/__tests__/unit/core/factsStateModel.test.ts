@@ -29,7 +29,7 @@ function storedRecord(
   return {
     schemaVersion: FACTS_SCHEMA_VERSION,
     resolutionEpoch: EPOCH,
-    rejectedClaims: 0,
+    rejectedClaims: [],
     facts: {
       schemaVersion: FACTS_SCHEMA_VERSION,
       path: 'src/a.ts',
@@ -64,6 +64,7 @@ function classify(
       syntaxValid: true,
       resolutionInputsValid: true,
       hasOpenItems: false,
+      hasPendingAttestation: false,
       ...evidence,
     },
     EPOCH,
@@ -129,7 +130,14 @@ describe('facts file state table', () => {
   });
 
   it('is uncertain when some of the submitted claims were refused', () => {
-    expect(classify({ record: storedRecord({}, { rejectedClaims: 1 }) })).toBe(
+    expect(
+      classify({
+        record: storedRecord(
+          {},
+          { rejectedClaims: [{ code: 'facts-reference-absent' }] },
+        ),
+      }),
+    ).toBe(
       FACTS_FILE_STATES.UNCERTAIN,
     );
   });

@@ -25,6 +25,16 @@
 - actor 비교는 NFKC·trim·소문자 접기 뒤에 한다. 이것이 보장하는 것은 **두 번째 읽기**이지 두 번째 신원이 아니다 — 서버는 신원을 확인할 수 없다.
 - 간선을 **더하는** 판정은 한 actor로 확정하고, **버리는** 판정은 다른 actor의 확인을 받아야 확정한다. 의견이 갈리면 간선을 남긴다. 틀린 판정은 언제든 다시 판정할 수 있어 고칠 수 없는 요구로 굳지 않는다(P5). 상태 기계 전체는 `evidence/s3a-adjudication-states.md`의 표이고, 구현은 그 표를 dispatch 표로 옮긴 것이다.
 - 유효 참조 = 제출된 레코드 ∪ adopt된 참조. adopt는 레코드의 참조를 가리지 않고 더하기만 한다.
+
+- **attested는 등급이지 면제가 아니다.** `provenance.tier: 'attested'` 레코드도 §4.1(hash 결속)·§4.2(문자열 존재)·§4.3(해석 경로 유효성)을 그대로 지난다. 달라지는 것은 둘뿐이다 — 계정 조건이 붙고, 한 번의 제출로 확정되지 않는다. 이유는 판정의 비대칭과 같다: attested는 도구가 아니라 읽고 쓴 주장이므로 빠뜨린 참조를 드러낼 독립 도구가 없고, 그 자리를 두 번째 눈이 대신한다.
+- **계정 조건은 줄 단위 정규식 일치 하나다.** 서버는 "이 줄이 참조 패턴에 걸리는가"라는 boolean만 계산한다 — 토큰도 구문도 만들지 않으므로 §4.2의 문자열 존재 확인과 같은 부류이고 그보다 강하지 않다(P1). 걸린 줄은 레코드의 참조(그 줄에 `sourceText ?? specifier`가 있다)나 `nonReferences`가 설명해야 하며, 설명되지 않은 줄이 하나라도 있으면 그 레코드는 저장되지 않고 **줄 번호 목록**과 함께 거부된다. 개수만 주면 어느 줄을 설명해야 할지 모른 채 같은 제출을 반복하게 된다(§4.6).
+- 패턴은 `FACTS_REFERENCE_LINE_PATTERNS`(ECMAScript 기본값) **∪** `FACTS_REFERENCE_FALLBACK_PATTERN`(범용)이다. conventions pack(§7)이 언어별 패턴의 정본이 될 자리이고, 그때까지는 둘의 합집합을 쓴다 — pack이 붙으면 놓치는 줄이 줄어드는 방향으로만 바뀐다. 기본값은 adapter의 `HIDDEN_REFERENCE_PATTERNS`에서 옮겨 온 것이고, 두 벌이 갈라지지 않게 하는 패리티 테스트가 S4에서 adapter와 함께 지워진다.
+- **pending은 레코드가 아니라 별도 저장물이다.** 레코드 shard에 섞으면 "구문 유효한 레코드"의 정의가 흐려진다. `<facts dir>/pending/`에 파일별 page로 두고 같은 shard·원자적 치환·CAS를 쓴다. page는 `path`·`actor`·`contentHash`와 확정되면 그대로 레코드가 될 attested 레코드 전체를 싣는다. 비교 대상인 `(reference, kind, resolved)` 집합은 **그 레코드에서 파생**하고 따로 저장하지 않는다 — 두 벌을 두면 갈라진다.
+- 확인은 **다른 actor**(NFKC·trim·소문자 접기 뒤 비교)의 두 번째 제출이 같은 간선 집합을 낼 때만 성립한다. 같은 actor의 재제출은 확인이 아니고, 불일치는 **저장하지도 pending을 바꾸지도 않는다** — 바꾸면 두 actor가 무한히 번갈아 덮어쓴다. 그 자리가 막다른 길이 되지 않는 이유가 `discard-pending`이고, 그래서 그 action은 편의가 아니라 P5의 구성 요소다.
+- pending의 `contentHash`와 다른 byte에 대한 제출은 pending을 만료시키고 **새 첫 제출**로 받는다. 확인은 같은 텍스트에 대한 것이어야 한다.
+- 확정된 attested 레코드가 이전 레코드의 간선을 빼는데 **그 간선의 모든 출현 줄이 두 제출 모두의 `nonReferences`에 있으면** 항목을 열지 않고 `dismissed`로 바로 기록한다(origin `attested-non-reference`). 두 actor가 이미 그 줄을 "참조 아님"으로 읽었고 그것이 dismiss가 요구하는 바로 그 수의 눈이므로, 항목을 열면 같은 의식을 두 번 치르게 된다 — 주석 안 import를 도구가 참조로 잡은 경우, 즉 attested가 존재하는 이유 그 자체가 그 자리다. `nonReferences`에 없는 채 빠진 간선은 지금처럼 항목이 열린다.
+- 계정은 줄을 **인용한** 참조만 인정한다. 단순 부분 문자열 포함이면 한 글자짜리 specifier 하나(`{ specifier: 'e', resolved: { external: 'e' } }` — 존재 확인도 통과한다)가 파일의 모든 줄을 한꺼번에 계정해 규칙을 이름만 남긴다. `sourceText`가 있으면 그 문자열이 줄에 있어야 하고, 없으면 `specifier`가 따옴표나 backtick으로 둘러싸인 채 줄에 나와야 한다.
+- 같은 파일에 **tool 등급 레코드가 저장되면 pending을 폐기한다.** 남겨 두면 나중의 두 번째 attested 제출이 아무도 다시 읽지 않은 주장을 되살려 tool 레코드를 덮는다. 상태 기계 전체는 `evidence/s3a-attested-states.md`의 표다.
 - 축소 탐지의 "같은 도구·새 epoch" 면제는 **`resolution-changed`에만** 적용한다. epoch는 문자열이 어디로 해석되는지를 바꾸지, 그 문자열이 참조인지 아닌지를 바꾸지 않는다. 면제를 `coverage-shrank`까지 넓히면 무관한 파일 하나가 늘어난 것만으로 도구의 누락이 보이지 않게 된다 — 트리는 늘 조금씩 움직이므로 사실상 상시 면제다.
 
 ## API Contracts
@@ -42,7 +52,9 @@
 - `isOpenAdjudication(state)` — 항목이 아직 actor를 기다리는가. `status`의 목록, 파일의 `uncertain` 판정, 레코드가 닫을 수 있는 대상이 모두 같은 두 상태를 뜻하므로 정본을 한 곳에 둔다.
 - `compareReferences(candidate, stored)` — 순수 함수. 동일성은 `(sourceText ?? specifier, kind)`와 해석이다.
 - `selectValidReferences(recordEdges, page, path)` — 레코드 ∪ adopt. 지금 소비자는 테스트뿐이고 S3c가 그래프에 연결한다.
-- `computeLineDigest(contents, reference)` · `readAdjudicationTable(directory)` · `writeAdjudicationPage(...)` — 부속 표의 만료 key와 입출력.
+- `computeLineDigest(contents, reference)` · `readAdjudicationTable(directory)` · `writeAdjudicationPages(...)` — 부속 표의 만료 key와 입출력.
+- `writeShardPages(directory, shards, updates, shardFileName)` — 부속 표와 pending 저장물이 함께 쓰는 배치 쓰기. shard당 한 번 쓰고 CAS 패배를 경로 목록으로 돌려준다. 두 저장물이 같은 모양이므로 배치 규칙을 한 벌만 둔다 — 갈라지면 한쪽만 고쳐진다.
+- `readPendingStore(directory)` · `findUnaccountedLines(lines, facts)` · `comparePendingEdges(pending, submitted)` — attested 경로의 읽기·계정·확인 비교. 모두 순수하거나 읽기 전용이다.
 - `writeExtractionList(path, relativePaths)` — 추출 대상 목록을 줄 단위로 원자적 치환. 개행·NUL이 든 이름은 줄 단위 파일이 표현하지 못하므로 목록에서 빼고 개수만 센다.
 - `recordEpochDrift(path, newEpoch | null)` — 연속으로 서로 다른 새 epoch를 통보한 횟수. 성공한 제출이 초기화한다.
 
@@ -60,6 +72,7 @@
 
 - 공급자가 선언하지 않은 프로젝트 밖 입력, git이 무시하는 생성 파일, lockfile이 바뀌지 않은 `node_modules` 내부 변경은 epoch에 잡히지 않는다.
 - 줄 단위로 묶인 판정은, 그 줄이 그대로인 채 다른 줄의 블록 주석 구분자가 사라져 주석이던 참조가 코드가 되는 경우를 놓친다.
+- attested의 계정 조건은 **패턴 안의 누락**만 잡는다. 패턴이 잡지 못하는 모양의 참조는 잡지 못한다 — fallback을 넓게 잡는 이유가 이것이고, 그래도 남는 것은 선언된 한계다(§4.6). 반대 방향의 대가도 있다: 넓은 fallback은 `use`·`from` 같은 낱말이 든 산문 줄까지 걸어 `nonReferences`로 설명하게 만든다.
 - 축소 탐지는 문자열을 센다. 같은 따옴표 문자열이 **주석 안에** 남아 있으면 출현 수가 실제 import 수보다 커져 항목이 열린다 — 정당한 편집인데 두 actor의 판정을 요구하는 경우다. 줄 번호로 대조하는 대안은 편집마다 번호가 움직여 더 나쁘다.
 - `kind`는 type-only import와 value import를 구분하지 않는다. 도구마다 type-only를 보고하는지가 달라 그 차이는 독립 비교에서만 드러난다.
 - 한 도구가 체계적으로 빠뜨리는 참조는 그 도구만으로는 드러나지 않는다.

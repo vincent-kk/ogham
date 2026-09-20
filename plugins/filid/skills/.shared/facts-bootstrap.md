@@ -2,7 +2,7 @@
 
 Canonical procedure for every filid skill whose judgments read dependency references. Each such skill links here from one short step placed before its first reference-based analysis call; the steps live only in this file.
 
-Run the steps in order, in the same turn as the calling skill, and return to the calling skill's next step when step 6 or the failure section ends the bootstrap. `PROJECT_ROOT` is the absolute project root the calling skill analyses.
+Run the steps in order, in the same turn as the calling skill, and return to the calling skill's next step when step 7 or the failure section ends the bootstrap. `PROJECT_ROOT` is the absolute project root the calling skill analyses.
 
 ## Tool use
 
@@ -19,13 +19,22 @@ Run the steps in order, in the same turn as the calling skill, and return to the
 mcp__plugin_filid_tools__facts({ action: "status", path: PROJECT_ROOT })
 ```
 
-`summary` carries `projectState`, `resolutionEpoch`, `scopeSource` and `extractionList`; keep those. `data` carries the lists: `missing`, `needsResolution`, `uncertain`, `toolError` and `rejected` are each `{ paths, truncated }`, and `unadjudicated` is `{ items, truncated }`. A list is a roster of paths only — no per-entry code or next action lives in `status`.
+`summary` carries `projectState`, `resolutionEpoch`, `scopeSource`, `extractionList` and `attestationRequirement`; keep those. `data` carries the lists: `missing`, `needsResolution`, `uncertain`, `toolError` and `indeterminate` are each `{ paths, truncated }`; `rejected` is `{ items, truncated }` where each item names its own `path`, `code` and `nextAction` (plus `specifier`, `inputPath` or `lines` where filid can name them); `unadjudicated` is `{ items, truncated }`; `pendingAttestations` is a list of `{ path, actor, contentHash, nextAction }`.
+
+A response's own `nextAction` and `attestationRequirement` are the contract. Where this document and a response differ, the response wins.
+
+An `uncertain` file always appears in at least one of four reason lists — `rejected`, `unadjudicated`, `pendingAttestations`, `indeterminate` — so route by those four rather than by `uncertain` itself:
+
+- `rejected` → step 4, item by item.
+- `unadjudicated` → step 5.
+- `pendingAttestations` → step 6.
+- `indeterminate` → the provider could not vouch for a reference in that file; it needs an attested record, so it goes to step 6 too.
 
 When a list's `truncated` is above zero the server left entries out of it: handle the ones it returned, then call `status` again for the rest.
 
 - `scopeSource: "default"` means the project declared no `facts.covers`, so the scope is the adapters' source extensions. That is a working scope, not a missing one: continue. A report that says what was analysed says this too.
 - `projectState: "facts-uninitialized"` means the scope in effect covers no file at all. Outside a review, follow the diagnostic: set `facts.covers` in the project's `.filid/config.json`, then call `status` again. Inside a review, do not edit config — record the diagnostic and follow the calling skill's rule for an incomplete bootstrap.
-- Otherwise continue with the first later step whose list is non-empty; when every list is empty, go to step 6.
+- Otherwise continue with the first later step whose list is non-empty; when every list is empty, go to step 7.
 
 ### 2. Extract and submit (`missing`, `needsResolution`)
 
@@ -58,19 +67,15 @@ An accepted submission replaces each submitted file's record. Whole-call refusal
 - `facts-record-changed` or `facts-side-table-changed` — another writer replaced a record or took the side-table page first. Return to step 1.
 - `facts-file-path-not-absolute`, `facts-file-inside-project`, `facts-file-not-regular`, `facts-file-unreadable`, `facts-file-not-json` — the submission file itself was wrong. Re-run the extractor into a fresh `mktemp` path outside the project and submit that.
 
-### 4. Resubmit what the tool could not settle (`rejected`, `uncertain`, `toolError`)
+### 4. Act on each rejected claim (`rejected`)
 
-`status` names these files and nothing more: `data.rejected.paths` holds the paths whose last submission left rejected claims, with no code and no next action. The codes live in the **submit response**, one `rejected[]` entry per refused record or reference, each with its own `code`, `nextAction` and — where the code is about a resolution input — `inputPath`.
+`data.rejected.items` names each refused claim with its `path`, its `code` and the one `nextAction` that changes it, and — where filid can name them — the `specifier`, the `inputPath` or the `lines` to read. Act from the item: its `nextAction` is the contract, and what follows only says which family of action it belongs to.
 
-So: extract those paths again as step 2 does and submit them, then read the submit response's `rejected[]`. Every entry carries its own `nextAction`; when it differs from the orientation below, the entry's `nextAction` wins.
+- Codes about moved bytes (`facts-content-hash-mismatch`, `facts-resolution-input-stale`) are fixed by extracting that path again as step 2 does and submitting it.
+- Codes a re-extraction only reproduces — the server cannot read something (`facts-resolution-input-unreadable`, `facts-source-file-unreadable`), or the record's content is what the extractor got wrong (`facts-record-schema-invalid`, `facts-reference-absent`, `facts-resolved-path-invalid`, `facts-exported-name-absent`) — are not re-extracted. Follow the item's `nextAction`: submit the file again from another tool, or, where the item says the file needs one, as an attested record (step 6). Changes the item asks for in the project itself — permissions, `facts.excludes`, deleting a declared input — belong outside a review; inside a review, change nothing, record the item and follow the calling skill's rule for an incomplete bootstrap.
+- `facts-record-out-of-scope` and `facts-record-path-invalid` mean the path is not one this project covers: drop it from the batch.
 
-- `facts-content-hash-mismatch` and `facts-resolution-input-stale` mean the bytes moved under the extraction: call `status` again and extract those files again from step 2.
-- `facts-resolution-input-unreadable` means the server cannot read a resolution input the record declares (`inputPath` names it). Extracting again reproduces the refusal. Outside a review, make that input readable or submit the record without declaring it; inside a review, change nothing in the project — record the entry and follow the calling skill's rule for an incomplete bootstrap.
-- `facts-source-file-unreadable` means the server cannot read the source file itself, or it exceeds the size limit. Extracting again reproduces the refusal. Outside a review, make the file readable and within the limit, or take it out of scope with `facts.excludes`; inside a review, change nothing in the project — record the entry and follow the calling skill's rule for an incomplete bootstrap.
-- `facts-record-out-of-scope` and `facts-record-path-invalid` mean the submitted path is not one this project covers: drop it from the batch.
-- `facts-record-schema-invalid`, `facts-reference-absent`, `facts-resolved-path-invalid` and `facts-exported-name-absent` are record content the extractor could not get right for that file. Submit that file again with another tool, keeping the same `FileFacts[]` shape the extractor emits; the server accepts a record only when `contentHash` equals the file's current bytes, every reference's `sourceText` (or `specifier`) occurs in the file, and every in-project `resolved.path` stays inside the project, crosses no symbolic link and names an existing file. A relative reference that resolves outside the project root is submitted as `{ external: <specifier> }`.
-
-A `toolError` caused by a real syntax error is fixed in the source outside a review; during a review it is a finding.
+A `toolError` caused by a real syntax error is fixed in the source outside a review; during a review it is a finding. A file whose tool cannot read it at all is attested instead (step 6).
 
 ### 5. Adjudicate open items (`unadjudicated`)
 
@@ -95,9 +100,20 @@ Each element of `items` carries `kind`, `reference` and `resolvedPath` copied fr
 - `adopt` — the reference is real. One actor settles it and the edge is added.
 - `dismiss` — the reference is not there (a comment, a string, or a wrong resolution); it carries `reason`, or the item is refused with `facts-adjudication-reason-required`. A dismissal waits for a different actor: brief a separate subagent with the item's file and lines only, have it read them independently and send its own `adjudicate` under its own `actor`. The actor that raised or dismissed an item cannot confirm it, and when the two disagree the item settles as `adopt`.
 
-### 6. Finish
+### 6. Attest what no tool can settle (`pendingAttestations`, `indeterminate`)
 
-The bootstrap is complete when every in-scope file is `exact` or `tool-error` and no item is unadjudicated. Call `status` again after each step that changed state; when anything else remains, return to the step that owns it. Never repeat the same call with the same input: a step whose next call would be identical to its last one cannot finish, and the failure section applies.
+Some files no tool output can settle: the tool cannot read them, a re-extraction only reproduces the same refusal, or the provider could not vouch for a reference. Those carry an attested record — one an agent writes after reading the file itself.
+
+`summary.attestationRequirement` states when such a record is owed, what it must carry, that every line the reference pattern matches is accounted for as a reference or in `nonReferences`, and that a second actor confirms it. It is the contract; this step only says who does what.
+
+- **First submission.** The agent that reads the file writes the record and submits it with its own `actor`: `submit({ action: "submit", path: PROJECT_ROOT, file: FACTS_OUT, resolutionEpoch, actor })`. It is stored as pending, so the file stays `uncertain`, and the response's `attested[]` entry says so. A record that leaves a matching line unexplained is refused instead, with the line numbers to read.
+- **Confirmation.** Each entry of `data.pendingAttestations` names the `path`, the `actor` that must NOT confirm it, and the `contentHash` the confirmation has to read. Brief a separate subagent with the file and those values only — never with the pending record's content — and have it read the file itself and submit its own attested record under its own `actor`. Matching records store the record and the file leaves `uncertain`.
+- **Disagreement.** A second answer that differs stores nothing and leaves the pending attestation as it was; the response names the lines that settle it. Read those lines and submit a record that settles them. If the two answers differ a second time, call `discard-pending({ action: "discard-pending", path: PROJECT_ROOT, sourcePaths })` for that file and record `facts bootstrap incomplete: step 6 attestation-mismatch` — do not send a third pair of readings, because a call identical to one already made cannot finish (step 7).
+- A tool-tier submission that succeeds for the same file discards the pending attestation by itself; nothing extra is owed.
+
+### 7. Finish
+
+The bootstrap is complete when every in-scope file is `exact` or `tool-error`, and `rejected`, `unadjudicated`, `pendingAttestations` and `indeterminate` are all empty. Call `status` again after each step that changed state; when anything else remains, return to the step that owns it. Never repeat the same call with the same input: a step whose next call would be identical to its last one cannot finish, and the failure section applies.
 
 ## If the bootstrap cannot finish
 

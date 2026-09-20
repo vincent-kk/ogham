@@ -1,13 +1,17 @@
 import {
   FACTS_ADJUDICATION_STATES,
   FACTS_SCHEMA_VERSION,
+  FACTS_TIERS,
 } from '../../../../../constants/facts.js';
 import {
   createDeclaredInputHasher,
   hashProjectFile,
   readAdjudicationTable,
+  readPendingStore,
+  splitSourceLines,
   validateFactsRecord,
   writeAdjudicationPages,
+  writeShardPages,
 } from '../../../../../core/facts/index.js';
 import type {
   AdjudicationPage,
@@ -15,10 +19,14 @@ import type {
   AdjudicationState,
   FactsRejection,
   ParsedSubmission,
+  ShardPageUpdate,
 } from '../../../../../core/facts/index.js';
+import type { AttestedOutcome } from '../../types/factsToolTypes.js';
 
+import { applyAttestation } from './applyAttestation.js';
 import type { FactsContext } from './buildFactsContext.js';
 import { planSideTableForSubmit } from './planSideTableForSubmit.js';
+import type { AgreedNonReferences } from './planSideTableForSubmit.js';
 import { writeFactsShards } from './writeFactsShards.js';
 
 /** What one submit call changed in the store. */
@@ -36,6 +44,12 @@ export interface StoreOutcome {
   closedItems: number;
   /** Judgements discarded with pages whose file left the tree or the scope. */
   removedAdjudicated: number;
+  /** One entry per attested record, with what it did and what is owed next. */
+  attested: AttestedOutcome[];
+  /** Edges two attesters had already put down, recorded without a new ritual. */
+  attestationDismissals: number;
+  /** Paths whose pending page another writer replaced mid-call. */
+  pendingConflicts: string[];
 }
 
 /** States an actor put an item into; a removed page loses these judgements. */
@@ -65,15 +79,25 @@ const JUDGED_STATES: readonly AdjudicationState[] = [
  * shard another writer took holds none of what this call planned for it, so
  * reporting the plan would state a number the disk does not have.
  *
+ * An attested record takes a longer road. It passes the same checks, then has
+ * to account for every line that looks like a reference and be confirmed by a
+ * different actor before it is stored at all (spec §4.6); until then it lives in
+ * the pending store, which is why a submission can accept a record here and
+ * store nothing. A `tool` record landing on a file discards that file's pending
+ * attestation: the tool read the bytes, so reviving an unread claim later could
+ * only overwrite what it found.
+ *
  * @param projectRoot - Absolute project root every path is judged against.
  * @param context - Scope, scanned paths, shards and epoch for this call.
  * @param parsed - Records that already matched the schema, with their pointers.
+ * @param actor - Self-declared actor of this call; attested records need one.
  * @returns Counts, every rejection, and the paths a concurrent writer took.
  */
 export function storeAcceptedRecords(
   projectRoot: string,
   context: FactsContext,
   parsed: readonly ParsedSubmission[],
+  actor: string,
 ): StoreOutcome {
   const validation = {
     projectRoot,
@@ -84,8 +108,14 @@ export function storeAcceptedRecords(
   const rejections: FactsRejection[] = [];
   const upserts = new Map<string, { path: string; value: unknown }>();
   const table = readAdjudicationTable(context.storePaths.sideTableDirectory);
+  const store = readPendingStore(context.storePaths.pendingDirectory);
+  const pendingUpdates = new Map<string, ShardPageUpdate>();
+  const attested: AttestedOutcome[] = [];
   const pageUpdates = new Map<string, AdjudicationPageUpdate>();
-  const planned = new Map<string, { opened: number; closed: number }>();
+  const planned = new Map<
+    string,
+    { opened: number; closed: number; dismissed: number }
+  >();
   for (const submission of parsed) {
     const result = validateFactsRecord(
       validation,
@@ -96,8 +126,29 @@ export function storeAcceptedRecords(
     if (result.accepted === null) continue;
     const held = context.records.get(result.accepted.path)?.record;
     const current = hashProjectFile(projectRoot, result.accepted.path);
+    const key = context.storePaths.pathDigest(result.accepted.path);
+    let agreed: AgreedNonReferences | undefined;
+    if (result.accepted.provenance.tier === FACTS_TIERS.ATTESTED) {
+      if (!current.ok) continue;
+      const effect = applyAttestation({
+        facts: result.accepted,
+        pending: store.pages.get(key),
+        lines: splitSourceLines(current.contents.toString('utf8')),
+        actor,
+        pointer: submission.pointer,
+      });
+      if (effect.rejection !== null) rejections.push(effect.rejection);
+      if (effect.outcome !== null) attested.push(effect.outcome);
+      agreed = effect.agreed ?? undefined;
+      if (effect.pendingChange !== 'keep')
+        pendingUpdates.set(key, {
+          path: result.accepted.path,
+          document: effect.page as unknown as Record<string, unknown> | null,
+        });
+      if (!effect.store) continue;
+    } else if (store.pages.has(key))
+      pendingUpdates.set(key, { path: result.accepted.path, document: null });
     if (current.ok) {
-      const key = context.storePaths.pathDigest(result.accepted.path);
       const plan = planSideTableForSubmit(
         table,
         key,
@@ -105,16 +156,30 @@ export function storeAcceptedRecords(
         result.accepted,
         current,
         held?.resolutionEpoch === context.epoch.resolutionEpoch,
+        agreed,
       );
       pageUpdates.set(key, { path: plan.path, items: plan.items });
-      planned.set(key, { opened: plan.opened, closed: plan.closedByRecord });
+      planned.set(key, {
+        opened: plan.opened,
+        closed: plan.closedByRecord,
+        dismissed: plan.dismissedByAttesters,
+      });
     }
     upserts.set(context.storePaths.pathDigest(result.accepted.path), {
       path: result.accepted.path,
       value: {
         schemaVersion: FACTS_SCHEMA_VERSION,
         resolutionEpoch: context.epoch.resolutionEpoch,
-        rejectedClaims: result.rejections.length,
+        rejectedClaims: result.rejections.map((rejection) => ({
+          code: rejection.code,
+          ...(rejection.specifier === undefined
+            ? {}
+            : { specifier: rejection.specifier }),
+          ...(rejection.inputPath === undefined
+            ? {}
+            : { inputPath: rejection.inputPath }),
+          ...(rejection.lines === undefined ? {} : { lines: rejection.lines }),
+        })),
         facts: result.accepted,
       },
     });
@@ -129,13 +194,21 @@ export function storeAcceptedRecords(
     pageUpdates,
     context.storePaths.shardFileName,
   );
+  const pendingWritten = writeShardPages(
+    context.storePaths.pendingDirectory,
+    store.shards,
+    pendingUpdates,
+    context.storePaths.shardFileName,
+  );
   const written = writeFactsShards(context, upserts, deletions);
   let openedItems = 0;
   let closedItems = 0;
+  let attestationDismissals = 0;
   for (const [key, plan] of planned)
     if (pagesWritten.stored.has(key)) {
       openedItems += plan.opened;
       closedItems += plan.closed;
+      attestationDismissals += plan.dismissed;
     }
   let removedAdjudicated = 0;
   for (const [key, page] of unreachable)
@@ -152,6 +225,9 @@ export function storeAcceptedRecords(
     openedItems,
     closedItems,
     removedAdjudicated,
+    attested,
+    attestationDismissals,
+    pendingConflicts: pendingWritten.conflicted,
   };
 }
 

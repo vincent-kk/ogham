@@ -112,6 +112,13 @@ export const FileFactsSchema = z
       })
       .strict()
       .optional(),
+    nonReferences: z
+      .array(
+        z
+          .object({ line: LineSchema, reason: z.string().min(1) })
+          .strict(),
+      )
+      .optional(),
     toolError: z
       .object({ message: z.string(), line: LineSchema.optional() })
       .strict()
@@ -119,6 +126,17 @@ export const FileFactsSchema = z
     provenance: ProvenanceSchema,
   })
   .strict();
+
+/**
+ * One line an attested record says is not a reference, and why.
+ *
+ * Only attested records need these: the accounting check asks every line that
+ * looks like a reference to be explained, and a line no reference quotes is
+ * explained here or the record is refused with that line's number.
+ */
+export type FactsNonReference = NonNullable<
+  z.infer<typeof FileFactsSchema>['nonReferences']
+>[number];
 
 /** One file's facts as submitted and, after acceptance, as stored. */
 export type FileFacts = z.infer<typeof FileFactsSchema>;

@@ -1,5 +1,6 @@
 import {
   FACTS_ACTIONS,
+  FACTS_ATTESTATION_OUTCOMES,
   FACTS_STATUS_LIST_LIMIT,
 } from '../../../../constants/facts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
@@ -14,6 +15,7 @@ import type {
 } from '../types/factsToolTypes.js';
 
 import { buildConflictDiagnostics } from './utils/buildConflictDiagnostics.js';
+import { buildPendingConflictDiagnostics } from './utils/buildPendingConflictDiagnostics.js';
 import { buildRemovedAdjudicationDiagnostics } from './utils/buildRemovedAdjudicationDiagnostics.js';
 import { buildSideTableConflictDiagnostics } from './utils/buildSideTableConflictDiagnostics.js';
 import { buildEpochMovedPayload } from './utils/buildEpochMovedPayload.js';
@@ -44,6 +46,9 @@ import { storeAcceptedRecords } from './utils/storeAcceptedRecords.js';
  * @param projectRoot - Absolute project root, used as given.
  * @param file - Absolute path of the extraction output, outside the project.
  * @param resolutionEpoch - The epoch the batch was extracted against.
+ * @param actor - Self-declared actor of this call. Only attested records need
+ * one, and they are refused individually when it is missing, so a batch of tool
+ * records is unaffected by its absence.
  * @returns What was stored, removed and refused, with the current epoch.
  * @throws {ToolDiagnosticError} A `facts-file-*` code when the submission file
  * cannot be taken.
@@ -52,6 +57,7 @@ export async function submitFacts(
   projectRoot: string,
   file: string,
   resolutionEpoch: string,
+  actor = '',
 ): Promise<ToolPayload<FactsSubmitSummary, FactsSubmitData>> {
   const context = await buildFactsContext(projectRoot);
   if (!context.scope.declared)
@@ -63,14 +69,22 @@ export async function submitFacts(
   if (resolutionEpoch !== context.epoch.resolutionEpoch)
     return buildEpochMovedPayload(projectRoot, context);
   const submission = parseSubmittedRecords(entries);
-  const outcome = storeAcceptedRecords(projectRoot, context, submission.parsed);
+  const outcome = storeAcceptedRecords(
+    projectRoot,
+    context,
+    submission.parsed,
+    actor,
+  );
   if (outcome.accepted > 0 || outcome.removed > 0)
     recordEpochDrift(context.storePaths.driftPath, null);
   const rejected = [...submission.rejections, ...outcome.rejections];
   return {
     projectRoot,
     status:
-      outcome.conflicted.length + outcome.sideTableConflicts.length > 0
+      outcome.conflicted.length +
+        outcome.sideTableConflicts.length +
+        outcome.pendingConflicts.length >
+      0
         ? TOOL_STATUSES.INDETERMINATE
         : TOOL_STATUSES.OK,
     summary: {
@@ -83,6 +97,15 @@ export async function submitFacts(
       openedItems: outcome.openedItems,
       closedItems: outcome.closedItems,
       removedAdjudicatedItems: outcome.removedAdjudicated,
+      attestationsPending: countOutcome(
+        outcome.attested,
+        FACTS_ATTESTATION_OUTCOMES.PENDING,
+      ),
+      attestationsConfirmed: countOutcome(
+        outcome.attested,
+        FACTS_ATTESTATION_OUTCOMES.CONFIRMED,
+      ),
+      attestationDismissals: outcome.attestationDismissals,
     },
     data: {
       rejected: rejected.slice(0, FACTS_STATUS_LIST_LIMIT),
@@ -90,6 +113,7 @@ export async function submitFacts(
       added: capFileList([]),
       removed: capFileList([]),
       changedResolutionInputs: capFileList([]),
+      attested: outcome.attested.slice(0, FACTS_STATUS_LIST_LIMIT),
     },
     diagnostics: [
       ...buildConflictDiagnostics(outcome.conflicted),
@@ -97,9 +121,23 @@ export async function submitFacts(
         outcome.sideTableConflicts,
         FACTS_ACTIONS.SUBMIT,
       ),
+      ...buildPendingConflictDiagnostics(outcome.pendingConflicts),
       ...buildRemovedAdjudicationDiagnostics(outcome.removedAdjudicated),
     ],
   };
+}
+
+/**
+ * How many attested records landed in one outcome.
+ * @param attested Every attested record's report from this call.
+ * @param outcome The outcome to count.
+ * @returns The number of records that landed in it.
+ */
+function countOutcome(
+  attested: readonly { outcome: string }[],
+  outcome: string,
+): number {
+  return attested.filter((report) => report.outcome === outcome).length;
 }
 
 /**

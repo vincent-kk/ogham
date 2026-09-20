@@ -61,6 +61,8 @@ export interface FileFacts {
       reasons: string[];
     };
   };
+  /** Lines an attested record says are not references, with the reason each is not. */
+  nonReferences?: { line: number; reason: string }[];
   /** Why the adapter failed on the file's bytes; its other axes are empty. */
   toolError?: { message: string; line?: number };
   provenance: FactsProvenance;

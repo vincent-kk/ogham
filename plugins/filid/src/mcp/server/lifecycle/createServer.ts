@@ -490,6 +490,18 @@ const FACTS_SOURCE_PATH_SCHEMA = z
   .describe(
     'adjudicate only: project-relative POSIX path of the file being judged.',
   );
+const FACTS_SOURCE_PATHS_SCHEMA = z
+  .array(z.string().min(1))
+  .min(1)
+  .describe(
+    'discard-pending only: project-relative POSIX paths whose unconfirmed attested submission to drop. Stored records and the adjudication side table are untouched.',
+  );
+const FACTS_ACTOR_SCHEMA = z
+  .string()
+  .min(1)
+  .describe(
+    'Who is claiming. Self-declared — the server cannot verify it. Required by adjudicate, and by submit when the batch carries an attested record, because both are confirmed only by a DIFFERENT actor.',
+  );
 const FACTS_ITEMS_SCHEMA = z
   .array(
     z.object({
@@ -526,6 +538,14 @@ const FACTS_INPUT_SCHEMA = z.discriminatedUnion('action', [
       path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
       file: FACTS_FILE_SCHEMA,
       resolutionEpoch: FACTS_EPOCH_SCHEMA,
+      actor: FACTS_ACTOR_SCHEMA.optional(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.DISCARD_PENDING),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      sourcePaths: FACTS_SOURCE_PATHS_SCHEMA,
     })
     .strict(),
   z
@@ -553,12 +573,7 @@ const FACTS_INPUT_SCHEMA = z.discriminatedUnion('action', [
         .describe(
           'adjudicate only: the sourcePath bytes this judgement was made against. A judgement made against other bytes is refused.',
         ),
-      actor: z
-        .string()
-        .min(1)
-        .describe(
-          'adjudicate only: who is deciding. Self-declared — a dismissal is confirmed only by a DIFFERENT actor, which the skill supplies as a separate subagent.',
-        ),
+      actor: FACTS_ACTOR_SCHEMA,
       items: FACTS_ITEMS_SCHEMA,
     })
     .strict(),
@@ -568,7 +583,7 @@ const FACTS_ADVERTISED_INPUT_SCHEMA = z.object({
   action: z
     .nativeEnum(FACTS_ACTIONS)
     .describe(
-      'status reports which files filid holds facts for and what it is waiting for; submit takes one batch of extracted facts and replaces the records for the files it carries; compare checks an independently extracted candidate against the store without storing it; adjudicate settles the disagreements compare recorded.',
+      'status reports which files filid holds facts for and what it is waiting for; submit takes one batch of extracted facts and replaces the records for the files it carries; compare checks an independently extracted candidate against the store without storing it; adjudicate settles the disagreements compare recorded; discard-pending drops an unconfirmed attested submission so a file two readers keep answering differently can be started over.',
     ),
   path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
   file: FACTS_FILE_SCHEMA.optional(),
@@ -581,6 +596,7 @@ const FACTS_ADVERTISED_INPUT_SCHEMA = z.object({
       'compare only: review generation whose frozen facts to compare against.',
     ),
   sourcePath: FACTS_SOURCE_PATH_SCHEMA.optional(),
+  sourcePaths: FACTS_SOURCE_PATHS_SCHEMA.optional(),
   contentHash: z
     .string()
     .min(1)
@@ -588,13 +604,7 @@ const FACTS_ADVERTISED_INPUT_SCHEMA = z.object({
     .describe(
       'adjudicate only: the sourcePath bytes this judgement was made against.',
     ),
-  actor: z
-    .string()
-    .min(1)
-    .optional()
-    .describe(
-      'adjudicate only: who is deciding. A dismissal is confirmed only by a different actor.',
-    ),
+  actor: FACTS_ACTOR_SCHEMA.optional(),
   items: FACTS_ITEMS_SCHEMA.optional(),
 });
 

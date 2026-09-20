@@ -30,7 +30,7 @@ const CANONICAL = readFileSync(
 /** Every `action: "x"` the document tells a skill to call. */
 const DOCUMENTED_ACTIONS = [
   ...new Set(
-    [...CANONICAL.matchAll(/action: "([a-z]+)"/g)].map(([, name]) => name),
+    [...CANONICAL.matchAll(/action: "([a-z-]+)"/g)].map(([, name]) => name),
   ),
 ];
 
@@ -161,22 +161,61 @@ describe('the facts bootstrap document matches the tool it drives', () => {
     ).toEqual([]);
   });
 
-  it('claims no per-entry field on a status list, because those live in the submit response', () => {
+  it('reads the status lists in the shape the server returns them', () => {
     for (const list of [
       'missing',
       'needsResolution',
       'uncertain',
       'toolError',
-      'rejected',
+      'indeterminate',
     ])
       expect(Object.keys(statusPayload.data[list] as object).sort()).toEqual([
         'paths',
         'truncated',
       ]);
-    expect(CANONICAL).toMatch(
-      /no per-entry code or next action lives in `status`/,
+    for (const list of ['rejected', 'unadjudicated'])
+      expect(Object.keys(statusPayload.data[list] as object).sort()).toEqual([
+        'items',
+        'truncated',
+      ]);
+    expect(Array.isArray(statusPayload.data.pendingAttestations)).toBe(true);
+    expect(CANONICAL).toContain('`data.rejected.items`');
+    expect(CANONICAL).toContain('`indeterminate`');
+    expect(CANONICAL).toContain('`pendingAttestations`');
+  });
+
+  it('routes an uncertain file by the four reason lists the server splits it into', () => {
+    const step = CANONICAL.slice(
+      CANONICAL.indexOf('### 1.'),
+      CANONICAL.indexOf('### 2.'),
     );
-    expect(CANONICAL).toMatch(/codes live in the \*\*submit response\*\*/);
+    for (const list of [
+      'rejected',
+      'unadjudicated',
+      'pendingAttestations',
+      'indeterminate',
+    ])
+      expect(step).toContain(`\`${list}\``);
+    expect(step).toMatch(/response wins/i);
+  });
+
+  it('names the attested path by its real arguments and action', () => {
+    const attested = CANONICAL.slice(CANONICAL.indexOf('### 6.'));
+    expect(attested).toContain('attestationRequirement');
+    expect(attested).toContain('actor');
+    expect(attested).toContain('sourcePaths');
+    expect(attested).toContain(FACTS_ACTIONS.DISCARD_PENDING);
+    for (const key of ['actor', 'sourcePaths'])
+      expect(ADVERTISED_KEYS.has(key)).toBe(true);
+  });
+
+  it('documents every action the tool has, except the one it deliberately leaves out', () => {
+    expect(
+      Object.values(FACTS_ACTIONS).filter(
+        (action) => !DOCUMENTED_ACTIONS.includes(action),
+      ),
+    ).toEqual([FACTS_ACTIONS.COMPARE]);
+    expect(CANONICAL).toMatch(/`compare` exists for a verifier/);
   });
 
   it('shows every key an adjudicate item needs', () => {

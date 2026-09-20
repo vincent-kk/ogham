@@ -29,6 +29,14 @@ export interface FactsFileEvidence {
    * does not carry, so the file's references are not yet agreed (spec §3).
    */
   hasOpenItems: boolean;
+  /**
+   * Whether an attested submission for this file is waiting on a second actor.
+   *
+   * It outranks `missing` because the next action differs: the file is not
+   * waiting for an extraction, it is waiting for a different reader to confirm
+   * what one already wrote (spec §4.6).
+   */
+  hasPendingAttestation: boolean;
 }
 
 /**
@@ -51,6 +59,7 @@ export function classifyFactsFile(
   currentEpoch: string,
 ): FactsFileState {
   if (!evidence.inScope) return FACTS_FILE_STATES.UNSUPPORTED;
+  if (evidence.hasPendingAttestation) return FACTS_FILE_STATES.UNCERTAIN;
   const { record } = evidence;
   if (record === null || !evidence.syntaxValid)
     return FACTS_FILE_STATES.MISSING;
@@ -60,7 +69,7 @@ export function classifyFactsFile(
     return FACTS_FILE_STATES.TOOL_ERROR;
   if (
     evidence.hasOpenItems ||
-    record.rejectedClaims > 0 ||
+    record.rejectedClaims.length > 0 ||
     hasIndeterminateReference(record)
   )
     return FACTS_FILE_STATES.UNCERTAIN;

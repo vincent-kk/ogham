@@ -28,7 +28,7 @@ export function buildFactsRejection(
     path,
     pointer,
     code: FACTS_REJECTION_CODES[code],
-    nextAction: FACTS_REJECTION_NEXT_ACTIONS[code],
+    nextAction: FACTS_REJECTION_NEXT_ACTIONS[FACTS_REJECTION_CODES[code]],
     ...(specifier === undefined ? {} : { specifier }),
     ...(inputPath === undefined ? {} : { inputPath }),
   };

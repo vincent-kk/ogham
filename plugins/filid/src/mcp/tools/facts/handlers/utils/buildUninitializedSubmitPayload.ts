@@ -38,6 +38,9 @@ export function buildUninitializedSubmitPayload(
       epochMoved: false,
       openedItems: 0,
       closedItems: 0,
+      attestationsPending: 0,
+      attestationsConfirmed: 0,
+      attestationDismissals: 0,
       removedAdjudicatedItems: 0,
     },
     data: {
@@ -45,6 +48,7 @@ export function buildUninitializedSubmitPayload(
       rejectedTruncated: 0,
       added: capFileList([]),
       removed: capFileList([]),
+      attested: [],
       changedResolutionInputs: capFileList([]),
     },
     diagnostics: [

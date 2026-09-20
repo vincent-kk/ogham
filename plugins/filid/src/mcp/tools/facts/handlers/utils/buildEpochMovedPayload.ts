@@ -56,6 +56,9 @@ export function buildEpochMovedPayload(
       epochMoved: true,
       openedItems: 0,
       closedItems: 0,
+      attestationsPending: 0,
+      attestationsConfirmed: 0,
+      attestationDismissals: 0,
       removedAdjudicatedItems: 0,
     },
     data: {
@@ -63,6 +66,7 @@ export function buildEpochMovedPayload(
       rejectedTruncated: 0,
       added: capFileList(difference.added),
       removed: capFileList(difference.removed),
+      attested: [],
       changedResolutionInputs: capFileList(difference.changedResolutionInputs),
     },
     diagnostics: [

@@ -29,7 +29,7 @@ function stepText(step: number): string {
   return end === -1 ? rest : rest.slice(0, end + 1);
 }
 
-describe('the canonical bootstrap walks the six branches in order', () => {
+describe('the canonical bootstrap walks the seven branches in order', () => {
   it.each([
     [
       1,
@@ -70,11 +70,12 @@ describe('the canonical bootstrap walks the six branches in order', () => {
     [
       4,
       [
+        'data.rejected.items',
         'facts-content-hash-mismatch',
         'facts-resolution-input-unreadable',
         'facts-source-file-unreadable',
+        'nextAction',
         'toolError',
-        'contentHash',
       ],
     ],
     [
@@ -90,12 +91,22 @@ describe('the canonical bootstrap walks the six branches in order', () => {
         '`dismiss`',
       ],
     ],
-    [6, ['exact', 'tool-error']],
+    [
+      6,
+      [
+        'attestationRequirement',
+        'data.pendingAttestations',
+        'actor',
+        'discard-pending',
+        'nonReferences',
+      ],
+    ],
+    [7, ['exact', 'tool-error']],
   ] as const)('step %i names its calls and next actions', (step, tokens) => {
     const text = stepText(step);
     for (const token of tokens) expect(text).toContain(token);
     expect(canonical.indexOf(`\n### ${step}. `)).toBeLessThan(
-      canonical.indexOf(step === 6 ? FAILURE_HEADING : `\n### ${step + 1}. `),
+      canonical.indexOf(step === 7 ? FAILURE_HEADING : `\n### ${step + 1}. `),
     );
   });
 });
@@ -131,7 +142,7 @@ describe('the canonical bootstrap bounds what the agent does', () => {
   });
 
   it('never repeats a call with the same input', () => {
-    expect(stepText(6)).toMatch(
+    expect(stepText(7)).toMatch(
       /never repeat the same call with the same input/i,
     );
   });

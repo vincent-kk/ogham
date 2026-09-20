@@ -46,6 +46,9 @@ export { validateFactsRecord } from './validation/validateFactsRecord.js';
 export { hashProjectFile } from './validation/utils/hashProjectFile.js';
 export { isProjectFilePathValid } from './validation/utils/isProjectFilePathValid.js';
 export { locateSourceText } from './validation/utils/locateSourceText.js';
+export { splitSourceLines } from './validation/utils/splitSourceLines.js';
+export type { StoredRejection } from './schema/storedFactsRecordSchema.js';
+export { buildFactsRejection } from './validation/utils/buildFactsRejection.js';
 export { checkDeclaredInputs } from './validation/utils/checkDeclaredInputs.js';
 export type { DeclaredInputVerdict } from './validation/utils/checkDeclaredInputs.js';
 export type { ProjectFileDigest } from './validation/utils/hashProjectFile.js';
@@ -63,6 +66,23 @@ export type {
 export { selectUnknownFiles } from './state/selectUnknownFiles.js';
 
 export { adjudicateItem } from './sideTable/adjudicateItem.js';
+export { agreedNonReferences } from './attested/agreedNonReferences.js';
+export { findUnaccountedLines } from './attested/findUnaccountedLines.js';
+export { resolveAttestation } from './attested/resolveAttestation.js';
+export type { AttestationResolution } from './attested/resolveAttestation.js';
+export { comparePendingEdges } from './pending/comparePendingEdges.js';
+export type { AttestationDifference } from './pending/comparePendingEdges.js';
+export { readPendingStore } from './pending/readPendingStore.js';
+export type {
+  PendingStoreContents,
+} from './pending/readPendingStore.js';
+export { PendingAttestationSchema } from './pending/pendingPageSchema.js';
+export type { PendingAttestation } from './pending/pendingPageSchema.js';
+export { writeShardPages } from './store/writeShardPages.js';
+export type {
+  ShardPageUpdate,
+  ShardWriteOutcome,
+} from './store/writeShardPages.js';
 export { isOpenAdjudication } from './sideTable/isOpenAdjudication.js';
 export { normalizeActor } from './sideTable/normalizeActor.js';
 export { readAdjudicationTable } from './sideTable/readAdjudicationTable.js';

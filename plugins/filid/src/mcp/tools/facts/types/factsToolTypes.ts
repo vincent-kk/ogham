@@ -1,9 +1,14 @@
-import type { FACTS_ACTIONS, FACTS_PROJECT_STATES } from '../../../../constants/facts.js';
+import type {
+  FACTS_ACTIONS,
+  FACTS_ATTESTATION_OUTCOMES,
+  FACTS_PROJECT_STATES,
+} from '../../../../constants/facts.js';
 import type {
   AdjudicationDecision,
   AdjudicationKey,
   AdjudicationOrigin,
   AdjudicationState,
+  AttestationDifference,
   FactsRejection,
 } from '../../../../core/facts/index.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
@@ -67,6 +72,54 @@ export interface FactsOpenItem {
   actor?: string;
   /** Why that actor says the edge is not there. */
   reason?: string;
+}
+
+/** Input of the discard-pending action. */
+export interface DiscardPendingInput {
+  action: typeof FACTS_ACTIONS.DISCARD_PENDING;
+  /** Absolute project root. */
+  path: string;
+  /** Project-relative POSIX paths whose pending attestation to drop. */
+  sourcePaths: string[];
+}
+
+/** What `discard-pending` reports about one call. */
+export interface FactsDiscardPendingSummary {
+  /** Pending attestations this call removed. */
+  discarded: number;
+  /** Paths that held none; reported, not refused. */
+  absent: number;
+  /** False when a concurrent writer took a shard and something stayed. */
+  stored: boolean;
+}
+
+/** Which paths `discard-pending` cleared and which held nothing. */
+export interface FactsDiscardPendingData {
+  discarded: string[];
+  absent: string[];
+}
+
+/** Where one attested submission landed in the state table. */
+export type FactsAttestationOutcome =
+  (typeof FACTS_ATTESTATION_OUTCOMES)[keyof typeof FACTS_ATTESTATION_OUTCOMES];
+
+/** What one attested record's submission did, and what is owed next. */
+export interface AttestedOutcome {
+  /** Project-relative POSIX path the record describes. */
+  path: string;
+  outcome: FactsAttestationOutcome;
+  /** The actor holding the pending attestation, when one is involved. */
+  actor?: string;
+  /**
+   * References only one of the two attestations carries, with their lines.
+   *
+   * Present for a disagreement and for a same-actor resubmission that differs
+   * from what that actor said before; the lines are what the reader has to open
+   * to settle it.
+   */
+  differences?: (AttestationDifference & { lines: number[] })[];
+  /** The one action that changes this file's state. */
+  nextAction: string;
 }
 
 /** Input of the compare action. */
@@ -133,9 +186,12 @@ export type FactsInput =
       path: string;
       file: string;
       resolutionEpoch: string;
+      /** Required only when the batch carries an attested record. */
+      actor?: string;
     }
   | AdjudicateInput
-  | CompareInput;
+  | CompareInput
+  | DiscardPendingInput;
 
 /** What `adjudicate` reports about one call. */
 export interface FactsAdjudicateSummary {
@@ -163,6 +219,29 @@ export interface FactsAdjudicateData {
   refused: { reference: string; code: string; nextAction: string }[];
 }
 
+/**
+ * One claim filid refused, as `status` reports it back.
+ *
+ * Everything the caller needs to choose a different action: the code says which
+ * refusal it is, the sentence says what changes it, and the specifier and lines
+ * say where to look. No file text — a path, a string the caller itself
+ * submitted, and line numbers.
+ */
+export interface RejectedClaim {
+  /** Project-relative POSIX path of the record the claim belonged to. */
+  path: string;
+  /** Stable reason code, as the submit response spelled it. */
+  code: string;
+  /** The one action that changes this outcome. */
+  nextAction: string;
+  /** The reference's specifier, on a reference-level rejection. */
+  specifier?: string;
+  /** The declared resolution input that caused it, path only. */
+  inputPath?: string;
+  /** 1-based lines the caller has to read, where filid could name them. */
+  lines?: number[];
+}
+
 /** One capped list plus how many entries it left out. */
 export interface FactsFileList {
   paths: string[];
@@ -182,6 +261,16 @@ export interface FactsStatusSummary {
   unsupported: number;
   /** Side-table items awaiting a decision across every in-scope file. */
   unadjudicatedItems: number;
+  /** Attested submissions held unconfirmed across every in-scope file. */
+  pendingAttestations: number;
+  /**
+   * What an attested record has to carry, stated as a requirement.
+   *
+   * Always present, like `outputRequirement`: a file that needs attestation is
+   * exactly the case where no tool output is coming to show the shape, so the
+   * bootstrap loop has to work from this response alone.
+   */
+  attestationRequirement: string;
   /**
    * Where extraction output must go, stated as a requirement.
    *
@@ -215,7 +304,16 @@ export interface FactsStatusData {
   needsResolution: FactsFileList;
   uncertain: FactsFileList;
   toolError: FactsFileList;
-  rejected: FactsFileList;
+  /**
+   * Files carrying a reference the provider could not vouch for.
+   *
+   * The one reason a file is `uncertain` that no other list in this response
+   * names; with it, every uncertain path appears in at least one of
+   * `rejected`, `unadjudicated`, `pendingAttestations` and this.
+   */
+  indeterminate: FactsFileList;
+  /** Every refused claim, with the action that changes it. */
+  rejected: { items: RejectedClaim[]; truncated: number };
   /**
    * Every side-table item awaiting a decision, with what judging it requires.
    *
@@ -224,6 +322,19 @@ export interface FactsStatusData {
    * are unsettled has to guess the rest of the adjudicate call.
    */
   unadjudicated: { items: FactsOpenItem[]; truncated: number };
+  /**
+   * Files holding an attested submission nobody has confirmed yet.
+   *
+   * Each names the actor that must NOT be the one confirming it, and the bytes
+   * the confirmation has to read, so the next submission can be built from this
+   * response alone.
+   */
+  pendingAttestations: {
+    path: string;
+    actor: string;
+    contentHash: string;
+    nextAction: string;
+  }[];
 }
 
 /** What `submit` reports about one call. */
@@ -239,6 +350,18 @@ export interface FactsSubmitSummary {
   openedItems: number;
   /** Side-table items this batch settled by carrying the edge after all. */
   closedItems: number;
+  /** Attested records stored unconfirmed, awaiting a second actor. */
+  attestationsPending: number;
+  /** Attested records a second actor confirmed, now stored as file records. */
+  attestationsConfirmed: number;
+  /**
+   * Edges a confirmed attestation dropped that its two readers had explained.
+   *
+   * Recorded as dismissed rather than opened: two actors already read those
+   * lines and called them non-references, which is the same bar a dismissal
+   * clears, so asking two more would be the ceremony twice.
+   */
+  attestationDismissals: number;
   /**
    * Judgements discarded because their file left the tree or the facts scope.
    *
@@ -259,6 +382,8 @@ export interface FactsSubmitData {
   removed: FactsFileList;
   /** Resolution inputs whose contents changed since that epoch. */
   changedResolutionInputs: FactsFileList;
+  /** One entry per attested record, with what it did and what is owed. */
+  attested: AttestedOutcome[];
 }
 
 /** Child payload variants returned by facts actions. */
@@ -266,4 +391,5 @@ export type FactsResult =
   | ToolPayload<FactsStatusSummary, FactsStatusData>
   | ToolPayload<FactsSubmitSummary, FactsSubmitData>
   | ToolPayload<FactsAdjudicateSummary, FactsAdjudicateData>
-  | ToolPayload<FactsCompareSummary, FactsCompareData>;
+  | ToolPayload<FactsCompareSummary, FactsCompareData>
+  | ToolPayload<FactsDiscardPendingSummary, FactsDiscardPendingData>;

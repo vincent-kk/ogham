@@ -24,12 +24,14 @@ import type { FactsContext } from './buildFactsContext.js';
  * @param projectRoot - Absolute project root, used as given.
  * @param context - Scope, scanned paths, records and epoch for this call.
  * @param open - Paths the caller is being offered an open item for.
+ * @param pending - Paths holding an attested submission awaiting confirmation.
  * @returns Each scanned path mapped to its state.
  */
 export function classifyScannedFiles(
   projectRoot: string,
   context: FactsContext,
   open: ReadonlySet<string>,
+  pending: ReadonlySet<string>,
 ): Map<string, FactsFileState> {
   const hashDeclaredInput = createDeclaredInputHasher(projectRoot);
   const states = new Map<string, FactsFileState>();
@@ -53,6 +55,7 @@ export function classifyScannedFiles(
             record === null ||
             checkDeclaredInputs(record.facts.provenance, hashDeclaredInput).ok,
           hasOpenItems: open.has(path),
+          hasPendingAttestation: pending.has(path),
         },
         context.epoch.resolutionEpoch,
       ),

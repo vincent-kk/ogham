@@ -21,7 +21,7 @@ const PROJECT_ROOT = '/project-under-test';
 const record = (path: string): unknown => ({
   schemaVersion: 1,
   resolutionEpoch: 'sha256:epoch',
-  rejectedClaims: 0,
+  rejectedClaims: [],
   facts: {
     schemaVersion: 1,
     path,

@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import {
   FACTS_EPOCH_DRIFT_FILE,
   FACTS_EXTRACTION_LIST_FILE,
+  FACTS_PENDING_DIRECTORY,
   FACTS_RECORD_EXTENSION,
   FACTS_SHARD_NAME_LENGTH,
   FACTS_SIDE_TABLE_DIRECTORY,
@@ -23,6 +24,8 @@ export interface FactsStorePaths {
   extractionListPath: string;
   /** Directory holding the adjudication side table's shards. */
   sideTableDirectory: string;
+  /** Directory holding unconfirmed attested submissions, one page per file. */
+  pendingDirectory: string;
   /**
    * Record key for one project-relative path.
    * @param relativePath Path as `listScannedFilePaths` spells it.
@@ -61,6 +64,7 @@ export function resolveFactsStorePaths(projectRoot: string): FactsStorePaths {
     driftPath: join(directory, FACTS_EPOCH_DRIFT_FILE),
     extractionListPath: join(directory, FACTS_EXTRACTION_LIST_FILE),
     sideTableDirectory: join(directory, FACTS_SIDE_TABLE_DIRECTORY),
+    pendingDirectory: join(directory, FACTS_PENDING_DIRECTORY),
     pathDigest: (relativePath) =>
       createHash('sha256').update(relativePath, 'utf8').digest('hex'),
     shardFileName: (pathDigest) =>

@@ -35,6 +35,13 @@ export function normalizeFileFacts(facts: FileFacts): FileFacts {
         }
       : {}),
     ...(facts.verification ? { verification: facts.verification } : {}),
+    ...(facts.nonReferences
+      ? {
+          nonReferences: [...facts.nonReferences].sort(
+            (left, right) => left.line - right.line,
+          ),
+        }
+      : {}),
     ...(facts.toolError ? { toolError: facts.toolError } : {}),
     provenance: {
       ...facts.provenance,

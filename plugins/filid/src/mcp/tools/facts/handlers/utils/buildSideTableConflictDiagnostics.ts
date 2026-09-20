@@ -6,11 +6,11 @@ import {
 import type { FACTS_ACTIONS } from '../../../../../constants/facts.js';
 import type { ToolDiagnostic } from '../../../../../types/toolEnvelope.js';
 
-/** The actions that write the side table, and so can lose a page. */
-type WritingAction = Exclude<
-  (typeof FACTS_ACTIONS)[keyof typeof FACTS_ACTIONS],
-  typeof FACTS_ACTIONS.STATUS
->;
+/** The actions that write the side table, and so can lose one of its pages. */
+type WritingAction =
+  | typeof FACTS_ACTIONS.SUBMIT
+  | typeof FACTS_ACTIONS.COMPARE
+  | typeof FACTS_ACTIONS.ADJUDICATE;
 
 /**
  * The diagnostic for side-table pages another writer took during this call.

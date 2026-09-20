@@ -53,12 +53,15 @@ export function validateReferences(
     const resolved = resolveEdge(context, reference);
     if (resolved === null) {
       rejections.push(
-        buildFactsRejection(
-          path,
-          `${at}/resolved`,
-          'RESOLVED_PATH_INVALID',
-          reference.specifier,
-        ),
+        {
+          ...buildFactsRejection(
+            path,
+            `${at}/resolved`,
+            'RESOLVED_PATH_INVALID',
+            reference.specifier,
+          ),
+          lines: found,
+        },
       );
       continue;
     }

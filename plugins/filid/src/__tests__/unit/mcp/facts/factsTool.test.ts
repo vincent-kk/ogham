@@ -194,6 +194,37 @@ describe('facts status', () => {
     expect(result.data?.missing.paths).not.toContain('src/generated/out.ts');
   });
 
+  it('reads a record from an older store shape as absent, and keeps going', async () => {
+    // `rejectedClaims` was a count before it became a list of reasons. A store
+    // written by the older shape must cost that one file a re-extraction, not
+    // the call: an unreadable entry is contained to its own key, its shard
+    // stays writable, and the next submission replaces it.
+    const paths = resolveFactsStorePaths(project.root);
+    const key = paths.pathDigest('src/thing.ts');
+    writeFactsShardFile(
+      paths.directory,
+      paths.shardFileName(key),
+      {
+        [key]: {
+          schemaVersion: 1,
+          resolutionEpoch: 'sha256:whatever',
+          rejectedClaims: 0,
+          facts: project.facts('src/thing.ts'),
+        },
+      },
+      null,
+    );
+
+    const before = await status();
+    const stored = await submit([project.facts('src/thing.ts')]);
+    const after = await status();
+
+    expect(before.data?.missing.paths).toContain('src/thing.ts');
+    expect(before.data?.rejected.items).toEqual([]);
+    expect(stored.summary.accepted).toBe(1);
+    expect(after.data?.missing.paths).not.toContain('src/thing.ts');
+  });
+
   // mkfifo is POSIX-only; Windows cannot stage this record.
   it.skipIf(process.platform === 'win32')(
     'still answers when a stored record names a FIFO as a resolution input',
@@ -210,7 +241,7 @@ describe('facts status', () => {
           [key]: {
             schemaVersion: 1,
             resolutionEpoch: 'sha256:whatever',
-            rejectedClaims: 0,
+            rejectedClaims: [],
             facts: {
               ...project.facts('src/thing.ts'),
               provenance: {

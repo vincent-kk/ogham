@@ -19,6 +19,14 @@ export interface FactsRejection {
    * The path only — never anything read from that file.
    */
   inputPath?: string;
+  /**
+   * 1-based lines the caller has to account for, on an attested refusal.
+   *
+   * Numbers, never the text on them: the caller opens its own copy of the file,
+   * and a count alone would leave it guessing which line to explain and
+   * repeating the same refusal (spec §4.6).
+   */
+  lines?: number[];
 }
 
 /** What one record's validation needs to know about the project around it. */

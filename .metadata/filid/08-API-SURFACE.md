@@ -323,13 +323,19 @@ interface FactsStatusSummary {
   toolError: number;
   unsupported: number;
   unadjudicatedItems: number;
+  pendingAttestations: number;
+  attestationRequirement: string;
   scopeSource: "config" | "default";
   outputRequirement: string;
   extractionList: { path: string; count: number; unrepresentable: number };
 }
 ```
 
-`data`는 상태별 경로 목록을 `{ paths, truncated }`로 싣는다: `missing`, `needsResolution`, `uncertain`, `toolError`, `rejected`. 목록은 상한까지만 인라인하고 나머지는 `truncated`로 센다.
+`data`는 상태별 경로 목록을 `{ paths, truncated }`로 싣는다: `missing`, `needsResolution`, `uncertain`, `toolError`, `indeterminate`. 목록은 상한까지만 인라인하고 나머지는 `truncated`로 센다.
+
+`rejected`는 **항목 단위**다 — `{ items: RejectedClaim[]; truncated }`이고
+`RejectedClaim`은 `{ path, code, nextAction, specifier?, inputPath?, lines? }`다. `uncertain`인 파일은
+언제나 `rejected`·`indeterminate`·`unadjudicated`·`pendingAttestations` 중 하나에 나타난다.
 
 `unadjudicated`만 **항목 단위**다 — `{ items: FactsOpenItem[]; truncated }`이고, `FactsOpenItem`은
 `{ path, kind, reference, resolvedPath, origin, state, lines, contentHash, staleUnderNewContent, actor?, reason? }`다.
@@ -358,6 +364,8 @@ interface FactsSubmitSummary {
   openedItems: number;
   closedItems: number;
   removedAdjudicatedItems: number;
+  attestationsPending: number;
+  attestationsConfirmed: number;
 }
 ```
 
@@ -409,6 +417,30 @@ interface FactsAdjudicateInput {
 - `contentHash`가 현재 byte와 다르면 **호출 전체**를 거부한다(`facts-adjudication-stale-content`). `actor`가 접기 뒤 비면 그것도 호출 전체를 거부하지만 **다른 코드**를 쓴다(`facts-adjudication-actor-required`) — byte를 다시 읽으라는 행동으로는 빈 actor가 고쳐지지 않는다. 항목이 표에 없거나 이유 없는 `dismiss`이면 그 항목만 거부하고 나머지는 적용한다.
 - 이번 호출이 **판정한** 항목만 현재 `contentHash`로 다시 각인한다.
 - 상태 기계 전체와 셀별 P5 검사는 `evidence/s3a-adjudication-states.md`에 있다.
+
+### facts — attested 등급과 discard-pending
+
+```typescript
+interface FactsDiscardPendingInput {
+  action: "discard-pending";
+  path: string;
+  sourcePaths: string[];     // 확정되지 않은 attested 제출을 버릴 파일들
+}
+```
+
+- `submit`은 `actor?: string`을 함께 받는다. `provenance.tier: "attested"` 레코드가 있으면 필수이고,
+  없으면 그 **레코드만** `facts-attested-actor-required`로 거부된다(같은 배치의 tool 레코드는 무사하다).
+- attested 레코드는 §4.1–4.3을 그대로 지난 뒤 둘을 더 지난다. **계정**: 참조 패턴에 걸리는 모든 줄이
+  레코드의 참조나 `nonReferences: { line, reason }[]`로 설명돼야 하고, 아니면
+  `facts-attested-unaccounted-lines`와 **줄 번호 목록**으로 거부된다. **확인**: 첫 제출은 pending으로
+  남고 파일은 `uncertain`이며, **다른 actor**의 두 번째 제출이 같은 간선 집합을 낼 때 레코드가 저장된다.
+- 불일치한 두 번째 제출은 아무것도 저장하지 않고 pending도 바꾸지 않는다. `submit` 응답의 `attested[]`가
+  결과 종류(`pending`·`replaced`·`confirmed`·`same-actor`·`mismatch`), 어느 쪽에만 있는 간선과 그 줄,
+  다음 행동을 싣는다.
+- `discard-pending`은 pending만 지운다. 저장된 레코드와 부속 표는 건드리지 않으므로 "레코드를 지우는
+  action"이 아니고, 두 actor가 영원히 다른 답을 내는 파일의 유일한 출구다(P5). pending이 없는 경로는
+  거부가 아니라 "이미 그 상태"로 보고한다. 이 action만 `facts-uninitialized` 분기를 두지 않는다 —
+  지우는 동작을 막으면 지울 수 없는 상태가 생긴다.
 
 ---
 

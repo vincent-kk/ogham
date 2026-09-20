@@ -136,6 +136,7 @@ export const FACTS_ADJUDICATION_ORIGINS = {
   RESOLUTION_DIFFERS: 'resolutionDiffers',
   COVERAGE_SHRANK: 'coverage-shrank',
   RESOLUTION_CHANGED: 'resolution-changed',
+  ATTESTED_NON_REFERENCE: 'attested-non-reference',
 } as const;
 
 /** Where one side-table item stands. */
@@ -159,7 +160,85 @@ export const FACTS_ACTIONS = {
   SUBMIT: 'submit',
   COMPARE: 'compare',
   ADJUDICATE: 'adjudicate',
+  DISCARD_PENDING: 'discard-pending',
 } as const;
+
+/**
+ * Line patterns that make a line owe an explanation in an attested record.
+ *
+ * Copied from the ECMAScript adapter's `HIDDEN_REFERENCE_PATTERNS`, which runs
+ * the same expressions against raw text rather than a parse — this is string
+ * matching of the same class as the existence check in spec §4.2, not
+ * interpretation (P1). Non-global on purpose: a global regular expression
+ * carries `lastIndex` across calls, and a module-level constant reused per line
+ * would then skip lines depending on what came before them.
+ *
+ * Two copies exist only until S4 removes the adapter; a parity test holds them
+ * to the same set of lines and is deleted with it. The conventions pack (§7) is
+ * where a language's pattern will live.
+ */
+export const FACTS_REFERENCE_LINE_PATTERNS: readonly RegExp[] = [
+  /(?<![\w$.])from\s*(['"])[^'"\n]+\1/,
+  /(?<![\w$.])import\s*\(\s*(['"])[^'"\n]+\1/,
+  /(?<![\w$.])import\s+(['"])[^'"\n]+\1/,
+  /(?<![\w$.])require\s*\(\s*(['"])[^'"\n]+\1/,
+];
+
+/**
+ * The language-agnostic fallback the accounting check adds to the defaults.
+ *
+ * Deliberately wide (spec §4.6): a line filid cannot recognise as a reference is
+ * a line whose omission nobody would notice, so the cost of over-matching —
+ * prose containing `use` or `from` has to be listed in `nonReferences` — is paid
+ * in the direction that cannot hide an edge.
+ */
+export const FACTS_REFERENCE_FALLBACK_PATTERN =
+  /(?<![\w$])(?:import|require|include|use|from)(?![\w$])/;
+
+/** Directory under the facts store holding unconfirmed attested submissions. */
+export const FACTS_PENDING_DIRECTORY = 'pending';
+
+/** What one attested record's submission did (`evidence/s3a-attested-states.md`). */
+export const FACTS_ATTESTATION_OUTCOMES = {
+  PENDING: 'pending',
+  CONFIRMED: 'confirmed',
+  MISMATCH: 'mismatch',
+  SAME_ACTOR: 'same-actor',
+  REPLACED: 'replaced',
+} as const;
+
+/**
+ * Next actions of the attestation outcomes, keyed by the outcome itself.
+ *
+ * By value rather than by name because the value is what a response carries: a
+ * report can look its own next action up without a second table to keep aligned.
+ */
+export const FACTS_ATTESTATION_NEXT_ACTIONS = {
+  [FACTS_ATTESTATION_OUTCOMES.PENDING]:
+    'Stored as an unconfirmed attestation, so this file stays uncertain. Have a DIFFERENT actor read the same file independently — the skill stands up a separate subagent — and submit its own attested record for it. Matching records confirm it; a different answer is reported rather than stored.',
+  [FACTS_ATTESTATION_OUTCOMES.CONFIRMED]:
+    'A second actor agreed, so the attested record is now the file record. Nothing further is owed for it.',
+  [FACTS_ATTESTATION_OUTCOMES.MISMATCH]:
+    'Nothing was stored and the pending attestation is unchanged, because replacing it would let two actors overwrite each other forever. Read the lines this response names in the current file and submit a record that settles them; if the pending attestation is the wrong one, call facts discard-pending for this path first.',
+  [FACTS_ATTESTATION_OUTCOMES.SAME_ACTOR]:
+    'A submission confirms nothing when it comes from the actor that already attested this file. Have a different actor submit its own attested record; if you now believe the pending attestation is wrong, call facts discard-pending for this path.',
+  [FACTS_ATTESTATION_OUTCOMES.REPLACED]:
+    'The file changed since the pending attestation was made, so it was dropped and this submission became the new first one. Have a different actor attest the CURRENT bytes to confirm it.',
+} as const;
+
+/** Code reported when an attested record leaves a matching line unexplained. */
+export const FACTS_ATTESTATION_PENDING_CODE = 'facts-attestation-pending';
+
+/**
+ * What an attested record has to carry, as `facts status` states it.
+ *
+ * Stated in every status response for the same reason `outputRequirement` is:
+ * the bootstrap loop (spec §8a) has to work for an agent that has only the
+ * responses, and a file that needs attestation is precisely the case where no
+ * tool output is coming to explain the shape.
+ */
+export const FACTS_ATTESTED_REQUIREMENT =
+  'Attestation is how a file settles when no tool can settle it: one filid reports as tool-error, one whose claims are rejected in a way re-extraction reproduces, or one still uncertain after every item is judged. An attested record is an ordinary FileFacts record with provenance.tier set to attested: it still binds to the file contentHash, every reference string must be in the file, and every resolved path must be valid. Two things are added. Every line that looks like a reference must be accounted for — by a reference that quotes it, or by an entry in nonReferences: { line, reason } — and a refusal names the lines that are not. And one submission never settles a file: the record is held unconfirmed until a DIFFERENT actor, reading the same bytes independently, submits the same set of references and resolutions.';
 
 /** Stable diagnostic codes emitted by the facts tool. */
 export const FACTS_DIAGNOSTIC_CODES = {
@@ -169,6 +248,7 @@ export const FACTS_DIAGNOSTIC_CODES = {
   RECORD_CHANGED: 'facts-record-changed',
   SIDE_TABLE_CHANGED: 'facts-side-table-changed',
   ADJUDICATED_ITEMS_REMOVED: 'facts-adjudicated-items-removed',
+  PENDING_CHANGED: 'facts-pending-attestation-changed',
   FILE_TOO_LARGE: 'facts-file-too-large',
   FILE_PATH_NOT_ABSOLUTE: 'facts-file-path-not-absolute',
   FILE_INSIDE_PROJECT: 'facts-file-inside-project',
@@ -224,6 +304,8 @@ export const FACTS_REJECTION_CODES = {
   RESOLUTION_INPUT_UNREADABLE: 'facts-resolution-input-unreadable',
   SOURCE_UNREADABLE: 'facts-source-file-unreadable',
   EXPORTED_NAME_ABSENT: 'facts-exported-name-absent',
+  ATTESTED_UNACCOUNTED: 'facts-attested-unaccounted-lines',
+  ATTESTED_ACTOR_REQUIRED: 'facts-attested-actor-required',
 } as const;
 
 /**
@@ -254,6 +336,8 @@ export const FACTS_DIAGNOSTIC_NEXT_ACTIONS = {
     'Another writer replaced this record between the read and the write. Call facts status, then submit the affected files again.',
   SIDE_TABLE_CHANGED:
     'Another writer replaced the side table between the read and the write. Call facts status, then run the action that reported this again.',
+  PENDING_CHANGED:
+    'Another writer replaced the pending attestation store between the read and the write, so these attested records were not stored. Call facts status to see which files still hold a pending attestation, then submit those attested records again.',
   ADJUDICATED_ITEMS_REMOVED:
     'These files left the scanned tree or the facts scope, so the judgements recorded against them went with them; this is a report, not a refusal, and nothing is owed if the files are gone for good. If one was renamed, submit a record for the new path and run facts compare for it — an edge that still applies comes back as an item to judge there.',
   FILE_TOO_LARGE:
@@ -270,28 +354,39 @@ export const FACTS_DIAGNOSTIC_NEXT_ACTIONS = {
     'The file at that path is not the JSON array of FileFacts records submit reads. Re-run the extraction program, confirm its output parses as JSON, and call submit again.',
 } as const;
 
-/** Next actions of the per-record and per-reference rejections. */
+/**
+ * Next actions of the rejections, keyed by the code itself.
+ *
+ * By value rather than by name because the stored record keeps the code and
+ * nothing else: `status` looks the sentence up when it reports the rejection,
+ * so the wording lives in one place instead of being copied into every record
+ * where it would go stale the first time it is improved.
+ */
 export const FACTS_REJECTION_NEXT_ACTIONS = {
-  SCHEMA_INVALID:
+  [FACTS_REJECTION_CODES.SCHEMA_INVALID]:
     'Fix the record at the JSON pointer this rejection names so it matches the FileFacts schema, then submit that file again.',
-  HASH_MISMATCH:
+  [FACTS_REJECTION_CODES.HASH_MISMATCH]:
     'The file changed after it was extracted. Re-extract that file and submit it again.',
-  OUT_OF_SCOPE:
+  [FACTS_REJECTION_CODES.OUT_OF_SCOPE]:
     'Submission cannot widen the scope. Either drop this record, or add the path to facts.covers in the project .filid/config.json and submit again.',
-  PATH_INVALID:
+  [FACTS_REJECTION_CODES.PATH_INVALID]:
     'This path is not in the scanned path list — most often because git ignores it, it or a parent is dot-prefixed, or it sits in an excluded directory — or it does not stay inside the project as a project-relative POSIX path. Either drop this record, or bring the file into the scan by adjusting .gitignore, structure.additionalExcludedDirectories or the facts scope, then submit again.',
-  REFERENCE_ABSENT:
+  [FACTS_REJECTION_CODES.REFERENCE_ABSENT]:
     'The string this reference reports is not in the file. Re-extract the file with a tool that reads its current bytes, or submit an attested record that accounts for the line.',
-  RESOLVED_PATH_INVALID:
+  [FACTS_REJECTION_CODES.RESOLVED_PATH_INVALID]:
     'The resolved path leaves the project, crosses a symbolic link, spells an entry differently than the directory does, or names a directory. Re-resolve it against the project tree and submit that record again.',
-  RESOLUTION_INPUT_STALE:
+  [FACTS_REJECTION_CODES.RESOLUTION_INPUT_STALE]:
     'A file this record declared as a resolution input no longer hashes to the value the record carries. Re-extract this file so its provenance names the current inputs, then submit it again.',
-  RESOLUTION_INPUT_UNREADABLE:
+  [FACTS_REJECTION_CODES.RESOLUTION_INPUT_UNREADABLE]:
     'filid cannot read a file this record declared as a resolution input — it is missing, not a regular file, past the size cap, or the server lacks permission. Re-extracting will hit the same refusal, so change one of three things: drop that path from the record provenance, make the file readable by the filid server as a regular file, or submit this file as attested.',
-  SOURCE_UNREADABLE:
+  [FACTS_REJECTION_CODES.SOURCE_UNREADABLE]:
     'filid cannot read this project file as a regular file within its size cap, so no record can be bound to its bytes. Re-extracting will hit the same refusal: either make the file readable and small enough, or put it outside the facts scope with facts.excludes in the project .filid/config.json.',
-  EXPORTED_NAME_ABSENT:
+  [FACTS_REJECTION_CODES.EXPORTED_NAME_ABSENT]:
     'The exported name this record reports is not in the file. Re-extract the file and submit it again.',
+  [FACTS_REJECTION_CODES.ATTESTED_UNACCOUNTED]:
+    'An attested record accounts for every line that looks like a reference. The lines this rejection names are explained by neither a reference nor a nonReferences entry. Read those exact lines and submit the record again with each one either quoted by a reference or listed in nonReferences with the reason it is not one.',
+  [FACTS_REJECTION_CODES.ATTESTED_ACTOR_REQUIRED]:
+    'An attested record is confirmed by a DIFFERENT actor, so the server has to know who is claiming it. Send the submit call again with actor set to a non-empty identity for whoever read this file.',
 } as const;
 
 /**

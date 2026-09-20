@@ -1,12 +1,17 @@
 import {
+  FACTS_ATTESTATION_NEXT_ACTIONS,
+  FACTS_ATTESTATION_OUTCOMES,
+  FACTS_ATTESTED_REQUIREMENT,
   FACTS_FILE_STATES,
   FACTS_OUTPUT_REQUIREMENT,
   FACTS_PROJECT_STATES,
   FACTS_STATUS_LIST_LIMIT,
 } from '../../../../constants/facts.js';
+import { ANALYSIS_CERTAINTIES } from '../../../../constants/analysisCertainties.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import {
   readAdjudicationTable,
+  readPendingStore,
   writeExtractionList,
 } from '../../../../core/facts/index.js';
 import type { FactsFileState } from '../../../../core/facts/index.js';
@@ -21,6 +26,7 @@ import { buildUninitializedPayload } from './utils/buildUninitializedPayload.js'
 import { classifyScannedFiles } from './utils/classifyScannedFiles.js';
 import { capFileList } from './utils/capFileList.js';
 import { collectOpenItems } from './utils/collectOpenItems.js';
+import { collectRejectedClaims } from './utils/collectRejectedClaims.js';
 
 /**
  * Report what filid knows about a project's facts, and what it is waiting for.
@@ -57,10 +63,26 @@ export async function reportFactsStatus(
     context,
     readAdjudicationTable(context.storePaths.sideTableDirectory),
   );
+  const pendingAttestations = [
+    ...readPendingStore(context.storePaths.pendingDirectory).pages.values(),
+  ]
+    .filter(
+      (page) =>
+        context.scannedSet.has(page.path) && context.scope.covers(page.path),
+    )
+    .sort((left, right) => left.path.localeCompare(right.path))
+    .map((page) => ({
+      path: page.path,
+      actor: page.actor,
+      contentHash: page.contentHash,
+      nextAction:
+        FACTS_ATTESTATION_NEXT_ACTIONS[FACTS_ATTESTATION_OUTCOMES.PENDING],
+    }));
   const byState = classifyScannedFiles(
     projectRoot,
     context,
     new Set(unadjudicated.map((item) => item.path)),
+    new Set(pendingAttestations.map((page) => page.path)),
   );
   const paths = (state: FactsFileState): string[] =>
     context.scannedPaths.filter((path) => byState.get(path) === state);
@@ -74,8 +96,12 @@ export async function reportFactsStatus(
       left.localeCompare(right),
     ),
   );
-  const rejected = context.scannedPaths.filter(
-    (path) => (context.records.get(path)?.record.rejectedClaims ?? 0) > 0,
+  const rejected = collectRejectedClaims(context);
+  const indeterminate = context.scannedPaths.filter((path) =>
+    (context.records.get(path)?.record.facts.references ?? []).some(
+      (reference) =>
+        reference.certainty === ANALYSIS_CERTAINTIES.INDETERMINATE,
+    ),
   );
   return {
     projectRoot,
@@ -91,6 +117,8 @@ export async function reportFactsStatus(
       toolError: toolError.length,
       unsupported: paths(FACTS_FILE_STATES.UNSUPPORTED).length,
       unadjudicatedItems: unadjudicated.length,
+      pendingAttestations: pendingAttestations.length,
+      attestationRequirement: FACTS_ATTESTED_REQUIREMENT,
       scopeSource: context.scope.source,
       outputRequirement: FACTS_OUTPUT_REQUIREMENT,
       extractionList: {
@@ -103,11 +131,19 @@ export async function reportFactsStatus(
       needsResolution: capFileList(needsResolution),
       uncertain: capFileList(uncertain),
       toolError: capFileList(toolError),
-      rejected: capFileList(rejected),
+      indeterminate: capFileList(indeterminate),
+      rejected: {
+        items: rejected.slice(0, FACTS_STATUS_LIST_LIMIT),
+        truncated: Math.max(0, rejected.length - FACTS_STATUS_LIST_LIMIT),
+      },
       unadjudicated: {
         items: unadjudicated.slice(0, FACTS_STATUS_LIST_LIMIT),
         truncated: Math.max(0, unadjudicated.length - FACTS_STATUS_LIST_LIMIT),
       },
+      pendingAttestations: pendingAttestations.slice(
+        0,
+        FACTS_STATUS_LIST_LIMIT,
+      ),
     },
     diagnostics: [],
   };

@@ -1,5 +1,6 @@
 import { ANALYSIS_AXES } from '../../../../../constants/analysisAxes.js';
 import {
+  FACTS_ATTESTED_REQUIREMENT,
   FACTS_DIAGNOSTIC_CODES,
   FACTS_DIAGNOSTIC_NEXT_ACTIONS,
   FACTS_OUTPUT_REQUIREMENT,
@@ -48,6 +49,8 @@ export function buildUninitializedPayload(
       toolError: 0,
       unsupported: 0,
       unadjudicatedItems: 0,
+      pendingAttestations: 0,
+      attestationRequirement: FACTS_ATTESTED_REQUIREMENT,
       scopeSource: 'config',
       outputRequirement: FACTS_OUTPUT_REQUIREMENT,
       extractionList: { path: extractionListPath, count: 0, unrepresentable: 0 },
@@ -57,8 +60,10 @@ export function buildUninitializedPayload(
       needsResolution: empty,
       uncertain: empty,
       toolError: empty,
-      rejected: empty,
+      indeterminate: empty,
+      rejected: { items: [], truncated: 0 },
       unadjudicated: { items: [], truncated: 0 },
+      pendingAttestations: [],
     },
     diagnostics: [
       {

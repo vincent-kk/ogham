@@ -4,11 +4,15 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { FACTS_ADJUDICATION_STATES } from '../../../../constants/facts.js';
+import {
+  FACTS_ADJUDICATION_STATES,
+  FACTS_ATTESTATION_OUTCOMES,
+} from '../../../../constants/facts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import {
   readAdjudicationTable,
   readFactsStore,
+  readPendingStore,
   resolveFactsStorePaths,
   selectValidReferences,
 } from '../../../../core/facts/index.js';
@@ -19,9 +23,11 @@ import type {
   FactsAdjudicateSummary,
   FactsCompareData,
   FactsCompareSummary,
+  FactsDiscardPendingSummary,
   FactsOpenItem,
   FactsStatusData,
   FactsStatusSummary,
+  FactsSubmitData,
   FactsSubmitSummary,
 } from '../../../../mcp/tools/facts/index.js';
 import type { Random } from '../../core/properties/helpers/createRandom.js';
@@ -29,15 +35,29 @@ import type { Random } from '../../core/properties/helpers/createRandom.js';
 import { checkAsyncProperty } from './helpers/checkAsyncProperty.js';
 import { cleanupFactsProjects } from './helpers/createFactsProject.js';
 import { createFactsWorld } from './helpers/factsWorld.js';
-import type { FactsWorld, ToolMode, WorldFile } from './helpers/factsWorld.js';
+import type {
+  AttestMode,
+  FactsWorld,
+  ToolMode,
+  WorldFile,
+} from './helpers/factsWorld.js';
 
 const ORIGINAL_CONFIG_DIR = process.env.CLAUDE_CONFIG_DIR;
 
 /** How many rounds the oracle gets before liveness counts as broken. */
 const ORACLE_ROUNDS = 8;
 
-/** The two identities a dismissal needs to reach `dismissed`. */
+/**
+ * The two identities a dismissal or an attestation needs to be confirmed.
+ *
+ * The spellings vary on purpose: identities are folded before comparison, so a
+ * scenario that only ever sent `alpha` would never exercise an actor confirming
+ * itself under a different spelling.
+ */
 const ACTORS = ['alpha', 'beta'];
+
+/** Spellings that fold to the same identity as `ACTORS[0]`. */
+const ALPHA_SPELLINGS = ['alpha', 'ALPHA ', ' Alpha'];
 
 /** Separator that cannot occur in a path, a kind or a reference. */
 const SEPARATOR = String.fromCharCode(0);
@@ -56,7 +76,7 @@ describe('the facts state machine under random operation sequences', () => {
     'keeps every invariant and settles under an oracle that only follows reported next actions',
     async () => {
       await expect(
-        checkAsyncProperty({ runs: 24, maxSize: 12, check: runScenario }),
+        checkAsyncProperty({ runs: 20, maxSize: 12, check: runScenario }),
       ).resolves.toBeUndefined();
     },
     600_000,
@@ -85,6 +105,7 @@ async function runScenario(random: Random, size: number): Promise<Failure> {
     const stored = new Set<string>();
     for (let step = 0; step < size + 2; step += 1) {
       log.push(world.mutate(random));
+      for (const edge of world.retired()) stored.delete(edge);
       const failure =
         (await randomCall(world, random, log)) ??
         (await afterCall(world, stored));
@@ -109,23 +130,201 @@ async function randomCall(
   random: Random,
   log: string[],
 ): Promise<Failure> {
-  const mode = random.pick(['exact', 'lossy', 'other'] as const);
-  const choice = random.int(3);
-  if (choice === 0) {
+  const mode = random.pick([
+    'exact',
+    'lossy',
+    'other',
+    'bogus',
+    'comments',
+  ] as const);
+  // Weighted, not uniform. Shrink detection only shows itself across two
+  // submissions of the same file, so diluting submit to one choice in six made
+  // whole rules unreachable — a defect the model cannot reach is a defect it
+  // does not check.
+  const choice = random.int(10);
+  if (choice < 3) {
     log.push(`submit(${mode})`);
     return await submitAndCheck(world, mode, random);
   }
-  if (choice === 1) {
+  if (choice === 3) {
     log.push(`compare(${mode})`);
     return await compareAndCheck(world, mode, random);
+  }
+  if (choice === 4 || choice === 5) {
+    const attestMode = random.pick(['honest', 'incomplete', 'wrong'] as const);
+    const path = random.pick(world.livePaths());
+    const actor = random.pick([...ALPHA_SPELLINGS, ACTORS[1] as string]);
+    log.push(`attest(${attestMode}, ${actor}) on ${path}`);
+    return await attestAndCheck(world, path, attestMode, actor);
+  }
+  if (choice === 6) {
+    const path = random.pick(world.livePaths());
+    log.push(`discard-pending on ${path}`);
+    return await discardAndCheck(world, [path]);
   }
   const open = (await readStatus(world)).data.unadjudicated.items;
   if (open.length === 0) return null;
   const item = random.pick(open);
+  if (choice === 7) {
+    log.push(`adjudicate with a stale contentHash on ${nameOf(item)}`);
+    return await staleAdjudicateAndCheck(world, item);
+  }
   const decision = random.pick(['adopt', 'dismiss'] as const);
   const actor = random.pick(ACTORS);
   log.push(`adjudicate(${actor}, ${decision}) on ${nameOf(item)}`);
   return await adjudicateAndCheck(world, item, decision, actor);
+}
+
+/**
+ * Attest one file and reconcile what the response said with the pending store.
+ * @param world The modelled project.
+ * @param path The file being attested.
+ * @param mode How faithful the reader is.
+ * @param actor Who is claiming.
+ * @returns Null when the response agreed with the store afterwards.
+ */
+async function attestAndCheck(
+  world: FactsWorld,
+  path: string,
+  mode: AttestMode,
+  actor: string,
+): Promise<Failure> {
+  const status = await readStatus(world);
+  const beforeItems = storedItems(world);
+  const beforePending = storedPending(world);
+  const result = await handleFacts({
+    action: 'submit',
+    path: world.project.root,
+    actor,
+    file: world.project.submission(
+      'attested.json',
+      JSON.stringify([world.attest(path, mode)]),
+    ),
+    resolutionEpoch: status.summary.resolutionEpoch,
+  });
+  const data = result.data as FactsSubmitData;
+  const held = storedPending(world);
+  for (const entry of data.attested) {
+    const now = held.get(entry.path);
+    if (
+      entry.outcome === FACTS_ATTESTATION_OUTCOMES.PENDING ||
+      entry.outcome === FACTS_ATTESTATION_OUTCOMES.REPLACED
+    ) {
+      if (now !== actor)
+        return `I2: submit reported ${entry.outcome} for ${entry.path}, the pending store holds ${String(now)}`;
+      continue;
+    }
+    if (
+      entry.outcome === FACTS_ATTESTATION_OUTCOMES.CONFIRMED &&
+      now !== undefined
+    )
+      return `I2: submit confirmed ${entry.path} but a pending attestation is still stored`;
+    // A disagreement stores nothing and changes nothing. Replacing what is held
+    // would let two readers overwrite each other forever, and the exit the
+    // design put there — discard-pending — would never be needed or taken.
+    if (
+      entry.outcome !== FACTS_ATTESTATION_OUTCOMES.CONFIRMED &&
+      now !== beforePending.get(entry.path)
+    )
+      return `I2: submit reported ${entry.outcome} for ${entry.path} but moved the pending attestation from ${String(beforePending.get(entry.path))} to ${String(now)}`;
+  }
+  return verdictsKept(beforeItems, storedItems(world), 'attest');
+}
+
+/**
+ * Discard the pending attestations of some paths and check the store agrees.
+ * @param world The modelled project.
+ * @param paths Project-relative paths to clear.
+ * @returns Null when the response agreed with the store afterwards.
+ */
+async function discardAndCheck(
+  world: FactsWorld,
+  paths: readonly string[],
+): Promise<Failure> {
+  const before = storedPending(world);
+  const records = storedRecordPaths(world);
+  const items = storedItems(world);
+  const result = await handleFacts({
+    action: 'discard-pending',
+    path: world.project.root,
+    sourcePaths: [...paths],
+  });
+  const summary = result.summary as FactsDiscardPendingSummary;
+  const after = storedPending(world);
+  // The one thing this action must not be is a way to delete a record or a
+  // judgement; its whole claim to not being one is that it touches neither.
+  if ([...storedRecordPaths(world)].join() !== [...records].join())
+    return 'I6: discard-pending changed which files hold a stored record';
+  const kept = verdictsKept(items, storedItems(world), 'discard-pending');
+  if (kept !== null) return kept;
+  if (storedItems(world).size !== items.size)
+    return 'I6: discard-pending changed the side table';
+  const removed = paths.filter((one) => before.has(one) && !after.has(one));
+  if (summary.discarded !== removed.length)
+    return `I2: discard-pending reported ${summary.discarded}, the store lost ${removed.length}`;
+  for (const one of paths)
+    if (!before.has(one) && after.has(one))
+      return `I2: discard-pending created a pending attestation for ${one}`;
+  return null;
+}
+
+/**
+ * Judge an item quoting bytes that are not the file's, and check nothing moved.
+ * @param world The modelled project.
+ * @param item The item exactly as a response reported it.
+ * @returns Null when the call was refused and changed nothing.
+ */
+async function staleAdjudicateAndCheck(
+  world: FactsWorld,
+  item: FactsOpenItem,
+): Promise<Failure> {
+  const before = storedItems(world);
+  const result = await handleFacts({
+    action: 'adjudicate',
+    path: world.project.root,
+    sourcePath: item.path,
+    contentHash: `sha256:${'0'.repeat(64)}`,
+    actor: ACTORS[0] as string,
+    items: [
+      {
+        kind: item.kind,
+        reference: item.reference,
+        resolvedPath: item.resolvedPath,
+        decision: 'adopt',
+      },
+    ],
+  });
+  if ((result.summary as FactsAdjudicateSummary).applied !== 0)
+    return 'I2: a judgement quoting other bytes was applied';
+  for (const [key, one] of storedItems(world))
+    if (before.get(key)?.state !== one.state)
+      return `I2: a refused judgement moved ${key.split(SEPARATOR).join(' ')}`;
+  return null;
+}
+
+/**
+ * Every file the record store currently holds a record for, sorted.
+ * @param world The modelled project.
+ * @returns Project-relative paths in a stable order.
+ */
+function storedRecordPaths(world: FactsWorld): string[] {
+  const storePaths = resolveFactsStorePaths(world.project.root);
+  return [...readFactsStore(storePaths.directory).records.values()]
+    .map((record) => record.facts.path)
+    .sort();
+}
+
+/**
+ * The actor holding each file's pending attestation right now.
+ * @param world The modelled project.
+ * @returns Project-relative path to the actor that attested it.
+ */
+function storedPending(world: FactsWorld): Map<string, string> {
+  const storePaths = resolveFactsStorePaths(world.project.root);
+  const held = new Map<string, string>();
+  for (const page of readPendingStore(storePaths.pendingDirectory).pages.values())
+    held.set(page.path, page.actor);
+  return held;
 }
 
 /**
@@ -298,6 +497,24 @@ async function driveOracle(
       log.push(`oracle round ${round}: submit(exact) for ${wanted.size} file(s)`);
       const failure = await submitAndCheck(world, 'exact', random, wanted);
       if (failure !== null) return failure;
+    } else if (status.data.rejected.items.length > 0) {
+      // The response says WHICH claim was refused and why, so the oracle can
+      // choose a different tool instead of re-running the one that will be
+      // refused identically. A path list alone would leave it guessing.
+      const wanted = new Set(
+        status.data.rejected.items.map((item) => item.path),
+      );
+      log.push(
+        `oracle round ${round}: re-extract ${wanted.size} refused file(s) honestly`,
+      );
+      const failure = await submitAndCheck(world, 'exact', random, wanted);
+      if (failure !== null) return failure;
+    } else if (status.data.pendingAttestations.length > 0) {
+      log.push(
+        `oracle round ${round}: settle ${status.data.pendingAttestations.length} attestation(s)`,
+      );
+      const failure = await settleAttestations(world, status.data);
+      if (failure !== null) return failure;
     } else if (status.data.unadjudicated.items.length > 0) {
       const actor = ACTORS[round % ACTORS.length] as string;
       log.push(
@@ -315,6 +532,41 @@ async function driveOracle(
     previous = refusals;
   }
   return `I3: the oracle did not settle within ${ORACLE_ROUNDS} rounds`;
+}
+
+/**
+ * Settle every file holding an unconfirmed attestation, using only the response.
+ *
+ * The oracle never inspects what the pending attestation claims — the response
+ * does not carry it — so it does what an honest second reader does: reads the
+ * file itself and submits its own record under the other identity. When the two
+ * disagree the response says so, and the only exit is the one the design put
+ * there: discard the pending attestation and start the pair over.
+ *
+ * @param world The modelled project.
+ * @param status The status data this round read.
+ * @returns Null when every attestation was settled or honestly refused.
+ */
+async function settleAttestations(
+  world: FactsWorld,
+  status: FactsStatusData,
+): Promise<Failure> {
+  for (const page of status.pendingAttestations) {
+    const other =
+      page.actor.trim().toLowerCase() === ACTORS[0]
+        ? (ACTORS[1] as string)
+        : (ACTORS[0] as string);
+    const failure = await attestAndCheck(world, page.path, 'honest', other);
+    if (failure !== null) return failure;
+    if (!storedPending(world).has(page.path)) continue;
+    const discarded = await discardAndCheck(world, [page.path]);
+    if (discarded !== null) return discarded;
+    for (const actor of ACTORS) {
+      const again = await attestAndCheck(world, page.path, 'honest', actor);
+      if (again !== null) return again;
+    }
+  }
+  return null;
 }
 
 /**
@@ -370,11 +622,6 @@ async function afterCall(
   world: FactsWorld,
   stored: Set<string>,
 ): Promise<Failure> {
-  const storePaths = resolveFactsStorePaths(world.project.root);
-  for (const record of readFactsStore(storePaths.directory).records.values())
-    for (const reference of record.facts.references)
-      if ('path' in reference.resolved)
-        stored.add(`${record.facts.path} -> ${reference.resolved.path}`);
   return await checkLiveEdges(world, stored);
 }
 
@@ -386,10 +633,12 @@ async function afterCall(
  * filid is already saying it cannot vouch for. The edge must be real: the model
  * knows which specifiers are live imports and which only sit in a comment, and
  * dropping a commented one is the system being right for a reason it cannot
- * state (spec §4.2, P1). And the edge must have been in an accepted record at
- * some point: filid does not read source, so an import no accepted record ever
- * carried is an omission it provably cannot detect, and demanding it would be
- * demanding P1 be false.
+ * state (spec §4.2, P1). And the edge must have been in an accepted record
+ * SINCE IT LAST BECAME REAL: filid does not read source, so an import no
+ * accepted record has carried is an omission it provably cannot detect, and
+ * demanding it would be demanding P1 be false. An import the file stopped
+ * making and later made again is a new claim by that same rule — whatever the
+ * store was once told about the old one is spent.
  *
  * What is left is the claim the system does make: an edge it once stood behind,
  * still really there, in a file it now calls exact, is carried — in the record,
@@ -402,7 +651,7 @@ async function afterCall(
  */
 async function checkLiveEdges(
   world: FactsWorld,
-  stored: ReadonlySet<string>,
+  stored: Set<string>,
 ): Promise<Failure> {
   const status = await readStatus(world);
   const unsettled = new Set([
@@ -419,6 +668,14 @@ async function checkLiveEdges(
     ]),
   );
   const table = readAdjudicationTable(storePaths.sideTableDirectory);
+  // Fold in only what a BINDING record holds. A record whose file has since
+  // changed still sits in the store, and counting its edges would let a claim
+  // about text nobody has now stand in for one about the text there is.
+  for (const [path, record] of records)
+    if (!unsettled.has(path) && world.covered(path))
+      for (const reference of record.facts.references)
+        if ('path' in reference.resolved)
+          stored.add(`${path} -> ${reference.resolved.path}`);
   for (const path of world.livePaths()) {
     if (!world.covered(path) || unsettled.has(path)) continue;
     const page = table.pages.get(storePaths.pathDigest(path));

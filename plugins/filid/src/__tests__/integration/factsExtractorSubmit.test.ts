@@ -239,7 +239,7 @@ describe('facts extractor output submitted to the facts tool', () => {
       needsResolution: after.data?.needsResolution.paths,
       uncertain: after.data?.uncertain.paths,
       toolError: after.data?.toolError.paths,
-      rejected: after.data?.rejected.paths,
+      rejected: after.data?.rejected.items,
     }).toEqual({
       missing: [],
       needsResolution: [],
@@ -256,7 +256,7 @@ describe('facts extractor output submitted to the facts tool', () => {
     const continued = storedRecords.find(
       ({ facts }) => facts.path === LINE_CONTINUATION_FILE,
     );
-    expect(continued?.rejectedClaims).toBe(0);
+    expect(continued?.rejectedClaims).toEqual([]);
     expect(continued?.facts.references).toEqual([
       expect.objectContaining({
         sourceText: "'./thing\\\n.js'",
@@ -266,7 +266,7 @@ describe('facts extractor output submitted to the facts tool', () => {
     const stored = storedRecords.find(
       ({ facts }) => facts.path === JSX_APOSTROPHE_FILE,
     );
-    expect(stored?.rejectedClaims).toBe(0);
+    expect(stored?.rejectedClaims).toEqual([]);
     const storedReferences = stored?.facts.references.map(
       ({ specifier, kind, certainty, resolved }) => ({
         specifier,

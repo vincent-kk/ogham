@@ -12,8 +12,20 @@ export interface WorldFile {
   commented: string[];
 }
 
-/** How a modelled extraction differs from an honest reading of the tree. */
-export type ToolMode = 'exact' | 'lossy' | 'other';
+/**
+ * How a modelled extraction differs from an honest reading of the tree.
+ *
+ * `bogus` keeps every real reference and adds one whose string is not in the
+ * file: the record is accepted, that claim is refused, and the file is left
+ * uncertain for a reason re-running the same tool reproduces exactly.
+ * `comments` reads commented-out imports as references — the mistake the
+ * attested tier exists to correct, and the one that puts a confirmed
+ * attestation and shrink detection in each other's way.
+ */
+export type ToolMode = 'exact' | 'lossy' | 'other' | 'bogus' | 'comments';
+
+/** How a modelled reader attests a file. */
+export type AttestMode = 'honest' | 'incomplete' | 'wrong';
 
 /** A modelled project plus the operations a scenario applies to it. */
 export interface FactsWorld {
@@ -30,6 +42,26 @@ export interface FactsWorld {
   /** Apply one random operation; returns a label for the failure message. */
   mutate(random: Random): string;
   /**
+   * Edges that stopped being real since this was last asked, and forgets them.
+   *
+   * An import the file no longer makes is an edge that genuinely ceased to
+   * exist, so whatever the store was once told about it is spent: if the import
+   * comes back it is a new claim nobody has made yet. Without this, a legitimate
+   * removal followed by a re-addition would look like a store that lost an edge
+   * it was told about.
+   */
+  retired(): string[];
+  /**
+   * What one reader would attest about a file as it now stands.
+   *
+   * `honest` accounts for every line the server's patterns flag — the live
+   * imports by quoting them, the commented ones through `nonReferences`.
+   * `incomplete` leaves the commented lines unexplained, and `wrong` points a
+   * live import at the wrong file while still quoting it, which is what a
+   * second reader has to disagree with rather than refuse.
+   */
+  attest(path: string, mode: AttestMode): FileFacts;
+  /**
    * What a tool would report about the tree as it now stands.
    *
    * `only` narrows it to the files a response asked for.
@@ -45,7 +77,12 @@ const TOOLS: Record<ToolMode, { tool: string; version: string }> = {
   exact: { tool: 'honest', version: '1.0.0' },
   lossy: { tool: 'honest', version: '1.0.0' },
   other: { tool: 'other', version: '2.0.0' },
+  bogus: { tool: 'careless', version: '3.0.0' },
+  comments: { tool: 'literal', version: '4.0.0' },
 };
+
+/** A specifier no modelled file ever contains. */
+const ABSENT_SPECIFIER = './never-written.js';
 
 /**
  * Build a modelled project of `size` source files.
@@ -74,6 +111,7 @@ export function createFactsWorld(size: number): FactsWorld {
   );
   const excluded: string[] = [];
   const everExisted = new Set<string>(paths);
+  const retired: string[] = [];
   let noise = 0;
   const project = createFactsProject({ '.filid/config.json': config([]) });
   const world: FactsWorld = {
@@ -86,6 +124,8 @@ export function createFactsWorld(size: number): FactsWorld {
     },
     covered: (path) => !excluded.includes(path),
     mutate: (source) => mutate(source),
+    retired: () => retired.splice(0, retired.length),
+    attest: (path, mode) => attest(path, mode),
     extract: (mode, source, only) => extract(mode, source, only),
   };
 
@@ -129,6 +169,7 @@ export function createFactsWorld(size: number): FactsWorld {
       if (file.live.length === 0) return addImport(source, path, file);
       const specifier = source.pick(file.live);
       file.live = file.live.filter((one) => one !== specifier);
+      retire(path, specifier);
       return `remove import ${specifier} from ${path}`;
     }
     if (choice === 6 || choice === 7) {
@@ -136,6 +177,7 @@ export function createFactsWorld(size: number): FactsWorld {
       const specifier = source.pick(file.live);
       file.live = file.live.filter((one) => one !== specifier);
       file.commented.push(specifier);
+      retire(path, specifier);
       return `comment out ${specifier} in ${path}`;
     }
     if (choice === 8) {
@@ -153,6 +195,7 @@ export function createFactsWorld(size: number): FactsWorld {
       return `add ${added} (moves the epoch)`;
     }
     if (choice === 10 && present.length > 2) {
+      for (const specifier of file.live) retire(path, specifier);
       files.delete(path);
       return `delete ${path}`;
     }
@@ -161,6 +204,17 @@ export function createFactsWorld(size: number): FactsWorld {
       return `exclude ${path} from the facts scope`;
     }
     return addImport(source, path, file);
+  }
+
+  /**
+   * Note that one edge stopped being real.
+   * @param path The importing file.
+   * @param specifier The specifier it no longer makes live.
+   * @returns Nothing; `retired` carries the edge until it is drained.
+   */
+  function retire(path: string, specifier: string): void {
+    const target = world.targetOf(specifier);
+    if (target !== null) retired.push(`${path} -> ${target}`);
   }
 
   /**
@@ -185,6 +239,46 @@ export function createFactsWorld(size: number): FactsWorld {
   }
 
   /**
+   * Build the record one reader would attest for a file.
+   * @param path The file being read.
+   * @param mode How faithful the reader is.
+   * @returns One attested record.
+   */
+  function attest(path: string, mode: AttestMode): FileFacts {
+    const file = files.get(path) as WorldFile;
+    const others = [...files.keys()].filter((other) => other !== path);
+    return project.facts(path, {
+      references: file.live.map((specifier) => {
+        const target =
+          mode === 'wrong' && others.length > 0
+            ? (others[0] as string)
+            : world.targetOf(specifier);
+        return {
+          specifier,
+          kind: 'static' as const,
+          resolved:
+            target === null ? { unresolved: true as const } : { path: target },
+        };
+      }),
+      ...(mode === 'incomplete' || file.commented.length === 0
+        ? {}
+        : {
+            nonReferences: file.commented.map((_specifier, index) => ({
+              line: file.live.length + index + 1,
+              reason: 'the specifier is inside a comment',
+            })),
+          }),
+      provenance: {
+        tool: 'reader',
+        version: '1.0.0',
+        command: 'read',
+        tier: 'attested' as const,
+        resolutionInputs: [],
+      },
+    });
+  }
+
+  /**
    * Build the records a tool would submit for the tree as it now stands.
    * @param mode Which modelled tool is reporting.
    * @param source Deterministic source, used to choose what a lossy tool drops.
@@ -199,7 +293,19 @@ export function createFactsWorld(size: number): FactsWorld {
     const dropped = mode === 'lossy' ? dropOne(source) : null;
     return world.livePaths().filter((path) => only?.has(path) ?? true).map((path) => {
       const file = files.get(path) as WorldFile;
-      const references = file.live
+      const invented =
+        mode === 'bogus'
+          ? [
+              {
+                specifier: ABSENT_SPECIFIER,
+                kind: 'static' as const,
+                resolved: { path },
+              },
+            ]
+          : [];
+      const seen =
+        mode === 'comments' ? [...file.live, ...file.commented] : file.live;
+      const references = seen
         .filter((specifier) => !(path === dropped?.path && specifier === dropped.specifier))
         .map((specifier) => {
           const target = world.targetOf(specifier);
@@ -211,7 +317,7 @@ export function createFactsWorld(size: number): FactsWorld {
           };
         });
       return project.facts(path, {
-        references,
+        references: [...references, ...invented],
         provenance: {
           ...TOOLS[mode],
           command: 'model',
