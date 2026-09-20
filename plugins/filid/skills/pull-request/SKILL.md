@@ -3,7 +3,7 @@ name: pull-request
 user-invocable: true
 description: 'Sync branch FCA documents through enrich-docs, record what could not be repaired as a PR handoff, then open or update a structured GitHub pull request. Use when a branch is ready for a PR.'
 argument-hint: '[--base REF] [--skip-enrich] [--draft] [--title TITLE] [--auto-approve] [--push|--no-push] [--issue URL] [--spec URL] [--decision URL|PATH] [--screenshot URL|PATH] [--focus TEXT] [--notes PATH]'
-version: '2.3.0'
+version: '2.4.0'
 complexity: complex
 plugin: filid
 ---
@@ -119,6 +119,8 @@ Source modifications left by Stage 1 surface as a Stage 0 abort on the next run.
 Keep the `BASE_REF` and `BASE_BRANCH` resolved in Stage 0. Verify `BASE_REF` still exists before continuing; do not re-estimate after the document commit or replace the selected ref with the default branch.
 
 ## Stage 3 — Change Analysis and PR Body
+
+Stage 1 may have added document files, so run the [facts bootstrap](../.shared/facts-bootstrap.md) for `PROJECT_ROOT` first, then continue to step 1 in the same turn.
 
 1. Collect branch-only commit subjects with `git log --format=%s <BASE_REF>..HEAD`. Collect changed paths with `git diff --name-only <BASE_REF>...HEAD`, Kind evidence with `git diff --name-status -M <BASE_REF>...HEAD`, file statistics with `git diff --stat <BASE_REF>...HEAD`, and summary statistics with `git diff --shortstat <BASE_REF>...HEAD`. The triple-dot diff starts at the merge-base and excludes base-only changes.
 2. Build the body from `reference.md` §3: five open sections on top, four collapsed regions below, in that order; optional sections are omitted when their inputs are absent.

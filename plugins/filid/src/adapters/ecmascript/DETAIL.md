@@ -112,6 +112,14 @@
 - 신뢰할 수 없는 텍스트에 제목 없는 case 호출 텍스트(`it (please)`)만 있는 후보는 `unsupported`다. template 안의 문장도 마찬가지다.
 - 인식된 case가 없고 불확실성이 경계 상실뿐인 후보는 `unsupported`다.
 
+## Boundary Exemptions
+
+### structure·verification 파싱 모듈 — 추출기는 프로세스를 띄우지 않는다
+
+- **Consumers**: `src/factsExtractor/**`
+- **Direct import**: allowed — `structure/extractDependencyReferences.ts`, `structure/inspectEntrySurface.ts`, `verification/classifyVerificationPath.ts`, `verification/countVerificationCases.ts`
+- **Reason**: 진입점은 discovery도 함께 노출하고, discovery의 ignore 필터가 `git ls-files`를 하위 프로세스로 부른다. 추출기는 번들 가드로 "프로세스 시작 0"을 강제하므로 진입점을 지날 수 없다. "프로세스를 띄우지 않는 파싱만"은 진입점이 표현할 수 없는 경계라 그 네 모듈만 직접 가져간다.
+
 ## History
 
 - 2026-09-19 — indeterminate 참조와 semantic case 계수 사유가 byte offset 대신 1-based 줄 번호를 보고한다. LLM 호출자가 해당 줄을 직접 읽고 판단하게 하려면 offset보다 줄 번호가 필요하다.

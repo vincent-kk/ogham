@@ -753,22 +753,6 @@
       "note": "Names a concrete next action that needs no new actor work. A sealed state without its report is not `cached` (handlers/prepareReviewArtifacts.ts:108-111), so a new run re-seals it."
     },
     {
-      "file": "src/mcp/tools/reviewState/handlers/sealReviewState.ts",
-      "hash": "8f9506fa2dda4db8",
-      "kind": "stop",
-      "class": "M",
-      "text": "Do not publish a verdict: report this and stop.",
-      "note": "A dead end today, but each case is fixed by a non-force prepare. The sentence after it already says a new run fixes it without discarding work, and validateReviewOpinion.ts:56,93 already retries the same cases once on its own. Draft for :90/:115/:168/:207: \"Do not publish a verdict. Once, after all prior actors finish, call prepare again with the original arguments and without force, follow its handoffs, and seal again; if seal returns this diagnostic again, report it and stop without a terminal verdict.\" Draft for :242: \"Do not publish a verdict. Call prepare again without force and dispatch any returned handoff that is not exhausted in this run, then seal again; if none remains, report this and stop without a terminal verdict.\" When every handoff is exhausted, :242 stays a designed terminal: a same-run retry must not bypass the exhaustion bound (cross-review/SKILL.md:70). Related to the cross-review seal step (S5b). (?) one row covers five sites"
-    },
-    {
-      "file": "src/mcp/tools/reviewState/handlers/utils/assertReviewInputsFresh.ts",
-      "hash": "8f9506fa2dda4db8",
-      "kind": "stop",
-      "class": "M",
-      "text": "Do not publish a verdict: report this and stop.",
-      "note": "Draft: \"Do not publish a verdict. Once, after every in-flight actor finishes, call prepare again with the same arguments and without force, follow its handoffs, and seal again; it reuses opinions whose inputs did not change. If the inputs change again, report this and stop without a terminal verdict.\" This mirrors the validate variant at :16-17. Re-preparing neither edits nor reverts config, so the config-protection rule does not apply. If the drift came from uncommitted edits, the re-sealed verdict is INCONCLUSIVE because the worktree is dirty (sealReviewState.ts:221-223)."
-    },
-    {
       "file": "src/mcp/tools/reviewState/handlers/utils/resolvePrepareBaseRef.ts",
       "hash": "8d4cd0ec84fad1aa",
       "kind": "human-call",

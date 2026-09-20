@@ -3,7 +3,7 @@ name: cross-review
 user-invocable: true
 description: 'Review a committed change through deterministic preparation, bounded reviewer rounds, independent verification, and a sealed verdict. Use after a branch has a PR, before resolve.'
 argument-hint: '[--base REF] [--effort auto|low|medium|high] [--force] [--cleanup]'
-version: '7.11.0'
+version: '7.12.0'
 complexity: complex
 plugin: filid
 ---
@@ -24,13 +24,13 @@ Anti-yield exception: when the host launches an actor in the background and retu
 - Prepare embeds `reviewers/reviewer.md` and `reviewers/verifier.md` in the briefs; the orchestrator neither opens these files nor passes their paths.
 - `rules/fca.md` FCA-13 and `rules/documents.md` DOC-6–DOC-8 judge Stage 1 document drafts and the PR body's handoff. `review_state prepare` reads the PR body's handoff block and the top template sections as change context, parsing the machine block (the HTML comment marker defined in `pull-request/reference.md` §7) into each review brief's `## FCA Handoff` section. The body file is read once at dispatch; a PR body edited after prepare reaches briefs only through `--force`.
 
-## Step 0 — Load the tool
+## Step 0 — Load the tool and bootstrap facts
 
-If the `review_state` schema is absent, call `ToolSearch` once with `select:mcp__plugin_filid_tools__review_state`.
+If the `review_state` schema is absent, call `ToolSearch` once with `select:mcp__plugin_filid_tools__review_state`. Then run the [facts bootstrap](../.shared/facts-bootstrap.md) for the absolute session cwd and continue to Step 1 in the same turn.
 
 ## Step 1 — Read the PR
 
-Run `gh pr view --json number,url,baseRefName` once. Keep the number and URL and assign its `baseRefName` as `PR_BASE_BRANCH`. Then write the body with one Bash call: `PR_BODY_PATH=$(mktemp "${TMPDIR:-/tmp}/filid-pr-body.XXXXXX") && gh pr view --json body -q '.body // ""' > "$PR_BODY_PATH" && echo "$PR_BODY_PATH"`; keep only the emitted path as `PR_BODY_PATH`, and never print or read the body. Run exactly these two `gh` commands; make no other Bash call before prepare except the base fallback below, and do not run git yourself. If a present PR has a missing or empty base name and no explicit `--base`, run `node <skill-directory>/../pull-request/scripts/resolveBaseBranch.mjs --project-root <session cwd>` and use its JSON `baseRef` as `--base`; stop with its diagnostic only when it exits nonzero or reports `ambiguous: true`. Record absence as `PR: none`, or access failure as `PR: unavailable`, and continue without `PR_BODY_PATH` or `PR_BASE_BRANCH`.
+Run `gh pr view --json number,url,baseRefName` once. Keep the number and URL and assign its `baseRefName` as `PR_BASE_BRANCH`. Then write the body with one Bash call: `PR_BODY_PATH=$(mktemp "${TMPDIR:-/tmp}/filid-pr-body.XXXXXX") && gh pr view --json body -q '.body // ""' > "$PR_BODY_PATH" && echo "$PR_BODY_PATH"`; keep only the emitted path as `PR_BODY_PATH`, and never print or read the body. Run exactly these two `gh` commands; apart from the facts bootstrap in Step 0 and the base fallback below, make no other Bash call before prepare, and do not run git yourself. If a present PR has a missing or empty base name and no explicit `--base`, run `node <skill-directory>/../pull-request/scripts/resolveBaseBranch.mjs --project-root <session cwd>` and use its JSON `baseRef` as `--base`; stop with its diagnostic only when it exits nonzero or reports `ambiguous: true`. Record absence as `PR: none`, or access failure as `PR: unavailable`, and continue without `PR_BODY_PATH` or `PR_BASE_BRANCH`.
 
 ## Step 2 — Prepare
 

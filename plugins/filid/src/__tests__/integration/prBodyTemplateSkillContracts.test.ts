@@ -85,7 +85,7 @@ describe('PR body template skill contracts', () => {
     expect(pullRequest).not.toContain('Body folded:');
   });
 
-  it('exposes the six caller options at version 2.3.0', () => {
+  it('exposes the six caller options at version 2.4.0', () => {
     const options = pullRequest
       .split('## Options')[1]
       .split('## Invariants')[0];
@@ -98,7 +98,7 @@ describe('PR body template skill contracts', () => {
       '--notes',
     ])
       expect(options).toContain(`\`${option}`);
-    expect(pullRequest).toContain("version: '2.3.0'");
+    expect(pullRequest).toContain("version: '2.4.0'");
   });
 
   it('forbids inferring caller-authored sections from code', () => {

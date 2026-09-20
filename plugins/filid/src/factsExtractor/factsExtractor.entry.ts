@@ -3,16 +3,13 @@
 import { existsSync, realpathSync, statSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { writeFileAtomicallySync } from '@ogham/cross-platform';
-
-import { ecmascriptStructureAdapter } from '../adapters/ecmascript/index.js';
-
 import { extractFileFacts } from './factsExtractor.js';
 import { normalizeCommand } from './utils/input/normalizeCommand.js';
 import { parseExtractorArguments } from './utils/input/parseExtractorArguments.js';
 import { readFileList } from './utils/input/readFileList.js';
 import { readListText } from './utils/input/readListText.js';
 import { isOutputInsideProject } from './utils/paths/isOutputInsideProject.js';
+import { writeExtractionOutput } from './utils/paths/writeExtractionOutput.js';
 
 /** Exit status of a command line the program refuses. */
 const USAGE_ERROR = 2;
@@ -57,15 +54,18 @@ if (parsed.filesFrom !== undefined) {
     );
   }
 }
-const requested = parsed.all
-  ? await ecmascriptStructureAdapter.discoverSourceFiles(root)
-  : [...parsed.files, ...listed];
+const selected = [...parsed.files, ...listed];
+const requested = parsed.part
+  ? selected.filter(
+      (_path, index) => index % parsed.part!.count === parsed.part!.index - 1,
+    )
+  : selected;
 const { records, rejected, unreadable } = await extractFileFacts(
   root,
   requested,
   normalizeCommand(argv, root, process.cwd()),
 );
-writeFileAtomicallySync(out, `${JSON.stringify(records)}\n`);
+writeExtractionOutput(out, `${JSON.stringify(records)}\n`);
 process.stdout.write(
   `${JSON.stringify({
     files: records.length,

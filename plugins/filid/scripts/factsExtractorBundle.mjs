@@ -29,7 +29,13 @@ const FORBIDDEN_PATTERNS = [
   /\bmicromatch\b/,
   /\bpicomatch\b/,
   /\blodash\b/,
-  // Process starts other than --all's one git call
+  // Any way to start a process, and any path to one
+  /node:child_process/,
+  /require\(["']child_process["']\)/,
+  /from\s*["']child_process["']/,
+  /import\s*\(\s*["'](?:node:)?child_process["']\s*\)/,
+  /\bspawnSync\(/,
+  /\bspawn\(/,
   /detached:/,
   /\bexecFileSync\b/,
   /\bexecSync\(/,
@@ -38,18 +44,6 @@ const FORBIDDEN_PATTERNS = [
   /\bexecFile\(/,
   // A bare call only: `x.exec(` is spelled like RegExp.prototype.exec, which the adapter uses
   /(?<![\w$.])exec\(/,
-];
-
-/**
- * Process-start calls the bundle holds exactly once, by the text that is counted.
- *
- * `spawnSync(` is cross-spawn's call behind the one fixed git invocation.
- * `spawn(` is cross-spawn's asynchronous export: CommonJS is not tree-shaken,
- * so it rides along, and the program never calls it.
- */
-const SINGLE_CALLS = [
-  ['spawnSync(', /spawnSync\(/g],
-  ['spawn(', /\bspawn\(/g],
 ];
 
 /**
@@ -75,9 +69,9 @@ export function factsExtractorBuildOptions(root) {
 /**
  * Check a built bundle against the isolation guard.
  *
- * `--all` selects the server's file set with git's ignore semantics, so the
- * bundle holds each of `SINGLE_CALLS` exactly once — what cross-spawn brings
- * behind the one fixed git invocation — and no other way to start a process.
+ * The server owns the scope, so the extractor reads a file list and starts no
+ * process: the bundle carries no `child_process` import and no call that could
+ * start one.
  * @param content Bundle text.
  * @param size Bundle size in bytes.
  * @returns One line per violation; empty when the bundle passes.
@@ -91,10 +85,5 @@ export function findFactsBundleViolations(content, size) {
   for (const pattern of FORBIDDEN_PATTERNS)
     if (pattern.test(content))
       violations.push(`forbidden pattern ${pattern} matched`);
-  for (const [call, pattern] of SINGLE_CALLS) {
-    const calls = (content.match(pattern) ?? []).length;
-    if (calls !== 1)
-      violations.push(`${call} occurs ${calls} times, expected 1`);
-  }
   return violations;
 }

@@ -3,7 +3,7 @@ name: restructure
 user-invocable: true
 description: 'Create a read-only FCA placement plan, obtain approval, execute it via external file operations, and verify exact postconditions. Use when a unit belongs at another fractal or misplacement is flagged.'
 argument-hint: '[path] <placement requests> [--dry-run] [--auto-approve]'
-version: '1.4.0'
+version: '1.5.0'
 complexity: complex
 plugin: filid
 ---
@@ -22,6 +22,10 @@ Move units to their FCA target locations through one persisted `restructure` `pl
 Use `enrich-docs` when only documents need improvement.
 
 ## Workflow
+
+### 0. Bootstrap facts
+
+Run the [facts bootstrap](../.shared/facts-bootstrap.md) for the project root, then continue to step 1 in the same turn.
 
 ### 1. Create the read-only plan
 

@@ -11,10 +11,8 @@ import { tmpdir } from 'node:os';
 import { join, relative } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { portableRelative } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ecmascriptStructureAdapter } from '../../../adapters/ecmascript/index.js';
 import type { FileFacts } from '../../../factsExtractor/index.js';
 
 /** Package root; `node --import tsx` resolves from here. */
@@ -188,31 +186,41 @@ describe('filid-facts command line', () => {
   );
 
   it.skipIf(process.platform === 'win32')(
-    'starts git only for --all, never for a file list',
+    'starts no child process for any input mode',
     () => {
       const bin = mkdtempSync(join(tmpdir(), 'filid-facts-bin-'));
-      const marker = join(bin, 'git-called');
-      writeFileSync(
-        join(bin, 'git'),
-        `#!/bin/sh\necho called >> '${marker}'\nexit 1\n`,
-      );
-      chmodSync(join(bin, 'git'), 0o755);
+      const marker = join(bin, 'command-called');
+      for (const command of ['git', 'sh', 'node']) {
+        writeFileSync(
+          join(bin, command),
+          `#!/bin/sh\necho called >> '${marker}'\nexit 1\n`,
+        );
+        chmodSync(join(bin, command), 0o755);
+      }
       const env = { ...process.env, PATH: `${bin}:${process.env.PATH ?? ''}` };
       try {
-        const listed = runProgram(
-          ['--root', root, '--out', join(outside, 'list.json'), 'a.ts'],
-          '',
-          env,
-        );
-        expect(listed.status).toBe(0);
+        expect(
+          runProgram(
+            ['--root', root, '--out', join(outside, 'list.json'), 'a.ts'],
+            '',
+            env,
+          ).status,
+        ).toBe(0);
+        expect(
+          runProgram(
+            [
+              '--root',
+              root,
+              '--out',
+              join(outside, 'stdin.json'),
+              '--files-from',
+              '-',
+            ],
+            'a.ts\n',
+            env,
+          ).status,
+        ).toBe(0);
         expect(existsSync(marker)).toBe(false);
-        const all = runProgram(
-          ['--root', root, '--out', join(outside, 'all.json'), '--all'],
-          '',
-          env,
-        );
-        expect(all.status).toBe(0);
-        expect(existsSync(marker)).toBe(true);
       } finally {
         rmSync(bin, { recursive: true, force: true });
       }
@@ -220,14 +228,77 @@ describe('filid-facts command line', () => {
     30_000,
   );
 
-  it('extracts with --all exactly the files the adapter discovers', async () => {
-    const out = join(outside, 'all.json');
-    expect(runProgram(['--root', root, '--out', out, '--all']).status).toBe(0);
-    const records = JSON.parse(readFileSync(out, 'utf8')) as FileFacts[];
-    expect(records.map(({ path }) => path)).toEqual(
-      (await ecmascriptStructureAdapter.discoverSourceFiles(root))
-        .map((path) => portableRelative(root, path).replaceAll('\\', '/'))
-        .sort(),
+  it('treats an inherited object key as an unknown option, not a value option', () => {
+    const refused = runProgram([
+      '--root',
+      root,
+      '--out',
+      join(outside, 'proto.json'),
+      'toString',
+      'a.ts',
+    ]);
+    expect(refused.status).toBe(0);
+    const records = JSON.parse(
+      readFileSync(join(outside, 'proto.json'), 'utf8'),
+    ) as FileFacts[];
+    expect(records.map(({ path }) => path)).toEqual(['a.ts']);
+  });
+
+  it('splits a list into disjoint parts whose union is the whole list', () => {
+    const listPath = join(outside, 'list.txt');
+    writeFileSync(listPath, ['a.ts', 'b.ts'].join('\n'));
+    const parts = [1, 2].map((part) => {
+      const out = join(outside, `part${part}.json`);
+      expect(
+        runProgram([
+          '--root',
+          root,
+          '--out',
+          out,
+          '--files-from',
+          listPath,
+          '--part',
+          `${part}/2`,
+        ]).status,
+      ).toBe(0);
+      return (JSON.parse(readFileSync(out, 'utf8')) as FileFacts[]).map(
+        ({ path }) => path,
+      );
+    });
+    expect(parts[0].filter((path) => parts[1].includes(path))).toEqual([]);
+    expect([...parts[0], ...parts[1]].sort()).toEqual(['a.ts', 'b.ts']);
+    expect(parts[0].length).toBeGreaterThan(0);
+    expect(parts[1].length).toBeGreaterThan(0);
+  });
+
+  it.each(['0/2', '3/2', 'x/2', '1/0', '1'])('refuses --part %s', (value) => {
+    const refused = runProgram(
+      [
+        '--root',
+        root,
+        '--out',
+        join(outside, 'bad-part.json'),
+        '--files-from',
+        '-',
+        '--part',
+        value,
+      ],
+      'a.ts\n',
     );
-  }, 30_000);
+    expect(refused.status).toBe(2);
+    expect(refused.stderr).toContain('--part');
+  });
+
+  it('refuses --all, because the server owns the scope', () => {
+    const refused = runProgram([
+      '--root',
+      root,
+      '--out',
+      join(outside, 'all.json'),
+      '--all',
+    ]);
+    expect(refused.status).toBe(2);
+    expect(refused.stderr).toContain('Unknown option --all');
+    expect(existsSync(join(outside, 'all.json'))).toBe(false);
+  });
 });

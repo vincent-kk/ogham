@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -13,6 +13,7 @@ import {
 } from '../../core/facts/index.js';
 import { extractFileFacts } from '../../factsExtractor/index.js';
 import type { FileFactsExtraction } from '../../factsExtractor/index.js';
+import { readFileList } from '../../factsExtractor/utils/input/readFileList.js';
 import { handleFacts } from '../../mcp/tools/facts/index.js';
 import type {
   FactsResult,
@@ -120,14 +121,22 @@ afterEach(() => {
 });
 
 /**
- * Run the extraction program's library entry over every covered source file.
+ * Extract exactly the files the server put in its extraction list.
+ *
+ * The CLI reads that list through `--files-from`; this runs the same list
+ * through the library entry, so the seam under test is the server's scope
+ * meeting the extractor's input.
  * @returns The extraction, exactly as the CLI would serialize its records.
  */
-function extractSources(): Promise<FileFactsExtraction> {
+async function extractSources(): Promise<FileFactsExtraction> {
+  const { summary } = await status();
+  const listed = readFileList(
+    readFileSync(summary.extractionList.path, 'utf8'),
+  );
   return extractFileFacts(
     project.root,
-    SOURCE_PATHS,
-    `filid-facts --root . ${SOURCE_PATHS.join(' ')}`,
+    listed,
+    `filid-facts --root . --files-from <list>`,
   );
 }
 
@@ -177,6 +186,17 @@ async function submitExtraction(extraction: FileFactsExtraction): Promise<{
 }
 
 describe('facts extractor output submitted to the facts tool', () => {
+  it('extracts the list the server wrote, with no path it cannot carry', async () => {
+    const { summary } = await status();
+    expect(summary.extractionList).toMatchObject({
+      count: SOURCE_PATHS.length,
+      unrepresentable: 0,
+    });
+    expect(
+      readFileList(readFileSync(summary.extractionList.path, 'utf8')).sort(),
+    ).toEqual([...SOURCE_PATHS].sort());
+  });
+
   it('emits one record per source file, each valid under the strict server schema', async () => {
     const extraction = await extractSources();
 

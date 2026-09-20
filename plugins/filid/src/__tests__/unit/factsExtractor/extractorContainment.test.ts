@@ -13,7 +13,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { ecmascriptStructureAdapter } from '../../../adapters/ecmascript/index.js';
+import * as dependencyReferences from '../../../adapters/ecmascript/structure/extractDependencyReferences.js';
 import { extractFileFacts } from '../../../factsExtractor/index.js';
 import { VERSION } from '../../../version.js';
 
@@ -138,7 +138,7 @@ describe('one failing file does not stop the run', () => {
 
   it('binds an adapter failure on read bytes to those bytes as a toolError record', async () => {
     const failure = vi
-      .spyOn(ecmascriptStructureAdapter, 'extractDependencies')
+      .spyOn(dependencyReferences, 'extractDependencyReferences')
       .mockRejectedValueOnce(new Error(`lexer broke in ${join(root, 'a.ts')}`));
     const extraction = await extractFileFacts(root, ['a.ts', 'b.ts'], 'cmd');
     failure.mockRestore();
@@ -158,7 +158,7 @@ describe('one failing file does not stop the run', () => {
 describe('a toolError message holds no absolute path', () => {
   it('replaces absolute paths outside the file and the root with a placeholder', async () => {
     const failure = vi
-      .spyOn(ecmascriptStructureAdapter, 'extractDependencies')
+      .spyOn(dependencyReferences, 'extractDependencyReferences')
       .mockRejectedValueOnce(
         new Error(
           `cannot open '/opt/elsewhere/x.ts' or C:\\Temp\\y.ts for ${join(root, 'a.ts')}`,

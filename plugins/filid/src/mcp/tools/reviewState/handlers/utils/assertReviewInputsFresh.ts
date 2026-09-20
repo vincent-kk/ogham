@@ -1,4 +1,7 @@
-import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../../constants/reviewState.js';
+import {
+  PREPARE_ONCE_REPEAT_TAIL,
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+} from '../../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../../errors/toolDiagnosticError.js';
 import type {
   ReviewStatePaths,
@@ -15,7 +18,7 @@ type InputsFreshCallingAction = 'checkpoint' | 'validate' | 'seal';
 const INPUTS_STALE_NEXT_ACTIONS: Record<InputsFreshCallingAction, string> = {
   validate:
     'Do not validate this generation. After every in-flight actor finishes, call prepare again with the same arguments and without force; it starts a new generation that reuses validated opinions whose inputs did not change.',
-  seal: 'Do not publish a verdict: report this and stop. A new /filid:cross-review run prepares a generation for the changed instructions or rules and reuses unaffected opinions.',
+  seal: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it opens a generation for the changed instructions or rules and reuses unaffected opinions. ${PREPARE_ONCE_REPEAT_TAIL}`,
   checkpoint:
     'Call prepare once with the same arguments and without force: it opens a new generation for the current instructions, rules and actor methods and reuses the opinions whose inputs did not change. Inside resolve or revalidate, finish that flow first and re-run /filid:pipeline, which re-enters at the right stage.',
 };

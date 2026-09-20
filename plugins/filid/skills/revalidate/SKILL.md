@@ -3,7 +3,7 @@ name: revalidate
 user-invocable: true
 description: 'Re-measure the post-correction delta against the recorded resolve baseline, judge every rejection justification, and issue the final PASS or FAIL. Use after resolve corrections are committed.'
 argument-hint: '[--base REF]'
-version: '1.1.1'
+version: '1.2.0'
 complexity: complex
 plugin: filid
 ---
@@ -19,6 +19,10 @@ This is the only stage that decides whether the review cycle closed. It re-measu
 Resolve files relative to this `SKILL.md`:
 
 - `reference.md` — status derivation matrix, `re-validate.md` template, constitutionality rules for rejections, PR comment format (§4).
+
+## Step 0 — Facts bootstrap
+
+Run the [facts bootstrap](../.shared/facts-bootstrap.md) for `PROJECT_ROOT`, then continue to Step 1 in the same turn.
 
 ## Step 1 — Locate the state and baseline
 

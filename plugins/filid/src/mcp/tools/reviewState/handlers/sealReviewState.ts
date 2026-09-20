@@ -7,6 +7,7 @@ import {
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
   PREPARE_ONCE_NEXT_ACTION,
+  PREPARE_ONCE_REPEAT_TAIL,
   REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_DIAGNOSTIC_MESSAGES,
   REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
@@ -89,7 +90,7 @@ export async function sealReviewState(
           affects: [],
           nextAction: schemaMismatch
             ? PREPARE_ONCE_NEXT_ACTION
-            : 'Do not publish a verdict: report this and stop. A new /filid:cross-review run prepares and reviews this branch from the start.',
+            : `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it prepares and reviews this branch from the start. ${PREPARE_ONCE_REPEAT_TAIL}`,
         },
       ],
     });
@@ -124,8 +125,7 @@ export async function sealReviewState(
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SOURCE_HASH_STALE,
           path: paths.statePath,
           affects: [],
-          nextAction:
-            'Do not publish a verdict: report this and stop. A new /filid:cross-review run prepares the current commits and reuses validated opinions for unchanged files.',
+          nextAction: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it prepares the current commits and reuses validated opinions for unchanged files. ${PREPARE_ONCE_REPEAT_TAIL}`,
         },
       ],
     });
@@ -160,8 +160,7 @@ export async function sealReviewState(
             message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.REPORT_MISSING,
             path: paths.reportPath,
             affects: [],
-            nextAction:
-              'Do not publish a verdict: report this and stop. A new /filid:cross-review run restores the report from the validated opinions without new reviewer work.',
+            nextAction: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it opens a generation from the validated opinions, so seal restores the report without new reviewer work. ${PREPARE_ONCE_REPEAT_TAIL}`,
           },
         ],
       });
@@ -213,8 +212,7 @@ export async function sealReviewState(
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SESSION_MISSING,
           path: paths.sessionPath,
           affects: [],
-          nextAction:
-            'Do not publish a verdict: report this and stop. A new /filid:cross-review run restores the session artifact and keeps validated progress.',
+          nextAction: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it restores the session artifact and keeps validated progress. ${PREPARE_ONCE_REPEAT_TAIL}`,
         },
       ],
     });
@@ -248,8 +246,7 @@ export async function sealReviewState(
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.OPINIONS_MISSING,
           path: paths.opinionsDirectory,
           affects: [],
-          nextAction:
-            'Do not publish a verdict: report this and stop. No reviewable group has a merged opinion; a new /filid:cross-review run dispatches the pending reviewer handoffs.',
+          nextAction: `Do not publish a verdict: no reviewable group has a merged opinion. After every in-flight actor finishes, call prepare once with the same arguments and without force and dispatch the handoffs it returns. ${PREPARE_ONCE_REPEAT_TAIL}`,
         },
       ],
     });

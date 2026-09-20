@@ -5,7 +5,7 @@ import { ECMASCRIPT_ADAPTER_ID } from '../structure/ecmascriptConventions.js';
 import { ecmascriptStructureAdapter } from '../structure/ecmascriptStructureAdapter.js';
 
 import { classifyVerificationPath } from './classifyVerificationPath.js';
-import { countSemanticCases } from './countSemanticCases.js';
+import { countVerificationCases } from './countVerificationCases.js';
 import { extractContractGroupIds } from './extractContractGroupIds.js';
 
 export const ecmascriptVerificationAdapter: VerificationAdapter = {
@@ -26,14 +26,7 @@ export const ecmascriptVerificationAdapter: VerificationAdapter = {
     return classifyVerificationPath(filePath);
   },
   async count(filePath) {
-    if (classifyVerificationPath(filePath) === 'unsupported')
-      return {
-        certainty: 'unsupported',
-        exactCount: undefined,
-        knownLowerBound: 0,
-        reasons: ['file role is not supported by the ECMAScript adapter'],
-      };
-    return countSemanticCases(readFileSync(filePath, 'utf8'));
+    return countVerificationCases(filePath);
   },
   async extractContractGroupIds(filePath) {
     if (classifyVerificationPath(filePath) === 'unsupported') return [];

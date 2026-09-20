@@ -22,7 +22,7 @@ beforeAll(async () => {
   bundle = result.outputFiles[0].text;
 }, 60_000);
 
-describe('the facts extractor bundle starts one process and pulls in no server code', () => {
+describe('the facts extractor bundle starts no process and pulls in no server code', () => {
   it('passes the guard the build script applies', () => {
     expect(
       findFactsBundleViolations(bundle, Buffer.byteLength(bundle)),
@@ -38,11 +38,18 @@ describe('the facts extractor bundle starts one process and pulls in no server c
 
   it.each([
     ['a detached spawn', 'x({detached:!0})'],
-    ['a second spawnSync call', 'y.spawnSync("sh")'],
+    ['a spawnSync call', 'y.spawnSync("sh")'],
     ['execFileSync', 'execFileSync("sh")'],
     ['execSync', 'z.execSync("sh")'],
     ['spawnDetached', 'spawnDetached("sh")'],
-    ['a second async spawn call', 'q.spawn("sh")'],
+    ['an async spawn call', 'q.spawn("sh")'],
+    ['a child_process import', 'import"node:child_process"'],
+    ['a child_process require', 'require("child_process")'],
+    ['a dynamic child_process import', 'await import("child_process")'],
+    [
+      'a dynamic node:child_process import',
+      "await import('node:child_process')",
+    ],
     ['fork', 'q.fork("worker.js")'],
     ['a bare exec call', 'exec("sh")'],
     ['execFile', 'q.execFile("sh")'],

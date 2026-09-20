@@ -1,10 +1,10 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
-import {
-  ecmascriptStructureAdapter,
-  ecmascriptVerificationAdapter,
-} from '../../../adapters/ecmascript/index.js';
+import { extractDependencyReferences } from '../../../adapters/ecmascript/structure/extractDependencyReferences.js';
+import { inspectEntrySurface } from '../../../adapters/ecmascript/structure/inspectEntrySurface.js';
+import { classifyVerificationPath } from '../../../adapters/ecmascript/verification/classifyVerificationPath.js';
+import { countVerificationCases } from '../../../adapters/ecmascript/verification/countVerificationCases.js';
 import type { FactsProvenance, FileFacts } from '../../types/fileFacts.js';
 import type { ProjectFile } from '../paths/resolveProjectFile.js';
 
@@ -73,16 +73,10 @@ export async function extractOneFile(
   if (bytes.includes(0))
     return record({ toolError: { message: BINARY_CONTENT_MESSAGE } });
   try {
-    const references = await ecmascriptStructureAdapter.extractDependencies(
-      file.absolutePath,
-    );
-    const surface = await ecmascriptStructureAdapter.inspectEntryPoint(
-      file.absolutePath,
-    );
-    const role = await ecmascriptVerificationAdapter.classify(
-      file.absolutePath,
-    );
-    const cases = await ecmascriptVerificationAdapter.count(file.absolutePath);
+    const references = await extractDependencyReferences(file.absolutePath);
+    const surface = await inspectEntrySurface(file.absolutePath);
+    const role = await classifyVerificationPath(file.absolutePath);
+    const cases = countVerificationCases(file.absolutePath);
     return record({
       references: references.map((reference) =>
         toReference(projectRoot, reference),

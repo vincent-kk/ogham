@@ -352,8 +352,11 @@ export const REVIEW_STATE_REPLACED_FILE_PREFIX = 'replaced-state-';
  * What every action says when the stored review state cannot be used: one
  * prepare without force replaces it, and a repeat inside one run ends the run.
  */
-export const PREPARE_ONCE_NEXT_ACTION =
-  'Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it archives this state and starts a new review generation. If the same diagnostic returns in this run, end without a terminal verdict and record it in the report as a filid defect.';
+/** How every "call prepare once" sentence ends: a repeat inside one run ends the run. */
+export const PREPARE_ONCE_REPEAT_TAIL =
+  'If the same diagnostic returns in this run, end without a terminal verdict and record it in the report as a filid defect.';
+
+export const PREPARE_ONCE_NEXT_ACTION = `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it archives this state and starts a new review generation. ${PREPARE_ONCE_REPEAT_TAIL}`;
 
 /** Stable machine-readable diagnostic codes returned by review-state handlers. */
 export const REVIEW_STATE_DIAGNOSTIC_CODES = {
