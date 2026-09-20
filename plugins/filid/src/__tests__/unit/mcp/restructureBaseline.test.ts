@@ -11,6 +11,9 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { materializeToolEnvelope } from '../../../core/infra/artifactStore/index.js';
+import { toProjectRelativePath } from '../../../lib/toProjectRelativePath.js';
+import { handleFacts } from '../../../mcp/tools/facts/index.js';
+import type { FactsStatusData } from '../../../mcp/tools/facts/index.js';
 import {
   type RestructureResult,
   handleRestructure,
@@ -24,8 +27,6 @@ import type {
   RestructurePlan,
 } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
-import { handleFacts } from '../../../mcp/tools/facts/index.js';
-import type { FactsStatusData } from '../../../mcp/tools/facts/index.js';
 import { seedFacts } from '../../integration/helpers/seedFacts.js';
 import { FIXTURE_INTENT } from '../../integration/reviewFlow/helpers/reviewFlowRepositoryFiles.js';
 import { writeSharedUnitRestructureProject } from '../../integration/reviewFlow/helpers/writeSharedUnitRestructureProject.js';
@@ -150,7 +151,7 @@ async function postcondition(planPath: string) {
     throw new Error('postcondition returned no validation result');
   const relative = ({ code, path }: { code: string; path?: string }) => [
     code,
-    path?.slice(projectRoot.length + 1),
+    path === undefined ? undefined : toProjectRelativePath(projectRoot, path),
   ];
   return {
     status: result.status,

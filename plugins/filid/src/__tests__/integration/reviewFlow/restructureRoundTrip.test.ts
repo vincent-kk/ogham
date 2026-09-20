@@ -11,6 +11,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { materializeToolEnvelope } from '../../../core/infra/artifactStore/index.js';
+import { toProjectRelativePath } from '../../../lib/toProjectRelativePath.js';
 import {
   type RestructureResult,
   handleRestructure,
@@ -21,7 +22,6 @@ import type {
 } from '../../../types/report.js';
 import type { RestructurePlan } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
-
 import { seedFacts } from '../helpers/seedFacts.js';
 
 import { writeSharedUnitRestructureProject } from './helpers/writeSharedUnitRestructureProject.js';
@@ -182,7 +182,9 @@ describe('restructure plan → precondition → postcondition round trip', () =>
       result.data && 'findings' in result.data
         ? result.data.findings.map(({ code, path }) => [
             code,
-            path?.slice(projectRoot.length + 1),
+            path === undefined
+              ? undefined
+              : toProjectRelativePath(projectRoot, path),
           ])
         : [],
     ).toEqual([
@@ -215,7 +217,9 @@ describe('restructure plan → precondition → postcondition round trip', () =>
 // An unknown key may have been meant to tighten the analysis, so its config-warning affects every axis.
 describe('an unknown config key keeps every restructure step indeterminate', () => {
   it('plans with status indeterminate beside the config-warning', async () => {
-    projectRoot = await writeSharedUnitRestructureProject(CONFIG_WITH_UNKNOWN_KEY);
+    projectRoot = await writeSharedUnitRestructureProject(
+      CONFIG_WITH_UNKNOWN_KEY,
+    );
     const { plan, data } = await planSharedUnitMove();
     expect(plan.status).toBe('indeterminate');
     expect(plan.diagnostics.map(({ code }) => code)).toEqual([
@@ -226,7 +230,9 @@ describe('an unknown config key keeps every restructure step indeterminate', () 
   });
 
   it('validates precondition and postcondition as indeterminate although the plan validates', async () => {
-    projectRoot = await writeSharedUnitRestructureProject(CONFIG_WITH_UNKNOWN_KEY);
+    projectRoot = await writeSharedUnitRestructureProject(
+      CONFIG_WITH_UNKNOWN_KEY,
+    );
     const { data, planPath } = await planSharedUnitMove();
     const before = await validate('precondition', planPath);
     expect(before).toMatchObject({
