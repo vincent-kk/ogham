@@ -10,11 +10,11 @@ import { configureReviewGroups } from './helpers/configureReviewGroups.js';
 import { createReviewStateSealFixture } from './helpers/createReviewStateSealFixture.js';
 
 /** Sealed review whose worktree changes after the verdict. */
-let fixture: ReturnType<typeof createReviewStateSealFixture>;
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 1);
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 1);
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });

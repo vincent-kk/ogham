@@ -30,6 +30,27 @@ export interface FactsFileEvidence {
    */
   hasOpenItems: boolean;
   /**
+   * Whether the store could not read the judgements that would settle this file.
+   *
+   * An unreadable side-table or pending shard is not an empty one: the file's
+   * open items and its adopted edges would both be invisible, and invisible
+   * they read as agreement. Losing a `dismiss` leaves the edge in place and is
+   * conservative; losing an `adopt` removes one, and a conclusion that requires
+   * an absence would pass on it (spec §3).
+   */
+  judgementsUnreadable: boolean;
+  /**
+   * Whether this file's judgements were discarded and nobody re-derived them.
+   *
+   * `discard-damaged` is the way out of an unreadable shard, but it removes
+   * what the shard held rather than recovering it — an adopted edge no record
+   * carries is simply gone. Settling the file the moment the shard is emptied
+   * would let a caller that skipped the comparison, or a concurrent seal,
+   * conclude over that absence. Cleared by a comparison whose candidate comes
+   * from a provenance the stored record did not (spec §3).
+   */
+  awaitingReDerivation: boolean;
+  /**
    * Whether an attested submission for this file is waiting on a second actor.
    *
    * It outranks `missing` because the next action differs: the file is not
@@ -48,6 +69,8 @@ export interface FactsFileEvidence {
  * positive declaration that outranks everything, an unbound record is no record,
  * a stale epoch or a moved declared input is reported before any judgement
  * drawn from resolutions, and a tool failure outranks the uncertainty it causes.
+ * Judgements the store could not read outrank the record itself: whatever the
+ * record says, what would contradict it was not read.
  *
 
  * @param evidence - The file, its record and whether that record still binds.
@@ -59,6 +82,8 @@ export function classifyFactsFile(
   currentEpoch: string,
 ): FactsFileState {
   if (!evidence.inScope) return FACTS_FILE_STATES.UNSUPPORTED;
+  if (evidence.judgementsUnreadable) return FACTS_FILE_STATES.UNCERTAIN;
+  if (evidence.awaitingReDerivation) return FACTS_FILE_STATES.UNCERTAIN;
   if (evidence.hasPendingAttestation) return FACTS_FILE_STATES.UNCERTAIN;
   const { record } = evidence;
   if (record === null || !evidence.syntaxValid)

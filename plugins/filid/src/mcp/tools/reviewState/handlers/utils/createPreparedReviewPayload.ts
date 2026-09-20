@@ -99,6 +99,7 @@ export function createPreparedReviewPayload(
       reviewDirectory: input.paths.reviewDirectory,
       statePath: input.paths.statePath,
       evidencePath: input.paths.evidencePath,
+      factsPath: input.paths.factsPath,
       sessionPath: input.paths.sessionPath,
       ...(input.state.incremental
         ? {

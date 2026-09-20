@@ -12,6 +12,7 @@ import {
   type ReviewStateSealFixture,
   createReviewStateSealFixture,
 } from './helpers/createReviewStateSealFixture.js';
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { prepareCandidateOnlyReviewState } from './helpers/prepareCandidateOnlyReviewState.js';
 import { runReviewStateFixtureGit } from './helpers/runReviewStateFixtureGit.js';
 import { writeReviewStateFixtureFile } from './helpers/writeReviewStateFixtureFile.js';
@@ -19,8 +20,8 @@ import { writeReviewStateFixtureFile } from './helpers/writeReviewStateFixtureFi
 /** Isolated Git repository and plugin root for prepare input contracts. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -37,7 +38,7 @@ describe('prepareReviewState optional inputs', () => {
       '.filid/local-note.txt',
       'local changes',
     );
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -46,7 +47,7 @@ describe('prepareReviewState optional inputs', () => {
   });
 
   it('detects the branch and normalizes a subdirectory to the Git root', async () => {
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: 'prepare',
       projectRoot: portableJoin(fixture.projectRoot, 'src'),
     });
@@ -62,7 +63,7 @@ describe('prepareReviewState optional inputs', () => {
       'rev-parse',
       'HEAD',
     ]);
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -152,7 +153,7 @@ describe('prepareReviewState optional inputs', () => {
   });
 
   it('normalizes a nested projectRoot and resolves branchName and local main, including checkpoint', async () => {
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: 'prepare',
       projectRoot: portableJoin(fixture.projectRoot, 'src'),
     });
@@ -184,7 +185,7 @@ describe('prepareReviewState optional inputs', () => {
 
   it('rejects an explicit unknown baseRef without falling back to main', async () => {
     await expect(
-      handleReviewState({
+      prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         baseRef: 'missing-base',
@@ -208,7 +209,7 @@ describe('prepareReviewState optional inputs', () => {
       'refs/remotes/origin/HEAD',
       'refs/remotes/origin/trunk',
     ]);
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -221,7 +222,7 @@ describe('prepareReviewState optional inputs', () => {
       'refs/remotes/origin/main',
       'main',
     ]);
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -235,7 +236,7 @@ describe('prepareReviewState optional inputs', () => {
       'main',
       'master',
     ]);
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -245,7 +246,7 @@ describe('prepareReviewState optional inputs', () => {
   it('reports an unresolved base when every candidate is absent', async () => {
     runReviewStateFixtureGit(fixture.projectRoot, ['branch', '-D', 'main']);
     await expect(
-      handleReviewState({
+      prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
       }),
@@ -254,7 +255,7 @@ describe('prepareReviewState optional inputs', () => {
 
   it('finds the detached review again from another action on the same HEAD', async () => {
     runReviewStateFixtureGit(fixture.projectRoot, ['checkout', '--detach']);
-    const first = await handleReviewState({
+    const first = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });

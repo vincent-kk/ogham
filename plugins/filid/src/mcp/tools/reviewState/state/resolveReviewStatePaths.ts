@@ -56,6 +56,10 @@ export function resolveLegacyReviewStatePaths(
       reviewDirectory,
       REVIEW_STATE_FILE_NAMES.EVIDENCE,
     ),
+    factsPath: resolveContainedPath(
+      reviewDirectory,
+      REVIEW_STATE_FILE_NAMES.FACTS,
+    ),
     sessionPath: resolveContainedPath(
       reviewDirectory,
       REVIEW_STATE_FILE_NAMES.SESSION,

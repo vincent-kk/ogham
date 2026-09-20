@@ -83,6 +83,39 @@ export interface DiscardPendingInput {
   sourcePaths: string[];
 }
 
+/** Input of the `discard-damaged` action. */
+export interface DiscardDamagedInput {
+  action: typeof FACTS_ACTIONS.DISCARD_DAMAGED;
+  /** Absolute project root. */
+  path: string;
+  /** Shard file names, exactly as the status diagnostic reported them. */
+  shards: string[];
+}
+
+/** What `discard-damaged` reports about one call. */
+export interface FactsDiscardDamagedSummary {
+  /** Shards whose unreadable contents this call dropped. */
+  discarded: number;
+  /** Named shards that were not damaged, so nothing was dropped for them. */
+  refused: number;
+  /**
+   * Scanned files this discard now holds uncertain, awaiting a comparison.
+   *
+   * Side-table shards only: a discarded pending shard marks nothing, and
+   * counting its files here would send the caller to look for them in an empty
+   * `awaitingComparison`.
+   */
+  affectedFiles: number;
+}
+
+/** Which shards `discard-damaged` dropped and which it refused. */
+export interface FactsDiscardDamagedData {
+  /** Shard file names this call emptied. */
+  discarded: string[];
+  /** Shard file names it refused, because the store reads them fine. */
+  refused: string[];
+}
+
 /** What `discard-pending` reports about one call. */
 export interface FactsDiscardPendingSummary {
   /** Pending attestations this call removed. */
@@ -176,6 +209,15 @@ export interface FactsCompareData {
    * unreachable until some run happens to derive the same difference again.
    */
   sideTableItems: FactsOpenItem[];
+  /**
+   * Files whose items this call could not record, when another writer won.
+   *
+   * Absent when everything landed. The buckets above report what the
+   * comparison derived, which is not the same question as what the store now
+   * holds: without this list a caller reading the data alone cannot tell the
+   * two apart.
+   */
+  unrecorded?: FactsFileList;
 }
 
 /** Action-discriminated input accepted by the public facts tool. */
@@ -191,7 +233,8 @@ export type FactsInput =
     }
   | AdjudicateInput
   | CompareInput
-  | DiscardPendingInput;
+  | DiscardPendingInput
+  | DiscardDamagedInput;
 
 /** What `adjudicate` reports about one call. */
 export interface FactsAdjudicateSummary {
@@ -240,6 +283,23 @@ export interface RejectedClaim {
   inputPath?: string;
   /** 1-based lines the caller has to read, where filid could name them. */
   lines?: number[];
+}
+
+/**
+ * One file held uncertain by a discard until somebody re-derives its judgements.
+ *
+ * No file text: a path and a tool name the caller itself submitted.
+ */
+export interface AwaitingComparisonFile {
+  /** Project-relative POSIX path whose judgements the discard took. */
+  path: string;
+  /**
+   * `provenance.tool` of the stored record, when one is readable.
+   *
+   * The comparison that clears this file must NOT declare it; absent means no
+   * record is stored, so any candidate re-derives rather than reproduces.
+   */
+  storedTool?: string;
 }
 
 /** One capped list plus how many entries it left out. */
@@ -312,6 +372,14 @@ export interface FactsStatusData {
    * `rejected`, `unadjudicated`, `pendingAttestations` and this.
    */
   indeterminate: FactsFileList;
+  /**
+   * Files whose judgements a discard took and nobody has re-derived.
+   *
+   * Each carries the `provenance.tool` of the stored record, because the
+   * comparison that clears the file has to come from a different one; without
+   * it the next action would be a guess (spec §3).
+   */
+  awaitingComparison: { items: AwaitingComparisonFile[]; truncated: number };
   /** Every refused claim, with the action that changes it. */
   rejected: { items: RejectedClaim[]; truncated: number };
   /**
@@ -392,4 +460,5 @@ export type FactsResult =
   | ToolPayload<FactsSubmitSummary, FactsSubmitData>
   | ToolPayload<FactsAdjudicateSummary, FactsAdjudicateData>
   | ToolPayload<FactsCompareSummary, FactsCompareData>
-  | ToolPayload<FactsDiscardPendingSummary, FactsDiscardPendingData>;
+  | ToolPayload<FactsDiscardPendingSummary, FactsDiscardPendingData>
+  | ToolPayload<FactsDiscardDamagedSummary, FactsDiscardDamagedData>;

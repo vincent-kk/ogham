@@ -25,6 +25,7 @@ import type {
 } from '../../../types/report.js';
 import type { PlacementRequest } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 import { writeSharedUnitRestructureProject } from '../../integration/reviewFlow/helpers/writeSharedUnitRestructureProject.js';
 
 import { persistPlanArtifact } from './helpers/persistPlanArtifact.js';
@@ -114,7 +115,7 @@ async function preconditionCodes(path: string): Promise<string[] | null> {
 }
 
 beforeEach(async () => {
-  projectRoot = writeSharedUnitRestructureProject();
+  projectRoot = await writeSharedUnitRestructureProject();
   outsideDirectory = mkdtempSync(join(tmp(), 'filid-outside-'));
   planPath = await persistPlan([
     {
@@ -167,6 +168,7 @@ describe('restructure precondition reads only what the plan read', () => {
       'domain/b/use.ts',
       "import { part } from '../a/parts/index.js';\nimport { value } from '../a/value.js';\n\nexport const b = value + part;\n",
     );
+    await seedFacts(projectRoot);
     const fractalPlan = await persistPlan([
       {
         sourcePath: join(projectRoot, 'domain/a/parts'),

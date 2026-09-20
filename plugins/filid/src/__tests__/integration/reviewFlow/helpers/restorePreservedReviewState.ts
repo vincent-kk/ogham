@@ -18,10 +18,10 @@ import {
  * @param fixtureDirectory Directory holding `config.json`, `review-state.json`, `generation/` and `plugin/`.
  * @returns Machine-local roots; the caller points `CLAUDE_PLUGIN_ROOT` at `pluginRoot`.
  */
-export function restorePreservedReviewState(
+export async function restorePreservedReviewState(
   fixtureDirectory: string,
-): PreservedTreeRoots {
-  const created = createPreservedReviewRepository();
+): Promise<PreservedTreeRoots> {
+  const created = await createPreservedReviewRepository();
   const roots = {
     projectRoot: runPinnedReviewGit(created, ['rev-parse', '--show-toplevel']),
     pluginRoot: mkdtempSync(portableJoin(tmp(), 'filid-review-plugin-')),

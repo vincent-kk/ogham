@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildDependencyGraph } from '../../../core/analysis/dependencyGraph/index.js';
+import {
+  buildDependencyGraph,
+  findUnownedReferences,
+} from '../../../core/analysis/dependencyGraph/index.js';
 import type { DependencyReference } from '../../../types/adapters.js';
 
 /** Root every fixture path sits under. */
@@ -44,18 +47,6 @@ describe('the dependency graph attributes what it cannot confirm to files', () =
         { path: 'b/use.ts', causes: ['unresolved-local-dependency'] },
       ],
     },
-    {
-      label: 'a reference to a file no owner holds',
-      reference: {
-        sourceFile: '/project/b/use.ts',
-        rawSpecifier: '../loose/x.js',
-        resolvedPath: '/project/loose/x.ts',
-        kind: 'static',
-      },
-      unknownFiles: [
-        { path: 'b/use.ts', causes: ['unowned-local-dependency'] },
-      ],
-    },
   ] as const)(
     'lists the source of $label and keeps the exact edge',
     ({ reference, unknownFiles }) => {
@@ -75,6 +66,34 @@ describe('the dependency graph attributes what it cannot confirm to files', () =
       ).toEqual([['/project/a', '/project/b']]);
     },
   );
+
+  it('reports a reference no owner holds without making its source unknown', () => {
+    const unowned: DependencyReference = {
+      sourceFile: '/project/b/use.ts',
+      rawSpecifier: '../loose/x.js',
+      resolvedPath: '/project/loose/x.ts',
+      kind: 'static',
+    };
+
+    const graph = buildDependencyGraph(
+      nodePaths,
+      [exactReference, unowned],
+      'exact',
+      { projectRoot },
+    );
+
+    expect(graph.unknownFiles).toEqual([]);
+    expect(graph.certainty).toBe('exact');
+    expect(
+      graph.edges.map(({ fromFractalPath, toFractalPath }) => [
+        fromFractalPath,
+        toFractalPath,
+      ]),
+    ).toEqual([['/project/a', '/project/b']]);
+    expect(findUnownedReferences(nodePaths, [exactReference, unowned])).toEqual(
+      [{ reference: unowned, unownedPath: '/project/loose/x.ts' }],
+    );
+  });
 
   it('derives exact certainty from an empty list', () => {
     const graph = buildDependencyGraph(nodePaths, [exactReference], 'exact', {

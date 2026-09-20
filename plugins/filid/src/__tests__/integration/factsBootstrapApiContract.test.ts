@@ -209,12 +209,20 @@ describe('the facts bootstrap document matches the tool it drives', () => {
       expect(ADVERTISED_KEYS.has(key)).toBe(true);
   });
 
-  it('documents every action the tool has, except the one it deliberately leaves out', () => {
+  it('documents every action the tool has, except the ones it deliberately leaves out', () => {
+    // Each exclusion is named with why it is one, so the list cannot quietly
+    // grow into "whatever the document has not caught up with".
+    const excluded = {
+      [FACTS_ACTIONS.COMPARE]: 'belongs to a verifier, not the bootstrap',
+      [FACTS_ACTIONS.DISCARD_DAMAGED]:
+        'introduced by the server in S3c; the bootstrap document routes it from the judgements diagnostic and follows separately',
+    };
+
     expect(
       Object.values(FACTS_ACTIONS).filter(
         (action) => !DOCUMENTED_ACTIONS.includes(action),
       ),
-    ).toEqual([FACTS_ACTIONS.COMPARE]);
+    ).toEqual(Object.keys(excluded));
     expect(CANONICAL).toMatch(/`compare` exists for a verifier/);
   });
 

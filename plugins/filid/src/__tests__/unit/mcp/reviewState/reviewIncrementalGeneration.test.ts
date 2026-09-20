@@ -38,6 +38,7 @@ const PREPARED_ARTIFACT_KEYS = [
   'diffsDirectory',
   'sessionPath',
   'evidencePath',
+  'factsPath',
 ] as const;
 
 /**
@@ -54,7 +55,7 @@ function stage(paths: ReviewStatePaths, id: string): ReviewStatePaths {
 }
 
 beforeEach(async () => {
-  fixture = createReviewStateSealFixture();
+  fixture = await createReviewStateSealFixture();
   const prepared = await handleReviewState({
     action: 'prepare',
     projectRoot: fixture.projectRoot,
@@ -83,9 +84,15 @@ describe('incremental generation publication', () => {
       state.groups[0].skeletonPath,
     );
     const opinionBytes = readFileSync(opinionPath, 'utf8');
+    const factsBytes = readFileSync(paths.factsPath, 'utf8');
     expect(staged.opinionsDirectory).not.toBe(paths.opinionsDirectory);
     expect(staged.handoffPath).toBe(join(staged.reviewDirectory, 'handoff.md'));
+    // The frozen facts are prepare-owned like the evidence beside them, so a
+    // generation reads its own and cannot be handed the next one's.
+    expect(staged.factsPath).toBe(join(staged.reviewDirectory, 'facts.json'));
+    expect(staged.factsPath).not.toBe(paths.factsPath);
     publishReviewGeneration(staged, next, before);
+    expect(readFileSync(staged.factsPath, 'utf8')).toBe(factsBytes);
     expect(
       readFileSync(join(staged.reviewDirectory, 'origin-state.json'), 'utf8'),
     ).toBe(before);

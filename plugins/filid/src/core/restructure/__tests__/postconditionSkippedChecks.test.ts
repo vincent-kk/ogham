@@ -90,6 +90,8 @@ function snapshotOf(entries: NodeEntry[]): ProjectSnapshot {
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    normalizedFacts: [],
+    filesOutsideFactsScope: 0,
     collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: '2026-09-20T00:00:00.000Z',
   };

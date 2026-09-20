@@ -54,9 +54,9 @@
     - 다른 요구의 허용이 필요한 이유: 재점유 맞교환(파일 A가 경로 P를 비우고, 파일 B가 P로 들어오는 두 move)에서 B의 rewrite가 첫 요구의 `currentSpecifier`와 같은 문자열을 정당하게 새로 쓴다.
     - 한계: 같은 소비자가 unit을 같은 specifier로 두 번 참조하고 그 문자열로 해석될 다른 파일도 요구받을 때, 참조 하나를 고치지 않은 상태와 정상 실행은 해석 결과가 같아 구분되지 않고 통과한다.
     - 어기면 `affectedImports`는 `import-rewrite-missing`, `preservedImports`는 `preserved-import-broken`이다. message는 unresolved, 다른 파일로 해석되는 `currentSpecifier` 참조, 요구 파일을 읽는 참조 없음 순으로 하나를 말한다.
-    - 실패의 nextAction은 두 갈래를 말한다: 그 import를 고치거나, 보고된 참조가 소비자에 실제로 없으면(주석·문자열 안) 의존성 분석이 틀린 것이므로 파일을 고치지 말고 사용자에게 보고한다.
+    - 실패의 nextAction은 두 갈래를 말한다: 그 import를 고치거나, 보고된 참조가 소비자에 실제로 없으면(주석·문자열 안) 저장된 사실이 틀린 것이므로 파일을 고치지 말고 **사실을 고친다** — 그 파일을 그 참조 없이 다시 제출하면 항목이 `coverage-shrank`로 돌아오고, `facts adjudicate`로 `dismiss`한 뒤 다른 actor가 같은 줄을 읽고 확인한다(스펙 §4.5). 사람을 부르지 않는다.
     - 검증 파일은 그래프 certainty에서 면제되므로 진단 검사가 깨진 옛 import를 드러낸다.
-  - 요구된 entry point가 있어도 adapter가 surface를 `unsupported`로 보고하면 `entry-point-surface-unsupported`다. 그 entry point가 unit을 노출하는지 확인할 수 없기 때문이다.
+  - 요구된 entry point가 있어도 surface가 `unsupported`면 `entry-point-surface-unsupported`다. 그 entry point가 unit을 노출하는지 확인할 수 없기 때문이다. nextAction은 그 경로의 사실에 `entrySurface`를 채우는 것이고(`FACTS_SECTION_UNAVAILABLE_NEXT_ACTION` 재사용 — 그 축을 보고하는 도구로 그 한 경로만 다시 추출하거나 attested 레코드로 제출), 사람에게 손으로 확인해 달라고 하지 않는다.
   - target 경로가 없거나, 디렉터리 unit(`unitKind`가 `file`이 아님)인데 target 노드가 없으면(같은 이름의 일반 파일만 있는 경우) `target-missing`이다. 그때 node type·artifact 검사는 생략된다. file unit의 target 노드는 부모 디렉터리이므로, target 파일이 있으면 노드도 있다.
   - import boundary와 DAG도 검사하고, 계획 시점 기준선(`baseline`)과 비교한다. 검사는 전부 하고 전부 보고한다. 새로 생긴 것은 `findings`, 계획 전부터 있던 것은 같은 전체 기록으로 `preexisting`에 싣는다. `preexisting`만 있으면 통과다.
     - 순환의 신원은 경로의 `(fromFractalPath, toFractalPath)` 쌍의 정렬 집합이다. 기준선 쪽 경로를 `relocateThroughMoves`로 계획의 이동에 통과시킨 뒤 비교한다. 그래서 이동이 기존 순환의 구성원을 옮겨도 같은 순환이다.

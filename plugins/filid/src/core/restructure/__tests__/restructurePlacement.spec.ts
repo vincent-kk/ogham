@@ -321,6 +321,8 @@ function makeSnapshot(
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    normalizedFacts: [],
+    filesOutsideFactsScope: 0,
     collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: CREATED_AT,
   };

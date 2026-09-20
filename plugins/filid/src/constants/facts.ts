@@ -114,6 +114,10 @@ export const FACTS_UNKNOWN_CAUSES = {
   NEEDS_RESOLUTION: 'facts-needs-resolution',
   UNCERTAIN: 'facts-uncertain',
   TOOL_ERROR: 'facts-tool-error',
+  /** The store could not read the judgements that would settle this file. */
+  JUDGEMENTS_UNREADABLE: 'facts-judgements-unreadable',
+  /** This file's judgements were discarded and nobody has re-derived them. */
+  JUDGEMENTS_DISCARDED: 'facts-judgements-discarded',
 } as const;
 
 /** Provenance tiers a record may declare (spec §2.1, §4.6). */
@@ -161,6 +165,7 @@ export const FACTS_ACTIONS = {
   COMPARE: 'compare',
   ADJUDICATE: 'adjudicate',
   DISCARD_PENDING: 'discard-pending',
+  DISCARD_DAMAGED: 'discard-damaged',
 } as const;
 
 /**
@@ -194,6 +199,54 @@ export const FACTS_REFERENCE_LINE_PATTERNS: readonly RegExp[] = [
  */
 export const FACTS_REFERENCE_FALLBACK_PATTERN =
   /(?<![\w$])(?:import|require|include|use|from)(?![\w$])/;
+
+/**
+ * Next action of an axis that found no record it could read for a file.
+ *
+ * One sentence for every axis that reads a record, because the way out is the
+ * same for all of them: the facts come from outside the server, so the answer
+ * is the bootstrap loop, not another call to the tool that reported the gap
+ * (spec §3, §8a). It names the loop rather than a single step so a caller that
+ * arrives here from any axis can finish it without reading another document.
+ */
+export const FACTS_RECORD_UNAVAILABLE_NEXT_ACTION =
+  'Run the facts bootstrap for this project: call facts status, extract the files it lists with the extraction program named in its output requirement, and submit those records with the resolutionEpoch it returned. Report this axis as indeterminate until a usable record exists for the file, never as passing.';
+
+/**
+ * Next action for a record that binds but reports nothing on one axis.
+ *
+ * Distinct from the bootstrap sentence, and that distinction is the whole
+ * point: the bootstrap extracts the files `facts status` lists, and status
+ * lists only what is missing or stale — an `exact` record whose optional
+ * section is absent is on neither list, so pointing at the bootstrap would
+ * repeat this diagnostic forever (P5). The way out is to extract that one
+ * file with a tool that reports the section, which the bootstrap document
+ * already describes as passing project-relative paths to the extractor.
+ */
+export const FACTS_SECTION_UNAVAILABLE_NEXT_ACTION =
+  'This file has a record filid accepts, but that record reports nothing for this axis, and calling the bootstrap again would re-extract nothing — status lists only files whose records are missing or stale. Extract this one path again with a tool that reports the section (the extraction program takes project-relative paths as positional arguments) and submit it, or submit an attested record for it that carries the section. Report this axis as indeterminate for this file until then.';
+
+/**
+ * Next action for a file an axis has to judge that the facts scope excludes.
+ *
+ * Distinct from the out-of-scope count report, which owes nothing because no
+ * rule needed those files. Here a rule does need this one — a discovered
+ * verification file, say — so the way out is to widen the scope and bootstrap
+ * it, and the axis stays indeterminate until a record exists.
+ */
+export const FACTS_SCOPE_EXCLUDES_JUDGED_FILE_NEXT_ACTION =
+  'This file has to be judged but the facts scope excludes it, so no record can exist for it. Outside a review — editing project config during one dirties the worktree being reviewed — add its path to facts.covers in the project .filid/config.json and run the facts bootstrap for it. Report this axis as indeterminate until then, never as passing.';
+
+/**
+ * Next action of the report that the store and the adapter disagree.
+ *
+ * Never a refusal: the analysis reads the store, and the adapter is only being
+ * measured against it while it still exists (spec §11-7). The action is still
+ * one that changes state, because a disagreement means one of the two is wrong
+ * about the file and only a resubmission settles which.
+ */
+export const FACTS_ADAPTER_DIVERGENCE_NEXT_ACTION =
+  'This does not block anything: the analysis used the stored facts. Read the references this message names in the file, and if the stored record is the wrong one, submit that file again with the tool that reads it correctly. If the adapter is the wrong one, record this message in your report as a filid defect and continue.';
 
 /** Directory under the facts store holding unconfirmed attested submissions. */
 export const FACTS_PENDING_DIRECTORY = 'pending';
@@ -241,6 +294,76 @@ export const FACTS_ATTESTED_REQUIREMENT =
   'Attestation is how a file settles when no tool can settle it: one filid reports as tool-error, one whose claims are rejected in a way re-extraction reproduces, or one still uncertain after every item is judged. An attested record is an ordinary FileFacts record with provenance.tier set to attested: it still binds to the file contentHash, every reference string must be in the file, and every resolved path must be valid. Two things are added. Every line that looks like a reference must be accounted for — by a reference that quotes it, or by an entry in nonReferences: { line, reason } — and a refusal names the lines that are not. And one submission never settles a file: the record is held unconfirmed until a DIFFERENT actor, reading the same bytes independently, submits the same set of references and resolutions.';
 
 /** Stable diagnostic codes emitted by the facts tool. */
+/**
+ * Next action for a file whose judgements the store could not be read for.
+ *
+ * Two repairs, because there are two damages and the response names which one.
+ * A shard whose JSON is broken is discarded by an explicit call — an ordinary
+ * submit does not reach it, because a side-table write happens only where a
+ * disagreement is detected and the disagreements are exactly what did not
+ * read. One the process cannot read is repaired outside filid, by making it
+ * readable.
+ */
+/** Refusal code for a `discard-damaged` call naming a shard that is not damaged. */
+export const FACTS_SHARD_NOT_DAMAGED_CODE = 'facts-shard-not-damaged';
+
+/**
+ * Next action after discarding a damaged judgement shard.
+ *
+ * Discarding ends the block; it does not bring the judgements back. The edges
+ * an adopted item carried are gone, so the way to find them again is the one
+ * that found them the first time — an independent extraction compared against
+ * the store, which reopens every disagreement as an item.
+ */
+export const FACTS_DAMAGED_DISCARDED_NEXT_ACTION =
+  'The shard is gone, and the files it covered are now held uncertain by the discard itself rather than by the damage: what it held is not recovered. Call facts status and, for every entry of data.awaitingComparison, extract that file with a program whose provenance.tool differs from the entry\'s storedTool — or read it yourself and submit it attested — then call facts compare with that candidate, which reopens every edge the store does not carry as an item to judge and clears the file. A dismissal that was lost costs nothing — the edge stays in place — but an adopted one is only found again this way.';
+
+/**
+ * Next action for a file whose discarded judgements nobody has re-derived.
+ *
+ * The discard ended the block and opened this one deliberately: leaving the file
+ * settled would let a caller that skipped the comparison conclude over an edge
+ * an adopted item carried and nothing now holds.
+ */
+export const FACTS_JUDGEMENTS_DISCARDED_NEXT_ACTION =
+  'Do not treat these files as settled: their judgements were discarded as unreadable, so an edge an adopted item carried may be gone with nothing left to say so. For every entry of data.awaitingComparison, extract that file with a program whose provenance.tool differs from the entry\'s storedTool — or read it yourself and submit it attested — and call facts compare with that candidate. A candidate from the same tool reproduces the record instead of re-deriving it and is refused with facts-comparison-not-independent.';
+
+/** A discard that dropped unconfirmed attestations rather than judgements. */
+export const FACTS_PENDING_DISCARDED_CODE =
+  'facts-pending-attestations-discarded';
+
+/**
+ * Next action after discarding a damaged pending shard.
+ *
+ * Nothing is owed: an unconfirmed attestation is one reader's claim that a
+ * second never agreed to, so dropping it removes no edge and holds no file.
+ * Each file returns to whatever its own record gives it.
+ */
+export const FACTS_PENDING_DISCARDED_NEXT_ACTION =
+  'Nothing is held by this discard and no edge was lost: what the shard carried was attested submissions a second actor had not confirmed, which never entered any file\'s references. Each file the shard covered reads as its own record leaves it. Call facts status: a file that still needs an attested reading is named there, with the actor it must not repeat and the bytes to read.';
+
+/** A comparison that cannot re-derive what a discard lost. */
+export const FACTS_COMPARISON_NOT_INDEPENDENT_CODE =
+  'facts-comparison-not-independent';
+
+/** A comparison measured against a generation rather than against the store. */
+export const FACTS_COMPARISON_NOT_AGAINST_STORE_CODE =
+  'facts-comparison-not-against-store';
+
+/**
+ * Next action for a comparison whose baseline was a generation's frozen facts.
+ *
+ * The loss a discard leaves happened in the store after the freeze, so a frozen
+ * baseline cannot see it: the candidate and the freeze can both carry the edge
+ * the store no longer has, report no difference, and clearing the mark on that
+ * nothing is the outcome the mark exists to prevent.
+ */
+export const FACTS_COMPARISON_AGAINST_STORE_NEXT_ACTION =
+  'Call facts compare again with the same candidate file and no generationId. A comparison against a generation measures the candidate against what the review was judged on, not against what the store holds now, so it cannot re-derive the judgements a discard took — the files stay listed in data.awaitingComparison of facts status until a comparison against the store clears them. The comparison just run is recorded as usual; only the mark is untouched.';
+
+export const FACTS_JUDGEMENTS_UNREADABLE_NEXT_ACTION =
+  'Do not treat this file as settled: the side-table shard that would hold its judgements did not read, so an adopted edge or an open item may be invisible. The response names the shard and which of the two it is. For an unparseable shard, call facts discard-damaged with that shard name — nothing else can write it, because the items that would be written are the ones nobody can read — and follow the next action it returns. For an unreadable one, restore read access to that file under the plugin cache, then call facts status again.';
+
 export const FACTS_DIAGNOSTIC_CODES = {
   UNINITIALIZED: 'facts-uninitialized',
   EPOCH_MOVED: 'facts-epoch-moved',
@@ -276,7 +399,20 @@ export const FACTS_UNFROZEN_GENERATION_CODE = 'facts-generation-not-frozen';
 
 /** Next action when a generation holds no frozen facts to compare against. */
 export const FACTS_UNFROZEN_GENERATION_NEXT_ACTION =
-  'Facts are not yet frozen into review generations, so there is nothing to compare against for that one. Call compare without generationId to compare against the live store.';
+  'That generation holds no frozen facts filid can read — it was prepared before facts were frozen, its directory is gone, or its facts.json no longer matches the digest its state recorded. Call compare without generationId to compare against the live store, or run review_state prepare once for that branch to freeze the facts again.';
+
+/** Refusal code for a `generationId` that cannot name a generation at all. */
+export const FACTS_GENERATION_ID_INVALID_CODE = 'facts-generation-id-invalid';
+
+/**
+ * Next action for a malformed `generationId`.
+ *
+ * Refused before it reaches a path: a value shaped like a path traversal is an
+ * argument that never named a generation, and answering it with "no frozen
+ * facts" would say the store looked.
+ */
+export const FACTS_GENERATION_ID_INVALID_NEXT_ACTION =
+  'Pass generationId exactly as the review handoff reported it — 32 hexadecimal characters — or omit it to compare against the live store.';
 
 /** Refusal for an adjudicate call that named no actor. */
 export const FACTS_ADJUDICATION_ACTOR_CODE = 'facts-adjudication-actor-required';

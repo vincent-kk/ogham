@@ -16,6 +16,11 @@ import {
   WORKTREE_DISPOSITIONS,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { readProjectFacts } from '../../../../core/facts/index.js';
+import {
+  createDefaultConfig,
+  loadConfig,
+} from '../../../../core/index.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { renderChecklistBlock } from '../render/renderChecklistBlock.js';
 import { renderFixRequests } from '../render/renderFixRequests.js';
@@ -39,7 +44,11 @@ import type {
 import { writeReviewState } from '../state/writeReviewState.js';
 import { foldReviewVerdict } from '../verdict/foldReviewVerdict.js';
 
+import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js';
+
 import { assertReviewInputsFresh } from './utils/assertReviewInputsFresh.js';
+import { detectFactsDiscrepancy } from './utils/detectFactsDiscrepancy.js';
+import { readFrozenFacts } from '../state/readFrozenFacts.js';
 import { createSealedReviewPayload } from './utils/createSealedReviewPayload.js';
 import { loadSealGroupEvidence } from './utils/loadSealGroupEvidence.js';
 import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
@@ -217,6 +226,48 @@ export async function sealReviewState(
       ],
     });
 
+  // Before the fold, and only while the phase can still change: a sealed
+  // generation answers from its own record, never from a store that moved
+  // after it (spec §9).
+  const frozen = readFrozenFacts(paths.factsPath, state);
+  if (frozen.status === 'unusable')
+    return createReviewStatePayload({
+      action: input.action,
+      disposition: REVIEW_STATE_DISPOSITIONS.MISSING,
+      paths,
+      status: TOOL_STATUSES.INDETERMINATE,
+      state,
+      diagnostics: [
+        {
+          code: REVIEW_STATE_DIAGNOSTIC_CODES.FACTS_FROZEN_UNUSABLE,
+          message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.FACTS_FROZEN_UNUSABLE,
+          path: paths.factsPath,
+          affects: [],
+          nextAction: `Do not publish a verdict. Call prepare once with the same arguments and without force: a generation whose frozen facts do not match its digest is incomplete, so prepare freezes them again and keeps validated progress. ${PREPARE_ONCE_REPEAT_TAIL}`,
+        },
+      ],
+    });
+  const disputed =
+    frozen.status === 'none'
+      ? { diagnostics: [], items: [] }
+      : detectFactsDiscrepancy(
+          input.projectRoot,
+          frozen.facts,
+          await readProjectFacts(
+            input.projectRoot,
+            loadConfig(input.projectRoot).config ?? createDefaultConfig(),
+          ),
+        );
+  if (disputed.diagnostics.length > 0)
+    return createReviewStatePayload({
+      action: input.action,
+      disposition: REVIEW_STATE_DISPOSITIONS.STALE,
+      paths,
+      status: TOOL_STATUSES.INDETERMINATE,
+      state,
+      diagnostics: disputed.diagnostics,
+    });
+
   const reviewableGroups = state.groups.filter(
     (group) => group.units.length > 0,
   );
@@ -307,6 +358,14 @@ export async function sealReviewState(
     phase: REVIEW_STATE_PHASES.SEALED,
     sealedAt: generatedAt,
     verdict: fold.verdict,
+    ...(frozen.status === 'none'
+      ? {}
+      : {
+          factsAdjudications: disputed.items,
+          factsAdjudicationsDigest: computeReviewArtifactHash(
+            JSON.stringify(disputed.items),
+          ),
+        }),
   };
 
   writeFileAtomicallySync(paths.reportPath, report);

@@ -2,10 +2,8 @@ import {
   FACTS_REFERENCE_FALLBACK_PATTERN,
   FACTS_REFERENCE_LINE_PATTERNS,
 } from '../../../constants/facts.js';
-import type {
-  FactsReference,
-  FileFacts,
-} from '../schema/fileFactsSchema.js';
+import type { FileFacts } from '../schema/fileFactsSchema.js';
+import { locateReference } from '../validation/utils/locateReference.js';
 
 /**
  * The lines an attested record leaves unexplained (spec §4.6).
@@ -16,12 +14,10 @@ import type {
  * `nonReferences` entry naming it; anything left is what the caller has to read
  * and account for.
  *
- * "Quotes it" is deliberately narrow. Plain substring containment would let a
- * one-character specifier — `{ specifier: 'e', resolved: { external: 'e' } }`
- * passes the existence check as easily as any other string — account for every
- * line in the file at once and retire the whole rule. A reference with no
- * `sourceText` therefore has to appear delimited on the line, which is the
- * weakest claim that still means "this line is where that reference is".
+ * "Quotes it" is `locateReference`, the same narrow rule the side table uses to
+ * decide whether a walked-back specifier is still on a line: a bare specifier
+ * has to appear delimited, because plain containment would let a one-character
+ * specifier account for every line in the file at once.
  *
  * Line numbers rather than a count, because a count leaves the caller guessing
  * which line to explain and repeating the same refusal — the loop spec §4.6
@@ -42,29 +38,16 @@ export function findUnaccountedLines(
   const unaccounted: number[] = [];
   for (const [index, line] of lines.entries()) {
     if (explained.has(index + 1) || !looksLikeReference(line)) continue;
-    if (facts.references.some((reference) => accountsFor(line, reference)))
+    if (
+      facts.references.some(
+        (reference) => locateReference([line], reference).length > 0,
+      )
+    )
       continue;
     unaccounted.push(index + 1);
   }
   return unaccounted;
 }
-
-/**
- * Whether one reference explains one line.
- * @param line The line's text.
- * @param reference A reference the record claims.
- * @returns True when the reference's own text is on that line.
- */
-function accountsFor(line: string, reference: FactsReference): boolean {
-  if (reference.sourceText !== undefined)
-    return line.includes(reference.sourceText);
-  return QUOTES.some((quote) =>
-    line.includes(`${quote}${reference.specifier}${quote}`),
-  );
-}
-
-/** Delimiters a bare specifier must be wrapped in to account for a line. */
-const QUOTES = ["'", '"', '`'] as const;
 
 /**
  * Whether one line owes an explanation.

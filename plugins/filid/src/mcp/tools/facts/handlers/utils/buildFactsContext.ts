@@ -1,43 +1,17 @@
 import {
-  collectDefaultResolutionInputs,
-  computeResolutionEpoch,
   readEpochSnapshot,
-  readFactsStore,
-  resolveFactsScope,
-  resolveFactsStorePaths,
+  readProjectFacts,
   writeEpochSnapshot,
 } from '../../../../../core/facts/index.js';
 import type {
-  FactsScope,
-  FactsShard,
-  FactsStorePaths,
+  ProjectFacts,
   ResolutionEpochSnapshot,
-  StoredFactsRecord,
 } from '../../../../../core/facts/index.js';
 import { loadConfig } from '../../../../../core/infra/configLoader/index.js';
-import {
-  listScannedFilePaths,
-  scanFileSetOptions,
-} from '../../../../../core/tree/fractalTree/index.js';
 import { runWithRequestMemo } from '../../../../../lib/runWithRequestMemo.js';
 
-/** One stored record together with the key it is filed under. */
-export interface FactsRecordEntry {
-  pathDigest: string;
-  record: StoredFactsRecord;
-}
-
 /** Everything both facts actions derive from the project before they diverge. */
-export interface FactsContext {
-  scope: FactsScope;
-  scannedPaths: string[];
-  scannedSet: Set<string>;
-  storePaths: FactsStorePaths;
-  /** Readable records keyed by the project-relative path each describes. */
-  records: Map<string, FactsRecordEntry>;
-  /** Shard file name to shard, carrying the compare-and-set tokens. */
-  shards: Map<string, FactsShard>;
-  epoch: ResolutionEpochSnapshot;
+export interface FactsContext extends ProjectFacts {
   /**
    * The epoch filid last recorded, read before this call overwrote it.
    *
@@ -50,14 +24,14 @@ export interface FactsContext {
 /**
  * Read the project state both facts actions start from.
  *
- * The scan runs with the options the project snapshot uses, not the built-in
- * defaults, so the facts scope and the analysed tree are the same set of files.
+ * What the store holds comes from `readProjectFacts`, which analysis reads
+ * through as well — one assembly for both, so the tool and the snapshot cannot
+ * disagree about which files are in scope or which epoch is current.
  *
- * The epoch depends on the project alone, never on what is stored — folding
- * record-declared inputs into it would let accepting a batch move the epoch the
- * next batch is submitted against. The snapshot is persisted here, on every
- * call, so that a caller which reads an epoch now and submits after the tree
- * moves can be told which paths moved instead of only that the epoch differs.
+ * What this adds is the part only a tool call may do: the epoch snapshot is
+ * persisted on every call, so that a caller which reads an epoch now and submits
+ * after the tree moves can be told which paths moved instead of only that the
+ * epoch differs. An analysis pass must not move that state.
  *
  * One call is one request-memo scope, so the scan work this context repeats —
  * the ignored-path query above all — runs once. The scope closes with the
@@ -71,33 +45,12 @@ export function buildFactsContext(
   projectRoot: string,
 ): Promise<FactsContext> {
   return runWithRequestMemo(async (): Promise<FactsContext> => {
-    const config = loadConfig(projectRoot).config ?? undefined;
-    const scope = resolveFactsScope(config);
-    const scannedPaths = await listScannedFilePaths(
+    const facts = await readProjectFacts(
       projectRoot,
-      scanFileSetOptions(config),
+      loadConfig(projectRoot).config ?? undefined,
     );
-    const storePaths = resolveFactsStorePaths(projectRoot);
-    const store = readFactsStore(storePaths.directory);
-    const records = new Map<string, FactsRecordEntry>();
-    for (const [pathDigest, record] of store.records)
-      records.set(record.facts.path, { pathDigest, record });
-    const epoch = computeResolutionEpoch(
-      projectRoot,
-      scannedPaths,
-      collectDefaultResolutionInputs(scannedPaths),
-    );
-    const previousEpoch = readEpochSnapshot(storePaths.epochSnapshotPath);
-    writeEpochSnapshot(storePaths.epochSnapshotPath, epoch);
-    return {
-      previousEpoch,
-      scope,
-      scannedPaths,
-      scannedSet: new Set(scannedPaths),
-      storePaths,
-      records,
-      shards: store.shards,
-      epoch,
-    };
+    const previousEpoch = readEpochSnapshot(facts.storePaths.epochSnapshotPath);
+    writeEpochSnapshot(facts.storePaths.epochSnapshotPath, facts.epoch);
+    return { ...facts, previousEpoch };
   });
 }

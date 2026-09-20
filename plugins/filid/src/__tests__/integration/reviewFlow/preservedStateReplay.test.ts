@@ -33,8 +33,8 @@ let preserved: ReviewStateRecord;
 /** Host plugin root restored after each case. */
 const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
 
-beforeEach(() => {
-  restored = restorePreservedReviewState(PRESERVED_S0);
+beforeEach(async () => {
+  restored = await restorePreservedReviewState(PRESERVED_S0);
   process.env.CLAUDE_PLUGIN_ROOT = restored.pluginRoot;
   const state = readReviewState(
     resolveReviewStatePaths(restored.projectRoot, PINNED_REVIEW_BRANCH)

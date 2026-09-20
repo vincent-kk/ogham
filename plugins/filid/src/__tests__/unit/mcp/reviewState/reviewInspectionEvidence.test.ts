@@ -17,8 +17,8 @@ import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Public validation fixture keeps audit requirements separate from discovery quality. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -87,7 +87,7 @@ describe('review inspection evidence', () => {
       code: null,
     },
   ])('$name', async ({ review, checked, riskPlan, code }) => {
-    configureReviewGroups(fixture.projectRoot, 1, review);
+    await configureReviewGroups(fixture.projectRoot, 1, review);
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
@@ -124,7 +124,7 @@ describe('review inspection evidence', () => {
   });
 
   it('keeps an unreadable-source gap inconclusive without forcing audit placeholders', async () => {
-    configureReviewGroups(fixture.projectRoot, 1, {
+    await configureReviewGroups(fixture.projectRoot, 1, {
       highRiskPaths: ['src/value.ts'],
     });
     const prepared = await handleReviewState({
@@ -177,7 +177,7 @@ describe('review inspection evidence', () => {
   });
 
   it('allows candidate-only automatic opinions without invented inspection records', async () => {
-    configureReviewGroups(fixture.projectRoot, 1);
+    await configureReviewGroups(fixture.projectRoot, 1);
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,

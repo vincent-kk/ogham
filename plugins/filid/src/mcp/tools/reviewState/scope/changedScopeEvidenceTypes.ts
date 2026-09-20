@@ -1,3 +1,4 @@
+import type { NormalizedFileFacts } from '../../../../types/fractal.js';
 import type { RuleScope } from '../../../../types/rules.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import type {
@@ -18,6 +19,8 @@ export interface CollectChangedScopeEvidenceInput {
   source: ReviewSourceSnapshot;
   /** Canonical evidence artifact path contained by the review directory. */
   evidencePath: string;
+  /** Canonical frozen-facts artifact path contained by the review directory. */
+  factsPath: string;
   /** Effective generated-path patterns from validated configuration. */
   generatedPaths: readonly string[];
   /** Effective lockfile basenames from validated configuration or defaults. */
@@ -34,6 +37,8 @@ export interface CollectedChangedScopeEvidence {
   outOfScopeDiagnostics: ToolDiagnostic[];
   /** Snapshot identity shared by every FCA observation in this collection. */
   snapshotHash: string;
+  /** Digest of the frozen facts this generation wrote (spec §9). */
+  factsDigest: string;
   /** Whether both structure and verification evidence are conclusive. */
   evidenceComplete: boolean;
   /** Classification of current uncommitted paths. */
@@ -64,10 +69,12 @@ export interface CollectedChangedScopeEvidence {
 /** Non-writing changed-scope result shared by prepare and handoff writers. */
 export interface ComputedChangedScopeEvidence extends Omit<
   CollectedChangedScopeEvidence,
-  'statuses'
+  'statuses' | 'factsDigest'
 > {
   /** Full derived statuses, including aggregate evidence completeness. */
   statuses: ReviewEvidenceStatuses;
+  /** Normalized facts of the review-scope files, for the caller to freeze. */
+  frozenFacts: NormalizedFileFacts[];
   /** All violations excluded from changed scope. */
   outOfScope: ReviewScopeViolation[];
   /** Non-finding diagnostics inside the review scope, normalized for persisted or returned evidence. */

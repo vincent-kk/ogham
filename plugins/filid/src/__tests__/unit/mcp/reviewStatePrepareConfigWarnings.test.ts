@@ -14,8 +14,8 @@ import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewSt
 /** Temporary Git repository and plugin root used by config-warning cases. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 
 afterEach(() => {

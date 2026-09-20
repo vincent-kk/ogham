@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 import type { ReviewStateRecord } from '../../../mcp/tools/reviewState/state/reviewStateTypes.js';
+import { seedFacts } from '../helpers/seedFacts.js';
 import { createReviewRulePluginRoot } from '../../unit/mcp/reviewState/helpers/createReviewRulePluginRoot.js';
 import { readPreparedReviewState } from '../../unit/mcp/reviewState/helpers/readPreparedReviewState.js';
 
@@ -56,10 +57,10 @@ function fileEvidenceHash(
   ].evidenceHash;
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   pluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
-  projectRoot = createPinnedReviewRepository(INTENT_GAP_REVIEW_REPOSITORY);
+  projectRoot = await createPinnedReviewRepository(INTENT_GAP_REVIEW_REPOSITORY);
 });
 afterEach(() => {
   rmSync(projectRoot, { recursive: true, force: true });
@@ -86,6 +87,9 @@ describe('prepare idempotence', () => {
       join(first.projectRoot, 'src/alpha/INTENT.md'),
       FIXTURE_INTENT,
     );
+    // A new path moves the project's resolution epoch, so the records are
+    // re-submitted the way the bootstrap does before the next prepare.
+    await seedFacts(projectRoot);
     const second = await prepare();
     expect(second.sourceHash).toBe(first.sourceHash);
     expect(second.scope.snapshotHash).not.toBe(first.scope.snapshotHash);

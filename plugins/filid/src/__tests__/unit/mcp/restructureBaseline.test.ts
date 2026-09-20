@@ -24,6 +24,9 @@ import type {
   RestructurePlan,
 } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
+import { handleFacts } from '../../../mcp/tools/facts/index.js';
+import type { FactsStatusData } from '../../../mcp/tools/facts/index.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 import { FIXTURE_INTENT } from '../../integration/reviewFlow/helpers/reviewFlowRepositoryFiles.js';
 import { writeSharedUnitRestructureProject } from '../../integration/reviewFlow/helpers/writeSharedUnitRestructureProject.js';
 
@@ -72,10 +75,11 @@ function isPlanPayload(
  * Write the shared-unit project plus the pre-existing cycle and violation.
  * @returns Nothing; `projectRoot` holds the project.
  */
-function writeProject(): void {
-  projectRoot = writeSharedUnitRestructureProject();
+async function writeProject(): Promise<void> {
+  projectRoot = await writeSharedUnitRestructureProject();
   for (const [path, content] of Object.entries(PREEXISTING_FILES))
     writeReviewStateFixtureFile(projectRoot, path, content);
+  await seedFacts(projectRoot);
 }
 
 /**
@@ -128,10 +132,15 @@ function executePlan(plan: RestructurePlan): void {
 
 /**
  * Run postcondition and project its findings and pre-existing records.
+ *
+ * The facts of the executed tree are submitted first, which is the step the
+ * restructure skill performs between the last write and this call (spec §11-9);
+ * without it the postcondition would be judging a tree it has no records for.
  * @param planPath Persisted plan artifact.
  * @returns Validity plus `[code, project-relative path]` of both lists.
  */
 async function postcondition(planPath: string) {
+  await seedFacts(projectRoot);
   const result = await handleRestructure({
     action: 'postcondition',
     path: projectRoot,
@@ -160,7 +169,7 @@ const VALUE_MOVE: PlacementRequest = {
 
 describe('postcondition compares cycles and boundary violations with the plan-time baseline', () => {
   it('passes an unrelated move and reports what existed before as preexisting', async () => {
-    writeProject();
+    await writeProject();
     const { data, planPath } = await persistPlan([VALUE_MOVE]);
     executePlan(data);
     expect(await postcondition(planPath)).toEqual({
@@ -175,7 +184,7 @@ describe('postcondition compares cycles and boundary violations with the plan-ti
   });
 
   it('reports a cycle the execution creates as a finding beside the preexisting one', async () => {
-    writeProject();
+    await writeProject();
     const { data, planPath } = await persistPlan([VALUE_MOVE]);
     executePlan(data);
     writeFileSync(
@@ -193,7 +202,7 @@ describe('postcondition compares cycles and boundary violations with the plan-ti
   });
 
   it('reports a boundary violation the move creates as a finding', async () => {
-    writeProject();
+    await writeProject();
     const { data, planPath } = await persistPlan([
       {
         sourcePath: 'domain/c',
@@ -217,7 +226,7 @@ describe('postcondition compares cycles and boundary violations with the plan-ti
   });
 
   it('identifies a cycle whose member the plan moved as the same cycle', async () => {
-    writeProject();
+    await writeProject();
     const { data, planPath } = await persistPlan([
       {
         sourcePath: 'domain/c',
@@ -230,6 +239,14 @@ describe('postcondition compares cycles and boundary violations with the plan-ti
     ]);
     executePlan(data);
     const result = await postcondition(planPath);
+    // The rewrite grew `../c/index.js` into `../../c/index.js`; the old text
+    // survives inside the new one and must not be read as an edge nobody claims.
+    expect(
+      (
+        (await handleFacts({ action: 'status', path: projectRoot }))
+          .data as FactsStatusData
+      ).unadjudicated.items,
+    ).toEqual([]);
     expect(result.findings).toEqual([]);
     expect(result.preexisting).toEqual([
       ['import-boundary-violation', 'c/peek.ts'],
@@ -248,9 +265,10 @@ const ORGAN_ACCESS_FILES: Readonly<Record<string, string>> = {
 
 describe('postcondition keeps organ-access violations in the comparison', () => {
   it('reports an organ access that existed before the plan as preexisting', async () => {
-    writeProject();
+    await writeProject();
     for (const [path, content] of Object.entries(ORGAN_ACCESS_FILES))
       writeReviewStateFixtureFile(projectRoot, path, content);
+    await seedFacts(projectRoot);
     const { data, planPath } = await persistPlan([VALUE_MOVE]);
     executePlan(data);
     const result = await postcondition(planPath);
@@ -262,12 +280,13 @@ describe('postcondition keeps organ-access violations in the comparison', () => 
   });
 
   it('reports an organ access the execution creates as a finding', async () => {
-    writeProject();
+    await writeProject();
     writeReviewStateFixtureFile(
       projectRoot,
       'domain/d/utils/helper.ts',
       ORGAN_ACCESS_FILES['domain/d/utils/helper.ts'],
     );
+    await seedFacts(projectRoot);
     const { data, planPath } = await persistPlan([VALUE_MOVE]);
     executePlan(data);
     writeReviewStateFixtureFile(

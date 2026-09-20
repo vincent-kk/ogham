@@ -8,11 +8,18 @@ export interface AdapterClaim {
   evidence: string[];
 }
 
+/** How a reference reaches its target, as a provider reports it. */
+export type DependencyReferenceKind =
+  | 'static'
+  | 'dynamic'
+  | 're-export'
+  | 'framework';
+
 export interface DependencyReference {
   sourceFile: string;
   rawSpecifier: string;
   resolvedPath: string | null;
-  kind: 'static' | 'dynamic' | 're-export' | 'framework';
+  kind: DependencyReferenceKind;
   /**
    * `indeterminate` when the adapter found the reference where it could not
    * trust token boundaries, so it may not be code at all. Omitted means exact.

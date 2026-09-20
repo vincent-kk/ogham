@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { buildReviewOpinion } from './helpers/buildReviewOpinion.js';
 import { buildVerdictReviewFinding } from './helpers/buildVerdictReviewFinding.js';
 import { configureReviewGroups } from './helpers/configureReviewGroups.js';
@@ -13,10 +14,10 @@ import { createReviewStateSealFixture } from './helpers/createReviewStateSealFix
 import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Isolated round artifacts and Git source used to prove stale-call immutability. */
-let fixture: ReturnType<typeof createReviewStateSealFixture>;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 1);
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 1);
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -49,7 +50,7 @@ describe('review round order', () => {
           cwd: fixture.projectRoot,
         },
       );
-      const prepared = await handleReviewState({
+      const prepared = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort,

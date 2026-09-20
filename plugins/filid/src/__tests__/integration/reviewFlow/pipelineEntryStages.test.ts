@@ -21,6 +21,7 @@ import {
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 import { resolveReviewStatePaths } from '../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 import { runReviewStateFixtureGit } from '../../unit/mcp/reviewState/helpers/runReviewStateFixtureGit.js';
+import { seedFacts } from '../helpers/seedFacts.js';
 
 /** Canonical instruction root exercised by the skill loader. */
 const skillsRoot = join(
@@ -108,7 +109,7 @@ describe('pipeline entry-stage document contract', () => {
 /** Temporary repository whose review directory is seeded per row. */
 let projectRoot: string;
 
-beforeEach(() => {
+beforeEach(async () => {
   projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-entry-stage-'));
   runReviewStateFixtureGit(projectRoot, ['init', '--initial-branch=main']);
   runReviewStateFixtureGit(projectRoot, [
@@ -123,6 +124,7 @@ beforeEach(() => {
     '-m',
     'initial',
   ]);
+  await seedFacts(projectRoot);
 });
 afterEach(() => rmSync(projectRoot, { recursive: true, force: true }));
 

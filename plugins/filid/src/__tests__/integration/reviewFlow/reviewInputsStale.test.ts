@@ -91,8 +91,8 @@ async function buildHandoffChangeContext(): Promise<string> {
 }
 
 beforeEach(async () => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 1);
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 1);
   const changeContext = await buildHandoffChangeContext();
   const payload = await handleReviewState({
     action: 'prepare',

@@ -24,6 +24,7 @@ import type {
 } from '../../../types/report.js';
 import type { RestructurePlan } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 import { writeSharedUnitRestructureProject } from '../../integration/reviewFlow/helpers/writeSharedUnitRestructureProject.js';
 
 import { persistPlanArtifact } from './helpers/persistPlanArtifact.js';
@@ -53,7 +54,7 @@ function isPlanPayload(
  * @returns Project root, the executed plan and its stored artifact path.
  */
 async function executeWithNewCycle() {
-  const projectRoot = writeSharedUnitRestructureProject();
+  const projectRoot = await writeSharedUnitRestructureProject();
   temporary.push(projectRoot);
   const plan = await handleRestructure({
     action: 'plan',
@@ -91,6 +92,7 @@ async function executeWithNewCycle() {
     join(projectRoot, 'domain/b/index.ts'),
     "export { b } from './use.js';\nexport { a } from '../a/index.js';\n",
   );
+  await seedFacts(projectRoot);
   return { projectRoot, planPath };
 }
 

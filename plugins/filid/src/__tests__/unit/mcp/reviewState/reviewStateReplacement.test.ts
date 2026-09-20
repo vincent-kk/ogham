@@ -20,13 +20,13 @@ import { configureReviewGroups } from './helpers/configureReviewGroups.js';
 import { createReviewStateSealFixture } from './helpers/createReviewStateSealFixture.js';
 
 /** Prepared review whose state file each case makes unusable. */
-let fixture: ReturnType<typeof createReviewStateSealFixture>;
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
 /** Branch-level state file of the prepared review. */
 let statePath: string;
 
 beforeEach(async () => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 1);
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 1);
   const prepared = await handleReviewState({
     action: 'prepare',
     projectRoot: fixture.projectRoot,

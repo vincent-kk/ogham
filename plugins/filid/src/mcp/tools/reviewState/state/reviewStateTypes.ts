@@ -163,6 +163,14 @@ export interface ReviewScopeFile extends ReviewChangedFile {
   repositoryRules: string[];
   /** Whether the current adapter snapshot reports this path as a public entry point. */
   publicEntryPoint?: boolean;
+  /**
+   * Digest of this file's frozen valid references (spec §9).
+   *
+   * Optional because a generation prepared before facts were frozen has none,
+   * and its `evidenceHash` keeps the tuple it was computed with — adding an
+   * element would make every in-flight review stale.
+   */
+  factsHash?: string;
 }
 
 /** Structure or verification violation normalized to a project-relative path. */
@@ -444,6 +452,23 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
   /** Deterministic groups and their validation handoffs. */
   groups: ReviewGroup[];
   /** Complete prepare-time evidence and roster snapshot. */
+  /**
+   * The side-table items the seal read, as it read them (spec §9).
+   *
+   * Written by a seal that had frozen facts to compare against, so a later
+   * checkpoint or re-seal answers from this record rather than from a live
+   * table that other flows keep changing. Absent before the first such seal.
+   */
+  factsAdjudications?: {
+    path: string;
+    kind: string;
+    reference: string;
+    resolvedPath: string;
+    state: string;
+    lineDigest: string;
+  }[];
+  /** Digest of that record, so a reader can tell it apart from another seal's. */
+  factsAdjudicationsDigest?: string;
   scope: {
     /** Prepared non-finding diagnostics, absent in legacy records. */
     diagnostics?: StoredToolDiagnostic[];
@@ -451,6 +476,13 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
     outOfScopeDiagnostics?: StoredToolDiagnostic[];
     /** FCA snapshot identity used to render evidence. */
     snapshotHash: string;
+    /**
+     * Digest of the facts this generation froze (spec §9).
+     *
+     * Absent in a generation prepared before facts were frozen, whose
+     * `evidenceHash` keeps the tuple it was computed with.
+     */
+    factsDigest?: string;
     /** Whether both structure and verification evidence are conclusive. */
     evidenceComplete: boolean;
     /** Prepare-time dirty-worktree classification. */
@@ -607,6 +639,14 @@ export interface ReviewPrepareData extends ReviewHandoffPlan {
   statePath: string;
   /** Absolute canonical evidence path. */
   evidencePath: string;
+  /**
+   * Absolute path of the generation's frozen facts.
+   *
+   * The valid references the review was judged on, kept beside the evidence so
+   * a verifier compares against what this generation saw rather than against a
+   * store that has moved on (spec §9).
+   */
+  factsPath: string;
   /** Absolute orchestration session path. */
   sessionPath: string;
   /** Machine-readable current-generation reuse decisions. */
@@ -921,6 +961,8 @@ export interface ReviewStatePaths {
   /** Canonical review blocker artifact path. */
   blockersPath: string;
   evidencePath: string;
+  /** Canonical frozen-facts artifact path of the generation (spec §9). */
+  factsPath: string;
   /** Canonical orchestration session artifact path. */
   sessionPath: string;
   /** Canonical pull-request comment artifact path. */

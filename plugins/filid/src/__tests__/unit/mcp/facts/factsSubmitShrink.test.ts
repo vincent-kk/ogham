@@ -397,6 +397,62 @@ describe('a record meeting a judgement that has already been made', () => {
   });
 });
 
+/**
+ * Submit one record for `src/deep/use.ts` claiming one specifier.
+ * @param specifier Reference text, as the file now spells it.
+ * @param target In-project path it resolves to.
+ * @returns The submit summary.
+ */
+async function submitDeep(
+  specifier: string,
+  target: string,
+): Promise<FactsSubmitSummary> {
+  const status = await handleFacts({ action: 'status', path: project.root });
+  const record = project.facts('src/deep/use.ts', {
+    references: [{ specifier, kind: 'static', resolved: { path: target } }],
+    provenance: {
+      tool: 'tool-a',
+      version: '1.0.0',
+      command: 'test',
+      tier: 'tool',
+      resolutionInputs: [],
+    },
+  });
+  const result = await handleFacts({
+    action: 'submit',
+    path: project.root,
+    file: project.submission(
+      `deep-${Math.random().toString(36).slice(2)}.json`,
+      JSON.stringify([record]),
+    ),
+    resolutionEpoch: (status.summary as FactsStatusSummary).resolutionEpoch,
+  });
+  return result.summary as FactsSubmitSummary;
+}
+
+describe('a rewritten specifier that spells the old one inside itself', () => {
+  it('opens no item when only the new specifier is on the line', async () => {
+    project.write('src/c/index.ts', 'export const x = 1;\n');
+    project.write('c/index.ts', 'export const x = 2;\n');
+    project.write(
+      'src/deep/use.ts',
+      "export { x } from '../c/index.js';\n",
+    );
+    await submitDeep('../c/index.js', 'src/c/index.ts');
+    // The restructure a caller runs: the unit moved up, so the specifier grew
+    // a segment and the old one survives only as a substring of the new one.
+    project.write(
+      'src/deep/use.ts',
+      "export { x } from '../../c/index.js';\n",
+    );
+
+    const summary = await submitDeep('../../c/index.js', 'c/index.ts');
+
+    expect(summary.openedItems).toBe(0);
+    expect(await unadjudicated()).toEqual([]);
+  });
+});
+
 describe('a tree that moved between two records of the same tool', () => {
   it('still opens an item for an edge the new record stopped claiming', async () => {
     await submit('src/thing.ts');

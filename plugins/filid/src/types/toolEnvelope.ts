@@ -42,6 +42,20 @@ export interface ToolDiagnostic {
   /** Unresolved dependency target as written by the consumer. */
   specifier?: string;
   /**
+   * 1-based line the caller has to read, when one line decides the answer.
+   *
+   * Set by a producer that knows which line its refusal is about — a disputed
+   * reference, say — so the caller does not have to search the file for it.
+   */
+  line?: number;
+  /**
+   * Who decides what happens next: `agent` when nothing needs a person.
+   *
+   * Stated rather than implied, because a diagnostic that reads like a request
+   * is how a flow ends up waiting on somebody who was never asked.
+   */
+  owner?: string;
+  /**
    * What the caller does next: the fix to make, the step filid leaves to the
    * caller, or who must decide.
    */

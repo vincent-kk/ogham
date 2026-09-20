@@ -15,6 +15,15 @@ export interface ShardWriteOutcome {
   stored: Set<string>;
   /** Paths whose shard another writer took, sorted. */
   conflicted: string[];
+  /**
+   * Shards this batch replaced, as they now stand, keyed by shard file name.
+   *
+   * A second batch in the same call chains its compare-and-set from these
+   * instead of re-reading the directory: a re-read would adopt whatever digest
+   * an interleaving writer left, so the check would pass and that writer's page
+   * would be overwritten without either caller learning of it.
+   */
+  shards: Map<string, FactsShard>;
 }
 
 /**
@@ -47,7 +56,11 @@ export function writeShardPages(
     const shard = shardFileName(key);
     byShard.set(shard, [...(byShard.get(shard) ?? []), key]);
   }
-  const outcome: ShardWriteOutcome = { stored: new Set<string>(), conflicted: [] };
+  const outcome: ShardWriteOutcome = {
+    stored: new Set<string>(),
+    conflicted: [],
+    shards: new Map<string, FactsShard>(),
+  };
   for (const [shard, keys] of byShard) {
     const existing = shards.get(shard);
     const entries = { ...(existing?.entries ?? {}) };
@@ -64,7 +77,11 @@ export function writeShardPages(
       entries[key] = update.document;
       changed = true;
     }
-    if (!changed || writeFactsShardFile(directory, shard, entries, existing?.digest ?? null)) {
+    const digest = changed
+      ? writeFactsShardFile(directory, shard, entries, existing?.digest ?? null)
+      : null;
+    if (digest !== null) outcome.shards.set(shard, { digest, entries });
+    if (!changed || digest !== null) {
       for (const key of keys) outcome.stored.add(key);
       continue;
     }

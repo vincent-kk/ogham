@@ -30,6 +30,7 @@ import type {
   FactsSubmitData,
   FactsSubmitSummary,
 } from '../../../../mcp/tools/facts/index.js';
+import { createRandom } from '../../core/properties/helpers/createRandom.js';
 import type { Random } from '../../core/properties/helpers/createRandom.js';
 
 import { checkAsyncProperty } from './helpers/checkAsyncProperty.js';
@@ -80,6 +81,30 @@ describe('the facts state machine under random operation sequences', () => {
       ).resolves.toBeUndefined();
     },
     600_000,
+  );
+
+  it(
+    'keeps the edges a tool-error record cannot repeat when a later submission drops one',
+    async () => {
+      const stateRoot = mkdtempSync(join(tmpdir(), 'filid-facts-model-'));
+      process.env.CLAUDE_CONFIG_DIR = stateRoot;
+      try {
+        const world = createFactsWorld(2);
+        const random = createRandom(7);
+        const stored = new Set<string>();
+        // Scripted rather than sampled: the loss needs three submissions of the
+        // same file in one order, and a tool chosen per call from six reaches
+        // it too rarely to be a check.
+        for (const mode of ['exact', 'unreadable', 'lossy'] as const) {
+          expect(await submitAndCheck(world, mode, random)).toBeNull();
+          expect(await afterCall(world, stored)).toBeNull();
+        }
+      } finally {
+        rmSync(stateRoot, { recursive: true, force: true });
+        cleanupFactsProjects();
+      }
+    },
+    120_000,
   );
 });
 
@@ -136,6 +161,7 @@ async function randomCall(
     'other',
     'bogus',
     'comments',
+    'unreadable',
   ] as const);
   // Weighted, not uniform. Shrink detection only shows itself across two
   // submissions of the same file, so diluting submit to one choice in six made

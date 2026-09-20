@@ -40,7 +40,7 @@ describe('ordinary incremental review wiring', () => {
   });
 
   it('prepares, accepts an ordinary opinion file and seals through the real MCP server', async () => {
-    const fixture = createReviewStateSealFixture();
+    const fixture = await createReviewStateSealFixture();
     const connection = await connectTestClient(createServer());
     try {
       const listed = await connection.client.listTools();

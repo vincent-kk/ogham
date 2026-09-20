@@ -6,6 +6,10 @@ import type {
   AnalysisCertainty,
   SnapshotDiagnostic,
 } from '../../../types/fractal.js';
+import type { VerificationFileFacts } from '../../../types/verification.js';
+import type { FactsFileState, ProjectFacts } from '../../facts/index.js';
+
+import { factsVerificationClaims } from './factsVerificationClaims.js';
 
 interface VerificationClaim {
   adapterId: string;
@@ -17,12 +21,31 @@ export interface CollectedVerificationClaims {
   adapters: VerificationAdapter[];
   diagnostics: SnapshotDiagnostic[];
   discoveredPathsByAdapter: ReadonlyMap<string, readonly string[]>;
+  /** Role and case count of each discovered file the store can answer for. */
+  verificationFacts: ReadonlyMap<string, VerificationFileFacts>;
   certainty: AnalysisCertainty;
 }
 
+/**
+ * Discover the project's verification files and read what the store says.
+ *
+ * Discovery stays with the adapters — which files are verification is a
+ * question about names and paths — while the role and case count of each one
+ * come from its facts record. A discovered file the store cannot answer for
+ * lowers the certainty and is named in a diagnostic, so it never leaves the
+ * analysis in silence.
+ * @param projectRoot Absolute project root the adapters discover under.
+ * @param adapters Verification adapters selected for this project.
+ * @param facts One read of the store against the current tree.
+ * @param factsStates Each scanned file's state, from that same read.
+ * @returns The active adapters, the discovered paths per adapter, the store's
+ * answer for each of them, the diagnostics and the discovery certainty.
+ */
 export async function collectVerificationClaims(
   projectRoot: string,
   adapters: readonly VerificationAdapter[],
+  facts: ProjectFacts,
+  factsStates: ReadonlyMap<string, FactsFileState>,
 ): Promise<CollectedVerificationClaims> {
   const claims = new Map<string, VerificationClaim[]>();
   const diagnostics: SnapshotDiagnostic[] = [];
@@ -89,10 +112,21 @@ export async function collectVerificationClaims(
     paths.sort((left, right) =>
       pathForCompare(left).localeCompare(pathForCompare(right)),
     );
+  const stored = factsVerificationClaims(
+    projectRoot,
+    [...discoveredPathsByAdapter.values()].flat(),
+    facts,
+    factsStates,
+  );
+  diagnostics.push(...stored.diagnostics);
   return {
     adapters: activeAdapters,
     diagnostics,
     discoveredPathsByAdapter,
-    certainty,
+    verificationFacts: stored.verificationFacts,
+    certainty:
+      stored.diagnostics.length > 0 && certainty === 'exact'
+        ? 'indeterminate'
+        : certainty,
   };
 }

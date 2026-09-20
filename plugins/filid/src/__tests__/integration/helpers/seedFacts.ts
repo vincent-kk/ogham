@@ -2,9 +2,8 @@ import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { FACTS_SCHEMA_VERSION } from '../../../constants/facts.js';
-import { hashProjectFile } from '../../../core/facts/index.js';
-import type { FileFacts } from '../../../core/facts/index.js';
+import { extractFileFacts } from '../../../factsExtractor/index.js';
+import { resolveFactsScope } from '../../../core/facts/index.js';
 import { loadConfig } from '../../../core/infra/configLoader/index.js';
 import {
   listScannedFilePaths,
@@ -13,6 +12,7 @@ import {
 import { handleFacts } from '../../../mcp/tools/facts/index.js';
 import type {
   FactsStatusSummary,
+  FactsSubmitData,
   FactsSubmitSummary,
 } from '../../../mcp/tools/facts/index.js';
 
@@ -20,15 +20,23 @@ import type {
 export interface SeededFacts {
   resolutionEpoch: string;
   accepted: number;
+  /** How many in-project edges the seeded records carry. */
+  edges: number;
 }
 
 /**
- * Give a test project a complete set of valid facts.
+ * Give a test project a complete set of valid facts, extracted from its files.
  *
- * Records carry no references. That is a real provider claim, not a placeholder:
- * a provider reports a record for every file in its scope and an empty array
- * where it found no reference, so a project seeded this way is `exact`
- * everywhere and any later test that needs an edge adds it explicitly.
+ * The records come from the extraction program, in process, so a seeded project
+ * carries the edges its source really makes. Seeding empty records instead
+ * would be worse than not seeding at all: every file would be `exact` and every
+ * cycle, boundary violation and consumer list would quietly become empty, and
+ * the tests that assert on them would pass by asserting nothing.
+ *
+ * Only the files the scope covers are extracted, which is what the extraction
+ * list `status` writes does in production: submitting a record for a file the
+ * scope excludes is refused, and a seeding helper that ignored the scope would
+ * be reporting that refusal instead of seeding.
  *
  * Submission goes through the tool rather than straight to the store, so the
  * path guard, the epoch check and every §4 check run exactly as they do in
@@ -37,45 +45,31 @@ export interface SeededFacts {
  * under the canonicalized temp directory, because the guard refuses both a path
  * inside the tree and one whose components include a symbolic link.
  *
- * No adapter is involved: turning adapter output into records is the extraction
- * program's job, and product code has no adapter-to-facts path.
+ * A refused record throws here rather than travelling. Seeding that half
+ * worked leaves the project `indeterminate`, and that shows up as a puzzling
+ * assertion failure far from the fixture that caused it; the refusal carries
+ * its code and path, so failing at the seam names the cause.
  *
- * @param projectRoot - Absolute root of a project whose config declares
- * `facts.covers`; without it every record is out of scope.
- * @returns The epoch the facts were stored at, and how many records landed.
+ * @param projectRoot - Absolute root of the project to seed. Its scope is
+ * whatever `facts.covers` declares, or the adapters' default extensions when it
+ * declares none.
+ * @returns The epoch the facts were stored at, how many records landed, and how
+ * many in-project edges they carry.
+ * @throws When the submission refused a record or one of its claims.
  */
 export async function seedFacts(projectRoot: string): Promise<SeededFacts> {
   const status = await handleFacts({ action: 'status', path: projectRoot });
   const resolutionEpoch = (status.summary as FactsStatusSummary)
     .resolutionEpoch;
-  const scanned = await listScannedFilePaths(
-    projectRoot,
-    scanFileSetOptions(loadConfig(projectRoot).config ?? undefined),
-  );
-  const records = scanned.flatMap(
-    (path): FileFacts[] => {
-      const digest = hashProjectFile(projectRoot, path);
-      if (!digest.ok) return [];
-      return [
-        {
-          schemaVersion: FACTS_SCHEMA_VERSION,
-          path,
-          contentHash: digest.contentHash,
-          references: [],
-          provenance: {
-            tool: 'seed-facts',
-            version: '1.0.0',
-            command: 'seedFacts',
-            tier: 'tool',
-            resolutionInputs: [],
-          },
-        },
-      ];
-    },
-  );
+  const config = loadConfig(projectRoot).config ?? undefined;
+  const scope = resolveFactsScope(config);
+  const scanned = (
+    await listScannedFilePaths(projectRoot, scanFileSetOptions(config))
+  ).filter((path) => scope.covers(path));
+  const extraction = await extractFileFacts(projectRoot, scanned, 'seedFacts');
   const directory = mkdtempSync(join(realpathSync(tmpdir()), 'filid-seed-'));
   const file = join(directory, 'facts.json');
-  writeFileSync(file, JSON.stringify(records));
+  writeFileSync(file, JSON.stringify(extraction.records));
   try {
     const result = await handleFacts({
       action: 'submit',
@@ -83,9 +77,23 @@ export async function seedFacts(projectRoot: string): Promise<SeededFacts> {
       file,
       resolutionEpoch,
     });
+    const rejected = (result.data as FactsSubmitData).rejected;
+    if (rejected.length > 0)
+      throw new Error(
+        `seedFacts: ${projectRoot} refused ${rejected.length} claim(s): ${rejected
+          .map((one) => `${one.path} ${one.code}`)
+          .join(', ')}`,
+      );
     return {
       resolutionEpoch,
       accepted: (result.summary as FactsSubmitSummary).accepted,
+      edges: extraction.records.reduce(
+        (total, record) =>
+          total +
+          record.references.filter((reference) => 'path' in reference.resolved)
+            .length,
+        0,
+      ),
     };
   } finally {
     rmSync(directory, { recursive: true, force: true });

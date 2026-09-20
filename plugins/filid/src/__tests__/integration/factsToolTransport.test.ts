@@ -263,6 +263,7 @@ describe('the facts tool across the MCP transport', () => {
       'items',
       'path',
       'resolutionEpoch',
+      'shards',
       'sourcePath',
       'sourcePaths',
     ]);

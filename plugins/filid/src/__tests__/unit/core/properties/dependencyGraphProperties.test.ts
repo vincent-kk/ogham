@@ -1,7 +1,10 @@
 import { describe, it } from 'vitest';
 
 import { DEPENDENCY_DIAGNOSTIC_CODES } from '../../../../constants/dependencyDiagnosticCodes.js';
-import { buildDependencyGraph } from '../../../../core/analysis/dependencyGraph/index.js';
+import {
+  buildDependencyGraph,
+  findUnownedReferences,
+} from '../../../../core/analysis/dependencyGraph/index.js';
 import type { DependencyReference } from '../../../../types/adapters.js';
 import type { UnknownFile } from '../../../../types/fractal.js';
 
@@ -88,8 +91,10 @@ function randomGraphInput(
     ? [
         {
           path: `m0/f${random.int(3)}.ts`,
+          // Two causes a collector can attribute outside the references; the
+          // graph carries whatever string it is handed.
           causes: random.shuffle([
-            DEPENDENCY_DIAGNOSTIC_CODES.ANALYSIS_FAILED,
+            'dependency-analysis-failed',
             'ambiguous-adapter-claim',
           ]),
         },
@@ -191,7 +196,7 @@ describe('buildDependencyGraph over random references', () => {
     });
   });
 
-  it('turns no uncertain, unresolved or unowned production reference into an edge, and lists its source', () => {
+  it('turns no uncertain, unresolved or unowned production reference into an edge; uncertain and unresolved list their source', () => {
     checkProperty({
       runs: RUNS,
       maxSize: 8,
@@ -206,9 +211,18 @@ describe('buildDependencyGraph over random references', () => {
             DEPENDENCY_DIAGNOSTIC_CODES.UNCERTAIN,
             DEPENDENCY_DIAGNOSTIC_CODES.UNRESOLVED,
           ],
-          unowned: [DEPENDENCY_DIAGNOSTIC_CODES.UNOWNED],
         };
         for (const [index, reference] of input.references.entries()) {
+          if (
+            input.shapes[index] === 'unowned' &&
+            evidence.some(
+              (item) =>
+                item.sourceFile === reference.sourceFile &&
+                item.rawSpecifier === reference.rawSpecifier &&
+                item.resolvedPath === reference.resolvedPath,
+            )
+          )
+            return 'unowned reference became an edge';
           const causes = expected[input.shapes[index]];
           if (!causes) continue;
           if (
@@ -230,6 +244,38 @@ describe('buildDependencyGraph over random references', () => {
             return `${reference.sourceFile} lacks ${missing}`;
         }
         return null;
+      },
+    });
+  });
+
+  it('reports every unowned reference in full and none of them as an unknown file', () => {
+    checkProperty({
+      runs: RUNS,
+      maxSize: 8,
+      generate: (random, size) => randomGraphInput(random, size, ALL_SHAPES),
+      check: (input) => {
+        const generated = input.references.filter(
+          (_, index) => input.shapes[index] === 'unowned',
+        );
+        const reported = findUnownedReferences(
+          input.nodePaths,
+          input.references,
+          { verificationPaths: input.verificationPaths },
+        );
+        if (reported.length !== generated.length)
+          return `${generated.length} unowned references, ${reported.length} reported`;
+        const lost = reported.findIndex(
+          ({ reference, unownedPath }, index) =>
+            reference !== generated[index] ||
+            unownedPath !== `${PROJECT_ROOT}/loose/x.ts`,
+        );
+        if (lost >= 0) return `report ${lost} names another reference or target`;
+        const listed = build(input).unknownFiles.filter(({ causes }) =>
+          causes.includes(DEPENDENCY_DIAGNOSTIC_CODES.UNOWNED),
+        );
+        return listed.length > 0
+          ? `an unowned reference made ${listed[0].path} an unknown file`
+          : null;
       },
     });
   });

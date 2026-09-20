@@ -15,8 +15,8 @@ import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Isolated states distinguish policy compatibility from source identity. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -49,7 +49,7 @@ describe('review validation policy compatibility', () => {
   ] as const)(
     'blocks %s policy %s through %s without rewriting history',
     async (phase, version, action) => {
-      configureReviewGroups(fixture.projectRoot, 1);
+      await configureReviewGroups(fixture.projectRoot, 1);
       const prepared = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
@@ -95,7 +95,7 @@ describe('review validation policy compatibility', () => {
   );
 
   it('stamps only fresh state and reuses a current sealed cache', async () => {
-    configureReviewGroups(fixture.projectRoot, 1);
+    await configureReviewGroups(fixture.projectRoot, 1);
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
@@ -133,7 +133,7 @@ describe('review validation policy compatibility', () => {
   });
 
   it('replaces an obsolete policy state through prepare, keeping its bytes', async () => {
-    configureReviewGroups(fixture.projectRoot, 1);
+    await configureReviewGroups(fixture.projectRoot, 1);
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,

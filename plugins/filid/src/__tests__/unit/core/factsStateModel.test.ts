@@ -64,6 +64,8 @@ function classify(
       syntaxValid: true,
       resolutionInputsValid: true,
       hasOpenItems: false,
+      judgementsUnreadable: false,
+      awaitingReDerivation: false,
       hasPendingAttestation: false,
       ...evidence,
     },

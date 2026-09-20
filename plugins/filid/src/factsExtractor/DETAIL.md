@@ -38,7 +38,7 @@
 - `provenance.resolutionInputs`는 비어 있다. adapter의 해석은 후보 경로의 존재만 보고 설정 파일을 읽지 않는다.
 - 선언된 한계: tsconfig `paths`나 package `exports`로 닿는 참조는 이 공급자가 보고하지 않는다. bare specifier는 참조로 내지 않는다(`resolved.external` 없음). 비-literal `import(x)`도 내지 않는다(`resolved.nonLiteral` 없음).
 - 선언된 한계: 문법이 틀린 텍스트는 parse되지 않고 scan된다. 그 파일의 facts는 scanner가 읽어 낸 값이고 syntax error 신호를 싣지 않는다.
-- 지금 코어는 루트 밖으로 풀린 같은 참조에 `unowned-local-dependency` 진단을 내고 그래프를 indeterminate로 둔다. S3c의 비교는 adapter 쪽의 루트 밖 resolved 경로도 `external`로 정규화한다. 그 차이(루트 밖 상대 import가 더는 분석을 막지 않음)는 선언된 동작 변화다.
+- 코어는 루트 밖으로 풀린 같은 참조에 `unowned-local-dependency` 진단을 내되 graph certainty는 내리지 않는다 — 소유 fractal이 없는 끝에는 노드가 없어 간선이 서지 않기 때문이다. S3c의 비교는 adapter 쪽의 루트 밖 resolved 경로도 `external`로 정규화하므로, 두 경로의 결론은 이 참조에서 갈리지 않는다.
 - stdout에는 요약 JSON 한 줄만 쓴다: 파일 수, `toolError` 수, 거부 수, 출력 경로, 걸린 시간.
 
 ## API Contracts

@@ -10,7 +10,7 @@
 - 참조를 확정하지 못한 파일은 `unknownFiles`에 원인과 함께 귀속한다. 그 참조는 edge로 쓰지 않는다. `UnknownFile`은 `{ path, causes }`다. `path`는 `options.projectRoot` 기준 POSIX 상대 경로이고, `causes`는 진단 코드의 정렬된 고유 목록이며, 목록은 path 순이다. 원인별 규칙:
   - `uncertain-local-dependency`: adapter가 `certainty: 'indeterminate'`로 표시한 참조의 source. verification 파일도 포함한다. 그 참조가 실제 import라면 edge 증거가 없어 이동 계획의 수정 목록에서 빠지기 때문이다.
   - `unresolved-local-dependency`: 풀리지 않은 production 참조의 source. indeterminate이면서 풀리지 않은 참조는 두 원인을 모두 받는다 — 수집기가 그 참조에 `unresolved-local-dependency` 진단을 내므로, 파일에 나온 진단 코드는 언제나 그 파일의 원인에 들어 있다.
-  - `unowned-local-dependency`: source 또는 target owner가 없는 production 참조의 source.
+  - 소유 fractal이 없는 참조는 **`unknownFiles`에 들어가지 않는다**. 노드가 없으므로 간선도 순환도 만들 수 없고, 경계를 만드는 것은 사용자 동의 사항이어서 그 파일 때문에 그래프가 미확정이 되지 않는다. 대신 `findUnownedReferences`가 source 파일과 소유자 없는 대상을 함께 빠짐없이 돌려주고, 진단은 `projectSnapshot`이 만든다.
   - verification 파일의 미해소·owner 부재 참조는 DAG 대상이 아니므로 귀속하지 않는다.
   - `options.unknownFiles`: 수집기가 참조 밖에서 찾은 항목(읽기 실패, adapter ownership 진단, 따라가지 않은 symlink)을 그대로 합친다.
 - 스칼라 `certainty`는 표시용 파생값이다. 시작 certainty가 `unsupported`면 `unsupported`다. 아니면 `unknownFiles`가 있거나 시작 certainty가 `indeterminate`면 `indeterminate`이고, 그 밖에는 `exact`다. 스냅숏 수집기는 파일에 귀속하지 못하는 `indeterminate`를 넘기지 않는다. 시작값 `indeterminate`는 호출자가 귀속 없이 넘긴 불확실성을 지우지 않기 위해 남겨 둔 것이다.

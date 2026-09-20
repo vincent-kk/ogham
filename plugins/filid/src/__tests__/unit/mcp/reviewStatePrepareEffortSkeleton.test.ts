@@ -19,8 +19,8 @@ import { writeReviewStateFixtureJson } from './reviewState/helpers/writeReviewSt
 /** Temporary Git repository and plugin root used by effort-skeleton cases. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 
 afterEach(() => {

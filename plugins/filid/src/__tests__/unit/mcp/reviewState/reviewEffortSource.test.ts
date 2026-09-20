@@ -10,11 +10,11 @@ import { createReviewStateSealFixture } from './helpers/createReviewStateSealFix
 import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Review prepared at one effort, re-prepared at another. */
-let fixture: ReturnType<typeof createReviewStateSealFixture>;
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 1);
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 1);
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -70,7 +70,7 @@ describe('a prepared effort changes only when the caller names one', () => {
       projectRoot: fixture.projectRoot,
       effort: 'low',
     });
-    configureReviewGroups(fixture.projectRoot, 1, { effort: 'high' });
+    await configureReviewGroups(fixture.projectRoot, 1, { effort: 'high' });
     const resumed = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,

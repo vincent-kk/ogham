@@ -78,7 +78,7 @@ interface ToolResultEnvelope<Summary, Data> {
 | `fractal_inspect` | scan/validate/verification/resolve                   | FCA inspection 결과        |
 | `restructure`     | plan/precondition/postcondition                      | plan 또는 validation 결과  |
 | `review_state`    | prepare/checkpoint/validate/seal/cleanup/assess      | review artifact 상태       |
-| `facts`           | status/submit/compare/adjudicate/discard-pending     | 사실 상태·제출·비교·판정   |
+| `facts`           | status/submit/compare/adjudicate/discard-pending/discard-damaged | 사실 상태·제출·비교·판정·손상 shard 폐기 |
 
 ### fractal_inspect — scan
 

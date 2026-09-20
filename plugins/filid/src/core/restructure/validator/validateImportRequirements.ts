@@ -11,11 +11,14 @@ import { type ImportMiss, findImportMiss } from './findImportMiss.js';
 
 /**
  * The branch every failed import finding ends with, for a reference the analysis may have misread.
+ *
+ * A misread is a wrong fact, not a wrong file, and the facts are judgeable:
+ * the stored reference is dismissed rather than reported onwards (spec §4.5).
  * @param entry - Import requirement
  * @returns Next-action sentence for a consumer that holds no such import
  */
 function misreadBranch(entry: ImportRequirement): string {
-  return ` If ${entry.consumerPath} holds no such import — the reported reference sits in a comment or a string — the dependency analysis is wrong: do not edit the file; report ${entry.consumerPath} and "${entry.currentSpecifier}" to the user.`;
+  return ` If ${entry.consumerPath} holds no such import — the reported reference sits in a comment or a string — the stored facts are wrong, not the file: do not edit ${entry.consumerPath}. Extract that one path again with a tool that does not report "${entry.currentSpecifier}" and submit it, which returns the reference as a coverage-shrank item; then call facts adjudicate for that item with decision "dismiss" and a reason, taking its kind, reference, resolvedPath and contentHash from the item that facts status lists for ${entry.consumerPath}. A dismissal is confirmed by a different actor: have the skill stand up a separate subagent, let it read only the lines the item names, and adjudicate from there.`;
 }
 
 /**

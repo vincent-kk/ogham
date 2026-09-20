@@ -4,11 +4,12 @@ import {
   classifyRelevanceTarget,
   partitionUnknownFiles,
 } from '../../../../core/index.js';
-import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type {
   ProjectSnapshot,
   UnknownFilePartition,
 } from '../../../../types/fractal.js';
+
+import type { ReviewScopePaths } from './utils/selectReviewScopePaths.js';
 
 /**
  * Split the snapshot's unknown files by the review scope.
@@ -21,31 +22,19 @@ import type {
  * directory's subtree in scope. A reference that does not spell the name
  * slips through.
  * @param snapshot Snapshot the review evidence comes from.
- * @param changedPaths Project-relative paths of the changed files.
+ * @param scopePaths The review's changed files and their graph neighbours,
+ * computed once by the caller — deriving them here would walk every edge's
+ * evidence a second time on every prepare and every handoff.
  * @param readText Text of a project-relative file, or null when it cannot be read.
  * @returns Unknown files inside the review scope and those outside it.
  */
 export function selectReviewScopeUnknownFiles(
   snapshot: ProjectSnapshot,
-  changedPaths: readonly string[],
+  scopePaths: ReviewScopePaths,
   readText: (relativePath: string) => string | null,
 ): UnknownFilePartition {
   const root = snapshot.projectRoot;
-  const changed = new Set(
-    changedPaths.map((path) =>
-      toProjectRelativePath(root, portableResolve(root, path)),
-    ),
-  );
-  const neighbours = snapshot.dependencyGraph.edges
-    .flatMap(({ evidence }) => evidence)
-    .flatMap(({ sourceFile, resolvedPath }) => {
-      const source = toProjectRelativePath(root, sourceFile);
-      const target = toProjectRelativePath(root, resolvedPath);
-      return [
-        ...(changed.has(source) ? [target] : []),
-        ...(changed.has(target) ? [source] : []),
-      ];
-    });
+  const { changed, neighbours } = scopePaths;
   return partitionUnknownFiles(
     snapshot.dependencyGraph.unknownFiles,
     [...changed].map((path) => ({

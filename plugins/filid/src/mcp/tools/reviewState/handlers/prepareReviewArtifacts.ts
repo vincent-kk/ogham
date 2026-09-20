@@ -26,6 +26,7 @@ import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { assertReviewValidationPolicy } from '../state/assertReviewValidationPolicy.js';
 import { clearStaleReviewArtifacts } from '../state/clearStaleReviewArtifacts.js';
 import { hasCompletePreparedArtifacts } from '../state/hasCompletePreparedArtifacts.js';
+import { readFrozenFacts } from '../state/readFrozenFacts.js';
 import { readReviewArtifactPresence } from '../state/readReviewArtifactPresence.js';
 import { readReviewState } from '../state/readReviewState.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
@@ -190,7 +191,15 @@ export async function prepareReviewArtifacts(
     });
   }
 
-  if (canResume && existsSync(paths.evidencePath)) {
+  // The frozen facts are checked beside the evidence, not only in the fuller
+  // completeness check above: resuming on the evidence alone would leave a
+  // generation whose `facts.json` seal refuses, and the refusal's next action
+  // is this very call — prepare has to be what puts the file back (P5).
+  if (
+    canResume &&
+    existsSync(paths.evidencePath) &&
+    readFrozenFacts(paths.factsPath, existing).status !== 'unusable'
+  ) {
     const presence = readReviewArtifactPresence(paths, existing);
     const loadedRules = hasAllReviewBriefs(paths, existing)
       ? null
@@ -270,6 +279,7 @@ export async function prepareReviewArtifacts(
     projectRoot: input.projectRoot,
     source,
     evidencePath: paths.evidencePath,
+    factsPath: paths.factsPath,
     generatedPaths: settings.generatedPaths,
     lockfiles: settings.lockfiles,
     createdAt,
@@ -386,6 +396,7 @@ export async function prepareReviewArtifacts(
         ? { outOfScopeDiagnostics: collected.outOfScopeDiagnostics }
         : {}),
       snapshotHash: collected.snapshotHash,
+      factsDigest: collected.factsDigest,
       evidenceComplete: collected.evidenceComplete,
       worktree: collected.worktree,
       dirtyPaths: collected.dirtyPaths,

@@ -30,6 +30,21 @@ export interface FactsScope {
    * @returns True when a `covers` pattern matches and no `excludes` one does.
    */
   covers: (relativePath: string) => boolean;
+  /**
+   * Whether the built-in default scope would cover one path.
+   *
+   * What the declared scope drops out of THIS set is what a project chose to
+   * leave unread; everything else it does not cover — a document, a manifest —
+   * was never a candidate for a reference fact. Counting those too would put a
+   * non-zero "unread" number on every project that declares nothing.
+   *
+   * Declared limit: a language outside the default extensions enters the scope
+   * only through `facts.covers`, so a file of that language the project never
+   * declared is not in this set and does not count as dropped.
+   * @param relativePath Path as `listScannedFilePaths` spells it.
+   * @returns True when a default-scope pattern matches it.
+   */
+  defaultCovers: (relativePath: string) => boolean;
 }
 
 /**
@@ -56,6 +71,7 @@ export function resolveFactsScope(config?: FilidConfig): FactsScope {
   const source = declaredCovers === undefined ? 'default' : 'config';
   const patterns = declaredCovers ?? defaultFactsCovers();
   const covers = patterns.map(globToRegExp);
+  const byDefault = defaultFactsCovers().map(globToRegExp);
   const excludes = (config?.facts?.excludes ?? []).map(globToRegExp);
   const provider = config?.facts?.provider;
   return {
@@ -65,5 +81,7 @@ export function resolveFactsScope(config?: FilidConfig): FactsScope {
     covers: (relativePath) =>
       covers.some((pattern) => pattern.test(relativePath)) &&
       !excludes.some((pattern) => pattern.test(relativePath)),
+    defaultCovers: (relativePath) =>
+      byDefault.some((pattern) => pattern.test(relativePath)),
   };
 }

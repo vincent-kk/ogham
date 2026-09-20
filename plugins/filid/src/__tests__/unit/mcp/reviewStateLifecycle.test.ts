@@ -28,6 +28,7 @@ import { commitReviewStateFixture } from './reviewState/helpers/commitReviewStat
 import { createReviewRulePluginRoot } from './reviewState/helpers/createReviewRulePluginRoot.js';
 import { readPreparedReviewState } from './reviewState/helpers/readPreparedReviewState.js';
 import { validatePreparedReviewState } from './reviewState/helpers/validatePreparedReviewState.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 /** Temporary repository exercised by lifecycle tests. */
 let projectRoot: string;
@@ -69,7 +70,7 @@ function writeProjectFile(relativePath: string, content: string): void {
   writeFileAtomicallySync(filePath, content);
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   fixturePluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
@@ -83,6 +84,7 @@ beforeEach(() => {
   git(['checkout', '-b', 'feature/lifecycle']);
   writeProjectFile('src/value', 'feature\n');
   commitReviewStateFixture(projectRoot, 'feature');
+  await seedFacts(projectRoot);
 });
 
 afterEach(() => {

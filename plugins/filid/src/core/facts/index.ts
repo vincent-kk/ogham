@@ -45,6 +45,7 @@ export type {
 export { validateFactsRecord } from './validation/validateFactsRecord.js';
 export { hashProjectFile } from './validation/utils/hashProjectFile.js';
 export { isProjectFilePathValid } from './validation/utils/isProjectFilePathValid.js';
+export { locateReference } from './validation/utils/locateReference.js';
 export { locateSourceText } from './validation/utils/locateSourceText.js';
 export { splitSourceLines } from './validation/utils/splitSourceLines.js';
 export type { StoredRejection } from './schema/storedFactsRecordSchema.js';
@@ -66,6 +67,12 @@ export type {
 export { selectUnknownFiles } from './state/selectUnknownFiles.js';
 
 export { adjudicateItem } from './sideTable/adjudicateItem.js';
+export { classifyProjectFacts } from './read/classifyProjectFacts.js';
+export { readProjectFacts } from './read/readProjectFacts.js';
+export type {
+  FactsRecordEntry,
+  ProjectFacts,
+} from './read/readProjectFacts.js';
 export { agreedNonReferences } from './attested/agreedNonReferences.js';
 export { findUnaccountedLines } from './attested/findUnaccountedLines.js';
 export { resolveAttestation } from './attested/resolveAttestation.js';
@@ -90,13 +97,14 @@ export type { AdjudicationTableContents } from './sideTable/readAdjudicationTabl
 export { AdjudicationPageSchema } from './sideTable/adjudicationTableSchema.js';
 export type { AdjudicationPage } from './sideTable/adjudicationTableSchema.js';
 export { computeLineDigest } from './sideTable/utils/computeLineDigest.js';
-export { compareReferences, originOf } from './sideTable/compareReferences.js';
+export { compareReferences } from './sideTable/compareReferences.js';
 export { detectShrunkReferences } from './sideTable/detectShrunkReferences.js';
 export type { ShrunkReference } from './sideTable/detectShrunkReferences.js';
 export type {
   ComparableReference,
   ReferenceComparison,
 } from './sideTable/compareReferences.js';
+export { damagedJudgementDiagnostics } from './read/damagedJudgementDiagnostics.js';
 export { selectValidReferences } from './sideTable/selectValidReferences.js';
 export type { ValidReference } from './sideTable/selectValidReferences.js';
 export { writeAdjudicationPages } from './sideTable/writeAdjudicationPages.js';

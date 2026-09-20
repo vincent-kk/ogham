@@ -17,8 +17,8 @@ import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Real prepare/validate/seal fixture; only actor opinions are supplied by the test. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -32,7 +32,7 @@ describe('automatic low precision protections', () => {
   it.each(['clean', 'finding', 'gap', 'missing'] as const)(
     'retains every group and seals %s evidence correctly',
     async (scenario) => {
-      configureReviewGroups(fixture.projectRoot, 16, {
+      await configureReviewGroups(fixture.projectRoot, 16, {
         highRiskPaths: ['src/value.ts'],
       });
       const prepared = await handleReviewState({

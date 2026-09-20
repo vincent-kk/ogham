@@ -6,7 +6,8 @@
 - test-record는 파일당 최대 32 semantic cases를 허용하며 전체 파일·case 수에는 제한을 두지 않는다.
 - exact count만 cap PASS/violation으로 판정하고 indeterminate와 unsupported는 별도 warning finding으로 보존한다.
 - 같은 owner fractal의 여러 spec-document는 실제 DETAIL acceptance group을 선언하고 파일 간 group이 겹치지 않아야 한다.
-- adapter가 역할, case count와 `filid:contract` marker를 해석한다.
+- 역할과 case count는 호출자가 facts 레코드에서 읽어 `verificationFacts`로 넘긴다. adapter는 어떤 파일이 verification인지 발견하고 `filid:contract` marker를 해석할 뿐, 역할·count를 다시 만들지 않는다 — 레코드가 없는 파일을 adapter로 메우면 부트스트랩 누락이 가려진다.
+- `verificationFacts`에 없는 발견 파일은 분석에서 빠진다. 그 사실은 호출자가 certainty와 진단으로 싣는다.
 - 같은 최고 confidence의 adapter가 한 파일을 주장하면 `ambiguous-adapter-claim` 진단을 남기고 해당 파일을 policy 분석에서 제외한다.
 - snapshot이 제공한 discovery 결과는 절대 portable path로 정규화해 한 번만 소비하며, 동일 adapter의 중복 path는 한 claim으로 취급한다.
 - discovery 실패나 adapter 경합으로 일부 파일을 판정하지 못하면 project certainty는 `indeterminate`이며 빈 exact 분석으로 축소하지 않는다.

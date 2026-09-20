@@ -1,10 +1,10 @@
 import { REVIEW_STATE_ACTIONS } from '../../../../../constants/reviewState.js';
-import { handleReviewState } from '../../../../../mcp/tools/reviewState/index.js';
 import type {
   ReviewEffort,
   ReviewStateRecord,
 } from '../../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
+import { prepareWithFacts } from './prepareWithFacts.js';
 import { readPreparedReviewState } from './readPreparedReviewState.js';
 
 /**
@@ -21,7 +21,7 @@ export async function prepareReviewStateFixture(
   branchName: string,
   effort?: ReviewEffort,
 ): Promise<ReviewStateRecord> {
-  const prepared = await handleReviewState({
+  const prepared = await prepareWithFacts({
     action: REVIEW_STATE_ACTIONS.PREPARE,
     projectRoot,
     branchName,

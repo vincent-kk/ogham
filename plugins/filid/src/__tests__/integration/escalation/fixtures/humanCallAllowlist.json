@@ -641,14 +641,6 @@
       "note": "R-2 designed termination shared by every unusable-state diagnostic (PREPARE_ONCE_NEXT_ACTION)."
     },
     {
-      "file": "src/core/projectSnapshot/evidence/collectDependencyReferences.ts",
-      "hash": "fae6a74f80fc2708",
-      "kind": "human-call",
-      "class": "U",
-      "text": "The evidence stays indeterminate until the file lexes exactly: with the user's consent, rewrite the unpaired quote — typically an apostrophe in JSX text such as Don't, written as &apos; or {\"'\"} — and run again.",
-      "note": "Rewriting product source text only to satisfy filid's lexer is the owner's call; consent is the stated safety condition, so an M draft would still call the user. Reading the line and judging stay agent actions. (?)"
-    },
-    {
       "file": "src/core/projectSnapshot/evidence/utils/createUnfollowedLinkDiagnostic.ts",
       "hash": "2afe7dcfae7ec64c",
       "kind": "human-call",
@@ -658,11 +650,11 @@
     },
     {
       "file": "src/core/projectSnapshot/projectSnapshot.ts",
-      "hash": "d1eb4193f53e76ad",
+      "hash": "6a0f1eabdd493f1b",
       "kind": "human-call",
       "class": "U",
-      "text": "With the user's agreement, make a fractal own ${} — an INTENT.md in its directory or an ancestor does that — or move the file under an existing fractal; the graph stays indeterminate until then.",
-      "note": "Creating a fractal (INTENT.md) or moving a file sets a module boundary; matches enrich-docs' approval gate (skills/enrich-docs/SKILL.md:37,54)."
+      "text": "With the user's agreement, make a fractal own ${} — an INTENT.md in its directory or an ancestor does that — or move the file under an existing fractal; until then no rule can see this reference.",
+      "note": "Creating a fractal (INTENT.md) or moving a file sets a module boundary; matches enrich-docs' approval gate (skills/enrich-docs/SKILL.md:37,54). The reference is a finding, not a stop: the graph is judged without it (S3c slice 5)."
     },
     {
       "file": "src/core/restructure/planner/describeDecision.ts",
@@ -719,22 +711,6 @@
       "class": "U",
       "text": "If the plan's moves or import edits closed the cycle, fix the imports that close it; if it existed before the plan, report it to the user as pre-existing.",
       "note": "Spec: a cycle created by the plan is a design judgment; adopted edges re-judged after S5b. The pre-existing branch is a report only; the code already splits baseline cycles, so that branch could follow the preexisting list instead of agent judgment."
-    },
-    {
-      "file": "src/core/restructure/validator/validateImportRequirements.ts",
-      "hash": "1806630a95c4c463",
-      "kind": "human-call",
-      "class": "S",
-      "text": "If ${} holds no such import — the reported reference sits in a comment or a string — the dependency analysis is wrong: do not edit the file; report ${} and \"${}\" to the user.",
-      "note": "Filid analysis defect (reference inside a comment or string); editing is forbidden and nothing clears the finding, so only a report remains."
-    },
-    {
-      "file": "src/core/restructure/validator/validateRequiredArtifacts.ts",
-      "hash": "d521a24761eba873",
-      "kind": "human-call",
-      "class": "U",
-      "text": "Tell the user that ${} exists but its exports cannot be verified by filid, and let them confirm by hand that it exports the unit's public surface; the finding clears only once an adapter that enumerates this entry point's surface is enabled.",
-      "note": "Human sign-off on a surface filid cannot verify; no state-changing agent action clears it (no shipped adapter enumerates it). The agent could read the file first, but that does not clear the finding. (?)"
     },
     {
       "file": "src/mcp/tools/reviewState/handlers/readReviewCheckpoint.ts",

@@ -19,7 +19,11 @@ import type {
   CollectChangedScopeEvidenceInput,
   ComputedChangedScopeEvidence,
 } from './changedScopeEvidenceTypes.js';
+import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js';
+
 import { classifyChangedFile } from './classifyChangedFile.js';
+import { selectFrozenFacts } from './utils/selectFrozenFacts.js';
+import { selectReviewScopePaths } from './utils/selectReviewScopePaths.js';
 import { deriveEvidenceStatuses } from './deriveEvidenceStatuses.js';
 import { readChangedFileRoster } from './readChangedFileRoster.js';
 import { readReviewWorktree } from './readReviewWorktree.js';
@@ -27,7 +31,9 @@ import { selectChangedScopeVerificationFiles } from './selectChangedScopeVerific
 import { selectChangedScopeViolations } from './selectChangedScopeViolations.js';
 import { selectReviewScopeUnknownFiles } from './selectReviewScopeUnknownFiles.js';
 import { haveSameReviewPaths } from './utils/haveSameReviewPaths.js';
+import { assertReviewScopeFacts } from './utils/assertReviewScopeFacts.js';
 import { scopeGraphUncertaintyViolations } from './utils/scopeGraphUncertaintyViolations.js';
+import { toolErrorViolations } from './utils/toolErrorViolations.js';
 import { sortScopeDiagnostics } from './utils/sortScopeDiagnostics.js';
 
 /**
@@ -37,7 +43,10 @@ import { sortScopeDiagnostics } from './utils/sortScopeDiagnostics.js';
  * @throws When Git's changed roster differs from the prepared file-hash keys.
  */
 export async function computeChangedScopeEvidence(
-  input: Omit<CollectChangedScopeEvidenceInput, 'evidencePath' | 'createdAt'>,
+  input: Omit<
+    CollectChangedScopeEvidenceInput,
+    'evidencePath' | 'factsPath' | 'createdAt'
+  >,
 ): Promise<ComputedChangedScopeEvidence> {
   const roster = await readChangedFileRoster(
     input.projectRoot,
@@ -64,6 +73,17 @@ export async function computeChangedScopeEvidence(
       file.role,
     ]),
   );
+  const scopePaths = selectReviewScopePaths(
+    context.snapshot,
+    roster.map((entry) => entry.path),
+  );
+  const frozenFacts = selectFrozenFacts(context.snapshot, scopePaths);
+  const factsHashByPath = new Map(
+    frozenFacts.map((entry) => [
+      entry.path,
+      computeReviewArtifactHash(JSON.stringify(entry.references)),
+    ]),
+  );
   const files = roster.map((entry) =>
     classifyChangedFile(
       {
@@ -83,6 +103,10 @@ export async function computeChangedScopeEvidence(
       },
     ),
   );
+  const filesWithFacts = files.map((file) => {
+    const factsHash = factsHashByPath.get(file.path);
+    return factsHash === undefined ? file : { ...file, factsHash };
+  });
   const scopedVerificationCertainty = aggregateCertainty(
     selectChangedScopeVerificationFiles(
       context.snapshot.verification.files,
@@ -92,9 +116,10 @@ export async function computeChangedScopeEvidence(
   );
   const scopeUnknownFiles = selectReviewScopeUnknownFiles(
     context.snapshot,
-    files.map(({ path }) => path),
+    scopePaths,
     (relativePath) => readUnknownFileText(input.projectRoot, relativePath),
   );
+  assertReviewScopeFacts(scopeUnknownFiles.relevant);
   const graphCertainty = context.snapshot.dependencyGraph.certainty;
   const scopedDependencyCertainty =
     graphCertainty === 'unsupported'
@@ -142,6 +167,7 @@ export async function computeChangedScopeEvidence(
         structureViolations,
         scopeUnknownFiles.relevant,
       ),
+      ...toolErrorViolations(scopeUnknownFiles.relevant),
       ...verificationViolations,
     ],
     files,
@@ -185,10 +211,11 @@ export async function computeChangedScopeEvidence(
   );
   return {
     snapshotHash: context.snapshot.snapshotHash,
+    frozenFacts,
     evidenceComplete: statuses.evidenceComplete,
     ...worktree,
     statuses,
-    files,
+    files: filesWithFacts,
     candidates,
     informational,
     outOfScopeCount: selection.outOfScope.length,

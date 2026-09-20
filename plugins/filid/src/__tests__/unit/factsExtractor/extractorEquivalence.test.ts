@@ -54,7 +54,7 @@ describe('records carry the values the ECMAScript adapter reports', () => {
   }, 120_000);
 
   it('matches the adapter on the harness restructure project', async () => {
-    const root = writeSharedUnitRestructureProject();
+    const root = await writeSharedUnitRestructureProject();
     temporaryRoots.push(root);
     const extraction = await extractDiscovered(root);
     expect(extraction.records.map(({ path }) => path)).toContain(

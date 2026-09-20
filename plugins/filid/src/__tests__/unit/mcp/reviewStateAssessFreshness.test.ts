@@ -19,6 +19,7 @@ import { resolveReviewStatePaths } from '../../../mcp/tools/reviewState/state/re
 import type { ReviewStatePaths } from '../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
 import { runReviewStateFixtureGit } from './reviewState/helpers/runReviewStateFixtureGit.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 /** Temporary repository whose actual HEAD drives the assessment. */
 let projectRoot: string;
@@ -70,7 +71,7 @@ function assess(root: string, hasPullRequest = false) {
   });
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-assess-freshness-'));
   runReviewStateFixtureGit(projectRoot, [
     'init',
@@ -85,6 +86,7 @@ beforeEach(() => {
     paths.reviewDirectory,
     REVIEW_STATE_FILE_NAMES.RE_VALIDATE,
   );
+  await seedFacts(projectRoot);
 });
 
 afterEach(() => {

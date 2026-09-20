@@ -13,6 +13,10 @@ import { SOURCE_EXTENSIONS } from '../../../adapters/index.js';
  * narrows by adopting facts. The conventions pack takes this over later, at
  * which point the import disappears rather than moving.
  *
+ * One glob per extension covers the whole tree: the recursive wildcard spans
+ * zero segments, so the pattern matches the root's own `index.ts` as well as
+ * `src/index.ts`.
+ *
  * @returns Source-extension globs, sorted so the value is stable to compare.
  */
 export function defaultFactsCovers(): string[] {

@@ -12,11 +12,11 @@ import { createReviewStateSealFixture } from './helpers/createReviewStateSealFix
 import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Fresh rounds isolate automatic verification recovery from earlier findings. */
-let fixture: ReturnType<typeof createReviewStateSealFixture>;
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
 /** Prepared paths shared with the recovery action. */
 let prepared: ReviewPreparePayload;
 beforeEach(async () => {
-  fixture = createReviewStateSealFixture();
+  fixture = await createReviewStateSealFixture();
   prepared = await handleReviewState({
     action: 'prepare',
     projectRoot: fixture.projectRoot,

@@ -52,11 +52,11 @@ function installLegacyState(run: string): string {
   return branchName;
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   pluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
   projectRoot = runPinnedReviewGit(
-    createPinnedReviewRepository(PLAIN_REVIEW_REPOSITORY),
+    await createPinnedReviewRepository(PLAIN_REVIEW_REPOSITORY),
     ['rev-parse', '--show-toplevel'],
   );
 });

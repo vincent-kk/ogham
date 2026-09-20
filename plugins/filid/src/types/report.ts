@@ -37,6 +37,19 @@ export interface FractalScanSummary {
   violationCount: number;
   certainty: AnalysisCertainty;
   /**
+   * Source files the declared facts scope drops.
+   *
+   * Counted as what the built-in default scope (the adapters' source
+   * extensions) would have covered minus what `facts.covers`/`facts.excludes`
+   * leaves in scope — a document or a manifest was never a candidate for a
+   * reference fact, and counting it would put a non-zero "unread" number on
+   * every project that declares nothing. Zero when the declared scope drops no
+   * source file. Declared limit: a language outside the default extensions
+   * enters the scope only through `facts.covers`, so a file of that language
+   * the project never declared does not count as dropped.
+   */
+  filesOutsideFactsScope: number;
+  /**
    * Diagnostics dropped because they concern nodes the name filter excluded.
    * Absent when no filter narrowed the query.
    */
@@ -175,6 +188,19 @@ export interface StructureValidateSummary {
 /** Summary of a restructure precondition or postcondition, with the caller's next step. */
 export type RestructureValidationSummary = StructureValidateSummary & {
   nextAction: string;
+  /**
+   * Source files the declared facts scope drops.
+   *
+   * Counted as what the built-in default scope (the adapters' source
+   * extensions) would have covered minus what `facts.covers`/`facts.excludes`
+   * leaves in scope — a document or a manifest was never a candidate for a
+   * reference fact, and counting it would put a non-zero "unread" number on
+   * every project that declares nothing. Zero when the declared scope drops no
+   * source file. Declared limit: a language outside the default extensions
+   * enters the scope only through `facts.covers`, so a file of that language
+   * the project never declared does not count as dropped.
+   */
+  filesOutsideFactsScope: number;
 };
 
 export type StructureValidateData = ValidationReport | PlanValidationResult;

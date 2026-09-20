@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildDependencyGraph } from '../../../core/analysis/dependencyGraph/index.js';
+import {
+  buildDependencyGraph,
+  findUnownedReferences,
+} from '../../../core/analysis/dependencyGraph/index.js';
 import type { DependencyReference } from '../../../types/adapters.js';
 
 const sourceFile = '/project/a/consumer.unit';
@@ -37,16 +40,24 @@ describe('DAG certainty excludes adapter-classified verification references', ()
   );
 
   it.each([['/project/a'], ['/project/b']])(
-    'keeps production owner uncertainty in %s',
+    'draws no edge and stays exact for a production reference with no owner in %s',
     (owner) => {
+      const unowned = { ...reference, resolvedPath: '/project/b/entry.unit' };
+      const graph = buildDependencyGraph([owner], [unowned], 'exact', {
+        projectRoot: '/project',
+      });
+      expect(graph.edges).toEqual([]);
+      expect(graph.unknownFiles).toEqual([]);
+      // The owner-less end has no node, so the reference is reported by
+      // findUnownedReferences instead of making the whole graph undecided.
+      expect(graph.certainty).toBe('exact');
       expect(
-        buildDependencyGraph(
-          [owner],
-          [{ ...reference, resolvedPath: '/project/b/entry.unit' }],
-          'exact',
-          { projectRoot: '/project' },
-        ).certainty,
-      ).toBe('indeterminate');
+        findUnownedReferences([owner], [unowned]).map(
+          ({ unownedPath }) => unownedPath,
+        ),
+      ).toEqual([
+        owner === '/project/a' ? '/project/b/entry.unit' : sourceFile,
+      ]);
     },
   );
 

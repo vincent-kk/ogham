@@ -43,6 +43,16 @@ export const AdjudicationPageSchema = z
     schemaVersion: z.literal(FACTS_SCHEMA_VERSION),
     path: z.string().min(1),
     items: z.array(AdjudicationItemSchema),
+    /**
+     * Set when this file's judgements were discarded as unreadable.
+     *
+     * The discard removed whatever the shard held, including an adopted edge no
+     * record carries, so the file stays uncertain until a comparison from a
+     * different provenance re-derives it (spec §3). Only `true` is stored:
+     * absent is the ordinary state, and a stored `false` would be a second way
+     * to spell it.
+     */
+    awaitingComparison: z.literal(true).optional(),
   })
   .strict();
 

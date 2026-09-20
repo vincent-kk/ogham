@@ -16,8 +16,8 @@ let fixture: ReviewStateSealFixture;
 /** Temporary directory holding the untrusted change-context input file. */
 let contextDirectory: string;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
   contextDirectory = mkdtempSync(portableJoin(tmp(), 'filid-pr-body-'));
 });
 

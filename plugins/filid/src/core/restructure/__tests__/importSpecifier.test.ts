@@ -91,6 +91,8 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    normalizedFacts: [],
+    filesOutsideFactsScope: 0,
     collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: '2026-07-28T00:00:00.000Z',
   };

@@ -8,7 +8,10 @@ import { FACTS_DIAGNOSTIC_CODES } from '../../../../constants/facts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { resolveFactsStorePaths } from '../../../../core/facts/index.js';
 import { handleFacts } from '../../../../mcp/tools/facts/index.js';
-import type { FactsSubmitSummary } from '../../../../mcp/tools/facts/index.js';
+import type {
+  FactsCompareData,
+  FactsSubmitSummary,
+} from '../../../../mcp/tools/facts/index.js';
 
 import {
   cleanupFactsProjects,
@@ -45,6 +48,7 @@ vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
         ? {
             stored: new Set<string>(),
             conflicted: [...updates.values()].map((update) => update.path),
+            shards: new Map(),
           }
         : actual.writeAdjudicationPages(
             directory,
@@ -57,9 +61,9 @@ vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
       shardFileName: string,
       entries: Record<string, unknown>,
       expectedDigest: string | null,
-    ): boolean => {
+    ): string | null => {
       shardWrites.names.push(shardFileName);
-      if (shardWrites.failAll) return false;
+      if (shardWrites.failAll) return null;
       return actual.writeFactsShardFile(
         directory,
         shardFileName,
@@ -273,6 +277,15 @@ async function submitEdge(withEdge: boolean): Promise<{
   };
 }
 
+/**
+ * How many items the side table still holds unsettled.
+ * @returns The count `status` reports.
+ */
+async function openItemCount(): Promise<number> {
+  const result = await handleFacts({ action: 'status', path: project.root });
+  return (result.summary as { unadjudicatedItems: number }).unadjudicatedItems;
+}
+
 describe('facts submit under a lost side-table page', () => {
   it('reports the loss and counts no item it did not store', async () => {
     await submitEdge(true);
@@ -289,5 +302,115 @@ describe('facts submit under a lost side-table page', () => {
     );
     // The recovery is this action's own work, not the comparison's.
     expect(result.nextActions.join(' ')).toContain('submit those files again');
+  });
+
+  it('stores no record whose opening page was refused', async () => {
+    await submitEdge(true);
+    pageWrites.failAll = true;
+
+    const result = await submitEdge(false);
+
+    // Storing the narrower record here makes the retry compare it with itself,
+    // so the edge is walked back with nothing left to open an item against.
+    expect(result.summary.accepted).toBe(0);
+  });
+
+  it('opens the item on the retry, which is the same call', async () => {
+    await submitEdge(true);
+    pageWrites.failAll = true;
+    await submitEdge(false);
+    pageWrites.failAll = false;
+
+    const retry = await submitEdge(false);
+
+    expect(retry.summary.openedItems).toBe(1);
+    expect(await openItemCount()).toBe(1);
+  });
+});
+
+describe('facts submit whose item outlives a lost record', () => {
+  it('keeps the file uncertain when the record did not land', async () => {
+    await submitEdge(true);
+    shardWrites.failAll = true;
+
+    const result = await submitEdge(false);
+
+    expect(result.summary.accepted).toBe(0);
+    expect(result.summary.openedItems).toBe(1);
+    expect(await openItemCount()).toBe(1);
+  });
+
+  it('closes that item by a later record that carries the edge', async () => {
+    await submitEdge(true);
+    shardWrites.failAll = true;
+    await submitEdge(false);
+    shardWrites.failAll = false;
+
+    const result = await submitEdge(true);
+
+    expect(result.summary.closedItems).toBe(1);
+    expect(await openItemCount()).toBe(0);
+  });
+});
+
+describe('facts submit under a lost record shard', () => {
+  it('leaves the judgements untouched when the record did not land', async () => {
+    await submitEdge(true);
+    await submitEdge(false);
+    const open = await openItemCount();
+    expect(open).toBe(1);
+    shardWrites.failAll = true;
+
+    // The edge is back, so this submit would close the item by record. The
+    // record cannot land, and a closed item over a record that is not there
+    // would settle the file on evidence the store does not hold.
+    const result = await submitEdge(true);
+
+    expect(result.summary.accepted).toBe(0);
+    expect(await openItemCount()).toBe(1);
+  });
+});
+
+describe('facts compare under a lost side-table page', () => {
+  it('refuses instead of reporting a comparison whose items did not land', async () => {
+    await submitEdge(true);
+    pageWrites.failAll = true;
+    const file = project.submission(
+      'candidate.json',
+      JSON.stringify([project.facts('src/edge.ts', { references: [] })]),
+    );
+
+    const result = await handleFacts({
+      action: 'compare',
+      path: project.root,
+      file,
+    });
+
+    expect(result.status).toBe(TOOL_STATUSES.INDETERMINATE);
+    expect(result.diagnostics.map(({ code }) => code)).toContain(
+      FACTS_DIAGNOSTIC_CODES.SIDE_TABLE_CHANGED,
+    );
+    expect(result.diagnostics[0]?.nextAction).toContain('compare again');
+  });
+
+  it('names the files whose items were not recorded', async () => {
+    await submitEdge(true);
+    pageWrites.failAll = true;
+    const file = project.submission(
+      'candidate.json',
+      JSON.stringify([project.facts('src/edge.ts', { references: [] })]),
+    );
+
+    const result = await handleFacts({
+      action: 'compare',
+      path: project.root,
+      file,
+    });
+
+    // The buckets say what the comparison found; without this list nothing in
+    // the data says which of those findings the store now holds.
+    expect((result.data as FactsCompareData).unrecorded?.paths).toEqual([
+      'src/edge.ts',
+    ]);
   });
 });

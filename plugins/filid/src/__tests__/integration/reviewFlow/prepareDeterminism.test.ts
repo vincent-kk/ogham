@@ -42,7 +42,7 @@ async function prepareIsolated(
 ): Promise<IsolatedPrepare> {
   const pluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
-  const projectRoot = createPinnedReviewRepository(files);
+  const projectRoot = await createPinnedReviewRepository(files);
   created.push(pluginRoot, projectRoot);
   const state = readPreparedReviewState(
     await handleReviewState({

@@ -21,8 +21,17 @@ export interface WorldFile {
  * `comments` reads commented-out imports as references — the mistake the
  * attested tier exists to correct, and the one that puts a confirmed
  * attestation and shrink detection in each other's way.
+ * `unreadable` cannot read the file at all and says so with `toolError`: it
+ * claims no reference, which is what makes the edges a previous submission
+ * established disappear without anybody withdrawing them.
  */
-export type ToolMode = 'exact' | 'lossy' | 'other' | 'bogus' | 'comments';
+export type ToolMode =
+  | 'exact'
+  | 'lossy'
+  | 'other'
+  | 'bogus'
+  | 'comments'
+  | 'unreadable';
 
 /** How a modelled reader attests a file. */
 export type AttestMode = 'honest' | 'incomplete' | 'wrong';
@@ -79,6 +88,7 @@ const TOOLS: Record<ToolMode, { tool: string; version: string }> = {
   other: { tool: 'other', version: '2.0.0' },
   bogus: { tool: 'careless', version: '3.0.0' },
   comments: { tool: 'literal', version: '4.0.0' },
+  unreadable: { tool: 'broken', version: '5.0.0' },
 };
 
 /** A specifier no modelled file ever contains. */
@@ -317,7 +327,10 @@ export function createFactsWorld(size: number): FactsWorld {
           };
         });
       return project.facts(path, {
-        references: [...references, ...invented],
+        references: mode === 'unreadable' ? [] : [...references, ...invented],
+        ...(mode === 'unreadable'
+          ? { toolError: { message: 'the modelled tool could not read it' } }
+          : {}),
         provenance: {
           ...TOOLS[mode],
           command: 'model',

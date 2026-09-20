@@ -1,6 +1,5 @@
-import { mkdtempSync } from 'node:fs';
-
-import { portableJoin, tmp } from '@ogham/cross-platform';
+import { createFixtureProjectRoot } from '../../../../integration/helpers/createFixtureProjectRoot.js';
+import { seedFacts } from '../../../../integration/helpers/seedFacts.js';
 
 import { createReviewRulePluginRoot } from './createReviewRulePluginRoot.js';
 import { runReviewStateFixtureGit } from './runReviewStateFixtureGit.js';
@@ -21,13 +20,18 @@ export interface ReviewStateSealFixture {
 /**
  * Create a clean temporary repository for seal integration tests.
  *
+ * The repository is given its facts here rather than in each test: analysis
+ * reads the facts store, so a fixture without records is a project filid can
+ * draw no reference-based conclusion about, and every test built on it would
+ * be testing the absence of facts instead of what it means to test.
+ *
  * @returns Fixture paths plus the prior plugin-root environment value.
  */
-export function createReviewStateSealFixture(): ReviewStateSealFixture {
+export async function createReviewStateSealFixture(): Promise<ReviewStateSealFixture> {
   const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   const pluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
-  const projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-seal-'));
+  const projectRoot = createFixtureProjectRoot('filid-review-seal-');
   const branchName = 'feature/seal-v7';
   runReviewStateFixtureGit(projectRoot, ['init', '-b', 'main']);
   runReviewStateFixtureGit(projectRoot, [
@@ -53,5 +57,6 @@ export function createReviewStateSealFixture(): ReviewStateSealFixture {
   writeReviewStateFixtureFile(projectRoot, 'yarn.lock', 'feature-lock\n');
   runReviewStateFixtureGit(projectRoot, ['add', '--all']);
   runReviewStateFixtureGit(projectRoot, ['commit', '-m', 'feature']);
+  await seedFacts(projectRoot);
   return { projectRoot, pluginRoot, branchName, originalPluginRoot };
 }

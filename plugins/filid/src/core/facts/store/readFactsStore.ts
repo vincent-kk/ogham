@@ -2,7 +2,10 @@ import { StoredFactsRecordSchema } from '../schema/storedFactsRecordSchema.js';
 import type { StoredFactsRecord } from '../schema/storedFactsRecordSchema.js';
 
 import { readShardDirectory } from './readShardDirectory.js';
-import type { FactsShard } from './readShardDirectory.js';
+import type {
+  FactsShard,
+  ShardDamage,
+} from './readShardDirectory.js';
 
 /** Everything the store holds right now. */
 export interface FactsStoreContents {
@@ -10,6 +13,10 @@ export interface FactsStoreContents {
   shards: Map<string, FactsShard>;
   /** Path digest to record, for every entry that matched the schema. */
   records: Map<string, StoredFactsRecord>;
+  /** Shard file name to why it could not be read as its entries. */
+  damaged: Map<string, ShardDamage>;
+  /** Whether the store directory itself could not be listed. */
+  directoryUnreadable: boolean;
 }
 
 /**
@@ -26,12 +33,13 @@ export interface FactsStoreContents {
  * @returns The shards and the records they hold.
  */
 export function readFactsStore(directory: string): FactsStoreContents {
-  const shards = readShardDirectory(directory);
+  const { shards, damaged, directoryUnreadable } =
+    readShardDirectory(directory);
   const records = new Map<string, StoredFactsRecord>();
   for (const shard of shards.values())
     for (const [key, value] of Object.entries(shard.entries)) {
       const parsed = StoredFactsRecordSchema.safeParse(value);
       if (parsed.success) records.set(key, parsed.data);
     }
-  return { shards, records };
+  return { shards, records, damaged, directoryUnreadable };
 }

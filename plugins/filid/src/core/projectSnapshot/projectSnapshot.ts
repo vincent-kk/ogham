@@ -2,6 +2,7 @@ import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
 import { resolveAdapters } from '../../adapters/index.js';
 import { ANALYSIS_AXES } from '../../constants/analysisAxes.js';
+import { DEPENDENCY_DIAGNOSTIC_CODES } from '../../constants/dependencyDiagnosticCodes.js';
 import { ALL_SNAPSHOT_AXES } from '../../constants/snapshotAxes.js';
 import type { AdapterRegistry } from '../../types/adapters.js';
 import type {
@@ -13,6 +14,9 @@ import {
   buildDependencyGraph,
   findUnownedReferences,
 } from '../analysis/dependencyGraph/index.js';
+import type { VerificationFileFacts } from '../../types/verification.js';
+import { classifyProjectFacts, readProjectFacts } from '../facts/index.js';
+import type { FactsFileState, ProjectFacts } from '../facts/index.js';
 import {
   type FilidConfig,
   resolveLanguage,
@@ -21,6 +25,7 @@ import { scanFileSetOptions, scanProject } from '../tree/fractalTree/index.js';
 import { analyzeVerification } from '../verification/index.js';
 
 import { collectDependencyReferences } from './evidence/collectDependencyReferences.js';
+import { normalizeFactsEvidence } from './evidence/normalizeFactsEvidence.js';
 import { collectDocumentEvidence } from './evidence/collectDocumentEvidence.js';
 import { collectEntryPointSurfaces } from './evidence/collectEntryPointSurfaces.js';
 import { collectLegacyCriteriaLedger } from './evidence/collectLegacyCriteriaLedger.js';
@@ -36,6 +41,29 @@ import { omitUnknownFiles } from './snapshotHash/omitUnknownFiles.js';
 export interface CreateProjectSnapshotOptions {
   /** Axes to collect; any axis left out is collected. */
   axes?: Partial<SnapshotAxisSelection>;
+  /**
+   * Run the structure adapter beside the store and report where they differ.
+   *
+   * Off by default, and reachable from nothing a user can set — no environment
+   * variable and no config key — because a product path that parsed every file
+   * twice would charge the caller for a measurement it did not ask for. The
+   * transition gate turns it on; the option leaves with the adapter in S4.
+   */
+  compareAdapterEvidence?: boolean;
+}
+
+/**
+ * Read the facts store once and classify every scanned file from that read.
+ * @param root Absolute project root, already resolved.
+ * @param config The configuration this snapshot is being built with.
+ * @returns The store contents and each scanned file's state (spec §3).
+ */
+async function readSnapshotFacts(
+  root: string,
+  config: FilidConfig,
+): Promise<{ facts: ProjectFacts; states: Map<string, FactsFileState> }> {
+  const facts = await readProjectFacts(root, config);
+  return { facts, states: classifyProjectFacts(root, facts) };
 }
 
 /**
@@ -80,26 +108,55 @@ export async function createProjectSnapshot(
     enforceStructureOwnership: true,
   });
   const documents = collectDocumentEvidence(tree);
-  const entryPoints = axes.entrySurfaces
-    ? await collectEntryPointSurfaces(tree, adapterResolution.adapters)
-    : { diagnostics: [], filePaths: [] };
-  const dependencies = axes.dependencies
-    ? await collectDependencyReferences(adapterResolution, projectRoot)
-    : {
-        certainty: 'unsupported' as const,
-        diagnostics: [],
-        filePaths: [],
-        references: [],
-        unknownFiles: [],
-      };
-  const verificationClaims = axes.verification
-    ? await collectVerificationClaims(root, selectedAdapters.verification)
-    : {
-        adapters: [],
-        diagnostics: [],
-        discoveredPathsByAdapter: new Map<string, readonly string[]>(),
-        certainty: 'unsupported' as const,
-      };
+  // One read of the store per snapshot: two reads could classify one file two
+  // ways, and the three axes would then disagree about what the project is.
+  const stored =
+    axes.entrySurfaces || axes.dependencies || axes.verification
+      ? await readSnapshotFacts(root, config)
+      : null;
+  const entryPoints =
+    axes.entrySurfaces && stored
+      ? await collectEntryPointSurfaces(
+          tree,
+          adapterResolution.adapters,
+          stored.facts,
+          stored.states,
+        )
+      : { diagnostics: [], filePaths: [] };
+  const dependencies =
+    axes.dependencies && stored
+      ? await collectDependencyReferences(
+          adapterResolution,
+          root,
+          stored.facts,
+          stored.states,
+          options.compareAdapterEvidence === true,
+        )
+      : {
+          certainty: 'unsupported' as const,
+          diagnostics: [],
+          filePaths: [],
+          references: [],
+          adjudications: [],
+          unknownFiles: [],
+          normalizedFacts: [],
+    filesOutsideFactsScope: 0,
+        };
+  const verificationClaims =
+    axes.verification && stored
+      ? await collectVerificationClaims(
+          root,
+          selectedAdapters.verification,
+          stored.facts,
+          stored.states,
+        )
+      : {
+          adapters: [],
+          diagnostics: [],
+          discoveredPathsByAdapter: new Map<string, readonly string[]>(),
+          verificationFacts: new Map<string, VerificationFileFacts>(),
+          certainty: 'unsupported' as const,
+        };
   const verificationAdapters = verificationClaims.adapters;
   // Verification is resolved before the graph: its file list decides which
   // references leave the cycle adjacency. It reads the tree and documents only,
@@ -114,6 +171,7 @@ export async function createProjectSnapshot(
         detailDocuments: documents.detailDocuments,
         discoveredPathsByAdapter: verificationClaims.discoveredPathsByAdapter,
         discoveryCertainty: verificationClaims.certainty,
+        verificationFacts: verificationClaims.verificationFacts,
       })
     : { files: [], violations: [], certainty: 'unsupported' as const };
   const ownerNodePaths = [...tree.nodes.values()]
@@ -146,9 +204,9 @@ export async function createProjectSnapshot(
         verificationPaths: verificationFilePaths,
       }).map(({ reference, unownedPath }) =>
         createDependencyDiagnostic(
-          'unowned-local-dependency',
+          DEPENDENCY_DIAGNOSTIC_CODES.UNOWNED,
           `${reference.rawSpecifier} in ${reference.sourceFile} resolves to ${reference.resolvedPath}, but no fractal owns ${unownedPath}, so the reference cannot enter the dependency graph.`,
-          `With the user's agreement, make a fractal own ${unownedPath} — an INTENT.md in its directory or an ancestor does that — or move the file under an existing fractal; the graph stays indeterminate until then. Otherwise report dependency results as indeterminate.`,
+          `With the user's agreement, make a fractal own ${unownedPath} — an INTENT.md in its directory or an ancestor does that — or move the file under an existing fractal; until then no rule can see this reference. Report it as a finding and carry on: the rest of the graph is judged without it.`,
           root,
           reference.sourceFile,
           reference.rawSpecifier,
@@ -217,6 +275,13 @@ export async function createProjectSnapshot(
     verification,
     legacyCriteriaLedger,
     diagnostics,
+    normalizedFacts: normalizeFactsEvidence(
+      root,
+      dependencies.references,
+      dependencies.adjudications,
+      stored?.states ?? new Map(),
+    ),
+    filesOutsideFactsScope: dependencies.filesOutsideFactsScope,
     collectedAxes: axes,
     createdAt: new Date().toISOString(),
   };

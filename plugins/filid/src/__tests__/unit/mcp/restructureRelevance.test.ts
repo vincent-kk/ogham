@@ -21,8 +21,10 @@ import {
 import type {
   RestructurePlanData,
   RestructurePlanSummary,
+  RestructureValidationSummary,
 } from '../../../types/report.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 import { writeSharedUnitRestructureProject } from '../../integration/reviewFlow/helpers/writeSharedUnitRestructureProject.js';
 
 import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewStateFixtureFile.js';
@@ -59,18 +61,33 @@ function isPlanPayload(
 }
 
 /**
+ * Narrow a restructure result to a precondition or postcondition summary.
+ * @param payload Result of any restructure action.
+ * @returns That validation's summary.
+ * @throws When the payload came from the plan action instead.
+ */
+function validationSummary(
+  payload: RestructureResult,
+): RestructureValidationSummary {
+  if (isPlanPayload(payload))
+    throw new Error('restructure returned a plan, not a validation');
+  return payload.summary;
+}
+
+/**
  * Write the shared-unit project with `domain/b/note.tsx` holding the given text.
  * @param note Text of the uncertain file.
  * @returns Nothing; `projectRoot` holds the project.
  */
-function writeProjectWithNote(note: string): void {
-  projectRoot = writeSharedUnitRestructureProject();
+async function writeProjectWithNote(note: string): Promise<void> {
+  projectRoot = await writeSharedUnitRestructureProject();
   writeReviewStateFixtureFile(projectRoot, 'domain/b/note.tsx', note);
   writeReviewStateFixtureFile(
     projectRoot,
     'domain/b/other.ts',
     'export const other = 1;\n',
   );
+  await seedFacts(projectRoot);
 }
 
 /**
@@ -100,33 +117,34 @@ async function planValueMove() {
 
 describe('an uncertain file blocks a restructure plan only when it relates to the move', () => {
   it('plans ok beside an unrelated JSX apostrophe and reports the file as information', async () => {
-    writeProjectWithNote(UNRELATED_NOTE);
+    await writeProjectWithNote(UNRELATED_NOTE);
     const { plan, data } = await planValueMove();
     expect(plan.status).toBe('ok');
     expect(data.unknownFiles).toEqual({
       relevant: [],
       other: [
-        { path: 'domain/b/note.tsx', causes: ['uncertain-local-dependency'] },
+        { path: 'domain/b/note.tsx', causes: ['facts-uncertain'] },
       ],
     });
   });
 
   it('blocks when the same file names the moved stem as a path token', async () => {
-    writeProjectWithNote(NAMING_NOTE);
+    await writeProjectWithNote(NAMING_NOTE);
     const { plan, data } = await planValueMove();
     expect(plan.status).toBe('indeterminate');
     expect(data.unknownFiles.relevant).toEqual([
-      { path: 'domain/b/note.tsx', causes: ['uncertain-local-dependency'] },
+      { path: 'domain/b/note.tsx', causes: ['facts-uncertain'] },
     ]);
   });
 
   it('fails precondition when the unrelated file changes after planning', async () => {
-    writeProjectWithNote(UNRELATED_NOTE);
+    await writeProjectWithNote(UNRELATED_NOTE);
     const { planPath } = await planValueMove();
     writeFileSync(
       join(projectRoot, 'domain/b/note.tsx'),
       `${UNRELATED_NOTE}// edited\n`,
     );
+    await seedFacts(projectRoot);
     const result = await handleRestructure({
       action: 'precondition',
       path: projectRoot,
@@ -140,9 +158,9 @@ describe('an uncertain file blocks a restructure plan only when it relates to th
   });
 });
 
-describe('a postcondition that passes beside unrelated unknown files states its limit', () => {
-  it('passes on the known edges and names how many files it could not read references of', async () => {
-    writeProjectWithNote(UNRELATED_NOTE);
+describe('a postcondition does not assert an absence over unknown files', () => {
+  it('stays indeterminate and asks for the facts of the files it could not read', async () => {
+    await writeProjectWithNote(UNRELATED_NOTE);
     const { data, planPath } = await planValueMove();
     for (const move of data.moves) {
       mkdirSync(dirname(move.targetPath), { recursive: true });
@@ -156,15 +174,86 @@ describe('a postcondition that passes beside unrelated unknown files states its 
           ),
         );
     }
+    await seedFacts(projectRoot);
+      const result = await handleRestructure({
+      action: 'postcondition',
+      path: projectRoot,
+      planPath,
+    });
+    expect(result.status).toBe('indeterminate');
+    expect(result.summary.nextAction).toMatch(
+      /^Restructure not verified: 1 file\(s\) in this project have no facts/,
+    );
+    expect(result.summary.nextAction).toContain('facts');
+    expect(result.summary.nextAction).not.toContain('report it complete');
+    expect(
+      result.data && 'unknownFiles' in result.data
+        ? result.data.unknownFiles
+        : null,
+    ).toEqual({
+      relevant: [],
+      other: [{ path: 'domain/b/note.tsx', causes: ['facts-uncertain'] }],
+    });
+  });
+});
+
+describe('a confirmed violation is not hidden behind an evidence gap', () => {
+  it('reports violations, not indeterminate, when the moves were never applied', async () => {
+    await writeProjectWithNote(UNRELATED_NOTE);
+    const { planPath } = await planValueMove();
     const result = await handleRestructure({
       action: 'postcondition',
       path: projectRoot,
       planPath,
     });
-    expect(result.status).toBe('ok');
-    expect(result.summary.nextAction).toContain('known edges');
+    expect(result.status).toBe('violations');
+    expect(result.summary.nextAction).toMatch(
+      /^Restructure not verified: follow each finding's nextAction/,
+    );
     expect(result.summary.nextAction).toContain('1 file');
-    expect(result.summary.nextAction).not.toContain('report it complete');
+  });
+});
+
+describe('a validation says how much of the project its scope left unjudged', () => {
+  it('counts each source file an exclusion drops and names the number in its next action', async () => {
+    projectRoot = await writeSharedUnitRestructureProject();
+    writeReviewStateFixtureFile(
+      projectRoot,
+      'tools/extra.ts',
+      'export const extra = 1;\n',
+    );
+    await seedFacts(projectRoot);
+    const { planPath } = await planValueMove();
+    const wide = await handleRestructure({
+      action: 'precondition',
+      path: projectRoot,
+      planPath,
+    });
+    writeReviewStateFixtureFile(
+      projectRoot,
+      '.filid/config.json',
+      JSON.stringify({
+        version: '2.0',
+        adapters: { mode: 'auto', enabled: [] },
+        rules: {},
+        facts: { excludes: ['tools/**'] },
+      }),
+    );
+    await seedFacts(projectRoot);
+    const narrowed = await handleRestructure({
+      action: 'precondition',
+      path: projectRoot,
+      planPath,
+    });
+    const count = validationSummary(narrowed).filesOutsideFactsScope;
+    // The project's documents are outside the facts scope too, and they are
+    // deliberately not counted: only a source file the project dropped is.
+    expect(validationSummary(wide).filesOutsideFactsScope).toBe(0);
+    expect(count).toBe(1);
+    expect(narrowed.summary.nextAction).toContain(
+      `${count} file(s) of this project sit outside the declared facts scope`,
+    );
+    expect(narrowed.summary.nextAction).toContain('facts.covers');
   });
 });
 
@@ -172,7 +261,7 @@ describe('a consumer behind a symbolic link out of the project is not silently d
   it.for([['file'], ['directory']] as const)(
     'does not plan ok beside a %s link that points outside',
     async ([kind], { skip }) => {
-      projectRoot = writeSharedUnitRestructureProject();
+      projectRoot = await writeSharedUnitRestructureProject();
       outsideDirectory = mkdtempSync(join(tmp(), 'filid-outside-'));
       const consumer = join(outsideDirectory, 'use.ts');
       writeFileSync(
@@ -216,7 +305,7 @@ describe('an unfollowed link leaves the list once its own name is excluded', () 
     async ([kind], { skip }) => {
       const name = kind === 'file' ? 'linked.ts' : 'vendor';
       const linkPath = kind === 'file' ? `domain/b/${name}` : name;
-      projectRoot = writeSharedUnitRestructureProject();
+      projectRoot = await writeSharedUnitRestructureProject();
       outsideDirectory = mkdtempSync(join(tmp(), 'filid-outside-'));
       const consumer = join(outsideDirectory, 'use.ts');
       writeFileSync(consumer, 'export const c = 1;\n');

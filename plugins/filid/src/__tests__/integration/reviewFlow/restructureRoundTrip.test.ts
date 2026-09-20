@@ -22,6 +22,8 @@ import type {
 import type { RestructurePlan } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
 
+import { seedFacts } from '../helpers/seedFacts.js';
+
 import { writeSharedUnitRestructureProject } from './helpers/writeSharedUnitRestructureProject.js';
 
 /** Config whose one unknown top-level key makes the snapshot emit `config-warning`. */
@@ -77,11 +79,15 @@ async function planSharedUnitMove() {
 
 /**
  * Carry out a plan's moves and import rewrites the way an external actor would.
+ *
+ * Submitting the moved tree's facts afterwards is part of the act: the
+ * restructure skill extracts and submits once every write is done, before the
+ * postcondition reads what the store holds (spec §11-9).
  * @param plan Plan whose moves and suggested `affectedImports` are applied in order.
- * @returns Nothing; the project tree holds the executed plan.
+ * @returns Nothing; the project tree holds the executed plan and its facts.
  * @throws When an affected import carries no suggested specifier to apply.
  */
-function executePlan(plan: RestructurePlan): void {
+async function executePlan(plan: RestructurePlan): Promise<void> {
   for (const move of plan.moves) {
     mkdirSync(dirname(move.targetPath), { recursive: true });
     renameSync(move.sourcePath, move.targetPath);
@@ -99,6 +105,7 @@ function executePlan(plan: RestructurePlan): void {
       );
     }
   }
+  await seedFacts(projectRoot);
 }
 
 /**
@@ -115,7 +122,7 @@ afterEach(() => rmSync(projectRoot, { recursive: true, force: true }));
 
 describe('restructure plan → precondition → postcondition round trip', () => {
   it('plans one organ move with both consumer rewrites', async () => {
-    projectRoot = writeSharedUnitRestructureProject();
+    projectRoot = await writeSharedUnitRestructureProject();
     const { plan, data } = await planSharedUnitMove();
     expect(plan.status).toBe('ok');
     expect(plan.diagnostics).toEqual([]);
@@ -148,7 +155,7 @@ describe('restructure plan → precondition → postcondition round trip', () =>
   });
 
   it('passes precondition, then postcondition after the actor executes the plan', async () => {
-    projectRoot = writeSharedUnitRestructureProject();
+    projectRoot = await writeSharedUnitRestructureProject();
     const { data, planPath } = await planSharedUnitMove();
     const before = await validate('precondition', planPath);
     expect(before).toMatchObject({
@@ -156,7 +163,7 @@ describe('restructure plan → precondition → postcondition round trip', () =>
       data: { valid: true, findings: [] },
       diagnostics: [],
     });
-    executePlan(data);
+    await executePlan(data);
     const after = await validate('postcondition', planPath);
     expect(after).toMatchObject({
       status: 'ok',
@@ -166,7 +173,7 @@ describe('restructure plan → precondition → postcondition round trip', () =>
   });
 
   it('fails postcondition while the plan is not executed', async () => {
-    projectRoot = writeSharedUnitRestructureProject();
+    projectRoot = await writeSharedUnitRestructureProject();
     const { planPath } = await planSharedUnitMove();
     const result = await validate('postcondition', planPath);
     expect(result.status).toBe('violations');
@@ -188,12 +195,13 @@ describe('restructure plan → precondition → postcondition round trip', () =>
   });
 
   it('fails precondition with snapshot-hash-mismatch when a read file drifts after planning', async () => {
-    projectRoot = writeSharedUnitRestructureProject();
+    projectRoot = await writeSharedUnitRestructureProject();
     const { planPath } = await planSharedUnitMove();
     writeFileSync(
       join(projectRoot, 'domain/b/use.ts'),
       "import { value } from '../a/value.js';\n\nexport const b = value + 3;\n",
     );
+    await seedFacts(projectRoot);
     const result = await validate('precondition', planPath);
     expect(result.status).toBe('violations');
     expect(
@@ -207,7 +215,7 @@ describe('restructure plan → precondition → postcondition round trip', () =>
 // An unknown key may have been meant to tighten the analysis, so its config-warning affects every axis.
 describe('an unknown config key keeps every restructure step indeterminate', () => {
   it('plans with status indeterminate beside the config-warning', async () => {
-    projectRoot = writeSharedUnitRestructureProject(CONFIG_WITH_UNKNOWN_KEY);
+    projectRoot = await writeSharedUnitRestructureProject(CONFIG_WITH_UNKNOWN_KEY);
     const { plan, data } = await planSharedUnitMove();
     expect(plan.status).toBe('indeterminate');
     expect(plan.diagnostics.map(({ code }) => code)).toEqual([
@@ -218,7 +226,7 @@ describe('an unknown config key keeps every restructure step indeterminate', () 
   });
 
   it('validates precondition and postcondition as indeterminate although the plan validates', async () => {
-    projectRoot = writeSharedUnitRestructureProject(CONFIG_WITH_UNKNOWN_KEY);
+    projectRoot = await writeSharedUnitRestructureProject(CONFIG_WITH_UNKNOWN_KEY);
     const { data, planPath } = await planSharedUnitMove();
     const before = await validate('precondition', planPath);
     expect(before).toMatchObject({
@@ -228,7 +236,7 @@ describe('an unknown config key keeps every restructure step indeterminate', () 
     expect(before.diagnostics.map(({ code }) => code)).toEqual([
       'config-warning',
     ]);
-    executePlan(data);
+    await executePlan(data);
     const after = await validate('postcondition', planPath);
     expect(after).toMatchObject({
       status: 'indeterminate',

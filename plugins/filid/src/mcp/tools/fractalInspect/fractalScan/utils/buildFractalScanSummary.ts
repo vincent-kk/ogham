@@ -32,5 +32,6 @@ export function buildFractalScanSummary(
     nodesByType,
     violationCount: validation.result.violations.length,
     certainty,
+    filesOutsideFactsScope: snapshot.filesOutsideFactsScope,
   };
 }

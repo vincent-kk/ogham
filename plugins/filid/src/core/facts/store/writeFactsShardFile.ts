@@ -23,29 +23,39 @@ import { writeFileAtomicallySync } from '@ogham/cross-platform';
  * @param entries - The shard's complete contents after this call.
  * @param expectedDigest - Digest observed when the store was read, or null when
  * no file was there.
- * @returns True when the shard was replaced, false on a compare-and-set miss.
+ * @returns The digest of the bytes just written — the token a later write in
+ * the same call must carry — or null on a compare-and-set miss. The digest is
+ * produced here because this is where the serialization is decided; hashing the
+ * same entries outside would be a second copy of that decision.
  */
+/** Stands for a shard that exists and cannot be read; never equals a digest. */
+const UNREADABLE = Symbol('unreadable shard');
+
 export function writeFactsShardFile(
   directory: string,
   shardFileName: string,
   entries: Record<string, unknown>,
   expectedDigest: string | null,
-): boolean {
+): string | null {
   const path = join(directory, shardFileName);
-  if (currentDigest(path) !== expectedDigest) return false;
-  writeFileAtomicallySync(path, JSON.stringify(entries));
-  return true;
+  if (currentDigest(path) !== expectedDigest) return null;
+  const body = JSON.stringify(entries);
+  writeFileAtomicallySync(path, body);
+  return createHash('sha256').update(body).digest('hex');
 }
 
 /**
  * Digest of a shard file's current bytes.
  * @param path Absolute shard file path.
- * @returns Hex digest, or null when no file is there.
+ * @returns Hex digest, null when no file is there, and `UNREADABLE` when one
+ * is there and cannot be read — which no `expectedDigest` ever equals, so the
+ * compare-and-set loses rather than replacing bytes nobody could compare.
  */
-function currentDigest(path: string): string | null {
+function currentDigest(path: string): string | null | typeof UNREADABLE {
   try {
     return createHash('sha256').update(readFileSync(path)).digest('hex');
-  } catch {
-    return null;
+  } catch (error) {
+    const code = (error as { code?: string } | null)?.code;
+    return code === 'ENOENT' || code === 'ENOTDIR' ? null : UNREADABLE;
   }
 }

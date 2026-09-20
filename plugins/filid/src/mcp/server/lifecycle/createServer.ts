@@ -496,6 +496,12 @@ const FACTS_SOURCE_PATHS_SCHEMA = z
   .describe(
     'discard-pending only: project-relative POSIX paths whose unconfirmed attested submission to drop. Stored records and the adjudication side table are untouched.',
   );
+const FACTS_SHARDS_SCHEMA = z
+  .array(z.string().regex(/^[0-9a-f]+\.json$/))
+  .min(1)
+  .describe(
+    'discard-damaged only: shard file names exactly as the judgements diagnostic reported them. Only a shard the store currently reads as unparseable is dropped; a readable one is refused by name.',
+  );
 const FACTS_ACTOR_SCHEMA = z
   .string()
   .min(1)
@@ -550,15 +556,22 @@ const FACTS_INPUT_SCHEMA = z.discriminatedUnion('action', [
     .strict(),
   z
     .object({
+      action: z.literal(FACTS_ACTIONS.DISCARD_DAMAGED),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      shards: FACTS_SHARDS_SCHEMA,
+    })
+    .strict(),
+  z
+    .object({
       action: z.literal(FACTS_ACTIONS.COMPARE),
       path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
       file: FACTS_FILE_SCHEMA,
       generationId: z
         .string()
-        .min(1)
+        .regex(/^[a-f0-9]{32}$/)
         .optional()
         .describe(
-          'compare only: review generation whose frozen facts to compare against. Facts are not frozen into generations yet, so passing one returns that fact rather than comparing against the live store.',
+          'compare only: review generation whose frozen facts to compare against, as its handoff reported it. Omit it to compare against the live store.',
         ),
     })
     .strict(),
@@ -583,20 +596,21 @@ const FACTS_ADVERTISED_INPUT_SCHEMA = z.object({
   action: z
     .nativeEnum(FACTS_ACTIONS)
     .describe(
-      'status reports which files filid holds facts for and what it is waiting for; submit takes one batch of extracted facts and replaces the records for the files it carries; compare checks an independently extracted candidate against the store without storing it; adjudicate settles the disagreements compare recorded; discard-pending drops an unconfirmed attested submission so a file two readers keep answering differently can be started over.',
+      'status reports which files filid holds facts for and what it is waiting for; submit takes one batch of extracted facts and replaces the records for the files it carries; compare checks an independently extracted candidate against the store without storing it; adjudicate settles the disagreements compare recorded; discard-pending drops an unconfirmed attested submission so a file two readers keep answering differently can be started over; discard-damaged drops a judgement shard whose JSON the store cannot read, which nothing else can write.',
     ),
   path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
   file: FACTS_FILE_SCHEMA.optional(),
   resolutionEpoch: FACTS_EPOCH_SCHEMA.optional(),
   generationId: z
     .string()
-    .min(1)
+    .regex(/^[a-f0-9]{32}$/)
     .optional()
     .describe(
       'compare only: review generation whose frozen facts to compare against.',
     ),
   sourcePath: FACTS_SOURCE_PATH_SCHEMA.optional(),
   sourcePaths: FACTS_SOURCE_PATHS_SCHEMA.optional(),
+  shards: FACTS_SHARDS_SCHEMA.optional(),
   contentHash: z
     .string()
     .min(1)

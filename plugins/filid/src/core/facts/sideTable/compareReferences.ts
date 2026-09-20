@@ -1,7 +1,5 @@
-import { FACTS_ADJUDICATION_ORIGINS } from '../../../constants/facts.js';
 import type { FactsReference } from '../schema/fileFactsSchema.js';
 
-import type { AdjudicationOrigin } from './types/adjudicationTypes.js';
 
 /** One reference reduced to what comparison is defined on (spec §4.5). */
 export interface ComparableReference {
@@ -85,17 +83,4 @@ export function compareReferences(
  */
 function keyOf(one: ComparableReference): string {
   return `${one.kind}${KEY_SEPARATOR}${one.reference}`;
-}
-
-/**
- * The side-table origin a comparison bucket contributes.
- * @param bucket Which bucket the item came from.
- * @returns The origin to record on the item.
- */
-export function originOf(
-  bucket: 'missingInStore' | 'resolutionDiffers',
-): AdjudicationOrigin {
-  return bucket === 'missingInStore'
-    ? FACTS_ADJUDICATION_ORIGINS.MISSING_IN_STORE
-    : FACTS_ADJUDICATION_ORIGINS.RESOLUTION_DIFFERS;
 }

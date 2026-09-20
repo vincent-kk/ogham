@@ -7,7 +7,9 @@
  */
 import type { ANALYSIS_AXES } from '../constants/analysisAxes.js';
 import type { ANALYSIS_CERTAINTIES } from '../constants/analysisCertainties.js';
+import type { FACTS_FILE_STATES } from '../constants/facts.js';
 
+import type { DependencyReferenceKind } from './adapters.js';
 import type { BoundaryExemptionDeclaration } from './documents.js';
 import type { VerificationProjectAnalysis } from './verification.js';
 
@@ -211,6 +213,56 @@ export interface SnapshotDiagnostic {
   nextAction: string;
 }
 
+/** One adjudicated item whose edge a file's valid references include (spec §4.5). */
+export interface NormalizedAdjudication {
+  /** `sourceText ?? specifier`, exactly as the side-table item names it. */
+  reference: string;
+  /** Project-relative path the adopted edge points at. */
+  resolvedPath: string;
+  /** Digest of the judged lines, so a freeze records what it applied. */
+  lineDigest: string;
+}
+
+/** One reference, reduced to what a conclusion can rest on. */
+export interface NormalizedReference {
+  /** `sourceText ?? specifier`, as the record spells it. */
+  reference: string;
+  /** Reference kind, as the provider reported it. */
+  kind: DependencyReferenceKind;
+  /** Project-relative path it resolves to; only in-project edges are kept. */
+  resolvedPath: string;
+}
+
+/**
+ * One file's valid references, normalized so a review can freeze them (spec §9).
+ *
+ * Valid means the record's references plus the adopted ones, which is what the
+ * rules run on; only in-project resolutions are kept, because an `external` or
+ * `unresolved` spelling difference carries no edge and would otherwise
+ * invalidate a whole review for nothing.
+ */
+export interface NormalizedFileFacts {
+  /** Project-relative POSIX path of the file these facts describe. */
+  path: string;
+  /**
+   * The file's facts state when the review froze it.
+   *
+   * An empty `references` means two different things — the store read the file
+   * and found no edge (`exact`), or no provider could read it at all
+   * (`tool-error`, which the prepare gate lets through). A comparison that
+   * cannot tell them apart demands an edge from a file nothing can extract,
+   * and nothing the caller does clears that (P5).
+   *
+   * Derived from the same constant as core's `FactsFileState`; the types are
+   * the same set, named twice because this one may not depend on core.
+   */
+  state: (typeof FACTS_FILE_STATES)[keyof typeof FACTS_FILE_STATES];
+  /** Its in-project edges, sorted, so two runs digest the same bytes. */
+  references: NormalizedReference[];
+  /** The judgements among them, empty when none applied. */
+  adjudications: NormalizedAdjudication[];
+}
+
 export interface LegacyCriteriaLedgerEvidence {
   path: string;
   targetDetailPath: string;
@@ -240,6 +292,31 @@ export interface ProjectSnapshot {
   verification: VerificationProjectAnalysis;
   legacyCriteriaLedger: LegacyCriteriaLedgerEvidence | null;
   diagnostics: SnapshotDiagnostic[];
+  /**
+   * The valid references behind this snapshot, one entry per `exact` file.
+   *
+   * Carried so a review can freeze what it judged (spec §9) without reading
+   * the store a second time, which could answer differently. Empty when the
+   * dependency axis was not collected.
+   */
+  normalizedFacts: NormalizedFileFacts[];
+  /**
+   * Source files the declared facts scope drops.
+   *
+   * An absence proved over files nobody looked at is not the same claim as one
+   * proved over all of them, and only this number tells the two apart. It
+   * changes no conclusion, so it is not a diagnostic and not a hash input.
+   *
+   * Counted as what the built-in default scope (the adapters' source
+   * extensions) would have covered minus what `facts.covers`/`facts.excludes`
+   * leaves in scope — a document or a manifest was never a candidate for a
+   * reference fact, and counting it would put a non-zero "unread" number on
+   * every project that declares nothing. Zero when the declared scope drops no
+   * source file. Declared limit: a language outside the default extensions
+   * enters the scope only through `facts.covers`, so a file of that language
+   * the project never declared does not count as dropped.
+   */
+  filesOutsideFactsScope: number;
   /**
    * What this snapshot actually collected. An axis reported false carries an
    * empty value with `unsupported` certainty — read this before trusting an

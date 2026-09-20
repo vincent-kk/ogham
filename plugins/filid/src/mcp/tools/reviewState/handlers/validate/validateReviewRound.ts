@@ -243,6 +243,9 @@ export async function validateReviewRound(
       files: state.scope.files,
       findings: merged.opinion.findings,
       sourceHash: state.sourceHash,
+      ...(state.generationId === undefined
+        ? {}
+        : { generationId: state.generationId }),
     }),
   );
   let updatedGroup: ReviewGroup = {

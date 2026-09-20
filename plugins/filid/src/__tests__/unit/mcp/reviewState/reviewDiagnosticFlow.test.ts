@@ -5,6 +5,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 
+import { seedFacts } from '../../../integration/helpers/seedFacts.js';
+
 import { buildReviewOpinion } from './helpers/buildReviewOpinion.js';
 import { buildReviewStateSealFinding } from './helpers/buildReviewStateSealFinding.js';
 import {
@@ -17,8 +19,8 @@ import { validateReviewStateSealGroup } from './helpers/validateReviewStateSealG
 import { writeReviewStateFixtureFile } from './helpers/writeReviewStateFixtureFile.js';
 
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -43,6 +45,7 @@ describe('prepared diagnostic evidence through seal and cache', () => {
         '-m',
         'unresolved import fixture',
       ]);
+      await seedFacts(fixture.projectRoot);
       const state = await prepareReviewStateSealFixture(fixture);
       const diagnostic = state.scope.diagnostics?.find(
         ({ code }) => code === 'unresolved-local-dependency',

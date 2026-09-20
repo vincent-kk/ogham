@@ -3,7 +3,6 @@ import {
   hashProjectFile,
   isOpenAdjudication,
 } from '../../../../../core/facts/index.js';
-import type { AdjudicationTableContents } from '../../../../../core/facts/index.js';
 import type { FactsOpenItem } from '../../types/factsToolTypes.js';
 
 import type { FactsContext } from './buildFactsContext.js';
@@ -22,17 +21,19 @@ import { describeAdjudicationItems } from './describeAdjudicationItems.js';
  * Read-only: an expired item is left on the page for the next writing action to
  * clear, exactly as it is today.
  *
+ * The pages come from the one read the call already made: reading the table a
+ * second time would let another actor's judgement land between the two, and
+ * the response would then say a file is uncertain while listing nothing to
+ * judge for it.
  * @param projectRoot - Absolute project root, used as given.
- * @param context - Scope, scanned paths and store paths for this call.
- * @param table - The side table as this call read it.
+ * @param context - Scope, scanned paths, store paths and adjudications of this call.
  * @returns Open items, grouped by file and ordered by path.
  */
 export function collectOpenItems(
   projectRoot: string,
   context: FactsContext,
-  table: AdjudicationTableContents,
 ): FactsOpenItem[] {
-  const pages = [...table.pages.values()]
+  const pages = [...context.adjudications.values()]
     .filter(
       (page) =>
         context.scannedSet.has(page.path) && context.scope.covers(page.path),

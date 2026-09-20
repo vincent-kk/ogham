@@ -6,6 +6,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 
+import { seedFacts } from '../../../integration/helpers/seedFacts.js';
+
 import { buildReviewOpinion } from './helpers/buildReviewOpinion.js';
 import { buildVerdictReviewFinding } from './helpers/buildVerdictReviewFinding.js';
 import { buildVerifyOpinion } from './helpers/buildVerifyOpinion.js';
@@ -14,10 +16,10 @@ import { createReviewStateSealFixture } from './helpers/createReviewStateSealFix
 import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Disposable committed source and isolated reviewer methods for each location case. */
-let fixture: ReturnType<typeof createReviewStateSealFixture>;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 1);
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 1);
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -64,6 +66,7 @@ describe('review finding location uncertainty', () => {
           cwd: fixture.projectRoot,
         },
       );
+      await seedFacts(fixture.projectRoot);
       const prepared = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
@@ -140,8 +143,10 @@ describe('review finding location uncertainty', () => {
         'confirmed',
         kind === 'unmatched' ? 0 : 1,
       );
-      // Deleting the fixture's only source leaves structure evidence indeterminate.
-      if (kind === 'deleted') expect(state.scope.evidenceComplete).toBe(false);
+      // Deleting the fixture's only source leaves nothing in the facts scope,
+      // so no file is unknown and the evidence is complete about an empty
+      // project; the finding, not the evidence, is what the verdict rests on.
+      if (kind === 'deleted') expect(state.scope.evidenceComplete).toBe(true);
       expect(sealed.summary.verdict).toBe(
         kind === 'unmatched' ? 'INCONCLUSIVE' : 'REQUEST_CHANGES',
       );

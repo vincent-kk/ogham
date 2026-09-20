@@ -3,10 +3,9 @@ import {
   resolveContainedPath,
 } from '@ogham/cross-platform';
 
-import {
-  REVIEW_STATE_DIRECTORY_NAMES,
-  REVIEW_STATE_FILE_NAMES,
-} from '../../../../constants/reviewState.js';
+import { REVIEW_STATE_FILE_NAMES } from '../../../../constants/reviewState.js';
+
+import { resolveGenerationDirectory } from './resolveGenerationDirectory.js';
 
 import type { ReviewStatePaths } from './reviewStateTypes.js';
 
@@ -27,9 +26,8 @@ export function resolveReviewGenerationPaths(
     paths.reviewRoot,
     paths.normalizedBranch,
   );
-  const reviewDirectory = resolveContainedPath(
+  const reviewDirectory = resolveGenerationDirectory(
     branchDirectory,
-    REVIEW_STATE_DIRECTORY_NAMES.GENERATIONS,
     generationId,
   );
   assertNoSymlinkDescendantsSync(paths.projectRoot, reviewDirectory);
@@ -56,6 +54,10 @@ export function resolveReviewGenerationPaths(
       reviewDirectory,
       REVIEW_STATE_FILE_NAMES.EVIDENCE,
     ),
+    factsPath: resolveContainedPath(
+      reviewDirectory,
+      REVIEW_STATE_FILE_NAMES.FACTS,
+    ),
     sessionPath: resolveContainedPath(
       reviewDirectory,
       REVIEW_STATE_FILE_NAMES.SESSION,
@@ -78,6 +80,7 @@ export function resolveReviewGenerationPaths(
     resolved.reportPath,
     resolved.blockersPath,
     resolved.evidencePath,
+    resolved.factsPath,
     resolved.sessionPath,
     resolved.prCommentPath,
     resolved.fixRequestsPath,

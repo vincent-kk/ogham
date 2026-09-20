@@ -33,15 +33,15 @@ afterEach(() => {
  * @param repository Base and feature files around the note; the plain repository by default.
  * @returns Nothing; `fixture` holds the repository and plugin root.
  */
-function pinRepositoryWithNote(
+async function pinRepositoryWithNote(
   note: string,
   repository: PinnedReviewRepositoryFiles = PLAIN_REVIEW_REPOSITORY,
-): void {
+): Promise<void> {
   const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   const pluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
   fixture = {
-    projectRoot: createPinnedReviewRepository({
+    projectRoot: await createPinnedReviewRepository({
       base: {
         ...repository.base,
         'src/note.tsx': note,
@@ -53,7 +53,7 @@ function pinRepositoryWithNote(
     branchName: PINNED_REVIEW_BRANCH,
     originalPluginRoot,
   };
-  configureReviewGroups(fixture.projectRoot, 1);
+  await configureReviewGroups(fixture.projectRoot, 1);
 }
 
 describe('review certainty counts only unknown files inside the review scope', () => {
@@ -67,24 +67,19 @@ describe('review certainty counts only unknown files inside the review scope', (
       dependencies: 'exact',
     },
     {
+      // Exact facts, one reference the provider resolved nowhere: the file is
+      // unknown to the graph through that edge, not through its own state.
       label: 'names no changed file and loads a missing file',
-      note: "export const Note = () => <p>Don't</p>; export { gone } from './gone.js';\n",
+      note: "export { gone } from './gone.js';\n",
       verdict: 'APPROVED',
       complete: true,
       dependencies: 'exact',
       outOfScope: ['unresolved-local-dependency'],
     },
-    {
-      label: 'names the changed file as a path token',
-      note: "export const Note = () => <p>Don't</p>; export { value } from './value.js';\n",
-      verdict: 'INCONCLUSIVE',
-      complete: false,
-      dependencies: 'indeterminate',
-    },
   ])(
     'seals $verdict when the uncertain file $label',
     async ({ note, verdict, complete, dependencies, outOfScope }) => {
-      pinRepositoryWithNote(note);
+      await pinRepositoryWithNote(note);
       if (!fixture) throw new Error('fixture was not created');
       const prepared = await handleReviewState({
         action: 'prepare',
@@ -114,6 +109,29 @@ describe('review certainty counts only unknown files inside the review scope', (
       });
     },
   );
+
+  it('refuses to prepare when the uncertain file names the changed file', async () => {
+    // The same relation that used to seal INCONCLUSIVE is now caught a step
+    // earlier: an unsettled file inside the review scope stops preparation and
+    // the refusal names it, so the evidence is never drawn from it (spec §9).
+    await pinRepositoryWithNote(
+      "export const Note = () => <p>Don't</p>; export { value } from './value.js';\n",
+    );
+    if (!fixture) throw new Error('fixture was not created');
+
+    await expect(
+      handleReviewState({
+        action: 'prepare',
+        projectRoot: fixture.projectRoot,
+        branchName: fixture.branchName,
+        baseRef: 'main',
+        effort: 'low',
+      }),
+    ).rejects.toMatchObject({
+      code: 'facts-incomplete',
+      message: expect.stringContaining('src/note.tsx'),
+    });
+  });
 });
 
 /** Root documents and entry that make the root fractal own the changed `src/value.ts`; no stray root peer. */
@@ -135,7 +153,7 @@ describe('graph-uncertainty rule results follow the review scope in a root-owned
    * @returns Messages of those candidates.
    */
   async function graphUncertaintyCandidates(note: string): Promise<string[]> {
-    pinRepositoryWithNote(note, ROOT_OWNER_REPOSITORY);
+    await pinRepositoryWithNote(note, ROOT_OWNER_REPOSITORY);
     if (!fixture) throw new Error('fixture was not created');
     const prepared = await handleReviewState({
       action: 'prepare',
@@ -165,18 +183,21 @@ describe('graph-uncertainty rule results follow the review scope in a root-owned
     expect(sealed.summary).toMatchObject({ verdict: 'APPROVED' });
   });
 
-  it('names the in-scope unknown files in the candidate it raises', async () => {
-    const messages = await graphUncertaintyCandidates(
-      "export const Note = () => <p>Don't</p>; export { value } from './value.js';\n",
-    );
-    expect(messages.length).toBeGreaterThan(0);
-    for (const message of messages) expect(message).toContain('src/note.tsx');
+  it('refuses to prepare instead of raising a candidate for an in-scope unknown file', async () => {
+    await expect(
+      graphUncertaintyCandidates(
+        "export const Note = () => <p>Don't</p>; export { value } from './value.js';\n",
+      ),
+    ).rejects.toMatchObject({
+      code: 'facts-incomplete',
+      message: expect.stringContaining('src/note.tsx'),
+    });
   });
 });
 
 describe('a changed module index at the project root relates every unknown file', () => {
   it('keeps the graph indeterminate and names the unrelated-looking unknown file', async () => {
-    pinRepositoryWithNote(
+    await pinRepositoryWithNote(
       "export const Note = () => <p>Don't</p>; export { other } from './other.js';\n",
       {
         base: ROOT_OWNER_REPOSITORY.base,
@@ -187,21 +208,20 @@ describe('a changed module index at the project root relates every unknown file'
       },
     );
     if (!fixture) throw new Error('fixture was not created');
-    const prepared = await handleReviewState({
-      action: 'prepare',
-      projectRoot: fixture.projectRoot,
-      branchName: fixture.branchName,
-      baseRef: 'main',
-      effort: 'low',
+    // A changed module index relates every unknown file under its parent, so
+    // the one that looks unrelated is in the review scope after all — and the
+    // refusal, not a candidate, is where the review now says so.
+    await expect(
+      handleReviewState({
+        action: 'prepare',
+        projectRoot: fixture.projectRoot,
+        branchName: fixture.branchName,
+        baseRef: 'main',
+        effort: 'low',
+      }),
+    ).rejects.toMatchObject({
+      code: 'facts-incomplete',
+      message: expect.stringContaining('src/note.tsx'),
     });
-    const state = readPreparedReviewState(prepared);
-    expect(state.scope.statuses.analysisAxes?.dependencies).toBe(
-      'indeterminate',
-    );
-    const messages = state.scope.candidates
-      .filter(({ certainty }) => certainty === 'indeterminate')
-      .map(({ message }) => message);
-    expect(messages.length).toBeGreaterThan(0);
-    for (const message of messages) expect(message).toContain('src/note.tsx');
   });
 });

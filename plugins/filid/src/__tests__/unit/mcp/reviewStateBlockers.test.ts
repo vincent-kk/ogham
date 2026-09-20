@@ -29,8 +29,8 @@ import { validateReviewStateSealGroup } from './reviewState/helpers/validateRevi
 /** Temporary repository and plugin root used by the active case. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 
 afterEach(() => {

@@ -3,15 +3,18 @@ import {
   FACTS_ATTESTATION_OUTCOMES,
   FACTS_ATTESTED_REQUIREMENT,
   FACTS_FILE_STATES,
+  FACTS_JUDGEMENTS_DISCARDED_NEXT_ACTION,
   FACTS_OUTPUT_REQUIREMENT,
   FACTS_PROJECT_STATES,
   FACTS_STATUS_LIST_LIMIT,
+  FACTS_UNKNOWN_CAUSES,
 } from '../../../../constants/facts.js';
+import { ANALYSIS_AXES } from '../../../../constants/analysisAxes.js';
 import { ANALYSIS_CERTAINTIES } from '../../../../constants/analysisCertainties.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import {
-  readAdjudicationTable,
-  readPendingStore,
+  classifyProjectFacts,
+  damagedJudgementDiagnostics,
   writeExtractionList,
 } from '../../../../core/facts/index.js';
 import type { FactsFileState } from '../../../../core/facts/index.js';
@@ -23,7 +26,6 @@ import type {
 
 import { buildFactsContext } from './utils/buildFactsContext.js';
 import { buildUninitializedPayload } from './utils/buildUninitializedPayload.js';
-import { classifyScannedFiles } from './utils/classifyScannedFiles.js';
 import { capFileList } from './utils/capFileList.js';
 import { collectOpenItems } from './utils/collectOpenItems.js';
 import { collectRejectedClaims } from './utils/collectRejectedClaims.js';
@@ -58,14 +60,8 @@ export async function reportFactsStatus(
       context.epoch.resolutionEpoch,
       context.storePaths.extractionListPath,
     );
-  const unadjudicated = collectOpenItems(
-    projectRoot,
-    context,
-    readAdjudicationTable(context.storePaths.sideTableDirectory),
-  );
-  const pendingAttestations = [
-    ...readPendingStore(context.storePaths.pendingDirectory).pages.values(),
-  ]
+  const unadjudicated = collectOpenItems(projectRoot, context);
+  const pendingAttestations = [...context.pending.values()]
     .filter(
       (page) =>
         context.scannedSet.has(page.path) && context.scope.covers(page.path),
@@ -78,12 +74,7 @@ export async function reportFactsStatus(
       nextAction:
         FACTS_ATTESTATION_NEXT_ACTIONS[FACTS_ATTESTATION_OUTCOMES.PENDING],
     }));
-  const byState = classifyScannedFiles(
-    projectRoot,
-    context,
-    new Set(unadjudicated.map((item) => item.path)),
-    new Set(pendingAttestations.map((page) => page.path)),
-  );
+  const byState = classifyProjectFacts(projectRoot, context);
   const paths = (state: FactsFileState): string[] =>
     context.scannedPaths.filter((path) => byState.get(path) === state);
   const missing = paths(FACTS_FILE_STATES.MISSING);
@@ -97,6 +88,15 @@ export async function reportFactsStatus(
     ),
   );
   const rejected = collectRejectedClaims(context);
+  const awaitingComparison = context.scannedPaths
+    .filter(
+      (path) => context.adjudications.get(path)?.awaitingComparison === true,
+    )
+    .map((path) => {
+      const storedTool =
+        context.records.get(path)?.record.facts.provenance.tool;
+      return { path, ...(storedTool === undefined ? {} : { storedTool }) };
+    });
   const indeterminate = context.scannedPaths.filter((path) =>
     (context.records.get(path)?.record.facts.references ?? []).some(
       (reference) =>
@@ -132,6 +132,13 @@ export async function reportFactsStatus(
       uncertain: capFileList(uncertain),
       toolError: capFileList(toolError),
       indeterminate: capFileList(indeterminate),
+      awaitingComparison: {
+        items: awaitingComparison.slice(0, FACTS_STATUS_LIST_LIMIT),
+        truncated: Math.max(
+          0,
+          awaitingComparison.length - FACTS_STATUS_LIST_LIMIT,
+        ),
+      },
       rejected: {
         items: rejected.slice(0, FACTS_STATUS_LIST_LIMIT),
         truncated: Math.max(0, rejected.length - FACTS_STATUS_LIST_LIMIT),
@@ -145,6 +152,21 @@ export async function reportFactsStatus(
         FACTS_STATUS_LIST_LIMIT,
       ),
     },
-    diagnostics: [],
+    diagnostics: [
+      ...damagedJudgementDiagnostics(context),
+      ...(awaitingComparison.length === 0
+        ? []
+        : [
+            {
+              code: FACTS_UNKNOWN_CAUSES.JUDGEMENTS_DISCARDED,
+              message: `${awaitingComparison.length} file(s) lost their judgements to a discard and nobody has re-derived them, so they are reported uncertain rather than settled.`,
+              nextAction: FACTS_JUDGEMENTS_DISCARDED_NEXT_ACTION,
+            },
+          ]),
+    ].map((report) => ({
+      ...report,
+      path: projectRoot,
+      affects: ANALYSIS_AXES,
+    })),
   };
 }

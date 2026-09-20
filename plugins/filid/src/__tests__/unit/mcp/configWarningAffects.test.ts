@@ -31,7 +31,7 @@ afterEach(() => rmSync(projectRoot, { recursive: true, force: true }));
 async function configWarningAffects(
   config: Record<string, unknown>,
 ): Promise<(readonly string[])[]> {
-  projectRoot = writeSharedUnitRestructureProject(config);
+  projectRoot = await writeSharedUnitRestructureProject(config);
   const { diagnostics } = await createToolSnapshot(projectRoot);
   return diagnostics
     .filter(({ code }) => code === 'config-warning')
@@ -120,7 +120,7 @@ describe('a config-warning affects the axes its dropped entry could have changed
   ])(
     'a restructure plan beside %s (%j) is %s',
     async (_label, extra, status) => {
-      projectRoot = writeSharedUnitRestructureProject({
+      projectRoot = await writeSharedUnitRestructureProject({
         ...BASE_CONFIG,
         ...extra,
       });

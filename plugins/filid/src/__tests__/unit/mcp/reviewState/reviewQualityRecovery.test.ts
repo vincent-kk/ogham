@@ -16,8 +16,8 @@ import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Corrupted artifacts exercise semantic checks independently of their hash bindings. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -31,7 +31,7 @@ describe('review quality through recovery and seal', () => {
   it.each(['checked', 'riskPlan'] as const)(
     'does not borrow prior %s to validate an incomplete raw follow-up',
     async (field) => {
-      configureReviewGroups(fixture.projectRoot, 1, {
+      await configureReviewGroups(fixture.projectRoot, 1, {
         highRiskPaths: ['src/value.ts'],
       });
       const prepared = await handleReviewState({
@@ -82,7 +82,7 @@ describe('review quality through recovery and seal', () => {
   );
 
   it('reviews a group again when its raw round is missing inspection records', async () => {
-    configureReviewGroups(fixture.projectRoot, 1);
+    await configureReviewGroups(fixture.projectRoot, 1);
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
@@ -120,7 +120,7 @@ describe('review quality through recovery and seal', () => {
   it.each(['checked', 'riskPlan'] as const)(
     'does not seal a semantically invalid %s even with matching artifact hashes',
     async (field) => {
-      configureReviewGroups(fixture.projectRoot, 1, {
+      await configureReviewGroups(fixture.projectRoot, 1, {
         highRiskPaths: ['src/value.ts'],
       });
       const prepared = await handleReviewState({

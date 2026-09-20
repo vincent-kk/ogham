@@ -61,6 +61,7 @@ export function buildUninitializedPayload(
       uncertain: empty,
       toolError: empty,
       indeterminate: empty,
+      awaitingComparison: { items: [], truncated: 0 },
       rejected: { items: [], truncated: 0 },
       unadjudicated: { items: [], truncated: 0 },
       pendingAttestations: [],

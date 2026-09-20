@@ -67,10 +67,11 @@ function isOwnedOrganReference(
 /**
  * Aggregate adapter dependency references into owner-level edges and cycles.
  * @param nodePaths Non-organ owner paths that can appear as graph nodes.
- * @param references Adapter-reported references; an unresolved or owner-less
- * production reference, or any reference the adapter marks `indeterminate`
- * (verification files included), puts its source in `unknownFiles` rather
- * than silently dropping out or becoming an edge.
+ * @param references Dependency references; an unresolved production reference,
+ * or any reference marked `indeterminate` (verification files included), puts
+ * its source in `unknownFiles` rather than silently dropping out or becoming an
+ * edge. An owner-less reference becomes neither: it is reported separately by
+ * `findUnownedReferences`, with its source and its owner-less target.
  * @param certainty Starting certainty from the reference collector: `unsupported`
  * stays; `indeterminate` stays even with an empty list, so uncertainty the
  * caller could not attribute is not lost.
@@ -127,11 +128,11 @@ export function buildDependencyGraph(
     }
     const fromFractalPath = resolveOwnerCached(reference.sourceFile);
     const toFractalPath = resolveOwnerCached(reference.resolvedPath);
-    if (!fromFractalPath || !toFractalPath) {
-      if (!isVerification)
-        attribute(reference.sourceFile, DEPENDENCY_DIAGNOSTIC_CODES.UNOWNED);
-      continue;
-    }
+    // An owner-less end has no node, and an edge between nodes that do not
+    // exist cannot make a cycle. The reference is reported as a finding with
+    // its source and target instead; making a boundary is the user's call, so
+    // this cannot be the graph's reason to stop.
+    if (!fromFractalPath || !toFractalPath) continue;
 
     const key = `${fromFractalPath}\0${toFractalPath}`;
     const edge = grouped.get(key) ?? {

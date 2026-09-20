@@ -8,10 +8,10 @@ import { INTENT_GAP_REVIEW_REPOSITORY } from './reviewFlowRepositoryFiles.js';
  * the pinned INTENT-gap repository with an ignored one-file-per-group review config.
  * @returns Absolute repository root whose HEAD equals the preserved state's head commit.
  */
-export function createPreservedReviewRepository(): string {
-  const projectRoot = createPinnedReviewRepository(
+export async function createPreservedReviewRepository(): Promise<string> {
+  const projectRoot = await createPinnedReviewRepository(
     INTENT_GAP_REVIEW_REPOSITORY,
   );
-  configureReviewGroups(projectRoot, 1);
+  await configureReviewGroups(projectRoot, 1);
   return projectRoot;
 }

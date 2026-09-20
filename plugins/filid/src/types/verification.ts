@@ -45,6 +45,14 @@ export interface DetailContractDocument {
 
 export type ContractGroupsByOwner = ReadonlyMap<string, ReadonlySet<string>>;
 
+/** What one file's facts record says about its verification role and cases. */
+export interface VerificationFileFacts {
+  /** The role the record reports; `unsupported` leaves the file unjudged. */
+  role: VerificationRole | 'unsupported';
+  /** The case count the record reports, in the adapter's own shape. */
+  cases: VerificationCaseCount;
+}
+
 export interface AnalyzeVerificationInput {
   projectRoot: string;
   adapters: readonly VerificationAdapter[];
@@ -52,4 +60,12 @@ export interface AnalyzeVerificationInput {
   detailDocuments?: readonly DetailContractDocument[];
   discoveredPathsByAdapter?: ReadonlyMap<string, readonly string[]>;
   discoveryCertainty?: AnalysisCertainty;
+  /**
+   * Role and case count per discovered file, keyed by `pathForCompare`.
+   *
+   * Required rather than optional: an absent entry means no record could be
+   * read for that file, and falling back to the adapter there would hide a
+   * missing bootstrap instead of reporting it (spec §11-7).
+   */
+  verificationFacts: ReadonlyMap<string, VerificationFileFacts>;
 }

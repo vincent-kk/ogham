@@ -1,5 +1,8 @@
 import { readShardDirectory } from '../store/readShardDirectory.js';
-import type { FactsShard } from '../store/readShardDirectory.js';
+import type {
+  FactsShard,
+  ShardDamage,
+} from '../store/readShardDirectory.js';
 
 import { PendingAttestationSchema } from './pendingPageSchema.js';
 import type { PendingAttestation } from './pendingPageSchema.js';
@@ -10,6 +13,10 @@ export interface PendingStoreContents {
   shards: Map<string, FactsShard>;
   /** Path digest to that file's pending attestation, for every valid page. */
   pages: Map<string, PendingAttestation>;
+  /** Shard file name to why it could not be read as its entries. */
+  damaged: Map<string, ShardDamage>;
+  /** Whether the directory itself could not be listed. */
+  directoryUnreadable: boolean;
 }
 
 /**
@@ -25,12 +32,13 @@ export interface PendingStoreContents {
  * @returns The shards and the pages they hold.
  */
 export function readPendingStore(directory: string): PendingStoreContents {
-  const shards = readShardDirectory(directory);
+  const { shards, damaged, directoryUnreadable } =
+    readShardDirectory(directory);
   const pages = new Map<string, PendingAttestation>();
   for (const shard of shards.values())
     for (const [key, value] of Object.entries(shard.entries)) {
       const parsed = PendingAttestationSchema.safeParse(value);
       if (parsed.success) pages.set(key, parsed.data);
     }
-  return { shards, pages };
+  return { shards, pages, damaged, directoryUnreadable };
 }

@@ -17,8 +17,8 @@ import {
 /** Temporary Git repository and plugin root used by state-recovery cases. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 
 afterEach(() => {

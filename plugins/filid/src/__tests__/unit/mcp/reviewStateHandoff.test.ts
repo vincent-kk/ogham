@@ -1,10 +1,9 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 
 import {
   ensureDirectorySync,
   portableDirname,
   portableJoin,
-  tmp,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -27,6 +26,8 @@ import {
 import { resolveReviewStatePaths } from '../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 
 import { runReviewStateFixtureGit } from './reviewState/helpers/runReviewStateFixtureGit.js';
+import { createFixtureProjectRoot } from '../../integration/helpers/createFixtureProjectRoot.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 vi.mock(
   '../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js',
@@ -109,8 +110,8 @@ function buildSeed(
   });
 }
 
-beforeEach(() => {
-  projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-handoff-'));
+beforeEach(async () => {
+  projectRoot = createFixtureProjectRoot('filid-review-handoff-');
   runReviewStateFixtureGit(projectRoot, ['init', '--initial-branch=main']);
   runReviewStateFixtureGit(projectRoot, ['config', 'user.name', 'Filid Test']);
   runReviewStateFixtureGit(projectRoot, [
@@ -143,6 +144,7 @@ beforeEach(() => {
   writeProjectFile('src/value.ts', "export const value = 'feature';\n");
   runReviewStateFixtureGit(projectRoot, ['add', '--all']);
   runReviewStateFixtureGit(projectRoot, ['commit', '-m', 'feature']);
+  await seedFacts(projectRoot);
 });
 
 afterEach(() => {
@@ -205,6 +207,7 @@ describe('review_state handoff', () => {
       '-m',
       'add verification evidence',
     ]);
+    await seedFacts(projectRoot);
 
     const result = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.HANDOFF,

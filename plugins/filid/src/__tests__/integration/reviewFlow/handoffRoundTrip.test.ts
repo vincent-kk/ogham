@@ -66,10 +66,10 @@ async function prepareWith(changeContext: string): Promise<ReviewStateRecord> {
   );
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   pluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
-  projectRoot = createPinnedReviewRepository(INTENT_GAP_REVIEW_REPOSITORY);
+  projectRoot = await createPinnedReviewRepository(INTENT_GAP_REVIEW_REPOSITORY);
 });
 afterEach(() => {
   rmSync(projectRoot, { recursive: true, force: true });

@@ -74,7 +74,7 @@ describe('Filid 1.0 MCP tool surface', () => {
   it.each(['effort-argument', 'outdated-policy'] as const)(
     'answers a %s prepare with a new generation in the MCP envelope',
     async (code) => {
-      const fixture = createReviewStateSealFixture();
+      const fixture = await createReviewStateSealFixture();
       let connection: Awaited<ReturnType<typeof connectTestClient>> | undefined;
       try {
         connection = await connectTestClient(createServer());

@@ -19,7 +19,8 @@ import { affectsAnalysisAxis } from '../../utils/affectsAnalysisAxis.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
 import { isAttributedToUnknownFile } from '../../utils/isAttributedToUnknownFile.js';
 import type { RestructureInput } from '../types/restructureTypes.js';
-import { describeKnownEdgesPostcondition } from '../utils/describeKnownEdgesPostcondition.js';
+import { describeFilesOutsideFactsScope } from '../utils/describeFilesOutsideFactsScope.js';
+import { describeUnknownFilesPostcondition } from '../utils/describeUnknownFilesPostcondition.js';
 import { readRestructurePlan } from '../utils/readRestructurePlan.js';
 
 type RestructureValidationInput = Extract<
@@ -36,10 +37,14 @@ type RestructureValidationInput = Extract<
  *
  * @param input - Validation action, project root, and absolute plan path.
  * @returns The canonical six-scope plan-validation result, with the caller's
- * next step chosen by action and status. Unknown files related to the plan,
- * or a restructure-axis diagnostic not explained by an unrelated unknown file,
- * make the status `indeterminate`. A passing postcondition beside unrelated
- * unknown files says it holds on the known edges only.
+ * next step chosen by action and status. A confirmed violation outranks an
+ * evidence gap, because submitting more facts never removes it. Otherwise
+ * unknown files related to the plan, or a restructure-axis diagnostic not
+ * explained by an unrelated unknown file, make the status `indeterminate`; a
+ * postcondition is stricter, since it asserts an absence, so ANY unknown file
+ * in the project leaves it indeterminate (spec §5). What was left unread —
+ * those unknown files, and the files the declared facts scope excludes — is
+ * named after the status's own next action rather than in place of it.
  */
 export async function validateRestructurePlan(
   input: RestructureValidationInput,
@@ -51,8 +56,12 @@ export async function validateRestructurePlan(
     input.action === RESTRUCTURE_ACTIONS.PRECONDITION
       ? validatePlanPreconditions(context.snapshot, plan)
       : validatePlanPostconditions(context.snapshot, plan);
-  const status =
-    result.unknownFiles.relevant.length > 0 ||
+  const isPostcondition = input.action === RESTRUCTURE_ACTIONS.POSTCONDITION;
+  const unknownFileCount = isPostcondition
+    ? result.unknownFiles.relevant.length + result.unknownFiles.other.length
+    : result.unknownFiles.relevant.length;
+  const hasEvidenceGap =
+    unknownFileCount > 0 ||
     context.diagnostics.some(
       (diagnostic) =>
         affectsAnalysisAxis(diagnostic, RESTRUCTURE_ANALYSIS_AXES) &&
@@ -61,11 +70,24 @@ export async function validateRestructurePlan(
           result.unknownFiles.other,
           context.snapshot.projectRoot,
         ),
-    )
+    );
+  const status = !result.valid
+    ? TOOL_STATUSES.VIOLATIONS
+    : hasEvidenceGap
       ? TOOL_STATUSES.INDETERMINATE
-      : result.valid
-        ? TOOL_STATUSES.OK
-        : TOOL_STATUSES.VIOLATIONS;
+      : TOOL_STATUSES.OK;
+  const assertsOverUnknownFiles = isPostcondition && unknownFileCount > 0;
+  const unreadSentences = [
+    assertsOverUnknownFiles
+      ? describeUnknownFilesPostcondition(unknownFileCount)
+      : undefined,
+    context.snapshot.filesOutsideFactsScope > 0
+      ? describeFilesOutsideFactsScope(
+          context.snapshot.filesOutsideFactsScope,
+          input.action,
+        )
+      : undefined,
+  ].filter((sentence): sentence is string => sentence !== undefined);
   return {
     projectRoot: context.snapshot.projectRoot,
     status,
@@ -78,12 +100,15 @@ export async function validateRestructurePlan(
       passed: result.valid ? 1 : 0,
       failed: result.valid ? 0 : 1,
       skipped: 0,
-      nextAction:
-        input.action === RESTRUCTURE_ACTIONS.POSTCONDITION &&
-        status === TOOL_STATUSES.OK &&
-        result.unknownFiles.other.length > 0
-          ? describeKnownEdgesPostcondition(result.unknownFiles.other.length)
-          : RESTRUCTURE_VALIDATION_NEXT_ACTIONS[input.action][status],
+      nextAction: (status === TOOL_STATUSES.INDETERMINATE &&
+      assertsOverUnknownFiles
+        ? unreadSentences
+        : [
+            RESTRUCTURE_VALIDATION_NEXT_ACTIONS[input.action][status],
+            ...unreadSentences,
+          ]
+      ).join(' '),
+      filesOutsideFactsScope: context.snapshot.filesOutsideFactsScope,
     },
     data: result,
     diagnostics: context.diagnostics,

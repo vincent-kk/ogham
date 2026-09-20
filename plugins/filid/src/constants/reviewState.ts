@@ -310,6 +310,7 @@ export const REVIEW_STATE_FILE_NAMES = {
   BLOCKERS: 'review-blockers.md',
   PR_COMMENT: 'pr-comment.md',
   EVIDENCE: 'evidence.md',
+  FACTS: 'facts.json',
   SESSION: 'session.md',
   VERIFICATION: 'verification.md',
   VERIFICATION_METRICS_PARTIAL: 'verification.metrics-half.partial.md',
@@ -386,11 +387,17 @@ export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   OPINIONS_MISSING: 'review-opinions-missing',
   OPINION_INVALID: 'review-opinion-invalid',
   SESSION_MISSING: 'review-session-missing',
+  /** A generation's frozen facts are gone or no longer match their digest. */
+  FACTS_FROZEN_UNUSABLE: 'review-facts-frozen-unusable',
   RULE_MAP_MISSING: 'review-rule-map-missing',
   /** Legacy or unreadable-schema state without explicit force. */
   INCREMENTAL_BOOTSTRAP_REQUIRED: 'review-incremental-bootstrap-required',
   /** Local review inputs (instructions, rules, actor methods) changed since prepare. */
   INPUTS_STALE: 'review-inputs-stale',
+  /** A file in the review scope has no facts the evidence can be drawn from. */
+  FACTS_INCOMPLETE: 'facts-incomplete',
+  /** The store disputes a reference this generation was judged on. */
+  FACTS_DISCREPANCY: 'facts-discrepancy',
   /** Repository `.filid/review-rules.json` content or schema is invalid. */
   REPOSITORY_RULES_INVALID: 'review-repository-rules-invalid',
   /** A repository rule declares a body file that does not exist. */
@@ -433,6 +440,8 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   OPINIONS_MISSING: 'No merged review opinions exist for this review state.',
   OPINION_INVALID: 'The review opinion is missing or invalid.',
   SESSION_MISSING: 'The prepared review session artifact is missing.',
+  FACTS_FROZEN_UNUSABLE:
+    'The facts this generation recorded a digest for are not the facts on disk.',
   RULE_MAP_MISSING: 'The cross-review rule map is missing.',
 } as const;
 
@@ -457,6 +466,12 @@ export const REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS = {
   EFFORT_LOCKED:
     'Report that the prepared review keeps its effort and that the configured effort applies to the next review; to review at another effort now, call prepare with that effort argument.',
   VALIDATION_POLICY_OUTDATED: PREPARE_ONCE_NEXT_ACTION,
+  FACTS_DISCREPANCY_UNSETTLED:
+    'Do not publish a verdict: a reviewed file holds a reported reference this generation was not judged on, and its side-table item is still open. Read the line this diagnostic names and call facts adjudicate for that item — adopt it when the reference is real, or dismiss it with a reason, which a second actor, a separate subagent the skill stands up, then judges independently. If the stored record is the wrong one, submit that file again with the tool that reads it correctly. Then call seal again; a settled item needs no new review.',
+  FACTS_DISCREPANCY_FROZEN_EDGES_CHANGED:
+    'Do not publish a verdict: a reviewed file\'s valid references are no longer the ones this generation froze — an edge has been added to them, or one it was judged on is gone. Either way the review answered for a set of edges that is not the current one. Call prepare once with the same arguments and without force — only the files whose valid references changed are reviewed again — then finish those and seal.',
+  FACTS_INCOMPLETE:
+    'Do not review this branch yet: filid holds no settled facts for the files this message names, so the review would be judged on references nobody has confirmed. Run the facts bootstrap (skills/.shared/facts-bootstrap.md) and route each file by the list facts status puts it in, not by its state alone — re-extracting is the answer for only two of the four. A file in missing or needsResolution is extracted with the program named in the output requirement and submitted. A file in rejected follows that item\'s own nextAction. A file in unadjudicated is settled with facts adjudicate — a dismissal is confirmed by a second actor, which the skill stands up as a separate subagent. A file in pendingAttestations or indeterminate needs an attested record that a second actor confirms. Every file reported uncertain appears in at least one of those four lists. Then call prepare again with the same arguments and without force.',
   RULE_PATH_ESCAPE:
     'Ask the user to make .filid/review-rules.json and its rule files regular files inside the repository. Then call review_state prepare again.',
   ACTOR_METHOD_MISSING:

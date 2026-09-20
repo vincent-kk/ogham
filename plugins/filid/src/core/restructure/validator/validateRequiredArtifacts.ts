@@ -1,6 +1,7 @@
 import { portableJoin, samePath } from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
+import { FACTS_SECTION_UNAVAILABLE_NEXT_ACTION } from '../../../constants/facts.js';
 import {
   REQUIRED_ARTIFACT_ROLES,
   RESTRUCTURE_VALIDATION_CODES,
@@ -59,8 +60,8 @@ export function validateRequiredArtifacts(
         return [
           {
             code: RESTRUCTURE_VALIDATION_CODES.ENTRY_POINT_SURFACE_UNSUPPORTED,
-            message: `Adapter ${entryPoint.adapterId} cannot inspect the exports of the entry point ${artifact.path}, so the postcondition cannot confirm it exposes the unit.`,
-            nextAction: `Tell the user that ${artifact.path} exists but its exports cannot be verified by filid, and let them confirm by hand that it exports the unit's public surface; the finding clears only once an adapter that enumerates this entry point's surface is enabled.`,
+            message: `No enumerated export surface is known for the entry point ${artifact.path}, so the postcondition cannot confirm it exposes the unit.`,
+            nextAction: `${artifact.path} exists, but nothing states its exports. ${FACTS_SECTION_UNAVAILABLE_NEXT_ACTION}`,
             path: artifact.path,
             sourcePath: move.sourcePath,
           },

@@ -133,6 +133,9 @@ export async function recoverReviewGroups(
             files: state.scope.files,
             findings: parsed.opinion.findings,
             sourceHash: state.sourceHash,
+            ...(state.generationId === undefined
+              ? {}
+              : { generationId: state.generationId }),
             verifierMethod: loadActorMethods(pluginRoot).verifier,
             diffs: readInlineReviewDiffs(paths, group),
           }),

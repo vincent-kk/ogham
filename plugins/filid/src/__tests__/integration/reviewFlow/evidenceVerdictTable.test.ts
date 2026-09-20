@@ -66,17 +66,17 @@ describe('config-warning end to end', () => {
   /** Pinned repository whose ignored config may carry an unknown key. */
   let fixture: ReviewStateSealFixture;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
     const pluginRoot = createReviewRulePluginRoot();
     process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
     fixture = {
-      projectRoot: createPinnedReviewRepository(PLAIN_REVIEW_REPOSITORY),
+      projectRoot: await createPinnedReviewRepository(PLAIN_REVIEW_REPOSITORY),
       pluginRoot,
       branchName: PINNED_REVIEW_BRANCH,
       originalPluginRoot,
     };
-    configureReviewGroups(fixture.projectRoot, 1);
+    await configureReviewGroups(fixture.projectRoot, 1);
   });
   afterEach(() => disposeReviewStateSealFixture(fixture));
 

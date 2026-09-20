@@ -1,8 +1,7 @@
-import { mkdtempSync } from 'node:fs';
-
-import { portableJoin, tmp } from '@ogham/cross-platform';
-
 import { writeReviewStateFixtureFile } from '../../../unit/mcp/reviewState/helpers/writeReviewStateFixtureFile.js';
+
+import { createFixtureProjectRoot } from '../../helpers/createFixtureProjectRoot.js';
+import { seedFacts } from '../../helpers/seedFacts.js';
 
 import { FIXTURE_INTENT } from './reviewFlowRepositoryFiles.js';
 
@@ -35,12 +34,16 @@ const PROJECT_FILES: Readonly<Record<string, string>> = {
 /**
  * Write an FCA project whose one shared unit belongs at the `domain` fractal.
  * @param config Optional `.filid/config.json` value; omitted means no config file.
+ * The project is given its facts here: analysis reads the facts store, so a
+ * fixture without records is one filid can draw no reference-based conclusion
+ * about, and a test built on it would assert the absence of facts instead.
+ *
  * @returns Absolute temporary project root.
  */
-export function writeSharedUnitRestructureProject(
+export async function writeSharedUnitRestructureProject(
   config?: Readonly<Record<string, unknown>>,
-): string {
-  const projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-restructure-'));
+): Promise<string> {
+  const projectRoot = createFixtureProjectRoot('filid-restructure-');
   for (const [path, content] of Object.entries(PROJECT_FILES))
     writeReviewStateFixtureFile(projectRoot, path, content);
   if (config)
@@ -49,5 +52,6 @@ export function writeSharedUnitRestructureProject(
       '.filid/config.json',
       JSON.stringify(config),
     );
+  await seedFacts(projectRoot);
   return projectRoot;
 }

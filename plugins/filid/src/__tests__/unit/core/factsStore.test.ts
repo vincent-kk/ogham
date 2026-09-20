@@ -55,9 +55,9 @@ afterEach(() => {
 /**
  * Write one record into its shard, reading the store for the current token.
  * @param path Project-relative path the record describes.
- * @returns Whether the shard write landed.
+ * @returns The digest the write left, or null when it lost the token.
  */
-function store(path: string): boolean {
+function store(path: string): string | null {
   const key = paths.pathDigest(path);
   const shard = paths.shardFileName(key);
   const existing = readFactsStore(paths.directory).shards.get(shard);
@@ -89,7 +89,7 @@ describe('facts record store', () => {
   });
 
   it('stores and reads back a record', () => {
-    expect(store('src/a.ts')).toBe(true);
+    expect(store('src/a.ts')).toMatch(/^[0-9a-f]{64}$/);
 
     const contents = readFactsStore(paths.directory);
     expect(contents.records.get(paths.pathDigest('src/a.ts'))).toBeDefined();
@@ -114,7 +114,7 @@ describe('facts record store', () => {
       'a-digest-nobody-wrote',
     );
 
-    expect(written).toBe(false);
+    expect(written).toBeNull();
   });
 
   it('preserves the other records in a shard when one is replaced', () => {
@@ -143,7 +143,7 @@ describe('facts record store', () => {
     const contents = readFactsStore(paths.directory);
 
     expect(contents.records.has(key)).toBe(false);
-    expect(store('src/a.ts')).toBe(true);
+    expect(store('src/a.ts')).not.toBeNull();
     expect(readFactsStore(paths.directory).records.has(key)).toBe(true);
   });
 
@@ -157,7 +157,7 @@ describe('facts record store', () => {
 
     expect(contents.records.has(key)).toBe(false);
     expect(contents.shards.get(shard)?.digest).toBeTypeOf('string');
-    expect(store('src/a.ts')).toBe(true);
+    expect(store('src/a.ts')).not.toBeNull();
   });
 
   it('ignores files in the store directory that are not shards', () => {

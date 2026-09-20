@@ -8,6 +8,7 @@ import { classifyRelevanceTarget } from '../../../core/analysis/dependencyGraph/
 import { createToolSnapshot } from '../../../mcp/tools/utils/createToolSnapshot.js';
 import type { FractalTree } from '../../../types/fractal.js';
 import { FIXTURE_INTENT } from '../../integration/reviewFlow/helpers/reviewFlowRepositoryFiles.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 /** Project with a manifest-only root, a fractal `domain` and its organ `domain/utils`, each with a module index. */
 const FILES: Readonly<Record<string, string>> = {
@@ -31,6 +32,7 @@ beforeAll(async () => {
     mkdirSync(dirname(join(projectRoot, path)), { recursive: true });
     writeFileSync(join(projectRoot, path), text);
   }
+  await seedFacts(projectRoot);
   tree = (await createToolSnapshot(projectRoot)).snapshot.tree;
 });
 afterAll(() => rmSync(projectRoot, { recursive: true, force: true }));

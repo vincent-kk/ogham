@@ -50,6 +50,17 @@ export const StoredFactsRecordSchema = z
      * re-running the tool that will be refused the same way.
      */
     rejectedClaims: z.array(StoredRejectionSchema),
+    /**
+     * In-project edges the last readable record carried, kept while the file
+     * is `tool-error`.
+     *
+     * Server-owned. A `toolError` record claims nothing about references, so
+     * it cannot be compared against — and without this the next record that
+     * claims nothing either is compared against an empty list and drops every
+     * edge with no item to judge (spec §2.4). Absent unless the stored record
+     * is a `toolError` one.
+     */
+    shrinkBaseline: FileFactsSchema.shape.references.optional(),
     facts: FileFactsSchema,
   })
   .strict();

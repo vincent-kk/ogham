@@ -11,10 +11,10 @@ import { createReviewStateSealFixture } from './helpers/createReviewStateSealFix
 import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Completed committed-source opinions whose worktree can change independently. */
-let fixture: ReturnType<typeof createReviewStateSealFixture>;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 1);
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 1);
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });

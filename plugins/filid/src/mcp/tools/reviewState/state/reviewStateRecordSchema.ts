@@ -113,6 +113,10 @@ const ReviewScopeFileSchema = z
     rules: z.array(z.string()),
     repositoryRules: z.array(z.string()),
     publicEntryPoint: z.boolean().optional(),
+    factsHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
   })
   .strict();
 
@@ -167,6 +171,10 @@ const ReviewScopeSchema = z
     diagnostics: z.array(StoredDiagnosticSchema).optional(),
     outOfScopeDiagnostics: z.array(StoredDiagnosticSchema).optional(),
     snapshotHash: z.string(),
+    factsDigest: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
     evidenceComplete: z.boolean(),
     worktree: z.nativeEnum(WORKTREE_DISPOSITIONS),
     dirtyPaths: z.array(z.string()),
@@ -215,6 +223,24 @@ export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
     phase: z.nativeEnum(REVIEW_STATE_PHASES),
     preparedAt: z.string(),
     sealedAt: z.string().optional(),
+    factsAdjudications: z
+      .array(
+        z
+          .object({
+            path: z.string(),
+            kind: z.string(),
+            reference: z.string(),
+            resolvedPath: z.string(),
+            state: z.string(),
+            lineDigest: z.string(),
+          })
+          .strict(),
+      )
+      .optional(),
+    factsAdjudicationsDigest: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
     effort: z.enum(['low', 'medium', 'high']),
     effortMode: z.enum(['auto', 'low', 'medium', 'high']).optional(),
     effortReason: z

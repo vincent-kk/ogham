@@ -2,20 +2,20 @@ import { rmSync } from 'node:fs';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 
 import {
   type ReviewStateSealFixture,
   createReviewStateSealFixture,
 } from './helpers/createReviewStateSealFixture.js';
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { runReviewStateFixtureGit } from './helpers/runReviewStateFixtureGit.js';
 import { writeReviewStateFixtureFile } from './helpers/writeReviewStateFixtureFile.js';
 
 /** Temporary repository whose real prepare action enforces the review budget. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -38,7 +38,7 @@ describe('prepare review cost budget', () => {
       '-m',
       'Add review scope',
     ]);
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       baseRef: 'main',
@@ -76,7 +76,7 @@ describe('prepare review cost budget', () => {
         'Configure review budget',
       ]);
       if (resume) {
-        const initial = await handleReviewState({
+        const initial = await prepareWithFacts({
           action: 'prepare',
           projectRoot: fixture.projectRoot,
           baseRef: 'main',
@@ -91,7 +91,7 @@ describe('prepare review cost budget', () => {
         );
       }
       await expect(
-        handleReviewState({
+        prepareWithFacts({
           action: 'prepare',
           projectRoot: fixture.projectRoot,
           baseRef: 'main',

@@ -15,7 +15,6 @@ import {
 } from '../../../../../core/facts/index.js';
 import type {
   AdjudicationPage,
-  AdjudicationPageUpdate,
   AdjudicationState,
   FactsRejection,
   ParsedSubmission,
@@ -26,7 +25,11 @@ import type { AttestedOutcome } from '../../types/factsToolTypes.js';
 import { applyAttestation } from './applyAttestation.js';
 import type { FactsContext } from './buildFactsContext.js';
 import { planSideTableForSubmit } from './planSideTableForSubmit.js';
-import type { AgreedNonReferences } from './planSideTableForSubmit.js';
+import type {
+  AgreedNonReferences,
+  SubmitSideTablePlan,
+} from './planSideTableForSubmit.js';
+import { splitSideTablePhases } from './splitSideTablePhases.js';
 import { writeFactsShards } from './writeFactsShards.js';
 
 /** What one submit call changed in the store. */
@@ -75,6 +78,12 @@ const JUDGED_STATES: readonly AdjudicationState[] = [
  * walked back becomes an item to judge, and one it carries after all closes the
  * item that was waiting on it (spec §2.4).
  *
+ * The three writes go in the order that is safe in each failure direction: the
+ * pages that OPEN items, then the records, then the pages that SETTLE them and
+ * the pending store (`splitSideTablePhases`). A record whose opening page was
+ * taken is left unstored, because the retry would otherwise compare it with
+ * itself and find no edge to open an item against.
+ *
  * Every count returned is counted over pages that actually landed. A page whose
  * shard another writer took holds none of what this call planned for it, so
  * reporting the plan would state a number the disk does not have.
@@ -111,11 +120,7 @@ export function storeAcceptedRecords(
   const store = readPendingStore(context.storePaths.pendingDirectory);
   const pendingUpdates = new Map<string, ShardPageUpdate>();
   const attested: AttestedOutcome[] = [];
-  const pageUpdates = new Map<string, AdjudicationPageUpdate>();
-  const planned = new Map<
-    string,
-    { opened: number; closed: number; dismissed: number }
-  >();
+  const plans = new Map<string, SubmitSideTablePlan>();
   for (const submission of parsed) {
     const result = validateFactsRecord(
       validation,
@@ -148,28 +153,38 @@ export function storeAcceptedRecords(
       if (!effect.store) continue;
     } else if (store.pages.has(key))
       pendingUpdates.set(key, { path: result.accepted.path, document: null });
-    if (current.ok) {
-      const plan = planSideTableForSubmit(
-        table,
+    if (current.ok)
+      plans.set(
         key,
-        held?.facts ?? null,
-        result.accepted,
-        current,
-        held?.resolutionEpoch === context.epoch.resolutionEpoch,
-        agreed,
+        planSideTableForSubmit(
+          table,
+          key,
+          held ?? null,
+          result.accepted,
+          current,
+          held?.resolutionEpoch === context.epoch.resolutionEpoch,
+          context.scannedSet,
+          agreed,
+        ),
       );
-      pageUpdates.set(key, { path: plan.path, items: plan.items });
-      planned.set(key, {
-        opened: plan.opened,
-        closed: plan.closedByRecord,
-        dismissed: plan.dismissedByAttesters,
-      });
-    }
+    // A record that could not be read keeps what the last readable one said,
+    // so the next record that CAN claim is judged against those edges rather
+    // than against nothing (spec §2.4).
+    const shrinkBaseline =
+      result.accepted.toolError === undefined
+        ? undefined
+        : (held?.shrinkBaseline ??
+          held?.facts.references.filter(
+            (reference) => 'path' in reference.resolved,
+          ));
     upserts.set(context.storePaths.pathDigest(result.accepted.path), {
       path: result.accepted.path,
       value: {
         schemaVersion: FACTS_SCHEMA_VERSION,
         resolutionEpoch: context.epoch.resolutionEpoch,
+        ...(shrinkBaseline === undefined || shrinkBaseline.length === 0
+          ? {}
+          : { shrinkBaseline }),
         rejectedClaims: result.rejections.map((rejection) => ({
           code: rejection.code,
           ...(rejection.specifier === undefined
@@ -186,12 +201,44 @@ export function storeAcceptedRecords(
   }
   const deletions = unreachableRecordKeys(context);
   const unreachable = unreachablePages(context, table);
+  const phases = splitSideTablePhases(plans);
+  // `awaitingComparison: false` because the page goes with its file: a mark
+  // kept for a path the tree no longer has would hold a file nothing can clear.
   for (const [key, page] of unreachable)
-    pageUpdates.set(key, { path: page.path, items: [] });
-  const pagesWritten = writeAdjudicationPages(
+    phases.settling.set(key, {
+      path: page.path,
+      items: [],
+      awaitingComparison: false,
+    });
+  // A pending attestation outlives its file the same way an item does, and
+  // the same loop follows: status names it, and the confirmation it waits for
+  // can never be written for a file that is not there.
+  for (const [key, page] of store.pages)
+    if (!context.scannedSet.has(page.path) || !context.scope.covers(page.path))
+      pendingUpdates.set(key, { path: page.path, document: null });
+  const opensWritten = writeAdjudicationPages(
     context.storePaths.sideTableDirectory,
     table,
-    pageUpdates,
+    phases.opening,
+    context.storePaths.shardFileName,
+  );
+  // A record whose opening page was taken is not stored: storing it would leave
+  // the retry comparing that record with itself, so the edge it walked back
+  // would have nothing left to open an item against and the file would read
+  // `exact`. The retry is the same call.
+  const refusedOpens = new Set(opensWritten.conflicted);
+  for (const [key, upsert] of upserts)
+    if (refusedOpens.has(upsert.path)) upserts.delete(key);
+  const written = writeFactsShards(context, upserts, deletions);
+  const lostRecords = new Set([...written.conflicted, ...refusedOpens]);
+  for (const [key, update] of phases.settling)
+    if (lostRecords.has(update.path)) phases.settling.delete(key);
+  for (const [key, update] of pendingUpdates)
+    if (lostRecords.has(update.path)) pendingUpdates.delete(key);
+  const settlesWritten = writeAdjudicationPages(
+    context.storePaths.sideTableDirectory,
+    { ...table, shards: new Map([...table.shards, ...opensWritten.shards]) },
+    phases.settling,
     context.storePaths.shardFileName,
   );
   const pendingWritten = writeShardPages(
@@ -200,19 +247,23 @@ export function storeAcceptedRecords(
     pendingUpdates,
     context.storePaths.shardFileName,
   );
-  const written = writeFactsShards(context, upserts, deletions);
   let openedItems = 0;
   let closedItems = 0;
   let attestationDismissals = 0;
-  for (const [key, plan] of planned)
-    if (pagesWritten.stored.has(key)) {
-      openedItems += plan.opened;
-      closedItems += plan.closed;
-      attestationDismissals += plan.dismissed;
+  for (const [key, plan] of plans) {
+    if (phases.opening.has(key) && !opensWritten.stored.has(key)) continue;
+    openedItems += plan.opened;
+    if (!settlesWritten.stored.has(key)) {
+      // The dismissal did not land, so those items are sitting open on disk.
+      openedItems += plan.dismissedByAttesters;
+      continue;
     }
+    closedItems += plan.closedByRecord;
+    attestationDismissals += plan.dismissedByAttesters;
+  }
   let removedAdjudicated = 0;
   for (const [key, page] of unreachable)
-    if (pagesWritten.stored.has(key))
+    if (settlesWritten.stored.has(key))
       removedAdjudicated += page.items.filter((item) =>
         JUDGED_STATES.includes(item.state),
       ).length;
@@ -221,7 +272,9 @@ export function storeAcceptedRecords(
     removed: written.removed,
     rejections,
     conflicted: written.conflicted,
-    sideTableConflicts: pagesWritten.conflicted,
+    sideTableConflicts: [
+      ...new Set([...opensWritten.conflicted, ...settlesWritten.conflicted]),
+    ].sort((left, right) => left.localeCompare(right)),
     openedItems,
     closedItems,
     removedAdjudicated,

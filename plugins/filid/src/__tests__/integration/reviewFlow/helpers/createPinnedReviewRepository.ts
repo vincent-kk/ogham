@@ -1,8 +1,6 @@
-import { mkdtempSync } from 'node:fs';
-
-import { portableJoin, tmp } from '@ogham/cross-platform';
-
 import { writeReviewStateFixtureFile } from '../../../unit/mcp/reviewState/helpers/writeReviewStateFixtureFile.js';
+import { createFixtureProjectRoot } from '../../helpers/createFixtureProjectRoot.js';
+import { seedFacts } from '../../helpers/seedFacts.js';
 
 import { runPinnedReviewGit } from './runPinnedReviewGit.js';
 
@@ -19,13 +17,20 @@ export interface PinnedReviewRepositoryFiles {
 
 /**
  * Create a Git repository whose commit ids depend only on the given bytes.
+ *
+ * The repository is given its facts here rather than in each test: analysis
+ * reads the facts store, so a fixture without records is a project filid can
+ * draw no reference-based conclusion about. Seeding writes nothing into the
+ * repository — records live in the state directory outside it — so the pinned
+ * commit ids are unchanged.
+ *
  * @param files Base and feature file contents, keyed by project-relative path.
  * @returns Absolute temporary repository root with the feature branch checked out.
  */
-export function createPinnedReviewRepository(
+export async function createPinnedReviewRepository(
   files: PinnedReviewRepositoryFiles,
-): string {
-  const projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-flow-'));
+): Promise<string> {
+  const projectRoot = createFixtureProjectRoot('filid-review-flow-');
   runPinnedReviewGit(projectRoot, ['init', '-b', 'main']);
   for (const [branch, commit] of [
     [null, files.base],
@@ -37,5 +42,6 @@ export function createPinnedReviewRepository(
     runPinnedReviewGit(projectRoot, ['add', '--all']);
     runPinnedReviewGit(projectRoot, ['commit', '-m', branch ?? 'base']);
   }
+  await seedFacts(projectRoot);
   return projectRoot;
 }

@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { completeIncrementalReview } from './helpers/completeIncrementalReview.js';
 import { configureReviewGroups } from './helpers/configureReviewGroups.js';
 import {
@@ -14,9 +15,9 @@ import {
 
 /** Disposable Git history exercises real prepare, validation and sealing. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 2);
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 2);
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -36,7 +37,7 @@ function prepare(
   userInstructions = '',
   changeContext = 'Review the assigned changes.',
 ) {
-  return handleReviewState({
+  return prepareWithFacts({
     action: 'prepare',
     projectRoot: fixture.projectRoot,
     effort: 'low',

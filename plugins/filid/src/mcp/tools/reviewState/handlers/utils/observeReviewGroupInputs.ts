@@ -92,8 +92,15 @@ export async function observeReviewGroupInputs(
           repositoryRules,
         ]),
       ),
+      // The frozen facts join the tuple only where the state has them: adding
+      // an element to a generation prepared before the freeze would make every
+      // in-flight review stale for nothing (spec §9).
       evidenceHash: computeReviewArtifactHash(
-        JSON.stringify([candidates, claims]),
+        JSON.stringify(
+          file.factsHash === undefined
+            ? [candidates, claims]
+            : [candidates, claims, file.factsHash],
+        ),
       ),
       contextHash: computeReviewArtifactHash(userInstructions),
       policyHash: computeReviewArtifactHash(

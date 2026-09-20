@@ -15,8 +15,8 @@ import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Disposable repository with persisted opinions and caller-authored context. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -30,7 +30,7 @@ describe('automatic effort resume', () => {
   it.each([false, true])(
     'keeps legacy high on repeated implicit resumes (missing evidence=%s)',
     async (missingEvidence) => {
-      configureReviewGroups(fixture.projectRoot, 1);
+      await configureReviewGroups(fixture.projectRoot, 1);
       const prepared = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
@@ -67,7 +67,7 @@ describe('automatic effort resume', () => {
   );
 
   it('updates metadata only while preserving caller context, briefs and completed opinions', async () => {
-    configureReviewGroups(fixture.projectRoot, 1, {
+    await configureReviewGroups(fixture.projectRoot, 1, {
       autoLowEffortGroupThreshold: 3,
     });
     const prepared = await handleReviewState({
@@ -98,7 +98,7 @@ describe('automatic effort resume', () => {
       'utf8',
     );
     for (const threshold of [4, 5]) {
-      configureReviewGroups(fixture.projectRoot, 1, {
+      await configureReviewGroups(fixture.projectRoot, 1, {
         autoLowEffortGroupThreshold: threshold,
       });
       const resumed = await handleReviewState({
@@ -138,7 +138,7 @@ describe('automatic effort resume', () => {
   });
 
   it('keeps a pending strong review when only the threshold config changes', async () => {
-    configureReviewGroups(fixture.projectRoot, 1, {
+    await configureReviewGroups(fixture.projectRoot, 1, {
       highRiskPaths: ['src/value.ts'],
       autoLowEffortGroupThreshold: 2,
     });
@@ -164,7 +164,7 @@ describe('automatic effort resume', () => {
       join(prepared.data.reviewDirectory, group.opinionPath),
       'utf8',
     );
-    configureReviewGroups(fixture.projectRoot, 1, {
+    await configureReviewGroups(fixture.projectRoot, 1, {
       autoLowEffortGroupThreshold: 1,
     });
     const resumed = await handleReviewState({
@@ -193,7 +193,7 @@ describe('automatic effort resume', () => {
   });
 
   it('leaves a sealed cache untouched despite explicit policy changes', async () => {
-    configureReviewGroups(fixture.projectRoot, 1);
+    await configureReviewGroups(fixture.projectRoot, 1);
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,

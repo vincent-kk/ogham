@@ -1,6 +1,8 @@
 import { createHash } from 'node:crypto';
 import { join } from 'node:path';
 
+import { canonicalizeTargetPathSync } from '@ogham/cross-platform';
+
 import {
   FACTS_EPOCH_DRIFT_FILE,
   FACTS_EXTRACTION_LIST_FILE,
@@ -53,11 +55,23 @@ export interface FactsStorePaths {
  * one per record — per-file opens dominated reading the store when every record
  * had its own file.
  *
+ * The root is canonicalized before it keys anything. Callers spell the same
+ * project differently — a review resolves it through git, which answers with
+ * the real path, while another tool passes the path it was handed, and on most
+ * systems a temporary directory is reached through a symbolic link. Two
+ * spellings keying two stores would mean facts submitted by a finished
+ * bootstrap are invisible to the analysis that asked for them, which is a loop
+ * with no way out (P5). A path that does not exist yet keys itself, which is
+ * what the canonicalizer returns for it.
+ *
  * @param projectRoot - Absolute project root the store is keyed by.
  * @returns Absolute paths and the key functions for that project.
  */
 export function resolveFactsStorePaths(projectRoot: string): FactsStorePaths {
-  const directory = join(getCacheDir(projectRoot), FACTS_STORE_DIRECTORY);
+  const directory = join(
+    getCacheDir(canonicalizeTargetPathSync(projectRoot, projectRoot)),
+    FACTS_STORE_DIRECTORY,
+  );
   return {
     directory,
     epochSnapshotPath: join(directory, `epoch${FACTS_RECORD_EXTENSION}`),

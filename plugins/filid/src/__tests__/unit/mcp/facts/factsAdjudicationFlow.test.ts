@@ -11,7 +11,11 @@ import {
   FACTS_DIAGNOSTIC_CODES,
   FACTS_UNFROZEN_GENERATION_CODE,
 } from '../../../../constants/facts.js';
-import { hashProjectFile } from '../../../../core/facts/index.js';
+import {
+  hashProjectFile,
+  readAdjudicationTable,
+  resolveFactsStorePaths,
+} from '../../../../core/facts/index.js';
 import { handleFacts } from '../../../../mcp/tools/facts/index.js';
 import type {
   AdjudicateDecisionInput,
@@ -160,6 +164,54 @@ async function adjudicate(
   };
 }
 
+/**
+ * Store a record for `src/index.ts` that carries the edge.
+ *
+ * A submission is the one input that settles an item without anybody judging
+ * it: the store now stands behind the very edge the item was raised about.
+ */
+async function submitRecordWithEdge(): Promise<void> {
+  const status = await handleFacts({ action: 'status', path: project.root });
+  const file = project.submission(
+    'carries-edge.json',
+    JSON.stringify([
+      project.facts('src/index.ts', {
+        references: [
+          {
+            specifier: EDGE.reference,
+            kind: EDGE.kind,
+            resolved: { path: EDGE.resolvedPath },
+          },
+        ],
+      }),
+    ]),
+  );
+  await handleFacts({
+    action: 'submit',
+    path: project.root,
+    file,
+    resolutionEpoch: (status.summary as FactsStatusSummary).resolutionEpoch,
+  });
+}
+
+/**
+ * Read the side table itself, since a settled item is invisible to `compare`.
+ * @returns The stored state of the one edge, or null when the row is gone.
+ */
+function storedState(): string | null {
+  const storePaths = resolveFactsStorePaths(project.root);
+  const page = readAdjudicationTable(storePaths.sideTableDirectory).pages.get(
+    storePaths.pathDigest('src/index.ts'),
+  );
+  return (
+    page?.items.find(
+      (item) =>
+        item.reference === EDGE.reference &&
+        item.resolvedPath === EDGE.resolvedPath,
+    )?.state ?? null
+  );
+}
+
 describe('facts compare', () => {
   it('records an edge the candidate has and the store does not', async () => {
     await submitEmptyRecord();
@@ -186,7 +238,9 @@ describe('facts compare', () => {
   it('answers a frozen-generation comparison with the fact that none exists', async () => {
     await submitEmptyRecord();
 
-    const result = await compare('gen-01');
+    // A well-formed id that names no generation: the answer under test is
+    // "nothing is frozen for it", not "that is not an id".
+    const result = await compare('a'.repeat(32));
 
     expect(result.codes).toEqual([FACTS_UNFROZEN_GENERATION_CODE]);
     expect(result.summary.comparedFiles).toBe(0);
@@ -309,6 +363,63 @@ describe('facts adjudicate — the cells that need the store', () => {
       FACTS_ADJUDICATION_REFUSALS.NO_SUCH_ITEM,
     );
     expect(result.summary.applied).toBe(0);
+  });
+
+  it('cell 3: a submitted edge closes an item nobody judged', async () => {
+    await submitEmptyRecord();
+    await compare();
+
+    await submitRecordWithEdge();
+
+    expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.CLOSED_BY_RECORD);
+  });
+
+  it('cell 9: a submitted edge closes an item awaiting confirmation', async () => {
+    await submitEmptyRecord();
+    await compare();
+    await adjudicate('A', 'dismiss', 'it is inside a comment');
+
+    await submitRecordWithEdge();
+
+    expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.CLOSED_BY_RECORD);
+  });
+
+  it('cell 22: a submitted edge leaves a judged item standing', async () => {
+    await submitEmptyRecord();
+    await compare();
+    await adjudicate('A', 'adopt');
+
+    await submitRecordWithEdge();
+
+    // Closing it here would let two ordinary submissions — one carrying the
+    // edge, the next dropping it — erase an actor's judgement with nothing
+    // left to revive.
+    expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.ADOPTED);
+  });
+
+  it('cell 13: expires an adopted item when the judged lines change', async () => {
+    await submitEmptyRecord();
+    await compare();
+    await adjudicate('A', 'adopt');
+    expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.ADOPTED);
+
+    project.write('src/index.ts', "export { thing } from './other.js';\n");
+    await compare();
+
+    expect(storedState()).toBeNull();
+  });
+
+  it('cell 16: expires a dismissed item when the judged lines change', async () => {
+    await submitEmptyRecord();
+    await compare();
+    await adjudicate('A', 'dismiss', 'it is inside a comment');
+    await adjudicate('B', 'dismiss', 'agreed, commented out');
+    expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.DISMISSED);
+
+    project.write('src/index.ts', "export { thing } from './other.js';\n");
+    await compare();
+
+    expect(storedState()).toBeNull();
   });
 
   it('answers facts-uninitialized when the scope covers nothing', async () => {

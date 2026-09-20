@@ -16,7 +16,7 @@ afterEach(() => {
 
 describe('a swap stages through organNameHint for a fractal target too', () => {
   it('places an independent unit under the temporary name as a fractal without a decision', async () => {
-    projectRoot = writeSharedUnitRestructureProject();
+    projectRoot = await writeSharedUnitRestructureProject();
     const plan = await handleRestructure({
       action: 'plan',
       path: projectRoot,

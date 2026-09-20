@@ -16,7 +16,7 @@ import { createReviewStateSealFixture } from '../unit/mcp/reviewState/helpers/cr
 import { connectTestClient } from './helpers/connectTestClient.js';
 
 /** Review fixture used by the transport case. */
-let fixture: ReturnType<typeof createReviewStateSealFixture> | undefined;
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>> | undefined;
 
 afterEach(() => {
   if (!fixture) return;
@@ -67,8 +67,8 @@ describe('every argument an action accepts survives the advertised tool schema',
   );
 
   it('refuses an opinion from a superseded generation through the MCP transport', async () => {
-    fixture = createReviewStateSealFixture();
-    configureReviewGroups(fixture.projectRoot, 1);
+    fixture = await createReviewStateSealFixture();
+    await configureReviewGroups(fixture.projectRoot, 1);
     const first = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,

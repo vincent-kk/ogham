@@ -90,6 +90,8 @@ function snapshotOf(
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    normalizedFacts: [],
+    filesOutsideFactsScope: 0,
     collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: '2026-09-19T00:00:00.000Z',
   };

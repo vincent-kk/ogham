@@ -17,7 +17,48 @@
 - 서버는 어떤 명령도 실행하지 않는다.
 
 - 부속 표는 facts 레코드 **밖**의 파일별 표다. key는 `(path, kind, sourceText ?? specifier)`이고, 항목은 그 문자열이 §5의 경로 토큰 규칙으로 나타나는 모든 줄의 byte digest(`lineDigest`)와 마지막으로 확인한 `contentHash`를 함께 싣는다. `lineDigest`가 달라지면 항목은 만료한다 — 파일 전체에 묶으면 무관한 편집마다 재판정이 돌아와 반사적 `dismiss`를 부른다.
-- 제출의 교체는 부속 표를 지우지 않는다. 표의 쓰기도 레코드와 같은 shard 단위 원자적 치환 + compare-and-set이며, **한 호출은 touch한 shard마다 정확히 한 번만 쓴다**. shard의 CAS token은 호출당 한 번 읽히므로 같은 shard를 두 번 쓰면 두 번째가 스스로에게 져서 항목이 조용히 사라진다. CAS 패배는 버리지 않고 진단으로 드러내며, 응답의 개수는 실제로 저장된 것만 센다.
+- **읽지 못한 것은 빈 것이 아니다.** shard 읽기는 세 가지를 구별한다: 파일이 **없음**(한 번도 쓰지 않음),
+  **읽기 실패**(권한 등), **JSON 파싱 실패**. 없음만 "빈 것"이고 나머지 둘은 손상으로 보고한다.
+  - **레코드** shard의 손상은 그 shard의 파일을 `missing`으로 떨어뜨린다 — 재추출·재제출로 풀리는
+    안전한 방향이므로 상태 규칙은 그대로 두고, 이유만 보고한다.
+  - **부속 표·pending** shard의 손상은 다르다. 열린 항목이나 확정된 `adopt`가 보이지 않으면 파일이
+    `exact`로 읽혀 **아무도 판정하지 않은 불일치 위에서 결론이 난다**(silent pass). 그래서 손상된 shard에
+    속할 수 있는 파일(경로 digest 앞자리가 그 shard 이름인 파일)은 `uncertain`이다. 유실 방향은
+    비대칭이다: `dismiss`가 사라지면 간선이 "있는 쪽"으로 남아 보수적이지만, `adopt`가 사라지면 간선이
+    사라져 부재를 요구하는 결론이 조용히 통과한다. `uncertain`이 그 둘을 함께 막는다.
+  - 손상은 파일 상태로만 말하지 않고 **응답에도 실린다**: `status`와 snapshot이 손상된 shard 이름과
+    어느 손상인지를 담은 `facts-judgements-unreadable` 진단을 낸다(내용은 싣지 않는다 — 파싱되지 않은
+    shard에는 실을 내용이 없고 열리지 않은 shard는 읽힌 적이 없다). 상태는 "결론을 낼 수 없다"를 말하고
+    진단은 "왜"를 말하며, 그 둘이 있어야 다음 행동을 고를 수 있다.
+  - **출구는 명시적 호출이다: `discard-damaged`.** 부속 표·pending에 쓰는 다른 모든 경로는 불일치가
+    탐지된 자리에서만 쓰는데, 깨진 shard가 들고 있는 불일치가 바로 아무도 읽을 수 없는 것이다 — 그래서
+    평범한 submit은 그 shard에 닿지 않고, 그 파일들은 영원히 `uncertain`이 된다. 도구가 shard 이름을 받아
+    **지금 `unparseable`인 shard만** 비우고(읽히는 shard는 이름으로 거절 — 답하기 싫은 판정을 지우는 길이
+    되면 안 된다), 지운 shard와 영향 파일 수를 응답에 싣는다. 쓰기는 손상된 shard 자신의 digest를 CAS로
+    들고 가므로 그 사이 다른 writer가 바꿔 놓았다면 그쪽이 이긴다. 읽기 경로는 여전히 쓰지 않는다
+    (조각 0: 저장소에 쓰는 것은 facts 도구의 호출뿐).
+  - **버리는 것이 되찾는 것은 아니고, 다음 행동을 권하는 것만으로는 아무것도 막지 못한다.** 유실의
+    비대칭을 닫는 것은 그다음 행동인데(독립 추출 뒤 `compare` — 저장소가 들고 있지 않은 간선이 다시
+    항목으로 열리는 설계된 경로다), shard를 비우는 순간 `judgements-unreadable`이 사라지므로 그 next
+    action을 건너뛴 호출자나 동시에 도는 seal이 곧바로 `exact` 위에서 결론을 낸다. 그래서 비우는 쓰기는
+    빈 shard가 아니라 **그 shard에 속하는 범위 안 스캔 경로마다 `awaitingComparison` 표시를 단 빈
+    페이지**를 쓴다(한 번의 원자적 치환, 같은 CAS). 그 표시가 붙은 파일은 `uncertain`이고, 이유는
+    `facts-judgements-discarded`다. 크기의 상한은 그 shard에 digest가 걸리는 스캔 파일 수다.
+  - 표시를 지우는 것은 **저장된 레코드의 `provenance.tool`과 다른 출처**의 `compare`, 또는 attested
+    후보뿐이다. 같은 도구는 레코드를 재생산할 뿐 아무것도 다시 도출하지 않으므로 표시를 지우지 않고
+    `facts-comparison-not-independent`로 그 사실과 대안을 돌려준다. 읽기는 쓰지 않으므로 표시를 다는
+    것도 지우는 것도 쓰기 action뿐이고, 상태의 출입은 전부 도구 호출로 가능하다(P5).
+  - 페이지 쓰기는 이 표시를 **기본적으로 보존한다**: 규칙을 한 곳(`writeAdjudicationPages`)에 두지 않으면
+    항목이 빈 페이지를 쓰는 평범한 제출이 표시를 지워 침묵으로 되돌린다. 명시적으로 `false`를 실은 쓰기만
+    표시를 지우며, 표시가 있는 빈 페이지는 지워지지 않는다. `dismiss`의 유실은 간선이 남는 쪽이라 추가
+    행동이 필요 없지만, 표시는 `adopt`의 유실과 구별할 방법이 없으므로 파일 단위로 건다.
+  - 읽지 못하는(`unreadable`) shard는 서버가 무엇을 해도 고칠 수 없으므로 다음 행동이 "그 파일을 읽을 수
+    있게 하라"다 — 환경의 문제이고, 그렇게 정직하게 말한다.
+- **CAS는 "없음"과 "못 읽음"을 구별한다.** `writeFactsShardFile`이 읽기 실패를 파일 없음과 같이
+  `null`로 보면, 읽지 못한 shard의 `expectedDigest`도 `null`이라 CAS가 통과해 **그 shard를 통째로
+  덮어쓴다**. 읽지 못한 shard에 대한 쓰기는 CAS 패배로 처리하고, 호출자는 기존 `*-changed` 진단으로
+  다시 읽게 한다.
+- 제출의 교체는 부속 표를 지우지 않는다. 표의 쓰기도 레코드와 같은 shard 단위 원자적 치환 + compare-and-set이며, **한 batch는 touch한 shard마다 정확히 한 번만 쓴다**. shard의 CAS token은 batch당 한 번 읽히므로 같은 batch가 같은 shard를 두 번 쓰면 두 번째가 스스로에게 져서 항목이 조용히 사라진다. 한 호출이 batch를 둘로 나눠야 할 때는 두 번째 batch가 첫 batch가 **실제로 쓴 shard 상태**(`ShardWriteOutcome.shards`)를 이어받는다 — 저장소를 다시 읽으면 그 사이에 끼어든 writer의 digest를 기대값으로 삼아 CAS가 무의미해지고 그 writer의 페이지를 조용히 덮는다. CAS 패배는 버리지 않고 진단으로 드러내며, 응답의 개수는 실제로 저장된 것만 센다.
 - 레코드가 닫을 수 있는 항목은 **아직 판정되지 않은 것**(`unadjudicated`·`pending-dismiss`)뿐이다. `adopted`·`dismissed` 항목은 그대로 둔다 — adopt된 항목을 레코드가 닫으면 그 간선을 담은 제출 하나로 adopt이 사라지고, 다음 제출이 그 간선을 도로 빼도 되살릴 항목이 없어 평범한 제출 두 번이 한 actor의 판정을 지운다. adopt된 간선은 dismiss가 확정될 때까지 유효하다는 계약과도 같은 말이다.
 - `closed-by-record` 항목은 그 간선이 제출에서 **다시** 빠지면 제자리에서 다시 열린다. 없으면 한 actor가 평범한 제출 두 번으로 진짜 import를 영구히 은퇴시킬 수 있다.
 - 트리에서 사라지거나 범위 밖으로 나간 파일의 표 페이지는 레코드를 지우는 같은 자리에서 지운다. 남겨 두면 `status`가 할 수 없는 일을 계속 지시하고 `adjudicate`는 `compare`가 결코 주지 않을 `contentHash`를 요구한다(P5 루프).
@@ -40,10 +81,12 @@
 ## API Contracts
 
 - `listScannedFilePaths`와 `scanFileSetOptions`는 이 fractal이 소유하지 않는다. `core/tree/fractalTree`의 entry point에서 가져온다 — 규칙의 정본을 scan 쪽에 한 벌만 두기 위해서다.
+- `readProjectFacts(projectRoot, config): Promise<ProjectFacts>` — 지금 트리에 대해 저장소가 무엇을 아는지 한 번에 읽는다: 범위, 스캔된 경로, 저장소 경로, 파일별 레코드, shard의 CAS token, 현재 epoch. **읽기 전용**이다 — epoch snapshot을 쓰는 것은 drift를 세는 쪽의 일이고 분석 경로가 그것을 해서는 안 된다. `config`를 인자로 받는 이유도 같다: snapshot을 만드는 쪽은 이미 config를 들고 있고, 여기서 다시 읽으면 한 호출 안에서 설정이 두 번 읽혀 서로 다를 수 있다.
+- 조직: `store/`는 shard의 입출력이고 `read/`는 그것을 현재 트리와 맞춰 한 장의 그림으로 만드는 자리다. 분석(`core/projectSnapshot`)과 도구(`mcp/tools/facts`)가 **같은 함수**로 읽어야 두 쪽이 다른 사실을 보지 않는다.
 - `computeResolutionEpoch(projectRoot, scannedPaths, resolutionInputPaths): ResolutionEpochSnapshot` — epoch와 그것을 만든 입력을 함께 돌려준다.
 - `diffEpochSnapshots(previous, current): EpochDifference` — `added`·`removed`·바뀐 해석 입력. `previous`가 null이면 셋 다 빈 목록이며 추측하지 않는다.
-- `resolveFactsScope(config): FactsScope` — `facts.covers`가 없으면 `declared: false`이고 모든 경로가 범위 밖이다.
-- `readFactsStore(directory)` / `writeFactsShardFile(directory, shardFileName, entries, expectedDigest)` — 레코드 key는 프로젝트 상대 경로의 digest다. 경로에서 이름을 직접 만들면 구분자와 길이 한계가 그대로 조작면이 된다.
+- `resolveFactsScope(config): FactsScope` — `facts.covers`를 선언했으면 그것이 범위이고(`source: 'config'`), 없으면 adapter의 소스 확장자로 만든 기본 범위다(`source: 'default'`). 서버는 프로젝트 설정을 쓰지 않으므로, 선언이 없는 것을 "아무것도 덮지 않음"으로 읽으면 facts 이전의 모든 프로젝트가 도구 안에서 빠져나올 길 없이 분석 불가가 된다. `declared`는 **유효 범위가 비었을 때만** false이고, 그것은 `covers: []`를 명시한 프로젝트 — 참조 분석을 원하지 않는다는 선언 — 뿐이다.
+- `readFactsStore(directory)` / `writeFactsShardFile(directory, shardFileName, entries, expectedDigest)` — 레코드 key는 프로젝트 상대 경로의 digest다. 경로에서 이름을 직접 만들면 구분자와 길이 한계가 그대로 조작면이 된다. 쓰기는 방금 쓴 bytes의 digest를 돌려주고 CAS 패배에는 `null`을 돌려준다 — 같은 호출의 다음 batch가 이어받을 token을 직렬화 결정이 있는 자리에서만 만들기 위해서다(밖에서 다시 hash하면 직렬화가 두 벌이 된다).
 - `createDeclaredInputHasher(projectRoot)` — 호출당 memo. 저장소 전체 배치는 같은 manifest를 수천 번 선언한다.
 - `readSubmissionFile(projectRoot, filePath)` · `parseSubmittedRecords(entries)` — 신뢰 경계. 전자는 거부 사유만, 후자는 JSON pointer만 돌려준다.
 - `validateFactsRecord(context, facts, pointer): FactsValidationResult` — 레코드 단위 거부와 참조 단위 거부를 구분한다.
@@ -53,7 +96,7 @@
 - `compareReferences(candidate, stored)` — 순수 함수. 동일성은 `(sourceText ?? specifier, kind)`와 해석이다.
 - `selectValidReferences(recordEdges, page, path)` — 레코드 ∪ adopt. 지금 소비자는 테스트뿐이고 S3c가 그래프에 연결한다.
 - `computeLineDigest(contents, reference)` · `readAdjudicationTable(directory)` · `writeAdjudicationPages(...)` — 부속 표의 만료 key와 입출력.
-- `writeShardPages(directory, shards, updates, shardFileName)` — 부속 표와 pending 저장물이 함께 쓰는 배치 쓰기. shard당 한 번 쓰고 CAS 패배를 경로 목록으로 돌려준다. 두 저장물이 같은 모양이므로 배치 규칙을 한 벌만 둔다 — 갈라지면 한쪽만 고쳐진다.
+- `writeShardPages(directory, shards, updates, shardFileName)` — 부속 표와 pending 저장물이 함께 쓰는 배치 쓰기. shard당 한 번 쓰고, CAS 패배를 경로 목록으로, 실제로 쓴 shard를 새 token과 함께 `shards`로 돌려준다(다음 batch가 이어받을 자리). 두 저장물이 같은 모양이므로 배치 규칙을 한 벌만 둔다 — 갈라지면 한쪽만 고쳐진다.
 - `readPendingStore(directory)` · `findUnaccountedLines(lines, facts)` · `comparePendingEdges(pending, submitted)` — attested 경로의 읽기·계정·확인 비교. 모두 순수하거나 읽기 전용이다.
 - `writeExtractionList(path, relativePaths)` — 추출 대상 목록을 줄 단위로 원자적 치환. 개행·NUL이 든 이름은 줄 단위 파일이 표현하지 못하므로 목록에서 빼고 개수만 센다.
 - `recordEpochDrift(path, newEpoch | null)` — 연속으로 서로 다른 새 epoch를 통보한 횟수. 성공한 제출이 초기화한다.
