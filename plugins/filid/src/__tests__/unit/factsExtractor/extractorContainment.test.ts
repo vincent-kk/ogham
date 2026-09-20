@@ -13,7 +13,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as dependencyReferences from '../../../adapters/ecmascript/structure/extractDependencyReferences.js';
+import * as dependencyReferences from '../../../factsExtractor/analysis/references/extractDependencyReferences.js';
 import { extractFileFacts } from '../../../factsExtractor/index.js';
 import { VERSION } from '../../../version.js';
 

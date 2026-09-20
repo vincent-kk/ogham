@@ -87,6 +87,36 @@ export const FACTS_SOURCE_FILE_MAX_BYTES = 32 * 1024 * 1024;
 /** Entries one `facts status` list carries inline before it reports a remainder. */
 export const FACTS_STATUS_LIST_LIMIT = 200;
 
+/**
+ * Contract group ids one record may report.
+ *
+ * A spec document links a handful of acceptance groups; a list past this is a
+ * record the server should not spend a line scan on, so it is refused by the
+ * schema rather than checked marker by marker.
+ */
+export const FACTS_CONTRACT_GROUP_LIMIT = 64;
+
+/**
+ * How long a contract group id may be.
+ *
+ * The server searches every line of the file for the marker and then for this
+ * id, so the id's length is a per-line cost. The longest acceptance-group id
+ * in this repository is 32 characters, and a DETAIL heading has to carry the
+ * same text, so this leaves room without letting a record spend the scan on a
+ * string no marker would hold.
+ */
+export const FACTS_CONTRACT_GROUP_ID_MAX_LENGTH = 128;
+
+/**
+ * The shape of a contract group id, as the extractor's marker scanner reads it.
+ *
+ * Kept identical to `\bfilid:contract\s+([A-Za-z][A-Za-z0-9._-]*)`: an id the
+ * scanner could never produce cannot be on any line, so the schema refuses it
+ * instead of letting the line check report it absent. The extractor's grammar
+ * is canonical; this pattern follows it.
+ */
+export const FACTS_CONTRACT_GROUP_ID_PATTERN = /^[A-Za-z][A-Za-z0-9._-]*$/;
+
 /** Project-level facts states (spec §3). */
 export const FACTS_PROJECT_STATES = {
   UNINITIALIZED: 'facts-uninitialized',
@@ -171,16 +201,16 @@ export const FACTS_ACTIONS = {
 /**
  * Line patterns that make a line owe an explanation in an attested record.
  *
- * Copied from the ECMAScript adapter's `HIDDEN_REFERENCE_PATTERNS`, which runs
- * the same expressions against raw text rather than a parse — this is string
- * matching of the same class as the existence check in spec §4.2, not
- * interpretation (P1). Non-global on purpose: a global regular expression
- * carries `lastIndex` across calls, and a module-level constant reused per line
- * would then skip lines depending on what came before them.
+ * The extraction program's `HIDDEN_REFERENCE_PATTERNS` is canonical; this copy
+ * must cover every line those patterns see, and a parity test holds the two to
+ * the same lines. The server keeps its own copy because the line accounting
+ * runs where no extractor does — it is string matching of the same class as the
+ * existence check in spec §4.2, not interpretation (P1). Non-global on purpose:
+ * a global regular expression carries `lastIndex` across calls, and a
+ * module-level constant reused per line would then skip lines depending on what
+ * came before them.
  *
- * Two copies exist only until S4 removes the adapter; a parity test holds them
- * to the same set of lines and is deleted with it. The conventions pack (§7) is
- * where a language's pattern will live.
+ * The conventions pack (§7) is where a language's pattern will live.
  */
 export const FACTS_REFERENCE_LINE_PATTERNS: readonly RegExp[] = [
   /(?<![\w$.])from\s*(['"])[^'"\n]+\1/,
@@ -237,16 +267,6 @@ export const FACTS_SECTION_UNAVAILABLE_NEXT_ACTION =
 export const FACTS_SCOPE_EXCLUDES_JUDGED_FILE_NEXT_ACTION =
   'This file has to be judged but the facts scope excludes it, so no record can exist for it. Outside a review — editing project config during one dirties the worktree being reviewed — add its path to facts.covers in the project .filid/config.json and run the facts bootstrap for it. Report this axis as indeterminate until then, never as passing.';
 
-/**
- * Next action of the report that the store and the adapter disagree.
- *
- * Never a refusal: the analysis reads the store, and the adapter is only being
- * measured against it while it still exists (spec §11-7). The action is still
- * one that changes state, because a disagreement means one of the two is wrong
- * about the file and only a resubmission settles which.
- */
-export const FACTS_ADAPTER_DIVERGENCE_NEXT_ACTION =
-  'This does not block anything: the analysis used the stored facts. Read the references this message names in the file, and if the stored record is the wrong one, submit that file again with the tool that reads it correctly. If the adapter is the wrong one, record this message in your report as a filid defect and continue.';
 
 /** Directory under the facts store holding unconfirmed attested submissions. */
 export const FACTS_PENDING_DIRECTORY = 'pending';
@@ -440,6 +460,7 @@ export const FACTS_REJECTION_CODES = {
   RESOLUTION_INPUT_UNREADABLE: 'facts-resolution-input-unreadable',
   SOURCE_UNREADABLE: 'facts-source-file-unreadable',
   EXPORTED_NAME_ABSENT: 'facts-exported-name-absent',
+  CONTRACT_GROUP_ABSENT: 'facts-contract-group-absent',
   ATTESTED_UNACCOUNTED: 'facts-attested-unaccounted-lines',
   ATTESTED_ACTOR_REQUIRED: 'facts-attested-actor-required',
 } as const;
@@ -519,6 +540,8 @@ export const FACTS_REJECTION_NEXT_ACTIONS = {
     'filid cannot read this project file as a regular file within its size cap, so no record can be bound to its bytes. Re-extracting will hit the same refusal: either make the file readable and small enough, or put it outside the facts scope with facts.excludes in the project .filid/config.json.',
   [FACTS_REJECTION_CODES.EXPORTED_NAME_ABSENT]:
     'The exported name this record reports is not in the file. Re-extract the file and submit it again.',
+  [FACTS_REJECTION_CODES.CONTRACT_GROUP_ABSENT]:
+    'No "filid:contract <group-id>" marker in the file names the contract group this record reports. Re-extract the file and submit it again, or add the marker to the spec document if the link is the one you meant.',
   [FACTS_REJECTION_CODES.ATTESTED_UNACCOUNTED]:
     'An attested record accounts for every line that looks like a reference. The lines this rejection names are explained by neither a reference nor a nonReferences entry. Read those exact lines and submit the record again with each one either quoted by a reference or listed in nonReferences with the reason it is not one.',
   [FACTS_REJECTION_CODES.ATTESTED_ACTOR_REQUIRED]:

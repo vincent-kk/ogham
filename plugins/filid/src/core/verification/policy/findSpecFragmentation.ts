@@ -33,6 +33,17 @@ export function findSpecFragmentation(
     const claimedBy = new Map<string, string>();
 
     for (const spec of specs) {
+      if (spec.contractGroupIds === undefined) {
+        violations.push({
+          ruleId: 'spec-contract-link',
+          path: spec.path,
+          severity: 'warning',
+          certainty: 'indeterminate',
+          message: `The record for ${shown(spec.path)} reports no contract group declarations, so its link to ${shown(ownerPath)}/DETAIL.md cannot be judged.`,
+          suggestion: `Re-extract ${shown(spec.path)} with the bundled extractor and submit the record again; a record that reports an empty list is read as "declares none".`,
+        });
+        continue;
+      }
       if (spec.contractGroupIds.length === 0) {
         violations.push({
           ruleId: 'spec-contract-link',

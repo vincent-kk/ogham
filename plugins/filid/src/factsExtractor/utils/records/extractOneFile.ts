@@ -1,10 +1,11 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 
-import { extractDependencyReferences } from '../../../adapters/ecmascript/structure/extractDependencyReferences.js';
-import { inspectEntrySurface } from '../../../adapters/ecmascript/structure/inspectEntrySurface.js';
-import { classifyVerificationPath } from '../../../adapters/ecmascript/verification/classifyVerificationPath.js';
-import { countVerificationCases } from '../../../adapters/ecmascript/verification/countVerificationCases.js';
+import { inspectEntrySurface } from '../../analysis/entrySurface/readEntrySurface.js';
+import { extractDependencyReferences } from '../../analysis/references/extractDependencyReferences.js';
+import { scanSource } from '../../analysis/scanSource.js';
+import { extractContractGroupIds } from '../../analysis/verification/extractContractGroupIds.js';
+import { verificationFromSource } from '../../analysis/verification/verificationFromSource.js';
 import type { FactsProvenance, FileFacts } from '../../types/fileFacts.js';
 import type { ProjectFile } from '../paths/resolveProjectFile.js';
 
@@ -73,10 +74,15 @@ export async function extractOneFile(
   if (bytes.includes(0))
     return record({ toolError: { message: BINARY_CONTENT_MESSAGE } });
   try {
-    const references = await extractDependencyReferences(file.absolutePath);
-    const surface = await inspectEntrySurface(file.absolutePath);
-    const role = await classifyVerificationPath(file.absolutePath);
-    const cases = countVerificationCases(file.absolutePath);
+    // One scan, four readings: references, the entry surface, the verification
+    // role and its case count all ask the same tokens of the same text.
+    const scanned = scanSource(bytes.toString('utf8'));
+    const references = await extractDependencyReferences(
+      file.absolutePath,
+      scanned,
+    );
+    const surface = await inspectEntrySurface(file.absolutePath, scanned);
+    const { role, cases } = verificationFromSource(file.absolutePath, scanned);
     return record({
       references: references.map((reference) =>
         toReference(projectRoot, reference),
@@ -96,6 +102,7 @@ export async function extractOneFile(
           knownLowerBound: cases.knownLowerBound,
           reasons: cases.reasons,
         },
+        contractGroupIds: extractContractGroupIds(scanned.source),
       },
     });
   } catch (error) {

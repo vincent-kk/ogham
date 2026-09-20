@@ -20,7 +20,6 @@ import {
 } from '../../facts/index.js';
 import type { FactsFileState, ProjectFacts } from '../../facts/index.js';
 
-import { compareAdapterReferences } from './compareAdapterReferences.js';
 import { factsDependencyReferences } from './factsDependencyReferences.js';
 import type { AppliedAdjudication } from './factsDependencyReferences.js';
 import { createUnfollowedLinkDiagnostic } from './utils/createUnfollowedLinkDiagnostic.js';
@@ -67,9 +66,6 @@ export interface CollectedDependencyReferences {
  * @param projectRoot Root the file paths are made relative to.
  * @param facts One read of the store against the current tree.
  * @param factsStates Each scanned file's state, from that same read.
- * @param compareAdapter Whether to run the adapter beside the store and report
- * where the two disagree; off on every product path, which is what keeps this
- * from parsing every file a second time.
  * @returns References, their diagnostics, the hashed file list, the applied
  * judgements, the attributed files and how many files the scope excludes.
  */
@@ -78,7 +74,6 @@ export async function collectDependencyReferences(
   projectRoot: string,
   facts: ProjectFacts,
   factsStates: ReadonlyMap<string, FactsFileState>,
-  compareAdapter = false,
 ): Promise<CollectedDependencyReferences> {
   const diagnostics: SnapshotDiagnostic[] = [];
   const filePaths = [...resolution.ownership.keys()].sort();
@@ -138,15 +133,6 @@ export async function collectDependencyReferences(
   diagnostics.push(
     ...unresolvedReferenceDiagnostics(projectRoot, facts, exactPaths),
   );
-  if (compareAdapter)
-    diagnostics.push(
-      ...(await compareAdapterReferences(
-        resolution,
-        projectRoot,
-        references,
-        exactPaths,
-      )),
-    );
   return {
     certainty: 'exact',
     diagnostics,

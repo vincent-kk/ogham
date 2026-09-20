@@ -40,7 +40,6 @@ const FIXTURE_ADAPTER: StructureAdapter = {
     hasDirectDeclarations: false,
     certainty: 'exact',
   }),
-  extractDependencies: async () => [],
   isFrameworkOwnedPeer: async () => false,
   suggestEntryPointPath: async (directoryPath) => `${directoryPath}/index.ts`,
 };

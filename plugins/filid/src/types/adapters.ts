@@ -59,8 +59,14 @@ export interface StructureAdapter {
     directoryPath: string,
     overrides?: readonly string[],
   ): Promise<EntryPointDescriptor[]>;
+  /**
+   * The surface a MANIFEST entry point declares.
+   *
+   * Source entry points are not read here: their surface comes from the file's
+   * facts record, which an extraction program produces (spec §11-8). An
+   * adapter asked about one reports `unsupported` rather than parsing it.
+   */
   inspectEntryPoint(entryPointPath: string): Promise<EntryPointInspection>;
-  extractDependencies(filePath: string): Promise<DependencyReference[]>;
   isFrameworkOwnedPeer(filePath: string): Promise<boolean>;
   suggestEntryPointPath(directoryPath: string): Promise<string>;
 }
@@ -75,10 +81,14 @@ export interface VerificationCaseCount {
 export interface VerificationAdapter {
   id: string;
   detect(projectRoot: string): Promise<AdapterClaim>;
+  /**
+   * Which files are verification, by name and path alone.
+   *
+   * What each one IS — its role, its case count and the contract groups it
+   * declares — comes from its facts record, so a candidate the store has not
+   * answered for is discovered and reported, never quietly dropped.
+   */
   discover(projectRoot: string): Promise<string[]>;
-  classify(filePath: string): Promise<VerificationRole | 'unsupported'>;
-  count(filePath: string): Promise<VerificationCaseCount>;
-  extractContractGroupIds(filePath: string): Promise<string[]>;
 }
 
 export interface AdapterDiagnostic {

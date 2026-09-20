@@ -86,20 +86,6 @@ function verificationAdapter(
     async discover() {
       return [filePath];
     },
-    async classify() {
-      return 'spec-document';
-    },
-    async count() {
-      return {
-        certainty: 'exact',
-        exactCount: 1,
-        knownLowerBound: 1,
-        reasons: [],
-      };
-    },
-    async extractContractGroupIds() {
-      return [];
-    },
   };
 }
 
@@ -462,9 +448,6 @@ describe('project snapshot', () => {
           certainty: 'exact',
         };
       },
-      async extractDependencies() {
-        return [];
-      },
       async isFrameworkOwnedPeer() {
         return false;
       },
@@ -526,9 +509,6 @@ describe('project snapshot', () => {
           hasDirectDeclarations: false,
           certainty: 'exact',
         };
-      },
-      async extractDependencies() {
-        return [];
       },
       async isFrameworkOwnedPeer() {
         return false;

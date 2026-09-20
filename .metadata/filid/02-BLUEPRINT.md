@@ -94,27 +94,27 @@ resolveVerification(projectRoot) → Promise<VerificationAdapter[]>
 ```
 discoverSourceFiles(projectRoot) → Promise<string[]>
 findEntryPoints(directoryPath)   → Promise<EntryPointDescriptor[]>
-inspectEntryPoint(path)          → Promise<EntryPointInspection>
-extractDependencies(filePath)    → Promise<DependencyReference[]>
+inspectEntryPoint(path)          → Promise<EntryPointInspection>  // manifest만
 isFrameworkOwnedPeer(filePath)   → Promise<boolean>
 suggestEntryPointPath(dirPath)   → Promise<string>
 ```
 
-**핵심 알고리즘**: 외부 native parser를 쓰지 않는 lexical scanner. 문자열·주석 구간과 괄호 nesting만 구분하며, 확실히 계산할 수 없는 구조는 값을 지어내지 않고 `indeterminate`로 반환한다. 정확성보다 **억지 PASS를 피하는 것이 우선**이다.
+**핵심 알고리즘**: 파일과 진입점의 **발견**. 소스 파일의 내용은 읽지 않는다 — 참조·표면·검증 증거는 facts 레코드에서 오고, 그 레코드를 만드는 판독은 추출 프로그램(`factsExtractor/analysis/`)이 소유한다. manifest만 JSON으로 읽는다.
 
-파일 확장자, 진입점 후보, framework convention, import/export 문법은 이 디렉터리 밖으로 새지 않는다.
+파일 확장자, 진입점 후보, framework convention, verification 이름 규칙은 이 디렉터리 밖으로 새지 않는다 — 추출 프로그램도 그 상수를 복제하지 않고 가져다 쓴다.
 
 ### ecmascript/verification/
 
 **목적**: 검증 문서 역할 판정과 의미론적 case 계산.
 
 ```
-classify(filePath)               → spec-document | test-record | unsupported
-count(filePath)                  → VerificationCaseCount
-extractContractGroupIds(filePath) → string[]
+discover(projectRoot)            → Promise<string[]>   // 이름으로 후보만
+verificationRoleFromName(path)   → spec-document | test-record | unsupported
 ```
 
-**핵심 알고리즘**: 일반 case·skip·todo는 각 1, 정적 parameterized row는 행 수만큼, 정적 parameterized suite 안의 case는 suite row 수를 곱한다. property test 선언은 생성 시행과 무관하게 1이다. 동적 table·사용자 wrapper·해석 불가 alias가 개수에 영향을 주면 `indeterminate`다. `filid:contract` 토큰은 주석에서만 추출한다.
+역할 확정, case 계수와 `filid:contract` marker 추출은 `factsExtractor/analysis/verification/`이 한다.
+
+**핵심 알고리즘**(추출 프로그램): 일반 case·skip·todo는 각 1, 정적 parameterized row는 행 수만큼, 정적 parameterized suite 안의 case는 suite row 수를 곱한다. property test 선언은 생성 시행과 무관하게 1이다. 동적 table·사용자 wrapper·해석 불가 alias가 개수에 영향을 주면 `indeterminate`다. `filid:contract` 토큰은 주석에서만 추출한다.
 
 ---
 

@@ -60,6 +60,8 @@ export interface FileFacts {
       knownLowerBound: number;
       reasons: string[];
     };
+    /** `filid:contract` group ids the file's comments declare, deduplicated. */
+    contractGroupIds: string[];
   };
   /** Lines an attested record says are not references, with the reason each is not. */
   nonReferences?: { line: number; reason: string }[];

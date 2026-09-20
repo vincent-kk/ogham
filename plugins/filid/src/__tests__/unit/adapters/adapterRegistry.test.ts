@@ -30,9 +30,6 @@ function structureAdapter(
     async inspectEntryPoint(): Promise<EntryPointInspection> {
       throw new Error('not used by registry tests');
     },
-    async extractDependencies(): Promise<[]> {
-      return [];
-    },
     async isFrameworkOwnedPeer(): Promise<boolean> {
       return false;
     },

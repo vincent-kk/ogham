@@ -330,9 +330,8 @@ import rewrite는 현재 raw specifier가 source machine path를 exact하게 지
 ## 검증 문서 계산
 
 ```
-파일 → VerificationAdapter.classify() → spec-document | test-record | unsupported
-                                     → count()        → VerificationCaseCount
-                                     → extractContractGroupIds()
+파일 → VerificationAdapter.discover() → 이름으로 고른 후보
+    → facts 레코드의 verification    → role · cases · contractGroupIds
     │
     ▼
 policy 평가

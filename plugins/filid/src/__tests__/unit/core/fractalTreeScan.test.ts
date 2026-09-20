@@ -44,9 +44,6 @@ const arbitraryEntryAdapter: StructureAdapter = {
       certainty: 'exact',
     };
   },
-  async extractDependencies() {
-    return [];
-  },
   async isFrameworkOwnedPeer() {
     return false;
   },

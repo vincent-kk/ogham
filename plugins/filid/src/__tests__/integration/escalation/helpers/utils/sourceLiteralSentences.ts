@@ -1,5 +1,5 @@
-import { lineAt } from '../../../../../adapters/ecmascript/structure/lexing/lineAt.js';
-import { scanLexicalTokens } from '../../../../../adapters/ecmascript/structure/scanLexicalTokens.js';
+import { lineAt } from '../../../../../factsExtractor/analysis/lexing/lineAt.js';
+import { scanLexicalTokens } from '../../../../../factsExtractor/analysis/lexing/scanLexicalTokens.js';
 
 import { type LocatedSentence, splitSentences } from './splitSentences.js';
 import { staticTemplateText } from './staticTemplateText.js';

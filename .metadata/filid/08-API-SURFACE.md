@@ -591,8 +591,8 @@ interface StructureAdapter {
   detect(projectRoot: string): Promise<AdapterClaim>;
   discoverSourceFiles(projectRoot: string): Promise<string[]>;
   findEntryPoints(directoryPath: string): Promise<EntryPointDescriptor[]>;
+  /** MANIFEST entry points only; a source surface comes from the file's record. */
   inspectEntryPoint(entryPointPath: string): Promise<EntryPointInspection>;
-  extractDependencies(filePath: string): Promise<DependencyReference[]>;
   isFrameworkOwnedPeer(filePath: string): Promise<boolean>;
   suggestEntryPointPath(directoryPath: string): Promise<string>;
 }
@@ -642,10 +642,8 @@ interface VerificationViolation {
 interface VerificationAdapter {
   id: string;
   detect(projectRoot: string): Promise<AdapterClaim>;
+  /** Discovery by name and path; role, case count and contract groups come from the record. */
   discover(projectRoot: string): Promise<string[]>;
-  classify(filePath: string): Promise<VerificationRole | "unsupported">;
-  count(filePath: string): Promise<VerificationCaseCount>;
-  extractContractGroupIds(filePath: string): Promise<string[]>;
 }
 ```
 

@@ -11,7 +11,14 @@ export interface VerificationFileAnalysis {
   role: VerificationRole;
   count: VerificationCaseCount;
   ownerFractalPath: string;
-  contractGroupIds: string[];
+  /**
+   * DETAIL acceptance groups the file's record reports it declares.
+   *
+   * Absent when the record carries no such list — "the record does not say",
+   * which the spec-link rule keeps as indeterminate rather than reading as a
+   * file that declares nothing.
+   */
+  contractGroupIds?: string[];
 }
 
 export type VerificationRuleId =
@@ -51,6 +58,8 @@ export interface VerificationFileFacts {
   role: VerificationRole | 'unsupported';
   /** The case count the record reports, in the adapter's own shape. */
   cases: VerificationCaseCount;
+  /** The `filid:contract` group ids the record reports, when it reports any. */
+  contractGroupIds?: string[];
 }
 
 export interface AnalyzeVerificationInput {

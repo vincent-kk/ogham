@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { portableRelative } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
-import { ecmascriptStructureAdapter } from '../../../adapters/ecmascript/index.js';
+import { extractDependencyReferences } from '../../../factsExtractor/analysis/references/extractDependencyReferences.js';
 
 /** Source root; every import the program reaches is judged relative to it. */
 const SOURCE_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
@@ -24,7 +24,7 @@ describe('the extractor stays out of the server', () => {
       const file = pending.pop();
       if (!file || seen.has(file)) continue;
       seen.add(file);
-      for (const reference of await ecmascriptStructureAdapter.extractDependencies(
+      for (const reference of await extractDependencyReferences(
         file,
       ))
         if (reference.resolvedPath) pending.push(reference.resolvedPath);

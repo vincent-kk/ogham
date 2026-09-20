@@ -5,9 +5,8 @@ import type { StructureAdapter } from '../../../types/adapters.js';
 
 import { walkSourceTree } from './discovery/walkSourceTree.js';
 import { ECMASCRIPT_ADAPTER_ID } from './ecmascriptConventions.js';
-import { extractDependencyReferences } from './extractDependencyReferences.js';
 import { findEntryPoints } from './findEntryPoints.js';
-import { inspectEntrySurface } from './inspectEntrySurface.js';
+import { inspectEntryPointSurface } from './inspectEntryPointSurface.js';
 
 export const ecmascriptStructureAdapter: StructureAdapter = {
   id: ECMASCRIPT_ADAPTER_ID,
@@ -36,10 +35,7 @@ export const ecmascriptStructureAdapter: StructureAdapter = {
     return findEntryPoints(directoryPath, overrides);
   },
   async inspectEntryPoint(entryPointPath) {
-    return inspectEntrySurface(entryPointPath);
-  },
-  async extractDependencies(filePath) {
-    return extractDependencyReferences(filePath);
+    return inspectEntryPointSurface(entryPointPath);
   },
   async isFrameworkOwnedPeer(filePath) {
     return (await findEntryPoints(dirname(filePath))).some(

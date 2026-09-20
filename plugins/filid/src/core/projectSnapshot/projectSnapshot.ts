@@ -41,15 +41,6 @@ import { omitUnknownFiles } from './snapshotHash/omitUnknownFiles.js';
 export interface CreateProjectSnapshotOptions {
   /** Axes to collect; any axis left out is collected. */
   axes?: Partial<SnapshotAxisSelection>;
-  /**
-   * Run the structure adapter beside the store and report where they differ.
-   *
-   * Off by default, and reachable from nothing a user can set — no environment
-   * variable and no config key — because a product path that parsed every file
-   * twice would charge the caller for a measurement it did not ask for. The
-   * transition gate turns it on; the option leaves with the adapter in S4.
-   */
-  compareAdapterEvidence?: boolean;
 }
 
 /**
@@ -152,7 +143,6 @@ export async function createProjectSnapshot(
           root,
           stored.facts,
           stored.states,
-          options.compareAdapterEvidence === true,
         )
       : {
           certainty: 'unsupported' as const,

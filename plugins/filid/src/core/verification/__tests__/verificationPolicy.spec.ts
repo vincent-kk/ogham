@@ -182,6 +182,31 @@ describe('verification policy', () => {
     );
   });
 
+  it('keeps a record that never reported its group links out of PASS', () => {
+    const unreported = file('/project/feature/create.spec', 'spec-document', 3);
+    delete (unreported as { contractGroupIds?: string[] }).contractGroupIds;
+
+    const result = evaluateVerificationPolicy(
+      [
+        unreported,
+        file('/project/feature/delete.spec', 'spec-document', 4, ['AC-delete']),
+      ],
+      PROJECT_ROOT,
+      groups('AC-delete'),
+    );
+
+    // "The record does not say" is not "the file declares nothing": the error
+    // would send a reader to add a marker that may already be there.
+    expect(result.violations).toContainEqual(
+      expect.objectContaining({
+        ruleId: 'spec-contract-link',
+        path: '/project/feature/create.spec',
+        severity: 'warning',
+        certainty: 'indeterminate',
+      }),
+    );
+  });
+
   it('flags links to acceptance groups absent from DETAIL', () => {
     const result = evaluateVerificationPolicy(
       [

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ecmascriptStructureAdapter } from '../../../adapters/ecmascript/index.js';
+import { extractDependencyReferences } from '../../../factsExtractor/analysis/references/extractDependencyReferences.js';
 import { extractFileFacts } from '../../../factsExtractor/index.js';
 
 /** Temporary project each case extracts from. */
@@ -29,11 +29,11 @@ const CONSUMER = [
 ].join('\n');
 
 describe('a reference whose specifier the source spells with escapes carries its source text', () => {
-  it('reports the written text on the adapter reference only when it differs from the specifier', async () => {
+  it('reports the written text on the extracted reference only when it differs from the specifier', async () => {
     writeFileSync(join(root, 'a.ts'), CONSUMER);
     expect(
       (
-        await ecmascriptStructureAdapter.extractDependencies(join(root, 'a.ts'))
+        await extractDependencyReferences(join(root, 'a.ts'))
       ).map(({ sourceText }) => sourceText),
     ).toEqual(["'./b\\.js'", "'./\\u0063.js'", "'./\\d.js'", undefined]);
   });

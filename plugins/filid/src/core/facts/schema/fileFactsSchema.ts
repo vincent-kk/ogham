@@ -2,6 +2,9 @@ import { z } from 'zod';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import {
+  FACTS_CONTRACT_GROUP_ID_MAX_LENGTH,
+  FACTS_CONTRACT_GROUP_ID_PATTERN,
+  FACTS_CONTRACT_GROUP_LIMIT,
   FACTS_HASH_PREFIX,
   FACTS_REFERENCE_KINDS,
   FACTS_SCHEMA_VERSION,
@@ -109,6 +112,16 @@ export const FileFactsSchema = z
             reasons: z.array(z.string()),
           })
           .strict(),
+        contractGroupIds: z
+          .array(
+            z
+              .string()
+              .max(FACTS_CONTRACT_GROUP_ID_MAX_LENGTH)
+              .regex(FACTS_CONTRACT_GROUP_ID_PATTERN),
+          )
+          .max(FACTS_CONTRACT_GROUP_LIMIT)
+          .refine((ids) => new Set(ids).size === ids.length)
+          .optional(),
       })
       .strict()
       .optional(),

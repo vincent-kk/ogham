@@ -1,7 +1,8 @@
-// DELETE WITH THE ADAPTER IN S4. The parity block below exists only while the
-// ECMAScript adapter and constants/facts.ts both carry a copy of the reference
-// patterns; when S4 removes `HIDDEN_REFERENCE_PATTERNS`, remove that block and
-// the import that reaches it. The accounting cases stay.
+// The parity block holds the server's `FACTS_REFERENCE_LINE_PATTERNS` to the
+// lines the extraction program's `HIDDEN_REFERENCE_PATTERNS` sees. The server
+// copy decides which lines an attested record must explain (spec §4.6), so a
+// line the extractor reads as a reference and the server does not is a
+// reference nobody has to account for.
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -9,7 +10,7 @@ import {
   FACTS_REFERENCE_LINE_PATTERNS,
   FACTS_SCHEMA_VERSION,
 } from '../../../constants/facts.js';
-import { HIDDEN_REFERENCE_PATTERNS } from '../../../adapters/ecmascript/structure/dependencies/referencesInSource.js';
+import { HIDDEN_REFERENCE_PATTERNS } from '../../../factsExtractor/analysis/references/referencesInSource.js';
 import { findUnaccountedLines } from '../../../core/facts/index.js';
 import type { FileFacts } from '../../../core/facts/index.js';
 

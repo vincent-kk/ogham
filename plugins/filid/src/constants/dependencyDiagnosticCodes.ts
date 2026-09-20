@@ -7,5 +7,4 @@ export const DEPENDENCY_DIAGNOSTIC_CODES = {
   UNRESOLVED: 'unresolved-local-dependency',
   UNOWNED: 'unowned-local-dependency',
   SYMLINK_NOT_FOLLOWED: 'symlink-not-followed',
-  ADAPTER_DIVERGENCE: 'facts-adapter-divergence',
 } as const;

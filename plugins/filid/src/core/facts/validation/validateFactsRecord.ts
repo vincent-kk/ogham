@@ -11,6 +11,7 @@ import { buildFactsRejection } from './utils/buildFactsRejection.js';
 import { hashProjectFile } from './utils/hashProjectFile.js';
 import { normalizeFileFacts } from './utils/normalizeFileFacts.js';
 import { splitSourceLines } from './utils/splitSourceLines.js';
+import { validateContractGroupIds } from './validateContractGroupIds.js';
 import { validateExportedNames } from './validateExportedNames.js';
 import { validateReferences } from './validateReferences.js';
 
@@ -90,13 +91,24 @@ export function validateFactsRecord(
     facts.path,
     pointer,
   );
+  const groups = validateContractGroupIds(
+    facts.verification,
+    lines,
+    facts.path,
+    pointer,
+  );
   return {
     accepted: normalizeFileFacts({
       ...facts,
       references: references.references,
       entrySurface: exported.entrySurface,
+      verification: groups.verification,
     }),
-    rejections: [...references.rejections, ...exported.rejections],
+    rejections: [
+      ...references.rejections,
+      ...exported.rejections,
+      ...groups.rejections,
+    ],
   };
 }
 

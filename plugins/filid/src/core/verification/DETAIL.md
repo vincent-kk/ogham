@@ -6,7 +6,8 @@
 - test-record는 파일당 최대 32 semantic cases를 허용하며 전체 파일·case 수에는 제한을 두지 않는다.
 - exact count만 cap PASS/violation으로 판정하고 indeterminate와 unsupported는 별도 warning finding으로 보존한다.
 - 같은 owner fractal의 여러 spec-document는 실제 DETAIL acceptance group을 선언하고 파일 간 group이 겹치지 않아야 한다.
-- 역할과 case count는 호출자가 facts 레코드에서 읽어 `verificationFacts`로 넘긴다. adapter는 어떤 파일이 verification인지 발견하고 `filid:contract` marker를 해석할 뿐, 역할·count를 다시 만들지 않는다 — 레코드가 없는 파일을 adapter로 메우면 부트스트랩 누락이 가려진다.
+- 역할, case count와 contract group id는 호출자가 facts 레코드에서 읽어 `verificationFacts`로 넘긴다. adapter는 어떤 파일이 verification인지 **발견**할 뿐 파일 내용을 해석하지 않는다 — 레코드가 없는 파일을 adapter로 메우면 부트스트랩 누락이 가려진다.
+- 레코드의 `verification`에 contract group id 목록이 없으면 그 파일의 group 선언은 **모르는 것**이다. 같은 owner에 spec이 둘 이상일 때 그 파일의 `spec-contract-link`는 `indeterminate` warning이고 다음 행동은 재추출이다. "선언이 없다"는 error로도, 통과로도 읽지 않는다 — 둘 다 레코드가 말하지 않은 것을 말한 셈이 된다.
 - `verificationFacts`에 없는 발견 파일은 분석에서 빠진다. 그 사실은 호출자가 certainty와 진단으로 싣는다.
 - 같은 최고 confidence의 adapter가 한 파일을 주장하면 `ambiguous-adapter-claim` 진단을 남기고 해당 파일을 policy 분석에서 제외한다.
 - snapshot이 제공한 discovery 결과는 절대 portable path로 정규화해 한 번만 소비하며, 동일 adapter의 중복 path는 한 claim으로 취급한다.
@@ -18,7 +19,7 @@
 
 - `analyzeVerification(input): Promise<VerificationProjectAnalysis>` — adapter evidence를 file analysis와 policy violation으로 조합한다.
 - `evaluateVerificationPolicy(files, contractGroups, projectRoot)` — 15/32와 spec 연결을 평가한다.
-- `findSpecFragmentation(files, contractGroups, projectRoot)` — 겹침, 누락과 알 수 없는 group finding을 만든다. `projectRoot`는 message의 경로를 상대 경로로 적는 데만 쓴다.
+- `findSpecFragmentation(files, contractGroups, projectRoot)` — 겹침, 누락, 알 수 없는 group과 레코드가 말하지 않은 group 선언의 finding을 만든다. `projectRoot`는 message의 경로를 상대 경로로 적는 데만 쓴다.
 - `resolveContractGroups(detailDocuments)` — DETAIL의 안정 acceptance group을 owner별 index로 만든다.
 
 ## Acceptance Criteria
@@ -40,7 +41,8 @@
 
 - 서로 다른 실제 DETAIL group에 연결된 spec은 통과한다.
 - 겹치는 group은 `spec-fragmentation`, 누락되거나 존재하지 않는 group은 `spec-contract-link` violation이다.
+- 레코드가 group id를 싣지 않은 spec은 같은 `spec-contract-link`의 `indeterminate` warning이고, 재추출을 다음 행동으로 싣는다.
 
 ## Last Updated
 
-2026-07-27 — portable path claim과 단일 discovery의 불확실성을 보존했다.
+2026-09-20 — contract group id를 레코드에서 읽고, 레코드가 말하지 않은 선언을 indeterminate로 보존한다.

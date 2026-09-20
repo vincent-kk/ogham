@@ -12,7 +12,7 @@ import { evaluateVerificationPolicy } from '../policy/evaluateVerificationPolicy
  * Judge the discovered verification files against the per-file policy.
  *
  * Discovery says which files are verification; the records say what each one
- * is and how many cases it holds. A discovered file with no record is left out
+ * is, how many cases it holds and which acceptance groups it declares. A discovered file with no record is left out
  * of the analysis rather than guessed at — the caller carries that gap as a
  * diagnostic and as `discoveryCertainty`, so it cannot become an empty pass.
  * @param input Project root, adapters, the discovered paths, the records'
@@ -55,7 +55,9 @@ export async function analyzeVerification(
         role: facts.role,
         count: facts.cases,
         ownerFractalPath: input.ownerFractalPath(path),
-        contractGroupIds: await adapter.extractContractGroupIds(path),
+        ...(facts.contractGroupIds === undefined
+          ? {}
+          : { contractGroupIds: facts.contractGroupIds }),
       });
     }
   }
