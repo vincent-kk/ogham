@@ -165,7 +165,7 @@ native 바이너리 의존과 전역 npm 모듈 탐색은 없다.
 | TypeScript Compiler API 사용                                                | 제거       | 같음 (ADR-01)                                                          |
 | npm 라이브러리 표면 (`exports`·`main`·`types`·`dist`)                       | 제거       | `private: true`. 빌드 대상은 MCP(CJS)·hook(ESM) 진입점뿐 (ADR-09)      |
 | `build:compile` (`tsc -p tsconfig.build.json`)                              | 제거       | 라이브러리 산출물이 없으므로 컴파일 단계 자체가 불필요                 |
-| MCP 도구 19개 → **9개**                                                     | −10        | [08-API-SURFACE](./08-API-SURFACE.md#10에서-제거된-도구) 대응표        |
+| MCP 도구 19개 → **9개**                                                     | −10        | [08-API-SURFACE](./08-API-SURFACE.md#10에서-제거된-도구) 대응표. 이후 4개로 통합되고 `facts`가 더해져 현재 5개다 |
 | 사용자 스킬 19개 → **12개**                                                 | −7         | [03-LIFECYCLE](./03-LIFECYCLE.md) 제거 사유표                          |
 | 페르소나 에이전트 14개 → **0개**                                            | −14        | 고정 에이전트 정의 없이 reviewer·verifier를 동적으로 실행 (ADR-13)     |
 | Hook 이벤트 4개 → **3개**                                                   | −1         | `SubagentStart` 역할 제한 훅 제거 (에이전트 계층이 사라짐)             |
@@ -176,7 +176,7 @@ native 바이너리 의존과 전역 npm 모듈 탐색은 없다.
 | `naming-convention`·`index-barrel-pattern`·CC·LCOM4·file-size·coverage 규칙 | 제거       | 전역 자동 gate는 소유하지 않고 변경 범위 리뷰만 수행 (ADR-08·13)       |
 | canonical 규칙 문서 `filid_fca-policy.md` 1개                               | 4개로 분할 | 로딩 조건이 다른 4개 required 문서                                     |
 
-계약 수준의 파급은 셋이다. **첫째**, 플러그인을 npm 패키지로 import하던 경로가 없다 — 소비 경로는 MCP 도구와 훅뿐이다. **둘째**, 제거된 도구를 호출하던 스킬은 복원이 아니라 9개 도구 위로 재작성됐다. **셋째**, `resolve`는 코드를 쓰지 않는다 — 수용·거부 결정과 기록만 소유하고 적용은 메인 에이전트나 다른 플러그인에 위임하며, 적용되지 않은 수용 항목은 `revalidate`가 `unapplied`로 보고한다.
+계약 수준의 파급은 셋이다. **첫째**, 플러그인을 npm 패키지로 import하던 경로가 없다 — 소비 경로는 MCP 도구와 훅뿐이다. **둘째**, 제거된 도구를 호출하던 스킬은 복원이 아니라 남은 도구 표면 위로 재작성됐다 — 1.0 시점 9개였고, 뒤의 통합과 `facts` 신설을 거쳐 지금은 5개다. **셋째**, `resolve`는 코드를 쓰지 않는다 — 수용·거부 결정과 기록만 소유하고 적용은 메인 에이전트나 다른 플러그인에 위임하며, 적용되지 않은 수용 항목은 `revalidate`가 `unapplied`로 보고한다.
 
 ---
 
@@ -202,7 +202,7 @@ plugins/filid/
 │   ├── mcp/
 │   │   ├── server/            #   registry, envelope, wrapHandler
 │   │   ├── serverEntry/       #   번들 진입점
-│   │   ├── tools/             #   9개 도구
+│   │   ├── tools/             #   5개 도구
 │   │   └── pages/settings/    #   설정 UI canonical source
 │   ├── hooks/                 # setup · userPromptSubmit · preToolUse · shared
 │   ├── types/                 # 언어 중립 공개 DTO (organ)
@@ -358,7 +358,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 
 **근거**: 규칙 선택·그룹 절단·산출물 검증·판정표 적용을 오케스트레이터가 산문으로 수행하면 실행마다 결과가 달라지고 후속 턴의 컨텍스트 비용이 커진다. 결정적 작업을 도구로 옮기면 FCA 검증을 유지하면서 같은 입력에 같은 그룹·위치·verdict를 만들고 프롬프트를 판단에 집중시킨다.
 
-**결과**: MCP 도구 수는 9개로 유지되고 `review_state`는 `prepare | checkpoint | validate | seal | cleanup | assess` 여섯 action을 제공한다. reviewer는 생성된 review brief가 가리키는 bounded diff와 규칙을 읽어 `opinions/review-NN.r<k>.json`을 쓰고, verifier는 `briefs/verify-NN.md`에서 `opinions/verify-NN.json`을 만든다. 하류가 소비하는 report·fix request·verdict 형식은 유지된다.
+**결과**: 이 변경으로 MCP 도구는 9개에서 4개로 합쳐졌고 `review_state`는 `prepare | checkpoint | validate | seal | cleanup | assess` 여섯 action을 제공한다. reviewer는 생성된 review brief가 가리키는 bounded diff와 규칙을 읽어 `opinions/review-NN.r<k>.json`을 쓰고, verifier는 `briefs/verify-NN.md`에서 `opinions/verify-NN.json`을 만든다. 하류가 소비하는 report·fix request·verdict 형식은 유지된다.
 
 ---
 
@@ -386,9 +386,9 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 | AC-16 | `@ast-grep/napi`, 전역 npm 탐색, `fast-glob` 없이 build가 성공한다                                                                                                                               | ADR-01 · ADR-09                                     |
 | AC-17 | DAG rule이 실제 cycle을 검출하며 placeholder PASS가 없다                                                                                                                                         | [07](./07-RULES-REFERENCE.md)                       |
 | AC-18 | cross-review finding은 `file:line` 또는 canonical 증거 행을 인용하고, verifier가 `CONFIRMED`한 finding만 fix request가 되며 구조 수정은 exact plan을 쓴다                                        | ADR-14 · [03](./03-LIFECYCLE.md)                    |
-| AC-19 | MCP 도구는 정확히 9개, 사용자 스킬은 정확히 12개                                                                                                                                                 | [08](./08-API-SURFACE.md) · [03](./03-LIFECYCLE.md) |
+| AC-19 | MCP 도구는 정확히 5개, 사용자 스킬은 정확히 12개                                                                                                                                                 | [08](./08-API-SURFACE.md) · [03](./03-LIFECYCLE.md) |
 | AC-20 | core·policy·DTO에는 특정 생태계의 확장자·테스트 호출 리터럴이 없다                                                                                                                               | ADR-02                                              |
-| AC-21 | merge-track 5스킬이 9개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않는다                                                                                                                   | [03](./03-LIFECYCLE.md)                             |
+| AC-21 | merge-track 5스킬이 5개 도구 표면만으로 동작하며 제거된 도구를 참조하지 않는다                                                                                                                   | [03](./03-LIFECYCLE.md)                             |
 | AC-22 | `resolve`는 코드를 직접 수정하지 않고 적용을 위임하며, 수용·거부 결정과 사유가 기록된다                                                                                                          | [03](./03-LIFECYCLE.md)                             |
 | AC-23 | `pipeline --auto`가 pull-request → cross-review → resolve → revalidate를 중단 없이 잇는다                                                                                                        | [03](./03-LIFECYCLE.md)                             |
 | AC-24 | `config-wizard` 없이 `project_setup`의 `init` + `settings` action만으로 config v2 생성·조회·저장이 완결된다                                                                                       | [04](./04-USAGE.md)                                 |

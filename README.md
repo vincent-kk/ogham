@@ -72,20 +72,19 @@ As codebases grow, AI agents lose context, documentation drifts from code, and d
 
 **What it provides:**
 
-| Component | Count    | Examples                                                                |
-| --------- | -------- | ----------------------------------------------------------------------- |
-| Skills    | 19       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline` |
-| MCP Tools | 18       | Structure analysis, drift detection, AST metrics, debt tracking         |
-| Agents    | 14       | Architect, Implementer, QA Reviewer, 7-persona review committee         |
-| Hooks     | 4 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit               |
+| Component | Count    | Examples                                                                   |
+| --------- | -------- | -------------------------------------------------------------------------- |
+| Skills    | 12       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline`    |
+| MCP Tools | 5        | `project_setup`, `fractal_inspect`, `restructure`, `review_state`, `facts` |
+| Hooks     | 3 events | SessionStart, PreToolUse, UserPromptSubmit                                 |
 
 **Key features:**
 
-- **Multi-persona consensus review** — A 7-persona committee (architect, knowledge manager, SRE, business driver, product manager, design/HCI, adjudicator) reaches consensus on PR changes
+- **Two-role change review** — `cross-review` runs a reviewer and an independent verifier over the changed files, then seals one verdict per group
 - **Automated rule enforcement** — INTENT.md 50-line limit, 3-tier boundary section validation, organ directory protection, naming conventions
 - **Structural drift detection** — Detects when code changes break documented structure and syncs automatically via DAG analysis
-- **AST-powered analysis** — Module cohesion (LCOM4), cyclomatic complexity, circular-dependency detection via `@ast-grep/napi`
-- **End-to-end pipeline** — `pipeline` chains PR creation → multi-persona review → resolve → revalidate
+- **Evidence with stated certainty** — Every dependency fact carries `exact | indeterminate | unsupported`, and cycle detection runs on the resulting DAG
+- **End-to-end pipeline** — `pipeline` chains PR creation → cross-review → resolve → revalidate
 
 ```
 # Initialize FCA-AI in your project
