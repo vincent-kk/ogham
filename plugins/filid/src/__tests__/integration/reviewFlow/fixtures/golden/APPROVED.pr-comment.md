@@ -9,7 +9,7 @@
 | Agent next action | No pending review work. |
 | Branch | `feature/review-flow` |
 | Base | `main` |
-| Snapshot | `310e5bc9971df4bdc1a55507cdbc17cbaa1b65c1cb629e96186ffac2699e06f3` |
+| Snapshot | `2b2f4bb467aa1d9be7aa25b6c5a5ad4832c7e7c96ed72351a5578baa0dc41ce7` |
 | Coverage | 1 reviewed · 1 skipped · 2 total |
 | Findings | 0 confirmed · 0 refuted · 0 indeterminate |
 | Generated | <SEALED_AT> |

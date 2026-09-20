@@ -9,6 +9,7 @@ import {
 import { normalizeSnapshotHashInput } from './normalizeSnapshotHashInput.js';
 import { resolveHashFile } from './resolveHashFile.js';
 import { stableSerialize } from './stableSerialize.js';
+import { compareByBytes } from '../../../lib/compareByBytes.js';
 
 /**
  * Hash the bytes of a set of project files together with supplemental inputs.
@@ -34,7 +35,8 @@ export function computeSnapshotHash(
     if (!uniqueFiles.has(key)) uniqueFiles.set(key, file);
   }
   const files = [...uniqueFiles.values()].sort((left, right) =>
-    pathForCompare(left.relativePath).localeCompare(
+    compareByBytes(
+      pathForCompare(left.relativePath),
       pathForCompare(right.relativePath),
     ),
   );

@@ -9,6 +9,7 @@ import type { StructureAdapter } from '../../../../types/adapters.js';
 import type { ScanOptions } from '../../../../types/scan.js';
 import { classifyNode } from '../../organClassifier/index.js';
 import type { NodeEntry } from '../treeBuilder/buildFractalTree.js';
+import { compareByBytes } from '../../../../lib/compareByBytes.js';
 
 export async function collectNodeMetadata(
   allDirs: string[],
@@ -73,7 +74,7 @@ export async function collectNodeMetadata(
                 candidate.adapterId === entryPoint.adapterId,
             ) === index,
         )
-        .sort((left, right) => left.path.localeCompare(right.path));
+        .sort((left, right) => compareByBytes(left.path, right.path));
       const frameworkReservedFiles: string[] = [];
       for (const peerFile of peerFiles) {
         const absolutePeerPath = join(path, peerFile);

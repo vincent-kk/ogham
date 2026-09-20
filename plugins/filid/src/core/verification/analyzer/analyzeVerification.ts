@@ -7,6 +7,7 @@ import type {
 } from '../../../types/verification.js';
 import { resolveContractGroups } from '../contracts/resolveContractGroups.js';
 import { evaluateVerificationPolicy } from '../policy/evaluateVerificationPolicy.js';
+import { compareByBytes } from '../../../lib/compareByBytes.js';
 
 /**
  * Judge the discovered verification files against the per-file policy.
@@ -39,7 +40,7 @@ export async function analyzeVerification(
         }),
       ).values(),
     ].sort((left, right) =>
-      pathForCompare(left).localeCompare(pathForCompare(right)),
+      compareByBytes(pathForCompare(left), pathForCompare(right)),
     );
     for (const path of discovered) {
       const key = pathForCompare(path);

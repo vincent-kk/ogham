@@ -10,6 +10,7 @@ import type { VerificationFileFacts } from '../../../types/verification.js';
 import type { FactsFileState, ProjectFacts } from '../../facts/index.js';
 
 import { factsVerificationClaims } from './factsVerificationClaims.js';
+import { compareByBytes } from '../../../lib/compareByBytes.js';
 
 interface VerificationClaim {
   adapterId: string;
@@ -91,7 +92,7 @@ export async function collectVerificationClaims(
     );
     const adapterIds = [
       ...new Set(highest.map((claim) => claim.adapterId)),
-    ].sort((left, right) => left.localeCompare(right));
+    ].sort(compareByBytes);
     const path = highest[0].path;
     if (adapterIds.length > 1) {
       certainty = 'indeterminate';
@@ -110,7 +111,7 @@ export async function collectVerificationClaims(
 
   for (const paths of discoveredPathsByAdapter.values())
     paths.sort((left, right) =>
-      pathForCompare(left).localeCompare(pathForCompare(right)),
+      compareByBytes(pathForCompare(left), pathForCompare(right)),
     );
   const stored = factsVerificationClaims(
     projectRoot,

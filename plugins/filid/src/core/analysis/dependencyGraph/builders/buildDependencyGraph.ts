@@ -14,6 +14,7 @@ import { listUnknownFiles } from './listUnknownFiles.js';
 import { resolveOwnerPath } from './resolveOwnerPath.js';
 import { resolveOwningOrganPath } from './resolveOwningOrganPath.js';
 import { sortPathsDeepestFirst } from './sortPathsDeepestFirst.js';
+import { compareByBytes } from '../../../../lib/compareByBytes.js';
 
 interface DependencyGraphOptions {
   /** Root the `unknownFiles` paths are relative to. */
@@ -164,15 +165,15 @@ export function buildDependencyGraph(
       ...edge,
       evidence: edge.evidence.sort(
         (left, right) =>
-          left.sourceFile.localeCompare(right.sourceFile) ||
-          left.rawSpecifier.localeCompare(right.rawSpecifier) ||
-          left.resolvedPath.localeCompare(right.resolvedPath),
+          compareByBytes(left.sourceFile, right.sourceFile) ||
+          compareByBytes(left.rawSpecifier, right.rawSpecifier) ||
+          compareByBytes(left.resolvedPath, right.resolvedPath),
       ),
     }))
     .sort(
       (left, right) =>
-        left.fromFractalPath.localeCompare(right.fromFractalPath) ||
-        left.toFractalPath.localeCompare(right.toFractalPath),
+        compareByBytes(left.fromFractalPath, right.fromFractalPath) ||
+        compareByBytes(left.toFractalPath, right.toFractalPath),
     );
   const unknownFiles = listUnknownFiles(
     options.projectRoot,
