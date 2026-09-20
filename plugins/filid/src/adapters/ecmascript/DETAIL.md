@@ -5,7 +5,8 @@
 - adapter는 현재 생태계 source file과 package/framework evidence를 탐지한다.
 - source discovery는 git이 무시하고 추적하지도 않는 파일을 제외한다. 이 결과가 dependency와 verification evidence의 입력이므로, 무시되는 build 산출물이 discovery에 남으면 DAG와 verification 계약이 산출물을 대상으로 판정한다. git이 없거나 project root가 work tree 밖이면 제외 없이 전부 탐지한다.
 - source discovery는 symlink를 따라가지 않는다. `discoverSourceTree()`는 소스 파일과 함께, 같은 순회에서 건너뛴 symlink 중 실제 위치가 project root 밖인 것을 돌려준다. 대상은 소스 확장자를 가진 파일 symlink와 제외 이름이 아닌 디렉터리 symlink다. root 안을 가리키는 symlink는 대상이 실제 경로로 이미 탐지되므로 돌려주지 않고, 끊어진 symlink와 loop는 분석할 내용이 없으므로 돌려주지 않는다. 무시·제외 규칙은 source discovery와 같다.
-- module, executable, framework과 manifest entry point를 exact path와 adapter ID로 보고한다.
+- module, executable, framework과 manifest entry point를 exact path와 adapter ID로 보고한다. descriptor는 호출자 소유의 새 객체다 — 스캐너가 결과를 그 자리에서 정렬·필터하므로 공유 배열을 돌려주면 다음 호출자가 앞 호출자의 변형을 본다.
+- 요청 스코프 메모가 열려 있으면 소스 트리 워크, git ignore 질의, 디렉터리별 entry point 판독은 한 스코프 안에서 각각 한 번만 실제로 일어난다. 키는 **호출자가 준 경로 문자열 그대로**이며 entry point는 정렬된 override 목록까지 포함한다. 결과 경로가 그 문자열에 `join`으로 붙어 만들어지므로, 키를 해석된 형태로 정규화하면 같은 디렉터리를 다른 철자로 부른 호출자가 남의 철자를 받는다. override는 멤버십으로만 읽혀 순서가 결과를 바꾸지 않으므로 키에서 정렬한다. 스코프가 없으면 매번 파일 시스템을 다시 읽는다. 한 스냅샷이 같은 트리를 여러 번 읽는 것은 지금도 "읽는 동안 트리가 움직이지 않는다"를 전제하므로, 메모는 그 전제를 완화하지 않고 강제한다.
 - 디렉터리에 `package.json`이 있으면 그것을 `kind: 'manifest'` entry point로 보고한다. 이 생태계에서 패키지의 공개 표면을 선언하는 자리는 `exports`·`main`·`bin`이고, 배럴이 없는 패키지 루트도 그 선언으로 소비자를 받는다 — 진입점이 없는 것이 아니라 module 파일이 아닌 곳에 있는 것이다. 상위 디렉터리의 `package.json`은 대상이 아니다(그건 framework 탐지용 조회다).
 - manifest는 `kind: 'module'`이 아니다. module은 분류기가 읽는 유일한 kind이므로, manifest가 module이면 `package.json`을 가진 모든 디렉터리가 fractal이 된다 — 저장소 루트까지 포함해서다. `surface`는 선언을 열거할 수 있으므로 `enumerated`이고, `framework`의 `opaque`를 쓰면 패키지 루트마다 영구 `entry-point-surface` 경고가 생긴다.
 - manifest entry의 inspection은 lexical scan이 아니라 JSON 파싱이다. `exports` 키 집합이 named surface이며, `exports`가 없으면 `main`·`bin`이 선언한 단일 진입을 `.` 하나로 보고한다.
@@ -48,7 +49,7 @@
 - `ecmascriptStructureAdapter: StructureAdapter` — registry에 등록되는 초기 structure adapter.
 - `scanLexicalTokens(source)` — comment/string/template/regex와 delimiter nesting을 보존한 lexical token stream. 첫 줄 shebang은 건너뛰고, 닫히지 않은 문자열·template 토큰은 `unterminated: true`를 가진다.
 - `extractDependencyReferences(filePath)` — adapter 중립 `DependencyReference[]`. 숨었거나 경계 상실 뒤에 있는 참조는 `certainty: 'indeterminate'`를 가진다.
-- `findEntryPoints(directoryPath, overrides?)` — module/executable/framework/manifest/configured descriptor 배열.
+- `findEntryPoints(directoryPath, overrides?)` — module/executable/framework/manifest/configured descriptor 배열. 매 호출이 새 배열과 새 descriptor를 돌려준다.
 - `ecmascriptVerificationAdapter` — spec/test role, semantic case count와 contract group marker를 분석하는 초기 verification adapter.
 - `countSemanticCases(source)` — 일반/skip/todo/property와 정적 parameterized rows를 의미론적 case 수로 계산하고 동적 구조를 indeterminate로 반환.
 - `extractContractGroupIds(source)` — comment의 `filid:contract` marker 추출.
@@ -122,6 +123,7 @@
 
 ## History
 
+- 2026-09-20 — discovery와 entry point 판독을 요청 스코프 메모 뒤에 두고, entry point descriptor를 호출자 소유 복사본으로 돌려준다. 같은 디렉터리를 파일 수만큼 다시 읽고 있었는데, 캐시를 공유 배열로 돌려주면 결과를 정렬하는 스캐너가 캐시를 오염시킨다.
 - 2026-09-19 — indeterminate 참조와 semantic case 계수 사유가 byte offset 대신 1-based 줄 번호를 보고한다. LLM 호출자가 해당 줄을 직접 읽고 판단하게 하려면 offset보다 줄 번호가 필요하다.
 - 2026-09-19 — 닫히지 않은 literal 신호를 경계 상실과 숨은 구문으로 나누고, 의존성 추출과 entry surface까지 넓혔다. unterminated 토큰을 모두 불확정으로 보면 JSX 텍스트 아포스트로피 하나가 cap 판정과 DAG를 흐린다. 처음에는 삼킨 구간을 코드로 다시 lex했다. 그런데 그 텍스트 안의 정규식·주석·URL과 같은 줄의 잘못 짝지어진 따옴표가 반례를 계속 만들었고, 틀린 exact와 3차 비용이 나왔다. 그래서 신뢰할 수 없는 텍스트를 원문 패턴으로만 본다. 과보고는 받아들이고 틀린 exact는 만들지 않는다. template 표현식을 같은 scanner로 건너뛰게 해서 중첩 template의 경계 상실도 없앴다.
 - 2026-09-19 — lexer에 정규식 리터럴 상태를 추가하고 `'`·`"` 문자열을 줄바꿈에서 끝냈다. `/["']/` 같은 정규식의 따옴표가 여러 줄짜리 가짜 문자열을 열어 case와 import를 삼키면서도 exact로 보고되고 있었다. 정규식 판정이 틀리는 드문 문맥에 대비해, 닫히지 않은 literal은 case 계수를 indeterminate로 만든다. 다만 그것만으로 role을 주면 개명 면제가 다시 열리므로 role 판정에서는 제외했다.
@@ -133,4 +135,4 @@
 
 ## Last Updated
 
-2026-09-19
+2026-09-20

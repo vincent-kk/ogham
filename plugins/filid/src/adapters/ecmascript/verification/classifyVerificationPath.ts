@@ -1,24 +1,10 @@
 import { readFileSync } from 'node:fs';
-import { basename, extname } from 'node:path';
 
 import type { VerificationRole } from '../../../types/adapters.js';
-import { SOURCE_EXTENSIONS } from '../structure/ecmascriptConventions.js';
 
+import { candidateRole } from './candidateRole.js';
 import { countSemanticCases } from './countSemanticCases.js';
 import { showsVerificationSyntax } from './showsVerificationSyntax.js';
-
-/** The naming convention picks a candidate; it never confirms the role. */
-function candidateRole(filePath: string): VerificationRole | 'unsupported' {
-  const extension = extname(filePath);
-  if (
-    !SOURCE_EXTENSIONS.includes(extension as (typeof SOURCE_EXTENSIONS)[number])
-  )
-    return 'unsupported';
-  const stem = basename(filePath, extension);
-  if (stem.endsWith('.spec')) return 'spec-document';
-  if (stem.endsWith('.test')) return 'test-record';
-  return 'unsupported';
-}
 
 /**
  * Resolve a verification role from the naming convention AND the file content.

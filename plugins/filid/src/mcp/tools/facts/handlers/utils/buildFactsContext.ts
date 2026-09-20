@@ -19,6 +19,7 @@ import {
   listScannedFilePaths,
   scanFileSetOptions,
 } from '../../../../../core/tree/fractalTree/index.js';
+import { runWithRequestMemo } from '../../../../../lib/runWithRequestMemo.js';
 
 /** One stored record together with the key it is filed under. */
 export interface FactsRecordEntry {
@@ -58,38 +59,45 @@ export interface FactsContext {
  * call, so that a caller which reads an epoch now and submits after the tree
  * moves can be told which paths moved instead of only that the epoch differs.
  *
+ * One call is one request-memo scope, so the scan work this context repeats —
+ * the ignored-path query above all — runs once. The scope closes with the
+ * context rather than spanning the facts action, which goes on to write into
+ * the store.
+ *
  * @param projectRoot - Absolute project root, used as given.
  * @returns Scope, scanned paths, store contents and the current epoch.
  */
-export async function buildFactsContext(
+export function buildFactsContext(
   projectRoot: string,
 ): Promise<FactsContext> {
-  const config = loadConfig(projectRoot).config ?? undefined;
-  const scope = resolveFactsScope(config);
-  const scannedPaths = await listScannedFilePaths(
-    projectRoot,
-    scanFileSetOptions(config),
-  );
-  const storePaths = resolveFactsStorePaths(projectRoot);
-  const store = readFactsStore(storePaths.directory);
-  const records = new Map<string, FactsRecordEntry>();
-  for (const [pathDigest, record] of store.records)
-    records.set(record.facts.path, { pathDigest, record });
-  const epoch = computeResolutionEpoch(
-    projectRoot,
-    scannedPaths,
-    collectDefaultResolutionInputs(scannedPaths),
-  );
-  const previousEpoch = readEpochSnapshot(storePaths.epochSnapshotPath);
-  writeEpochSnapshot(storePaths.epochSnapshotPath, epoch);
-  return {
-    previousEpoch,
-    scope,
-    scannedPaths,
-    scannedSet: new Set(scannedPaths),
-    storePaths,
-    records,
-    shards: store.shards,
-    epoch,
-  };
+  return runWithRequestMemo(async (): Promise<FactsContext> => {
+    const config = loadConfig(projectRoot).config ?? undefined;
+    const scope = resolveFactsScope(config);
+    const scannedPaths = await listScannedFilePaths(
+      projectRoot,
+      scanFileSetOptions(config),
+    );
+    const storePaths = resolveFactsStorePaths(projectRoot);
+    const store = readFactsStore(storePaths.directory);
+    const records = new Map<string, FactsRecordEntry>();
+    for (const [pathDigest, record] of store.records)
+      records.set(record.facts.path, { pathDigest, record });
+    const epoch = computeResolutionEpoch(
+      projectRoot,
+      scannedPaths,
+      collectDefaultResolutionInputs(scannedPaths),
+    );
+    const previousEpoch = readEpochSnapshot(storePaths.epochSnapshotPath);
+    writeEpochSnapshot(storePaths.epochSnapshotPath, epoch);
+    return {
+      previousEpoch,
+      scope,
+      scannedPaths,
+      scannedSet: new Set(scannedPaths),
+      storePaths,
+      records,
+      shards: store.shards,
+      epoch,
+    };
+  });
 }

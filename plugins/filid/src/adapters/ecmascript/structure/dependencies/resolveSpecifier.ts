@@ -1,4 +1,4 @@
-import { existsSync, statSync } from 'node:fs';
+import { statSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 
 import { SOURCE_EXTENSIONS } from '../ecmascriptConventions.js';
@@ -32,6 +32,14 @@ export function resolveSpecifier(
     ),
   ];
   for (const candidate of candidates)
-    if (existsSync(candidate) && statSync(candidate).isFile()) return candidate;
+    try {
+      if (statSync(candidate, { throwIfNoEntry: false })?.isFile())
+        return candidate;
+    } catch {
+      // A candidate that cannot be stat'd at all — a denied directory, a link
+      // loop, a name the filesystem rejects — names no file this analysis can
+      // resolve, so it is absent rather than a failure.
+      continue;
+    }
   return null;
 }

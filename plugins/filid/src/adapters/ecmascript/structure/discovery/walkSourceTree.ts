@@ -1,13 +1,28 @@
+/**
+ * @file walkSourceTree.ts
+ * @description Reads the request-scoped memo opened by `runWithRequestMemo`,
+ * which cannot be passed in: the adapter interface between that scope and this
+ * function carries no cache. With no scope open the tree is walked on every
+ * call.
+ */
 import { type Dirent, readdirSync, realpathSync } from 'node:fs';
 import { extname, join } from 'node:path';
 
 import { createIgnoreFilter } from '../../../../lib/createIgnoreFilter.js';
+import { memoizeWithinRequest } from '../../../../lib/memoizeWithinRequest.js';
 import {
   EXCLUDED_DIRECTORY_NAMES,
   SOURCE_EXTENSIONS,
 } from '../ecmascriptConventions.js';
 
 import { isLinkOutside } from './isLinkOutside.js';
+
+/**
+ * Memo namespace. The key is the root exactly as the caller spelled it: every
+ * path in the walk is built by joining onto that spelling, so a resolved key
+ * would hand one caller another's spelling.
+ */
+const MEMO_NAMESPACE = 'walkSourceTree';
 
 /** What one walk of the source tree found. */
 export interface SourceTreeWalk {
@@ -40,31 +55,39 @@ function hasSourceExtension(entry: Dirent): boolean {
  * @returns Source files and outside-pointing links, each in sorted walk order.
  */
 export function walkSourceTree(projectRoot: string): SourceTreeWalk {
-  const isIgnored = createIgnoreFilter(projectRoot);
-  const realRoot = realpathSync(projectRoot);
-  const walk: SourceTreeWalk = { files: [], unfollowedLinks: [] };
-  const visit = (directoryPath: string): void => {
-    const entries = readdirSync(directoryPath, { withFileTypes: true }).sort(
-      (left, right) => left.name.localeCompare(right.name),
-    );
-    for (const entry of entries) {
-      const path = join(directoryPath, entry.name);
-      if (isIgnored(path)) continue;
-      if (entry.isSymbolicLink()) {
-        if (
-          !EXCLUDED_DIRECTORY_NAMES.has(entry.name) &&
-          isLinkOutside(realRoot, path, hasSourceExtension(entry))
-        )
-          walk.unfollowedLinks.push(path);
-        continue;
-      }
-      if (entry.isDirectory()) {
-        if (!EXCLUDED_DIRECTORY_NAMES.has(entry.name)) visit(path);
-        continue;
-      }
-      if (entry.isFile() && hasSourceExtension(entry)) walk.files.push(path);
-    }
-  };
-  visit(projectRoot);
-  return walk;
+  const walk = memoizeWithinRequest(
+    MEMO_NAMESPACE,
+    projectRoot,
+    (): SourceTreeWalk => {
+      const isIgnored = createIgnoreFilter(projectRoot);
+      const realRoot = realpathSync(projectRoot);
+      const found: SourceTreeWalk = { files: [], unfollowedLinks: [] };
+      const visit = (directoryPath: string): void => {
+        const entries = readdirSync(directoryPath, {
+          withFileTypes: true,
+        }).sort((left, right) => left.name.localeCompare(right.name));
+        for (const entry of entries) {
+          const path = join(directoryPath, entry.name);
+          if (isIgnored(path)) continue;
+          if (entry.isSymbolicLink()) {
+            if (
+              !EXCLUDED_DIRECTORY_NAMES.has(entry.name) &&
+              isLinkOutside(realRoot, path, hasSourceExtension(entry))
+            )
+              found.unfollowedLinks.push(path);
+            continue;
+          }
+          if (entry.isDirectory()) {
+            if (!EXCLUDED_DIRECTORY_NAMES.has(entry.name)) visit(path);
+            continue;
+          }
+          if (entry.isFile() && hasSourceExtension(entry))
+            found.files.push(path);
+        }
+      };
+      visit(projectRoot);
+      return found;
+    },
+  );
+  return { files: [...walk.files], unfollowedLinks: [...walk.unfollowedLinks] };
 }
