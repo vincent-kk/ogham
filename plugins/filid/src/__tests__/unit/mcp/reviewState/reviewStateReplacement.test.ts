@@ -19,6 +19,14 @@ import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 import { configureReviewGroups } from './helpers/configureReviewGroups.js';
 import { createReviewStateSealFixture } from './helpers/createReviewStateSealFixture.js';
 
+/**
+ * Windows maps a read-only directory to an attribute that still accepts writes,
+ * and a root user ignores the mode outright — the archive failure this case
+ * needs cannot be staged there.
+ */
+const unwritableDirectoriesUnsupported =
+  process.platform === 'win32' || process.getuid?.() === 0;
+
 /** Prepared review whose state file each case makes unusable. */
 let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
 /** Branch-level state file of the prepared review. */
@@ -144,22 +152,25 @@ describe('prepare replaces a review state it cannot use', () => {
     rmSync(outside, { recursive: true, force: true });
   });
 
-  it('names the archive failure when the review directory cannot be written', async () => {
-    makeUnusable('unparseable');
-    const branchDirectory = dirname(statePath);
-    chmodSync(branchDirectory, 0o555);
-    try {
-      await expect(
-        handleReviewState({
-          action: 'prepare',
-          projectRoot: fixture.projectRoot,
-          effort: 'low',
-        }),
-      ).rejects.toMatchObject({ code: 'review-state-archive-failed' });
-    } finally {
-      chmodSync(branchDirectory, 0o755);
-    }
-  });
+  it.skipIf(unwritableDirectoriesUnsupported)(
+    'names the archive failure when the review directory cannot be written',
+    async () => {
+      makeUnusable('unparseable');
+      const branchDirectory = dirname(statePath);
+      chmodSync(branchDirectory, 0o555);
+      try {
+        await expect(
+          handleReviewState({
+            action: 'prepare',
+            projectRoot: fixture.projectRoot,
+            effort: 'low',
+          }),
+        ).rejects.toMatchObject({ code: 'review-state-archive-failed' });
+      } finally {
+        chmodSync(branchDirectory, 0o755);
+      }
+    },
+  );
 
   it.each(['checkpoint', 'seal'] as const)(
     'sends %s back to one prepare call without asking a person',

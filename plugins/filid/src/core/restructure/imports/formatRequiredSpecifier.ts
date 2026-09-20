@@ -1,4 +1,5 @@
 import {
+  normalize,
   pathForCompare,
   portableDirname,
   portableRelative,
@@ -12,7 +13,9 @@ import { applySpecifierExtension } from '../specifiers/applySpecifierExtension.j
  *
  * A file reference keeps the extension notation of the consumer's current
  * specifier. The result is always path-like: without a leading `./` a
- * relative path reads as a bare package specifier.
+ * relative path reads as a bare package specifier. It is also always separated
+ * by `/`, which the language fixes for a module specifier — the host does not,
+ * and a relative path computed on Windows arrives separated by `\`.
  * @param consumerPath - Final path of the importing file
  * @param targetPath - Final path of the imported file or directory
  * @param rawSpecifier - Specifier the consumer writes today
@@ -25,7 +28,9 @@ export function formatRequiredSpecifier(
   rawSpecifier: string,
   reference: 'file' | 'directory',
 ): string {
-  const relative = portableRelative(portableDirname(consumerPath), targetPath);
+  const relative = normalize(
+    portableRelative(portableDirname(consumerPath), targetPath),
+  );
   const specifier =
     reference === 'file'
       ? applySpecifierExtension(relative, rawSpecifier)

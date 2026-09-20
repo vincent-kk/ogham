@@ -1,11 +1,24 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { isAbsolute, join, relative } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { findEntryPoints } from '../../../adapters/ecmascript/structure/findEntryPoints.js';
 import { runWithRequestMemo } from '../../../lib/runWithRequestMemo.js';
+
+/**
+ * Whether no relative spelling of the fixture directory exists.
+ *
+ * One exists only where the temporary directory shares a volume with the
+ * working directory. A Windows runner puts the temporary directory on `C:` and
+ * the checkout on `D:`, and `relative` then answers with an absolute path —
+ * the fixture's own spelling, which is the one thing this case needs it not to
+ * be.
+ */
+const relativeSpellingUnavailable = isAbsolute(
+  relative(process.cwd(), tmpdir()),
+);
 
 /** A directory holding one peer file and, until a test adds one, no entry point. */
 let directory: string;
@@ -49,24 +62,27 @@ describe('findEntryPoints inside a request-memo scope', () => {
     });
   });
 
-  it('gives each spelling of one directory descriptors in that spelling', () => {
-    writeFileSync(join(directory, 'index.ts'), 'export const a = 1;\n');
-    // `join` normalizes away a trailing slash, `.` and `..`, so the only
-    // spelling of one directory that survives into a descriptor path is a
-    // relative one.
-    const relativeSpelling = relative(process.cwd(), directory);
-    expect(join(relativeSpelling, 'index.ts')).not.toBe(
-      join(directory, 'index.ts'),
-    );
-    runWithRequestMemo(() => {
-      expect(findEntryPoints(directory).map(({ path }) => path)).toContain(
+  it.skipIf(relativeSpellingUnavailable)(
+    'gives each spelling of one directory descriptors in that spelling',
+    () => {
+      writeFileSync(join(directory, 'index.ts'), 'export const a = 1;\n');
+      // `join` normalizes away a trailing slash, `.` and `..`, so the only
+      // spelling of one directory that survives into a descriptor path is a
+      // relative one.
+      const relativeSpelling = relative(process.cwd(), directory);
+      expect(join(relativeSpelling, 'index.ts')).not.toBe(
         join(directory, 'index.ts'),
       );
-      expect(
-        findEntryPoints(relativeSpelling).map(({ path }) => path),
-      ).toContain(join(relativeSpelling, 'index.ts'));
-    });
-  });
+      runWithRequestMemo(() => {
+        expect(findEntryPoints(directory).map(({ path }) => path)).toContain(
+          join(directory, 'index.ts'),
+        );
+        expect(
+          findEntryPoints(relativeSpelling).map(({ path }) => path),
+        ).toContain(join(relativeSpelling, 'index.ts'));
+      });
+    },
+  );
 
   it('keeps the readings of one directory apart by overrides', () => {
     runWithRequestMemo(() => {

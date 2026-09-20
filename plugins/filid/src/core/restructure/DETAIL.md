@@ -20,6 +20,7 @@
 - import 변경 요구는 해석 결과로 표현한다: `{ consumerPath, currentSpecifier, requiredResolvedPath, suggestedSpecifier? }`. `requiredResolvedPath`는 모든 move 뒤 그 import가 불러야 할 파일이다. 검증은 이 경로만 본다.
 - `suggestedSpecifier`는 현재 specifier가 대상 파일(stem 기준) 또는 그 엄밀한 상위 디렉터리를 가리키는 path-like 형태일 때만 싣는 제안이다. 검증에 쓰지 않는다. stem은 **마지막 세그먼트의 확장자를 제거한 형태**다. 소스 확장자를 그대로 적을 수 없는 생태계 관례(TypeScript ESM이 `.ts` 파일을 `.js`로 참조, 확장자 생략)를 제안에 반영하기 위해서다.
 - 제안은 소비자가 쓰던 확장자 표기를 보존한다. core는 어느 확장자가 유효한지 알지 못하며, 원래 specifier의 표기를 그대로 되돌려 준다.
+- 제안된 specifier는 언제나 `/`로 구분한다. module specifier의 구분자는 호스트가 아니라 언어가 정하므로, Windows에서 계산한 상대 경로의 `\`를 그대로 실을 수 없다.
 - 제안된 specifier는 항상 path-like다. `../`로 시작하면 그대로 두고, `..`이면 `../`, 빈 문자열이면 `./`, 그 밖은 `./`를 붙인다. 붙이지 않으면 `types.ts` 같은 bare specifier가 되어 package import로 해석된다.
 - **`moves`는 실행 순서다.** `moves[i].targetPath`는 그 move를 실행하는 시점의 목적지다. 뒤에 오는 move의 source가 그 경로를 포함하면 함께 옮겨진다.
 - 순서 제약 — 다음이면 a를 b보다 먼저 실행한다:

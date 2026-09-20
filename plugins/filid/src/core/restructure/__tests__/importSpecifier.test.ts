@@ -9,6 +9,7 @@ import type {
   ProjectSnapshot,
 } from '../../../types/fractal.js';
 import { buildImportRewrites } from '../imports/buildImportRewrites.js';
+import { formatRequiredSpecifier } from '../imports/formatRequiredSpecifier.js';
 import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { stripPathExtension } from '../specifiers/stripPathExtension.js';
 import { validateImportRequirements } from '../validator/validateImportRequirements.js';
@@ -310,5 +311,18 @@ describe('suggested specifiers under ecosystem extension conventions', () => {
         requiredResolvedPath: PATHS.TARGET,
       },
     ]);
+  });
+});
+
+describe('a specifier computed from Windows paths', () => {
+  it('is separated the way a module specifier is, not the way the host is', () => {
+    expect(
+      formatRequiredSpecifier(
+        'C:\\Repo\\domain\\a\\use.ts',
+        'C:\\Repo\\domain\\model\\value.ts',
+        './value.js',
+        'file',
+      ),
+    ).toBe('../model/value.js');
   });
 });

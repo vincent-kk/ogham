@@ -16,6 +16,16 @@ export interface PreservedTreeRoots {
 }
 
 /**
+ * Spell a root for the file its placeholder sits in.
+ * @param root Absolute root path.
+ * @param intoJson Whether the placeholder sits inside a JSON string literal.
+ * @returns The root, with its backslashes escaped when JSON has to parse it.
+ */
+function spellRoot(root: string, intoJson: boolean): string {
+  return intoJson ? JSON.stringify(root).slice(1, -1) : root;
+}
+
+/**
  * Copy a preserved fixture file or directory, replacing the root placeholders.
  * @param from Fixture file or directory.
  * @param to Destination path mirroring `from`; missing parents are created.
@@ -35,11 +45,12 @@ export function copyPreservedTreeWithRoots(
   for (const source of sources) {
     const target = join(to, relative(from, source));
     mkdirSync(dirname(target), { recursive: true });
+    const intoJson = target.endsWith('.json');
     writeFileSync(
       target,
       readFileSync(source, 'utf8')
-        .replaceAll('<PROJECT_ROOT>', roots.projectRoot)
-        .replaceAll('<PLUGIN_ROOT>', roots.pluginRoot),
+        .replaceAll('<PROJECT_ROOT>', spellRoot(roots.projectRoot, intoJson))
+        .replaceAll('<PLUGIN_ROOT>', spellRoot(roots.pluginRoot, intoJson)),
     );
   }
 }

@@ -2,14 +2,14 @@ import { execFileSync } from 'node:child_process';
 import { mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { buildSync } from 'esbuild';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-const GUARDED_READ = new URL(
-  '../../../core/facts/paths/readGuardedFileSync.ts',
-  import.meta.url,
-).pathname;
+const GUARDED_READ = fileURLToPath(
+  new URL('../../../core/facts/paths/readGuardedFileSync.ts', import.meta.url),
+);
 
 /**
  * Drive the guarded read from a footer appended to the bundle.

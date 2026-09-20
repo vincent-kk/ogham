@@ -1,20 +1,24 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, relative, sep } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { listScannedFilePaths } from '../../../core/tree/fractalTree/scanner/listScannedFilePaths.js';
-import type { ScanOptions } from '../../../types/scan.js';
 import { scanProject } from '../../../core/tree/fractalTree/scanner/scanProject.js';
+import type { ScanOptions } from '../../../types/scan.js';
 
-const REPOSITORY_SUBTREE = new URL('../../../core/tree/', import.meta.url)
-  .pathname;
+const REPOSITORY_SUBTREE = fileURLToPath(
+  new URL('../../../core/tree/', import.meta.url),
+);
 
-const HARNESS_FIXTURE = new URL(
-  '../../integration/reviewFlow/fixtures/preserved-s0/',
-  import.meta.url,
-).pathname;
+const HARNESS_FIXTURE = fileURLToPath(
+  new URL(
+    '../../integration/reviewFlow/fixtures/preserved-s0/',
+    import.meta.url,
+  ),
+);
 
 const temporaryRoots: string[] = [];
 

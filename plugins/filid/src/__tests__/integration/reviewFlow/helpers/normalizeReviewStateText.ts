@@ -22,7 +22,10 @@ export function normalizeReviewStateText(
     2,
   );
   roots.forEach((root, index) => {
-    text = text.replaceAll(root, `<ROOT${index}>`);
+    // A Windows root reaches the text with every backslash escaped, so its raw
+    // spelling never occurs there; on POSIX the two spellings are one.
+    for (const spelling of new Set([root, JSON.stringify(root).slice(1, -1)]))
+      text = text.replaceAll(spelling, `<ROOT${index}>`);
   });
   return text;
 }

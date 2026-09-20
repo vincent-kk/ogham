@@ -9,7 +9,7 @@ import {
 } from 'node:fs';
 import { join } from 'node:path';
 
-import { tmp } from '@ogham/cross-platform';
+import { portableResolve, tmp } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { McpToolName } from '../../../constants/mcpToolNames.js';
@@ -231,7 +231,12 @@ describe('restructure precondition never reads outside the project root', () => 
   );
 
   it('reports only project-root-mismatch for a plan forged to the filesystem root', async () => {
-    forgePlan({ projectRoot: '/', readPaths: [outsideDirectory] });
+    // A bare `/` carries no drive on Windows, so it would resolve against
+    // the current one and leave the fixture's own volume outside the root.
+    forgePlan({
+      projectRoot: portableResolve(projectRoot, '/'),
+      readPaths: [outsideDirectory],
+    });
     expect(await preconditionCodes(planPath)).toEqual([
       'project-root-mismatch',
     ]);
