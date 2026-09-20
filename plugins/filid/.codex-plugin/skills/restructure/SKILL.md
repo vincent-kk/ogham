@@ -3,7 +3,7 @@ name: restructure
 user-invocable: true
 description: 'Create a read-only FCA placement plan, obtain approval, execute it via external file operations, and verify exact postconditions. Use when a unit belongs at another fractal or misplacement is flagged.'
 argument-hint: '[path] <placement requests> [--dry-run] [--auto-approve]'
-version: '1.3.0'
+version: '1.5.0'
 complexity: complex
 plugin: filid
 ---
@@ -23,15 +23,19 @@ Use `enrich-docs` when only documents need improvement.
 
 ## Workflow
 
+### 0. Bootstrap facts
+
+Run the [facts bootstrap](../.shared/facts-bootstrap.md) for the project root, then continue to step 1 in the same turn. Facts are settled twice in this skill: once here, so the plan reads a current graph, and once after every move lands (step 5) — never in between. A submission made while files are moving is measured against a tree that keeps changing, so its epoch moves and nothing settles.
+
 ### 1. Create the read-only plan
 
 Translate explicit placement requests into `RestructurePlanInput` and call `restructure` with `action: "plan"`. Read the persisted artifact's `.data`; verify its artifact hash. Stop when the envelope is non-`ok` or the plan contains unresolved moves. The summary, each unresolved `decisions[]` entry, diagnostic and finding carry `nextAction`: follow it, or report it verbatim when you cannot.
 
 A request whose computed target equals its current path arrives in `alreadyPlaced`, never in `moves`. Report it as already correctly placed, execute nothing for it, and do not treat it as a failure. Its `affectedImports` is empty; a directory move in the same plan may still carry it along.
 
-`moves` is an execution order. Each `targetPath` is where that move puts its unit when it runs, and a later move whose source holds that path carries it along. Every import rewrite names the consumer's final path and the specifier it needs after all moves. Moves no order can satisfy arrive in `unresolved` with `move-order-conflict`. Imports filid cannot rewrite arrive in `delegatedImports`; the move still runs and you write those specifiers.
+`moves` is an execution order. Each `targetPath` is where that move puts its unit when it runs, and a later move whose source holds that path carries it along. Every `affectedImports` entry names the consumer's final path and the file it must load after all moves (`requiredResolvedPath`), plus a `suggestedSpecifier` when filid can synthesize one; without it, the move still runs and you write that specifier. Moves no order can satisfy arrive in `unresolved` with `move-order-conflict`.
 
-The MCP call calculates consumer placement, LCA, target node type, required artifacts, and import rewrites. It does not modify the project tree.
+The MCP call calculates consumer placement, LCA, target node type, required artifacts, and import requirements. It does not modify the project tree.
 
 ### 2. Validate preconditions
 
@@ -39,17 +43,29 @@ Call `restructure` with `action: "precondition"` and the absolute plan artifact 
 
 ### 3. Present and approve
 
-Show the plan ID/hash and every Current/Target/Type/Basis/LCA decision, artifact, and import rewrite. `--dry-run` ends here. Otherwise obtain approval unless `--auto-approve` explicitly authorized this exact validated artifact.
+Show the plan ID/hash and every Current/Target/Type/Basis/LCA decision, artifact, and import requirement. `--dry-run` ends here. Otherwise obtain approval unless `--auto-approve` explicitly authorized this exact validated artifact.
 
 ### 4. Execute outside MCP
 
-The calling environment updates DETAIL.md and boundary-changing INTENT.md first, then creates the required artifacts of `alreadyPlaced` entries. It runs `moves` in listed order — each move relocates its exact source path to its `targetPath` and then creates that move's required artifacts — and only after the last move applies `affectedImports`, then edits each `delegatedImports` entry so it loads `requiredResolvedPath`. Never reorder moves. Use cross-platform path/file helpers and preserve unrelated changes.
+The calling environment updates DETAIL.md and boundary-changing INTENT.md first, then creates the required artifacts of `alreadyPlaced` entries. It runs `moves` in listed order — each move relocates its exact source path to its `targetPath` and then creates that move's required artifacts — and only after the last move changes each `affectedImports` entry so it loads its `requiredResolvedPath` — its `suggestedSpecifier` when present, otherwise a relative path-like specifier in the file's existing style. Never reorder moves. Use cross-platform path/file helpers and preserve unrelated changes.
 
 Filid MCP never moves a file and never rewrites an import. This skill does not turn those operations into a generic MCP capability.
 
-### 5. Validate exact postconditions
+### 5. Settle facts for the new layout
+
+Every move and every import edit is done, so the tree is still again. In this order, in the same turn:
+
+1. Run the [facts bootstrap](../.shared/facts-bootstrap.md) once for the whole repository — one `status`, one extraction over the list it names, one `submit`. Moved files are new paths and their consumers changed, so a partial batch leaves the graph half-old.
+2. Have a **separate subagent** extract the same scope with its own Bash call and send `mcp__plugin_filid_tools__facts({ action: "compare", path: PROJECT_ROOT, file: <its extraction output> })` — no `generationId`, since this settles the live store rather than a review generation. That subagent reports what the comparison returned and judges nothing: an actor that confirms its own reading confirms nothing.
+3. Adjudicate the items the comparison opened, through the bootstrap's adjudicate step. A `dismiss` is confirmed by a different subagent there, not here.
+
+### 6. Validate exact postconditions
 
 Call `restructure` with `action: "postcondition"` and the same artifact. Source absence, target presence, required artifacts, imports, boundaries, and DAG must all pass. Report a postcondition failure as failure; do not silently replan.
+
+A postcondition that comes back `indeterminate` because the graph holds unknown files names those files: bootstrap them (step 5.1) and call `postcondition` again. Two findings are facts work, and each one's `nextAction` is the contract: a reported reference that sits in a comment or a string is re-extracted with a tool that does not report it, submitted — which returns it as a `coverage-shrank` item — and then dismissed through `adjudicate` with a second actor confirming, never by editing the consumer to satisfy the reader; an entry point whose exports nothing states is re-extracted alone with a tool that reports that section, or attested. Follow the sentence the response carries rather than reporting either upward.
+
+Two things in the summary qualify a pass, and both are reported rather than dropped. `summary.filesOutsideFactsScope` above zero means the declared `facts.covers` excluded that many scanned files, so no reference-based rule ran over them and the `nextAction` carries the sentence that says so. A `status: ok` whose `data.unknownFiles.other` is non-empty was verified over known edges only. Report either as it stands, and follow the summary's `nextAction` to narrow it.
 
 ## Options
 

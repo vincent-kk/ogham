@@ -3,7 +3,7 @@ name: scan
 user-invocable: true
 description: 'Run the single full-project FCA audit across snapshot structure, document and import boundaries, dependency DAG, and verification contracts. Use before review or integration, or as a health check.'
 argument-hint: '[path]'
-version: '2.1.1'
+version: '2.2.0'
 complexity: medium
 plugin: filid
 ---
@@ -27,6 +27,10 @@ For a targeted boundary question, use `/filid:context-query`. For a proposed sou
 ## Workflow
 
 Run all phases in one continuous operation. Large payloads and artifacts are internal evidence and are not echoed to the user.
+
+### Phase 0 — Facts Bootstrap
+
+Run the [facts bootstrap](../.shared/facts-bootstrap.md) for the project root, then continue to Phase 1 in the same turn.
 
 ### Phase 1 — Snapshot Summary
 
