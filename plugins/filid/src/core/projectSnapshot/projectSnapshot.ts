@@ -53,17 +53,39 @@ export interface CreateProjectSnapshotOptions {
 }
 
 /**
+ * How many bytes of already-read source one snapshot holds for its hash.
+ *
+ * Past this the remaining files are read again by `computeSnapshotHash`, which
+ * costs time and changes no answer — the point of the cap is that a project
+ * large enough to matter cannot make one snapshot hold its whole source.
+ */
+const SNAPSHOT_HASH_BYTE_BUDGET = 64 * 1024 * 1024;
+
+/**
  * Read the facts store once and classify every scanned file from that read.
  * @param root Absolute project root, already resolved.
  * @param config The configuration this snapshot is being built with.
- * @returns The store contents and each scanned file's state (spec §3).
+ * @returns The store contents, each scanned file's state (spec §3), and the
+ * bytes the classification read, for the snapshot hash to reuse.
  */
 async function readSnapshotFacts(
   root: string,
   config: FilidConfig,
-): Promise<{ facts: ProjectFacts; states: Map<string, FactsFileState> }> {
+): Promise<{
+  facts: ProjectFacts;
+  states: Map<string, FactsFileState>;
+  bytes: Map<string, Uint8Array>;
+}> {
   const facts = await readProjectFacts(root, config);
-  return { facts, states: classifyProjectFacts(root, facts) };
+  const collect = {
+    bytes: new Map<string, Uint8Array>(),
+    maxTotalBytes: SNAPSHOT_HASH_BYTE_BUDGET,
+  };
+  return {
+    facts,
+    states: classifyProjectFacts(root, facts, collect),
+    bytes: collect.bytes,
+  };
 }
 
 /**
@@ -262,6 +284,7 @@ export async function createProjectSnapshot(
       // narrowed one adds the selection, so the two cannot collide.
       ...(isEveryAxis ? [] : [axes]),
     ],
+    stored?.bytes,
   );
 
   return {

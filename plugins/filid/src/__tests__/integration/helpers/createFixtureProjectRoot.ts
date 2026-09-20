@@ -13,8 +13,14 @@ import { portableJoin, tmp } from '@ogham/cross-platform';
  * the behaviour under test.
  *
  * @param prefix - Name prefix of the temporary directory.
+ * @param parent - Directory to create it in. Pass the run's root for a fixture
+ * no teardown of its own removes; omitting it uses the system temporary
+ * directory, and then the caller's own cleanup is the only one.
  * @returns The canonical absolute path of the new directory.
  */
-export function createFixtureProjectRoot(prefix: string): string {
-  return realpathSync(mkdtempSync(portableJoin(tmp(), prefix)));
+export function createFixtureProjectRoot(
+  prefix: string,
+  parent?: string,
+): string {
+  return realpathSync(mkdtempSync(portableJoin(parent ?? tmp(), prefix)));
 }

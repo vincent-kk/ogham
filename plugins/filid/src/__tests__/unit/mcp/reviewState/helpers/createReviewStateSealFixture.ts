@@ -1,9 +1,10 @@
+import { cpSync } from 'node:fs';
+
 import { createFixtureProjectRoot } from '../../../../integration/helpers/createFixtureProjectRoot.js';
 import { seedFacts } from '../../../../integration/helpers/seedFacts.js';
 
 import { createReviewRulePluginRoot } from './createReviewRulePluginRoot.js';
-import { runReviewStateFixtureGit } from './runReviewStateFixtureGit.js';
-import { writeReviewStateFixtureFile } from './writeReviewStateFixtureFile.js';
+import { resolveSealFixtureTemplate } from './resolveSealFixtureTemplate.js';
 
 /** Complete temporary-repository identity used by seal integration tests. */
 export interface ReviewStateSealFixture {
@@ -25,38 +26,30 @@ export interface ReviewStateSealFixture {
  * draw no reference-based conclusion about, and every test built on it would
  * be testing the absence of facts instead of what it means to test.
  *
+ * The history is copied from a template built once per worker process rather
+ * than committed again per fixture; a copy of a repository is that repository,
+ * down to the object ids and the index. The facts are seeded after the copy
+ * because the store is keyed by the canonical project root, which every copy
+ * has its own of.
+ *
  * @returns Fixture paths plus the prior plugin-root environment value.
+ * @throws When the template cannot be built or the facts are refused.
  */
 export async function createReviewStateSealFixture(): Promise<ReviewStateSealFixture> {
   const originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   const pluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = pluginRoot;
+  const template = resolveSealFixtureTemplate();
   const projectRoot = createFixtureProjectRoot('filid-review-seal-');
-  const branchName = 'feature/seal-v7';
-  runReviewStateFixtureGit(projectRoot, ['init', '-b', 'main']);
-  runReviewStateFixtureGit(projectRoot, [
-    'config',
-    'user.email',
-    'filid@example.test',
-  ]);
-  runReviewStateFixtureGit(projectRoot, ['config', 'user.name', 'Filid Test']);
-  writeReviewStateFixtureFile(
-    projectRoot,
-    'src/value.ts',
-    'export const value = 1;\n',
-  );
-  writeReviewStateFixtureFile(projectRoot, 'yarn.lock', 'base-lock\n');
-  runReviewStateFixtureGit(projectRoot, ['add', '--all']);
-  runReviewStateFixtureGit(projectRoot, ['commit', '-m', 'base']);
-  runReviewStateFixtureGit(projectRoot, ['checkout', '-b', branchName]);
-  writeReviewStateFixtureFile(
-    projectRoot,
-    'src/value.ts',
-    'export const value = 2;\n',
-  );
-  writeReviewStateFixtureFile(projectRoot, 'yarn.lock', 'feature-lock\n');
-  runReviewStateFixtureGit(projectRoot, ['add', '--all']);
-  runReviewStateFixtureGit(projectRoot, ['commit', '-m', 'feature']);
+  cpSync(template.root, projectRoot, {
+    recursive: true,
+    preserveTimestamps: true,
+  });
   await seedFacts(projectRoot);
-  return { projectRoot, pluginRoot, branchName, originalPluginRoot };
+  return {
+    projectRoot,
+    pluginRoot,
+    branchName: template.branchName,
+    originalPluginRoot,
+  };
 }

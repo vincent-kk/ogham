@@ -1,3 +1,9 @@
+import {
+  canonicalizeTargetPathSync,
+  pathForCompare,
+  portableResolve,
+} from '@ogham/cross-platform';
+
 import { checkDeclaredInputs } from '../validation/utils/checkDeclaredInputs.js';
 import { computeLineDigest } from '../sideTable/utils/computeLineDigest.js';
 import { createDeclaredInputHasher } from '../epoch/createDeclaredInputHasher.js';
@@ -9,6 +15,25 @@ import { classifyFactsFile } from '../state/classifyFactsFile.js';
 import type { FactsFileState } from '../state/classifyFactsFile.js';
 
 import type { ProjectFacts } from './readProjectFacts.js';
+
+/**
+ * Where a caller collects the bytes this classification already read, so the
+ * same request does not read them a second time.
+ */
+export interface ClassifiedFileBytes {
+  /**
+   * Filled with the bytes of every file read here, keyed by
+   * `pathForCompare(portableResolve(projectRoot, path))` — the key
+   * `computeSnapshotHash` looks a file up by. The caller owns the map.
+   */
+  bytes: Map<string, Uint8Array>;
+  /**
+   * Collecting stops once holding one more file would pass this total. A file
+   * left uncollected is simply read again by whoever needs it, so the cap
+   * bounds memory without changing any answer.
+   */
+  maxTotalBytes: number;
+}
 
 /**
  * Decide the facts state of every scanned file (spec §3).
@@ -25,14 +50,20 @@ import type { ProjectFacts } from './readProjectFacts.js';
  *
  * @param projectRoot - Absolute project root, used as given.
  * @param facts - One read of the store against the current tree.
+ * @param collect - Where to hand back the bytes read here. Omit it and nothing
+ * is collected; pass it only when the collected bytes will be used against the
+ * same tree this call read, since they are a snapshot of that moment.
  * @returns Each scanned path mapped to its state.
  */
 export function classifyProjectFacts(
   projectRoot: string,
   facts: ProjectFacts,
+  collect?: ClassifiedFileBytes,
 ): Map<string, FactsFileState> {
   const hashDeclaredInput = createDeclaredInputHasher(projectRoot);
   const states = new Map<string, FactsFileState>();
+  const canonicalRoot = canonicalProjectRoot(projectRoot);
+  let collected = 0;
   const judgementsUnreadableFor = (path: string): boolean =>
     facts.judgementsDirectoryUnreadable ||
     facts.damagedJudgementShards.has(
@@ -46,7 +77,18 @@ export function classifyProjectFacts(
     const current =
       record === null && openItems.length === 0
         ? null
-        : hashProjectFile(projectRoot, path);
+        : hashProjectFile(projectRoot, path, canonicalRoot);
+    if (
+      collect &&
+      current?.ok === true &&
+      collected + current.contents.byteLength <= collect.maxTotalBytes
+    ) {
+      collect.bytes.set(
+        pathForCompare(portableResolve(projectRoot, path)),
+        current.contents,
+      );
+      collected += current.contents.byteLength;
+    }
     states.set(
       path,
       classifyFactsFile(
@@ -73,6 +115,20 @@ export function classifyProjectFacts(
     );
   }
   return states;
+}
+
+/**
+ * The canonical location of the project root, for the whole classification.
+ * @param projectRoot Absolute project root.
+ * @returns Its canonical location, or undefined when it cannot be resolved —
+ * then each file resolves it again and reports the failure as its own.
+ */
+function canonicalProjectRoot(projectRoot: string): string | undefined {
+  try {
+    return canonicalizeTargetPathSync(projectRoot, projectRoot);
+  } catch {
+    return undefined;
+  }
 }
 
 /**

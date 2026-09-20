@@ -38,17 +38,28 @@ export function findUnownedReferences(
   );
   const verificationPaths = new Set(options.verificationPaths ?? []);
   const results: UnownedReference[] = [];
+  // Keyed on the target alone: the candidate list is built above and does not
+  // change while the loop runs, so ownership is a function of the target path.
+  const ownerByPath = new Map<string, string | null>();
+
+  const resolveOwnerCached = (targetPath: string): string | null => {
+    const cached = ownerByPath.get(targetPath);
+    if (cached !== undefined) return cached;
+    const owner = resolveOwnerPath(nodePathsDeepestFirst, targetPath);
+    ownerByPath.set(targetPath, owner);
+    return owner;
+  };
 
   for (const reference of references) {
     if (reference.certainty === 'indeterminate') continue;
     if (reference.resolvedPath === null) continue;
     if (verificationPaths.has(reference.sourceFile)) continue;
 
-    if (!resolveOwnerPath(nodePathsDeepestFirst, reference.sourceFile)) {
+    if (!resolveOwnerCached(reference.sourceFile)) {
       results.push({ reference, unownedPath: reference.sourceFile });
       continue;
     }
-    if (!resolveOwnerPath(nodePathsDeepestFirst, reference.resolvedPath))
+    if (!resolveOwnerCached(reference.resolvedPath))
       results.push({ reference, unownedPath: reference.resolvedPath });
   }
 

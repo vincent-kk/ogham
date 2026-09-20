@@ -37,7 +37,7 @@
 
 - `createProjectSnapshot(projectRoot, registry, config, options?): Promise<ProjectSnapshot>` — read-only snapshot을 생성한다. `options.axes`로 축을 부분 지정하면 지정하지 않은 축은 수집한다.
 - `SnapshotAxisSelection` — `entrySurfaces`, `dependencies`, `verification` 세 boolean. `ProjectSnapshot.collectedAxes`에 그대로 실린다.
-- `computeSnapshotHash(projectRoot, filePaths, inputs?)` — 정렬된 relative path, content와 supplemental input의 SHA-256을 반환한다.
+- `computeSnapshotHash(projectRoot, filePaths, inputs?, knownBytes?)` — 정렬된 relative path, content와 supplemental input의 SHA-256을 반환한다. `knownBytes`는 `pathForCompare(absolutePath)` 키로 **이미 읽은 바이트**를 건네는 선택 인자다. 같은 요청 안에서 facts classify가 레코드 대조용으로 읽은 바이트를 여기서 다시 읽지 않으려는 것이며, 해시 입력 바이트 자체는 같으므로 결과 해시는 바뀌지 않는다. 건네지지 않은 경로는 지금처럼 이 함수가 읽는다.
 - `resolveHashFile(projectRoot, filePath): HashFile` — hash 대상 경로를 project root 기준 `{ absolutePath, relativePath }`로 정규화한다. 경로가 root 밖이면 던진다. 판정은 경로 문자열로만 하며 symlink는 따라가지 않는다. `computeSnapshotHash`와, 파일 내용이 아닌 경로 상태를 hash에 섞는 호출자(restructure의 probe)가 같은 containment를 쓰게 하려고 공개한다.
 - graph evidence는 source file, raw specifier와 resolved target을 보존한다.
 

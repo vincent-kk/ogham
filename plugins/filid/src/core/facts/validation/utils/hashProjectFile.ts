@@ -37,6 +37,11 @@ export type ProjectFileDigest =
  *
  * @param projectRoot - Absolute project root the path must stay inside.
  * @param relativePath - POSIX path relative to the project root.
+ * @param canonicalProjectRoot - The canonical location of `projectRoot`, when
+ * the caller already has it. It is what this function would compute from
+ * `projectRoot` alone, hoisted out of a loop that would otherwise re-resolve
+ * one unchanging path per file; omitting it resolves it here, and a caller that
+ * cannot resolve it omits it so the failure is still reported per file.
  * @returns The digest and the bytes, or `unreadable` when the path escapes the
  * project, is not a regular file, exceeds the source cap, or cannot be read —
  * all of which mean no record can bind to it.
@@ -44,6 +49,7 @@ export type ProjectFileDigest =
 export function hashProjectFile(
   projectRoot: string,
   relativePath: string,
+  canonicalProjectRoot?: string,
 ): ProjectFileDigest {
   let canonical: string;
   let canonicalRoot: string;
@@ -52,7 +58,9 @@ export function hashProjectFile(
       projectRoot,
       resolveContainedPath(projectRoot, relativePath),
     );
-    canonicalRoot = canonicalizeTargetPathSync(projectRoot, projectRoot);
+    canonicalRoot =
+      canonicalProjectRoot ??
+      canonicalizeTargetPathSync(projectRoot, projectRoot);
   } catch {
     return { ok: false, reason: 'unreadable' };
   }
