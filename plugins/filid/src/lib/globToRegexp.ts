@@ -18,10 +18,16 @@ const QUESTION_MARK_PATTERN = /\?/g;
  * @description Convert a minimal picomatch-style glob into a `RegExp`.
  *
  * Supported syntax:
- *   `**` — any path (including separators)
+ *   `**` — any path (including separators and newlines)
  *   `*`  — any single path segment (no `/`)
  *   `?`  — any single character within a segment (no `/`)
  *   All other characters are matched literally (regex metacharacters escaped).
+ *
+ * `**` compiles to `[\s\S]*`, not `.*`: a regular `.` excludes newlines, so a
+ * file whose name contains one would fall outside every `**` pattern while
+ * still matching `*` (which compiles to a negated class and does match one).
+ * That split made the same file in scope under one pattern and out under
+ * another. Every character a filename may hold is now matched by both.
  *
  * Advanced globbing (brace sets, negation, character classes beyond
  * escape-safety) is NOT supported — the intended use cases are path-exempt
@@ -36,7 +42,7 @@ export function globToRegExp(pattern: string): RegExp {
     .replace(REGEXP_METACHARACTER_PATTERN, '\\$&')
     .replace(DOUBLE_STAR_PATTERN, '__DOUBLESTAR__')
     .replace(SINGLE_STAR_PATTERN, '[^/]*')
-    .replace(DOUBLE_STAR_PLACEHOLDER_PATTERN, '.*')
+    .replace(DOUBLE_STAR_PLACEHOLDER_PATTERN, '[\\s\\S]*')
     .replace(QUESTION_MARK_PATTERN, '[^/]');
   return new RegExp(`^${escaped}$`);
 }

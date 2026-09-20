@@ -3,6 +3,8 @@
 ## Requirements
 
 - `status`는 `{ projectState, resolutionEpoch, missing[], needsResolution[], uncertain[], toolError[], rejected[], unadjudicated[], outputRequirement }`를 돌려준다. 프로젝트를 바꾸지 않는다.
+- `status`의 `unadjudicated[]`는 **항목 단위**다. 열린 항목마다 `adjudicate`가 요구하는 값 전부(`path`·`kind`·`reference`·`resolvedPath`·현재 `contentHash`)와 판단에 필요한 값(`origin`·`state`·`lines`·`staleUnderNewContent`, 확인 대기 중인 `actor`·`reason`)을 싣는다. 경로만 주면 호출자가 key를 추측하게 되고, 추측은 `facts-adjudication-no-such-item`으로 거절되며, 그 거절의 다음 행동이 다시 같은 목록을 가리켜 루프가 된다(P5). 부트스트랩(§8a)의 `status → adjudicate`가 성립하는 지점이다.
+- 열린 항목 목록에는 **판정할 수 있는 것만** 싣는다. 트리·범위를 벗어난 파일, 읽을 수 없는 파일, 그리고 판정 대상 줄이 바뀌어 만료한 항목은 `adjudicate`가 받지 않으므로 목록에서 뺀다. `status`는 읽기 전용이므로 만료 항목을 지우지는 않는다 — 다음 쓰기 action이 지운다.
 - `submit { file, resolutionEpoch }`의 epoch 검사는 호출 전체에 대해 all-or-nothing이다. 전달된 epoch가 현재와 다르면 아무것도 저장하지 않고 `facts-epoch-moved`, 새 epoch, `added[]`·`removed[]`·바뀐 해석 입력을 돌려준다.
 - epoch가 맞으면 레코드마다 §4.1–4.3을 검사해 통과한 것으로 그 파일의 레코드를 교체하고, 거부된 레코드·참조를 `rejected[]`로 돌려준다.
 - 같은 epoch 안에서 `submit`을 여러 번 호출할 수 있고, 각 호출은 자기가 실은 파일의 레코드만 교체한다. 상한을 넘는 파일은 `facts-file-too-large`와 함께 분할 제출을 안내한다.
@@ -14,13 +16,21 @@
 - 두 action의 스캔은 `core/tree/fractalTree`의 `scanFileSetOptions`를 쓴다. 그것이 snapshot과 같은 파일 집합을 보기 위한 단일 정본이다. 기본 옵션을 쓰면 깊이 10을 넘는 파일이 snapshot에는 있고 facts 범위에는 없게 된다.
 - 레코드가 선언한 해석 입력은 제출 때 현재 hash와 대조하고, 어긋나면 그 레코드를 거부한다. 거부는 두 가지로 나뉜다 — 내용이 달라진 것(`stale`, 재추출)과 서버가 읽지 못하는 것(`unreadable`, 재추출로는 풀리지 않으므로 선언 제거·권한·attested). 어느 입력이 왜 걸렸는지는 경로와 사유 code로만 돌려주고 내용은 돌려주지 않는다. 선언 입력은 프로젝트 epoch에 들어가지 않으므로 한 배치를 받아들여도 다음 배치의 epoch는 움직이지 않는다 — 분할 제출이 성립하는 이유다.
 
+- `compare { file, generationId? }`는 후보를 **레코드로 저장하지 않고** 비교한다. 프로젝트 안 경로로 해석된 불일치만 부속 표에 미판정 항목으로 남고, 그 밖의 차이는 `informational[]`에만 실려 파일 상태를 바꾸지 않는다. 응답의 `sideTableItems[]`는 비교한 파일의 페이지 **전체**를 `status`와 같은 모양으로 싣는다 — 이번 비교가 만든 차이만 실으면 다른 제출이 연 항목이 보이지 않고, 보이지 않는 항목은 판정할 수 없다. `generationId`가 오면 지금은 "그 generation에 동결된 사실이 없다"는 코드로 답한다 — 동결은 뒤 단계다.
+- `adjudicate { sourcePath, contentHash, actor, items }`는 호출 전체를 파일 byte에 묶는다. `contentHash`가 현재와 다르면 아무것도 판정하지 않는다(`facts-adjudication-stale-content`). `actor`가 접기 뒤 비면 그것도 호출 전체를 거부하지만 **다른 코드**를 쓴다(`facts-adjudication-actor-required`) — byte를 다시 읽으라는 다음 행동은 actor가 빈 호출을 고치지 못하므로 그 거부를 스스로 재생산한다. 항목 하나가 표에 없거나 이유 없는 `dismiss`이면 그 항목만 거부하고 나머지는 적용한다.
+- 이번 호출이 **판정한** 항목만 현재 `contentHash`로 다시 각인한다. 아무도 다시 읽지 않은 항목의 `staleUnderNewContent`까지 지우면 일어나지 않은 재확인을 주장하게 된다.
+- `compare`의 `file`은 `submit`의 `file`과 **같은 가드**를 지난다(정규화 → 보호된 열기 → 프로젝트 밖 · 일반 파일 · 상한).
+
 ## API Contracts
 
 - `handleFacts(input): Promise<FactsResult>` — `action`이 handler를 고른다.
+- `status`는 추출이 필요한 파일(범위 안의 `missing` ∪ `needs-resolution`)의 목록을 서버 cache 디렉터리에 줄 단위로 쓰고 `extractionList: { path, count, unrepresentable }`로 알린다. 에이전트는 그 경로를 추출기의 `--files-from`에 그대로 넘긴다 — 범위를 서버가 정하므로 추출기는 스캔·ignore·scope를 다시 구현하지 않는다.
 - `status` 요약은 상태별 개수를, `data`는 상태별 경로 목록과 생략된 개수(`truncated`)를 싣는다. 한 번도 제출하지 않은 저장소는 스캔된 모든 파일이 `missing`이므로 상한이 곧 응답 크기의 상한이다.
-- `submit` 요약은 `accepted`·`removed`·`rejectedRecords`·`rejectedClaims`·`epochMoved`를, `data`는 거부 목록과 epoch 차이를 싣는다.
+- `submit` 요약은 `accepted`·`removed`·`rejectedRecords`·`rejectedClaims`·`epochMoved`·`openedItems`·`closedItems`·`removedAdjudicatedItems`를, `data`는 거부 목록과 epoch 차이를 싣는다. 개수는 모두 **실제로 저장된 shard·페이지만** 센다.
+- 트리·범위를 벗어난 파일의 표 페이지를 지울 때 그 페이지가 담고 있던 판정(`pending-dismiss`·`adopted`·`dismissed`)의 개수를 `facts-adjudicated-items-removed`로 보고한다. 막지 않는 보고다(S6 R-3) — 제거 자체는 옳고 되돌릴 것이 없다. rename은 새 경로의 첫 제출에 비교 대상 레코드가 없어 축소로 잡히지 않으므로, 다음 행동은 새 경로로 `compare`를 한 번 돌리는 것이다.
 - 신뢰 경계 오류는 `ToolDiagnosticError`로 던져 공통 error envelope를 탄다: `facts-file-path-not-absolute`, `facts-file-inside-project`, `facts-file-not-regular`, `facts-file-too-large`, `facts-file-unreadable`, `facts-file-not-json`.
 - 저장 도중 다른 writer가 같은 레코드를 바꾸면 그 레코드는 저장되지 않고 `facts-record-changed` 진단 하나가 실리며 status는 `indeterminate`다.
+- 부속 표 페이지를 빼앗기면 `facts-side-table-changed`이고, 이것도 `indeterminate`다 — 레코드는 들어갔는데 항목이 안 들어간 제출은 항목 없이 좁아진 그래프다. 다음 행동은 **진 action의 일**이다: `submit`은 재제출, `compare`는 같은 후보로 재비교, `adjudicate`는 `status`로 현재 항목을 다시 받아 재판정.
 
 ## Design Decisions
 

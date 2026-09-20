@@ -17,18 +17,21 @@ import { capFileList } from './capFileList.js';
 /**
  * The answer every facts action gives a project with no declared scope.
  *
- * Out of scope is a positive declaration, so a project that has not made one is
- * not quietly treated as covering nothing, and it is not a pass either: the
- * status is `unsupported` and the single diagnostic names the config edit that
- * changes it (spec §2.3, §3).
+ * Reached only when the effective scope covers nothing, which now means the
+ * project declared an empty `facts.covers` — an absent declaration falls back
+ * to the default scope instead. It is not a pass: the status is `unsupported`
+ * and the diagnostic names the config edit that changes it (spec §2.3, §3).
  *
  * @param projectRoot - Absolute project root, echoed into the payload.
  * @param resolutionEpoch - The epoch, which is well-defined without a scope.
+ * @param extractionListPath - Where the list would be written; no scope means
+ * nothing to extract, so the file is reported empty rather than omitted.
  * @returns A status payload holding empty lists and one actionable diagnostic.
  */
 export function buildUninitializedPayload(
   projectRoot: string,
   resolutionEpoch: string,
+  extractionListPath: string,
 ): ToolPayload<FactsStatusSummary, FactsStatusData> {
   const empty = capFileList([]);
   return {
@@ -44,7 +47,10 @@ export function buildUninitializedPayload(
       uncertain: 0,
       toolError: 0,
       unsupported: 0,
+      unadjudicatedItems: 0,
+      scopeSource: 'config',
       outputRequirement: FACTS_OUTPUT_REQUIREMENT,
+      extractionList: { path: extractionListPath, count: 0, unrepresentable: 0 },
     },
     data: {
       missing: empty,
@@ -52,7 +58,7 @@ export function buildUninitializedPayload(
       uncertain: empty,
       toolError: empty,
       rejected: empty,
-      unadjudicated: empty,
+      unadjudicated: { items: [], truncated: 0 },
     },
     diagnostics: [
       {

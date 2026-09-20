@@ -27,6 +27,11 @@ export interface FactsProject {
    */
   write: (relativePath: string, contents: string) => void;
   /**
+   * Remove files from the project, ignoring the ones that are not there.
+   * @param relativePaths Project-relative POSIX paths.
+   */
+  remove: (...relativePaths: string[]) => void;
+  /**
    * Write a submission document outside the project.
    * @param name File name.
    * @param body JSON text, or any bytes when testing the guard.
@@ -91,6 +96,10 @@ export function createFactsProject(
     root,
     outside,
     write,
+    remove: (...relativePaths) => {
+      for (const relativePath of relativePaths)
+        rmSync(join(root, ...relativePath.split('/')), { force: true });
+    },
     submission: (name, body) => {
       const path = join(outside, name);
       writeFileSync(path, body);

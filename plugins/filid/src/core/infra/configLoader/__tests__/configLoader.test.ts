@@ -65,6 +65,7 @@ describe('createDefaultConfig — language seeding', () => {
       'language',
       'adapters',
       'rules',
+      'facts',
     ]);
   });
 });

@@ -21,6 +21,12 @@ export const FACTS_RECORD_EXTENSION = '.json';
  */
 export const FACTS_SHARD_NAME_LENGTH = 2;
 
+/** Directory under the facts store that holds the adjudication side table. */
+export const FACTS_SIDE_TABLE_DIRECTORY = 'adjudications';
+
+/** File holding the paths an extractor should read, one per line. */
+export const FACTS_EXTRACTION_LIST_FILE = 'extract.txt';
+
 /** File holding the consecutive-epoch counter behind `facts-tree-unstable`. */
 export const FACTS_EPOCH_DRIFT_FILE = 'epoch-drift.json';
 
@@ -97,6 +103,19 @@ export const FACTS_FILE_STATES = {
   TOOL_ERROR: 'tool-error',
 } as const;
 
+/**
+ * Cause codes a facts state contributes to the graph's `unknownFiles`.
+ *
+ * One per state that leaves a file unknown, so a facts-derived unknown merges
+ * with a graph-derived one without translating either.
+ */
+export const FACTS_UNKNOWN_CAUSES = {
+  MISSING: 'facts-missing',
+  NEEDS_RESOLUTION: 'facts-needs-resolution',
+  UNCERTAIN: 'facts-uncertain',
+  TOOL_ERROR: 'facts-tool-error',
+} as const;
+
 /** Provenance tiers a record may declare (spec §2.1, §4.6). */
 export const FACTS_TIERS = {
   TOOL: 'tool',
@@ -111,10 +130,35 @@ export const FACTS_REFERENCE_KINDS = {
   FRAMEWORK: 'framework',
 } as const;
 
+/** How an item reached the side table (spec §4.5). */
+export const FACTS_ADJUDICATION_ORIGINS = {
+  MISSING_IN_STORE: 'missingInStore',
+  RESOLUTION_DIFFERS: 'resolutionDiffers',
+  COVERAGE_SHRANK: 'coverage-shrank',
+  RESOLUTION_CHANGED: 'resolution-changed',
+} as const;
+
+/** Where one side-table item stands. */
+export const FACTS_ADJUDICATION_STATES = {
+  UNADJUDICATED: 'unadjudicated',
+  PENDING_DISMISS: 'pending-dismiss',
+  ADOPTED: 'adopted',
+  DISMISSED: 'dismissed',
+  CLOSED_BY_RECORD: 'closed-by-record',
+} as const;
+
+/** What an actor claims about one item. */
+export const FACTS_DECISIONS = {
+  ADOPT: 'adopt',
+  DISMISS: 'dismiss',
+} as const;
+
 /** Public actions exposed by the facts dispatcher. */
 export const FACTS_ACTIONS = {
   STATUS: 'status',
   SUBMIT: 'submit',
+  COMPARE: 'compare',
+  ADJUDICATE: 'adjudicate',
 } as const;
 
 /** Stable diagnostic codes emitted by the facts tool. */
@@ -123,6 +167,8 @@ export const FACTS_DIAGNOSTIC_CODES = {
   EPOCH_MOVED: 'facts-epoch-moved',
   TREE_UNSTABLE: 'facts-tree-unstable',
   RECORD_CHANGED: 'facts-record-changed',
+  SIDE_TABLE_CHANGED: 'facts-side-table-changed',
+  ADJUDICATED_ITEMS_REMOVED: 'facts-adjudicated-items-removed',
   FILE_TOO_LARGE: 'facts-file-too-large',
   FILE_PATH_NOT_ABSOLUTE: 'facts-file-path-not-absolute',
   FILE_INSIDE_PROJECT: 'facts-file-inside-project',
@@ -130,6 +176,41 @@ export const FACTS_DIAGNOSTIC_CODES = {
   FILE_UNREADABLE: 'facts-file-unreadable',
   FILE_NOT_JSON: 'facts-file-not-json',
 } as const;
+
+/** Why one adjudication item was refused rather than applied. */
+export const FACTS_ADJUDICATION_REFUSALS = {
+  NO_SUCH_ITEM: 'facts-adjudication-no-such-item',
+  REASON_REQUIRED: 'facts-adjudication-reason-required',
+} as const;
+
+/** Next actions of the per-item adjudication refusals, keyed like their codes. */
+export const FACTS_ADJUDICATION_REFUSAL_NEXT_ACTIONS = {
+  NO_SUCH_ITEM:
+    'The side table holds no item with that kind, reference and resolved path for this file. Call facts status for this project: its unadjudicated list carries every open item with the kind, reference, resolvedPath and contentHash this action needs. Adjudicate one of those.',
+  REASON_REQUIRED:
+    'A dismissal says an edge is not there, so it carries the reason it is not. Send the same item again with a reason.',
+} as const;
+
+/** Code for a comparison asked against a generation with no frozen facts. */
+export const FACTS_UNFROZEN_GENERATION_CODE = 'facts-generation-not-frozen';
+
+/** Next action when a generation holds no frozen facts to compare against. */
+export const FACTS_UNFROZEN_GENERATION_NEXT_ACTION =
+  'Facts are not yet frozen into review generations, so there is nothing to compare against for that one. Call compare without generationId to compare against the live store.';
+
+/** Refusal for an adjudicate call that named no actor. */
+export const FACTS_ADJUDICATION_ACTOR_CODE = 'facts-adjudication-actor-required';
+
+/** Next action when a call carried an actor identity that folds to nothing. */
+export const FACTS_ADJUDICATION_ACTOR_NEXT_ACTION =
+  'A dismissal is confirmed by a different actor, so every judgement names the one deciding. Send actor as a non-empty identity — it is folded to lowercase with surrounding space removed, so it must hold at least one other character — and adjudicate again with the same items.';
+
+/** Stale-bytes refusal for a whole adjudicate call. */
+export const FACTS_ADJUDICATION_STALE_CODE = 'facts-adjudication-stale-content';
+
+/** Next action for a judgement made against bytes that have since changed. */
+export const FACTS_ADJUDICATION_STALE_NEXT_ACTION =
+  'This judgement was made against file bytes that have since changed, so it cannot be trusted. Read the lines the items name in the current file, then adjudicate again with the contentHash facts status now reports for this file.';
 
 /** Per-record and per-reference rejection codes returned in `rejected[]`. */
 export const FACTS_REJECTION_CODES = {
@@ -145,16 +226,36 @@ export const FACTS_REJECTION_CODES = {
   EXPORTED_NAME_ABSENT: 'facts-exported-name-absent',
 } as const;
 
+/**
+ * Next actions for a side-table page another writer took, keyed by the action.
+ *
+ * One code, three recoveries: the work a lost page costs is the work the losing
+ * action was doing, so a submit re-submits, a compare re-compares and an
+ * adjudicate re-reads the items before judging them again.
+ */
+export const FACTS_SIDE_TABLE_CONFLICT_NEXT_ACTIONS = {
+  submit:
+    'Another writer replaced the side table for these files between the read and the write, so their items were not stored. Call facts status, then submit those files again.',
+  compare:
+    'Another writer replaced the side table for these files between the read and the write, so their items were not stored. Run facts compare again with the same candidate file — the comparison is recomputed from the store each time.',
+  adjudicate:
+    'Another writer replaced this side-table page between the read and the write, so nothing was judged. Call facts status for the current items and contentHash, then adjudicate again.',
+} as const;
+
 /** Next actions of the facts diagnostics, keyed like their codes. */
 export const FACTS_DIAGNOSTIC_NEXT_ACTIONS = {
   UNINITIALIZED:
-    'Declare the facts scope before submitting: set facts.covers (and optionally facts.excludes) in the project .filid/config.json, then call facts status again.',
+    'The facts scope in effect covers no files, so there is nothing to analyse. Outside a review — editing project config during one dirties the worktree being reviewed — set facts.covers in the project .filid/config.json to the paths this project wants analysed, then call facts status again.',
   EPOCH_MOVED:
     'Nothing was stored. Re-extract the files this response lists as added or changed, then call submit again with the resolutionEpoch this response returned.',
   TREE_UNSTABLE:
     'The path list changed again on every retry, so re-extracting cannot converge. Use the added and removed paths to find what writes into the tree: delete those files, add them to .gitignore or facts.excludes, or stop the process writing them, then call facts status again.',
   RECORD_CHANGED:
     'Another writer replaced this record between the read and the write. Call facts status, then submit the affected files again.',
+  SIDE_TABLE_CHANGED:
+    'Another writer replaced the side table between the read and the write. Call facts status, then run the action that reported this again.',
+  ADJUDICATED_ITEMS_REMOVED:
+    'These files left the scanned tree or the facts scope, so the judgements recorded against them went with them; this is a report, not a refusal, and nothing is owed if the files are gone for good. If one was renamed, submit a record for the new path and run facts compare for it — an edge that still applies comes back as an item to judge there.',
   FILE_TOO_LARGE:
     'Split the extraction output into several JSON files, each under the byte cap this message names, and call submit once per file with the same resolutionEpoch.',
   FILE_PATH_NOT_ABSOLUTE:

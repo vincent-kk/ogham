@@ -122,8 +122,29 @@ async function submit(
 }
 
 describe('facts status', () => {
-  it('reports facts-uninitialized when no scope is declared', async () => {
+  it('falls back to the default scope when the project declares none', async () => {
     project.write('.filid/config.json', CONFIG(undefined));
+
+    const result = await status();
+
+    expect(result.summary.projectState).toBe(FACTS_PROJECT_STATES.READY);
+    expect(result.summary.scopeSource).toBe('default');
+    // The default scope is the adapters' source extensions, so the .ts files
+    // are analysed and the markdown file is not.
+    expect(result.data?.missing.paths).toEqual([
+      'src/index.ts',
+      'src/thing.ts',
+    ]);
+  });
+
+  it('says the scope came from config when the project declares one', async () => {
+    const result = await status();
+
+    expect(result.summary.scopeSource).toBe('config');
+  });
+
+  it('reports facts-uninitialized only when the scope covers nothing', async () => {
+    project.write('.filid/config.json', CONFIG({ covers: [] }));
 
     const result = await status();
 

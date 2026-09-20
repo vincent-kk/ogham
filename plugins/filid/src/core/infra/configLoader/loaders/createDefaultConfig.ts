@@ -1,4 +1,5 @@
 import { getDefaultAdapterIds } from '../../../../adapters/index.js';
+import { defaultFactsCovers } from '../../../facts/index.js';
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 import { BUILTIN_RULE_SEVERITIES } from '../../../../constants/builtinRuleSeverities.js';
 
@@ -24,5 +25,6 @@ export function createDefaultConfig(
       enabled: adapterIds ?? getDefaultAdapterIds(),
     },
     rules,
+    facts: { covers: defaultFactsCovers() },
   };
 }

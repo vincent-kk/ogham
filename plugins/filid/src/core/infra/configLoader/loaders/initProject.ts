@@ -45,7 +45,6 @@ export function initProject(
     configCreated = true;
     log.debug('created default config', configPath);
   }
-
   return {
     configCreated,
     configMigrated: configCreated

@@ -36,6 +36,9 @@ export function buildUninitializedSubmitPayload(
       rejectedRecords: 0,
       rejectedClaims: 0,
       epochMoved: false,
+      openedItems: 0,
+      closedItems: 0,
+      removedAdjudicatedItems: 0,
     },
     data: {
       rejected: [],

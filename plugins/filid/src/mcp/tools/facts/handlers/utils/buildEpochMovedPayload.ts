@@ -54,6 +54,9 @@ export function buildEpochMovedPayload(
       rejectedRecords: 0,
       rejectedClaims: 0,
       epochMoved: true,
+      openedItems: 0,
+      closedItems: 0,
+      removedAdjudicatedItems: 0,
     },
     data: {
       rejected: [],

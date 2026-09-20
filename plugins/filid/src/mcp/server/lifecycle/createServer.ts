@@ -13,7 +13,9 @@ import {
 } from '../../../constants/mcpContracts.js';
 import {
   FACTS_ACTIONS,
+  FACTS_DECISIONS,
   FACTS_OUTPUT_REQUIREMENT,
+  FACTS_REFERENCE_KINDS,
 } from '../../../constants/facts.js';
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { CONTRACT_INTENTS } from '../../../constants/restructure.js';
@@ -482,6 +484,35 @@ const FACTS_EPOCH_SCHEMA = z
     'submit only: the resolutionEpoch the batch was extracted against, as facts status returned it. A stale value stores nothing and returns the current epoch with the paths that moved.',
   );
 
+const FACTS_SOURCE_PATH_SCHEMA = z
+  .string()
+  .min(1)
+  .describe(
+    'adjudicate only: project-relative POSIX path of the file being judged.',
+  );
+const FACTS_ITEMS_SCHEMA = z
+  .array(
+    z.object({
+      kind: z.nativeEnum(FACTS_REFERENCE_KINDS),
+      reference: z
+        .string()
+        .min(1)
+        .describe('The reference string exactly as the item reports it.'),
+      resolvedPath: z
+        .string()
+        .min(1)
+        .describe('The in-project path the item says the reference resolves to.'),
+      decision: z.nativeEnum(FACTS_DECISIONS),
+      reason: z
+        .string()
+        .min(1)
+        .optional()
+        .describe('Required for dismiss: why that edge is not there.'),
+    }),
+  )
+  .min(1)
+  .describe('adjudicate only: one decision per side-table item.');
+
 const FACTS_INPUT_SCHEMA = z.discriminatedUnion('action', [
   z
     .object({
@@ -497,17 +528,74 @@ const FACTS_INPUT_SCHEMA = z.discriminatedUnion('action', [
       resolutionEpoch: FACTS_EPOCH_SCHEMA,
     })
     .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.COMPARE),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      file: FACTS_FILE_SCHEMA,
+      generationId: z
+        .string()
+        .min(1)
+        .optional()
+        .describe(
+          'compare only: review generation whose frozen facts to compare against. Facts are not frozen into generations yet, so passing one returns that fact rather than comparing against the live store.',
+        ),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.ADJUDICATE),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      sourcePath: FACTS_SOURCE_PATH_SCHEMA,
+      contentHash: z
+        .string()
+        .min(1)
+        .describe(
+          'adjudicate only: the sourcePath bytes this judgement was made against. A judgement made against other bytes is refused.',
+        ),
+      actor: z
+        .string()
+        .min(1)
+        .describe(
+          'adjudicate only: who is deciding. Self-declared — a dismissal is confirmed only by a DIFFERENT actor, which the skill supplies as a separate subagent.',
+        ),
+      items: FACTS_ITEMS_SCHEMA,
+    })
+    .strict(),
 ]);
 
 const FACTS_ADVERTISED_INPUT_SCHEMA = z.object({
   action: z
     .nativeEnum(FACTS_ACTIONS)
     .describe(
-      'status reports which files filid holds facts for and what it is waiting for; submit takes one batch of extracted facts and replaces the records for the files it carries.',
+      'status reports which files filid holds facts for and what it is waiting for; submit takes one batch of extracted facts and replaces the records for the files it carries; compare checks an independently extracted candidate against the store without storing it; adjudicate settles the disagreements compare recorded.',
     ),
   path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
   file: FACTS_FILE_SCHEMA.optional(),
   resolutionEpoch: FACTS_EPOCH_SCHEMA.optional(),
+  generationId: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'compare only: review generation whose frozen facts to compare against.',
+    ),
+  sourcePath: FACTS_SOURCE_PATH_SCHEMA.optional(),
+  contentHash: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'adjudicate only: the sourcePath bytes this judgement was made against.',
+    ),
+  actor: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'adjudicate only: who is deciding. A dismissal is confirmed only by a different actor.',
+    ),
+  items: FACTS_ITEMS_SCHEMA.optional(),
 });
 
 /**

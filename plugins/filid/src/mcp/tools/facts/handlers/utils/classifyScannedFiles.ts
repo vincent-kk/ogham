@@ -17,13 +17,19 @@ import type { FactsContext } from './buildFactsContext.js';
  * are hashed through one per-call memo, because a whole-repository store names
  * the same handful of manifests thousands of times.
  *
+ * Which files hold open items is passed in rather than read here, because the
+ * answer has to be the same one the response lists: a file is `uncertain`
+ * exactly when the caller was handed something to judge for it.
+ *
  * @param projectRoot - Absolute project root, used as given.
  * @param context - Scope, scanned paths, records and epoch for this call.
+ * @param open - Paths the caller is being offered an open item for.
  * @returns Each scanned path mapped to its state.
  */
 export function classifyScannedFiles(
   projectRoot: string,
   context: FactsContext,
+  open: ReadonlySet<string>,
 ): Map<string, FactsFileState> {
   const hashDeclaredInput = createDeclaredInputHasher(projectRoot);
   const states = new Map<string, FactsFileState>();
@@ -46,6 +52,7 @@ export function classifyScannedFiles(
           resolutionInputsValid:
             record === null ||
             checkDeclaredInputs(record.facts.provenance, hashDeclaredInput).ok,
+          hasOpenItems: open.has(path),
         },
         context.epoch.resolutionEpoch,
       ),

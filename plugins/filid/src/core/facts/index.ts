@@ -8,6 +8,7 @@ export type {
 export { StoredFactsRecordSchema } from './schema/storedFactsRecordSchema.js';
 export type { StoredFactsRecord } from './schema/storedFactsRecordSchema.js';
 
+export { defaultFactsCovers } from './scope/defaultFactsCovers.js';
 export { resolveFactsScope } from './scope/resolveFactsScope.js';
 export type { FactsScope } from './scope/resolveFactsScope.js';
 
@@ -24,13 +25,14 @@ export type { EpochDifference } from './epoch/diffEpochSnapshots.js';
 export { resolveFactsStorePaths } from './store/factsStorePaths.js';
 export type { FactsStorePaths } from './store/factsStorePaths.js';
 export { readFactsStore } from './store/readFactsStore.js';
-export type {
-  FactsShard,
-  FactsStoreContents,
-} from './store/readFactsStore.js';
+export type { FactsStoreContents } from './store/readFactsStore.js';
+export { readShardDirectory } from './store/readShardDirectory.js';
+export type { FactsShard } from './store/readShardDirectory.js';
 export { writeFactsShardFile } from './store/writeFactsShardFile.js';
 export { readEpochSnapshot } from './store/readEpochSnapshot.js';
 export { writeEpochSnapshot } from './store/writeEpochSnapshot.js';
+export { writeExtractionList } from './store/writeExtractionList.js';
+export type { ExtractionListWrite } from './store/writeExtractionList.js';
 
 export { readSubmissionFile } from './ingest/readSubmissionFile.js';
 export type { SubmissionFileRead } from './ingest/readSubmissionFile.js';
@@ -42,6 +44,8 @@ export type {
 
 export { validateFactsRecord } from './validation/validateFactsRecord.js';
 export { hashProjectFile } from './validation/utils/hashProjectFile.js';
+export { isProjectFilePathValid } from './validation/utils/isProjectFilePathValid.js';
+export { locateSourceText } from './validation/utils/locateSourceText.js';
 export { checkDeclaredInputs } from './validation/utils/checkDeclaredInputs.js';
 export type { DeclaredInputVerdict } from './validation/utils/checkDeclaredInputs.js';
 export type { ProjectFileDigest } from './validation/utils/hashProjectFile.js';
@@ -57,6 +61,37 @@ export type {
   FactsFileState,
 } from './state/classifyFactsFile.js';
 export { selectUnknownFiles } from './state/selectUnknownFiles.js';
+
+export { adjudicateItem } from './sideTable/adjudicateItem.js';
+export { isOpenAdjudication } from './sideTable/isOpenAdjudication.js';
+export { normalizeActor } from './sideTable/normalizeActor.js';
+export { readAdjudicationTable } from './sideTable/readAdjudicationTable.js';
+export type { AdjudicationTableContents } from './sideTable/readAdjudicationTable.js';
+export { AdjudicationPageSchema } from './sideTable/adjudicationTableSchema.js';
+export type { AdjudicationPage } from './sideTable/adjudicationTableSchema.js';
+export { computeLineDigest } from './sideTable/utils/computeLineDigest.js';
+export { compareReferences, originOf } from './sideTable/compareReferences.js';
+export { detectShrunkReferences } from './sideTable/detectShrunkReferences.js';
+export type { ShrunkReference } from './sideTable/detectShrunkReferences.js';
+export type {
+  ComparableReference,
+  ReferenceComparison,
+} from './sideTable/compareReferences.js';
+export { selectValidReferences } from './sideTable/selectValidReferences.js';
+export type { ValidReference } from './sideTable/selectValidReferences.js';
+export { writeAdjudicationPages } from './sideTable/writeAdjudicationPages.js';
+export type {
+  AdjudicationPageUpdate,
+  AdjudicationWriteOutcome,
+} from './sideTable/writeAdjudicationPages.js';
+export type { AdjudicationOutcome } from './sideTable/adjudicateItem.js';
+export type {
+  AdjudicationDecision,
+  AdjudicationItem,
+  AdjudicationKey,
+  AdjudicationOrigin,
+  AdjudicationState,
+} from './sideTable/types/adjudicationTypes.js';
 
 export { recordEpochDrift } from './stability/recordEpochDrift.js';
 export type { EpochDriftVerdict } from './stability/recordEpochDrift.js';

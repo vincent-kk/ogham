@@ -81,11 +81,16 @@ const ReviewConfigSchema = z
  * `covers` is a positive declaration: without it the project is
  * `facts-uninitialized` and no reference-based judgement runs, so dropping it
  * changes which files are analysed at all rather than loosening a check.
+ *
+ * `provider` names the tool whose resolutions the project treats as
+ * authoritative; a resolution disagreement is information only when the stored
+ * record came from it (spec §4.5).
  */
 const FactsConfigSchema = z
   .object({
     covers: z.array(z.string().min(1)).optional(),
     excludes: z.array(z.string().min(1)).optional(),
+    provider: z.string().min(1).optional(),
   })
   .strict();
 

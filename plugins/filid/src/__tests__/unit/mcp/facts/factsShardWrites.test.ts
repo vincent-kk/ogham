@@ -27,11 +27,31 @@ const shardWrites = vi.hoisted(() => ({
   failAll: false,
 }));
 
+/** Whether the side table is allowed to keep the pages a call plans for it. */
+const pageWrites = vi.hoisted(() => ({ failAll: false }));
+
 vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
   const actual =
     await importOriginal<typeof import('../../../../core/facts/index.js')>();
   return {
     ...actual,
+    writeAdjudicationPages: (
+      directory: string,
+      table: Parameters<typeof actual.writeAdjudicationPages>[1],
+      updates: Parameters<typeof actual.writeAdjudicationPages>[2],
+      shardFileName: (digest: string) => string,
+    ): ReturnType<typeof actual.writeAdjudicationPages> =>
+      pageWrites.failAll
+        ? {
+            stored: new Set<string>(),
+            conflicted: [...updates.values()].map((update) => update.path),
+          }
+        : actual.writeAdjudicationPages(
+            directory,
+            table,
+            updates,
+            shardFileName,
+          ),
     writeFactsShardFile: (
       directory: string,
       shardFileName: string,
@@ -68,10 +88,12 @@ let project: FactsProject;
 beforeEach(() => {
   shardWrites.names = [];
   shardWrites.failAll = false;
+  pageWrites.failAll = false;
   stateRoot = mkdtempSync(join(tmpdir(), 'filid-facts-shard-'));
   process.env.CLAUDE_CONFIG_DIR = stateRoot;
   project = createFactsProject({
     '.filid/config.json': CONFIG,
+    'src/edge.ts': "export { value1 } from './file1.js';\n",
     ...Object.fromEntries(
       SOURCE_FILES.map((index) => [
         `src/file${index}.ts`,
@@ -206,5 +228,66 @@ describe('facts submit under a lost compare-and-set', () => {
 
     expect(result.summary.accepted).toBe(SOURCE_FILES.length);
     expect(storedDrift()).toEqual([]);
+  });
+});
+
+/**
+ * Submit one record for `src/edge.ts`, with or without its edge.
+ * @param withEdge Whether the record claims the import in the file.
+ * @returns The submit summary, envelope status and diagnostic codes.
+ */
+async function submitEdge(withEdge: boolean): Promise<{
+  summary: FactsSubmitSummary;
+  status: string;
+  codes: string[];
+  nextActions: string[];
+}> {
+  const resolutionEpoch = await currentEpoch();
+  const file = project.submission(
+    `edge-${Math.random().toString(36).slice(2)}.json`,
+    JSON.stringify([
+      project.facts('src/edge.ts', {
+        references: withEdge
+          ? [
+              {
+                specifier: './file1.js',
+                kind: 'static',
+                resolved: { path: 'src/file1.ts' },
+              },
+            ]
+          : [],
+      }),
+    ]),
+  );
+  const result = await handleFacts({
+    action: 'submit',
+    path: project.root,
+    file,
+    resolutionEpoch,
+  });
+  return {
+    summary: result.summary as FactsSubmitSummary,
+    status: result.status,
+    codes: result.diagnostics.map((diagnostic) => diagnostic.code),
+    nextActions: result.diagnostics.map((diagnostic) => diagnostic.nextAction),
+  };
+}
+
+describe('facts submit under a lost side-table page', () => {
+  it('reports the loss and counts no item it did not store', async () => {
+    await submitEdge(true);
+    pageWrites.failAll = true;
+
+    // The record landed and the item that would have shown the narrowing did
+    // not. Reporting OK here would be a graph quietly one edge smaller.
+    const result = await submitEdge(false);
+
+    expect(result.summary.openedItems).toBe(0);
+    expect(result.status).toBe(TOOL_STATUSES.INDETERMINATE);
+    expect(result.codes).toContain(
+      FACTS_DIAGNOSTIC_CODES.SIDE_TABLE_CHANGED,
+    );
+    // The recovery is this action's own work, not the comparison's.
+    expect(result.nextActions.join(' ')).toContain('submit those files again');
   });
 });

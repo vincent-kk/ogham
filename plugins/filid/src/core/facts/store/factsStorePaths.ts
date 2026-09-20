@@ -3,8 +3,10 @@ import { join } from 'node:path';
 
 import {
   FACTS_EPOCH_DRIFT_FILE,
+  FACTS_EXTRACTION_LIST_FILE,
   FACTS_RECORD_EXTENSION,
   FACTS_SHARD_NAME_LENGTH,
+  FACTS_SIDE_TABLE_DIRECTORY,
   FACTS_STORE_DIRECTORY,
 } from '../../../constants/facts.js';
 import { getCacheDir } from '../../infra/cacheManager/index.js';
@@ -17,6 +19,10 @@ export interface FactsStorePaths {
   epochSnapshotPath: string;
   /** File holding the consecutive-epoch counter. */
   driftPath: string;
+  /** File holding the paths an extractor should read, one per line. */
+  extractionListPath: string;
+  /** Directory holding the adjudication side table's shards. */
+  sideTableDirectory: string;
   /**
    * Record key for one project-relative path.
    * @param relativePath Path as `listScannedFilePaths` spells it.
@@ -53,6 +59,8 @@ export function resolveFactsStorePaths(projectRoot: string): FactsStorePaths {
     directory,
     epochSnapshotPath: join(directory, `epoch${FACTS_RECORD_EXTENSION}`),
     driftPath: join(directory, FACTS_EPOCH_DRIFT_FILE),
+    extractionListPath: join(directory, FACTS_EXTRACTION_LIST_FILE),
+    sideTableDirectory: join(directory, FACTS_SIDE_TABLE_DIRECTORY),
     pathDigest: (relativePath) =>
       createHash('sha256').update(relativePath, 'utf8').digest('hex'),
     shardFileName: (pathDigest) =>

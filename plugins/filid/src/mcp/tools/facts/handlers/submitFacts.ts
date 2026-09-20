@@ -1,4 +1,7 @@
-import { FACTS_STATUS_LIST_LIMIT } from '../../../../constants/facts.js';
+import {
+  FACTS_ACTIONS,
+  FACTS_STATUS_LIST_LIMIT,
+} from '../../../../constants/facts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import {
   parseSubmittedRecords,
@@ -11,6 +14,8 @@ import type {
 } from '../types/factsToolTypes.js';
 
 import { buildConflictDiagnostics } from './utils/buildConflictDiagnostics.js';
+import { buildRemovedAdjudicationDiagnostics } from './utils/buildRemovedAdjudicationDiagnostics.js';
+import { buildSideTableConflictDiagnostics } from './utils/buildSideTableConflictDiagnostics.js';
 import { buildEpochMovedPayload } from './utils/buildEpochMovedPayload.js';
 import { buildUninitializedSubmitPayload } from './utils/buildUninitializedSubmitPayload.js';
 import { buildFactsContext } from './utils/buildFactsContext.js';
@@ -31,6 +36,10 @@ import { storeAcceptedRecords } from './utils/storeAcceptedRecords.js';
  * A call whose every shard write lost its compare-and-set changed nothing, so
  * treating it as progress would let two writers reset each other's counter
  * forever and hide a tree that never settles.
+ *
+ * Both stores can lose a write, and both losses are reported. A submission that
+ * stored its records but lost the side-table pages narrowed the graph without
+ * opening the items that would have shown it, which is indeterminate, not OK.
  *
  * @param projectRoot - Absolute project root, used as given.
  * @param file - Absolute path of the extraction output, outside the project.
@@ -61,7 +70,7 @@ export async function submitFacts(
   return {
     projectRoot,
     status:
-      outcome.conflicted.length > 0
+      outcome.conflicted.length + outcome.sideTableConflicts.length > 0
         ? TOOL_STATUSES.INDETERMINATE
         : TOOL_STATUSES.OK,
     summary: {
@@ -71,6 +80,9 @@ export async function submitFacts(
       rejectedRecords: submission.rejections.length + countRejectedRecords(outcome.rejections),
       rejectedClaims: rejected.length,
       epochMoved: false,
+      openedItems: outcome.openedItems,
+      closedItems: outcome.closedItems,
+      removedAdjudicatedItems: outcome.removedAdjudicated,
     },
     data: {
       rejected: rejected.slice(0, FACTS_STATUS_LIST_LIMIT),
@@ -79,7 +91,14 @@ export async function submitFacts(
       removed: capFileList([]),
       changedResolutionInputs: capFileList([]),
     },
-    diagnostics: buildConflictDiagnostics(outcome.conflicted),
+    diagnostics: [
+      ...buildConflictDiagnostics(outcome.conflicted),
+      ...buildSideTableConflictDiagnostics(
+        outcome.sideTableConflicts,
+        FACTS_ACTIONS.SUBMIT,
+      ),
+      ...buildRemovedAdjudicationDiagnostics(outcome.removedAdjudicated),
+    ],
   };
 }
 

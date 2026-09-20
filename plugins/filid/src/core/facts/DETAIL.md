@@ -16,6 +16,17 @@
 - 응답에는 제출 파일의 byte도, JSON parser나 schema validator의 원문 메시지도 싣지 않는다.
 - 서버는 어떤 명령도 실행하지 않는다.
 
+- 부속 표는 facts 레코드 **밖**의 파일별 표다. key는 `(path, kind, sourceText ?? specifier)`이고, 항목은 그 문자열이 §5의 경로 토큰 규칙으로 나타나는 모든 줄의 byte digest(`lineDigest`)와 마지막으로 확인한 `contentHash`를 함께 싣는다. `lineDigest`가 달라지면 항목은 만료한다 — 파일 전체에 묶으면 무관한 편집마다 재판정이 돌아와 반사적 `dismiss`를 부른다.
+- 제출의 교체는 부속 표를 지우지 않는다. 표의 쓰기도 레코드와 같은 shard 단위 원자적 치환 + compare-and-set이며, **한 호출은 touch한 shard마다 정확히 한 번만 쓴다**. shard의 CAS token은 호출당 한 번 읽히므로 같은 shard를 두 번 쓰면 두 번째가 스스로에게 져서 항목이 조용히 사라진다. CAS 패배는 버리지 않고 진단으로 드러내며, 응답의 개수는 실제로 저장된 것만 센다.
+- 레코드가 닫을 수 있는 항목은 **아직 판정되지 않은 것**(`unadjudicated`·`pending-dismiss`)뿐이다. `adopted`·`dismissed` 항목은 그대로 둔다 — adopt된 항목을 레코드가 닫으면 그 간선을 담은 제출 하나로 adopt이 사라지고, 다음 제출이 그 간선을 도로 빼도 되살릴 항목이 없어 평범한 제출 두 번이 한 actor의 판정을 지운다. adopt된 간선은 dismiss가 확정될 때까지 유효하다는 계약과도 같은 말이다.
+- `closed-by-record` 항목은 그 간선이 제출에서 **다시** 빠지면 제자리에서 다시 열린다. 없으면 한 actor가 평범한 제출 두 번으로 진짜 import를 영구히 은퇴시킬 수 있다.
+- 트리에서 사라지거나 범위 밖으로 나간 파일의 표 페이지는 레코드를 지우는 같은 자리에서 지운다. 남겨 두면 `status`가 할 수 없는 일을 계속 지시하고 `adjudicate`는 `compare`가 결코 주지 않을 `contentHash`를 요구한다(P5 루프).
+- `adjudicate`는 판정을 적용하기 전에 만료를 먼저 적용하고, **이번 호출이 판정한 항목만** `contentHash`를 현재 값으로 갱신한다. 그래서 줄이 지워진 간선은 adopt될 수 없고, `staleUnderNewContent`는 "판정 이후 바뀌었다"를 뜻한다 — 아무도 다시 읽지 않은 항목의 표시까지 지우면 일어나지 않은 재확인을 주장하게 된다.
+- actor 비교는 NFKC·trim·소문자 접기 뒤에 한다. 이것이 보장하는 것은 **두 번째 읽기**이지 두 번째 신원이 아니다 — 서버는 신원을 확인할 수 없다.
+- 간선을 **더하는** 판정은 한 actor로 확정하고, **버리는** 판정은 다른 actor의 확인을 받아야 확정한다. 의견이 갈리면 간선을 남긴다. 틀린 판정은 언제든 다시 판정할 수 있어 고칠 수 없는 요구로 굳지 않는다(P5). 상태 기계 전체는 `evidence/s3a-adjudication-states.md`의 표이고, 구현은 그 표를 dispatch 표로 옮긴 것이다.
+- 유효 참조 = 제출된 레코드 ∪ adopt된 참조. adopt는 레코드의 참조를 가리지 않고 더하기만 한다.
+- 축소 탐지의 "같은 도구·새 epoch" 면제는 **`resolution-changed`에만** 적용한다. epoch는 문자열이 어디로 해석되는지를 바꾸지, 그 문자열이 참조인지 아닌지를 바꾸지 않는다. 면제를 `coverage-shrank`까지 넓히면 무관한 파일 하나가 늘어난 것만으로 도구의 누락이 보이지 않게 된다 — 트리는 늘 조금씩 움직이므로 사실상 상시 면제다.
+
 ## API Contracts
 
 - `listScannedFilePaths`와 `scanFileSetOptions`는 이 fractal이 소유하지 않는다. `core/tree/fractalTree`의 entry point에서 가져온다 — 규칙의 정본을 scan 쪽에 한 벌만 두기 위해서다.
@@ -26,7 +37,13 @@
 - `createDeclaredInputHasher(projectRoot)` — 호출당 memo. 저장소 전체 배치는 같은 manifest를 수천 번 선언한다.
 - `readSubmissionFile(projectRoot, filePath)` · `parseSubmittedRecords(entries)` — 신뢰 경계. 전자는 거부 사유만, 후자는 JSON pointer만 돌려준다.
 - `validateFactsRecord(context, facts, pointer): FactsValidationResult` — 레코드 단위 거부와 참조 단위 거부를 구분한다.
-- `classifyFactsFile(evidence, currentEpoch)` · `selectUnknownFiles(states)` — 순수 함수.
+- `classifyFactsFile(evidence, currentEpoch)` · `selectUnknownFiles(states)` — 순수 함수. 후자는 그래프의 `UnknownFile { path, causes }`를 그대로 돌려주어 facts발 unknown과 그래프발 unknown이 번역 없이 합쳐진다.
+- `adjudicateItem(item, decision, actor)` — 순수 함수. 상태 표의 한 셀을 적용하고 다음 행동을 함께 돌려준다.
+- `isOpenAdjudication(state)` — 항목이 아직 actor를 기다리는가. `status`의 목록, 파일의 `uncertain` 판정, 레코드가 닫을 수 있는 대상이 모두 같은 두 상태를 뜻하므로 정본을 한 곳에 둔다.
+- `compareReferences(candidate, stored)` — 순수 함수. 동일성은 `(sourceText ?? specifier, kind)`와 해석이다.
+- `selectValidReferences(recordEdges, page, path)` — 레코드 ∪ adopt. 지금 소비자는 테스트뿐이고 S3c가 그래프에 연결한다.
+- `computeLineDigest(contents, reference)` · `readAdjudicationTable(directory)` · `writeAdjudicationPage(...)` — 부속 표의 만료 key와 입출력.
+- `writeExtractionList(path, relativePaths)` — 추출 대상 목록을 줄 단위로 원자적 치환. 개행·NUL이 든 이름은 줄 단위 파일이 표현하지 못하므로 목록에서 빼고 개수만 센다.
 - `recordEpochDrift(path, newEpoch | null)` — 연속으로 서로 다른 새 epoch를 통보한 횟수. 성공한 제출이 초기화한다.
 
 ## Design Decisions
@@ -43,6 +60,7 @@
 
 - 공급자가 선언하지 않은 프로젝트 밖 입력, git이 무시하는 생성 파일, lockfile이 바뀌지 않은 `node_modules` 내부 변경은 epoch에 잡히지 않는다.
 - 줄 단위로 묶인 판정은, 그 줄이 그대로인 채 다른 줄의 블록 주석 구분자가 사라져 주석이던 참조가 코드가 되는 경우를 놓친다.
+- 축소 탐지는 문자열을 센다. 같은 따옴표 문자열이 **주석 안에** 남아 있으면 출현 수가 실제 import 수보다 커져 항목이 열린다 — 정당한 편집인데 두 actor의 판정을 요구하는 경우다. 줄 번호로 대조하는 대안은 편집마다 번호가 움직여 더 나쁘다.
 - `kind`는 type-only import와 value import를 구분하지 않는다. 도구마다 type-only를 보고하는지가 달라 그 차이는 독립 비교에서만 드러난다.
 - 한 도구가 체계적으로 빠뜨리는 참조는 그 도구만으로는 드러나지 않는다.
 

@@ -22,6 +22,13 @@ export interface FactsFileEvidence {
    * which the project epoch cannot do.
    */
   resolutionInputsValid: boolean;
+  /**
+   * Whether the side table holds an item for this file nobody has settled.
+   *
+   * An unadjudicated or `pending-dismiss` item is a reported edge the record
+   * does not carry, so the file's references are not yet agreed (spec §3).
+   */
+  hasOpenItems: boolean;
 }
 
 /**
@@ -34,9 +41,7 @@ export interface FactsFileEvidence {
  * a stale epoch or a moved declared input is reported before any judgement
  * drawn from resolutions, and a tool failure outranks the uncertainty it causes.
  *
- * Adjudication items (spec §4.5) are not an input yet; they join the
- * `uncertain` branch when the side table exists.
- *
+
  * @param evidence - The file, its record and whether that record still binds.
  * @param currentEpoch - The project's resolution epoch right now.
  * @returns The file's state.
@@ -53,7 +58,11 @@ export function classifyFactsFile(
     return FACTS_FILE_STATES.NEEDS_RESOLUTION;
   if (record.facts.toolError !== undefined)
     return FACTS_FILE_STATES.TOOL_ERROR;
-  if (record.rejectedClaims > 0 || hasIndeterminateReference(record))
+  if (
+    evidence.hasOpenItems ||
+    record.rejectedClaims > 0 ||
+    hasIndeterminateReference(record)
+  )
     return FACTS_FILE_STATES.UNCERTAIN;
   return FACTS_FILE_STATES.EXACT;
 }

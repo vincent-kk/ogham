@@ -63,6 +63,7 @@ function classify(
       record: storedRecord(),
       syntaxValid: true,
       resolutionInputsValid: true,
+      hasOpenItems: false,
       ...evidence,
     },
     EPOCH,
@@ -100,6 +101,10 @@ describe('facts file state table', () => {
     expect(classify({ resolutionInputsValid: false })).toBe(
       FACTS_FILE_STATES.NEEDS_RESOLUTION,
     );
+  });
+
+  it('is uncertain while the side table holds an unsettled item', () => {
+    expect(classify({ hasOpenItems: true })).toBe(FACTS_FILE_STATES.UNCERTAIN);
   });
 
   it('is tool-error when the provider reported a failure', () => {
@@ -140,7 +145,7 @@ describe('facts file state table', () => {
 });
 
 describe('unknownFiles', () => {
-  it('is the union of the four unknown states, sorted by raw bytes', () => {
+  it('carries each unknown state as its cause code, sorted by path', () => {
     const states = new Map<string, FactsFileState>([
       ['src/z.ts', FACTS_FILE_STATES.MISSING],
       ['src/a.ts', FACTS_FILE_STATES.EXACT],
@@ -151,10 +156,10 @@ describe('unknownFiles', () => {
     ]);
 
     expect(selectUnknownFiles(states)).toEqual([
-      'src/b.ts',
-      'src/c.ts',
-      'src/d.ts',
-      'src/z.ts',
+      { path: 'src/b.ts', causes: ['facts-needs-resolution'] },
+      { path: 'src/c.ts', causes: ['facts-uncertain'] },
+      { path: 'src/d.ts', causes: ['facts-tool-error'] },
+      { path: 'src/z.ts', causes: ['facts-missing'] },
     ]);
   });
 
