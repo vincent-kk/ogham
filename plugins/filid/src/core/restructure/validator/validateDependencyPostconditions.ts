@@ -4,6 +4,9 @@ import type {
   PlanValidationFinding,
   RestructurePlan,
 } from '../../../types/restructure.js';
+import { canonicalizeDirectedGraph } from '../../analysis/dependencyGraph/cycles/canonicalizeDirectedGraph.js';
+import { findStronglyConnectedComponents } from '../../analysis/dependencyGraph/cycles/findStronglyConnectedComponents.js';
+import { toDirectedPairs } from '../../analysis/dependencyGraph/cycles/toDirectedPairs.js';
 import { relocateThroughMoves } from '../imports/relocateThroughMoves.js';
 
 import { cycleIdentity } from './cycleIdentity.js';
@@ -11,10 +14,12 @@ import { cycleIdentity } from './cycleIdentity.js';
 /**
  * Check the post-execution graph for cycles and for unknown files the plan's conclusions need.
  *
- * Every cycle is reported. One whose identity matches a plan-time cycle
- * relocated through the plan's moves is `preexisting`; any other is a
- * finding. "No cycle" — and the import requirements' "every reference" — is
- * an absence, so a related unknown file makes it a finding; unrelated ones do not.
+ * Every cycle is reported. One whose strongly connected component, identified
+ * by member owners rather than by its representative route, matches a
+ * plan-time component relocated through the plan's moves is `preexisting`;
+ * any other is a finding. "No cycle" — and the import requirements' "every
+ * reference" — is an absence, so a related unknown file makes it a finding;
+ * unrelated ones do not.
  * @param snapshot Post-execution snapshot.
  * @param plan The executed plan, with its baseline.
  * @param relevantUnknownFiles Unknown files related to the plan's units.
@@ -26,18 +31,27 @@ export function validateDependencyPostconditions(
   relevantUnknownFiles: readonly UnknownFile[],
 ): { findings: PlanValidationFinding[]; preexisting: PlanValidationFinding[] } {
   const baseline = new Set(
-    plan.baseline.cycles.map((route) =>
+    plan.baseline.cycles.map((component) =>
       cycleIdentity(
-        route.map((path) => relocateThroughMoves(path, plan.moves)),
+        component.map((path) => relocateThroughMoves(path, plan.moves)),
       ),
     ),
   );
+  const pairs = toDirectedPairs(snapshot.dependencyGraph);
+  const graph = canonicalizeDirectedGraph(pairs.nodePaths, pairs.edges);
+  const componentByNode = new Map<string, string[]>();
+  for (const component of findStronglyConnectedComponents(graph))
+    if (component.length > 1)
+      for (const node of component) componentByNode.set(node, component);
+
   const result = {
     findings: [] as PlanValidationFinding[],
     preexisting: [] as PlanValidationFinding[],
   };
   for (const cycle of snapshot.dependencyGraph.cycles)
-    (baseline.has(cycleIdentity(cycle))
+    (baseline.has(
+      cycleIdentity(componentByNode.get(cycle[0] ?? '') ?? cycle),
+    )
       ? result.preexisting
       : result.findings
     ).push({

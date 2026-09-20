@@ -62,6 +62,9 @@ describe('a prepared effort changes only when the caller names one', () => {
     });
     expect(reprepared.status).toBe('ok');
     expect(readPreparedReviewState(reprepared).effort).toBe('high');
+    expect(readPreparedReviewState(reprepared).replacedFrom?.reason).toBe(
+      'review-effort-changed',
+    );
   });
 
   it('keeps the prepared effort when only the config names another, and reports it', async () => {

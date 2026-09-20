@@ -51,8 +51,12 @@
   동결 **이후**에 저장소에서 일어난 것이라 동결본은 그것을 볼 수 없다. 동결본과 후보가 둘 다 잃어버린
   간선을 들고 있으면 차이가 0으로 나오고, 그 0을 근거로 표시를 지우면 표시가 막으려던 바로 그 결과가
   된다. 그 경우는 `facts-comparison-not-against-store`로 사실과 다음 행동(같은 후보 파일로
-  `generationId` 없이 다시 `compare`)을 돌려준다. 어느 경우든 비교 자체는 거부하지 않는다 — 그 후보가
-  찾은 차이는 여전히 항목이 될 가치가 있고, 지워지지 않는 것은 표시뿐이다.
+  `generationId` 없이 다시 `compare`)을 돌려준다. 표시를 지우지 못하는 두 경우는 비교 자체를 거부하지
+  않는다 — 그 후보가 찾은 차이는 여전히 항목이 될 가치가 있고, 지워지지 않는 것은 표시뿐이다.
+  `compare`는 레코드 단위로 비교 자체를 건너뛰는 경우도 둘 있다. `generationId`가 왔는데 그 파일이 이름
+  붙은 generation의 동결본에 없으면 `facts-comparison-not-frozen`이고, 후보의 `contentHash`가 파일의
+  현재 byte와 다르면 `facts-content-hash-mismatch`다 — 둘 다 그 파일만 건너뛰고 나머지 레코드는 비교를
+  계속하며, 응답은 건너뛴 파일 목록과 이유를 진단으로 싣는다.
 - `discard-pending { sourcePaths }`는 그 파일들의 pending만 지운다. **저장된 레코드와 부속 표는 건드리지 않으므로 "레코드를 지우는 action"이 아니다.** 두 actor가 영원히 다른 답을 내는 파일의 유일한 출구이고, 그래서 편의가 아니라 **P5의 구성 요소**다. pending이 없는 경로는 거부가 아니라 "이미 그 상태"로 보고한다.
 - `status`는 attested가 필요한 파일에 대해 **언제·무엇을·어떤 모양으로** 내야 하는지를 응답만으로 말한다. `attestationRequirement`의 첫 문장이 그 시점을 이름으로 든다 — 도구가 읽지 못한 파일(`tool-error`), 재추출이 같은 거부를 재생산하는 파일(`rejected[]`), 항목을 다 판정하고도 남은 `uncertain`. 이어서: `attestationRequirement`(필수 필드, `nonReferences` 요구, 두 번째 actor)와, pending이 있는 파일마다 그 actor·`contentHash`·다음 행동을 싣는 `pendingAttestations[]`. 에이전트가 skill 문서 없이도 막히지 않아야 한다.
 

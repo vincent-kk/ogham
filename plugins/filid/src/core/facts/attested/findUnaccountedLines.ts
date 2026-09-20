@@ -4,6 +4,7 @@ import {
 } from '../../../constants/facts.js';
 import type { FileFacts } from '../schema/fileFactsSchema.js';
 import { locateReference } from '../validation/utils/locateReference.js';
+import { splitSourceLines } from '../validation/utils/splitSourceLines.js';
 
 /**
  * The lines an attested record leaves unexplained (spec §4.6).
@@ -35,15 +36,18 @@ export function findUnaccountedLines(
   const explained = new Set(
     (facts.nonReferences ?? []).map((entry) => entry.line),
   );
+  const accounted = new Set<number>();
+  for (const reference of facts.references) {
+    const span = splitSourceLines(
+      reference.sourceText ?? reference.specifier,
+    ).length;
+    for (const start of locateReference(lines, reference))
+      for (let at = start; at < start + span; at += 1) accounted.add(at);
+  }
   const unaccounted: number[] = [];
   for (const [index, line] of lines.entries()) {
-    if (explained.has(index + 1) || !looksLikeReference(line)) continue;
-    if (
-      facts.references.some(
-        (reference) => locateReference([line], reference).length > 0,
-      )
-    )
-      continue;
+    if (explained.has(index + 1) || accounted.has(index + 1)) continue;
+    if (!looksLikeReference(line)) continue;
     unaccounted.push(index + 1);
   }
   return unaccounted;

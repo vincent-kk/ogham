@@ -1,4 +1,5 @@
-import type { FactsShard } from './readShardDirectory.js';
+import { compareByBytes } from '../../../lib/compareByBytes.js';
+import type { FactsShard, ShardDamage } from './readShardDirectory.js';
 import { writeFactsShardFile } from './writeFactsShardFile.js';
 
 /** One keyed document as a caller wants it to end up. */
@@ -43,6 +44,11 @@ export interface ShardWriteOutcome {
  * @param shards - The directory as this call read it, carrying the tokens.
  * @param updates - Page updates keyed by path digest.
  * @param shardFileName - Maps a path digest to its shard file.
+ * @param damaged - Shards the directory currently reports as damaged. A
+ * damaged shard's entries could not be read, so an ordinary write must not
+ * replace it with only the pages this batch happens to know about — that
+ * would silently discard whatever the unreadable bytes held. Only
+ * `discard-damaged` may write a damaged shard, through its own call.
  * @returns Which pages landed and which paths lost their shard.
  */
 export function writeShardPages(
@@ -50,11 +56,13 @@ export function writeShardPages(
   shards: ReadonlyMap<string, FactsShard>,
   updates: ReadonlyMap<string, ShardPageUpdate>,
   shardFileName: (pathDigest: string) => string,
+  damaged: ReadonlyMap<string, ShardDamage>,
 ): ShardWriteOutcome {
-  const byShard = new Map<string, string[]>();
-  for (const key of updates.keys()) {
+  const byShard = new Map<string, Array<[string, ShardPageUpdate]>>();
+  for (const entry of updates) {
+    const [key] = entry;
     const shard = shardFileName(key);
-    byShard.set(shard, [...(byShard.get(shard) ?? []), key]);
+    byShard.set(shard, [...(byShard.get(shard) ?? []), entry]);
   }
   const outcome: ShardWriteOutcome = {
     stored: new Set<string>(),
@@ -62,11 +70,14 @@ export function writeShardPages(
     shards: new Map<string, FactsShard>(),
   };
   for (const [shard, keys] of byShard) {
+    if (damaged.has(shard)) {
+      for (const [, update] of keys) outcome.conflicted.push(update.path);
+      continue;
+    }
     const existing = shards.get(shard);
     const entries = { ...(existing?.entries ?? {}) };
     let changed = false;
-    for (const key of keys) {
-      const update = updates.get(key) as ShardPageUpdate;
+    for (const [key, update] of keys) {
       if (update.document === null) {
         if (key in entries) {
           delete entries[key];
@@ -82,12 +93,11 @@ export function writeShardPages(
       : null;
     if (digest !== null) outcome.shards.set(shard, { digest, entries });
     if (!changed || digest !== null) {
-      for (const key of keys) outcome.stored.add(key);
+      for (const [key] of keys) outcome.stored.add(key);
       continue;
     }
-    for (const key of keys)
-      outcome.conflicted.push((updates.get(key) as ShardPageUpdate).path);
+    for (const [, update] of keys) outcome.conflicted.push(update.path);
   }
-  outcome.conflicted.sort((left, right) => left.localeCompare(right));
+  outcome.conflicted.sort(compareByBytes);
   return outcome;
 }

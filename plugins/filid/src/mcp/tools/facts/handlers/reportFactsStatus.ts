@@ -90,18 +90,22 @@ export async function reportFactsStatus(
   const rejected = collectRejectedClaims(context);
   const awaitingComparison = context.scannedPaths
     .filter(
-      (path) => context.adjudications.get(path)?.awaitingComparison === true,
+      (path) =>
+        context.scope.covers(path) &&
+        context.adjudications.get(path)?.awaitingComparison === true,
     )
     .map((path) => {
       const storedTool =
         context.records.get(path)?.record.facts.provenance.tool;
       return { path, ...(storedTool === undefined ? {} : { storedTool }) };
     });
-  const indeterminate = context.scannedPaths.filter((path) =>
-    (context.records.get(path)?.record.facts.references ?? []).some(
-      (reference) =>
-        reference.certainty === ANALYSIS_CERTAINTIES.INDETERMINATE,
-    ),
+  const indeterminate = context.scannedPaths.filter(
+    (path) =>
+      context.scope.covers(path) &&
+      (context.records.get(path)?.record.facts.references ?? []).some(
+        (reference) =>
+          reference.certainty === ANALYSIS_CERTAINTIES.INDETERMINATE,
+      ),
   );
   return {
     projectRoot,

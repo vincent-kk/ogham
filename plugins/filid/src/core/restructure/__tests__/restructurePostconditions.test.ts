@@ -26,6 +26,8 @@ import {
   validatePlanPostconditions,
   validatePlanPreconditions,
 } from '../index.js';
+import { collectPlanBaseline } from '../planner/collectPlanBaseline.js';
+import { validateDependencyPostconditions } from '../validator/validateDependencyPostconditions.js';
 
 const PATHS = {
   ROOT: '/project',
@@ -48,6 +50,14 @@ const PATHS = {
 const WINDOWS_PATHS = {
   ROOT: 'C:\\Repo',
   ROOT_ALIAS: 'c:/repo',
+} as const;
+
+/** Three fractals whose 2-cycles a<->b and a<->c form one SCC, for cycle-identity fixtures. */
+const SCC_PATHS = {
+  A: '/project/domain/scc-a',
+  B: '/project/domain/scc-b',
+  C: '/project/domain/scc-c',
+  Z: '/project/domain/scc-z',
 } as const;
 
 const POST_STATES = {
@@ -313,6 +323,98 @@ function makeSnapshot(
   };
 }
 
+/** Dependency graph over `scc-a`, `bOrZPath` and `scc-c`, holding the 2-cycles a<->bOrZPath and a<->c as one SCC. */
+function sccGraph(bOrZPath: string, cycleRoute: string[]): DependencyGraph {
+  const evidenceFor = (
+    sourceFile: string,
+    resolvedPath: string,
+  ): DependencyGraph['edges'][number]['evidence'] => [
+    { sourceFile, rawSpecifier: './peer.unit', resolvedPath },
+  ];
+  return {
+    nodePaths: [PATHS.ROOT, PATHS.DOMAIN, SCC_PATHS.A, bOrZPath, SCC_PATHS.C],
+    edges: [
+      {
+        fromFractalPath: SCC_PATHS.A,
+        toFractalPath: bOrZPath,
+        evidence: evidenceFor(
+          `${SCC_PATHS.A}/index.unit`,
+          `${bOrZPath}/index.unit`,
+        ),
+      },
+      {
+        fromFractalPath: bOrZPath,
+        toFractalPath: SCC_PATHS.A,
+        evidence: evidenceFor(
+          `${bOrZPath}/index.unit`,
+          `${SCC_PATHS.A}/index.unit`,
+        ),
+      },
+      {
+        fromFractalPath: SCC_PATHS.A,
+        toFractalPath: SCC_PATHS.C,
+        evidence: evidenceFor(
+          `${SCC_PATHS.A}/index.unit`,
+          `${SCC_PATHS.C}/index.unit`,
+        ),
+      },
+      {
+        fromFractalPath: SCC_PATHS.C,
+        toFractalPath: SCC_PATHS.A,
+        evidence: evidenceFor(
+          `${SCC_PATHS.C}/index.unit`,
+          `${SCC_PATHS.A}/index.unit`,
+        ),
+      },
+    ],
+    cycles: [cycleRoute],
+    unknownFiles: [],
+    certainty: ANALYSIS_CERTAINTIES.EXACT,
+  };
+}
+
+/** A snapshot over the `sccGraph` fixture, with `bOrZPath` standing in for the second SCC member. */
+function sccSnapshot(
+  bOrZPath: string,
+  cycleRoute: string[],
+  snapshotHash: string,
+): ProjectSnapshot {
+  const fractalEntry = (path: string, name: string): NodeEntry => ({
+    path,
+    name,
+    type: NODE_TYPES.FRACTAL,
+    hasIntentMd: true,
+    hasDetailMd: true,
+  });
+  const tree = buildFractalTree([
+    fractalEntry(PATHS.ROOT, 'project'),
+    fractalEntry(PATHS.DOMAIN, 'domain'),
+    fractalEntry(SCC_PATHS.A, 'scc-a'),
+    fractalEntry(bOrZPath, bOrZPath.split('/').pop()!),
+    fractalEntry(SCC_PATHS.C, 'scc-c'),
+  ]);
+  return {
+    schemaVersion: 1,
+    projectRoot: PATHS.ROOT,
+    outputLanguage: 'ko',
+    snapshotHash,
+    tree,
+    dependencyGraph: sccGraph(bOrZPath, cycleRoute),
+    adapterIds: ['fixture'],
+    verification: {
+      files: [],
+      violations: [],
+      certainty: ANALYSIS_CERTAINTIES.EXACT,
+    },
+    legacyCriteriaLedger: null,
+    diagnostics: [],
+    normalizedFacts: [],
+    filesOutsideFactsScope: 0,
+    collectedAxes: ALL_SNAPSHOT_AXES,
+    createdAt: CREATED_AT,
+  };
+}
+
 function findingOf(
   result: ReturnType<
     typeof validatePlanPreconditions | typeof validatePlanPostconditions
@@ -509,6 +611,41 @@ describe('restructure plan validation', () => {
     expect(finding.nextAction).toContain(
       `In ${PATHS.CONSUMER}, change the import "../a/value.unit" so it loads ${PATHS.TARGET}, for example "../model/value.unit"`,
     );
+  });
+
+  it('classifies a cycle as preexisting by SCC membership, even when the plan changes its representative route', () => {
+    const preSnapshot = sccSnapshot(SCC_PATHS.B, [
+      SCC_PATHS.A,
+      SCC_PATHS.B,
+      SCC_PATHS.A,
+    ], PLAN_SNAPSHOT_HASH);
+    const move: MoveInstruction = {
+      ...ORGAN_MOVE,
+      sourcePath: SCC_PATHS.B,
+      targetPath: SCC_PATHS.Z,
+    };
+    const plan: RestructurePlan = {
+      ...makePlan(move),
+      baseline: collectPlanBaseline(preSnapshot),
+    };
+    const postSnapshot = sccSnapshot(SCC_PATHS.Z, [
+      SCC_PATHS.A,
+      SCC_PATHS.C,
+      SCC_PATHS.A,
+    ], POST_SNAPSHOT_HASH);
+
+    const result = validateDependencyPostconditions(postSnapshot, plan, []);
+
+    expect(
+      result.findings.some(
+        (finding) => finding.code === RESTRUCTURE_VALIDATION_CODES.DEPENDENCY_CYCLE,
+      ),
+    ).toBe(false);
+    expect(
+      result.preexisting.some(
+        (finding) => finding.code === RESTRUCTURE_VALIDATION_CODES.DEPENDENCY_CYCLE,
+      ),
+    ).toBe(true);
   });
 
   it('does not pass an indeterminate dependency graph', () => {

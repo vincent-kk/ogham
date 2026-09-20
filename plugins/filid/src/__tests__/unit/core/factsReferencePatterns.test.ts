@@ -155,6 +155,23 @@ describe('what it takes for a reference to account for a line', () => {
     ).toEqual([]);
   });
 
+  it('accepts a specifier split across lines by a line continuation', () => {
+    const facts = record([]);
+    expect(
+      findUnaccountedLines(["import x from './a\\", "/b.js';"], {
+        ...facts,
+        references: [
+          {
+            specifier: './a/b.js',
+            sourceText: "'./a\\\n/b.js'",
+            kind: 'static',
+            resolved: { path: 'src/b.ts' },
+          },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
   it('accepts a sourceText exactly as the source spells it', () => {
     const facts = record([]);
     expect(

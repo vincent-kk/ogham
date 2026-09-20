@@ -75,4 +75,18 @@ describe('a recursive wildcard spans zero segments', () => {
     expect(globToRegExp('**/*.ts').test('src/a\nb.ts')).toBe(true);
     expect(globToRegExp('**/*.ts').test('a\nb.ts')).toBe(true);
   });
+
+  it('spans zero segments across consecutive recursive wildcards', () => {
+    // The defect this closes: a global replace consumed the first `**/`,
+    // leaving the second without the `^`/`/` the pattern required, so it fell
+    // through to the literal-`/` branch and could no longer match zero
+    // segments — dropping every root-level file out of scope silently.
+    const pattern = globToRegExp('**/**/*.ts');
+
+    expect(pattern.test('a.ts')).toBe(true);
+    expect(pattern.test('x/a.ts')).toBe(true);
+    expect(pattern.test('x/y/a.ts')).toBe(true);
+
+    expect(globToRegExp('a/**/**/b').test('a/b')).toBe(true);
+  });
 });

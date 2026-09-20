@@ -388,6 +388,31 @@ export const FACTS_COMPARISON_NOT_AGAINST_STORE_CODE =
 export const FACTS_COMPARISON_AGAINST_STORE_NEXT_ACTION =
   'Call facts compare again with the same candidate file and no generationId. A comparison against a generation measures the candidate against what the review was judged on, not against what the store holds now, so it cannot re-derive the judgements a discard took — the files stay listed in data.awaitingComparison of facts status until a comparison against the store clears them. The comparison just run is recorded as usual; only the mark is untouched.';
 
+/** A candidate file the named generation's frozen facts hold no entry for. */
+export const FACTS_COMPARISON_NOT_FROZEN_CODE = 'facts-comparison-not-frozen';
+
+/**
+ * Next action for a candidate file a generation never froze.
+ *
+ * `selectFrozenFacts` narrows what a generation freezes to the review's
+ * changed files and their neighbours (spec §9), so a file outside that set
+ * has no frozen entry to compare against — folding the missing entry to an
+ * empty one would report every in-project reference of that file as absent
+ * from the store when the store may carry them all.
+ */
+export const FACTS_COMPARISON_NOT_FROZEN_NEXT_ACTION =
+  'This file sat outside the named generation\'s frozen scope, so there is nothing frozen to compare the candidate against. Call facts compare again for this file without generationId to measure it against the live store instead.';
+
+/**
+ * Next action for a compare candidate whose declared bytes the file no longer carries.
+ *
+ * `compare` reads the file itself for `current`, so a stale `contentHash`
+ * would otherwise pass silently on nothing but the live bytes — the same gap
+ * `submit` closes by rejecting the record outright (spec §4.1–4.3).
+ */
+export const FACTS_COMPARISON_HASH_MISMATCH_NEXT_ACTION =
+  'The candidate declares a contentHash the file no longer carries, so nothing about it was compared. Re-extract that file and call facts compare again with the fresh candidate.';
+
 export const FACTS_JUDGEMENTS_UNREADABLE_NEXT_ACTION =
   'Do not treat this file as settled: the side-table shard that would hold its judgements did not read, so an adopted edge or an open item may be invisible. The response names the shard and which of the two it is. For an unparseable shard, call facts discard-damaged with that shard name — nothing else can write it, because the items that would be written are the ones nobody can read — and follow the next action it returns. For an unreadable one, restore read access to that file under the plugin cache, then call facts status again.';
 

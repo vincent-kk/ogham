@@ -2,9 +2,13 @@ import { ANALYSIS_AXES } from '../../../../constants/analysisAxes.js';
 import {
   FACTS_ACTIONS,
   FACTS_COMPARISON_AGAINST_STORE_NEXT_ACTION,
+  FACTS_COMPARISON_HASH_MISMATCH_NEXT_ACTION,
   FACTS_COMPARISON_NOT_AGAINST_STORE_CODE,
+  FACTS_COMPARISON_NOT_FROZEN_CODE,
+  FACTS_COMPARISON_NOT_FROZEN_NEXT_ACTION,
   FACTS_COMPARISON_NOT_INDEPENDENT_CODE,
   FACTS_JUDGEMENTS_DISCARDED_NEXT_ACTION,
+  FACTS_REJECTION_CODES,
   FACTS_TIERS,
 } from '../../../../constants/facts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
@@ -109,10 +113,27 @@ export async function compareFacts(
   const updates = new Map<string, AdjudicationPageUpdate>();
   const notIndependent: string[] = [];
   const againstFrozen: string[] = [];
+  const notFrozen: string[] = [];
+  const hashMismatch: string[] = [];
   for (const { facts } of submission.parsed) {
     if (!context.scope.covers(facts.path)) continue;
+    // A file the named generation never froze has no baseline to compare
+    // against; folding the missing entry to an empty one would report every
+    // in-project reference of the file as absent from the store, even though
+    // the store may carry them all (spec §9).
+    if (frozenByPath !== null && !frozenByPath.has(facts.path)) {
+      notFrozen.push(facts.path);
+      continue;
+    }
     const current = hashProjectFile(input.path, facts.path);
     if (!current.ok) continue;
+    // `submit` rejects a record whose declared bytes the file no longer
+    // carries (facts-content-hash-mismatch); a comparison reading only the
+    // live bytes would otherwise pass a stale candidate on nothing it saw.
+    if (current.contentHash !== facts.contentHash) {
+      hashMismatch.push(facts.path);
+      continue;
+    }
     const candidate = toComparableReferences(
       facts.references,
       current.contents.toString('utf8').split(/\r\n|\r|\n/),
@@ -226,6 +247,28 @@ export async function compareFacts(
               path: input.path,
               affects: ANALYSIS_AXES,
               nextAction: FACTS_COMPARISON_AGAINST_STORE_NEXT_ACTION,
+            },
+          ]),
+      ...(notFrozen.length === 0
+        ? []
+        : [
+            {
+              code: FACTS_COMPARISON_NOT_FROZEN_CODE,
+              message: `${notFrozen.length} file(s) were not compared: the named generation's frozen facts hold no entry for them (${notFrozen.join(', ')}).`,
+              path: input.path,
+              affects: ANALYSIS_AXES,
+              nextAction: FACTS_COMPARISON_NOT_FROZEN_NEXT_ACTION,
+            },
+          ]),
+      ...(hashMismatch.length === 0
+        ? []
+        : [
+            {
+              code: FACTS_REJECTION_CODES.HASH_MISMATCH,
+              message: `${hashMismatch.length} file(s) were not compared: the candidate's contentHash does not match the file's current bytes (${hashMismatch.join(', ')}).`,
+              path: input.path,
+              affects: ANALYSIS_AXES,
+              nextAction: FACTS_COMPARISON_HASH_MISMATCH_NEXT_ACTION,
             },
           ]),
     ],

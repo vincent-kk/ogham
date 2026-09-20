@@ -1,8 +1,8 @@
 /** Regex syntax that a glob treats as literal text. */
 const REGEXP_METACHARACTER_PATTERN = /[.+^${}()|[\]\\]/g;
 
-/** A recursive wildcard and its separator, at the start or after a separator. */
-const ANY_SEGMENTS_PATTERN = /(^|\/)\*\*\//g;
+/** One or more consecutive recursive wildcards and their separator, at the start or after a separator. */
+const ANY_SEGMENTS_PATTERN = /(^|\/)(?:\*\*\/)+/g;
 
 /** Recursive wildcard protected before single-star conversion. */
 const DOUBLE_STAR_PATTERN = /\*\*/g;

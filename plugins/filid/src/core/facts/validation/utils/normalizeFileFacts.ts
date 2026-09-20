@@ -1,4 +1,7 @@
-import type { FileFacts } from '../../schema/fileFactsSchema.js';
+import type {
+  FactsReference,
+  FileFacts,
+} from '../../schema/fileFactsSchema.js';
 
 /**
  * Put one accepted record into filid's canonical shape.
@@ -18,10 +21,7 @@ export function normalizeFileFacts(facts: FileFacts): FileFacts {
     path: facts.path,
     contentHash: facts.contentHash,
     references: [...facts.references].sort((left, right) =>
-      byBytes(
-        `${left.specifier}\0${left.kind}\0${JSON.stringify(left.resolved)}`,
-        `${right.specifier}\0${right.kind}\0${JSON.stringify(right.resolved)}`,
-      ),
+      byBytes(referenceKey(left), referenceKey(right)),
     ),
     ...(facts.entrySurface
       ? {
@@ -61,3 +61,18 @@ export function normalizeFileFacts(facts: FileFacts): FileFacts {
 function byBytes(left: string, right: string): number {
   return Buffer.compare(Buffer.from(left, 'utf8'), Buffer.from(right, 'utf8'));
 }
+
+/**
+ * Build a reference's sort key from every field that distinguishes it.
+ * @param one Reference to key.
+ * @returns A NUL-joined string usable with {@link byBytes}.
+ */
+const referenceKey = (one: FactsReference): string =>
+  [
+    one.sourceText ?? one.specifier,
+    one.specifier,
+    one.kind,
+    JSON.stringify(one.resolved),
+    one.line ?? '',
+    JSON.stringify(one.candidateLines ?? []),
+  ].join('\0');

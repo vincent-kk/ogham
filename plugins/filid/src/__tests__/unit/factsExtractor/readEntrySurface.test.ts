@@ -80,4 +80,72 @@ describe('the surface an entry point declares in its own text', () => {
     expect(inspection.hasDirectDeclarations).toBe(true);
     expect(inspection.certainty).toBe('exact');
   });
+
+  it('reads the declared name through an async modifier', async () => {
+    const entry = writeIn('src/index.ts', 'export async function run() {}\n');
+
+    const inspection = await inspectEntrySurface(entry);
+
+    expect(inspection.exportedNames).toEqual(['run']);
+    expect(inspection.certainty).toBe('exact');
+  });
+
+  it('reads the declared name through a declare modifier', async () => {
+    const entry = writeIn('src/index.ts', 'export declare function run(): void;\n');
+
+    const inspection = await inspectEntrySurface(entry);
+
+    expect(inspection.exportedNames).toEqual(['run']);
+    expect(inspection.certainty).toBe('exact');
+  });
+
+  it('reads the declared name through an abstract modifier', async () => {
+    const entry = writeIn('src/index.ts', 'export abstract class Run {}\n');
+
+    const inspection = await inspectEntrySurface(entry);
+
+    expect(inspection.exportedNames).toEqual(['Run']);
+    expect(inspection.certainty).toBe('exact');
+  });
+
+  it('reads the declared name through an async modifier on a generator', async () => {
+    const entry = writeIn(
+      'src/index.ts',
+      'export async function* gen() {}\n',
+    );
+
+    const inspection = await inspectEntrySurface(entry);
+
+    expect(inspection.exportedNames).toEqual(['gen']);
+    expect(inspection.certainty).toBe('exact');
+  });
+
+  it('still reads an aliased named export without a modifier', async () => {
+    const entry = writeIn('src/index.ts', "export { a as b };\n");
+
+    const inspection = await inspectEntrySurface(entry);
+
+    expect(inspection.exportedNames).toEqual(['b']);
+    expect(inspection.certainty).toBe('exact');
+  });
+
+  it('still reads a re-exported type without a modifier', async () => {
+    const entry = writeIn(
+      'src/index.ts',
+      "export type { A } from './a.js';\n",
+    );
+
+    const inspection = await inspectEntrySurface(entry);
+
+    expect(inspection.exportedNames).toEqual(['A']);
+    expect(inspection.certainty).toBe('exact');
+  });
+
+  it('reports an export assignment as indeterminate', async () => {
+    const entry = writeIn('src/index.ts', 'export = foo;\n');
+
+    const inspection = await inspectEntrySurface(entry);
+
+    expect(inspection.certainty).toBe('indeterminate');
+  });
 });

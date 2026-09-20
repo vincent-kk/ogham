@@ -1,4 +1,5 @@
 import { FACTS_FILE_STATES, FACTS_UNKNOWN_CAUSES } from '../../../constants/facts.js';
+import { compareByBytes } from '../../../lib/compareByBytes.js';
 import type { UnknownFile } from '../../../types/fractal.js';
 
 import type { FactsFileState } from './classifyFactsFile.js';
@@ -36,5 +37,5 @@ export function selectUnknownFiles(
       const cause = CAUSE_BY_STATE[state];
       return cause === undefined ? [] : [{ path, causes: [cause] }];
     })
-    .sort((left, right) => left.path.localeCompare(right.path));
+    .sort((left, right) => compareByBytes(left.path, right.path));
 }

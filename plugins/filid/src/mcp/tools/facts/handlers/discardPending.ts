@@ -57,6 +57,7 @@ export async function discardPending(
     store.shards,
     updates,
     storePaths.shardFileName,
+    store.damaged,
   );
   const kept = new Set(written.conflicted);
   return {

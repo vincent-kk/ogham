@@ -186,7 +186,7 @@ export async function prepareIncrementalReviewState(
         : keepsPreparedEffort
           ? undefined
           : {
-              reason: REVIEW_STATE_DIAGNOSTIC_CODES.EFFORT_LOCKED,
+              reason: REVIEW_STATE_DIAGNOSTIC_CODES.EFFORT_CHANGED,
               ...(previous.generationId
                 ? { priorGenerationId: previous.generationId }
                 : {}),

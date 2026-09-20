@@ -254,6 +254,40 @@ describe('a file whose judgements were discarded is not settled by the discard',
     );
   });
 
+  it('is not cleared by a candidate whose contentHash does not match the file', async () => {
+    const shard = await adoptThenDamage();
+    await discard(shard);
+
+    const stale = project.facts('src/index.ts', {
+      references: [EDGE],
+      contentHash: `sha256:${'0'.repeat(64)}`,
+      provenance: {
+        tool: 'tool-b',
+        version: '1.0.0',
+        command: 'test',
+        tier: 'tool',
+        resolutionInputs: [],
+      },
+    });
+    const result = await handleFacts({
+      action: 'compare',
+      path: project.root,
+      file: project.submission('stale.json', JSON.stringify([stale])),
+    });
+
+    expect(result.diagnostics.map(({ code }) => code)).toContain(
+      'facts-content-hash-mismatch',
+    );
+    expect((result.data as FactsCompareData).missingInStore).toHaveLength(0);
+    expect(await stateOfIndex()).toBe(FACTS_FILE_STATES.UNCERTAIN);
+    const status = await handleFacts({ action: 'status', path: project.root });
+    expect(
+      (status.data as FactsStatusData).awaitingComparison.items.map(
+        (item) => item.path,
+      ),
+    ).toContain('src/index.ts');
+  });
+
   it('survives an ordinary submit, which knows nothing about the mark', async () => {
     const shard = await adoptThenDamage();
     await discard(shard);
@@ -306,5 +340,62 @@ describe('a file whose judgements were discarded is not settled by the discard',
     await adoptTheOpenItem();
 
     expect(await stateOfIndex()).toBe(FACTS_FILE_STATES.EXACT);
+  });
+});
+
+describe('status lists apply the same scope filter as their siblings', () => {
+  it('excludes a file scope no longer covers from awaitingComparison and indeterminate', async () => {
+    const shard = await adoptThenDamage();
+    await discard(shard);
+    const status = await handleFacts({ action: 'status', path: project.root });
+    await handleFacts({
+      action: 'submit',
+      path: project.root,
+      file: project.submission(
+        'indeterminate.json',
+        JSON.stringify([
+          project.facts('src/index.ts', {
+            references: [
+              {
+                specifier: './thing.js',
+                kind: 'static',
+                certainty: 'indeterminate',
+                resolved: { unresolved: true },
+              },
+            ],
+          }),
+        ]),
+      ),
+      resolutionEpoch: (status.summary as FactsStatusSummary).resolutionEpoch,
+    });
+
+    // Sanity: both lists carry the file while the scope still covers it —
+    // `collectOpenItems` and `pendingAttestations` already filter on scope,
+    // so this is what their two siblings owed all along.
+    const before = await handleFacts({ action: 'status', path: project.root });
+    const beforeData = before.data as FactsStatusData;
+    expect(beforeData.awaitingComparison.items.map((item) => item.path)).toContain(
+      'src/index.ts',
+    );
+    expect(beforeData.indeterminate.paths).toContain('src/index.ts');
+
+    // Narrow the scope so `src/index.ts` is scanned but no longer covered —
+    // the same gap that leaves a compared file with nothing frozen to answer.
+    project.write(
+      '.filid/config.json',
+      JSON.stringify({
+        version: '2.0',
+        adapters: { mode: 'auto', enabled: [] },
+        rules: {},
+        facts: { covers: ['nowhere/**'] },
+      }),
+    );
+
+    const after = await handleFacts({ action: 'status', path: project.root });
+    const afterData = after.data as FactsStatusData;
+    expect(afterData.awaitingComparison.items.map((item) => item.path)).not.toContain(
+      'src/index.ts',
+    );
+    expect(afterData.indeterminate.paths).not.toContain('src/index.ts');
   });
 });

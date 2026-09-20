@@ -1,19 +1,16 @@
 import { pathForCompare } from '@ogham/cross-platform';
 
 /**
- * A cycle's identity: the sorted set of its `(fromFractalPath, toFractalPath)` pairs.
+ * A cycle's identity: the sorted, de-duplicated set of its member owner paths.
  *
- * Two routes through the same edges are one cycle whichever owner they start
- * from, and a route relocated through a plan's moves compares with the route
- * the post-execution graph reports.
- * @param route Owner paths, the first repeated at the end.
- * @returns A stable key; equal for routes over the same edges.
+ * Identifying a cycle by its strongly connected component, not by a
+ * representative route, keeps the identity stable when a restructure renames
+ * or relocates one of the owners without changing the topology.
+ * @param nodes Owner paths of the cycle's strongly connected component.
+ * @returns A stable key; equal for components over the same owners.
  */
-export function cycleIdentity(route: readonly string[]): string {
-  const pairs = route
-    .slice(1)
-    .map(
-      (to, index) => `${pathForCompare(route[index])}\0${pathForCompare(to)}`,
-    );
-  return [...new Set(pairs)].sort().join('\n');
+export function cycleIdentity(nodes: readonly string[]): string {
+  return [...new Set(nodes.map((node) => pathForCompare(node)))]
+    .sort()
+    .join('\n');
 }

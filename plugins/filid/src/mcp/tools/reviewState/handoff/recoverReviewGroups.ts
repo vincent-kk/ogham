@@ -64,7 +64,12 @@ export async function recoverReviewGroups(
         state = rebuilt;
         group = state.groups.find(({ id }) => id === group.id)!;
       } else {
-        group = discardReviewGroupRounds(paths, group, state.sourceHash);
+        group = discardReviewGroupRounds(
+          paths,
+          group,
+          state.sourceHash,
+          observed.roundFiles,
+        );
         discardedGroups.push(group.id);
       }
     }

@@ -35,17 +35,15 @@ function randomRoute(random: Random, size: number): string[] {
 }
 
 /**
- * The edge pairs of a route as a sorted, duplicate-free list.
+ * The member owners of a route as a sorted, duplicate-free list.
  * @param route Closed route.
- * @returns `from→to` strings.
+ * @returns Owner paths, the closing repeat dropped.
  */
-function edgePairs(route: readonly string[]): string[] {
-  return [
-    ...new Set(route.slice(1).map((to, index) => `${route[index]}→${to}`)),
-  ].sort();
+function nodeSet(route: readonly string[]): string[] {
+  return [...new Set(route.slice(0, -1))].sort();
 }
 
-describe('a cycle identity names its edge set', () => {
+describe('a cycle identity names its component node set', () => {
   it('is the same for every rotation of a route', () => {
     checkProperty({
       runs: RUNS,
@@ -64,7 +62,7 @@ describe('a cycle identity names its edge set', () => {
     });
   });
 
-  it('is equal for two routes exactly when their edge sets are equal', () => {
+  it('is equal for two routes exactly when their node sets are equal', () => {
     checkProperty({
       runs: RUNS,
       maxSize: 3,
@@ -73,12 +71,12 @@ describe('a cycle identity names its edge set', () => {
         right: randomRoute(random, size),
       }),
       check: ({ left, right }) => {
-        const sameEdges =
-          edgePairs(left).join('\n') === edgePairs(right).join('\n');
+        const sameNodes =
+          nodeSet(left).join('\n') === nodeSet(right).join('\n');
         const sameIdentity = cycleIdentity(left) === cycleIdentity(right);
-        return sameEdges === sameIdentity
+        return sameNodes === sameIdentity
           ? null
-          : `same edges=${sameEdges}, same identity=${sameIdentity}`;
+          : `same nodes=${sameNodes}, same identity=${sameIdentity}`;
       },
     });
   });
@@ -112,11 +110,7 @@ describe('a cycle identity names its edge set', () => {
       check: ({ route, moves }) => {
         const relocate = (owner: string) => relocateThroughMoves(owner, moves);
         const relocatedIdentity = [
-          ...new Set(
-            cycleIdentity(route)
-              .split('\n')
-              .map((pair) => pair.split('\0').map(relocate).join('\0')),
-          ),
+          ...new Set(cycleIdentity(route).split('\n').map(relocate)),
         ]
           .sort()
           .join('\n');

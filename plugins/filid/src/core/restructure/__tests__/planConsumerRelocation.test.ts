@@ -263,12 +263,14 @@ describe('restructure rewrites consumers the same plan relocates', () => {
       { path: PATHS.ROOT, requests: [internalMove(PATHS.CONTRACTS)] },
     );
 
-    expect(plan.moves[0]?.affectedImports).toContainEqual({
+    expect(plan.moves[0]?.preservedImports).toContainEqual({
       consumerPath: PATHS.X_OPS_GUARD,
       currentSpecifier: './types.ts',
       requiredResolvedPath: '/root/x/ops/types.ts',
-      suggestedSpecifier: './types.ts',
     });
+    expect(plan.moves[0]?.affectedImports).not.toContainEqual(
+      expect.objectContaining({ consumerPath: PATHS.X_OPS_GUARD }),
+    );
   });
 
   it('applies planned moves in execution order', () => {

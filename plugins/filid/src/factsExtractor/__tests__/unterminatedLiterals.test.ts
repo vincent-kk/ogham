@@ -2,6 +2,8 @@ import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
 
+import { findUntrustedText } from '../analysis/lexing/findUntrustedText.js';
+import type { LexicalToken } from '../analysis/lexing/lexicalToken.js';
 import { scanLexicalTokens } from '../analysis/lexing/scanLexicalTokens.js';
 import { scanSource } from '../analysis/scanSource.js';
 import { countSemanticCases } from '../analysis/verification/countSemanticCases.js';
@@ -74,6 +76,37 @@ describe('unterminated literals: lost track versus hidden syntax', () => {
         "render(<Button>Don't</Button>);\nit('a', () => {});\nit('b', () => {});",
       ),
     ).toMatchObject({ certainty: 'exact', exactCount: 2 });
+  });
+
+  it('does not lose track at a terminated template literal sharing a stray-quote line', () => {
+    const source = "const s = 'x; const t = `plain`; it('c', () => {});\n";
+    const quoteStart = source.indexOf("'x");
+    const templateStart = source.indexOf('`plain`');
+    const tokens: LexicalToken[] = [
+      {
+        kind: 'string',
+        value: 'x',
+        start: quoteStart,
+        end: quoteStart + 2,
+        parenDepth: 0,
+        braceDepth: 0,
+        bracketDepth: 0,
+        unterminated: true,
+      },
+      {
+        kind: 'template',
+        value: 'plain',
+        start: templateStart,
+        end: templateStart + '`plain`'.length,
+        parenDepth: 0,
+        braceDepth: 0,
+        bracketDepth: 0,
+      },
+    ];
+
+    expect(findUntrustedText(source, tokens).lostTrackAt).toBe(
+      Number.POSITIVE_INFINITY,
+    );
   });
 
   it('denies the role to a renamed file whose only uncertainty is a lost template', async () => {

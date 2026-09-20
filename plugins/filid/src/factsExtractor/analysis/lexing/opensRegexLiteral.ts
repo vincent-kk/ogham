@@ -34,7 +34,7 @@ const OPERAND_END_PUNCTUATION = new Set([')', ']']);
  * An identifier character outside ASCII. The scanner reads only ASCII
  * identifiers, so `총액` or the `é` of `café` arrives as punctuation.
  */
-const NON_ASCII_IDENTIFIER_PART = /\p{ID_Continue}/u;
+const NON_ASCII_IDENTIFIER_PART = /[\p{ID_Continue}\uD800-\uDFFF]/u;
 
 function endsOperand(token: PrecedingToken): boolean {
   if (token.kind === 'identifier')

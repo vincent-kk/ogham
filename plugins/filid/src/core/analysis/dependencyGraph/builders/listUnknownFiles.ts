@@ -1,3 +1,4 @@
+import { compareByBytes } from '../../../../lib/compareByBytes.js';
 import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type { UnknownFile } from '../../../../types/fractal.js';
 
@@ -24,5 +25,5 @@ export function listUnknownFiles(
     add(toProjectRelativePath(projectRoot, sourceFile), causes);
   return [...merged]
     .map(([path, causes]) => ({ path, causes: [...causes].sort() }))
-    .sort((left, right) => left.path.localeCompare(right.path));
+    .sort((left, right) => compareByBytes(left.path, right.path));
 }

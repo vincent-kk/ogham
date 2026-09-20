@@ -173,6 +173,22 @@ describe('unknownFiles', () => {
     ]);
   });
 
+  it('orders by raw bytes, not locale collation', () => {
+    // '-' (0x2D) < 'Z' (0x5A) < 'a' (0x61) in byte order; ICU locale collation
+    // would instead place 'a/a.ts' before 'a/Z.ts'.
+    const states = new Map<string, FactsFileState>([
+      ['a/a.ts', FACTS_FILE_STATES.MISSING],
+      ['a/Z.ts', FACTS_FILE_STATES.MISSING],
+      ['a/-b.ts', FACTS_FILE_STATES.MISSING],
+    ]);
+
+    expect(selectUnknownFiles(states)).toEqual([
+      { path: 'a/-b.ts', causes: ['facts-missing'] },
+      { path: 'a/Z.ts', causes: ['facts-missing'] },
+      { path: 'a/a.ts', causes: ['facts-missing'] },
+    ]);
+  });
+
   it('excludes unsupported, because out of scope is a decision, not a gap', () => {
     const states = new Map<string, FactsFileState>([
       ['src/e.ts', FACTS_FILE_STATES.UNSUPPORTED],

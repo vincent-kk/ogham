@@ -81,5 +81,11 @@ export function writeAdjudicationPages(
             },
     });
   }
-  return writeShardPages(directory, table.shards, pages, shardFileName);
+  return writeShardPages(
+    directory,
+    table.shards,
+    pages,
+    shardFileName,
+    table.damaged,
+  );
 }

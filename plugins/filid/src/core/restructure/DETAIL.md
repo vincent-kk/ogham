@@ -59,7 +59,7 @@
   - 요구된 entry point가 있어도 surface가 `unsupported`면 `entry-point-surface-unsupported`다. 그 entry point가 unit을 노출하는지 확인할 수 없기 때문이다. nextAction은 그 경로의 사실에 `entrySurface`를 채우는 것이고(`FACTS_SECTION_UNAVAILABLE_NEXT_ACTION` 재사용 — 그 축을 보고하는 도구로 그 한 경로만 다시 추출하거나 attested 레코드로 제출), 사람에게 손으로 확인해 달라고 하지 않는다.
   - target 경로가 없거나, 디렉터리 unit(`unitKind`가 `file`이 아님)인데 target 노드가 없으면(같은 이름의 일반 파일만 있는 경우) `target-missing`이다. 그때 node type·artifact 검사는 생략된다. file unit의 target 노드는 부모 디렉터리이므로, target 파일이 있으면 노드도 있다.
   - import boundary와 DAG도 검사하고, 계획 시점 기준선(`baseline`)과 비교한다. 검사는 전부 하고 전부 보고한다. 새로 생긴 것은 `findings`, 계획 전부터 있던 것은 같은 전체 기록으로 `preexisting`에 싣는다. `preexisting`만 있으면 통과다.
-    - 순환의 신원은 경로의 `(fromFractalPath, toFractalPath)` 쌍의 정렬 집합이다. 기준선 쪽 경로를 `relocateThroughMoves`로 계획의 이동에 통과시킨 뒤 비교한다. 그래서 이동이 기존 순환의 구성원을 옮겨도 같은 순환이다.
+    - 순환의 신원은 그 strongly connected component 구성원 owner 경로의 정렬·중복 없는 집합이다. 대표 route가 아니라 구성원으로 식별하는 이유: restructure는 바로 그 route를 고르는 경로들의 이름을 바꾸므로, route 기반 신원은 위상이 그대로여도 바뀐다. 기준선 쪽 경로를 `relocateThroughMoves`로 계획의 이동에 통과시킨 뒤 비교한다. 그래서 이동이 기존 순환의 구성원을 옮겨도 같은 순환이다.
     - 경계 위반의 신원은 (rule, 소비자 파일, 대상 파일)이고 같은 변환을 거친다. 대상 파일은 규칙 위반의 `importedPath`다. organ 접근 위반도 `importedPath`를 싣는다. `importedPath`가 없는 위반(규칙의 certainty 경고 제외)은 기준선과 비교할 수 없으므로 `findings`에 남긴다.
     - boundary 규칙의 certainty 경고는 finding으로 쓰지 않는다. 대신 관련 `unknownFiles`가 있으면 `dependency-graph-indeterminate` finding 하나가 그 목록을 싣는다. 관련 파일이 없으면 무관한 `unknownFiles`가 있어도 부재 결론(순환 없음, 경계 위반 없음, 보존 import 전부)을 낸다. 존재 결론(찾은 순환·위반)은 `unknownFiles`와 무관하게 보고한다.
 - 모든 validation finding은 경로·specifier를 담은 `message`와 `nextAction`을 싣는다. boundary finding은 규칙 위반의 `message`와 `suggestion`을 쓴다.
@@ -79,7 +79,7 @@
 - `collectPlanReadPaths(snapshot, moves, unknownFilePaths?): string[]` — `readPaths`(source 파일, 소비자, source가 import하는 파일, 관련성 판정이 읽은 `unknownFiles`)를 정렬해 중복 없이 반환한다.
 - `partitionPlanUnknownFiles(snapshot, targets, consumerPaths, readText): { relevant, other, readPaths }` — 계획·precondition·postcondition이 같이 쓰는 관련성 판정. `targets`와 `consumerPaths`는 절대 경로다. `readPaths`는 텍스트를 읽은 파일의 절대 경로다.
 - `readUnknownFileText(projectRoot, relativePath): string | null` — 경로 문자열과 실제 위치가 root 안인 파일의 텍스트. 밖이거나 읽지 못하면 null.
-- `collectPlanBaseline(snapshot): PlanBaseline` — 계획 시점의 순환 경로와 경계 위반 신원(rule, 소비자, 대상).
+- `collectPlanBaseline(snapshot): PlanBaseline` — 계획 시점 그래프의 다중 노드 strongly connected component들의 node-path 집합과 경계 위반 신원(rule, 소비자, 대상).
 - `splitByBaseline(snapshot, plan): { findings, preexisting }` — post snapshot의 순환·경계 위반 finding을 기준선과 비교해 나눈다.
 - `collectPlanProbePaths(projectRoot, moves, readPaths): string[]` — `probePaths`(target 경로, source·target 조상 디렉터리의 `INTENT.md`·`DETAIL.md`)에서 `readPaths`와 겹치는 것을 뺀 정렬·중복 없는 목록.
 - `computePlanReadHash(projectRoot, readPaths, probePaths): string` — `readPaths`의 byte와 `probePaths`의 상태(`missing | file | directory`, file이면 내용)로 `readHash`를 계산한다. 계획과 precondition이 같은 함수를 쓴다. 두 목록 모두 `resolveHashFile`의 root containment를 거치므로 경로 문자열이 root 밖이면 읽기 전에 던진다. 이 함수 자체는 symlink를 따라가므로, symlink를 거친 탈출은 호출 전에 막아야 한다: 계획은 그런 probe를 싣지 않고, plan artifact reader는 그런 경로가 있는 artifact를 거절한다.

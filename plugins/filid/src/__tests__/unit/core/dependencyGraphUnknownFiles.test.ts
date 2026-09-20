@@ -4,6 +4,7 @@ import {
   buildDependencyGraph,
   findUnownedReferences,
 } from '../../../core/analysis/dependencyGraph/index.js';
+import { listUnknownFiles } from '../../../core/analysis/dependencyGraph/builders/listUnknownFiles.js';
 import type { DependencyReference } from '../../../types/adapters.js';
 
 /** Root every fixture path sits under. */
@@ -166,5 +167,23 @@ describe('the dependency graph attributes what it cannot confirm to files', () =
       buildDependencyGraph(nodePaths, [], 'unsupported', { projectRoot })
         .certainty,
     ).toBe('unsupported');
+  });
+});
+
+describe('listUnknownFiles orders entries by raw bytes', () => {
+  it('places a/-b.ts before a/Z.ts before a/a.ts, not locale order', () => {
+    // '-' (0x2D) < 'Z' (0x5A) < 'a' (0x61) in byte order; ICU locale collation
+    // would instead place 'a/a.ts' before 'a/Z.ts'.
+    const seeds = [
+      { path: 'a/a.ts', causes: ['unresolved-local-dependency'] },
+      { path: 'a/Z.ts', causes: ['unresolved-local-dependency'] },
+      { path: 'a/-b.ts', causes: ['unresolved-local-dependency'] },
+    ];
+
+    expect(listUnknownFiles(projectRoot, new Map(), seeds)).toEqual([
+      { path: 'a/-b.ts', causes: ['unresolved-local-dependency'] },
+      { path: 'a/Z.ts', causes: ['unresolved-local-dependency'] },
+      { path: 'a/a.ts', causes: ['unresolved-local-dependency'] },
+    ]);
   });
 });

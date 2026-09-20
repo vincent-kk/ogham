@@ -246,6 +246,7 @@ export function storeAcceptedRecords(
     store.shards,
     pendingUpdates,
     context.storePaths.shardFileName,
+    store.damaged,
   );
   let openedItems = 0;
   let closedItems = 0;

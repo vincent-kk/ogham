@@ -134,7 +134,10 @@ export function findUntrustedText(
     const line = lines[lineIndex];
     if (!line || token.start < line.start) continue;
     line.literals.push({ start: token.start, end: token.end });
-    const content = source.slice(token.start + 1, token.end);
+    const content = source.slice(
+      token.start + 1,
+      token.unterminated ? token.end : token.end - 1,
+    );
     if (content.includes('/*') || content.includes('`'))
       lostTrackAt = Math.min(lostTrackAt, token.start);
   }

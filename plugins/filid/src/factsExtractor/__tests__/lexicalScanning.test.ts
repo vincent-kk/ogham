@@ -59,6 +59,14 @@ describe('ecmascript lexical scanning of regex literals and strings', () => {
     ).toEqual([]);
   });
 
+  it('reads a slash after an astral identifier character as division', () => {
+    expect(
+      shapes('const r = 𝑥 / 2 + b / c;').filter((shape) =>
+        shape.startsWith('regex:'),
+      ),
+    ).toEqual([]);
+  });
+
   it('still opens a regex after a prefix operator and a spaced <', () => {
     expect(
       shapes(

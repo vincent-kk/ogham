@@ -7,6 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { resolveFactsStorePaths } from '../../../../core/facts/index.js';
 import { handleFacts } from '../../../../mcp/tools/facts/index.js';
 import type {
+  FactsCompareData,
   FactsCompareSummary,
   FactsStatusData,
 } from '../../../../mcp/tools/facts/index.js';
@@ -246,6 +247,64 @@ describe('a comparison against a generation reads that generation\'s facts', () 
       comparedFiles: 1,
       missingInStore: 0,
     });
+  });
+
+  it('skips a file the named generation never froze, rather than treating it as empty', async () => {
+    const prepared = await prepare();
+    const state = readPreparedReviewState(prepared);
+    // Written after the freeze, so no frozen entry can exist for it — the
+    // case selectFrozenFacts's changed-and-neighbour narrowing produces for
+    // any file outside a review's scope.
+    writeReviewStateFixtureFile(
+      fixture.projectRoot,
+      'src/untouched.ts',
+      "import { helper } from './helper.js';\n\nexport const untouchedThing = helper;\n",
+    );
+    const bytes = readFileSync(join(fixture.projectRoot, 'src/untouched.ts'));
+    const contentHash = `sha256:${createHash('sha256').update(bytes).digest('hex')}`;
+    const candidate = join(fixture.pluginRoot, 'untouched-candidate.json');
+    writeFileSync(
+      candidate,
+      JSON.stringify([
+        {
+          schemaVersion: 1,
+          path: 'src/untouched.ts',
+          contentHash,
+          references: [
+            {
+              specifier: './helper.js',
+              kind: 'static',
+              resolved: { path: 'src/helper.ts' },
+            },
+          ],
+          provenance: {
+            tool: 'other-tool',
+            version: '1.0.0',
+            command: 'test',
+            tier: 'tool',
+            resolutionInputs: [],
+          },
+        },
+      ]),
+    );
+
+    const result = await handleFacts({
+      action: 'compare',
+      path: fixture.projectRoot,
+      file: candidate,
+      generationId: state.generationId!,
+    });
+
+    // Folding the missing entry to "frozen empty" would report this edge as
+    // absent from the store; skipping it leaves nothing to report and opens
+    // no side-table item.
+    expect(result.summary as FactsCompareSummary).toMatchObject({
+      missingInStore: 0,
+    });
+    expect((result.data as FactsCompareData).sideTableItems).toEqual([]);
+    expect(result.diagnostics.map(({ code }) => code)).toContain(
+      'facts-comparison-not-frozen',
+    );
   });
 });
 

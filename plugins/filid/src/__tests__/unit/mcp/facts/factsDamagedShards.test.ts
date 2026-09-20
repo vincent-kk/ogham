@@ -12,7 +12,10 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { FACTS_FILE_STATES } from '../../../../constants/facts.js';
+import {
+  FACTS_DIAGNOSTIC_CODES,
+  FACTS_FILE_STATES,
+} from '../../../../constants/facts.js';
 import {
   classifyProjectFacts,
   readPendingStore,
@@ -232,6 +235,101 @@ describe('a write never replaces a shard nobody could compare against', () => {
     // A read failure is not "no file there": treating the two alike made the
     // write replace bytes no compare-and-set had compared.
     expect(digestOf(path)).toBe(before);
+  });
+});
+
+describe('a shard covering another file is never overwritten by an ordinary submit', () => {
+  it('refuses the second file, keeps the first uncertain, and stores no record for either', async () => {
+    // `src/index.ts` and `src/f902.ts` hash to the same shard prefix, `a2`.
+    project.write('src/f902.ts', "export { thing } from './thing.js';\n");
+
+    async function submitPair(claims: {
+      index: boolean;
+      f902: boolean;
+    }): Promise<void> {
+      const status = await handleFacts({ action: 'status', path: project.root });
+      const file = project.submission(
+        `pair-${claims.index}-${claims.f902}.json`,
+        JSON.stringify([
+          project.facts('src/index.ts', {
+            references: claims.index ? [EDGE] : [],
+          }),
+          project.facts('src/f902.ts', {
+            references: claims.f902 ? [EDGE] : [],
+          }),
+        ]),
+      );
+      await handleFacts({
+        action: 'submit',
+        path: project.root,
+        file,
+        resolutionEpoch: (status.summary as FactsStatusSummary).resolutionEpoch,
+      });
+    }
+
+    // Baseline: both files claim the edge, so there is nothing to judge yet.
+    await submitPair({ index: true, f902: true });
+    // Walk the edge back for `index.ts` alone: opens an item on a healthy shard.
+    await submitPair({ index: false, f902: true });
+
+    const shardPath = join(sideTableDirectory(), 'a2.json');
+    writeFileSync(shardPath, '{ not json');
+    const before = digestOf(shardPath);
+
+    // An ordinary submit walks the edge back for `f902.ts` too, on the shard
+    // that is now damaged.
+    const status = await handleFacts({ action: 'status', path: project.root });
+    const result = await handleFacts({
+      action: 'submit',
+      path: project.root,
+      file: project.submission(
+        'f902-drop.json',
+        JSON.stringify([project.facts('src/f902.ts', { references: [] })]),
+      ),
+      resolutionEpoch: (status.summary as FactsStatusSummary).resolutionEpoch,
+    });
+
+    expect(result.status).toBe('indeterminate');
+    // The damaged shard was refused wholesale, not silently replaced with only
+    // the page this submit knew about.
+    expect(digestOf(shardPath)).toBe(before);
+    expect(await stateOf('src/index.ts')).toBe(FACTS_FILE_STATES.UNCERTAIN);
+    const statusAfter = await handleFacts({ action: 'status', path: project.root });
+    expect(
+      statusAfter.diagnostics.some(
+        ({ code }) => code === 'facts-judgements-unreadable',
+      ),
+    ).toBe(true);
+    const conflictDiagnostic = result.diagnostics.find(
+      ({ code }) => code === FACTS_DIAGNOSTIC_CODES.SIDE_TABLE_CHANGED,
+    );
+    expect(conflictDiagnostic?.message).toContain('src/f902.ts');
+
+    // The record dropping the edge lost its opening page, so it was never
+    // stored — the record still on disk is the one that claims it.
+    const facts = await readProjectFacts(project.root, {
+      ...createDefaultConfig(),
+      facts: { covers: ['src/**'] },
+    });
+    expect(
+      facts.records
+        .get('src/f902.ts')
+        ?.record.facts.references.map((reference) => reference.specifier),
+    ).toEqual(['./thing.js']);
+    expect(await stateOf('src/f902.ts')).not.toBe(FACTS_FILE_STATES.EXACT);
+
+    const discardResult = await handleFacts({
+      action: 'discard-damaged',
+      path: project.root,
+      shards: ['a2.json'],
+    });
+    expect(discardResult.summary).toMatchObject({ discarded: 1 });
+    expect(
+      (
+        (await handleFacts({ action: 'status', path: project.root }))
+          .data as FactsStatusData
+      ).awaitingComparison.items.map((item) => item.path),
+    ).toContain('src/index.ts');
   });
 });
 

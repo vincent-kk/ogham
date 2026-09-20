@@ -251,6 +251,17 @@ describe('recoverReviewGroups through prepare', () => {
           ),
         ),
       ).toMatchObject({ round: 1, state: 'INDETERMINATE' });
+      // Only round 1 can prove this: round 2's setup above already removes r2.json,
+      // so asserting its absence there would hold regardless of recovery behavior.
+      if (round === 1)
+        expect(
+          existsSync(
+            portableJoin(
+              prepared.data.reviewDirectory,
+              'opinions/review-01.r2.json',
+            ),
+          ),
+        ).toBe(false);
     },
   );
 

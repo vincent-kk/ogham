@@ -32,6 +32,7 @@ function inspectEntryPointSource(
     'type',
     'var',
   ]);
+  const modifierKeywords = new Set(['abstract', 'async', 'declare']);
 
   for (let index = 0; index < tokens.length; index += 1) {
     const token = tokens[index];
@@ -69,13 +70,16 @@ function inspectEntryPointSource(
       }
       continue;
     }
-    if (declarationKeywords.has(next.value)) {
+    let cursor = index + 1;
+    while (modifierKeywords.has(tokens[cursor]?.value ?? '')) cursor += 1;
+    const declaration = tokens[cursor];
+    if (declaration && declarationKeywords.has(declaration.value)) {
       const name = tokens
-        .slice(index + 2)
+        .slice(cursor + 1)
         .find((candidate) => candidate.kind === 'identifier');
       if (name) exportedNames.add(name.value);
       else certainty = 'indeterminate';
-    }
+    } else certainty = 'indeterminate';
   }
 
   if (hidesExport(source, tokens)) certainty = 'indeterminate';

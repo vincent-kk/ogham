@@ -363,6 +363,8 @@ export const PREPARE_ONCE_NEXT_ACTION = `Do not publish a verdict. After every i
 export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   /** A prepared assignment cannot change its effective review effort. */
   EFFORT_LOCKED: 'review-effort-locked',
+  /** Prepare opened a new generation because the requested effort differs from the prepared one. */
+  EFFORT_CHANGED: 'review-effort-changed',
   /** Persisted validation belongs to an unsupported trust policy. */
   VALIDATION_POLICY_OUTDATED: 'review-validation-policy-outdated',
   /** Configured actor-group budget would be exceeded by this review. */

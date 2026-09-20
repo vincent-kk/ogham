@@ -68,6 +68,7 @@ vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
       shards: Parameters<typeof actual.writeShardPages>[1],
       updates: Parameters<typeof actual.writeShardPages>[2],
       shardFileName: (digest: string) => string,
+      damaged: Parameters<typeof actual.writeShardPages>[4],
     ): ReturnType<typeof actual.writeShardPages> =>
       pendingWrites.failAll
         ? {
@@ -75,7 +76,13 @@ vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
             conflicted: [...updates.values()].map((update) => update.path),
             shards: new Map(),
           }
-        : actual.writeShardPages(directory, shards, updates, shardFileName),
+        : actual.writeShardPages(
+            directory,
+            shards,
+            updates,
+            shardFileName,
+            damaged,
+          ),
     writeFactsShardFile: (
       directory: string,
       shardFileName: string,

@@ -77,31 +77,35 @@ export function collectIncomingRewrites(
         currentSpecifier: evidence.rawSpecifier,
         requiredResolvedPath: finalPath,
       };
+      const kept = keepsRelativeLocation(
+        evidence.sourceFile,
+        evidence.resolvedPath,
+        consumerPath,
+        finalPath,
+      );
+      if (kept) {
+        result.preserved.push(requirement);
+        continue;
+      }
       if (
-        !specifierDenotesPath(
+        specifierDenotesPath(
           evidence.sourceFile,
           evidence.rawSpecifier,
           evidence.resolvedPath,
         )
       ) {
-        const kept = keepsRelativeLocation(
-          evidence.sourceFile,
-          evidence.resolvedPath,
-          consumerPath,
-          finalPath,
-        );
-        (kept ? result.preserved : result.required).push(requirement);
+        result.required.push({
+          ...requirement,
+          suggestedSpecifier: formatRequiredSpecifier(
+            consumerPath,
+            finalPath,
+            evidence.rawSpecifier,
+            'file',
+          ),
+        });
         continue;
       }
-      result.required.push({
-        ...requirement,
-        suggestedSpecifier: formatRequiredSpecifier(
-          consumerPath,
-          finalPath,
-          evidence.rawSpecifier,
-          'file',
-        ),
-      });
+      result.required.push(requirement);
     }
 
   return result;

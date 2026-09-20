@@ -172,7 +172,7 @@ export interface PlanBaselineViolation {
 
 /** What the plan-time snapshot already violated, compared after execution. */
 export interface PlanBaseline {
-  /** Cycle routes of the plan-time graph, each closed by its first owner. */
+  /** Node-path sets of the plan-time graph's multi-node strongly connected components. */
   cycles: string[][];
   /**
    * Identity of each import-boundary violation the plan-time snapshot held; a
