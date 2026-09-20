@@ -10,8 +10,11 @@ import {
   FACTS_ADJUDICATION_REFUSALS,
   FACTS_ADJUDICATION_STALE_CODE,
   FACTS_ATTESTATION_PENDING_CODE,
+  FACTS_COMPARISON_NOT_AGAINST_STORE_CODE,
+  FACTS_COMPARISON_NOT_INDEPENDENT_CODE,
   FACTS_DIAGNOSTIC_CODES,
   FACTS_GENERATION_ID_INVALID_CODE,
+  FACTS_PENDING_DISCARDED_CODE,
   FACTS_REJECTION_CODES,
   FACTS_SHARD_NOT_DAMAGED_CODE,
   FACTS_UNFROZEN_GENERATION_CODE,
@@ -32,7 +35,10 @@ const REAL_CODES = new Set<string>([
   FACTS_ADJUDICATION_ACTOR_CODE,
   FACTS_ADJUDICATION_STALE_CODE,
   FACTS_ATTESTATION_PENDING_CODE,
+  FACTS_COMPARISON_NOT_AGAINST_STORE_CODE,
+  FACTS_COMPARISON_NOT_INDEPENDENT_CODE,
   FACTS_GENERATION_ID_INVALID_CODE,
+  FACTS_PENDING_DISCARDED_CODE,
   FACTS_SHARD_NOT_DAMAGED_CODE,
   FACTS_UNFROZEN_GENERATION_CODE,
 ]);
@@ -84,7 +90,25 @@ const HANDLED_BY = [
   ],
   [FACTS_UNKNOWN_CAUSES.TOOL_ERROR, '.shared/facts-bootstrap.md'],
   [FACTS_UNKNOWN_CAUSES.JUDGEMENTS_UNREADABLE, '.shared/facts-bootstrap.md'],
+  [FACTS_UNKNOWN_CAUSES.JUDGEMENTS_DISCARDED, '.shared/facts-bootstrap.md'],
   [FACTS_SHARD_NOT_DAMAGED_CODE, '.shared/facts-bootstrap.md'],
+  [FACTS_PENDING_DISCARDED_CODE, '.shared/facts-bootstrap.md'],
+  [FACTS_COMPARISON_NOT_INDEPENDENT_CODE, '.shared/facts-bootstrap.md'],
+  [
+    FACTS_COMPARISON_NOT_AGAINST_STORE_CODE,
+    '.shared/facts-bootstrap.md',
+  ],
+  // Two documents owe this one an answer: the bootstrap says how to clear the
+  // mark, and the verifier — who always compares against a generation — says
+  // why clearing it is never its business.
+  [
+    FACTS_COMPARISON_NOT_AGAINST_STORE_CODE,
+    'cross-review/reviewers/verifier.md',
+  ],
+  [
+    FACTS_REJECTION_CODES.CONTRACT_GROUP_ABSENT,
+    '.shared/facts-bootstrap.md',
+  ],
   [
     FACTS_DIAGNOSTIC_CODES.SIDE_TABLE_CHANGED,
     'cross-review/reviewers/verifier.md',

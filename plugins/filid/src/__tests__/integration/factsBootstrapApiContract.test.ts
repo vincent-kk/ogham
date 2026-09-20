@@ -7,6 +7,7 @@ import type { z } from 'zod';
 
 import {
   FACTS_ACTIONS,
+  FACTS_COMPARISON_NOT_INDEPENDENT_CODE,
   FACTS_SHARD_NOT_DAMAGED_CODE,
   FACTS_UNKNOWN_CAUSES,
 } from '../../constants/facts.js';
@@ -186,18 +187,22 @@ describe('the facts bootstrap document matches the tool it drives', () => {
     expect(CANONICAL).toContain('`pendingAttestations`');
   });
 
-  it('routes an uncertain file by the four reason lists the server splits it into', () => {
+  it('routes an uncertain file by every reason list the server splits it into', () => {
     const step = CANONICAL.slice(
       CANONICAL.indexOf('### 1.'),
       CANONICAL.indexOf('### 2.'),
     );
+    // Named, not counted: a count drifts silently the next time a reason is
+    // added, which is exactly how the gate's own sentence went stale.
     for (const list of [
       'rejected',
       'unadjudicated',
       'pendingAttestations',
       'indeterminate',
+      'awaitingComparison',
     ])
       expect(step).toContain(`\`${list}\``);
+    expect(step).toContain(FACTS_UNKNOWN_CAUSES.JUDGEMENTS_UNREADABLE);
     expect(step).toMatch(/response wins/i);
   });
 
@@ -300,16 +305,66 @@ describe('the facts bootstrap document matches the tool it drives', () => {
       FACTS_SHARD_NOT_DAMAGED_CODE,
     );
     expect(step).toContain(FACTS_SHARD_NOT_DAMAGED_CODE);
-    // Every field step 7 sends the reader to belongs to this response.
+    // Step 7 reads two responses — the discard and the status that follows it
+    // — so a field it names has to belong to one of them.
     const real = new Set([
       ...Object.keys(dropped.data ?? {}).map((key) => `data.${key}`),
       ...Object.keys(dropped.summary).map((key) => `summary.${key}`),
+      ...Object.keys(reported.data ?? {}).map((key) => `data.${key}`),
+      ...Object.keys(reported.summary).map((key) => `summary.${key}`),
     ]);
     const spelled = [
       ...step.matchAll(/`((?:data|summary)\.[a-zA-Z]+)`/g),
     ].map(([, path]) => path);
     expect(spelled.length).toBeGreaterThan(0);
     expect(spelled.filter((path) => !real.has(path))).toEqual([]);
+  });
+
+  it('leaves the discarded files waiting for a comparison it can name', async () => {
+    const project = createFactsProject({ 'src/only.ts': 'export const a = 1;\n' });
+    const record = project.facts('src/only.ts');
+    const first = await handleFacts({ action: 'status', path: project.root });
+    // A stored record is what makes a same-tool candidate a reproduction
+    // rather than a re-derivation, so the refusal needs one to exist.
+    await handleFacts({
+      action: 'submit',
+      path: project.root,
+      file: project.submission('stored.json', JSON.stringify([record])),
+      resolutionEpoch: (first.summary as { resolutionEpoch: string })
+        .resolutionEpoch,
+    });
+    const shard = damageOneJudgementShard(project.root);
+    await handleFacts({
+      action: 'discard-damaged',
+      path: project.root,
+      shards: [shard],
+    });
+
+    const after = await handleFacts({ action: 'status', path: project.root });
+    const candidate = project.submission(
+      'same-tool.json',
+      JSON.stringify([record]),
+    );
+    const reproduced = await handleFacts({
+      action: 'compare',
+      path: project.root,
+      file: candidate,
+    });
+
+    const step = CANONICAL.slice(CANONICAL.indexOf('### 7.'));
+    const waiting = (after.data as { awaitingComparison?: unknown })
+      .awaitingComparison;
+    expect(waiting).toMatchObject({ items: [{ path: 'src/only.ts' }] });
+    expect((after.diagnostics ?? []).map(({ code }) => code)).toContain(
+      FACTS_UNKNOWN_CAUSES.JUDGEMENTS_DISCARDED,
+    );
+    expect(step).toContain(FACTS_UNKNOWN_CAUSES.JUDGEMENTS_DISCARDED);
+    expect(step).toContain('awaitingComparison');
+    expect((reproduced.diagnostics ?? []).map(({ code }) => code)).toContain(
+      FACTS_COMPARISON_NOT_INDEPENDENT_CODE,
+    );
+    expect(step).toContain(FACTS_COMPARISON_NOT_INDEPENDENT_CODE);
+    expect(step).toContain('storedTool');
   });
 
   it('never tells the agent to extract everything or to run git', () => {

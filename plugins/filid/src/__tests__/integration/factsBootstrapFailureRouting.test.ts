@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -17,9 +18,11 @@ import {
   REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
 } from '../../constants/reviewState.js';
+import { resolveFactsStorePaths } from '../../core/facts/index.js';
 import { createDefaultConfig } from '../../core/infra/configLoader/index.js';
 import { createProjectSnapshot } from '../../core/projectSnapshot/index.js';
 import { handleFacts } from '../../mcp/tools/facts/index.js';
+import type { FactsStatusData } from '../../mcp/tools/facts/index.js';
 import { describeUnknownFilesPostcondition } from '../../mcp/tools/restructure/utils/describeUnknownFilesPostcondition.js';
 import { handleReviewState } from '../../mcp/tools/reviewState/index.js';
 import { buildReviewOpinion } from '../unit/mcp/reviewState/helpers/buildReviewOpinion.js';
@@ -29,6 +32,7 @@ import {
 } from '../unit/mcp/reviewState/helpers/createReviewStateSealFixture.js';
 import { buildReviewStateSealFinding } from '../unit/mcp/reviewState/helpers/buildReviewStateSealFinding.js';
 import { prepareWithFacts } from '../unit/mcp/reviewState/helpers/prepareWithFacts.js';
+import { seedFacts } from './helpers/seedFacts.js';
 import { runReviewStateFixtureGit } from '../unit/mcp/reviewState/helpers/runReviewStateFixtureGit.js';
 import { writeReviewStateFixtureFile } from '../unit/mcp/reviewState/helpers/writeReviewStateFixtureFile.js';
 
@@ -102,6 +106,81 @@ async function renderedVerifyBrief(projectRoot: string): Promise<string> {
       throw new Error(JSON.stringify(validated.data.problems));
   }
   throw new Error('the review fixture never dispatched a verifier');
+}
+
+
+/**
+ * Leave one file uncertain for the single reason that a discard took its judgements.
+ *
+ * Its record is replaced with one claiming nothing, the item that opens is
+ * adopted so the edge lives in the side table alone, and the shard holding that
+ * adoption is made unparseable and discarded. The file is then left with a
+ * current record, no refused claim and no open item — `awaitingComparison` is
+ * the only list it appears in, which is the routing this gate has to name.
+ *
+ * @param projectRoot - Fixture root whose store is written.
+ * @param outside - A writable directory outside that root, for submission files.
+ * @param path - Project-relative POSIX path to strand.
+ */
+async function strandOnADiscard(
+  projectRoot: string,
+  outside: string,
+  path: string,
+): Promise<void> {
+  const before = await handleFacts({ action: 'status', path: projectRoot });
+  const bytes = readFileSync(join(projectRoot, path));
+  const file = join(outside, 'shrink.json');
+  writeFileSync(
+    file,
+    JSON.stringify([
+      {
+        schemaVersion: 1,
+        path,
+        contentHash: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
+        references: [],
+        provenance: {
+          tool: 'other-tool',
+          version: '1.0.0',
+          command: 'test',
+          tier: 'tool',
+          resolutionInputs: [],
+        },
+      },
+    ]),
+  );
+  await handleFacts({
+    action: 'submit',
+    path: projectRoot,
+    file,
+    resolutionEpoch: (before.summary as { resolutionEpoch: string })
+      .resolutionEpoch,
+  });
+  const opened = await handleFacts({ action: 'status', path: projectRoot });
+  const item = (opened.data as FactsStatusData).unadjudicated.items[0];
+  if (item === undefined) throw new Error('the shrink opened no item to adopt');
+  await handleFacts({
+    action: 'adjudicate',
+    path: projectRoot,
+    sourcePath: item.path,
+    contentHash: item.contentHash,
+    actor: 'reader-a',
+    items: [
+      {
+        kind: item.kind,
+        reference: item.reference,
+        resolvedPath: item.resolvedPath,
+        decision: 'adopt',
+      },
+    ],
+  });
+  const storePaths = resolveFactsStorePaths(projectRoot);
+  const shard = storePaths.shardFileName(storePaths.pathDigest(path));
+  writeFileSync(join(storePaths.sideTableDirectory, shard), '{ not json');
+  await handleFacts({
+    action: 'discard-damaged',
+    path: projectRoot,
+    shards: [shard],
+  });
 }
 
 /** A review fixture prepared once, then given one committed file with no facts. */
@@ -209,6 +288,49 @@ describe('the failure table says what each caller really gets', () => {
       expect(REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FACTS_INCOMPLETE).toContain(
         list,
       );
+  });
+
+  it('cross-review: names the list a file held only by a discard is routed by', async () => {
+    const local = await createReviewStateSealFixture();
+    try {
+      writeReviewStateFixtureFile(
+        local.projectRoot,
+        'src/helper.ts',
+        'export const helper = 1;\n',
+      );
+      writeReviewStateFixtureFile(
+        local.projectRoot,
+        'src/value.ts',
+        "import { helper } from './helper.js';\n\nexport const value = helper;\n",
+      );
+      runReviewStateFixtureGit(local.projectRoot, ['add', '--all']);
+      runReviewStateFixtureGit(local.projectRoot, ['commit', '-m', 'edge']);
+      await seedFacts(local.projectRoot);
+      await strandOnADiscard(local.projectRoot, local.pluginRoot, 'src/value.ts');
+
+      await expect(
+        handleReviewState({
+          action: 'prepare',
+          projectRoot: local.projectRoot,
+          branchName: local.branchName,
+          baseRef: 'main',
+          effort: 'low',
+        }),
+      ).rejects.toMatchObject({
+        code: REVIEW_STATE_DIAGNOSTIC_CODES.FACTS_INCOMPLETE,
+        message: expect.stringContaining('src/value.ts'),
+        nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FACTS_INCOMPLETE,
+      });
+      // The file is in none of the lists the sentence used to enumerate, so a
+      // reader following it to the letter has nowhere to look.
+      expect(REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FACTS_INCOMPLETE).toContain(
+        'awaitingComparison',
+      );
+    } finally {
+      rmSync(local.projectRoot, { recursive: true, force: true });
+      rmSync(local.pluginRoot, { recursive: true, force: true });
+      process.env.CLAUDE_PLUGIN_ROOT = fixture.pluginRoot;
+    }
   });
 
   it('pull-request: handoff carries the gate diagnostic instead of swallowing it', async () => {

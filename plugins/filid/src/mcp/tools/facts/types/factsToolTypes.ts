@@ -367,9 +367,13 @@ export interface FactsStatusData {
   /**
    * Files carrying a reference the provider could not vouch for.
    *
-   * The one reason a file is `uncertain` that no other list in this response
-   * names; with it, every uncertain path appears in at least one of
-   * `rejected`, `unadjudicated`, `pendingAttestations` and this.
+   * One of the reasons a file is `uncertain` that no other list in this
+   * response names. Together, `rejected`, `unadjudicated`,
+   * `pendingAttestations`, `awaitingComparison` and this account for every
+   * uncertain path except one: a file held by a `facts-judgements-unreadable`
+   * diagnostic is in no list, because what did not read is what would have
+   * named it. The reasons are listed rather than counted — a count is what
+   * goes stale the next time one is added.
    */
   indeterminate: FactsFileList;
   /**

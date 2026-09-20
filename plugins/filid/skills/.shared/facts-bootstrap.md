@@ -19,17 +19,18 @@ Run the steps in order, in the same turn as the calling skill, and return to the
 mcp__plugin_filid_tools__facts({ action: "status", path: PROJECT_ROOT })
 ```
 
-`summary` carries `projectState`, `resolutionEpoch`, `scopeSource`, `extractionList` and `attestationRequirement`; keep those. `data` carries the lists: `missing`, `needsResolution`, `uncertain`, `toolError` and `indeterminate` are each `{ paths, truncated }`; `rejected` is `{ items, truncated }` where each item names its own `path`, `code` and `nextAction` (plus `specifier`, `inputPath` or `lines` where filid can name them); `unadjudicated` is `{ items, truncated }`; `pendingAttestations` is a list of `{ path, actor, contentHash, nextAction }`.
+`summary` carries `projectState`, `resolutionEpoch`, `scopeSource`, `extractionList` and `attestationRequirement`; keep those. `data` carries the lists: `missing`, `needsResolution`, `uncertain`, `toolError` and `indeterminate` are each `{ paths, truncated }`; `rejected` is `{ items, truncated }` where each item names its own `path`, `code` and `nextAction` (plus `specifier`, `inputPath` or `lines` where filid can name them); `unadjudicated` is `{ items, truncated }`; `awaitingComparison` is `{ items, truncated }` where each item names its `path` and, when a record is stored for it, the `storedTool` that wrote it; `pendingAttestations` is a list of `{ path, actor, contentHash, nextAction }`.
 
 A response's own `nextAction` and `attestationRequirement` are the contract. Where this document and a response differ, the response wins.
 
-An `uncertain` file has a reason, and the reason decides the action — route by the reason, never by `uncertain` itself. Four reasons arrive as lists in `data`, and a fifth as a `facts-judgements-unreadable` diagnostic on the response, which names a shard rather than any file:
+An `uncertain` file has a reason, and the reason decides the action — route by the reason, never by `uncertain` itself. Five reasons arrive as lists in `data`, and one more as a `facts-judgements-unreadable` diagnostic on the response, which names a shard rather than any file:
 
 - `rejected` → step 4, item by item.
 - `unadjudicated` → step 5.
 - `pendingAttestations` → step 6.
 - `indeterminate` → the provider could not vouch for a reference in that file; it needs an attested record, so it goes to step 6 too.
-- a `facts-judgements-unreadable` diagnostic → step 7. The files it holds uncertain are in none of the four lists, because what did not read is the judgements about them.
+- `awaitingComparison` → step 7, second half. A discard took this file's judgements and nobody has re-derived them; the response carries `facts-judgements-discarded` beside the list.
+- a `facts-judgements-unreadable` diagnostic → step 7. The files it holds uncertain are in none of the lists, because what did not read is what would have named them.
 
 When a list's `truncated` is above zero the server left entries out of it: handle the ones it returned, then call `status` again for the rest.
 
@@ -74,6 +75,7 @@ An accepted submission replaces each submitted file's record. Whole-call refusal
 
 - Codes about moved bytes (`facts-content-hash-mismatch`, `facts-resolution-input-stale`) are fixed by extracting that path again as step 2 does and submitting it.
 - Codes a re-extraction only reproduces — the server cannot read something (`facts-resolution-input-unreadable`, `facts-source-file-unreadable`), or the record's content is what the extractor got wrong (`facts-record-schema-invalid`, `facts-reference-absent`, `facts-resolved-path-invalid`, `facts-exported-name-absent`) — are not re-extracted. Follow the item's `nextAction`: submit the file again from another tool, or, where the item says the file needs one, as an attested record (step 6). Changes the item asks for in the project itself — permissions, `facts.excludes`, deleting a declared input — belong outside a review; inside a review, change nothing, record the item and follow the calling skill's rule for an incomplete bootstrap.
+- `facts-contract-group-absent` — the record links a verification file to a contract group whose `filid:contract <group-id>` marker is not in the file. Two ways out, and the item says which one it means: extract that path again and submit it, or, when the link is the one intended, add the marker to the spec document — an edit to the project, so outside a review only.
 - `facts-record-out-of-scope` and `facts-record-path-invalid` mean the path is not one this project covers: drop it from the batch.
 
 A `toolError` caused by a real syntax error is fixed in the source outside a review; during a review a changed file in that state becomes a review candidate whose rule is `facts-tool-error` — a finding, not a refusal, and it does not hold the bootstrap open. A file whose tool cannot read it at all is attested instead (step 6).
@@ -123,13 +125,18 @@ The store keeps judgements in shards. When one does not read, the adopted edges 
 mcp__plugin_filid_tools__facts({ action: "discard-damaged", path: PROJECT_ROOT, shards })
 ```
 
-`shards` holds the shard names exactly as the diagnostic reported them, and nothing else — a shard the store can read comes back in `data.refused` with `facts-shard-not-damaged`, and the response says to call `status` again and pass only what its judgements diagnostic reports as unparseable. `data.discarded` names what went, and `summary.affectedFiles` counts the scanned files it covered.
+`shards` holds the shard names exactly as the diagnostic reported them, and nothing else — a shard the store can read comes back in `data.refused` with `facts-shard-not-damaged`, and the response says to call `status` again and pass only what its judgements diagnostic reports as unparseable. `data.discarded` names what went, and `summary.affectedFiles` counts only the files the discard marked. A discard that dropped a pending shard rather than a judgement one answers `facts-pending-attestations-discarded`: nothing is held and no edge was lost, because an unconfirmed attestation never entered any file's references — call `status` and carry on.
 
-Discarding ends the block; it does not bring the judgements back, and the response's `nextAction` is the contract for what follows. Extract those files again (step 2's subset form) and send the candidate to `compare`, which reopens every edge the store does not carry as an item to judge in step 5. A lost `dismiss` costs nothing — the edge stays where it was — but a lost `adopt` is only found again this way.
+**After a judgement discard, the block moves rather than ends.** Those files come back from `status` in `data.awaitingComparison` under `facts-judgements-discarded`, and they stay `uncertain` until one thing clears them: a `compare` whose candidate could not simply reproduce what the lost judgements already decided.
+
+- The candidate must not come from the tool that wrote the stored record. Each item names that tool as `storedTool`; extract with a program declaring a different `provenance.tool`, or read the file yourself and submit an attested candidate. A same-tool candidate is refused with `facts-comparison-not-independent` and clears nothing. Where the bundled extractor is the only program available, it always declares the same tool, so the attested reading is the way through — which is what the response's next action offers as its second branch.
+- The comparison must measure against the store: call it **without** `generationId`. A discard takes from the store after a generation was frozen, so a frozen baseline cannot see the loss; that call is recorded as usual but leaves the mark, and says so with `facts-comparison-not-against-store`.
+
+A file has two refusals it can meet here and never both at once. Either way the response's `nextAction` is the contract. The comparison itself reopens every edge the store does not carry as an item to judge in step 5: a lost `dismiss` costs nothing, since the edge stays where it was, but a lost `adopt` is only found again this way.
 
 ### 8. Finish
 
-The bootstrap is complete when every in-scope file is `exact` or `tool-error`, and `rejected`, `unadjudicated`, `pendingAttestations` and `indeterminate` are all empty. Call `status` again after each step that changed state; when anything else remains, return to the step that owns it. Never repeat the same call with the same input: a step whose next call would be identical to its last one cannot finish, and the failure section applies.
+The bootstrap is complete when every in-scope file is `exact` or `tool-error`, and `rejected`, `unadjudicated`, `awaitingComparison`, `pendingAttestations` and `indeterminate` are all empty. Call `status` again after each step that changed state; when anything else remains, return to the step that owns it. Never repeat the same call with the same input: a step whose next call would be identical to its last one cannot finish, and the failure section applies.
 
 ## If the bootstrap cannot finish
 

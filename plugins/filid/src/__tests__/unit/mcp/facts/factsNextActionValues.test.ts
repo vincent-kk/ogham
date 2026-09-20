@@ -395,6 +395,7 @@ describe('why a file is unsettled, from status alone', () => {
       ...data.indeterminate.paths,
       ...data.unadjudicated.items.map((item) => item.path),
       ...data.pendingAttestations.map((page) => page.path),
+      ...data.awaitingComparison.items.map((item) => item.path),
     ]);
 
     // A file reported as uncertain with no reason in the response is a stop
