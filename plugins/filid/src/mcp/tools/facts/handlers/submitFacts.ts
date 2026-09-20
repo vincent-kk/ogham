@@ -7,6 +7,7 @@ import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import {
   parseSubmittedRecords,
   recordEpochDrift,
+  writeEpochSnapshot,
 } from '../../../../core/facts/index.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 import type {
@@ -75,8 +76,13 @@ export async function submitFacts(
     submission.parsed,
     actor,
   );
-  if (outcome.accepted > 0 || outcome.removed > 0)
+  if (outcome.accepted > 0 || outcome.removed > 0) {
     recordEpochDrift(context.storePaths.driftPath, null);
+    // The caller has caught up with the tree, so the difference lists of the
+    // next refusal are measured from here rather than from whatever epoch it
+    // was holding before.
+    writeEpochSnapshot(context.storePaths.epochSnapshotPath, context.epoch);
+  }
   const rejected = [...submission.rejections, ...outcome.rejections];
   return {
     projectRoot,

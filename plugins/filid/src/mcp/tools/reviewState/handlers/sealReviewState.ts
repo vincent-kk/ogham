@@ -7,7 +7,6 @@ import {
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
   PREPARE_ONCE_NEXT_ACTION,
-  PREPARE_ONCE_REPEAT_TAIL,
   REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_DIAGNOSTIC_MESSAGES,
   REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
@@ -99,7 +98,7 @@ export async function sealReviewState(
           affects: [],
           nextAction: schemaMismatch
             ? PREPARE_ONCE_NEXT_ACTION
-            : `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it prepares and reviews this branch from the start. ${PREPARE_ONCE_REPEAT_TAIL}`,
+            : REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.STATE_MISSING,
         },
       ],
     });
@@ -134,7 +133,7 @@ export async function sealReviewState(
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SOURCE_HASH_STALE,
           path: paths.statePath,
           affects: [],
-          nextAction: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it prepares the current commits and reuses validated opinions for unchanged files. ${PREPARE_ONCE_REPEAT_TAIL}`,
+          nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.SOURCE_HASH_STALE,
         },
       ],
     });
@@ -169,7 +168,7 @@ export async function sealReviewState(
             message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.REPORT_MISSING,
             path: paths.reportPath,
             affects: [],
-            nextAction: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it opens a generation from the validated opinions, so seal restores the report without new reviewer work. ${PREPARE_ONCE_REPEAT_TAIL}`,
+            nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.REPORT_MISSING,
           },
         ],
       });
@@ -221,7 +220,7 @@ export async function sealReviewState(
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SESSION_MISSING,
           path: paths.sessionPath,
           affects: [],
-          nextAction: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it restores the session artifact and keeps validated progress. ${PREPARE_ONCE_REPEAT_TAIL}`,
+          nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.SESSION_MISSING,
         },
       ],
     });
@@ -298,7 +297,7 @@ export async function sealReviewState(
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.OPINIONS_MISSING,
           path: paths.opinionsDirectory,
           affects: [],
-          nextAction: `Do not publish a verdict: no reviewable group has a merged opinion. After every in-flight actor finishes, call prepare once with the same arguments and without force and dispatch the handoffs it returns. ${PREPARE_ONCE_REPEAT_TAIL}`,
+          nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.OPINIONS_MISSING,
         },
       ],
     });
@@ -393,6 +392,22 @@ export async function sealReviewState(
     reuse: state.incremental?.summary,
     hasFixRequests: fixRequests !== null,
     blockersPath: blockers === null ? null : paths.blockersPath,
-    diagnostics: replacementDiagnostics,
+    diagnostics: [
+      ...replacementDiagnostics,
+      // The sealed verdict answers for files reference rules never judged, so
+      // the response that publishes it says which ones (spec §3).
+      ...(state.scope.diagnostics ?? [])
+        .filter(
+          ({ code }) =>
+            code === REVIEW_STATE_DIAGNOSTIC_CODES.FILES_OUTSIDE_FACTS_SCOPE,
+        )
+        .map((diagnostic) => ({
+          ...diagnostic,
+          affects: diagnostic.affects ?? [],
+          nextAction:
+            diagnostic.nextAction ??
+            REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FILES_OUTSIDE_FACTS_SCOPE,
+        })),
+    ],
   });
 }

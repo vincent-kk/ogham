@@ -1,4 +1,5 @@
-import { cpSync } from 'node:fs';
+import { cpSync, rmSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { writeReviewStateFixtureFile } from '../../../unit/mcp/reviewState/helpers/writeReviewStateFixtureFile.js';
 import { createFixtureProjectRoot } from '../../helpers/createFixtureProjectRoot.js';
@@ -16,6 +17,14 @@ export interface PinnedReviewRepositoryFiles {
   base: Readonly<Record<string, string>>;
   /** Files written over the base and committed on the feature branch. */
   feature: Readonly<Record<string, string>>;
+  /**
+   * Project-relative paths the feature commit removes.
+   *
+   * Writing the feature files over the base cannot express a deletion, and a
+   * review of a change that deletes or moves a file is not the same review as
+   * one that only adds: the graph loses edges rather than gaining them.
+   */
+  remove?: readonly string[];
 }
 
 /**
@@ -33,7 +42,11 @@ const templates = new Map<string, string>();
 function templateKey(files: PinnedReviewRepositoryFiles): string {
   const pairs = (one: Readonly<Record<string, string>>): [string, string][] =>
     Object.entries(one).sort(([left], [right]) => left.localeCompare(right));
-  return JSON.stringify([pairs(files.base), pairs(files.feature)]);
+  return JSON.stringify([
+    pairs(files.base),
+    pairs(files.feature),
+    [...(files.remove ?? [])].sort((left, right) => left.localeCompare(right)),
+  ]);
 }
 
 /**
@@ -50,7 +63,8 @@ function templateKey(files: PinnedReviewRepositoryFiles): string {
  * `runPinnedReviewGit` pins the identity and the clock, so a rebuild from the
  * same bytes would produce the commit ids the copy already carries.
  *
- * @param files Base and feature file contents, keyed by project-relative path.
+ * @param files Base and feature file contents keyed by project-relative path,
+ * and the paths the feature commit removes.
  * @returns Absolute temporary repository root with the feature branch checked out.
  * @throws When Git fails to build the history or the facts are refused.
  */
@@ -72,6 +86,9 @@ export async function createPinnedReviewRepository(
       if (branch) runPinnedReviewGit(template, ['checkout', '-b', branch]);
       for (const [path, content] of Object.entries(commit))
         writeReviewStateFixtureFile(template, path, content);
+      if (branch)
+        for (const path of files.remove ?? [])
+          rmSync(join(template, ...path.split('/')), { force: true });
       runPinnedReviewGit(template, ['add', '--all']);
       runPinnedReviewGit(template, ['commit', '-m', branch ?? 'base']);
     }

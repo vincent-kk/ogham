@@ -422,6 +422,7 @@ export async function prepareReviewArtifacts(
     diagnostics: [
       ...collected.diagnostics.map(applyReviewContextNextAction),
       ...context.diagnostics,
+      ...collected.outsideFactsScope,
     ],
     concurrency: settings.concurrency,
     handoff: planNextHandoffs({

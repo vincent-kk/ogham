@@ -34,6 +34,7 @@ import { createRandom } from '../../core/properties/helpers/createRandom.js';
 import type { Random } from '../../core/properties/helpers/createRandom.js';
 
 import { checkAsyncProperty } from './helpers/checkAsyncProperty.js';
+import { resolvePropertyRuns } from './helpers/resolvePropertyRuns.js';
 import { cleanupFactsProjects } from './helpers/createFactsProject.js';
 import { createFactsWorld } from './helpers/factsWorld.js';
 import type {
@@ -77,7 +78,11 @@ describe('the facts state machine under random operation sequences', () => {
     'keeps every invariant and settles under an oracle that only follows reported next actions',
     async () => {
       await expect(
-        checkAsyncProperty({ runs: 20, maxSize: 12, check: runScenario }),
+        checkAsyncProperty({
+          runs: resolvePropertyRuns(20),
+          maxSize: 12,
+          check: runScenario,
+        }),
       ).resolves.toBeUndefined();
     },
     600_000,

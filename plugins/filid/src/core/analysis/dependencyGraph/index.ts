@@ -9,4 +9,5 @@ export { partitionUnknownFiles } from './relevance/partitionUnknownFiles.js';
 export { findUnownedReferences } from './queries/findUnownedReferences.js';
 export { getDirectDependencies } from './queries/getDirectDependencies.js';
 export { topologicalSort } from './queries/topologicalSort.js';
+export { collectTargetNames } from './relevance/collectTargetNames.js';
 export { containsPathToken } from './relevance/containsPathToken.js';

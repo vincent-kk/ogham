@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -7,7 +7,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
   FACTS_ADJUDICATION_STATES,
   FACTS_ATTESTATION_OUTCOMES,
+  FACTS_REJECTION_CODES,
 } from '../../constants/facts.js';
+import { resolveFactsStorePaths } from '../../core/facts/index.js';
 import { McpToolName } from '../../constants/mcpToolNames.js';
 import { createServer } from '../../mcp/server/lifecycle/createServer.js';
 import type {
@@ -240,6 +242,101 @@ describe('the facts tool across the MCP transport', () => {
       absent: 1,
     });
     expect((after.summary as FactsStatusSummary).pendingAttestations).toBe(0);
+  });
+
+  it('carries a contract group the file does not mark, as its own rejection', async () => {
+    const status = await callFacts({ action: 'status', path: project.root });
+
+    const submitted = await callFacts({
+      action: 'submit',
+      path: project.root,
+      file: project.submission(
+        'groups.json',
+        JSON.stringify([
+          project.facts('src/index.ts', {
+            references: [],
+            verification: {
+              role: 'spec-document',
+              cases: {
+                certainty: 'exact',
+                exactCount: 1,
+                knownLowerBound: 1,
+                reasons: [],
+              },
+              contractGroupIds: ['AC-invented'],
+            },
+          }),
+        ]),
+      ),
+      resolutionEpoch: (status.summary as FactsStatusSummary).resolutionEpoch,
+    });
+
+    expect(
+      (submitted.data as FactsSubmitData).rejected.map(({ code }) => code),
+    ).toContain(FACTS_REJECTION_CODES.CONTRACT_GROUP_ABSENT);
+  });
+
+  it('carries awaitingComparison after the judgements of a shard are discarded', async () => {
+    await callFacts({
+      action: 'submit',
+      path: project.root,
+      file: project.submission(
+        'edge.json',
+        JSON.stringify([
+          project.facts('src/index.ts', {
+            references: [
+              {
+                specifier: REFERENCE,
+                kind: 'static',
+                resolved: { path: 'src/thing.ts' },
+              },
+            ],
+          }),
+        ]),
+      ),
+      resolutionEpoch: (
+        (await callFacts({ action: 'status', path: project.root }))
+          .summary as FactsStatusSummary
+      ).resolutionEpoch,
+    });
+    await submitEmptyRecord();
+    const open = await callFacts({ action: 'status', path: project.root });
+    const item = (open.data as FactsStatusData).unadjudicated.items[0];
+    await callFacts({
+      action: 'adjudicate',
+      path: project.root,
+      sourcePath: item.path,
+      contentHash: item.contentHash,
+      actor: 'reader-a',
+      items: [
+        {
+          kind: item.kind,
+          reference: item.reference,
+          resolvedPath: item.resolvedPath,
+          decision: 'adopt',
+        },
+      ],
+    });
+    // The adoption is the only place that edge lives; damaging its shard is the
+    // loss the discard has to account for.
+    const directory = resolveFactsStorePaths(project.root).sideTableDirectory;
+    const shard = readdirSync(directory).find((name) =>
+      name.endsWith('.json'),
+    ) as string;
+    writeFileSync(join(directory, shard), '{ not json');
+
+    await callFacts({
+      action: 'discard-damaged',
+      path: project.root,
+      shards: [shard],
+    });
+    const after = await callFacts({ action: 'status', path: project.root });
+
+    expect(
+      (after.data as FactsStatusData).awaitingComparison.items.map(
+        ({ path }) => path,
+      ),
+    ).toContain('src/index.ts');
   });
 
   it('advertises every one of those arguments, nested fields included', async () => {

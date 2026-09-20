@@ -225,6 +225,38 @@ describe('the count rule separates an edit from a tool omission', () => {
     expect(after.openedItems).toBe(0);
   });
 
+  it('leaves an open item closed by the record that claims both targets', async () => {
+    project.write(
+      'src/pair.ts',
+      `import type { T } from '${REFERENCE}';\nimport { v } from '${REFERENCE}';\n`,
+    );
+    await submitPair([{ path: 'src/thing.ts' }, { path: 'src/other.ts' }]);
+    await submitPair([{ path: 'src/thing.ts' }]);
+    expect(await unadjudicated()).toContain('src/pair.ts');
+
+    const back = await submitPair([
+      { path: 'src/thing.ts' },
+      { path: 'src/other.ts' },
+    ]);
+
+    // The record carries the edge again, so the item is settled by the record
+    // rather than reopened: reopening what the store now stands behind would
+    // ask two actors to judge a claim nobody disputes.
+    expect(back.openedItems).toBe(0);
+    const storePaths = resolveFactsStorePaths(project.root);
+    const page = readAdjudicationTable(storePaths.sideTableDirectory).pages.get(
+      storePaths.pathDigest('src/pair.ts'),
+    );
+    expect(
+      page?.items.map(({ resolvedPath, state }) => ({ resolvedPath, state })),
+    ).toEqual([
+      {
+        resolvedPath: 'src/other.ts',
+        state: FACTS_ADJUDICATION_STATES.CLOSED_BY_RECORD,
+      },
+    ]);
+  });
+
   it('opens an item when both remain but the record claims only one', async () => {
     project.write(
       'src/pair.ts',

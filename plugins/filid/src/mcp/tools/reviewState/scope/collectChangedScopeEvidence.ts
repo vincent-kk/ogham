@@ -46,6 +46,7 @@ export async function collectChangedScopeEvidence(
     factsDigest: computeReviewArtifactHash(facts),
     evidenceDiagnostics: computed.evidenceDiagnostics,
     outOfScopeDiagnostics: computed.outOfScopeDiagnostics,
+    outsideFactsScope: computed.outsideFactsScope,
     snapshotHash: computed.snapshotHash,
     evidenceComplete: computed.evidenceComplete,
     worktree: computed.worktree,

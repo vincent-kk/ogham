@@ -28,10 +28,14 @@ export interface FactsContext extends ProjectFacts {
  * through as well — one assembly for both, so the tool and the snapshot cannot
  * disagree about which files are in scope or which epoch is current.
  *
- * What this adds is the part only a tool call may do: the epoch snapshot is
- * persisted on every call, so that a caller which reads an epoch now and submits
- * after the tree moves can be told which paths moved instead of only that the
- * epoch differs. An analysis pass must not move that state.
+ * What this adds is the part only a tool call may do: the epoch snapshot the
+ * difference lists are measured from. It is written only while the tree stands
+ * still — when the stored epoch is the one this call computed, or there is
+ * none. Once the tree has moved, the stored snapshot is the baseline a caller
+ * that read an epoch earlier is still holding, and overwriting it would answer
+ * that caller's stale submission with an empty difference. The baseline moves
+ * forward again where the caller has caught up: an accepted submit. An analysis
+ * pass must not move that state.
  *
  * One call is one request-memo scope, so the scan work this context repeats —
  * the ignored-path query above all — runs once. The scope closes with the
@@ -50,7 +54,11 @@ export function buildFactsContext(
       loadConfig(projectRoot).config ?? undefined,
     );
     const previousEpoch = readEpochSnapshot(facts.storePaths.epochSnapshotPath);
-    writeEpochSnapshot(facts.storePaths.epochSnapshotPath, facts.epoch);
+    if (
+      previousEpoch === null ||
+      previousEpoch.resolutionEpoch === facts.epoch.resolutionEpoch
+    )
+      writeEpochSnapshot(facts.storePaths.epochSnapshotPath, facts.epoch);
     return { ...facts, previousEpoch };
   });
 }

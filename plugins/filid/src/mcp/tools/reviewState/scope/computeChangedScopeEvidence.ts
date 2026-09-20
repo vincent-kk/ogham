@@ -1,8 +1,19 @@
-import { pathForCompare } from '@ogham/cross-platform';
+import {
+  pathForCompare,
+  portableDirname,
+  portableResolve,
+} from '@ogham/cross-platform';
 
 import { REVIEW_STATE_DELETED_FILE_HASH } from '../../../../constants/reviewState.js';
 import { RULE_SCOPES } from '../../../../constants/ruleScopes.js';
-import { validateStructure } from '../../../../core/index.js';
+import {
+  classifyRelevanceTarget,
+  collectTargetNames,
+  loadConfig,
+  validateStructure,
+} from '../../../../core/index.js';
+import { resolveFactsScope } from '../../../../core/facts/index.js';
+import { compareByBytes } from '../../../../lib/compareByBytes.js';
 import { readUnknownFileText } from '../../../../core/restructure/index.js';
 import { aggregateCertainty } from '../../../../core/verification/index.js';
 import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
@@ -23,6 +34,8 @@ import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js'
 
 import { classifyChangedFile } from './classifyChangedFile.js';
 import { selectFrozenFacts } from './utils/selectFrozenFacts.js';
+import { isOutOfScopeVerificationDiagnostic } from './utils/isOutOfScopeVerificationDiagnostic.js';
+import { outsideFactsScopeDiagnostic } from './utils/outsideFactsScopeDiagnostic.js';
 import { selectReviewScopePaths } from './utils/selectReviewScopePaths.js';
 import { deriveEvidenceStatuses } from './deriveEvidenceStatuses.js';
 import { readChangedFileRoster } from './readChangedFileRoster.js';
@@ -127,12 +140,46 @@ export async function computeChangedScopeEvidence(
       : scopeUnknownFiles.relevant.length > 0
         ? 'indeterminate'
         : 'exact';
+  const changedNames = collectTargetNames([
+    ...[...scopePaths.changed].map((path) => ({
+      path,
+      kind: classifyRelevanceTarget(
+        context.snapshot.tree,
+        portableResolve(input.projectRoot, path),
+        false,
+      ),
+    })),
+    // A deleted path is gone from the tree, so nothing can say whether it was
+    // its directory's entry — and a reference to an entry spells the directory,
+    // not the file. Both names are offered rather than neither: keeping a
+    // diagnostic the change did not break costs a reviewer a look, and dropping
+    // one it did break seals over it.
+    ...[...scopePaths.changed]
+      .filter(
+        (path) =>
+          input.source.fileHashes[path] === REVIEW_STATE_DELETED_FILE_HASH,
+      )
+      .map((path) => ({
+        path: portableDirname(portableResolve(input.projectRoot, path)),
+        kind: 'directory' as const,
+      })),
+  ]);
   const isOutOfScope = (diagnostic: ToolDiagnostic) =>
     isAttributedToUnknownFile(
       diagnostic,
       scopeUnknownFiles.other,
       context.snapshot.projectRoot,
-    );
+    ) ||
+    isOutOfScopeVerificationDiagnostic({
+      diagnostic,
+      projectRoot: context.snapshot.projectRoot,
+      scopePaths,
+      isVerificationFile: (relativePath) =>
+        (verificationRoles.get(
+          pathForCompare(portableResolve(input.projectRoot, relativePath)),
+        ) ?? 'unsupported') !== 'unsupported',
+      changedNames,
+    });
   const scopedDiagnostics = context.diagnostics.filter(
     (diagnostic) => !isOutOfScope(diagnostic),
   );
@@ -205,7 +252,21 @@ export async function computeChangedScopeEvidence(
             : {}),
         })),
     );
-  const evidenceDiagnostics = normalizeDiagnostics(scopedDiagnostics);
+  // Reference-based rules read facts, so a review-scope file the declared
+  // scope drops is judged by every other rule and by none of those.
+  const factsScope = resolveFactsScope(
+    loadConfig(input.projectRoot).config ?? undefined,
+  );
+  const outsideFactsScope = [
+    ...new Set([...scopePaths.changed, ...scopePaths.neighbours]),
+  ]
+    .filter((path) => factsScope.defaultCovers(path) && !factsScope.covers(path))
+    .sort(compareByBytes);
+  const outsideScopeReport = outsideFactsScopeDiagnostic(outsideFactsScope);
+  const evidenceDiagnostics = normalizeDiagnostics([
+    ...scopedDiagnostics,
+    ...(outsideScopeReport === null ? [] : [outsideScopeReport]),
+  ]);
   const outOfScopeDiagnostics = normalizeDiagnostics(
     context.diagnostics.filter(isOutOfScope),
   );
@@ -222,6 +283,7 @@ export async function computeChangedScopeEvidence(
     infoCount: informational.length,
     diagnostics: context.diagnostics,
     outOfScope: selection.outOfScope,
+    outsideFactsScope: outsideScopeReport === null ? [] : [outsideScopeReport],
     evidenceDiagnostics,
     outOfScopeDiagnostics,
     ruleScopeById,

@@ -44,6 +44,8 @@ export {
 export {
   buildDAG,
   buildDependencyGraph,
+  collectTargetNames,
+  containsPathToken,
   detectCycles,
   classifyRelevanceTarget,
   getDirectDependencies,

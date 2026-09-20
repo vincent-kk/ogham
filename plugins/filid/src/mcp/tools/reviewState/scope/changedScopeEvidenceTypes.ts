@@ -35,6 +35,14 @@ export interface CollectedChangedScopeEvidence {
   evidenceDiagnostics: ToolDiagnostic[];
   /** Normalized non-finding diagnostics of unknown files outside the review scope; they block nothing. */
   outOfScopeDiagnostics: ToolDiagnostic[];
+  /**
+   * The one report naming review-scope files the declared facts scope drops.
+   *
+   * Empty when it drops none. Carried apart from the scope diagnostics because
+   * the prepare and seal responses echo it, while the scope list is what the
+   * blocker fold and `evidence.md` read.
+   */
+  outsideFactsScope: ToolDiagnostic[];
   /** Snapshot identity shared by every FCA observation in this collection. */
   snapshotHash: string;
   /** Digest of the frozen facts this generation wrote (spec §9). */

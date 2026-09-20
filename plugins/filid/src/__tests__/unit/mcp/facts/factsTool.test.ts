@@ -377,6 +377,33 @@ describe('facts submit', () => {
     expect(result.data?.added.paths).toEqual(['src/added.ts']);
   });
 
+  it('still names the moved paths when a status ran between the read and the submit', async () => {
+    const stale = (await status()).summary.resolutionEpoch;
+    project.write('src/added.ts', 'export const added = 1;\n');
+    // The skill calls status again — to read a truncated list, or to check
+    // where a file stands — before the caller submits what it extracted.
+    await status();
+
+    const result = await submit([project.facts('src/thing.ts')], stale);
+
+    expect(result.codes).toEqual([FACTS_DIAGNOSTIC_CODES.EPOCH_MOVED]);
+    expect(result.data?.added.paths).toEqual(['src/added.ts']);
+  });
+
+  it('names what moved since the tree last stood still, over repeated moves', async () => {
+    const stale = (await status()).summary.resolutionEpoch;
+    for (const name of ['a', 'b']) {
+      project.write(`src/${name}.ts`, 'export const x = 1;\n');
+      await status();
+    }
+
+    const result = await submit([], stale);
+
+    // A caller that cannot see everything that moved cannot find what is
+    // writing into the tree, which is what facts-tree-unstable asks it to do.
+    expect(result.data?.added.paths).toEqual(['src/a.ts', 'src/b.ts']);
+  });
+
   it('reports facts-tree-unstable once the tree has moved three times under a caller', async () => {
     const stale = (await status()).summary.resolutionEpoch;
     const codes: string[] = [];
