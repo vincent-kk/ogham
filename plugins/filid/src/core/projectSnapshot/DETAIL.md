@@ -97,7 +97,7 @@
 - 외부 package dependency는 project graph의 unresolved로 오인하지 않는다.
 - 선택 가능한 structure adapter가 없어도 참조는 저장소에서 오므로 dependency certainty는 `exact`이고, 불확실성은 파일별 `unknownFiles`에 남는다. verification adapter가 없으면 discovery가 비어 해당 certainty가 `unsupported`다.
 - 선언된 facts 범위가 비어 있으면 빈 exact PASS가 아니라 dependency certainty가 `unsupported`이고 `facts-uninitialized` 진단 하나를 남긴다.
-- source 또는 resolved target 어느 한쪽에 non-organ owner가 없는 참조는 `unowned-local-dependency` 진단을 남기되 graph certainty를 내리지 않는다. 소유 fractal이 없으면 노드가 없고, 노드 없는 간선으로 순환을 말할 수 없다 — 경계를 만드는 것은 사용자 동의 사항이므로(S6 A31/A32) 그 파일 때문에 분석이 멈추지 않는다. 빠짐없이 보고되는지는 `findUnownedReferences`의 property가 지킨다.
+- source 또는 resolved target 어느 한쪽에 non-organ owner가 없는 참조는 `unowned-local-dependency` 진단을 남기되 graph certainty를 내리지 않는다. 소유 fractal이 없으면 노드가 없고, 노드 없는 간선으로 순환을 말할 수 없다 — 경계를 만드는 것은 사용자 동의 사항이므로 그 파일 때문에 분석이 멈추지 않는다. 빠짐없이 보고되는지는 `findUnownedReferences`의 property가 지킨다.
 - 레코드가 없는 entry point의 surface는 빈 exact가 아니라 `indeterminate`이고 `entry-point-facts-unavailable` 진단이 함께 나온다.
 - 레코드가 없는 verification 파일은 조용히 빠지지 않는다: verification certainty가 `indeterminate`이고 `verification-facts-unavailable` 진단이 그 경로를 싣는다.
 

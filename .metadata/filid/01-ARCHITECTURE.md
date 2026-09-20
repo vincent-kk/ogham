@@ -94,7 +94,7 @@ AI 에이전트가 대규모 코드베이스를 다룰 때의 핵심 문제는 �
 ```
 ┌──────────────────────────────────────────────────────────┐
 │  host boundary                                            │
-│  mcp/    9 tools + settings page                          │
+│  mcp/    5 tools + settings page                          │
 │  hooks/  SessionStart · UserPromptSubmit · PreToolUse     │
 └───────────────────────────┬──────────────────────────────┘
                             │
@@ -116,8 +116,8 @@ AI 에이전트가 대규모 코드베이스를 다룰 때의 핵심 문제는 �
 
 실제 edge 방향은 `core → adapters` 이며 역방향 edge는 0이다. core가 어댑터 레지스트리를 호출해 사실을 모으고, 어댑터는 core를 전혀 모른다. 이 방향이 "생태계 리터럴은 어댑터 밖으로 새지 않는다"를 구조적으로 보장한다.
 
-- `adapters/`가 확장자, 진입점 후보, framework convention, import/export 문법, spec/test 탐색 패턴과 case 호출 문법을 소유한다.
-- `core/`는 이 중 어느 것도 알지 못한다. 어댑터가 보고한 경로와 certainty만 읽는다.
+- `adapters/`가 확장자, 진입점 후보, framework convention과 그 생태계의 이름 규칙을 소유한다 — 모두 파일 내용을 읽지 않는 판단이다. import/export 문법, spec/test 탐색 패턴과 case 호출 문법은 서버 밖 공급자(추출 프로그램)가 소유한다.
+- `core/`는 이 중 어느 것도 알지 못한다. 사실 저장소가 보관한 경로와 certainty만 읽는다.
 - `mcp/`와 `hooks/`는 host 경계이며 정책 판단을 하지 않는다.
 
 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다. 새 어댑터 때문에 이 셋 중 하나가 바뀐다면 설계 위반이다.
@@ -160,7 +160,7 @@ native 바이너리 의존과 전역 npm 모듈 탐색은 없다.
 
 | 사라진 것                                                                   | 개수 변화  | 대체 / 사유                                                            |
 | --------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------- |
-| `@ast-grep/napi` (tree-sitter native)                                       | 의존 제거  | 어댑터의 lexical scanner + certainty 3분법 (ADR-01)                    |
+| `@ast-grep/napi` (tree-sitter native)                                       | 의존 제거  | 공급자 추출 + 서버의 네 가지 검증 + certainty 3분법 (ADR-01)          |
 | `fast-glob`                                                                 | 의존 제거  | `fs.readdirSync` 재귀 traversal                                        |
 | TypeScript Compiler API 사용                                                | 제거       | 같음 (ADR-01)                                                          |
 | npm 라이브러리 표면 (`exports`·`main`·`types`·`dist`)                       | 제거       | `private: true`. 빌드 대상은 MCP(CJS)·hook(ESM) 진입점뿐 (ADR-09)      |
@@ -188,8 +188,8 @@ plugins/filid/
 │   ├── adapters/              # 생태계 증거 수집
 │   │   ├── registry/          #   등록·해석 (claim, 동률 판정)
 │   │   └── ecmascript/        #   초기 어댑터
-│   │       ├── structure/     #     lexical scanner, 진입점, 의존성
-│   │       └── verification/  #     spec/test 역할과 case 계산
+│   │       ├── structure/     #     소스 탐색, 진입점 발견(manifest 판독)
+│   │       └── verification/  #     verification 파일 발견(이름 규칙)
 │   ├── core/                  # 언어 중립 FCA 엔진
 │   │   ├── tree/              #   fractalTree · organClassifier · boundaryDetector
 │   │   ├── rules/             #   ruleEngine(15) · fractalValidator · documentValidator
@@ -222,15 +222,28 @@ plugins/filid/
 
 ## 설계 결정 기록 (ADR)
 
-### ADR-01 — native parser를 쓰지 않고 확신을 분리한다
+### ADR-01 — 서버는 소스를 해석하지 않는다
 
-**상태**: 채택 (1.0에서 ADR-1 "TypeScript Compiler API 선택"을 대체)
+**상태**: 채택 (1.0의 ADR-01 "native parser를 쓰지 않고 확신을 분리한다"를 대체, 그 ADR은 1.0에서 ADR-1 "TypeScript Compiler API 선택"을 대체했다)
 
-`@ast-grep/napi`(tree-sitter)와 TypeScript Compiler API 의존을 모두 제거하고, 어댑터의 작은 lexical scanner가 문자열·주석과 괄호 nesting만 구분한다. 대신 모든 분석 결과에 `exact | indeterminate | unsupported` 3분법을 부여한다.
+filid 서버는 소스 코드를 해석하지 않는다. 의존 사실은 **교체 가능한 공급자**가 **에이전트 샌드박스 안에서** 만들고, 서버는 그 결과를 받아 네 가지만 검증한다.
 
-**근거**: 마켓플레이스로 배포되는 플러그인에서 native 바이너리 의존은 지속적인 설치 실패원이다. 그리고 구조 위반을 보고하는 도구는 자신 있게 틀린 답을 내는 순간 가치가 0이 된다. "덜 정확하되 모를 때 모른다고 말함"이 "정확하지만 가끔 확신에 찬 오답"보다 낫다.
+1. **byte 결속** — 레코드의 `contentHash`가 지금 파일의 byte와 같은가. 다르면 저장하지 않는다.
+2. **존재 확인** — 보고된 참조 문자열이 그 파일 안에 실제로 있는가. 없으면 그 참조를 버린다.
+3. **경로 유효성** — `resolved.path`가 프로젝트 안이고, symlink를 지나지 않으며, 실재하는 파일인가. 아니면 거부한다.
+4. **판정 절차** — 이견은 부속 표에 항목으로 남고, `adopt`는 한 actor로, `dismiss`와 attested 레코드는 **다른 actor**의 독립 확인으로만 닫힌다.
 
-**트레이드오프**: 동적 table, 사용자 wrapper, 해석 불가능한 alias는 정확한 개수를 낼 수 없다. 이때 `indeterminate`를 반환하며 절대 PASS로 변환하지 않는다.
+서버가 하지 않는 것: 소스를 토큰으로 자르는 일, AST를 만드는 일, 모듈 해석 규칙을 흉내 내는 일, 그리고 공급자를 **서버가 실행하는 일**.
+
+서버에 남는 생태계 판단은 **파일 내용을 읽지 않는 것들**이다: 이름·경로로 소스 파일을 걷는 일, 이름·경로와 manifest(`package.json`을 JSON으로 읽는다)로 진입점 **파일**을 발견하는 일, framework가 소유한 peer 판정, 그리고 그 생태계의 이름 상수. 진입점이 무엇을 export하는지는 사실의 `entrySurface`에서 오고, verification 파일의 role과 case 수는 사실의 `verification`에서 온다.
+
+`exact | indeterminate | unsupported` 3분법은 유지한다. 확신의 출처가 서버의 파서에서 공급자의 등급(`tool` / `attested`)과 판정 상태로 옮겨갈 뿐, "모를 때 모른다고 말한다"는 규칙은 그대로다.
+
+**근거**: 1.0의 ADR-01은 native 바이너리 의존을 없앴지만 그 자리에 서버 안의 lexical scanner를 두었고, 서버는 여전히 "이 저장소의 소스가 무엇을 import하는가"를 스스로 판단했다. 그 판단은 생태계마다 다른 해석 규칙(`exports`, `paths`, 번들러 alias)을 서버가 흉내 내게 했고, 언어가 늘 때마다 서버 안의 파싱 코드를 늘렸으며, 서버가 틀렸을 때 사용자가 고칠 자리를 남기지 않았다 — 파서는 서버의 내부였다. 공급자 배치에서는 추출기가 부족하면 에이전트가 다른 도구로 같은 모양의 레코드를 내거나, 파일을 직접 읽은 **attested** 레코드를 낼 수 있다. 검증도 독립적이다: 서버가 자기가 만든 사실을 자기가 검증하지 않는다.
+
+**기각한 대안**: Babel 등 JS 파서를 서버에 두기 — 설치 실패원은 줄지만 해석의 주체가 서버로 남고 검증이 독립적이지 않다. tree-sitter로 복귀 — 정확도는 가장 높으나 native 바이너리 의존이 돌아오고, 배포에서 설치 실패는 기능 부재와 같다. 서버가 공급자 명령을 `spawn` — MCP 서버가 프로젝트 설정으로 조종되는 실행 표면이 되고, 샌드박스·권한·시간 제한을 서버가 떠안으며, 에이전트의 권한 경계와 어긋난다. 검증 없이 공급자를 믿기 — 저장소가 "누군가 그렇게 말했다"의 모음이 되고, 날조된 참조가 그대로 그래프가 된다.
+
+**트레이드오프**: 서버는 공급자가 정직한지 알 수 없다. 아는 것은 "이 byte에 이 문자열이 있다"와 "이 경로가 실재한다"뿐이므로, `dismiss`와 attested는 **다른 actor**를 요구한다 — 신뢰가 아니라 절차로 막는다. actor는 자기 신고이고 서버는 두 actor의 독립성을 확인할 수 없다(철자만 바꾼 같은 이름은 정규화가 걸러낸다). 존재 확인은 문자열 수준이라 참조가 주석이나 문자열 리터럴 안에 있어도 서버는 구분하지 못하며, 그 구분은 판정(`dismiss`)이 한다. 동적 table, 사용자 wrapper, 해석 불가능한 alias는 여전히 정확한 개수를 낼 수 없고, 그때는 `indeterminate`이며 절대 PASS로 변환하지 않는다. 이 ADR은 filid **서버**에 대한 것이고, 규칙 평가와 구조 검사 같은 리뷰 흐름의 다른 판단은 여전히 서버 안에 있다.
 
 ### ADR-02 — 생태계 리터럴은 어댑터 안에만 둔다
 
@@ -240,7 +253,7 @@ core, policy, MCP DTO에는 파일 확장자, 진입점 파일명, 테스트 호
 
 **근거**: 이것이 다언어 지원의 유일한 진입 조건이다. core가 `index.ts`를 알면 다음 생태계는 core 수정을 요구한다.
 
-**트레이드오프**: core는 어댑터가 보고하지 않은 사실을 스스로 보충할 수 없다. 어느 어댑터도 소유를 주장하지 않는 파일은 `unsupported`로 남는다.
+**트레이드오프**: core는 사실 저장소에 없는 것을 스스로 보충하지 않는다. 어느 어댑터도 소유를 주장하지 않는 파일은 `unsupported`로 남고, 범위 안인데 레코드가 없는 파일은 `unknownFiles`이며 다음 행동은 그 파일의 사실 제출이다.
 
 ### ADR-03 — restructure는 읽기 전용이다
 
@@ -399,6 +412,7 @@ organ은 진입점을 갖지 않는 것이 정의이므로 "진입점을 경유�
 | AC-29 | 소스 확장자를 그대로 적을 수 없는 생태계(`.js`로 참조되는 `.ts`, 확장자 생략)에서도 import rewrite가 exact evidence로 산출된다                                                                   | [08](./08-API-SURFACE.md)                           |
 | AC-30 | git이 무시하면서 추적하지 않는 경로는 snapshot 증거에 들어가지 않고, git이 답하지 못하면 필터 이전과 동일하게 스캔한다                                                                           | [06](./06-HOW-IT-WORKS.md)                          |
 | AC-31 | 계산된 target이 source와 같은 요청은 `alreadyPlaced`로 분리되어 `moves`에 없고, 그 계획의 postcondition은 `source-still-present`를 내지 않되 유닛이 계획된 경로에 없으면 `target-missing`을 낸다 | [08](./08-API-SURFACE.md)                           |
+| AC-33 | 서버 번들에 소스 파싱 모듈이 없다. 토큰화·AST·모듈 해석은 추출 프로그램(`src/factsExtractor/analysis/`)에만 있고, adapter는 파일 내용을 읽지 않는다(manifest JSON 제외)                       | ADR-01                                              |
 | AC-32 | rule roster와 `createDefaultConfig`가 같은 severity 정본을 읽는다. 프로젝트 config에 적힌 severity는 그 프로젝트의 선택으로 유지되며, 어떤 도구도 그것을 재시드하지 않는다                       | [07](./07-RULES-REFERENCE.md)                       |
 
 ---

@@ -37,7 +37,7 @@ claude --plugin-dir ./plugins/filid
 
 Building produces:
 
-- `bridge/mcp-server.cjs` — MCP server (4 tools)
+- `bridge/mcp-server.cjs` — MCP server (5 tools)
 - `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 3 hook scripts
 - `public/settings.html` — the settings UI served by `project_setup` action `settings`
 
@@ -217,6 +217,7 @@ A rule an adapter cannot measure exactly returns an `indeterminate` finding — 
 | `fractal_inspect` | `scan`, `validate`, `verification`, `resolve`                      | Inspect FCA structure, tests, and owner chains         |
 | `restructure`     | `plan`, `precondition`, `postcondition`                            | Plan placement and validate external execution         |
 | `review_state`    | `prepare`, `checkpoint`, `validate`, `seal`, `cleanup`, `assess`   | Prepare, validate, fold, and render cross-review state |
+| `facts`          | `status`, `submit`, `compare`, `adjudicate`, `discard-pending`, `discard-damaged` | Hold the dependency facts a provider extracted, and settle disputes over them |
 
 Every tool returns the same envelope. Results stay small: anything over 16 KiB is written to a content-addressed artifact and referenced by path and SHA-256.
 

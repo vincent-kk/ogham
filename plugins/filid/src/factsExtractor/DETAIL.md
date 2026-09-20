@@ -17,7 +17,7 @@
   - 루트 안의 symlink를 지나는 경로(파일 link, 디렉터리 link)는 `symlink`로 거부한다. 서버의 scan이 symlink를 제외하기 때문이다.
   - 받아들인 경로는 실제 위치의 디스크 철자로 적는다. 대소문자만 다른 입력(`A.TS`와 `a.ts`)은 한 레코드가 된다.
   - 거부한 항목은 레코드가 되지 않고 요약의 `rejected`에 센다.
-- 레코드는 `FileFacts` 형식이다(스펙 §2.1). adapter 값과의 대응은 task evidence `s3b-mapping.md`에 있다.
+- 레코드는 `FileFacts` 형식이다(스펙 §2.1).
   - `path`는 프로젝트 상대 POSIX다.
   - `contentHash`는 `sha256:<hex>`다.
   - 모든 파일에 `references`, `entrySurface`, `verification`을 싣는다. role이 `unsupported`인 파일의 `verification`도 싣는다.

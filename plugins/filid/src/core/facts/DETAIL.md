@@ -8,6 +8,7 @@
 - `resolutionEpoch`는 스캔된 경로 목록과 **프로젝트 기본 해석 입력**(manifest·lockfile basename 패턴에 걸린 스캔 경로)의 내용으로만 만든다. 소스 파일의 내용은 들어가지 않는다 — 본문만 바뀌면 해석은 그대로 맞고, 파일이 늘거나 줄거나 옮겨지면 형제 이름 하나로 같은 specifier의 정답이 바뀌므로 모든 레코드의 해석이 한꺼번에 무효가 된다.
 - 레코드가 선언한 `provenance.resolutionInputs`는 epoch에 **들어가지 않고 그 레코드 자신을 묶는다**. 제출 시 선언된 입력마다 현재 hash가 선언된 값과 같아야 하고(아니면 그 레코드 거부), 분류 시 달라졌거나 읽을 수 없으면 그 레코드의 파일이 `needs-resolution`이다. 선언 입력은 프로젝트 밖을 가리킬 수 있다.
 - epoch digest는 원소마다 길이를 붙여 먹인다. 구분자만 쓰면 `"a\0b"` 한 개와 `"a"`,`"b"` 두 개가 같은 digest가 된다.
+- **저장소 경로는 정규화한 루트에서 파생한다.** 호출자마다 같은 프로젝트를 다르게 적는다 — 리뷰는 git이 답한 실제 경로를 쓰고, 다른 도구는 건네받은 철자를 그대로 넘기며, 대부분의 시스템에서 임시 디렉터리는 symlink를 지나 닿는다. 두 철자가 두 저장소를 열면 끝난 부트스트랩이 제출한 사실이 그것을 요구한 분석에게 보이지 않아, 빠져나갈 길 없는 고리가 된다(P5). 아직 없는 경로는 자기 자신으로 키가 된다.
 - 레코드는 경로 digest 앞 2 hex로 나눈 shard 파일에 모여 있다. 쓰기는 원자적 치환과 `(shard, 이전 byte digest)`의 compare-and-set이며, **CAS 단위는 레코드가 아니라 shard**다. 스키마를 벗어난 **항목 하나**는 그 파일만 `missing`으로 읽히고 shard는 그대로 다시 쓸 수 있다. shard의 JSON 자체가 깨지면 그 shard의 항목 전부가 `missing`이 되고, shard digest가 CAS token으로 남아 재제출로 복구된다.
 - 제출 파일은 절대 경로이고, **정규화한 실제 위치**가 프로젝트 트리 밖이며, 일반 파일이고 크기 상한 안이어야 한다. 경로는 비교·검사·열기 전에 모두 정규화하므로 프로젝트 밖으로 이어지는 symlink는 통과하고 안으로 이어지는 symlink는 거절된다.
 - **서버가 여는 모든 경로는 먼저 정규화하고 그 다음에 연다.** 제출 파일과 해석 입력에 같은 규칙이 적용된다. 정규화하지 않으면 ancestor symlink 검사가 파일시스템 루트부터 걷기 때문에, macOS `/tmp`·`/var` 아래의 프로젝트나 `node_modules`의 workspace 링크처럼 흔한 배치가 통째로 거절된다. 해석 입력에서 그 거절은 최악이다 — 영구히 `null`로 읽혀 manifest를 고쳐도 epoch가 움직이지 않고 레코드가 낡은 해석 위에서 `exact`로 남는다. 제출 파일에는 정규화 뒤 containment를 보고, 해석 입력에는 보지 않는다(스펙 §2.2가 프로젝트 밖 입력을 허용하고 서버는 hash만 한다).
@@ -95,7 +96,7 @@
 - `adjudicateItem(item, decision, actor)` — 순수 함수. 상태 표의 한 셀을 적용하고 다음 행동을 함께 돌려준다.
 - `isOpenAdjudication(state)` — 항목이 아직 actor를 기다리는가. `status`의 목록, 파일의 `uncertain` 판정, 레코드가 닫을 수 있는 대상이 모두 같은 두 상태를 뜻하므로 정본을 한 곳에 둔다.
 - `compareReferences(candidate, stored)` — 순수 함수. 동일성은 `(sourceText ?? specifier, kind)`와 해석이다.
-- `selectValidReferences(recordEdges, page, path)` — 레코드 ∪ adopt. 지금 소비자는 테스트뿐이고 S3c가 그래프에 연결한다.
+- `selectValidReferences(recordEdges, page, path)` — 레코드 ∪ adopt. snapshot이 의존성 그래프의 입력으로 읽는다.
 - `computeLineDigest(contents, reference)` · `readAdjudicationTable(directory)` · `writeAdjudicationPages(...)` — 부속 표의 만료 key와 입출력.
 - `writeShardPages(directory, shards, updates, shardFileName)` — 부속 표와 pending 저장물이 함께 쓰는 배치 쓰기. shard당 한 번 쓰고, CAS 패배를 경로 목록으로, 실제로 쓴 shard를 새 token과 함께 `shards`로 돌려준다(다음 batch가 이어받을 자리). 두 저장물이 같은 모양이므로 배치 규칙을 한 벌만 둔다 — 갈라지면 한쪽만 고쳐진다.
 - `readPendingStore(directory)` · `findUnaccountedLines(lines, facts)` · `comparePendingEdges(pending, submitted)` — attested 경로의 읽기·계정·확인 비교. 모두 순수하거나 읽기 전용이다.

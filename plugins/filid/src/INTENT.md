@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Filid 1.0의 canonical TypeScript source. 생태계 어댑터가 사실을 수집하고, 언어 중립 core가 FCA 결과를 만들며, MCP와 훅이 host 경계를 담당한다.
+Filid 1.0의 canonical TypeScript source. 서버 밖 공급자가 의존 사실을 만들고 서버가 그것을 검증·보관하며, 생태계 어댑터는 이름·경로·manifest 증거만 맡고, 언어 중립 core가 그 사실로 FCA 결과를 만들며, MCP와 훅이 host 경계를 담당한다.
 
 ## Conventions
 
@@ -16,7 +16,7 @@ Filid 1.0의 canonical TypeScript source. 생태계 어댑터가 사실을 수�
 ### Always do
 
 - 새 fractal에 INTENT.md, DETAIL.md와 named-export entry point 추가
-- 어댑터 증거의 unsupported/indeterminate를 PASS와 구분
+- 사실과 어댑터 증거의 unsupported/indeterminate/unknown을 PASS와 구분
 
 ### Ask first
 

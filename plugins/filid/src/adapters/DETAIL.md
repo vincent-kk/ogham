@@ -11,8 +11,7 @@
 - 호출자가 제외 디렉터리 이름을 지정하면 그 이름을 세그먼트로 담은 path는 ownership 후보에서 먼저 빠진다. 제외된 path는 `unsupported`도 아니고 진단도 만들지 않는다 — 제외는 "소유자를 찾지 못했다"가 아니라 "증거 대상이 아니다"이므로, 진단으로 남기면 제외의 목적인 미해결 참조 제거가 이름만 바뀐 채 그대로 남는다.
 - explicit config의 미등록 adapter ID는 `unknown-adapter-id` validation 진단이다.
 - 새 생태계 지원은 adapter 등록으로 추가되며 core type, policy와 MCP schema를 바꾸지 않는다.
-- `DependencyReference.certainty`는 선택 필드이고 생략은 exact다. adapter는 토큰 경계를 믿을 수 없는 구간에서 찾았거나 그 뒤에 있어 실제 코드인지 확정할 수 없는 참조를 `indeterminate`로 표시한다. core는 그런 참조를 edge로 쓰지 않는다. 확정할 수 없는 참조를 exact edge로 쓰면 phantom 의존이 생기고, 버리면 숨은 의존이 조용히 사라진다.
-- `DependencyReference.sourceText`는 선택 필드다. adapter가 읽은 specifier(`rawSpecifier`, escape를 푼 값)가 소스에 적힌 literal과 다를 때만 구분자를 포함한 원문을 싣는다. 그 값은 파일 byte에 그대로 있으므로 facts 제출의 존재 확인이 이 원문으로 참조를 찾는다. core는 이 필드를 읽지 않는다.
+- adapter는 `DependencyReference`를 만들지 않는다. 그 레코드는 사실 저장소가 보관하며 `certainty`와 `sourceText`의 계약은 `core/facts/DETAIL.md`가 소유한다.
 
 ## API Contracts
 
@@ -21,8 +20,8 @@
 - `AdapterRegistry.registerStructure` / `registerVerification` — ID별 adapter 등록.
 - `AdapterRegistry.selectStructure` / `selectVerification` — detect 없이 explicit ID validation과 등록 candidate 선택만 수행한다.
 - `AdapterRegistry.resolveStructure` / `resolveVerification` — detect confidence가 양수인 adapter를 confidence 내림차순으로 반환.
-- `StructureAdapter`는 source discovery, 따라가지 않은 symlink 보고(선택), adapter별 entry point override 해석, entry point inspection, dependency extraction, framework peer 판정과 entry point 제안을 제공한다.
-- `VerificationAdapter`는 verification file discovery, role, semantic case count와 DETAIL contract group marker를 제공한다.
+- `StructureAdapter`는 source discovery, 따라가지 않은 symlink 보고(선택), adapter별 entry point override 해석, entry point inspection(manifest JSON 판독), framework peer 판정과 entry point 제안을 제공한다. 소스 파일의 내용은 읽지 않는다.
+- `VerificationAdapter`는 이름·경로로 verification file discovery만 제공한다. role, case 수와 contract group id는 사실 레코드의 `verification`에서 온다.
 
 ## Acceptance Criteria
 

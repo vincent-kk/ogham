@@ -61,7 +61,7 @@
 - `status`는 추출이 필요한 파일(범위 안의 `missing` ∪ `needs-resolution`)의 목록을 서버 cache 디렉터리에 줄 단위로 쓰고 `extractionList: { path, count, unrepresentable }`로 알린다. 에이전트는 그 경로를 추출기의 `--files-from`에 그대로 넘긴다 — 범위를 서버가 정하므로 추출기는 스캔·ignore·scope를 다시 구현하지 않는다.
 - `status` 요약은 상태별 개수를, `data`는 상태별 경로 목록과 생략된 개수(`truncated`)를 싣는다. 한 번도 제출하지 않은 저장소는 스캔된 모든 파일이 `missing`이므로 상한이 곧 응답 크기의 상한이다.
 - `submit` 요약은 `accepted`·`removed`·`rejectedRecords`·`rejectedClaims`·`epochMoved`·`openedItems`·`closedItems`·`removedAdjudicatedItems`·`attestationsPending`·`attestationsConfirmed`를, `data`는 거부 목록과 epoch 차이, 그리고 attested 레코드마다의 결과(`attested[]`: 결과 종류, 다른 쪽에만 있는 간선, 다음 행동)를 싣는다. 개수는 모두 **실제로 저장된 shard·페이지만** 센다.
-- 트리·범위를 벗어난 파일의 표 페이지를 지울 때 그 페이지가 담고 있던 판정(`pending-dismiss`·`adopted`·`dismissed`)의 개수를 `facts-adjudicated-items-removed`로 보고한다. 막지 않는 보고다(S6 R-3) — 제거 자체는 옳고 되돌릴 것이 없다. rename은 새 경로의 첫 제출에 비교 대상 레코드가 없어 축소로 잡히지 않으므로, 다음 행동은 새 경로로 `compare`를 한 번 돌리는 것이다.
+- 트리·범위를 벗어난 파일의 표 페이지를 지울 때 그 페이지가 담고 있던 판정(`pending-dismiss`·`adopted`·`dismissed`)의 개수를 `facts-adjudicated-items-removed`로 보고한다. 막지 않는 보고다 — 제거 자체는 옳고 되돌릴 것이 없다. rename은 새 경로의 첫 제출에 비교 대상 레코드가 없어 축소로 잡히지 않으므로, 다음 행동은 새 경로로 `compare`를 한 번 돌리는 것이다.
 - 신뢰 경계 오류는 `ToolDiagnosticError`로 던져 공통 error envelope를 탄다: `facts-file-path-not-absolute`, `facts-file-inside-project`, `facts-file-not-regular`, `facts-file-too-large`, `facts-file-unreadable`, `facts-file-not-json`.
 - 저장 도중 다른 writer가 같은 레코드를 바꾸면 그 레코드는 저장되지 않고 `facts-record-changed` 진단 하나가 실리며 status는 `indeterminate`다.
 - 부속 표 페이지를 빼앗기면 `facts-side-table-changed`이고, 이것도 `indeterminate`다 — 레코드는 들어갔는데 항목이 안 들어간 제출은 항목 없이 좁아진 그래프다. 다음 행동은 **진 action의 일**이다: `submit`은 재제출, `compare`는 같은 후보로 재비교, `adjudicate`는 `status`로 현재 항목을 다시 받아 재판정.

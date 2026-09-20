@@ -1,6 +1,6 @@
 # 06. 내부 동작 메커니즘 상세
 
-> `@ogham/filid` 1.0 기준. 훅 파이프라인, lexical scanner, snapshot과 hash, 의존성 그래프, LCA와 배치 계획, 검증 문서 계산, MCP 라우팅과 envelope.
+> `@ogham/filid` 1.0 기준. 훅 파이프라인, 사실 수집(facts), snapshot과 hash, 의존성 그래프, LCA와 배치 계획, 검증 문서 계산, MCP 라우팅과 envelope.
 
 ---
 
@@ -119,27 +119,27 @@ action: READ the intent file above with the Read tool before your next step in t
 
 ---
 
-## Lexical scanner
+## 사실 수집
 
-1.0은 native parser도 TypeScript Compiler API도 쓰지 않는다. 어댑터는 작은 어휘 스캐너로 필요한 사실만 모은다.
+1.0의 서버는 소스를 해석하지 않는다(ADR-01). 소스를 읽어 참조·진입점 surface·verification 사실을 만드는 일은 서버 밖 **공급자**의 몫이고, 기본 공급자는 플러그인이 배포하고 **에이전트가 자기 샌드박스에서 실행하는** 추출 프로그램(`src/factsExtractor/`)이다. 서버는 그 결과를 받아 byte 결속·존재 확인·경로 유효성·판정 절차만 검증하고 보관한다.
 
 ```
-소스 문자열
+소스 파일 (에이전트 샌드박스)
     │
-    ▼  단일 패스 스캔
+    ▼  추출 프로그램
     │
-    ├── 문자열 리터럴 / 템플릿 / 주석 구간 식별  → 그 안은 코드가 아님
-    ├── 괄호·중괄호 nesting depth 추적           → top-level 여부 판정
-    └── 관심 토큰만 수집
-          ├─ import / export 선언과 specifier
-          ├─ 진입점 후보의 export 이름
-          └─ 검증 파일의 case 호출
+    ├── 참조와 그 해석 경로
+    ├── 진입점의 export 이름 (entrySurface)
+    └── verification 파일의 role과 case 수
+    │
+    ▼  submit
+서버: contentHash 결속 · 문자열 존재 확인 · 경로 유효성 · 부속 표 판정
     │
     ▼
 { 값, certainty }
 ```
 
-핵심은 정확도가 아니라 **정직함**이다. 스캐너가 확정할 수 없는 구조를 만나면 값을 지어내지 않고 `indeterminate`를 붙인다.
+핵심은 정확도가 아니라 **정직함**이다. 공급자가 확정할 수 없는 참조는 값을 지어내지 않고 `indeterminate`로 오며, 서버가 검증하지 못한 것은 저장되지 않는다.
 
 | certainty       | 의미                                         |
 | --------------- | -------------------------------------------- |
@@ -224,10 +224,12 @@ ADR-01이 glob 의존을 제거한 상태이므로 `.gitignore` 문법을 직접
 ## 의존성 그래프와 cycle
 
 ```
-adapter dependency references
+사실 저장소의 유효 참조 (제출 ∪ adopt)
     │
     ▼
 각 reference의 sourceFile / resolvedPath를 소유 fractal로 승격
+    │  범위 안인데 레코드가 없는 파일은 승격되지 않고
+    │  `unknownFiles`로 남는다 — 다음 행동은 그 파일의 사실 제출이다
     │
     ▼
 DependencyGraphEdge {

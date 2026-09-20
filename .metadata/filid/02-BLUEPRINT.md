@@ -189,7 +189,7 @@ detectCycles(graph)                                                      → str
 getDirectDependencies / topologicalSort
 ```
 
-**핵심 알고리즘**: 어댑터의 dependency reference를 소유 fractal로 승격해 edge를 만들고, 각 edge는 `sourceFile` · `rawSpecifier` · `resolvedPath`를 증거로 갖는다. cycle은 **실제 directed closed route**를 반환한다. 그래프를 만들 수 없는 파일이 결론에 영향을 줄 수 있으면 전체 결과가 `indeterminate`다.
+**핵심 알고리즘**: dependency reference를 소유 fractal로 승격해 edge를 만들고, 각 edge는 `sourceFile` · `rawSpecifier` · `resolvedPath`를 증거로 갖는다. `references` 인자의 출처는 어댑터가 아니라 **사실 저장소**다 — snapshot이 범위 안 파일의 유효 참조(제출 ∪ adopt)를 읽어 넘기고, 레코드가 없는 범위 안 파일은 edge가 되지 않고 `unknownFiles`로 남는다. 시그니처는 그대로다. cycle은 **실제 directed closed route**를 반환한다. 그래프를 만들 수 없는 파일이 결론에 영향을 줄 수 있으면 전체 결과가 `indeterminate`다.
 
 소유 subtree 안의 organ 참조는 **edge로는 보존되지만 cycle adjacency에서 빠진다.** 부모 소유 organ을 자식 fractal이 참조할 때 생기는 `부모 → 자식 → 부모` 왕복은 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure`의 `plan` action이 incoming edge로 소비자를 계산하기 때문이다.
 

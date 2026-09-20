@@ -32,6 +32,7 @@
 
 - 생성된 manifest, `bridge/`, `public/` 또는 버전 소스를 손편집
 - MCP에서 파일 이동, import rewrite, commit, push, PR 생성 수행
+- MCP 서버가 소스 파일을 해석 — 토큰화, AST 구축, 모듈 해석 규칙 흉내
 - Seiri나 특정 생태계 parser를 core runtime dependency로 요구
 
 ## Dependencies

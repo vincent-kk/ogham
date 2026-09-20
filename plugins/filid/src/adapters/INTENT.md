@@ -2,7 +2,7 @@
 
 ## Purpose
 
-생태계별 파일·entry point·dependency·verification 사실을 수집해 언어 중립 core 계약으로 변환한다.
+생태계별 파일과 entry point를 이름·경로·manifest로 발견해 언어 중립 core 계약으로 변환한다. 파일 내용에서 오는 사실(의존 참조, entry surface, verification role과 case 수)은 여기서 만들지 않는다.
 
 ## Structure
 
@@ -14,7 +14,7 @@
 
 - 판단 우선순위: 1. 오탐 방지 2. 정확한 증거 3. 생태계 coverage
 - adapter ID와 모든 생태계 리터럴은 각 adapter 안에 둔다.
-- 모호한 구문은 억지로 해석하지 않고 indeterminate/unsupported로 남긴다.
+- 모호한 증거는 억지로 해석하지 않고 indeterminate/unsupported로 남긴다. 이 판단이 닿는 곳은 manifest 판독과 이름 규칙뿐이다 — 소스 구문은 여기서 보지 않는다.
 
 ## Boundaries
 
@@ -37,6 +37,7 @@
 - core rule이나 MCP DTO에 생태계 리터럴을 밀어 넣기
 - 새 생태계 adapter 추가가 core type, policy rule 또는 MCP schema 변경을 요구하게 만들기
 - native parser, 전역 npm module 또는 `fast-glob` 요구
+- 소스 파일의 내용을 구문으로 해석 (manifest JSON 판독은 예외)
 - unsupported 증거를 PASS로 변환
 
 ## Dependencies
