@@ -13,12 +13,12 @@ import type {
   ReviewScopeViolation,
 } from '../state/reviewStateTypes.js';
 
+import { normalizeHandoffCallerEntry } from './normalizeHandoffCallerEntry.js';
 import {
   REVIEW_HANDOFF_SEED_SCHEMA,
   type ReviewHandoffEntry,
   type ReviewHandoffSeed,
 } from './reviewHandoffSeedSchema.js';
-import { normalizeHandoffCallerEntry } from './normalizeHandoffCallerEntry.js';
 import { boundHandoffPath } from './utils/boundHandoffPath.js';
 
 /**

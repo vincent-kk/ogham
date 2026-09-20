@@ -142,7 +142,7 @@ describe('a config-warning affects the axes its dropped entry could have changed
   it.each([
     [
       [],
-      'Continue the review; dropping this key changes no analysis conclusion. Ask the user to fix or remove the named key in the filid config; the review used the remaining valid settings.',
+      'Continue the review; dropping this key changes no analysis conclusion. Report that the named key in the filid config is invalid and was dropped, so it should be fixed or removed; the review used the remaining valid settings.',
     ],
     [
       ['dependencies', 'boundaries', 'verification'],

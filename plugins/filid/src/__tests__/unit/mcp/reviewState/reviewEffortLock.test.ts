@@ -32,7 +32,7 @@ describe('prepared effort lock', () => {
     ['low', 'medium'],
     ['high', 'low'],
   ] as const)(
-    'rejects %s to %s before the first opinion is submitted',
+    'opens a new generation from %s when the argument names %s',
     async (effort, requested) => {
       configureReviewGroups(fixture.projectRoot, 1, {
         highRiskPaths: ['src/value.ts'],
@@ -42,16 +42,16 @@ describe('prepared effort lock', () => {
         projectRoot: fixture.projectRoot,
         effort,
       });
-      const stateBytes = readFileSync(prepared.data.statePath, 'utf8');
       const sessionBytes = readFileSync(prepared.data.sessionPath, 'utf8');
-      await expect(
-        handleReviewState({
-          action: 'prepare',
-          projectRoot: fixture.projectRoot,
-          effort: requested,
-        }),
-      ).rejects.toMatchObject({ code: 'review-effort-locked' });
-      expect(readFileSync(prepared.data.statePath, 'utf8')).toBe(stateBytes);
+      const reprepared = await handleReviewState({
+        action: 'prepare',
+        projectRoot: fixture.projectRoot,
+        effort: requested,
+      });
+      expect(readPreparedReviewState(reprepared).effort).toBe(requested);
+      expect(reprepared.summary.generationId).not.toBe(
+        prepared.summary.generationId,
+      );
       expect(readFileSync(prepared.data.sessionPath, 'utf8')).toBe(
         sessionBytes,
       );
@@ -97,31 +97,26 @@ describe('prepared effort lock', () => {
       );
       if (missingEvidence) rmSync(prepared.data.evidencePath);
       const paths = [
-        prepared.data.statePath,
-        prepared.data.sessionPath,
         join(prepared.data.reviewDirectory, group.briefPath),
         join(prepared.data.reviewDirectory, group.opinionPath),
       ];
       const before = paths.map((path) => readFileSync(path, 'utf8'));
-      for (const effort of ['auto', 'low'] as const) {
-        configureReviewGroups(fixture.projectRoot, 1, {
-          highRiskPaths: ['src/value.ts'],
-          autoLowEffortGroupThreshold: 1,
-        });
-        await expect(
-          handleReviewState({
-            action: 'prepare',
-            projectRoot: fixture.projectRoot,
-            effort,
-          }),
-        ).rejects.toMatchObject({ code: 'review-effort-locked' });
-        expect(paths.map((path) => readFileSync(path, 'utf8'))).toEqual(before);
-      }
+      configureReviewGroups(fixture.projectRoot, 1, {
+        highRiskPaths: ['src/value.ts'],
+        autoLowEffortGroupThreshold: 1,
+        effort: 'low',
+      });
       const resumed = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
-        effort: 'medium',
       });
+      expect(paths.map((path) => readFileSync(path, 'utf8'))).toEqual(before);
+      expect(readPreparedReviewState(resumed).effort).toBe(
+        readPreparedReviewState(prepared).effort,
+      );
+      expect(readFileSync(prepared.data.sessionPath, 'utf8')).toContain(
+        'effort: medium',
+      );
       expect(resumed.data.next).toContainEqual(
         expect.objectContaining({
           kind: 'review',

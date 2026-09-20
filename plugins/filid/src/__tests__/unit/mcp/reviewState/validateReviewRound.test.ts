@@ -160,6 +160,7 @@ describe('validateReviewRound handoff', () => {
     expect(reviewed.data.next).toEqual([
       {
         kind: 'verify',
+        generationId: state.generationId,
         group: group.id,
         modelTier: 'efficient',
         riskReasons: [],

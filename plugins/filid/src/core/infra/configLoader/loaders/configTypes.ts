@@ -5,6 +5,8 @@ import type { FilidConfig } from './configSchemas.js';
 /** Result of initProject. */
 export interface InitResult {
   configCreated: boolean;
+  /** Whether an existing v1 config was converted to v2 and written. */
+  configMigrated: boolean;
   filePath: {
     config: string;
   };

@@ -52,10 +52,10 @@ Generated paths are the ones declared in `structure.generatedPaths`; the classif
 
 **`resolve`**
 
-| Failure                      | Pipeline action                                   |
-| ---------------------------- | ------------------------------------------------- |
-| Typecheck failure (`--auto`) | Stop. The corrections left the tree uncompilable. |
-| Accepted item `unapplied`    | Continue — `revalidate` fails it with evidence.   |
+| Failure                                                     | Pipeline action                                                                               |
+| ----------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Typecheck failure with every correction reverted (`--auto`) | Stop. The failure predates the corrections; `resolve` repaired or reverted each one it could. |
+| Accepted item `unapplied`                                   | Continue — `revalidate` fails it with evidence.                                               |
 
 **`revalidate`**
 

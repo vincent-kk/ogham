@@ -205,7 +205,7 @@ function denyMissingMoveSource(sourcePath: string): HookOutput {
     hookSpecificOutput: {
       hookEventName: 'PreToolUse',
       permissionDecision: 'deny',
-      permissionDecisionReason: `Cannot project Move source ${sourcePath}: it does not exist. ${DENY_RETRY_GUIDANCE}`,
+      permissionDecisionReason: `Cannot project Move source ${sourcePath}: it does not exist. Correct the source path, or create the destination with an Add File operation instead of a Move. ${DENY_RETRY_GUIDANCE}`,
     },
   };
 }
@@ -240,7 +240,9 @@ function enforceApproximateStructureCheck(
       ...result.hookSpecificOutput,
       permissionDecision: 'deny',
       permissionDecisionReason:
-        `Cannot allow an approximate Move projection while a structure risk remains. ` +
+        `Cannot allow an approximate Move projection while a structure risk remains: ` +
+        `the Move carries hunks filid could not apply exactly, so it checked the source plus every added line. ` +
+        `Edit the source in place first so the hunks apply, then re-emit a bodyless Move; filid then checks the exact content. ` +
         DENY_RETRY_GUIDANCE,
     },
   };

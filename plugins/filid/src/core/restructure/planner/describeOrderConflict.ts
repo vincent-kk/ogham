@@ -21,8 +21,7 @@ const CONFLICT_SENTENCES: Record<
   }),
   swap: ({ sourcePath }, related) => ({
     message: `Moves in this group (${[sourcePath, ...related].join(', ')}) land on paths other moves in the group still occupy, so no order runs them without overwriting a unit.`,
-    nextAction:
-      'Ask the user how to stage the exchange, for example by renaming one unit to a temporary name first; filid cannot plan a move onto an occupied path.',
+    nextAction: `Stage the exchange across plans: plan the move of ${findOuterSource([sourcePath, ...related])} alone with organNameHint set to a directory name nothing occupies, execute and validate it; create a new plan for the remaining moves against the new layout; then plan that unit again from its temporary place with its original organNameHint, or none. One plan cannot move a unit onto a path another unit still occupies.`,
   }),
   cycle: ({ sourcePath }, related) => ({
     message: `The moves of ${sourcePath} and ${related.join(', ')} each require another to run first, so no order runs them in one plan.`,

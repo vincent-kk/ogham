@@ -53,18 +53,10 @@ describe('automatic effort resume', () => {
           maxReviewerHandoffs: 3,
         });
       }
-      await expect(
-        handleReviewState({
-          action: 'prepare',
-          projectRoot: fixture.projectRoot,
-          effort: 'auto',
-        }),
-      ).rejects.toMatchObject({ code: 'review-effort-locked' });
       const auto = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'auto',
-        force: true,
       });
       expect(auto.summary).toMatchObject({
         effort: 'medium',
@@ -145,7 +137,7 @@ describe('automatic effort resume', () => {
     }
   });
 
-  it('rejects threshold changes that would drop a pending strong review', async () => {
+  it('keeps a pending strong review when only the threshold config changes', async () => {
     configureReviewGroups(fixture.projectRoot, 1, {
       highRiskPaths: ['src/value.ts'],
       autoLowEffortGroupThreshold: 2,
@@ -175,16 +167,9 @@ describe('automatic effort resume', () => {
     configureReviewGroups(fixture.projectRoot, 1, {
       autoLowEffortGroupThreshold: 1,
     });
-    await expect(
-      handleReviewState({
-        action: 'prepare',
-        projectRoot: fixture.projectRoot,
-      }),
-    ).rejects.toMatchObject({ code: 'review-effort-locked' });
     const resumed = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
-      effort: 'medium',
     });
     expect(resumed.summary).toMatchObject({
       effort: 'medium',

@@ -25,7 +25,7 @@ describe('pre-tool-validator', () => {
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(result.hookSpecificOutput?.permissionDecisionReason).toMatch(
-      /restructure|sub-fractal|STOP and ask/,
+      /Compress, deduplicate, or move detailed content to DETAIL\.md/,
     );
   });
 
@@ -149,7 +149,7 @@ describe('pre-tool-validator', () => {
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(result.hookSpecificOutput?.permissionDecisionReason).toMatch(
-      /restructure|RESTRUCTURED|STOP and ask/,
+      /Rewrite it to the current state/,
     );
   });
 

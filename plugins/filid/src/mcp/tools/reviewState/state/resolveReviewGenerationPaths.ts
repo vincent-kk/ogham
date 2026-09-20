@@ -3,7 +3,10 @@ import {
   resolveContainedPath,
 } from '@ogham/cross-platform';
 
-import { REVIEW_STATE_FILE_NAMES } from '../../../../constants/reviewState.js';
+import {
+  REVIEW_STATE_DIRECTORY_NAMES,
+  REVIEW_STATE_FILE_NAMES,
+} from '../../../../constants/reviewState.js';
 
 import type { ReviewStatePaths } from './reviewStateTypes.js';
 
@@ -26,7 +29,7 @@ export function resolveReviewGenerationPaths(
   );
   const reviewDirectory = resolveContainedPath(
     branchDirectory,
-    'generations',
+    REVIEW_STATE_DIRECTORY_NAMES.GENERATIONS,
     generationId,
   );
   assertNoSymlinkDescendantsSync(paths.projectRoot, reviewDirectory);

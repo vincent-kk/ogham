@@ -503,7 +503,7 @@ describe('restructure orders overlapping moves for automatic execution', () => {
     expect(decision.nextAction).toContain(`Keep one request for ${P.DELAY}`);
   });
 
-  it('sends two files exchanging places to the user as a swap', () => {
+  it('stages two files exchanging places through a temporary name', () => {
     const result = plan(
       snapshotOf(
         [organ(P.M1, 'm1', ['f.ts']), organ(P.M2, 'm2', ['f.ts'])],
@@ -517,7 +517,8 @@ describe('restructure orders overlapping moves for automatic execution', () => {
     const decision = conflictDecision(result, P.M1_FILE);
 
     expect(decision.message).toContain(`(${P.M1_FILE}, ${P.M2_FILE})`);
-    expect(decision.nextAction).toContain('Ask the user how to stage');
+    expect(decision.nextAction).toContain('Stage the exchange across plans');
+    expect(decision.nextAction).toContain('organNameHint');
   });
 
   it('gives every member of a cycle with one occupied landing the swap cause', () => {
@@ -535,7 +536,7 @@ describe('restructure orders overlapping moves for automatic execution', () => {
     expect(
       [P.SCHED, P.A_FILE, P.OPS_A].map((source) =>
         conflictDecision(result, source).nextAction.startsWith(
-          'Ask the user how to stage',
+          'Stage the exchange across plans',
         ),
       ),
     ).toEqual([true, true, true]);

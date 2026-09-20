@@ -114,7 +114,7 @@ export async function collectDependencyReferences(
         code: DEPENDENCY_DIAGNOSTIC_CODES.ANALYSIS_FAILED,
         message: `Could not read the dependencies of ${filePath}: ${rawMessage}`,
         nextAction:
-          "Check that the file is readable source text, then run again; if it repeats, report this message to the user. The file's dependencies are unknown until then.",
+          "Check that the file is readable source text, then run again; if it repeats, record this message in your report as a filid defect and continue. The file's dependencies are unknown until then.",
         path: filePath,
         affects: ['dependencies', 'boundaries'],
         causeId: createHash('sha256')

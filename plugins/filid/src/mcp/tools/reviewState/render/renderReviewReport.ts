@@ -5,18 +5,19 @@ import { renderBlockerSummary } from './utils/renderBlockerSummary.js';
 import { renderConfirmedFindingsTable } from './utils/renderConfirmedFindingsTable.js';
 import { renderCoverageSummary } from './utils/renderCoverageSummary.js';
 import { renderCoverageTable } from './utils/renderCoverageTable.js';
-import { renderRefutedCandidatesTable } from './utils/renderRefutedCandidatesTable.js';
-import { renderReviewReuseSummary } from './utils/renderReviewReuseSummary.js';
-import { renderScopeTable } from './utils/renderScopeTable.js';
-import { renderUnresolvedEvidenceTable } from './utils/renderUnresolvedEvidenceTable.js';
-import { renderVerificationLogTable } from './utils/renderVerificationLogTable.js';
-
+import { renderGenerationReplacement } from './utils/renderGenerationReplacement.js';
 /**
  * Render the canonical schema-7 cross-review report from a verdict fold.
  *
  * @param input Prepared identity, evidence, roster, and deterministic fold.
  * @returns Canonical report Markdown with one trailing newline.
  */
+import { renderRefutedCandidatesTable } from './utils/renderRefutedCandidatesTable.js';
+import { renderReviewReuseSummary } from './utils/renderReviewReuseSummary.js';
+import { renderScopeTable } from './utils/renderScopeTable.js';
+import { renderUnresolvedEvidenceTable } from './utils/renderUnresolvedEvidenceTable.js';
+import { renderVerificationLogTable } from './utils/renderVerificationLogTable.js';
+
 export function renderReviewReport(input: ReviewRenderInput): string {
   const finalReason =
     input.fold.verdict === 'INCONCLUSIVE'
@@ -59,6 +60,9 @@ export function renderReviewReport(input: ReviewRenderInput): string {
     '',
     `# Cross-Review — ${input.branchName}`,
     '',
+    ...(renderGenerationReplacement(input.replacedFrom)
+      ? [`> ${renderGenerationReplacement(input.replacedFrom)!}`, '']
+      : []),
     ...(input.fold.blockers.length > 0
       ? [renderBlockerSummary(input, 'report'), '']
       : []),

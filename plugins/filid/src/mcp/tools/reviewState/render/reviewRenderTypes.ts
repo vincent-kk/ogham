@@ -2,6 +2,7 @@ import type { ToolStatus } from '../../../../types/toolEnvelope.js';
 import type { ReviewReuseSummary } from '../state/reviewIncrementalTypes.js';
 import type {
   ReviewEvidenceStatuses,
+  ReviewGenerationReplacement,
   ReviewScopeFile,
   WorktreeDisposition,
 } from '../state/reviewStateTypes.js';
@@ -26,6 +27,8 @@ export interface ReviewRenderEvidence {
 
 /** Shared deterministic input for every seal-time Markdown renderer. */
 export interface ReviewRenderInput {
+  /** What this generation replaced, rendered so a re-run is never mistaken for a first review. */
+  replacedFrom?: ReviewGenerationReplacement;
   /** Actor work carried or remaining in this generation. */
   reuse?: ReviewReuseSummary;
   /** Original reviewed branch name. */

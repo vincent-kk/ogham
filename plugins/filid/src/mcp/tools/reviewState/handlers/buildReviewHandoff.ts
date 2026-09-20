@@ -155,9 +155,8 @@ export async function buildReviewHandoff(
     counts = Object.fromEntries(
       REVIEW_HANDOFF_CLASS_ORDER.map((handoffClass) => [
         handoffClass,
-        completeFailureEntries.filter(
-          (entry) => entry.class === handoffClass,
-        ).length,
+        completeFailureEntries.filter((entry) => entry.class === handoffClass)
+          .length,
       ]),
     ) as Record<ReviewHandoffClass, number>;
   }

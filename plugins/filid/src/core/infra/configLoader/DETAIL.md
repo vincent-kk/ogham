@@ -5,7 +5,7 @@
 - project config의 schema version은 `2.0`이며 문서 출력 언어, adapter 선택, rule override와 언어 중립 구조 옵션을 관리한다.
 - `language`는 문서 출력 언어일 뿐 프로그래밍 언어 선택값이 아니다.
 - adapter mode `auto`는 등록 adapter claim을 사용하고 `explicit`은 `enabled` ID만 사용한다. explicit의 빈 목록과 미등록 ID는 validation finding이다.
-- v1 config는 메모리에서 v2로 변환하고 `config-migration-required`와 제거된 key 진단을 반환한다. 사용자가 settings 저장을 승인하기 전에는 파일을 쓰지 않는다. `config-migration-required`는 값을 대응 v2 필드로 옮겼다는 알림이라 `affects: []`다. 제거된 v1 key(naming, route, complexity, promotion)는 v2에 대응 필드가 없어 소유자 정책을 잃은 것이므로 `config-key-discarded`는 세 축 전부다.
+- v1 config는 메모리에서 v2로 변환하고 `config-migration-required`와 제거된 key 진단을 반환하며 읽기 경로는 파일을 쓰지 않는다. `initProject`는 기존 config가 v1이고 변환이 무손실일 때(`config-key-discarded` 없음)만 v2를 기록하고 `configMigrated`로 알린다. 버리는 key가 있으면 파일을 그대로 두고 진단만 남긴다. 기록은 JSON 직렬화라 주석과 원래 서식·키 순서는 보존되지 않는다. 인식하지 못하는 최상위 key도 `config-key-discarded`를 내므로 기록하지 않는다. `config-migration-required`는 값을 대응 v2 필드로 옮겼다는 알림이라 `affects: []`다. 제거된 v1 key(naming, route, complexity, promotion)는 v2에 대응 필드가 없어 소유자 정책을 잃은 것이므로 `config-key-discarded`는 세 축 전부다.
 - loader는 잘못된 값과 모르는 key를 버리고 계속한다. 버린 항목마다 경고와 그 config 경로(`key`)를 남긴다. 레이어를 읽지 못했거나 병합 결과가 다시 검증되지 않아 config 전체가 기본값으로 대체되면 `key`는 `null`이다. 도구는 이 경로로 경고의 `affects`를 정한다(`mcp/tools` DETAIL).
 - 주석성 key는 경고 없이 버린다: 어느 깊이에서든 스키마에 없는(unrecognized) `$schema`, `$comment`, 그리고 `_`로 시작하는 key. JSON에 주석이 없어 흔히 쓰이고 분석에는 쓰이지 않는다. 잘못된 값은 key 이름과 무관하게 언제나 경고한다 — `entryPointOverrides`처럼 사용자 경로가 key인 record에서는 `_`로 시작하는 key가 진짜 설정이다.
 - 기존 organ, depth, allowed peer와 entry point 설정은 대응하는 v2 필드로 옮긴다. naming, route, complexity, promotion 설정은 진단 후 버린다.

@@ -28,7 +28,7 @@ export function evaluateRule(
         path: context.node.path,
         certainty: 'indeterminate',
         suggestion:
-          "This is a filid rule failure, not a finding about the node: treat the rule's result as unknown. Run again; if it repeats, report this message to the user.",
+          "This is a filid rule failure, not a finding about the node: treat the rule's result as unknown. Run again; if it repeats, record this message in your report as a filid defect and continue.",
       },
     ];
   }

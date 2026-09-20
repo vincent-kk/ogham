@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { GENERIC_DENY_REASON } from '../../../constants/hookDefaults.js';
+import {
+  DENY_RETRY_GUIDANCE,
+  GENERIC_DENY_REASON,
+} from '../../../constants/hookDefaults.js';
 import { mergeResults } from '../../../hooks/preToolUse/utils/mergeResults.js';
 import type { HookOutput } from '../../../types/hooks.js';
 
@@ -113,14 +116,17 @@ describe('mergeResults', () => {
     expect(out.hookSpecificOutput?.permissionDecisionReason).toBeTruthy();
   });
 
-  it('deny without a reason → falls back to the exact GENERIC_DENY_REASON text, telling the caller to stop and report rather than resubmit', () => {
+  it('deny without a reason → falls back to the exact GENERIC_DENY_REASON text, which ends the write as a recorded filid defect instead of calling a person', () => {
     const out = mergeResults([
       { continue: true, hookSpecificOutput: { permissionDecision: 'deny' } },
     ]);
     expect(out.hookSpecificOutput?.permissionDecisionReason).toBe(
       GENERIC_DENY_REASON,
     );
-    expect(GENERIC_DENY_REASON).toContain('Stop and report this to the user');
-    expect(GENERIC_DENY_REASON).toContain('do not resubmit the call unchanged');
+    for (const sentence of [GENERIC_DENY_REASON, DENY_RETRY_GUIDANCE]) {
+      expect(sentence).toContain('do not resubmit');
+      expect(sentence).toContain('as a filid defect');
+      expect(sentence).not.toMatch(/\buser\b/);
+    }
   });
 });

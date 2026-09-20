@@ -29,7 +29,7 @@
   - 바깥 target을 가진 move가 먼저(`b.target ⊊ a.target`): 바깥 target 디렉터리를 이동으로 먼저 만든다. 안쪽이 먼저 오면 뒤의 디렉터리 이동이 이미 생긴 디렉터리 안으로 중첩된다.
   - 이 제약으로 안정 위상 정렬하고, 동률은 요청 순서로 정한다.
 - 자동으로 순서를 정할 수 없는 move만 `move-order-conflict`로 `unresolved`에 두고, 원인과 관련 move는 `decisions` 문장이 밝힌다. 순환에 속하지 않은 move는 남긴다.
-  - 순환 멤버는 순환 그룹 단위로 원인을 받는다: source 중복은 `duplicate`, 그룹 안 move가 그룹이 아직 점유한 경로에 착지하면 `swap`(분할해도 덮어쓰므로 사용자에게 묻는다), 그 밖은 `cycle`이다. `cycle`은 다른 source를 모두 포함하는 source(없으면 경로 순서상 첫 source)의 move를 먼저 단독 실행하게 한다.
+  - 순환 멤버는 순환 그룹 단위로 원인을 받는다: source 중복은 `duplicate`, 그룹 안 move가 그룹이 아직 점유한 경로에 착지하면 `swap`(한 계획으로는 덮어쓰므로, 경로 순서상 첫 source의 move를 아무도 점유하지 않은 임시 `organNameHint`로 단독 실행하고, 남은 요청을 새 계획으로 실행한 뒤, 그 unit을 원래 이름으로 다시 계획하게 한다. 이름 힌트는 organ과 fractal 대상 모두의 컨테이너 이름이 된다), 그 밖은 `cycle`이다. `cycle`은 다른 source를 모두 포함하는 source(없으면 경로 순서상 첫 source)의 move를 먼저 단독 실행하게 한다.
   - `nested`: 순환 밖에서 target과 source가 포함 관계인 move.
   - `emptied`: 안쪽 move가 snapshot 파일을 모두 옮기고 다른 move가 안착하지 않는 디렉터리 move. filid가 보지 못하는 파일(dot-prefixed, symbolic link, git-ignored, 제외 디렉터리)은 호출자가 확인하게 한다.
 - **import 수정은 edge마다 정확히 한 move가 싣는다.** 소유권은 실행 가능한 move만으로 정한다.

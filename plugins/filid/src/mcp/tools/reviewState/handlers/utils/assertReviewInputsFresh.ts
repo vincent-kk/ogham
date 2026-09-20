@@ -17,7 +17,7 @@ const INPUTS_STALE_NEXT_ACTIONS: Record<InputsFreshCallingAction, string> = {
     'Do not validate this generation. After every in-flight actor finishes, call prepare again with the same arguments and without force; it starts a new generation that reuses validated opinions whose inputs did not change.',
   seal: 'Do not publish a verdict: report this and stop. A new /filid:cross-review run prepares a generation for the changed instructions or rules and reuses unaffected opinions.',
   checkpoint:
-    'Stop and tell the user that local review inputs (instructions, review rules or actor methods) changed since the review. Only reverting those edits clears this; if they must stay, the review must be prepared again by /filid:cross-review outside resolve or revalidate.',
+    'Call prepare once with the same arguments and without force: it opens a new generation for the current instructions, rules and actor methods and reuses the opinions whose inputs did not change. Inside resolve or revalidate, finish that flow first and re-run /filid:pipeline, which re-enters at the right stage.',
 };
 
 /**

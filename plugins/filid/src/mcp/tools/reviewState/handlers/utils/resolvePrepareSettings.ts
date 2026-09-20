@@ -59,6 +59,12 @@ export function resolvePrepareSettings(input: PrepareSettingsInput) {
     effortMode,
     effortExplicit:
       requestedEffort !== undefined || review?.effort !== undefined,
+    effortSource:
+      requestedEffort !== undefined
+        ? ('argument' as const)
+        : review?.effort !== undefined
+          ? ('config' as const)
+          : ('default' as const),
     autoLowEffortGroupThreshold:
       review?.autoLowEffortGroupThreshold ??
       REVIEW_AUTO_LOW_EFFORT_GROUP_THRESHOLD,

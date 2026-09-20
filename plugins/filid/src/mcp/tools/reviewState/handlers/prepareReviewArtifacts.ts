@@ -40,7 +40,6 @@ import type {
 import { writeReviewState } from '../state/writeReviewState.js';
 
 import { applyMissingTestRules } from './utils/applyMissingTestRules.js';
-import { assertPreparedEffortUnchanged } from './utils/assertPreparedEffortUnchanged.js';
 import { assertRenderedUnitsMatchGroups } from './utils/assertRenderedUnitsMatchGroups.js';
 import { assertReviewGroupBudget } from './utils/assertReviewGroupBudget.js';
 import { clearRecomputedReviewArtifacts } from './utils/clearRecomputedReviewArtifacts.js';
@@ -150,7 +149,16 @@ export async function prepareReviewArtifacts(
     settings.autoLowEffortGroupThreshold,
   );
   if (preserveLegacy) policy.effortReason = 'legacy-resume';
-  if (canResume) assertPreparedEffortUnchanged(existing, policy.effort);
+  if (
+    canResume &&
+    settings.effortSource !== 'argument' &&
+    policy.effort !== existing.effort
+  )
+    policy = selectReviewEffort(
+      existing.effort,
+      existing.groups.filter((group) => group.rounds > 0).length,
+      settings.autoLowEffortGroupThreshold,
+    );
   const metadataChanged =
     canResume &&
     (existing.effortMode !== policy.effortMode ||

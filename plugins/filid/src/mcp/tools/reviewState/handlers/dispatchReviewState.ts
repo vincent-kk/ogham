@@ -21,6 +21,7 @@ import { cleanupReviewState } from './cleanupReviewState.js';
 import { prepareReviewState } from './prepareReviewState.js';
 import { readReviewCheckpoint } from './readReviewCheckpoint.js';
 import { sealReviewState } from './sealReviewState.js';
+import { readDetachedReviewKey } from './utils/readDetachedReviewKey.js';
 import { validateReviewOpinion } from './validateReviewOpinion.js';
 
 /**
@@ -61,13 +62,10 @@ export async function dispatchReviewState(
   ).trim();
   const branchName =
     candidate.branchName ??
-    (await executeReviewGit(projectRoot, ['branch', '--show-current'])).trim();
-  if (candidate.branchName === undefined && !branchName)
-    throw new ToolDiagnosticError(
-      REVIEW_STATE_DIAGNOSTIC_CODES.BRANCH_UNRESOLVED,
-      `The current Git branch could not be resolved because HEAD in ${projectRoot} is detached.`,
-      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.BRANCH_UNRESOLVED,
-    );
+    ((
+      await executeReviewGit(projectRoot, ['branch', '--show-current'])
+    ).trim() ||
+      (await readDetachedReviewKey(projectRoot)));
   const input = {
     ...candidate,
     projectRoot,

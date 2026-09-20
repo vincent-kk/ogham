@@ -2,10 +2,10 @@ import { existsSync } from 'node:fs';
 
 import {
   readUtf8FileIfExistsSync,
-  removeFileIfExistsSync,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
+import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
 import { renderOpinionSkeleton } from '../brief/renderOpinionSkeleton.js';
 import { renderVerifyBrief } from '../brief/renderVerifyBrief.js';
 import { readInlineReviewDiffs } from '../diff/readInlineReviewDiffs.js';
@@ -22,6 +22,7 @@ import type {
 import { writeReviewState } from '../state/writeReviewState.js';
 
 import { readReviewGroupArtifactStatus } from './readReviewGroupArtifactStatus.js';
+import { discardReviewGroupRounds } from './utils/discardReviewGroupRounds.js';
 import { rebuildReviewGroup } from './utils/rebuildReviewGroup.js';
 import { writeAutoVerifyOpinion } from './utils/writeAutoVerifyOpinion.js';
 import { writeCandidateOnlyReviewOpinion } from './utils/writeCandidateOnlyReviewOpinion.js';
@@ -40,6 +41,7 @@ export async function recoverReviewGroups(
   pluginRoot: string | null,
 ): Promise<ReviewStateRecord> {
   let state = initial;
+  const discardedGroups: string[] = [];
   for (const observed of readReviewGroupArtifactStatus(state, paths)) {
     let group = state.groups.find(({ id }) => id === observed.group)!;
     if (group.rounds === 0 && observed.review !== 'trusted')
@@ -55,23 +57,15 @@ export async function recoverReviewGroups(
         { length: lastRound },
         (_, index) => index + 1,
       ).every((round) => observed.roundFiles.includes(round));
-      if (completePrefix) {
-        state = await rebuildReviewGroup(
-          state,
-          paths,
-          group,
-          observed.roundFiles,
-        );
+      const rebuilt = completePrefix
+        ? await rebuildReviewGroup(state, paths, group, observed.roundFiles)
+        : null;
+      if (rebuilt) {
+        state = rebuilt;
         group = state.groups.find(({ id }) => id === group.id)!;
       } else {
-        group = { ...group, validated: { review: null, verify: null } };
-        removeFileIfExistsSync(
-          resolveReviewArtifactPath(paths, group.opinionPath),
-        );
-        writeFileAtomicallySync(
-          resolveReviewArtifactPath(paths, group.skeletonPath),
-          renderOpinionSkeleton(group, state.sourceHash, 1),
-        );
+        group = discardReviewGroupRounds(paths, group, state.sourceHash);
+        discardedGroups.push(group.id);
       }
     }
 
@@ -150,6 +144,20 @@ export async function recoverReviewGroups(
       groups: state.groups.map((item) => (item.id === group.id ? group : item)),
     };
   }
+  if (discardedGroups.length > 0)
+    state = {
+      ...state,
+      replacedFrom: {
+        reason: REVIEW_STATE_DIAGNOSTIC_CODES.OPINION_INVALID,
+        ...state.replacedFrom,
+        discardedGroups: [
+          ...new Set([
+            ...(state.replacedFrom?.discardedGroups ?? []),
+            ...discardedGroups,
+          ]),
+        ],
+      },
+    };
   writeReviewState(paths.statePath, state);
   return state;
 }

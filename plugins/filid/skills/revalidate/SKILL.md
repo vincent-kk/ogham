@@ -31,7 +31,7 @@ mcp__plugin_filid_tools__review_state({
 })
 ```
 
-Use `data.reviewDirectory` as `REVIEW_DIR`; never derive a directory name. `missing` aborts. `stale` is expected here — corrections moved the source — and is not an error at this stage.
+Use `data.reviewDirectory` as `REVIEW_DIR`; never derive a directory name. `missing` aborts. `stale` carrying `review-source-hash-stale` is expected here — corrections moved the source — and is not an error at this stage; any other `stale` diagnostic follows its own `nextAction` instead.
 
 Read both `REVIEW_DIR/justifications.md` and `REVIEW_DIR/fix-requests.md`. The absence of `justifications.md` means `resolve` never ran; report that and end. Take `resolve_commit_sha` from the `justifications.md` frontmatter.
 

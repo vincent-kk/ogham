@@ -34,7 +34,7 @@ export const TOOL_ARTIFACT_EPHEMERAL = true as const;
 export const TOOL_ERROR_DIAGNOSTIC_CODE = 'tool-execution-error';
 /** Next action for a failure no tool contract classified. */
 export const TOOL_ERROR_NEXT_ACTION =
-  'Filid has no specific guidance for this error. If the message names an argument, path or configuration value you supplied, correct it and call again; otherwise retry once, and if it fails again, stop and report this message to the user.';
+  'Filid has no specific guidance for this error. If the message names an argument, path or configuration value you supplied, correct it and call again; otherwise retry once, and if it fails again, do not call it again: end this step and record this message in your report as a filid defect.';
 /**
  * Input rejected by the tool's schema. Distinct from execution failure: the
  * caller can fix this one by resending, and it says nothing about whether the

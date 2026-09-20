@@ -6,8 +6,10 @@ import {
 
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
+  PREPARE_ONCE_NEXT_ACTION,
   REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_DIAGNOSTIC_MESSAGES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_PHASES,
   WORKTREE_DISPOSITIONS,
@@ -86,7 +88,7 @@ export async function sealReviewState(
           path: paths.statePath,
           affects: [],
           nextAction: schemaMismatch
-            ? "Do not publish a verdict. Ask the user whether to start a fresh review; only on the user's request, and after all prior actors finish, call prepare with force: true, because prepare without force refuses this state with review-incremental-bootstrap-required."
+            ? PREPARE_ONCE_NEXT_ACTION
             : 'Do not publish a verdict: report this and stop. A new /filid:cross-review run prepares and reviews this branch from the start.',
         },
       ],
@@ -94,6 +96,17 @@ export async function sealReviewState(
   }
   const state = restored;
   assertReviewValidationPolicy(state);
+  const replacementDiagnostics = state.replacedFrom
+    ? [
+        {
+          code: REVIEW_STATE_DIAGNOSTIC_CODES.STATE_REPLACED,
+          message: `This generation replaced ${state.replacedFrom.priorGenerationId ?? 'an earlier generation'} (${state.replacedFrom.reason})${state.replacedFrom.priorVerdict ? `, which had published ${state.replacedFrom.priorVerdict}` : ''}.`,
+          path: paths.statePath,
+          affects: [],
+          nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.STATE_REPLACED,
+        },
+      ]
+    : [];
   const source = await computeReviewSourceHash(
     input.projectRoot,
     input.baseRef ?? state.baseRef,
@@ -127,26 +140,9 @@ export async function sealReviewState(
     settings.generatedPaths,
   );
   if (state.phase === REVIEW_STATE_PHASES.SEALED) {
-    if (
+    const worktreeMoved =
       worktree.dirtyPathsHash !== state.scope.dirtyPathsHash ||
-      worktree.worktree !== state.scope.worktree
-    )
-      return createReviewStatePayload({
-        action: input.action,
-        disposition: REVIEW_STATE_DISPOSITIONS.STALE,
-        paths,
-        status: TOOL_STATUSES.INDETERMINATE,
-        diagnostics: [
-          {
-            code: REVIEW_STATE_DIAGNOSTIC_CODES.WORKTREE_STALE,
-            message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.WORKTREE_STALE,
-            path: paths.statePath,
-            affects: [],
-            nextAction:
-              'Do not publish the earlier verdict: report this and stop. Reverting the uncommitted changes makes seal return the sealed verdict again; committing them needs a new /filid:cross-review run.',
-          },
-        ],
-      });
+      worktree.worktree !== state.scope.worktree;
     const summary =
       state.verdict === null
         ? null
@@ -186,6 +182,20 @@ export async function sealReviewState(
       reuse: state.incremental?.summary,
       hasFixRequests: summary.verdict === 'REQUEST_CHANGES',
       blockersPath: blockers.blockersPath,
+      diagnostics: [
+        ...replacementDiagnostics,
+        ...(worktreeMoved
+          ? [
+              {
+                code: REVIEW_STATE_DIAGNOSTIC_CODES.WORKTREE_STALE,
+                message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.WORKTREE_STALE,
+                path: paths.statePath,
+                affects: [],
+                nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.WORKTREE_STALE,
+              },
+            ]
+          : []),
+      ],
     });
   }
 
@@ -283,6 +293,7 @@ export async function sealReviewState(
     files: state.scope.files,
     fold,
     reuse: state.incremental?.summary,
+    ...(state.replacedFrom ? { replacedFrom: state.replacedFrom } : {}),
   };
   const report = renderReviewReport(renderInput);
   const blockers = renderReviewBlockers(renderInput);
@@ -325,5 +336,6 @@ export async function sealReviewState(
     reuse: state.incremental?.summary,
     hasFixRequests: fixRequests !== null,
     blockersPath: blockers === null ? null : paths.blockersPath,
+    diagnostics: replacementDiagnostics,
   });
 }

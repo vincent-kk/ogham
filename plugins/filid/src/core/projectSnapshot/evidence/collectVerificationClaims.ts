@@ -1,6 +1,6 @@
-import { ANALYSIS_AXES } from '../../../constants/analysisAxes.js';
 import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
+import { ANALYSIS_AXES } from '../../../constants/analysisAxes.js';
 import type { VerificationAdapter } from '../../../types/adapters.js';
 import type {
   AnalysisCertainty,
@@ -53,7 +53,7 @@ export async function collectVerificationClaims(
         message: `Verification file discovery failed: ${error instanceof Error ? error.message : String(error)}`,
         affects: ANALYSIS_AXES,
         nextAction:
-          'Run again; if it repeats, report this message to the user. Verification evidence stays indeterminate until discovery succeeds.',
+          'Run again; if it repeats, record this message in your report as a filid defect and continue. Verification evidence stays indeterminate until discovery succeeds.',
       });
     }
 

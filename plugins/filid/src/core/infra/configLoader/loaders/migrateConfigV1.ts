@@ -45,7 +45,7 @@ export function migrateConfigV1(
         'Config v1 was converted in memory; save through settings to persist v2.',
       affects: [],
       nextAction:
-        'Ask the user to open the filid settings page (project_setup action "settings") and save once; that writes the v2 configuration.',
+        'Run project_setup action "init" on this project to write the converted v2 configuration; it writes only when no key is discarded, and reports config-key-discarded otherwise.',
     },
   ];
   const sourceRules =

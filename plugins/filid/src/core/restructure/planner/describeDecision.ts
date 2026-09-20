@@ -37,7 +37,7 @@ const DECISION_SENTENCES: Record<
       ? {
           message: `No fractal owns ${context.sourcePath}: neither its directory nor any ancestor up to ${context.projectRoot} is a fractal, so filid has no owner to plan the move from.`,
           nextAction:
-            'Give its directory or an ancestor an INTENT.md so a fractal owns it (the enrich-docs skill drafts one), or ask the user where the unit belongs; then create a new plan.',
+            "With the user's agreement, give its directory or an ancestor an INTENT.md so a fractal owns it (the enrich-docs skill drafts one), or ask the user where the unit belongs; then create a new plan.",
         }
       : {
           message: `${context.sourcePath} is outside the project at ${context.projectRoot}, so filid cannot plan a move for it.`,

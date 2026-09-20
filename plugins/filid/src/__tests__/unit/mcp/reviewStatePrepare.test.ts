@@ -599,7 +599,7 @@ describe('review_state prepare v7', () => {
     );
   });
 
-  it('rejects effort changes and resumes with the prepared effort', async () => {
+  it('resumes a prepared review with its own effort', async () => {
     await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
@@ -608,15 +608,6 @@ describe('review_state prepare v7', () => {
       effort: 'low',
     });
 
-    await expect(
-      handleReviewState({
-        action: REVIEW_STATE_ACTIONS.PREPARE,
-        projectRoot,
-        branchName: BRANCH,
-        baseRef: 'main',
-        effort: 'high',
-      }),
-    ).rejects.toMatchObject({ code: 'review-effort-locked' });
     const changed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,

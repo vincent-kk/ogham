@@ -81,7 +81,7 @@ describe('review quality through recovery and seal', () => {
     },
   );
 
-  it('refuses to rebuild a trusted merged opinion from a raw round missing inspection records', async () => {
+  it('reviews a group again when its raw round is missing inspection records', async () => {
     configureReviewGroups(fixture.projectRoot, 1);
     const prepared = await handleReviewState({
       action: 'prepare',
@@ -105,14 +105,16 @@ describe('review quality through recovery and seal', () => {
     });
     writeFileSync(rawPath, invalid);
     rmSync(join(prepared.data.reviewDirectory, group.opinionPath));
-    await expect(
-      handleReviewState({
-        action: 'prepare',
-        projectRoot: fixture.projectRoot,
-        effort: 'low',
-      }),
-    ).rejects.toMatchObject({ code: 'review-opinion-invalid' });
-    expect(readFileSync(rawPath, 'utf8')).toBe(invalid);
+    const replanned = await handleReviewState({
+      action: 'prepare',
+      projectRoot: fixture.projectRoot,
+      effort: 'low',
+    });
+    expect(replanned.status).toBe('ok');
+    expect(
+      replanned.data.next.map(({ kind, group: id }) => [kind, id]),
+    ).toContainEqual(['review', group.id]);
+    expect(readFileSync(rawPath, 'utf8')).not.toBe(invalid);
   });
 
   it.each(['checked', 'riskPlan'] as const)(

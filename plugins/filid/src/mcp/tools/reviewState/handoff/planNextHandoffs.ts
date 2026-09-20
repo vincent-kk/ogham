@@ -60,6 +60,7 @@ export function planNextHandoffs(input: {
         status?.review === 'trusted' ? review!.round + 1 : (review?.round ?? 1);
       next.push({
         kind: 'review',
+        ...(state.generationId ? { generationId: state.generationId } : {}),
         modelTier:
           round >= 2 ||
           (group.rounds === 1 && (group.riskReasons?.length ?? 0) > 0)
@@ -85,6 +86,7 @@ export function planNextHandoffs(input: {
     )
       next.push({
         kind: 'verify',
+        ...(state.generationId ? { generationId: state.generationId } : {}),
         modelTier: 'efficient',
         riskReasons: group.riskReasons ?? [],
         group: group.id,

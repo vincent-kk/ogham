@@ -1,5 +1,6 @@
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
+  PREPARE_ONCE_NEXT_ACTION,
   REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_DIAGNOSTIC_MESSAGES,
   REVIEW_STATE_DISPOSITIONS,
@@ -67,7 +68,7 @@ export async function readReviewCheckpoint(
           path: paths.statePath,
           affects: [],
           nextAction: schemaMismatch
-            ? 'Stop without a verdict: this review state cannot be read. Ask the user whether to start a fresh review with /filid:cross-review --force.'
+            ? PREPARE_ONCE_NEXT_ACTION
             : 'Stop without a verdict: no prepared review exists for this branch. Run /filid:cross-review to prepare and seal a review before resolving or revalidating.',
         },
       ],

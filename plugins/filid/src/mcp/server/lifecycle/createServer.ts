@@ -341,6 +341,13 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
     kind: z.nativeEnum(REVIEW_VALIDATE_KINDS),
     group: z.string().regex(/^\d{2,}$/),
     round: z.number().int().min(1).optional(),
+    generationId: z
+      .string()
+      .regex(/^[a-f0-9]{32}$/)
+      .optional()
+      .describe(
+        'Generation the handoff came from; a replaced generation is refused.',
+      ),
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
@@ -451,6 +458,13 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .min(1)
     .optional()
     .describe('review validation only: one-based reviewer round.'),
+  generationId: z
+    .string()
+    .regex(/^[a-f0-9]{32}$/)
+    .optional()
+    .describe(
+      'validate only: the generationId of the handoff this opinion answers; an opinion from a generation a later prepare replaced is refused instead of merged.',
+    ),
   confirm: z
     .literal(true)
     .optional()
@@ -495,6 +509,43 @@ const FACTS_ADVERTISED_INPUT_SCHEMA = z.object({
   file: FACTS_FILE_SCHEMA.optional(),
   resolutionEpoch: FACTS_EPOCH_SCHEMA.optional(),
 });
+
+/**
+ * The two schemas each tool has: what it advertises to callers, and what its
+ * actions actually read.
+ *
+ * The advertised schema is what `registerTool` validates with, and it strips
+ * unknown keys, so an argument an action reads but the advertised object omits
+ * never reaches the handler. A contract test compares the two per tool, which
+ * is why this pairing is exported.
+ */
+export const MCP_TOOL_INPUT_SCHEMAS = [
+  {
+    tool: McpToolName.PROJECT_SETUP,
+    advertised: PROJECT_SETUP_ADVERTISED_INPUT_SCHEMA,
+    internal: PROJECT_SETUP_INPUT_SCHEMA,
+  },
+  {
+    tool: McpToolName.FRACTAL_INSPECT,
+    advertised: FRACTAL_INSPECT_ADVERTISED_INPUT_SCHEMA,
+    internal: FRACTAL_INSPECT_INPUT_SCHEMA,
+  },
+  {
+    tool: McpToolName.RESTRUCTURE,
+    advertised: RESTRUCTURE_ADVERTISED_INPUT_SCHEMA,
+    internal: RESTRUCTURE_INPUT_SCHEMA,
+  },
+  {
+    tool: McpToolName.REVIEW_STATE,
+    advertised: REVIEW_STATE_ADVERTISED_INPUT_SCHEMA,
+    internal: REVIEW_STATE_INPUT_SCHEMA,
+  },
+  {
+    tool: McpToolName.FACTS,
+    advertised: FACTS_ADVERTISED_INPUT_SCHEMA,
+    internal: FACTS_INPUT_SCHEMA,
+  },
+] as const;
 
 const MCP_SERVER_INFO = {
   name: MCP_SERVER_NAME,

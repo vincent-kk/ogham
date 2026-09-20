@@ -56,14 +56,18 @@ describe('prepareReviewState optional inputs', () => {
     );
   });
 
-  it('reports an unresolved branch on detached HEAD', async () => {
+  it('prepares a detached HEAD without branchName under a key taken from HEAD', async () => {
     runReviewStateFixtureGit(fixture.projectRoot, ['checkout', '--detach']);
-    await expect(
-      handleReviewState({
-        action: 'prepare',
-        projectRoot: fixture.projectRoot,
-      }),
-    ).rejects.toMatchObject({ code: 'review-branch-unresolved' });
+    const head = runReviewStateFixtureGit(fixture.projectRoot, [
+      'rev-parse',
+      'HEAD',
+    ]);
+    const result = await handleReviewState({
+      action: 'prepare',
+      projectRoot: fixture.projectRoot,
+    });
+    expect(result.status).toBe('ok');
+    expect(result.data.branchName).toBe(`detached-${head.slice(0, 12)}`);
   });
 
   it('carries valid changeContext handoff claims only into newly written review briefs', async () => {
@@ -248,14 +252,17 @@ describe('prepareReviewState optional inputs', () => {
     ).rejects.toMatchObject({ code: 'review-base-ref-unresolved' });
   });
 
-  it('reports detached HEAD when branchName is omitted', async () => {
+  it('finds the detached review again from another action on the same HEAD', async () => {
     runReviewStateFixtureGit(fixture.projectRoot, ['checkout', '--detach']);
-    await expect(
-      handleReviewState({
-        action: 'prepare',
-        projectRoot: fixture.projectRoot,
-      }),
-    ).rejects.toMatchObject({ code: 'review-branch-unresolved' });
+    const first = await handleReviewState({
+      action: 'prepare',
+      projectRoot: fixture.projectRoot,
+    });
+    const second = await handleReviewState({
+      action: 'checkpoint',
+      projectRoot: fixture.projectRoot,
+    });
+    expect(second.data.reviewDirectory).toBe(first.data.reviewDirectory);
   });
 
   it('sanitizes and caps changeContext only when prepare renders artifacts', async () => {

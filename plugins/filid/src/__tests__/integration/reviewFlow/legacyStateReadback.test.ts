@@ -68,7 +68,7 @@ afterEach(() => {
 
 describe('legacy baseline-v7 state readback through the handler', () => {
   it.each(['a', 'b', 'c', 'd', 'f', 'g', 'h'])(
-    'current behavior: run %s parses as a v2 state, checkpoint and seal refuse its missing validation policy, prepare demands a forced bootstrap',
+    'current behavior: run %s parses as a v2 state, checkpoint and seal refuse its missing validation policy, and prepare archives it for a new generation',
     async (run) => {
       const branchName = installLegacyState(run);
       const restored = readReviewState(
@@ -81,16 +81,18 @@ describe('legacy baseline-v7 state readback through the handler', () => {
         ).rejects.toMatchObject({
           code: 'review-validation-policy-outdated',
         });
-      await expect(
-        handleReviewState({
-          action: 'prepare',
-          projectRoot,
-          branchName,
-          baseRef: 'main',
-        }),
-      ).rejects.toMatchObject({
-        code: 'review-incremental-bootstrap-required',
+      const prepared = await handleReviewState({
+        action: 'prepare',
+        projectRoot,
+        branchName,
+        baseRef: 'main',
       });
+      expect(prepared.status).toBe('ok');
+      expect(
+        prepared.diagnostics.find(
+          ({ code }) => code === 'review-state-replaced',
+        )?.message,
+      ).toContain('review-validation-policy-outdated');
     },
   );
 });

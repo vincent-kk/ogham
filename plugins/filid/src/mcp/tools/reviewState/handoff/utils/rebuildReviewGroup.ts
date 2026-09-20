@@ -3,8 +3,6 @@ import {
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 
-import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../../constants/reviewState.js';
-import { ToolDiagnosticError } from '../../../../errors/toolDiagnosticError.js';
 import { validateReviewRound } from '../../handlers/validate/validateReviewRound.js';
 import { readReviewState } from '../../state/readReviewState.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
@@ -21,15 +19,15 @@ import { writeReviewGroupProgress } from '../../state/writeReviewGroupProgress.j
  * @param paths Contained paths used by the existing validation effect boundary.
  * @param group Invalid merged review whose complete raw prefix is available.
  * @param roundFiles Existing raw rounds, including any unvalidated later draft.
- * @returns State with a rebuilt merged review and the prior verify hash binding.
- * @throws When a raw round cannot be read or no longer satisfies validation.
+ * @returns State with a rebuilt merged review and the prior verify hash binding, or null when a stored round no longer validates and the rounds must be discarded.
+ * @throws When a raw round cannot be read.
  */
 export async function rebuildReviewGroup(
   state: ReviewStateRecord,
   paths: ReviewStatePaths,
   group: ReviewGroup,
   roundFiles: readonly number[],
-): Promise<ReviewStateRecord> {
+): Promise<ReviewStateRecord | null> {
   const verifyPath = resolveReviewArtifactPath(paths, group.verifyPath);
   const verifyBytes = readUtf8FileIfExistsSync(verifyPath);
   const saved = new Map(
@@ -73,12 +71,7 @@ export async function rebuildReviewGroup(
         group: current,
         replayReview: group.validated.review!,
       });
-      if (!result.summary.ok)
-        throw new ToolDiagnosticError(
-          REVIEW_STATE_DIAGNOSTIC_CODES.OPINION_INVALID,
-          `Raw review round ${round} for group ${group.id} at ${raw.path} no longer passes validation, so the group's merged opinion cannot be rebuilt.`,
-          "Stop without dispatching actors or publishing a verdict. Ask the user whether to start a fresh review; only on the user's explicit request, and after all prior actors finish, call prepare with force: true, which repeats all review work.",
-        );
+      if (!result.summary.ok) return null;
       const persisted = readReviewState(paths.statePath);
       if (persisted === null || 'kind' in persisted)
         throw new Error('Review state disappeared during round recovery.');

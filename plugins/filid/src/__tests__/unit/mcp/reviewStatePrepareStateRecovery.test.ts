@@ -51,7 +51,7 @@ describe('review_state prepare state recovery', () => {
     expect(recovered.summary.disposition).toBe('fresh');
   });
 
-  it('rejects a truncated state without force, leaving the file untouched', async () => {
+  it('replaces a truncated state without force, keeping its bytes beside it', async () => {
     const prepared = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,
@@ -61,16 +61,19 @@ describe('review_state prepare state recovery', () => {
     writeFileAtomicallySync(prepared.data.statePath, '{"schemaVersion":');
     const truncatedBefore = readUtf8FileIfExistsSync(prepared.data.statePath);
 
-    await expect(
-      handleReviewState({
-        action: REVIEW_STATE_ACTIONS.PREPARE,
-        projectRoot: fixture.projectRoot,
-        branchName: fixture.branchName,
-        baseRef: 'main',
-      }),
-    ).rejects.toMatchObject({ code: 'review-incremental-bootstrap-required' });
+    const replaced = await handleReviewState({
+      action: REVIEW_STATE_ACTIONS.PREPARE,
+      projectRoot: fixture.projectRoot,
+      branchName: fixture.branchName,
+      baseRef: 'main',
+    });
 
-    expect(readUtf8FileIfExistsSync(prepared.data.statePath)).toBe(
+    expect(replaced.status).toBe('ok');
+    const diagnostic = replaced.diagnostics.find(
+      ({ code }) => code === 'review-state-replaced',
+    );
+    expect(readUtf8FileIfExistsSync(diagnostic!.path!)).toBe(truncatedBefore);
+    expect(readUtf8FileIfExistsSync(prepared.data.statePath)).not.toBe(
       truncatedBefore,
     );
   });

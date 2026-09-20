@@ -224,6 +224,38 @@ export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
     groups: z.array(ReviewGroupSchema),
     scope: ReviewScopeSchema,
     verdict: z.enum(['APPROVED', 'REQUEST_CHANGES', 'INCONCLUSIVE']).nullable(),
+    replacedFrom: z
+      .object({
+        reason: z.string().min(1),
+        archivePath: z.string().min(1).optional(),
+        priorGenerationId: z
+          .string()
+          .regex(/^[a-f0-9]{32}$/)
+          .optional(),
+        priorVerdict: z
+          .enum(['APPROVED', 'REQUEST_CHANGES', 'INCONCLUSIVE'])
+          .optional(),
+        discardedGroups: z.array(z.string()).optional(),
+        chain: z
+          .array(
+            z
+              .object({
+                reason: z.string().min(1),
+                priorGenerationId: z
+                  .string()
+                  .regex(/^[a-f0-9]{32}$/)
+                  .optional(),
+                priorVerdict: z
+                  .enum(['APPROVED', 'REQUEST_CHANGES', 'INCONCLUSIVE'])
+                  .optional(),
+              })
+              .strict(),
+          )
+          .optional(),
+        olderCount: z.number().int().nonnegative().optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .superRefine((state, context) => {

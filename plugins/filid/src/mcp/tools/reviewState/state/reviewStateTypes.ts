@@ -328,6 +328,8 @@ export type ReviewStateInput =
       group: string;
       /** Required one-based reviewer round and forbidden for verification. */
       round?: number;
+      /** Generation the handoff was dispatched from; a replaced one is refused instead of merged. */
+      generationId?: string;
     }
   | {
       action: typeof REVIEW_STATE_ACTIONS.CLEANUP;
@@ -351,6 +353,8 @@ export type ResolvedReviewStateInput = ReviewStateInput & {
 export interface ReviewHandoff {
   /** Actor whose opinion is required next. */
   kind: 'review' | 'verify';
+  /** Generation this assignment belongs to; validate refuses an opinion returned against a later one. */
+  generationId?: string;
   /** Prepared group receiving the assignment. */
   group: string;
   /** One-based reviewer round; absent for verifier work. */
@@ -376,7 +380,37 @@ export interface ReviewHandoffPlan {
 }
 
 /** Persisted identity and lifecycle state for one branch review. */
+/** What a generation replaced, so a reader can tell a re-run from a first review. */
+export interface ReviewGenerationReplacement {
+  /** Diagnostic code or rule that made the prior generation unusable. */
+  reason: string;
+  /** Absolute path of the archived prior state bytes, when one was moved aside. */
+  archivePath?: string;
+  /** Generation this one supersedes, when the prior state could be read. */
+  priorGenerationId?: string;
+  /** Verdict the superseded generation published, when it had sealed one. */
+  priorVerdict?: 'APPROVED' | 'REQUEST_CHANGES' | 'INCONCLUSIVE';
+  /** Groups whose stored rounds were discarded and dispatched again. */
+  discardedGroups?: string[];
+  /** Replacements this one follows, newest first, bounded; `olderCount` stands for the rest. */
+  chain?: ReviewGenerationReplacementLink[];
+  /** Replacements older than the carried chain, when the chain was cut. */
+  olderCount?: number;
+}
+
+/** One earlier replacement, kept so a chain of re-runs still names the verdict it started from. */
+export interface ReviewGenerationReplacementLink {
+  /** Why that generation was replaced. */
+  reason: string;
+  /** Generation it replaced, when it was known. */
+  priorGenerationId?: string;
+  /** Verdict that generation had published, when it had one. */
+  priorVerdict?: 'APPROVED' | 'REQUEST_CHANGES' | 'INCONCLUSIVE';
+}
+
 export interface ReviewStateRecord extends ReviewEffortMetadata {
+  /** Set when prepare opened this generation instead of resuming an earlier one. */
+  replacedFrom?: ReviewGenerationReplacement;
   /** Observed-input protocol, absent in legacy sessions. */
   incremental?: ReviewIncrementalState;
   /** Isolated artifact epoch; absent only in legacy branch-root sessions. */

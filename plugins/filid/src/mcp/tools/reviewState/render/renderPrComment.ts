@@ -8,15 +8,16 @@ import { renderBlockerSummary } from './utils/renderBlockerSummary.js';
 import { renderConfirmedFindingsTable } from './utils/renderConfirmedFindingsTable.js';
 import { renderCoverageSummary } from './utils/renderCoverageSummary.js';
 import { renderCoverageTable } from './utils/renderCoverageTable.js';
-import { renderUnresolvedEvidenceTable } from './utils/renderUnresolvedEvidenceTable.js';
-import { renderVerificationLogTable } from './utils/renderVerificationLogTable.js';
-
+import { renderGenerationReplacement } from './utils/renderGenerationReplacement.js';
 /**
  * Render the canonical governance comment for a pull-request publisher.
  *
  * @param input Prepared identity, report location, and deterministic fold.
  * @returns Markdown containing governance facts and exactly three details blocks.
  */
+import { renderUnresolvedEvidenceTable } from './utils/renderUnresolvedEvidenceTable.js';
+import { renderVerificationLogTable } from './utils/renderVerificationLogTable.js';
+
 export function renderPrComment(input: ReviewRenderInput): string {
   const confirmed =
     input.fold.confirmed.length === 0
@@ -32,6 +33,9 @@ export function renderPrComment(input: ReviewRenderInput): string {
   return [
     `## Code Review Governance — ${input.fold.verdict}`,
     '',
+    ...(renderGenerationReplacement(input.replacedFrom)
+      ? [`> ${renderGenerationReplacement(input.replacedFrom)!}`, '']
+      : []),
     '| Field | Value |',
     '| --- | --- |',
     `| Verdict | ${input.fold.verdict} |`,

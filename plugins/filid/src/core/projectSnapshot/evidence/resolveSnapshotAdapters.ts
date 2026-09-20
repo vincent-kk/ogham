@@ -21,7 +21,7 @@ function buildAdapterSelectionDiagnostic(message: string): SnapshotDiagnostic {
     affects: ANALYSIS_AXES,
     nextAction: unknownId
       ? 'Set adapters.enabled in .filid/config.json to adapter ids this filid version ships, or set adapters.mode to "auto", then run again.'
-      : 'Check adapters in .filid/config.json, then run again; if it repeats, report this message to the user.',
+      : 'Check adapters in .filid/config.json, then run again; if it repeats, record this message in your report as a filid defect and continue.',
   };
 }
 

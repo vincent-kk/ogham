@@ -71,11 +71,8 @@ afterEach(() => {
 });
 
 describe('Filid 1.0 MCP tool surface', () => {
-  it.each([
-    'review-effort-locked',
-    'review-validation-policy-outdated',
-  ] as const)(
-    'returns %s without handoffs or a cached verdict in the MCP envelope',
+  it.each(['effort-argument', 'outdated-policy'] as const)(
+    'answers a %s prepare with a new generation in the MCP envelope',
     async (code) => {
       const fixture = createReviewStateSealFixture();
       let connection: Awaited<ReturnType<typeof connectTestClient>> | undefined;
@@ -86,7 +83,7 @@ describe('Filid 1.0 MCP tool surface', () => {
           projectRoot: fixture.projectRoot,
           effort: 'medium',
         });
-        if (code === 'review-validation-policy-outdated') {
+        if (code === 'outdated-policy') {
           const state = readPreparedReviewState(prepared);
           const group = state.groups[0]!;
           writeFileSync(
@@ -118,7 +115,7 @@ describe('Filid 1.0 MCP tool surface', () => {
             effort: 'low',
           },
         });
-        expect(result.isError).toBe(true);
+        expect(result.isError ?? false).toBe(false);
         const content: unknown = Array.isArray(result.content)
           ? result.content[0]
           : null;
@@ -130,13 +127,19 @@ describe('Filid 1.0 MCP tool surface', () => {
         )
           throw new Error('Expected text error envelope');
         const envelope = JSON.parse(content.text);
-        expect(envelope).toMatchObject({
-          status: 'unsupported',
-          diagnostics: [{ code }],
-        });
-        expect(envelope.data).toBeUndefined();
-        expect(envelope.summary?.verdict).toBeUndefined();
-        expect(readFileSync(prepared.data.statePath, 'utf8')).toBe(stateBytes);
+        expect(envelope.status).toBe('ok');
+        expect(envelope.summary.generationId).not.toBe(
+          prepared.summary.generationId,
+        );
+        expect(
+          envelope.diagnostics.some(
+            ({ code: reported }: { code: string }) =>
+              reported === 'review-state-replaced',
+          ),
+        ).toBe(code === 'outdated-policy');
+        expect(readFileSync(prepared.data.statePath, 'utf8')).not.toBe(
+          stateBytes,
+        );
       } finally {
         await connection?.close();
         rmSync(fixture.projectRoot, { recursive: true, force: true });

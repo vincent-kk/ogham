@@ -99,7 +99,7 @@ describe('seal current worktree', () => {
     },
   );
 
-  it('preserves a sealed cache and returns stale after a new dirty path', async () => {
+  it('preserves a sealed cache and reports the new dirty path with its verdict', async () => {
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
@@ -125,12 +125,12 @@ describe('seal current worktree', () => {
       action: 'seal',
       projectRoot: fixture.projectRoot,
     });
-    expect(repeated.summary.disposition).toBe('stale');
-    expect(repeated.summary.verdict).toBeUndefined();
+    expect(repeated.summary.disposition).toBe('sealed');
+    expect(repeated.summary.verdict).toBe('APPROVED');
     const stale = repeated.diagnostics.find(
       ({ code }) => code === 'review-worktree-stale',
     );
-    expect(stale?.nextAction).toContain('Reverting the uncommitted changes');
+    expect(stale?.nextAction).toContain('uncommitted changes are outside it');
     expect(`${stale?.message} ${stale?.nextAction}`).not.toMatch(/\bprepare\b/);
     expect(paths.map((path) => readFileSync(path, 'utf8'))).toEqual(bytes);
   });
