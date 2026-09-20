@@ -1,10 +1,10 @@
 import { pathForCompare } from '@ogham/cross-platform';
 
-import { containsPathToken } from '../../../../../core/index.js';
 import { toProjectRelativePath } from '../../../../../lib/toProjectRelativePath.js';
 import type { ToolDiagnostic } from '../../../../../types/toolEnvelope.js';
 
 import type { ReviewScopePaths } from './selectReviewScopePaths.js';
+import { specifierNamesTarget } from './specifierNamesTarget.js';
 
 /** What decides whether a diagnostic belongs to this review. */
 export interface OutOfScopeVerificationInput {
@@ -54,6 +54,6 @@ export function isOutOfScopeVerificationDiagnostic(
     return false;
   if (!input.isVerificationFile(relative)) return false;
   return !input.changedNames.some((name) =>
-    containsPathToken(diagnostic.specifier ?? '', name),
+    specifierNamesTarget(diagnostic.specifier ?? '', name),
   );
 }

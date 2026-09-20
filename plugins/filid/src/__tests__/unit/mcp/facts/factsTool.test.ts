@@ -404,6 +404,28 @@ describe('facts submit', () => {
     expect(result.data?.added.paths).toEqual(['src/a.ts', 'src/b.ts']);
   });
 
+  it('measures from the epoch a caller proved it had read, accepted or not', async () => {
+    await status();
+    project.write('src/first.ts', 'export const first = 1;\n');
+    const current = (await status()).summary.resolutionEpoch;
+    // The submission is refused for its own reason, but the epoch it carried
+    // matched: the caller has read this tree.
+    const refused = await submit(
+      [
+        project.facts('src/thing.ts', {
+          contentHash: `sha256:${'0'.repeat(64)}`,
+        }),
+      ],
+      current,
+    );
+    expect(refused.summary.accepted).toBe(0);
+    project.write('src/second.ts', 'export const second = 1;\n');
+
+    const result = await submit([], current);
+
+    expect(result.data?.added.paths).toEqual(['src/second.ts']);
+  });
+
   it('reports facts-tree-unstable once the tree has moved three times under a caller', async () => {
     const stale = (await status()).summary.resolutionEpoch;
     const codes: string[] = [];

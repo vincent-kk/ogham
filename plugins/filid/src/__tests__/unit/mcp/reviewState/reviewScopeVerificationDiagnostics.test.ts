@@ -151,9 +151,33 @@ describe('the exception that keeps a broken import of a changed file', () => {
       scopePaths: { changed: new Set(['src/value.ts']), neighbours: [] },
       isVerificationFile: (relativePath) =>
         relativePath === 'src/unrelated.test.ts',
-      changedNames: ['value'],
+      changedNames: ['value', 'thing'],
     });
   }
+
+  it.for([
+    ['a bare specifier that is the name', 'thing'],
+    ['a bare specifier whose first segment is the name', 'thing/inner.js'],
+    ['a path-mapped first segment', 'auth/thing.js'],
+    ['a hash alias', '#thing'],
+    ['a tilde alias', '~/thing.js'],
+    ['a scope alias', '@/thing.js'],
+    ['a relative specifier', './thing.js'],
+    ['a parent specifier', '../thing/index.js'],
+  ] as const)('keeps the diagnostic for %s', ([, specifier]) => {
+    // The specifier is not file text: nothing quotes it, so the name can start
+    // it. A miss here drops the diagnostic and seals over a test this change
+    // broke.
+    expect(dropped(specifier)).toBe(false);
+  });
+
+  it.for([
+    ['a longer name', './thingamajig.js'],
+    ['a name inside a word', './something.js'],
+    ['another directory', './other/inner.js'],
+  ] as const)('drops it for %s', ([, specifier]) => {
+    expect(dropped(specifier)).toBe(true);
+  });
 
   it('keeps the diagnostic when the reference spells a changed name', () => {
     // The rename under review is what broke this import; dropping it here

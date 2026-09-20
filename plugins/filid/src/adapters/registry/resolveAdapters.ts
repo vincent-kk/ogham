@@ -7,6 +7,7 @@ import type {
   AdapterResolution,
   StructureAdapter,
 } from '../../types/adapters.js';
+import { compareByBytes } from '../../lib/compareByBytes.js';
 
 const PATH_SEPARATOR = /[\\/]/;
 
@@ -83,7 +84,7 @@ export async function resolveAdapters(
     .sort(
       (left, right) =>
         right.claim.confidence - left.claim.confidence ||
-        left.adapter.id.localeCompare(right.adapter.id),
+        compareByBytes(left.adapter.id, right.adapter.id),
     );
   const claimed: ClaimedAdapter[] = await Promise.all(
     active.map(async ({ adapter, claim }) => {
@@ -112,7 +113,7 @@ export async function resolveAdapters(
     if (!requested.has(key)) requested.set(key, absolutePath);
   }
   const paths = [...requested.values()].sort((left, right) =>
-    pathForCompare(left).localeCompare(pathForCompare(right)),
+    compareByBytes(pathForCompare(left), pathForCompare(right)),
   );
   const ownership = new Map<string, AdapterOwnership>();
   const unsupportedPaths: string[] = [];
@@ -142,7 +143,7 @@ export async function resolveAdapters(
     if (highest.length > 1) {
       const adapterIds = highest
         .map(({ adapter }) => adapter.id)
-        .sort((left, right) => left.localeCompare(right));
+        .sort(compareByBytes);
       diagnostics.push({
         code: 'ambiguous-adapter-claim',
         path,
@@ -173,7 +174,7 @@ export async function resolveAdapters(
         unfollowedLinks.map((path) => [pathForCompare(path), path]),
       ).values(),
     ].sort((left, right) =>
-      pathForCompare(left).localeCompare(pathForCompare(right)),
+      compareByBytes(pathForCompare(left), pathForCompare(right)),
     ),
     diagnostics,
   };

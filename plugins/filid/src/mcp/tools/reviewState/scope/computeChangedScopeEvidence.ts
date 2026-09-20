@@ -149,11 +149,9 @@ export async function computeChangedScopeEvidence(
         false,
       ),
     })),
-    // A deleted path is gone from the tree, so nothing can say whether it was
-    // its directory's entry — and a reference to an entry spells the directory,
-    // not the file. Both names are offered rather than neither: keeping a
-    // diagnostic the change did not break costs a reviewer a look, and dropping
-    // one it did break seals over it.
+    // A deleted path cannot say whether it was its directory's entry, and a
+    // reference to an entry spells the directory. Both names are offered:
+    // over-reporting costs a look, under-reporting seals over a break.
     ...[...scopePaths.changed]
       .filter(
         (path) =>

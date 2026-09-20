@@ -4,6 +4,7 @@ import {
 } from '../../../constants/facts.js';
 
 import type { ProjectFacts } from './readProjectFacts.js';
+import { compareByBytes } from '../../../lib/compareByBytes.js';
 
 /** One report of judgements the store holds and could not read. */
 export interface DamagedJudgementReport {
@@ -31,7 +32,7 @@ export function damagedJudgementDiagnostics(
   facts: ProjectFacts,
 ): DamagedJudgementReport[] {
   const reports = [...facts.damagedJudgementShards]
-    .sort(([left], [right]) => left.localeCompare(right))
+    .sort(([left], [right]) => compareByBytes(left, right))
     .map(([shard, damage]) => ({
       code: FACTS_UNKNOWN_CAUSES.JUDGEMENTS_UNREADABLE,
       message: `The judgement shard ${shard} is ${damage}, so the items and adopted edges it holds are invisible and the files it covers are reported uncertain rather than settled.`,
