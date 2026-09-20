@@ -84,7 +84,7 @@ Use the PR result from Step 1:
 - PR access unavailable: skip and record `pr-comment: unavailable`.
 - Posting fails: record `pr-comment: failed: <reason>`.
 
-Comment absence or failure never changes the verdict. Report the verdict, review completeness, human-decision requirement and agent next action from the sealed comment. Include `pr-comment` status and the returned blocker path whenever non-null. For legacy INCONCLUSIVE caches without a sidecar, report `review-blockers: unavailable (legacy)`. Do not ask the user to resolve agent-owned evidence gaps.
+Comment absence or failure never changes the verdict. Report the verdict, review completeness, human-decision requirement and agent next action from the sealed comment. Include `pr-comment` status and the returned blocker path whenever non-null. A `review-files-outside-facts-scope` diagnostic blocks nothing and moves no verdict: carry its count into the report as the changed files the reference-based rules did not judge, and leave `facts.covers` alone — editing project config would dirty the worktree this review is judging, and the scope the project declared is a valid choice. For legacy INCONCLUSIVE caches without a sidecar, report `review-blockers: unavailable (legacy)`. Do not ask the user to resolve agent-owned evidence gaps.
 
 ```text
 Review verdict: INCONCLUSIVE

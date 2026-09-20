@@ -86,6 +86,10 @@ const HANDLED_BY = [
     REVIEW_STATE_DIAGNOSTIC_CODES.FACTS_FROZEN_UNUSABLE,
     'cross-review/SKILL.md',
   ],
+  [
+    REVIEW_STATE_DIAGNOSTIC_CODES.FILES_OUTSIDE_FACTS_SCOPE,
+    'cross-review/SKILL.md',
+  ],
   [FACTS_UNKNOWN_CAUSES.TOOL_ERROR, '.shared/facts-bootstrap.md'],
   [FACTS_UNKNOWN_CAUSES.JUDGEMENTS_UNREADABLE, '.shared/facts-bootstrap.md'],
   [FACTS_UNKNOWN_CAUSES.JUDGEMENTS_DISCARDED, '.shared/facts-bootstrap.md'],

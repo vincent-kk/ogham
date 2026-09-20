@@ -208,6 +208,7 @@ hash 설계에서 중요한 두 가지:
 
 - **root 경로에 독립적이다.** 같은 트리를 다른 위치에 clone해도 hash가 같다.
 - **mtime을 쓰지 않는다.** checkout이나 touch가 거짓 무효화를 만들지 않는다. 내용이 바뀌어야 hash가 바뀐다.
+- **정렬은 raw byte 비교다.** 경로 목록을 locale 규칙(`localeCompare`)으로 정렬하면 같은 트리가 ICU 자료가 다른 기계에서 다른 hash를 얻는다. hash는 기계를 건너 비교되는 값이므로 정렬도 기계에 독립이어야 한다.
 
 legacy ledger가 존재하면 그 내용도 hash 입력에 포함된다 — ledger가 바뀌면 snapshot도 새로 만들어야 하기 때문이다. `documentEvidence` 역시 이미 hash 입력이므로, DETAIL.md의 면책 선언을 고치면 snapshot이 새로 만들어진다. 면책은 별도 hash 계약을 만들지 않고 문서 증거의 일부로 따라온다.
 
