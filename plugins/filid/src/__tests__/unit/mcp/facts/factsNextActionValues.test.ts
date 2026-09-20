@@ -242,6 +242,13 @@ describe('what a response has to carry for its next action to work', () => {
 
     expect(result.diagnostics[0]?.code).toBe(FACTS_ADJUDICATION_ACTOR_CODE);
     expect(result.diagnostics[0]?.nextAction).toContain('actor');
+    // Cell 23 is "no change", so the code is only half of it: a refusal that
+    // judged something anyway would leave the table one judgement ahead of
+    // what the caller was told happened.
+    expect(
+      (result.summary as FactsAdjudicateSummary).applied,
+    ).toBe(0);
+    expect(await openItems()).toEqual([item]);
   });
 });
 

@@ -442,8 +442,32 @@ describe('the failure table says what each caller really gets', () => {
       /re-run the cycle once from `review`/i,
     );
     expect(skill('pipeline/reference.md')).toMatch(
-      /second INCONCLUSIVE for the same reason stops the cycle/i,
+      /second INCONCLUSIVE for the same reason[^|]*stops the cycle/i,
     );
+  });
+});
+
+describe('a repeated refusal is judged by what it asks, not by how often it came', () => {
+  it('seal: settling an open item is not a publish, and the other next action is progress', () => {
+    const seal = skill('cross-review/SKILL.md');
+    const settled = REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FACTS_DISCREPANCY_UNSETTLED;
+
+    // The server's own sentence names both outcomes of a settlement; the skill
+    // must not shorten that into "a settled item seals".
+    expect(settled).toMatch(/seals/);
+    expect(settled).toMatch(/adds or removes an edge/);
+    expect(seal).not.toMatch(/needs no new review/);
+    expect(seal).toMatch(/does not by itself publish/);
+    expect(seal).toMatch(/same `code` with the same `nextAction`/);
+    expect(seal).toMatch(/other next action is progress/);
+  });
+
+  it.each([
+    ['cross-review/SKILL.md', /different files.*is progress|is progress.*different files/s],
+    ['.shared/facts-bootstrap.md', /naming different files[^.]*is progress/],
+    ['pipeline/reference.md', /asking for something else is progress/],
+  ])('%s keeps a different refusal out of its stop rule', (document, rule) => {
+    expect(skill(document)).toMatch(rule);
   });
 });
 

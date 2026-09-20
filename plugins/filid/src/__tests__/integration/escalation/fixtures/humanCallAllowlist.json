@@ -10,11 +10,11 @@
     },
     {
       "file": "skills/.shared/facts-bootstrap.md",
-      "hash": "c642f68fdd0503ea",
+      "hash": "70cc0ff80c0ea265",
       "kind": "stop",
       "class": "N",
-      "text": "On a second `facts-incomplete` in the same run, end without a terminal verdict and record it in the report as a filid defect. |",
-      "note": "R-2 designed termination of the bootstrap retry inside one run (S5b)."
+      "text": "A second `facts-incomplete` over the same files in the same groups is the same refusal: end without a terminal verdict and record it in the report as a filid defect.",
+      "note": "R-2 designed termination of the bootstrap retry inside one run; a refusal over different files is progress, not a repeat (S5b)."
     },
     {
       "file": "skills/.shared/intent-template.md",
@@ -274,11 +274,11 @@
     },
     {
       "file": "skills/pipeline/reference.md",
-      "hash": "e14d300458247360",
+      "hash": "510a7d2002c3804f",
       "kind": "stop",
       "class": "N",
-      "text": "A second INCONCLUSIVE for the same reason stops the cycle. |",
-      "note": "Designed termination after one facts-driven retry of the cycle (C38, S5b)."
+      "text": "A second INCONCLUSIVE for the same reason — the same next action over the same subject — stops the cycle; one asking for something else is progress. |",
+      "note": "Designed termination after one facts-driven retry of the cycle (C38); the stop is keyed on the reason, not the count (S5b)."
     },
     {
       "file": "skills/pipeline/reference.md",

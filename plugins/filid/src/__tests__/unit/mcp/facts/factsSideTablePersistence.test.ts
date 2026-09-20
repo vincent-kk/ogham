@@ -4,8 +4,14 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { FACTS_DIAGNOSTIC_CODES } from '../../../../constants/facts.js';
 import {
+  FACTS_ADJUDICATION_ORIGINS,
+  FACTS_ADJUDICATION_STATES,
+  FACTS_DIAGNOSTIC_CODES,
+} from '../../../../constants/facts.js';
+import {
+  computeLineDigest,
+  hashProjectFile,
   readAdjudicationTable,
   resolveFactsStorePaths,
   writeAdjudicationPages,
@@ -160,16 +166,42 @@ describe('side-table writes within one call', () => {
   });
 });
 
+/**
+ * The one stored item of a file, read from the side table rather than a report.
+ * @param path Project-relative POSIX path whose page to read.
+ * @returns That page's first item, or undefined when the page is empty.
+ */
+function storedItem(path: string) {
+  const paths = resolveFactsStorePaths(project.root);
+  return readAdjudicationTable(paths.sideTableDirectory).pages.get(
+    paths.pathDigest(path),
+  )?.items[0];
+}
+
 describe('a closed-by-record item', () => {
-  it('returns as coverage-shrank when the edge is submitted away again', async () => {
+  it('cell 21: returns as coverage-shrank when the edge is submitted away again', async () => {
     await submit(['src/f9.ts'], false, 'a.json');
     await compare(['src/f9.ts']);
     await submit(['src/f9.ts'], true, 'b.json');
+    expect(storedItem('src/f9.ts')?.state).toBe(
+      FACTS_ADJUDICATION_STATES.CLOSED_BY_RECORD,
+    );
 
     const summary = await submit(['src/f9.ts'], false, 'c.json');
 
     expect(summary.openedItems).toBe(1);
     expect(await unadjudicated()).toEqual(['src/f9.ts']);
+    // Counting the report is not the cell: what it claims is that the row is
+    // judgeable again, in place, under the origin this submission gave it.
+    const current = hashProjectFile(project.root, 'src/f9.ts');
+    expect(storedItem('src/f9.ts')).toMatchObject({
+      state: FACTS_ADJUDICATION_STATES.UNADJUDICATED,
+      origin: FACTS_ADJUDICATION_ORIGINS.COVERAGE_SHRANK,
+      contentHash: current.ok ? current.contentHash : 'unreadable',
+      lineDigest: current.ok
+        ? computeLineDigest(current.contents, REF.specifier)
+        : 'unreadable',
+    });
   });
 });
 

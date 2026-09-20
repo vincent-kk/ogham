@@ -4,6 +4,7 @@ import {
   FACTS_PENDING_DISCARDED_CODE,
   FACTS_PENDING_DISCARDED_NEXT_ACTION,
   FACTS_SHARD_NOT_DAMAGED_CODE,
+  FACTS_SHARD_NOT_DAMAGED_NEXT_ACTION,
   FACTS_UNKNOWN_CAUSES,
 } from '../../../../constants/facts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
@@ -145,8 +146,7 @@ export async function discardDamagedShards(
               message: `Nothing was dropped for ${refused.join(', ')}: the store reads ${refused.length === 1 ? 'it' : 'them'}, or another writer replaced ${refused.length === 1 ? 'it' : 'them'} first.`,
               path: input.path,
               affects: ANALYSIS_AXES,
-              nextAction:
-                'Call facts status again and pass only the shard names its judgements diagnostic reports as unparseable; a shard that reads needs no repair.',
+              nextAction: FACTS_SHARD_NOT_DAMAGED_NEXT_ACTION,
             },
           ]
         : []),

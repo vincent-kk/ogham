@@ -310,7 +310,21 @@ describe('facts adjudicate — the cells that need the store', () => {
     );
   });
 
-  it('cells 4 and 10: expires an item when the judged lines change', async () => {
+  it('cell 4: expires an unadjudicated item when the judged lines change', async () => {
+    await submitEmptyRecord();
+    await compare();
+    expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.UNADJUDICATED);
+
+    // Nobody has judged it, so nothing is lost by dropping the row — and a
+    // row about lines that are gone is one no actor could answer for.
+    project.write('src/index.ts', "export { thing } from './other.js';\n");
+    const after = await compare();
+
+    expect(after.data.sideTableItems).toEqual([]);
+    expect(storedState()).toBeNull();
+  });
+
+  it('cell 10: expires a judged item when the judged lines change', async () => {
     await submitEmptyRecord();
     await compare();
     await adjudicate('A', 'dismiss', 'it is inside a comment');
@@ -319,6 +333,7 @@ describe('facts adjudicate — the cells that need the store', () => {
     const after = await compare();
 
     expect(after.data.sideTableItems).toEqual([]);
+    expect(storedState()).toBeNull();
   });
 
   it('keeps a judgement when an unrelated line changes, and flags it once', async () => {
@@ -384,7 +399,7 @@ describe('facts adjudicate — the cells that need the store', () => {
     expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.CLOSED_BY_RECORD);
   });
 
-  it('cell 22: a submitted edge leaves a judged item standing', async () => {
+  it('cell 22, adopted: a submitted edge leaves a judged item standing', async () => {
     await submitEmptyRecord();
     await compare();
     await adjudicate('A', 'adopt');
@@ -395,6 +410,20 @@ describe('facts adjudicate — the cells that need the store', () => {
     // edge, the next dropping it — erase an actor's judgement with nothing
     // left to revive.
     expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.ADOPTED);
+  });
+
+  it('cell 22, dismissed: the same holds once two actors have put it down', async () => {
+    await submitEmptyRecord();
+    await compare();
+    await adjudicate('A', 'dismiss', 'it is inside a comment');
+    await adjudicate('B', 'dismiss', 'agreed, commented out');
+    expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.DISMISSED);
+
+    await submitRecordWithEdge();
+
+    // A record carrying the edge does not overturn two actors who read the
+    // line and said it is not one; only a fresh judgement does.
+    expect(storedState()).toBe(FACTS_ADJUDICATION_STATES.DISMISSED);
   });
 
   it('cell 13: expires an adopted item when the judged lines change', async () => {

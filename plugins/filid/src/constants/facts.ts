@@ -299,9 +299,6 @@ export const FACTS_ATTESTATION_NEXT_ACTIONS = {
     'The file changed since the pending attestation was made, so it was dropped and this submission became the new first one. Have a different actor attest the CURRENT bytes to confirm it.',
 } as const;
 
-/** Code reported when an attested record leaves a matching line unexplained. */
-export const FACTS_ATTESTATION_PENDING_CODE = 'facts-attestation-pending';
-
 /**
  * What an attested record has to carry, as `facts status` states it.
  *
@@ -326,6 +323,16 @@ export const FACTS_ATTESTED_REQUIREMENT =
  */
 /** Refusal code for a `discard-damaged` call naming a shard that is not damaged. */
 export const FACTS_SHARD_NOT_DAMAGED_CODE = 'facts-shard-not-damaged';
+
+/**
+ * Next action after naming a shard the store can read.
+ *
+ * Beside its code rather than in the handler: a next action is looked up by
+ * code, and one written at the throw site is a sentence no other caller of that
+ * code can find.
+ */
+export const FACTS_SHARD_NOT_DAMAGED_NEXT_ACTION =
+  'Call facts status again and pass only the shard names its judgements diagnostic reports as unparseable; a shard that reads needs no repair.';
 
 /**
  * Next action after discarding a damaged judgement shard.
@@ -472,6 +479,62 @@ export const FACTS_REJECTION_CODES = {
  * action was doing, so a submit re-submits, a compare re-compares and an
  * adjudicate re-reads the items before judging them again.
  */
+/**
+ * Next actions of the `facts-file-*` refusals, by the action that was refused.
+ *
+ * Both `submit` and `compare` open a caller-supplied file through the same
+ * guard, and the recovery is the caller's own call: `compare` takes no
+ * `resolutionEpoch`, so a refusal that names one sends it to an argument its
+ * action does not have (P5). Splitting works for both — a `compare` call
+ * compares exactly the records its own file carries, so file-by-file
+ * comparisons cover the same set as one oversized candidate would have.
+ */
+export const FACTS_FILE_NEXT_ACTIONS = {
+  submit: {
+    FILE_TOO_LARGE:
+      'Split the extraction output into several JSON files, each under the byte cap this message names, and call submit once per file with the same resolutionEpoch.',
+    FILE_PATH_NOT_ABSOLUTE:
+      'Pass file as an absolute path to the extraction output, then call submit again.',
+    FILE_INSIDE_PROJECT:
+      'This path resolves inside the project tree. Write the extraction output outside it — an untracked file inside the tree joins the scanned path list and moves the epoch it is submitted against — then call submit with that path.',
+    FILE_NOT_REGULAR:
+      'Pass a path that resolves to a regular file. A directory, a FIFO or a device node is refused; a symbolic link is fine as long as it leads to a regular file outside the project. Then call submit again.',
+    FILE_UNREADABLE:
+      'Confirm the extraction output exists at that path and is readable by the filid server process, then call submit again.',
+    FILE_NOT_JSON:
+      'The file at that path is not the JSON array of FileFacts records submit reads. Re-run the extraction program, confirm its output parses as JSON, and call submit again.',
+  },
+  compare: {
+    FILE_TOO_LARGE:
+      'Split the candidate into several JSON files, each under the byte cap this message names, and call compare once per file. Each call compares exactly the records the file it is given carries, so the files together cover what the oversized candidate would have.',
+    FILE_PATH_NOT_ABSOLUTE:
+      'Pass file as an absolute path to the candidate, then call compare again.',
+    FILE_INSIDE_PROJECT:
+      'This path resolves inside the project tree. Write the candidate outside it — an untracked file inside the tree joins the scanned path list and changes what the comparison is measured against — then call compare with that path.',
+    FILE_NOT_REGULAR:
+      'Pass a path that resolves to a regular file. A directory, a FIFO or a device node is refused; a symbolic link is fine as long as it leads to a regular file outside the project. Then call compare again.',
+    FILE_UNREADABLE:
+      'Confirm the candidate exists at that path and is readable by the filid server process, then call compare again.',
+    FILE_NOT_JSON:
+      'The file at that path is not the JSON array of FileFacts records compare reads. Re-run the extraction program, confirm its output parses as JSON, and call compare again.',
+  },
+} as const;
+
+/**
+ * Next actions after losing a pending page, keyed by the action that lost it.
+ *
+ * Keyed like `FACTS_SIDE_TABLE_CONFLICT_NEXT_ACTIONS` and for the same reason:
+ * the recovery is the losing action's own work. Telling `discard-pending` to
+ * submit the attested record again asks it to restore the very thing it was
+ * throwing away, which is a next action its caller cannot carry out (P5).
+ */
+export const FACTS_PENDING_CONFLICT_NEXT_ACTIONS = {
+  submit:
+    'Another writer replaced the pending attestation store between the read and the write, so these attested records were not stored. Call facts status to see which files still hold a pending attestation, then submit those attested records again.',
+  'discard-pending':
+    'Another writer replaced the pending attestation store between the read and the write, so nothing was discarded for these files. Call facts status to see which of them still hold a pending attestation, then call facts discard-pending again for those.',
+} as const;
+
 export const FACTS_SIDE_TABLE_CONFLICT_NEXT_ACTIONS = {
   submit:
     'Another writer replaced the side table for these files between the read and the write, so their items were not stored. Call facts status, then submit those files again.',
@@ -493,22 +556,8 @@ export const FACTS_DIAGNOSTIC_NEXT_ACTIONS = {
     'Another writer replaced this record between the read and the write. Call facts status, then submit the affected files again.',
   SIDE_TABLE_CHANGED:
     'Another writer replaced the side table between the read and the write. Call facts status, then run the action that reported this again.',
-  PENDING_CHANGED:
-    'Another writer replaced the pending attestation store between the read and the write, so these attested records were not stored. Call facts status to see which files still hold a pending attestation, then submit those attested records again.',
   ADJUDICATED_ITEMS_REMOVED:
     'These files left the scanned tree or the facts scope, so the judgements recorded against them went with them; this is a report, not a refusal, and nothing is owed if the files are gone for good. If one was renamed, submit a record for the new path and run facts compare for it — an edge that still applies comes back as an item to judge there.',
-  FILE_TOO_LARGE:
-    'Split the extraction output into several JSON files, each under the byte cap this message names, and call submit once per file with the same resolutionEpoch.',
-  FILE_PATH_NOT_ABSOLUTE:
-    'Pass file as an absolute path to the extraction output.',
-  FILE_INSIDE_PROJECT:
-    'This path resolves inside the project tree. Write the extraction output outside it — an untracked file inside the tree joins the scanned path list and moves the epoch it is submitted against — then call submit with that path.',
-  FILE_NOT_REGULAR:
-    'Pass a path that resolves to a regular file. A directory, a FIFO or a device node is refused; a symbolic link is fine as long as it leads to a regular file outside the project. Then call submit again.',
-  FILE_UNREADABLE:
-    'Confirm the extraction output exists at that path and is readable by the filid server process, then call submit again.',
-  FILE_NOT_JSON:
-    'The file at that path is not the JSON array of FileFacts records submit reads. Re-run the extraction program, confirm its output parses as JSON, and call submit again.',
 } as const;
 
 /**

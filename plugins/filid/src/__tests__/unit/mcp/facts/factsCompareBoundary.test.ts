@@ -6,6 +6,7 @@ import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import {
+  FACTS_ACTIONS,
   FACTS_DIAGNOSTIC_CODES,
   FACTS_SUBMISSION_MAX_BYTES,
 } from '../../../../constants/facts.js';
@@ -138,6 +139,27 @@ describe('facts compare candidate path guard', () => {
     const error = await compareExpectingRefusal(oversized);
 
     expect(error.code).toBe(FACTS_DIAGNOSTIC_CODES.FILE_TOO_LARGE);
+  });
+
+  it('answers in the action the caller used, not in submit', async () => {
+    const oversized = project.submission('big.json', '');
+    writeFileSync(oversized, Buffer.alloc(FACTS_SUBMISSION_MAX_BYTES + 1, 0x20));
+    const inside = join(project.root, 'inside.json');
+    writeFileSync(inside, '[]');
+
+    const refusals = [
+      await compareExpectingRefusal(oversized),
+      await compareExpectingRefusal(inside),
+      await compareExpectingRefusal(join(project.outside, 'absent.json')),
+    ];
+
+    // `compare` takes no resolutionEpoch, so a refusal that names one sends
+    // the caller to an argument its action does not have.
+    for (const refusal of refusals) {
+      expect(refusal.nextAction).toContain(FACTS_ACTIONS.COMPARE);
+      expect(refusal.nextAction).not.toContain('resolutionEpoch');
+      expect(refusal.nextAction).not.toContain('submit');
+    }
   });
 
   it('leaks no byte of a non-JSON candidate into the refusal', async () => {

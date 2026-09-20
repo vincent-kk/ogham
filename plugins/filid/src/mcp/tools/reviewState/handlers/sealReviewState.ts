@@ -243,7 +243,8 @@ export async function sealReviewState(
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.FACTS_FROZEN_UNUSABLE,
           path: paths.factsPath,
           affects: [],
-          nextAction: `Do not publish a verdict. Call prepare once with the same arguments and without force: a generation whose frozen facts do not match its digest is incomplete, so prepare freezes them again and keeps validated progress. ${PREPARE_ONCE_REPEAT_TAIL}`,
+          nextAction:
+            REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FACTS_FROZEN_UNUSABLE,
         },
       ],
     });

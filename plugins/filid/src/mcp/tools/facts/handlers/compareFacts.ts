@@ -96,7 +96,7 @@ export async function compareFacts(
     frozen === null
       ? null
       : new Map(frozen.map((entry) => [entry.path, entry]));
-  const entries = openSubmission(input.path, input.file);
+  const entries = openSubmission(input.path, input.file, FACTS_ACTIONS.COMPARE);
   const submission = parseSubmittedRecords(entries);
   const table = readAdjudicationTable(context.storePaths.sideTableDirectory);
   const comparison: FactsCompareData = {

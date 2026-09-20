@@ -1,3 +1,4 @@
+import { FACTS_ACTIONS } from '../../../../constants/facts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import {
   readPendingStore,
@@ -73,6 +74,9 @@ export async function discardPending(
       discarded: discarded.filter((one) => !kept.has(one)),
       absent,
     },
-    diagnostics: buildPendingConflictDiagnostics(written.conflicted),
+    diagnostics: buildPendingConflictDiagnostics(
+      written.conflicted,
+      FACTS_ACTIONS.DISCARD_PENDING,
+    ),
   };
 }

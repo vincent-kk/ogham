@@ -65,7 +65,7 @@ export async function submitFacts(
       projectRoot,
       context.epoch.resolutionEpoch,
     );
-  const entries = openSubmission(projectRoot, file);
+  const entries = openSubmission(projectRoot, file, FACTS_ACTIONS.SUBMIT);
   if (resolutionEpoch !== context.epoch.resolutionEpoch)
     return buildEpochMovedPayload(projectRoot, context);
   const submission = parseSubmittedRecords(entries);
@@ -121,7 +121,10 @@ export async function submitFacts(
         outcome.sideTableConflicts,
         FACTS_ACTIONS.SUBMIT,
       ),
-      ...buildPendingConflictDiagnostics(outcome.pendingConflicts),
+      ...buildPendingConflictDiagnostics(
+        outcome.pendingConflicts,
+        FACTS_ACTIONS.SUBMIT,
+      ),
       ...buildRemovedAdjudicationDiagnostics(outcome.removedAdjudicated),
     ],
   };

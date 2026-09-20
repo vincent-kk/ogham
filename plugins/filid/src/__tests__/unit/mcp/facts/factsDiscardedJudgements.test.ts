@@ -254,6 +254,50 @@ describe('a file whose judgements were discarded is not settled by the discard',
     );
   });
 
+  it('survives an ordinary submit, which knows nothing about the mark', async () => {
+    const shard = await adoptThenDamage();
+    await discard(shard);
+
+    // The page holds no items, so a planner that wrote it back as "empty"
+    // would delete it and return the file to silence. The carry-forward rule
+    // lives in writeAdjudicationPages alone, which is what makes this hold.
+    await submit([EDGE]);
+
+    expect(await stateOfIndex()).toBe(FACTS_FILE_STATES.UNCERTAIN);
+    const status = await handleFacts({ action: 'status', path: project.root });
+    expect(
+      (status.data as FactsStatusData).awaitingComparison.items.map(
+        (item) => item.path,
+      ),
+    ).toContain('src/index.ts');
+  });
+
+  it('goes with the file when the tree no longer holds it', async () => {
+    const shard = await adoptThenDamage();
+    await discard(shard);
+
+    // A mark kept for a path the scan no longer reports would be a state no
+    // call could clear, because compare has no file left to re-derive from.
+    project.remove('src/index.ts');
+    // Any submit sweeps what the tree no longer holds; this one is about
+    // another file entirely.
+    const status = await handleFacts({ action: 'status', path: project.root });
+    await handleFacts({
+      action: 'submit',
+      path: project.root,
+      file: project.submission(
+        'other.json',
+        JSON.stringify([project.facts('src/thing.ts')]),
+      ),
+      resolutionEpoch: (status.summary as FactsStatusSummary).resolutionEpoch,
+    });
+
+    const after = await handleFacts({ action: 'status', path: project.root });
+    expect(
+      (after.data as FactsStatusData).awaitingComparison.items,
+    ).toEqual([]);
+  });
+
   it('leaves uncertain once the reopened edge is adjudicated', async () => {
     const shard = await adoptThenDamage();
     await discard(shard);

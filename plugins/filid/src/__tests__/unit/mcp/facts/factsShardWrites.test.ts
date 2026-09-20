@@ -1,10 +1,14 @@
+import { createHash } from 'node:crypto';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { FACTS_DIAGNOSTIC_CODES } from '../../../../constants/facts.js';
+import {
+  FACTS_ACTIONS,
+  FACTS_DIAGNOSTIC_CODES,
+} from '../../../../constants/facts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { resolveFactsStorePaths } from '../../../../core/facts/index.js';
 import { handleFacts } from '../../../../mcp/tools/facts/index.js';
@@ -33,6 +37,9 @@ const shardWrites = vi.hoisted(() => ({
 /** Whether the side table is allowed to keep the pages a call plans for it. */
 const pageWrites = vi.hoisted(() => ({ failAll: false }));
 
+/** Whether the pending store is allowed to keep the pages a call plans for it. */
+const pendingWrites = vi.hoisted(() => ({ failAll: false }));
+
 vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
   const actual =
     await importOriginal<typeof import('../../../../core/facts/index.js')>();
@@ -56,6 +63,19 @@ vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
             updates,
             shardFileName,
           ),
+    writeShardPages: (
+      directory: string,
+      shards: Parameters<typeof actual.writeShardPages>[1],
+      updates: Parameters<typeof actual.writeShardPages>[2],
+      shardFileName: (digest: string) => string,
+    ): ReturnType<typeof actual.writeShardPages> =>
+      pendingWrites.failAll
+        ? {
+            stored: new Set<string>(),
+            conflicted: [...updates.values()].map((update) => update.path),
+            shards: new Map(),
+          }
+        : actual.writeShardPages(directory, shards, updates, shardFileName),
     writeFactsShardFile: (
       directory: string,
       shardFileName: string,
@@ -93,6 +113,7 @@ beforeEach(() => {
   shardWrites.names = [];
   shardWrites.failAll = false;
   pageWrites.failAll = false;
+  pendingWrites.failAll = false;
   stateRoot = mkdtempSync(join(tmpdir(), 'filid-facts-shard-'));
   process.env.CLAUDE_CONFIG_DIR = stateRoot;
   project = createFactsProject({
@@ -412,5 +433,62 @@ describe('facts compare under a lost side-table page', () => {
     expect((result.data as FactsCompareData).unrecorded?.paths).toEqual([
       'src/edge.ts',
     ]);
+  });
+});
+
+/**
+ * Leave one unconfirmed attested submission in the pending store.
+ *
+ * `discard-pending` needs something to discard, and only a first attested
+ * submission puts a page there.
+ */
+async function openOnePendingAttestation(): Promise<void> {
+  const bytes = readFileSync(join(project.root, 'src/edge.ts'));
+  const status = await currentEpoch();
+  await handleFacts({
+    action: 'submit',
+    path: project.root,
+    file: project.submission(
+      'attested.json',
+      JSON.stringify([
+        {
+          schemaVersion: 1,
+          path: 'src/edge.ts',
+          contentHash: `sha256:${createHash('sha256').update(bytes).digest('hex')}`,
+          references: [],
+          nonReferences: [{ line: 1, reason: 'the import is re-exported' }],
+          provenance: {
+            tool: 'reader',
+            version: '1.0.0',
+            command: 'read',
+            tier: 'attested',
+            resolutionInputs: [],
+          },
+        },
+      ]),
+    ),
+    resolutionEpoch: status,
+    actor: 'first-reader',
+  });
+}
+
+describe('facts discard-pending under a lost pending page', () => {
+  it('asks for the discard again, not for the record it was discarding', async () => {
+    await openOnePendingAttestation();
+    pendingWrites.failAll = true;
+
+    const result = await handleFacts({
+      action: 'discard-pending',
+      path: project.root,
+      sourcePaths: ['src/edge.ts'],
+    });
+
+    expect(result.status).toBe(TOOL_STATUSES.INDETERMINATE);
+    // Telling this caller to submit the attested record again is the opposite
+    // of what it asked for: the record is the thing it is throwing away.
+    const [diagnostic] = result.diagnostics;
+    expect(diagnostic?.code).toBe(FACTS_DIAGNOSTIC_CODES.PENDING_CHANGED);
+    expect(diagnostic?.nextAction).toContain(FACTS_ACTIONS.DISCARD_PENDING);
+    expect(diagnostic?.nextAction).not.toContain('submit those attested');
   });
 });

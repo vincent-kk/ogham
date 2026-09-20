@@ -10,6 +10,7 @@ import type {
   FactsStatusData,
   FactsStatusSummary,
 } from '../../../../mcp/tools/facts/index.js';
+import { REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS } from '../../../../constants/reviewState.js';
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 import { resolveReviewStatePaths } from '../../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 import type { ReviewStateRecord } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
@@ -515,6 +516,69 @@ describe('seal refuses before the fold when the facts are disputed', () => {
 
     expect(sealed.status).toBe('ok');
     expect(sealed.summary).toMatchObject({ disposition: 'sealed' });
+  });
+
+  it('seals when the settlement leaves the frozen edges as they were', async () => {
+    // The record walked back an edge the generation froze, so adopting the
+    // item puts that same edge back into the file's valid references: the set
+    // the review answered for is the set the store now holds.
+    await openOneItem();
+    const [item] = await openItems();
+    await handleFacts({
+      action: 'adjudicate',
+      path: fixture.projectRoot,
+      sourcePath: item.path,
+      contentHash: item.contentHash,
+      actor: 'first-reader',
+      items: [
+        {
+          kind: item.kind,
+          reference: item.reference,
+          resolvedPath: item.resolvedPath,
+          decision: 'adopt',
+        },
+      ],
+    });
+
+    const sealed = await seal();
+
+    expect(sealed.status).toBe('ok');
+    expect(sealed.summary).toMatchObject({ disposition: 'sealed' });
+  });
+
+  it('asks for a prepare when the settlement adds an edge the freeze lacked', async () => {
+    // Here adopting does the opposite: the item is an edge the generation
+    // never froze, so settling it grows the valid set and the review answered
+    // for the smaller one. Which branch a settled item lands in is decided by
+    // the edges it leaves behind, not by the decision that settled it.
+    await submitReference('src/other.ts');
+    const [item] = await openItems();
+    await handleFacts({
+      action: 'adjudicate',
+      path: fixture.projectRoot,
+      sourcePath: item.path,
+      contentHash: item.contentHash,
+      actor: 'first-reader',
+      items: [
+        {
+          kind: item.kind,
+          reference: item.reference,
+          resolvedPath: item.resolvedPath,
+          decision: 'adopt',
+        },
+      ],
+    });
+
+    const refused = await seal();
+
+    expect(refused.status).toBe('indeterminate');
+    expect(refused.diagnostics?.[0]?.nextAction).toContain('prepare once');
+    expect(await openItems()).toEqual([]);
+    // So the sentence that sent the caller to adjudicate has to admit this
+    // branch exists; promising the next seal publishes costs a whole call.
+    expect(
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FACTS_DISCREPANCY_UNSETTLED,
+    ).toContain('prepare');
   });
 
   it('records the items the seal referenced in the sealed state', async () => {
