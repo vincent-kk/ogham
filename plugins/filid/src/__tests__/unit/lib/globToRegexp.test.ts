@@ -32,3 +32,47 @@ describe('globToRegExp', () => {
     expect(globToRegExp('src/a.ts').test('src/a.ts')).toBe(true);
   });
 });
+
+describe('a recursive wildcard spans zero segments', () => {
+  it('matches a root-level file, not only one under a directory', () => {
+    // The defect this closes: the separator written after `**` was compiled
+    // literally, so a default scope of source-extension globs silently left
+    // every root-level file out — reported `unsupported`, never missing.
+    const pattern = globToRegExp('**/*.ts');
+
+    expect(pattern.test('index.ts')).toBe(true);
+    expect(pattern.test('src/index.ts')).toBe(true);
+    expect(pattern.test('src/deep/index.ts')).toBe(true);
+    expect(pattern.test('index.tsx')).toBe(false);
+  });
+
+  it('spans zero segments in the middle of a pattern too', () => {
+    const pattern = globToRegExp('src/**/index.ts');
+
+    expect(pattern.test('src/index.ts')).toBe(true);
+    expect(pattern.test('src/a/index.ts')).toBe(true);
+    expect(pattern.test('src/a/b/index.ts')).toBe(true);
+    expect(pattern.test('other/index.ts')).toBe(false);
+  });
+
+  it('leaves a trailing recursive wildcard as it was', () => {
+    const pattern = globToRegExp('src/**');
+
+    expect(pattern.test('src/index.ts')).toBe(true);
+    expect(pattern.test('src/a/index.ts')).toBe(true);
+    // Unchanged on purpose: it matched the directory's contents before and
+    // matches exactly those now.
+    expect(pattern.test('src')).toBe(false);
+  });
+
+  it('still keeps a single star inside one segment', () => {
+    expect(globToRegExp('**/*.ts').test('src/a/b.ts')).toBe(true);
+    expect(globToRegExp('src/*.ts').test('src/a/b.ts')).toBe(false);
+    expect(globToRegExp('src/*/b.ts').test('src/a/b.ts')).toBe(true);
+  });
+
+  it('still matches a name holding a newline', () => {
+    expect(globToRegExp('**/*.ts').test('src/a\nb.ts')).toBe(true);
+    expect(globToRegExp('**/*.ts').test('a\nb.ts')).toBe(true);
+  });
+});
