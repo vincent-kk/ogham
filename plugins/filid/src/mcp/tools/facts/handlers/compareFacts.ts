@@ -202,7 +202,7 @@ export async function compareFacts(
     // it: reporting OK would say the store now holds something to judge when
     // it does not, and nobody would call compare again.
     status:
-      written.conflicted.length > 0
+      written.conflicted.length + written.damaged.length > 0
         ? TOOL_STATUSES.INDETERMINATE
         : TOOL_STATUSES.OK,
     summary: {
@@ -218,13 +218,16 @@ export async function compareFacts(
     },
     data: capComparisonLists({
       ...comparison,
-      ...(written.conflicted.length === 0
+      ...(written.conflicted.length + written.damaged.length === 0
         ? {}
-        : { unrecorded: capFileList(written.conflicted) }),
+        : {
+            unrecorded: capFileList([...written.conflicted, ...written.damaged]),
+          }),
     }),
     diagnostics: [
       ...buildSideTableConflictDiagnostics(
         written.conflicted,
+        written.damaged,
         FACTS_ACTIONS.COMPARE,
       ),
       ...(notIndependent.length === 0

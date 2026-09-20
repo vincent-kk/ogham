@@ -17,22 +17,22 @@ import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
 
 const PATHS = {
-  ROOT: '/root',
-  ROOT_INDEX: '/root/index.ts',
-  X: '/root/x',
-  X_INDEX: '/root/x/index.ts',
-  CONTRACTS: '/root/x/contracts',
-  TYPES: '/root/x/contracts/types.ts',
-  GUARD: '/root/x/contracts/guard.ts',
-  SCHEDULING: '/root/x/scheduling',
-  DELAY: '/root/x/scheduling/delay.ts',
-  OPS: '/root/ops',
-  OPS_TYPES: '/root/ops/types.ts',
-  OPS_DELAY: '/root/ops/delay.ts',
-  X_OPS_GUARD: '/root/x/ops/guard.ts',
-  CONTRACTS_INDEX: '/root/x/contracts/index.ts',
-  TIMING_OTHER: '/root/timing/other.ts',
-  SCHEDULING_OTHER: '/root/x/scheduling/other.ts',
+  ROOT: '/filid-fixture-root',
+  ROOT_INDEX: '/filid-fixture-root/index.ts',
+  X: '/filid-fixture-root/x',
+  X_INDEX: '/filid-fixture-root/x/index.ts',
+  CONTRACTS: '/filid-fixture-root/x/contracts',
+  TYPES: '/filid-fixture-root/x/contracts/types.ts',
+  GUARD: '/filid-fixture-root/x/contracts/guard.ts',
+  SCHEDULING: '/filid-fixture-root/x/scheduling',
+  DELAY: '/filid-fixture-root/x/scheduling/delay.ts',
+  OPS: '/filid-fixture-root/ops',
+  OPS_TYPES: '/filid-fixture-root/ops/types.ts',
+  OPS_DELAY: '/filid-fixture-root/ops/delay.ts',
+  X_OPS_GUARD: '/filid-fixture-root/x/ops/guard.ts',
+  CONTRACTS_INDEX: '/filid-fixture-root/x/contracts/index.ts',
+  TIMING_OTHER: '/filid-fixture-root/timing/other.ts',
+  SCHEDULING_OTHER: '/filid-fixture-root/x/scheduling/other.ts',
 } as const;
 
 function fractal(path: string, name: string, peerFiles: string[]): NodeEntry {
@@ -266,7 +266,7 @@ describe('restructure rewrites consumers the same plan relocates', () => {
     expect(plan.moves[0]?.preservedImports).toContainEqual({
       consumerPath: PATHS.X_OPS_GUARD,
       currentSpecifier: './types.ts',
-      requiredResolvedPath: '/root/x/ops/types.ts',
+      requiredResolvedPath: '/filid-fixture-root/x/ops/types.ts',
     });
     expect(plan.moves[0]?.affectedImports).not.toContainEqual(
       expect.objectContaining({ consumerPath: PATHS.X_OPS_GUARD }),
@@ -277,7 +277,7 @@ describe('restructure rewrites consumers the same plan relocates', () => {
     const fileMove = { sourcePath: PATHS.DELAY, targetPath: PATHS.OPS_DELAY };
     const directoryMove = {
       sourcePath: PATHS.SCHEDULING,
-      targetPath: '/root/timing',
+      targetPath: '/filid-fixture-root/timing',
     };
 
     expect(relocateThroughMoves(PATHS.DELAY, [fileMove, directoryMove])).toBe(
@@ -288,7 +288,7 @@ describe('restructure rewrites consumers the same plan relocates', () => {
     ).toBe(PATHS.TIMING_OTHER);
     expect(
       relocateThroughMoves(PATHS.DELAY, [fileMove, directoryMove], 1),
-    ).toBe('/root/timing/delay.ts');
+    ).toBe('/filid-fixture-root/timing/delay.ts');
   });
 
   it('lists the outgoing import of a moved file whose target stays', () => {

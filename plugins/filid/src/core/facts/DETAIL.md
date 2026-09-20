@@ -98,7 +98,7 @@
 - `compareReferences(candidate, stored)` — 순수 함수. 동일성은 `(sourceText ?? specifier, kind)`와 해석이다.
 - `selectValidReferences(recordEdges, page, path)` — 레코드 ∪ adopt. snapshot이 의존성 그래프의 입력으로 읽는다.
 - `computeLineDigest(contents, reference)` · `readAdjudicationTable(directory)` · `writeAdjudicationPages(...)` — 부속 표의 만료 key와 입출력.
-- `writeShardPages(directory, shards, updates, shardFileName, damaged)` — 부속 표와 pending 저장물이 함께 쓰는 배치 쓰기. shard당 한 번 쓰고, CAS 패배를 경로 목록으로, 실제로 쓴 shard를 새 token과 함께 `shards`로 돌려준다(다음 batch가 이어받을 자리). `damaged`에 실린 shard는 아예 쓰지 않고 그 shard로 갈 페이지 전부를 `conflicted`로 돌린다 — 읽을 수 없는 shard를 평범한 쓰기가 이 batch가 아는 페이지만으로 갈아치우면, 읽지 못한 나머지 항목의 판정이 조용히 사라진다. 그런 shard를 비우는 것은 `discard-damaged` 하나뿐이다. 두 저장물이 같은 모양이므로 배치 규칙과 이 손상 shard 배치 불변도 한 벌만 둔다 — 갈라지면 한쪽만 고쳐진다.
+- `writeShardPages(directory, shards, updates, shardFileName, damaged)` — 부속 표와 pending 저장물이 함께 쓰는 배치 쓰기. shard당 한 번 쓰고, CAS 패배를 `conflicted` 경로 목록으로, 실제로 쓴 shard를 새 token과 함께 `shards`로 돌려준다(다음 batch가 이어받을 자리). `damaged`에 실린 shard는 아예 쓰지 않고 그 shard로 갈 페이지 전부를 결과의 `damaged` 목록으로 돌린다 — 읽을 수 없는 shard를 평범한 쓰기가 이 batch가 아는 페이지만으로 갈아치우면, 읽지 못한 나머지 항목의 판정이 조용히 사라진다. `conflicted`와 갈라 둔 것은 재시도로 나을 수 없는 손상을 재시도로 낫는 CAS 패배처럼 알리지 않기 위해서다 — 호출자는 `damaged` 목록을 `facts-judgements-unreadable` 진단으로 돌려 `discard-damaged`를 가리킨다. 그런 shard를 비우는 것은 `discard-damaged` 하나뿐이다. 두 저장물이 같은 모양이므로 배치 규칙과 이 손상 shard 배치 불변도 한 벌만 둔다 — 갈라지면 한쪽만 고쳐진다.
 - `readPendingStore(directory)` · `findUnaccountedLines(lines, facts)` · `comparePendingEdges(pending, submitted)` — attested 경로의 읽기·계정·확인 비교. 모두 순수하거나 읽기 전용이다.
 - `writeExtractionList(path, relativePaths)` — 추출 대상 목록을 줄 단위로 원자적 치환. 개행·NUL이 든 이름은 줄 단위 파일이 표현하지 못하므로 목록에서 빼고 개수만 센다.
 - `recordEpochDrift(path, newEpoch | null)` — 연속으로 서로 다른 새 epoch를 통보한 횟수. 성공한 제출이 초기화한다.

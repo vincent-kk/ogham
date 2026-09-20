@@ -21,30 +21,30 @@ import { describeOrderConflict } from '../planner/describeOrderConflict.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
 
 const P = {
-  ROOT: '/root',
-  ROOT_INDEX: '/root/index.ts',
-  X: '/root/x',
-  X_INDEX: '/root/x/index.ts',
-  SCHED: '/root/x/sched',
-  DELAY: '/root/x/sched/delay.ts',
-  OTHER: '/root/x/sched/other.ts',
-  KEEP: '/root/x/sched/keep.ts',
-  A_FILE: '/root/x/sched/a.ts',
-  DEEP: '/root/x/sched/deep',
-  DEEP_FILE: '/root/x/sched/deep/f.ts',
-  Y: '/root/y',
-  FMT: '/root/y/fmt.ts',
-  OPS: '/root/ops',
-  OPS_DELAY: '/root/ops/delay.ts',
-  LEGACY: '/root/legacy',
-  LEGACY_DELAY: '/root/legacy/delay.ts',
-  TIMING: '/root/timing',
-  EMPTY: '/root/x/empty',
-  M1: '/root/x/m1',
-  M1_FILE: '/root/x/m1/f.ts',
-  M2: '/root/x/m2',
-  M2_FILE: '/root/x/m2/f.ts',
-  OPS_A: '/root/ops/a.ts',
+  ROOT: '/filid-fixture-root',
+  ROOT_INDEX: '/filid-fixture-root/index.ts',
+  X: '/filid-fixture-root/x',
+  X_INDEX: '/filid-fixture-root/x/index.ts',
+  SCHED: '/filid-fixture-root/x/sched',
+  DELAY: '/filid-fixture-root/x/sched/delay.ts',
+  OTHER: '/filid-fixture-root/x/sched/other.ts',
+  KEEP: '/filid-fixture-root/x/sched/keep.ts',
+  A_FILE: '/filid-fixture-root/x/sched/a.ts',
+  DEEP: '/filid-fixture-root/x/sched/deep',
+  DEEP_FILE: '/filid-fixture-root/x/sched/deep/f.ts',
+  Y: '/filid-fixture-root/y',
+  FMT: '/filid-fixture-root/y/fmt.ts',
+  OPS: '/filid-fixture-root/ops',
+  OPS_DELAY: '/filid-fixture-root/ops/delay.ts',
+  LEGACY: '/filid-fixture-root/legacy',
+  LEGACY_DELAY: '/filid-fixture-root/legacy/delay.ts',
+  TIMING: '/filid-fixture-root/timing',
+  EMPTY: '/filid-fixture-root/x/empty',
+  M1: '/filid-fixture-root/x/m1',
+  M1_FILE: '/filid-fixture-root/x/m1/f.ts',
+  M2: '/filid-fixture-root/x/m2',
+  M2_FILE: '/filid-fixture-root/x/m2/f.ts',
+  OPS_A: '/filid-fixture-root/ops/a.ts',
 } as const;
 
 const CONFLICT = RESTRUCTURE_DECISION_REASONS.MOVE_ORDER_CONFLICT;
@@ -176,7 +176,7 @@ describe('restructure orders overlapping moves for automatic execution', () => {
         {
           consumerPath: P.X_INDEX,
           currentSpecifier: './sched/delay.ts',
-          requiredResolvedPath: '/root/x/ops/delay.ts',
+          requiredResolvedPath: '/filid-fixture-root/x/ops/delay.ts',
           suggestedSpecifier: './ops/delay.ts',
         },
       ],
@@ -184,7 +184,7 @@ describe('restructure orders overlapping moves for automatic execution', () => {
         {
           consumerPath: P.ROOT_INDEX,
           currentSpecifier: './x/sched/other.ts',
-          requiredResolvedPath: '/root/timing/other.ts',
+          requiredResolvedPath: '/filid-fixture-root/timing/other.ts',
           suggestedSpecifier: './timing/other.ts',
         },
       ],
@@ -482,7 +482,7 @@ describe('restructure orders overlapping moves for automatic execution', () => {
       {
         consumerPath: P.ROOT_INDEX,
         currentSpecifier: './x/sched/a.ts',
-        requiredResolvedPath: '/root/svc/a.ts',
+        requiredResolvedPath: '/filid-fixture-root/svc/a.ts',
         suggestedSpecifier: './svc/a.ts',
       },
     ]);
@@ -595,8 +595,8 @@ describe('restructure orders overlapping moves for automatic execution', () => {
   });
 
   it('names the same move to run first from every member of a cycle no source encloses', () => {
-    const directory = { sourcePath: '/root/x', targetPath: '/root/x/y' };
-    const file = { sourcePath: '/root/q.ts', targetPath: '/root/x/y/q.ts' };
+    const directory = { sourcePath: '/filid-fixture-root/x', targetPath: '/filid-fixture-root/x/y' };
+    const file = { sourcePath: '/filid-fixture-root/q.ts', targetPath: '/filid-fixture-root/x/y/q.ts' };
     const fromDirectory = describeOrderConflict(directory, 'cycle', [
       file.sourcePath,
     ]);

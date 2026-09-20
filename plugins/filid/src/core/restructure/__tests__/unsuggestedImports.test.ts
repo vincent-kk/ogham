@@ -17,18 +17,18 @@ import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
 
 const P = {
-  ROOT: '/root',
-  APP: '/root/app',
-  APP_INDEX: '/root/app/index.ts',
-  FEATURE: '/root/feature',
-  FEATURE_INDEX: '/root/feature/index.ts',
-  PARTS: '/root/feature/parts',
-  PARTS_INDEX: '/root/feature/parts/index.ts',
-  MOVED: '/root/app/feature',
-  MOVED_INDEX: '/root/app/feature/index.ts',
-  MOVED_PARTS: '/root/app/feature/parts',
-  MOVED_PARTS_INDEX: '/root/app/feature/parts/index.ts',
-  SHADOW: '/root/app/feature/parts.ts',
+  ROOT: '/filid-fixture-root',
+  APP: '/filid-fixture-root/app',
+  APP_INDEX: '/filid-fixture-root/app/index.ts',
+  FEATURE: '/filid-fixture-root/feature',
+  FEATURE_INDEX: '/filid-fixture-root/feature/index.ts',
+  PARTS: '/filid-fixture-root/feature/parts',
+  PARTS_INDEX: '/filid-fixture-root/feature/parts/index.ts',
+  MOVED: '/filid-fixture-root/app/feature',
+  MOVED_INDEX: '/filid-fixture-root/app/feature/index.ts',
+  MOVED_PARTS: '/filid-fixture-root/app/feature/parts',
+  MOVED_PARTS_INDEX: '/filid-fixture-root/app/feature/parts/index.ts',
+  SHADOW: '/filid-fixture-root/app/feature/parts.ts',
 } as const;
 
 function fractal(path: string, name: string, peerFiles: string[]): NodeEntry {
@@ -174,12 +174,12 @@ describe('restructure leaves imports it cannot suggest to the caller', () => {
   });
 
   it('preserves an outgoing import whose target keeps its relative place', () => {
-    const consumer = '/root/app/x/feature.ts';
-    const shared = '/root/app/shared.ts';
+    const consumer = '/filid-fixture-root/app/x/feature.ts';
+    const shared = '/filid-fixture-root/app/shared.ts';
     const unit = {
       sourcePath: consumer,
-      targetPath: '/root/app/y/feature.ts',
-      rewriteTargetPath: '/root/app/y/feature.ts',
+      targetPath: '/filid-fixture-root/app/y/feature.ts',
+      rewriteTargetPath: '/filid-fixture-root/app/y/feature.ts',
     };
     const snapshot = snapshotOf(
       [fractal(P.ROOT, 'root', []), fractal(P.APP, 'app', ['shared.ts'])],
@@ -199,12 +199,12 @@ describe('restructure leaves imports it cannot suggest to the caller', () => {
   });
 
   it('requires an outgoing import whose target changes its relative place, without a suggestion', () => {
-    const consumer = '/root/app/x/feature.ts';
-    const shared = '/root/app/shared.ts';
+    const consumer = '/filid-fixture-root/app/x/feature.ts';
+    const shared = '/filid-fixture-root/app/shared.ts';
     const unit = {
       sourcePath: consumer,
-      targetPath: '/root/app/x/deep/feature.ts',
-      rewriteTargetPath: '/root/app/x/deep/feature.ts',
+      targetPath: '/filid-fixture-root/app/x/deep/feature.ts',
+      rewriteTargetPath: '/filid-fixture-root/app/x/deep/feature.ts',
     };
     const snapshot = snapshotOf(
       [fractal(P.ROOT, 'root', []), fractal(P.APP, 'app', ['shared.ts'])],
@@ -283,7 +283,7 @@ describe('restructure leaves imports it cannot suggest to the caller', () => {
   });
 
   it('reports an unsuggested import whose old specifier still loads another file beside a rewritten one', () => {
-    const intercepting = '/root/feature.ts';
+    const intercepting = '/filid-fixture-root/feature.ts';
     const after = snapshotOf(
       [
         fractal(P.ROOT, 'root', ['feature.ts']),

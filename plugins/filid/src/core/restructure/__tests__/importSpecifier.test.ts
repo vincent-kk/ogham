@@ -14,17 +14,17 @@ import { stripPathExtension } from '../specifiers/stripPathExtension.js';
 import { validateImportRequirements } from '../validator/validateImportRequirements.js';
 
 const PATHS = {
-  ROOT: '/root',
-  FEATURE_A: '/root/featureA',
-  FEATURE_A_FILE: '/root/featureA/index.ts',
-  FEATURE_B: '/root/featureB',
-  FEATURE_B_FILE: '/root/featureB/index.ts',
-  SOURCE: '/root/lib/logger.ts',
-  TARGET: '/root/shared/logger.ts',
-  DIRECTORY_INDEX: '/root/lib/index.ts',
-  SOURCE_DIRECTORY: '/root/lib',
-  TARGET_DIRECTORY: '/root/shared',
-  NESTED_CONSUMER: '/root/lib/deep/consumer.ts',
+  ROOT: '/filid-fixture-root',
+  FEATURE_A: '/filid-fixture-root/featureA',
+  FEATURE_A_FILE: '/filid-fixture-root/featureA/index.ts',
+  FEATURE_B: '/filid-fixture-root/featureB',
+  FEATURE_B_FILE: '/filid-fixture-root/featureB/index.ts',
+  SOURCE: '/filid-fixture-root/lib/logger.ts',
+  TARGET: '/filid-fixture-root/shared/logger.ts',
+  DIRECTORY_INDEX: '/filid-fixture-root/lib/index.ts',
+  SOURCE_DIRECTORY: '/filid-fixture-root/lib',
+  TARGET_DIRECTORY: '/filid-fixture-root/shared',
+  NESTED_CONSUMER: '/filid-fixture-root/lib/deep/consumer.ts',
 } as const;
 
 function node(path: string, name: string, depth: number): FractalNode {
@@ -262,8 +262,8 @@ describe('suggested specifiers under ecosystem extension conventions', () => {
     expect(stripPathExtension('..')).toBe('..');
     expect(stripPathExtension('../..')).toBe('../..');
     expect(stripPathExtension('.')).toBe('.');
-    expect(stripPathExtension('/root/lib/.gitignore')).toBe(
-      '/root/lib/.gitignore',
+    expect(stripPathExtension('/filid-fixture-root/lib/.gitignore')).toBe(
+      '/filid-fixture-root/lib/.gitignore',
     );
   });
 
@@ -284,7 +284,7 @@ describe('suggested specifiers under ecosystem extension conventions', () => {
     expect(result.required).toEqual([]);
     expect(result.preserved).toEqual([
       {
-        consumerPath: '/root/shared/deep/consumer.ts',
+        consumerPath: '/filid-fixture-root/shared/deep/consumer.ts',
         currentSpecifier: '..',
         requiredResolvedPath: PATHS.TARGET_DIRECTORY,
       },

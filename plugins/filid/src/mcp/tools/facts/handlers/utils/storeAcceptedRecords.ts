@@ -41,6 +41,8 @@ export interface StoreOutcome {
   conflicted: string[];
   /** Paths whose side-table page another writer replaced mid-call. */
   sideTableConflicts: string[];
+  /** Paths whose side-table page is damaged, so this call could not write it. */
+  sideTableDamaged: string[];
   /** Edges this batch walked back, now awaiting judgement. */
   openedItems: number;
   /** Side-table items this batch settled by carrying the edge. */
@@ -53,6 +55,8 @@ export interface StoreOutcome {
   attestationDismissals: number;
   /** Paths whose pending page another writer replaced mid-call. */
   pendingConflicts: string[];
+  /** Paths whose pending page is damaged, so this call could not write it. */
+  pendingDamaged: string[];
 }
 
 /** States an actor put an item into; a removed page loses these judgements. */
@@ -226,7 +230,10 @@ export function storeAcceptedRecords(
   // the retry comparing that record with itself, so the edge it walked back
   // would have nothing left to open an item against and the file would read
   // `exact`. The retry is the same call.
-  const refusedOpens = new Set(opensWritten.conflicted);
+  const refusedOpens = new Set([
+    ...opensWritten.conflicted,
+    ...opensWritten.damaged,
+  ]);
   for (const [key, upsert] of upserts)
     if (refusedOpens.has(upsert.path)) upserts.delete(key);
   const written = writeFactsShards(context, upserts, deletions);
@@ -276,12 +283,16 @@ export function storeAcceptedRecords(
     sideTableConflicts: [
       ...new Set([...opensWritten.conflicted, ...settlesWritten.conflicted]),
     ].sort((left, right) => left.localeCompare(right)),
+    sideTableDamaged: [
+      ...new Set([...opensWritten.damaged, ...settlesWritten.damaged]),
+    ].sort((left, right) => left.localeCompare(right)),
     openedItems,
     closedItems,
     removedAdjudicated,
     attested,
     attestationDismissals,
     pendingConflicts: pendingWritten.conflicted,
+    pendingDamaged: pendingWritten.damaged,
   };
 }
 

@@ -21,9 +21,10 @@ import { buildPendingConflictDiagnostics } from './utils/buildPendingConflictDia
  * This is the only way out of a file two actors keep answering differently: a
  * disagreement stores nothing and leaves the pending attestation standing, so
  * without an explicit discard the two would alternate forever. That is why the
- * action is a component of P5 rather than a convenience, and why it is the one
- * facts action that runs whatever the project's scope says — a removal that can
- * be blocked is a state that cannot be cleared.
+ * action is a component of P5 rather than a convenience, and why it is one of
+ * the facts actions that run whatever the project's scope says. A damaged
+ * shard still refuses it, the same as any other write: `discard-damaged` is
+ * the action that clears a pending attestation nothing else can reach.
  *
  * It touches the pending store and nothing else. Stored records and the
  * adjudication side table are untouched, so this is not a way to delete a
@@ -59,17 +60,17 @@ export async function discardPending(
     storePaths.shardFileName,
     store.damaged,
   );
-  const kept = new Set(written.conflicted);
+  const kept = new Set([...written.conflicted, ...written.damaged]);
   return {
     projectRoot: input.path,
     status:
-      written.conflicted.length > 0
+      written.conflicted.length + written.damaged.length > 0
         ? TOOL_STATUSES.INDETERMINATE
         : TOOL_STATUSES.OK,
     summary: {
       discarded: discarded.filter((one) => !kept.has(one)).length,
       absent: absent.length,
-      stored: written.conflicted.length === 0,
+      stored: written.conflicted.length + written.damaged.length === 0,
     },
     data: {
       discarded: discarded.filter((one) => !kept.has(one)),
@@ -77,6 +78,7 @@ export async function discardPending(
     },
     diagnostics: buildPendingConflictDiagnostics(
       written.conflicted,
+      written.damaged,
       FACTS_ACTIONS.DISCARD_PENDING,
     ),
   };

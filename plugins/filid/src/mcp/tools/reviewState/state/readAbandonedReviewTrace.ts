@@ -29,7 +29,7 @@ const VERDICT_LINE =
  */
 export function readAbandonedReviewTrace(branchDirectory: string): {
   abandoned: boolean;
-  priorVerdict?: ReviewStateRecord['verdict'] & string;
+  priorVerdict?: Exclude<ReviewStateRecord['verdict'], null>;
 } {
   let entries;
   try {
@@ -41,7 +41,10 @@ export function readAbandonedReviewTrace(branchDirectory: string): {
     return { abandoned: false };
   }
   let abandoned = false;
-  let newest: { verdict: ReviewStateRecord['verdict'] & string; mtimeMs: number } | null = null;
+  let newest: {
+    verdict: Exclude<ReviewStateRecord['verdict'], null>;
+    mtimeMs: number;
+  } | null = null;
   for (const entry of entries) {
     if (
       entry.isDirectory() &&
@@ -56,9 +59,16 @@ export function readAbandonedReviewTrace(branchDirectory: string): {
     const path = join(entry.parentPath, entry.name);
     const verdict = VERDICT_LINE.exec(readUtf8FileIfExistsSync(path) ?? '');
     if (!verdict) continue;
-    const mtimeMs = statSync(path).mtimeMs;
-    if (newest === null || mtimeMs > newest.mtimeMs)
-      newest = { verdict: verdict[1] as ReviewStateRecord['verdict'] & string, mtimeMs };
+    // The report can disappear between the read above and this stat; that
+    // race is not a reason to fail prepare, so a vanished file is skipped
+    // rather than left to throw ENOENT.
+    const stats = statSync(path, { throwIfNoEntry: false });
+    if (stats === undefined) continue;
+    if (newest === null || stats.mtimeMs > newest.mtimeMs)
+      newest = {
+        verdict: verdict[1] as Exclude<ReviewStateRecord['verdict'], null>,
+        mtimeMs: stats.mtimeMs,
+      };
   }
   return newest ? { abandoned: true, priorVerdict: newest.verdict } : { abandoned };
 }

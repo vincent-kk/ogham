@@ -18,6 +18,9 @@ import type { FactsProject } from './helpers/createFactsProject.js';
 
 const ORIGINAL_CONFIG_DIR = process.env.CLAUDE_CONFIG_DIR;
 
+/** Windows filenames cannot hold a control character, so the fixture file cannot be created there. */
+const controlCharacterPathsUnsupported = process.platform === 'win32';
+
 const CONFIG = (facts: unknown): string =>
   JSON.stringify({
     version: '2.0',
@@ -81,20 +84,23 @@ describe('facts status extraction list', () => {
     ).not.toContain('notes.md');
   });
 
-  it('drops a file whose name a line-oriented list cannot carry, and counts it', async () => {
-    // A `**` glob cannot match a newline (its `.` excludes one), but `src/*`
-    // can, so this is how such a file actually reaches the declared scope.
-    project.write('.filid/config.json', CONFIG({ covers: ['src/*'] }));
-    project.write('src/two\nlines.ts', 'export const odd = 1;\n');
+  it.skipIf(controlCharacterPathsUnsupported)(
+    'drops a file whose name a line-oriented list cannot carry, and counts it',
+    async () => {
+      // A `**` glob cannot match a newline (its `.` excludes one), but `src/*`
+      // can, so this is how such a file actually reaches the declared scope.
+      project.write('.filid/config.json', CONFIG({ covers: ['src/*'] }));
+      project.write('src/two\nlines.ts', 'export const odd = 1;\n');
 
-    const result = await status();
+      const result = await status();
 
-    const body = readFileSync(result.summary.extractionList.path, 'utf8');
-    expect(result.summary.extractionList.unrepresentable).toBe(1);
-    expect(body).not.toContain('two\nlines.ts');
-    // Still reported as a file with no facts, so it is never read as "fine".
-    expect(result.data?.missing.paths).toContain('src/two\nlines.ts');
-  });
+      const body = readFileSync(result.summary.extractionList.path, 'utf8');
+      expect(result.summary.extractionList.unrepresentable).toBe(1);
+      expect(body).not.toContain('two\nlines.ts');
+      // Still reported as a file with no facts, so it is never read as "fine".
+      expect(result.data?.missing.paths).toContain('src/two\nlines.ts');
+    },
+  );
 
   it('rewrites the list on every call rather than appending', async () => {
     const before = await status();

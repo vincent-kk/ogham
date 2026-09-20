@@ -88,7 +88,9 @@ export async function submitFacts(
     status:
       outcome.conflicted.length +
         outcome.sideTableConflicts.length +
-        outcome.pendingConflicts.length >
+        outcome.sideTableDamaged.length +
+        outcome.pendingConflicts.length +
+        outcome.pendingDamaged.length >
       0
         ? TOOL_STATUSES.INDETERMINATE
         : TOOL_STATUSES.OK,
@@ -124,10 +126,12 @@ export async function submitFacts(
       ...buildConflictDiagnostics(outcome.conflicted),
       ...buildSideTableConflictDiagnostics(
         outcome.sideTableConflicts,
+        outcome.sideTableDamaged,
         FACTS_ACTIONS.SUBMIT,
       ),
       ...buildPendingConflictDiagnostics(
         outcome.pendingConflicts,
+        outcome.pendingDamaged,
         FACTS_ACTIONS.SUBMIT,
       ),
       ...buildRemovedAdjudicationDiagnostics(outcome.removedAdjudicated),

@@ -12,10 +12,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import {
-  FACTS_DIAGNOSTIC_CODES,
-  FACTS_FILE_STATES,
-} from '../../../../constants/facts.js';
+import { FACTS_FILE_STATES } from '../../../../constants/facts.js';
 import {
   classifyProjectFacts,
   readPendingStore,
@@ -50,6 +47,9 @@ const EDGE = {
 };
 
 const ORIGINAL_CONFIG_DIR = process.env.CLAUDE_CONFIG_DIR;
+
+/** Windows maps mode 0o000 to the read-only attribute, which still reads — the damage cannot be staged. */
+const unreadableFilesUnsupported = process.platform === 'win32';
 
 let stateRoot: string;
 let project: FactsProject;
@@ -153,9 +153,14 @@ describe('a judgement shard the store cannot read is not an empty one', () => {
   it.for([['unparseable'], ['unreadable']] as const)(
     'reports the file uncertain when its side-table shard is %s',
     async ([damage], { skip }) => {
+      if (
+        damage === 'unreadable' &&
+        (unreadableFilesUnsupported || process.getuid?.() === 0)
+      )
+        skip(
+          'the damage cannot be staged: Windows keeps a 0o000 file readable, and root reads every file',
+        );
       await openItemThenDamage(damage);
-      if (damage === 'unreadable' && process.getuid?.() === 0)
-        skip('root reads every file, so the damage cannot be staged');
 
       // Without the item the record alone reads as agreement, and analysis
       // would conclude from a disagreement nobody judged.
@@ -218,8 +223,10 @@ describe('a write never replaces a shard nobody could compare against', () => {
   it('loses the compare-and-set instead of overwriting unreadable bytes', async ({
     skip,
   }) => {
-    if (process.getuid?.() === 0)
-      skip('root reads every file, so the damage cannot be staged');
+    if (unreadableFilesUnsupported || process.getuid?.() === 0)
+      skip(
+        'the damage cannot be staged: Windows keeps a 0o000 file readable, and root reads every file',
+      );
     await submit('first.json', [EDGE]);
     const directory = resolveFactsStorePaths(project.root).directory;
     const [shard] = readdirSync(directory).filter((name) =>
@@ -301,7 +308,7 @@ describe('a shard covering another file is never overwritten by an ordinary subm
       ),
     ).toBe(true);
     const conflictDiagnostic = result.diagnostics.find(
-      ({ code }) => code === FACTS_DIAGNOSTIC_CODES.SIDE_TABLE_CHANGED,
+      ({ code }) => code === 'facts-judgements-unreadable',
     );
     expect(conflictDiagnostic?.message).toContain('src/f902.ts');
 

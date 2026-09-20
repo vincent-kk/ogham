@@ -55,6 +55,7 @@ vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
         ? {
             stored: new Set<string>(),
             conflicted: [...updates.values()].map((update) => update.path),
+            damaged: [] as string[],
             shards: new Map(),
           }
         : actual.writeAdjudicationPages(
@@ -74,6 +75,7 @@ vi.mock('../../../../core/facts/index.js', async (importOriginal) => {
         ? {
             stored: new Set<string>(),
             conflicted: [...updates.values()].map((update) => update.path),
+            damaged: [] as string[],
             shards: new Map(),
           }
         : actual.writeShardPages(

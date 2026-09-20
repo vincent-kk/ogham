@@ -133,7 +133,7 @@ export async function adjudicateItems(
   // refusal would otherwise create an empty shard file.
   const unchanged = JSON.stringify(items) === JSON.stringify(before);
   const written = unchanged
-    ? { stored: new Set([key]), conflicted: [] as string[] }
+    ? { stored: new Set([key]), conflicted: [] as string[], damaged: [] as string[] }
     : writeAdjudicationPages(
         context.storePaths.sideTableDirectory,
         table,
@@ -143,7 +143,7 @@ export async function adjudicateItems(
   return {
     projectRoot: input.path,
     status:
-      written.conflicted.length > 0
+      written.conflicted.length + written.damaged.length > 0
         ? TOOL_STATUSES.INDETERMINATE
         : TOOL_STATUSES.OK,
     summary: {
@@ -153,11 +153,12 @@ export async function adjudicateItems(
       awaitingConfirmation: outcomes.filter(
         (outcome) => outcome.nextAction !== '',
       ).length,
-      stored: written.conflicted.length === 0,
+      stored: written.conflicted.length + written.damaged.length === 0,
     },
     data: { outcomes, refused },
     diagnostics: buildSideTableConflictDiagnostics(
       written.conflicted,
+      written.damaged,
       FACTS_ACTIONS.ADJUDICATE,
     ),
   };

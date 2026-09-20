@@ -6,9 +6,9 @@ import type { PlanningDecisionReason } from '../../../types/restructure.js';
 import { describeDecision } from '../planner/describeDecision.js';
 
 const CONTEXT = {
-  projectRoot: '/root',
-  sourcePath: '/root/x/unit.ts',
-  placementPath: '/root/x',
+  projectRoot: '/filid-fixture-root',
+  sourcePath: '/filid-fixture-root/x/unit.ts',
+  placementPath: '/filid-fixture-root/x',
   relatedUnknownFiles: [
     { path: 'x/note.unit', causes: ['uncertain-local-dependency'] },
   ],
@@ -44,13 +44,13 @@ describe('restructure decision guidance', () => {
     );
     const unowned = describeDecision(
       RESTRUCTURE_DECISION_REASONS.SOURCE_PATH_OUTSIDE_PROJECT,
-      { ...CONTEXT, sourcePath: '/root/loose/unit.ts' },
+      { ...CONTEXT, sourcePath: '/filid-fixture-root/loose/unit.ts' },
     );
 
     expect(outside.message).toBe(
-      '/elsewhere/unit.ts is outside the project at /root, so filid cannot plan a move for it.',
+      '/elsewhere/unit.ts is outside the project at /filid-fixture-root, so filid cannot plan a move for it.',
     );
-    expect(unowned.message).toContain('No fractal owns /root/loose/unit.ts');
+    expect(unowned.message).toContain('No fractal owns /filid-fixture-root/loose/unit.ts');
     expect(unowned.nextAction).toContain('INTENT.md');
   });
 

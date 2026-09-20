@@ -17,6 +17,14 @@ export interface ShardWriteOutcome {
   /** Paths whose shard another writer took, sorted. */
   conflicted: string[];
   /**
+   * Paths whose shard is damaged, sorted.
+   *
+   * A damaged shard does not clear on retry the way a lost compare-and-set
+   * does, so these are kept apart from `conflicted`: a caller that folds them
+   * back in would tell its caller to do the one thing that cannot fix this.
+   */
+  damaged: string[];
+  /**
    * Shards this batch replaced, as they now stand, keyed by shard file name.
    *
    * A second batch in the same call chains its compare-and-set from these
@@ -49,7 +57,8 @@ export interface ShardWriteOutcome {
  * replace it with only the pages this batch happens to know about — that
  * would silently discard whatever the unreadable bytes held. Only
  * `discard-damaged` may write a damaged shard, through its own call.
- * @returns Which pages landed and which paths lost their shard.
+ * @returns Which pages landed, which paths lost their shard to another
+ * writer, and which paths were refused because their shard is damaged.
  */
 export function writeShardPages(
   directory: string,
@@ -67,11 +76,12 @@ export function writeShardPages(
   const outcome: ShardWriteOutcome = {
     stored: new Set<string>(),
     conflicted: [],
+    damaged: [],
     shards: new Map<string, FactsShard>(),
   };
   for (const [shard, keys] of byShard) {
     if (damaged.has(shard)) {
-      for (const [, update] of keys) outcome.conflicted.push(update.path);
+      for (const [, update] of keys) outcome.damaged.push(update.path);
       continue;
     }
     const existing = shards.get(shard);
@@ -99,5 +109,6 @@ export function writeShardPages(
     for (const [, update] of keys) outcome.conflicted.push(update.path);
   }
   outcome.conflicted.sort(compareByBytes);
+  outcome.damaged.sort(compareByBytes);
   return outcome;
 }

@@ -23,18 +23,18 @@ import type { NodeEntry } from '../../tree/fractalTree/index.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
 
 const P = {
-  ROOT: '/root',
-  A: '/root/a',
-  X: '/root/a/x',
-  Z: '/root/z',
-  MOVED_X: '/root/z/x',
-  Q: '/root/q.ts',
-  Q_IN_X: '/root/a/x/q.ts',
-  SERVICE_SOURCE: '/root/a/s.ts',
-  SERVICE_DIRECTORY: '/root/a/svc',
-  SVC: '/root/svc',
-  SVC_FILE: '/root/svc/s.ts',
-  SVC_ENTRY: '/root/svc/index.ts',
+  ROOT: '/filid-fixture-root',
+  A: '/filid-fixture-root/a',
+  X: '/filid-fixture-root/a/x',
+  Z: '/filid-fixture-root/z',
+  MOVED_X: '/filid-fixture-root/z/x',
+  Q: '/filid-fixture-root/q.ts',
+  Q_IN_X: '/filid-fixture-root/a/x/q.ts',
+  SERVICE_SOURCE: '/filid-fixture-root/a/s.ts',
+  SERVICE_DIRECTORY: '/filid-fixture-root/a/svc',
+  SVC: '/filid-fixture-root/svc',
+  SVC_FILE: '/filid-fixture-root/svc/s.ts',
+  SVC_ENTRY: '/filid-fixture-root/svc/index.ts',
 } as const;
 
 /**

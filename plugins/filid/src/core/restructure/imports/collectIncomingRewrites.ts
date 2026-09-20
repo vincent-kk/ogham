@@ -23,9 +23,9 @@ import { relocateThroughMoves } from './relocateThroughMoves.js';
  *
  * An entry is emitted only when this unit is the first move to carry the
  * imported file, and it requires the consumer's final path to load the file's
- * final path. An import whose specifier denotes its file carries a suggested
- * specifier; any other carries none, or is preserved when the moves keep the
- * file at the same place relative to the consumer.
+ * final path. An import the moves keep at the same place relative to its
+ * consumer is preserved; any other is required, carrying a suggested
+ * specifier when its specifier denotes its file.
  * @param snapshot - Pre-move snapshot
  * @param unit - The moved unit
  * @param orderedMoves - Executable moves in execution order, holding `unit`

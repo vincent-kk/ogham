@@ -4,9 +4,7 @@ import type {
   PlanValidationFinding,
   RestructurePlan,
 } from '../../../types/restructure.js';
-import { canonicalizeDirectedGraph } from '../../analysis/dependencyGraph/cycles/canonicalizeDirectedGraph.js';
-import { findStronglyConnectedComponents } from '../../analysis/dependencyGraph/cycles/findStronglyConnectedComponents.js';
-import { toDirectedPairs } from '../../analysis/dependencyGraph/cycles/toDirectedPairs.js';
+import { listCyclicComponents } from '../../analysis/dependencyGraph/index.js';
 import { relocateThroughMoves } from '../imports/relocateThroughMoves.js';
 
 import { cycleIdentity } from './cycleIdentity.js';
@@ -37,12 +35,9 @@ export function validateDependencyPostconditions(
       ),
     ),
   );
-  const pairs = toDirectedPairs(snapshot.dependencyGraph);
-  const graph = canonicalizeDirectedGraph(pairs.nodePaths, pairs.edges);
   const componentByNode = new Map<string, string[]>();
-  for (const component of findStronglyConnectedComponents(graph))
-    if (component.length > 1)
-      for (const node of component) componentByNode.set(node, component);
+  for (const component of listCyclicComponents(snapshot.dependencyGraph))
+    for (const node of component) componentByNode.set(node, component);
 
   const result = {
     findings: [] as PlanValidationFinding[],

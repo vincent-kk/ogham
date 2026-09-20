@@ -3,6 +3,7 @@ export { buildDependencyGraph } from './builders/buildDependencyGraph.js';
 export { resolveOwningOrganPath } from './builders/resolveOwningOrganPath.js';
 export { sortPathsDeepestFirst } from './builders/sortPathsDeepestFirst.js';
 export { detectCycles } from './cycles/detectCycles.js';
+export { listCyclicComponents } from './cycles/listCyclicComponents.js';
 export { classifyRelevanceTarget } from './relevance/classifyRelevanceTarget.js';
 export type { RelevanceTarget } from './relevance/relevanceTarget.js';
 export { partitionUnknownFiles } from './relevance/partitionUnknownFiles.js';

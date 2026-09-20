@@ -14,19 +14,19 @@ import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
 
 const P = {
-  ROOT: '/root',
-  APP: '/root/app',
-  APP_INDEX: '/root/app/index.ts',
-  UTIL: '/root/app/util',
-  UTIL_INDEX: '/root/app/util/index.ts',
-  UTIL_FILE: '/root/app/util.ts',
-  LIB: '/root/app/lib',
-  LIB_INDEX: '/root/app/lib/index.ts',
-  LIB_OTHER: '/root/app/lib/other.ts',
-  STAGING: '/root/staging',
-  THING: '/root/staging/thing.ts',
-  FEATURE: '/root/app/feature',
-  MOVED_THING: '/root/app/feature/thing.ts',
+  ROOT: '/filid-fixture-root',
+  APP: '/filid-fixture-root/app',
+  APP_INDEX: '/filid-fixture-root/app/index.ts',
+  UTIL: '/filid-fixture-root/app/util',
+  UTIL_INDEX: '/filid-fixture-root/app/util/index.ts',
+  UTIL_FILE: '/filid-fixture-root/app/util.ts',
+  LIB: '/filid-fixture-root/app/lib',
+  LIB_INDEX: '/filid-fixture-root/app/lib/index.ts',
+  LIB_OTHER: '/filid-fixture-root/app/lib/other.ts',
+  STAGING: '/filid-fixture-root/staging',
+  THING: '/filid-fixture-root/staging/thing.ts',
+  FEATURE: '/filid-fixture-root/app/feature',
+  MOVED_THING: '/filid-fixture-root/app/feature/thing.ts',
 } as const;
 
 /**

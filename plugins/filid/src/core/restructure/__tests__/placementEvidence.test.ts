@@ -19,16 +19,16 @@ import type { NodeEntry } from '../../tree/fractalTree/index.js';
 import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 
 const P = {
-  ROOT: '/root',
-  MANIFEST: '/root/package.json',
-  APP: '/root/app',
-  APP_INDEX: '/root/app/index.ts',
-  B: '/root/b',
-  B_USE: '/root/b/use.ts',
-  UTIL: '/root/app/util.ts',
-  LIB: '/root/b/lib',
-  LIB_A: '/root/b/lib/a.ts',
-  LIB_B: '/root/b/lib/b.ts',
+  ROOT: '/filid-fixture-root',
+  MANIFEST: '/filid-fixture-root/package.json',
+  APP: '/filid-fixture-root/app',
+  APP_INDEX: '/filid-fixture-root/app/index.ts',
+  B: '/filid-fixture-root/b',
+  B_USE: '/filid-fixture-root/b/use.ts',
+  UTIL: '/filid-fixture-root/app/util.ts',
+  LIB: '/filid-fixture-root/b/lib',
+  LIB_A: '/filid-fixture-root/b/lib/a.ts',
+  LIB_B: '/filid-fixture-root/b/lib/b.ts',
 } as const;
 
 function entry(
@@ -118,7 +118,7 @@ describe('restructure placement evidence', () => {
     expect(result.unresolved).toEqual([]);
     expect(result.moves[0]?.requiredArtifacts).toContainEqual({
       role: REQUIRED_ARTIFACT_ROLES.ENTRY_POINT,
-      path: '/root/b/util/index.ts',
+      path: '/filid-fixture-root/b/util/index.ts',
       adapterId: 'fixture',
     });
   });
@@ -137,7 +137,7 @@ describe('restructure placement evidence', () => {
     );
 
     expect(result.moves.map(({ targetPath }) => targetPath)).toEqual([
-      '/root/app/lib',
+      '/filid-fixture-root/app/lib',
     ]);
     expect(result.moves[0]?.consumerPaths).toEqual([P.APP_INDEX]);
   });
