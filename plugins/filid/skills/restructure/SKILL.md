@@ -25,7 +25,7 @@ Use `enrich-docs` when only documents need improvement.
 
 ### 0. Bootstrap facts
 
-Run the [facts bootstrap](../.shared/facts-bootstrap.md) for the project root, then continue to step 1 in the same turn.
+Run the [facts bootstrap](../.shared/facts-bootstrap.md) for the project root, then continue to step 1 in the same turn. Facts are settled twice in this skill: once here, so the plan reads a current graph, and once after every move lands (step 5) — never in between. A submission made while files are moving is measured against a tree that keeps changing, so its epoch moves and nothing settles.
 
 ### 1. Create the read-only plan
 
@@ -51,9 +51,21 @@ The calling environment updates DETAIL.md and boundary-changing INTENT.md first,
 
 Filid MCP never moves a file and never rewrites an import. This skill does not turn those operations into a generic MCP capability.
 
-### 5. Validate exact postconditions
+### 5. Settle facts for the new layout
+
+Every move and every import edit is done, so the tree is still again. In this order, in the same turn:
+
+1. Run the [facts bootstrap](../.shared/facts-bootstrap.md) once for the whole repository — one `status`, one extraction over the list it names, one `submit`. Moved files are new paths and their consumers changed, so a partial batch leaves the graph half-old.
+2. Have a **separate subagent** extract the same scope with its own Bash call and send `mcp__plugin_filid_tools__facts({ action: "compare", path: PROJECT_ROOT, file: <its extraction output> })` — no `generationId`, since this settles the live store rather than a review generation. That subagent reports what the comparison returned and judges nothing: an actor that confirms its own reading confirms nothing.
+3. Adjudicate the items the comparison opened, through the bootstrap's adjudicate step. A `dismiss` is confirmed by a different subagent there, not here.
+
+### 6. Validate exact postconditions
 
 Call `restructure` with `action: "postcondition"` and the same artifact. Source absence, target presence, required artifacts, imports, boundaries, and DAG must all pass. Report a postcondition failure as failure; do not silently replan.
+
+A postcondition that comes back `indeterminate` because the graph holds unknown files names those files: bootstrap them (step 5.1) and call `postcondition` again. Two findings are facts work, and each one's `nextAction` is the contract: a reported reference that sits in a comment or a string is re-extracted with a tool that does not report it, submitted — which returns it as a `coverage-shrank` item — and then dismissed through `adjudicate` with a second actor confirming, never by editing the consumer to satisfy the reader; an entry point whose exports nothing states is re-extracted alone with a tool that reports that section, or attested. Follow the sentence the response carries rather than reporting either upward.
+
+Two things in the summary qualify a pass, and both are reported rather than dropped. `summary.filesOutsideFactsScope` above zero means the declared `facts.covers` excluded that many scanned files, so no reference-based rule ran over them and the `nextAction` carries the sentence that says so. A `status: ok` whose `data.unknownFiles.other` is non-empty was verified over known edges only. Report either as it stands, and follow the summary's `nextAction` to narrow it.
 
 ## Options
 

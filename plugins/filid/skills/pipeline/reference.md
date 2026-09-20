@@ -44,11 +44,11 @@ Generated paths are the ones declared in `structure.generatedPaths`; the classif
 
 **`review`**
 
-| Verdict           | Pipeline action                                                                              |
-| ----------------- | -------------------------------------------------------------------------------------------- |
-| `APPROVED`        | Stop and report success. There is nothing to resolve.                                        |
-| `REQUEST_CHANGES` | Continue to `resolve`.                                                                       |
-| `INCONCLUSIVE`    | Stop. Evidence could not settle the question; a resolve run would act on unsettled findings. |
+| Verdict           | Pipeline action                                                                                                                                                                                                                                                                                                 |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `APPROVED`        | Stop and report success. There is nothing to resolve.                                                                                                                                                                                                                                                           |
+| `REQUEST_CHANGES` | Continue to `resolve`.                                                                                                                                                                                                                                                                                          |
+| `INCONCLUSIVE`    | When the sealed comment's next actions are facts work — bootstrap or adjudicate — carry them out and re-run the cycle once from `review`. Otherwise stop: evidence could not settle the question, and a resolve run would act on unsettled findings. A second INCONCLUSIVE for the same reason stops the cycle. |
 
 **`resolve`**
 

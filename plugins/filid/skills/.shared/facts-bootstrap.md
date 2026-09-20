@@ -2,7 +2,7 @@
 
 Canonical procedure for every filid skill whose judgments read dependency references. Each such skill links here from one short step placed before its first reference-based analysis call; the steps live only in this file.
 
-Run the steps in order, in the same turn as the calling skill, and return to the calling skill's next step when step 7 or the failure section ends the bootstrap. `PROJECT_ROOT` is the absolute project root the calling skill analyses.
+Run the steps in order, in the same turn as the calling skill, and return to the calling skill's next step when step 8 or the failure section ends the bootstrap. `PROJECT_ROOT` is the absolute project root the calling skill analyses.
 
 ## Tool use
 
@@ -23,22 +23,23 @@ mcp__plugin_filid_tools__facts({ action: "status", path: PROJECT_ROOT })
 
 A response's own `nextAction` and `attestationRequirement` are the contract. Where this document and a response differ, the response wins.
 
-An `uncertain` file always appears in at least one of four reason lists — `rejected`, `unadjudicated`, `pendingAttestations`, `indeterminate` — so route by those four rather than by `uncertain` itself:
+An `uncertain` file has a reason, and the reason decides the action — route by the reason, never by `uncertain` itself. Four reasons arrive as lists in `data`, and a fifth as a `facts-judgements-unreadable` diagnostic on the response, which names a shard rather than any file:
 
 - `rejected` → step 4, item by item.
 - `unadjudicated` → step 5.
 - `pendingAttestations` → step 6.
 - `indeterminate` → the provider could not vouch for a reference in that file; it needs an attested record, so it goes to step 6 too.
+- a `facts-judgements-unreadable` diagnostic → step 7. The files it holds uncertain are in none of the four lists, because what did not read is the judgements about them.
 
 When a list's `truncated` is above zero the server left entries out of it: handle the ones it returned, then call `status` again for the rest.
 
 - `scopeSource: "default"` means the project declared no `facts.covers`, so the scope is the adapters' source extensions. That is a working scope, not a missing one: continue. A report that says what was analysed says this too.
 - `projectState: "facts-uninitialized"` means the scope in effect covers no file at all. Outside a review, follow the diagnostic: set `facts.covers` in the project's `.filid/config.json`, then call `status` again. Inside a review, do not edit config — record the diagnostic and follow the calling skill's rule for an incomplete bootstrap.
-- Otherwise continue with the first later step whose list is non-empty; when every list is empty, go to step 7.
+- Otherwise continue with the first later step whose list is non-empty; when every list is empty and no judgements diagnostic remains, go to step 8.
 
 ### 2. Extract and submit (`missing`, `needsResolution`)
 
-The server owns the scope. `extractionList.path` names a file it wrote holding the paths to extract, and `extractionList.count` how many; the agent passes that path straight through and never reads or edits it. `extractionList.unrepresentable` counts in-scope files whose names a line-oriented list cannot carry — they are absent from the list and stay `missing`; report that number rather than trying to extract them.
+The server owns the scope. `extractionList.path` names a file it wrote holding the paths to extract, and `extractionList.count` how many; the agent passes that path straight through and never reads or edits it. The list holds exactly the in-scope files whose record is absent or stale — `missing` and `needsResolution` — so a file that already has a record filid accepts is never on it. `extractionList.unrepresentable` counts in-scope files whose names a line-oriented list cannot carry — they are absent from the list and stay `missing`; report that number rather than trying to extract them.
 
 Run the bundled extractor in one Bash call that creates a unique output file and prints only its path:
 
@@ -49,7 +50,7 @@ FACTS_OUT=$(mktemp "${TMPDIR:-/tmp}/filid-facts.XXXXXX") && node "${CLAUDE_PLUGI
 - Keep the printed path as `FACTS_OUT`. Every run creates its own file, so extractions by other sessions or projects sharing the directory never overwrite it.
 - The output must lie outside the project tree: the server refuses a submission from inside it, and a file there joins the scanned path list and moves the epoch by itself.
 - If `CLAUDE_PLUGIN_ROOT` is not set, locate the extractor with `Glob(**/bridge/filid-facts.mjs)`.
-- To extract a subset — one file the calling skill cares about, or one part of a split submission — pass those project-relative paths as positional arguments, or pipe them to `--files-from -`, in the same shape of call.
+- To extract a subset — one file the calling skill cares about, or one part of a split submission — pass those project-relative paths as positional arguments, or pipe them to `--files-from -`, in the same shape of call. This is also the way out when an analysis reports that a file's record carries nothing for the axis it needs: that file is `exact`, so the extraction list does not hold it, and running the bootstrap again would re-extract nothing. Its diagnostic's `nextAction` says so; extract that one path with a tool that reports the section, or attest it (step 6).
 
 Submit the output file with the epoch from step 1:
 
@@ -75,7 +76,7 @@ An accepted submission replaces each submitted file's record. Whole-call refusal
 - Codes a re-extraction only reproduces — the server cannot read something (`facts-resolution-input-unreadable`, `facts-source-file-unreadable`), or the record's content is what the extractor got wrong (`facts-record-schema-invalid`, `facts-reference-absent`, `facts-resolved-path-invalid`, `facts-exported-name-absent`) — are not re-extracted. Follow the item's `nextAction`: submit the file again from another tool, or, where the item says the file needs one, as an attested record (step 6). Changes the item asks for in the project itself — permissions, `facts.excludes`, deleting a declared input — belong outside a review; inside a review, change nothing, record the item and follow the calling skill's rule for an incomplete bootstrap.
 - `facts-record-out-of-scope` and `facts-record-path-invalid` mean the path is not one this project covers: drop it from the batch.
 
-A `toolError` caused by a real syntax error is fixed in the source outside a review; during a review it is a finding. A file whose tool cannot read it at all is attested instead (step 6).
+A `toolError` caused by a real syntax error is fixed in the source outside a review; during a review a changed file in that state becomes a review candidate whose rule is `facts-tool-error` — a finding, not a refusal, and it does not hold the bootstrap open. A file whose tool cannot read it at all is attested instead (step 6).
 
 ### 5. Adjudicate open items (`unadjudicated`)
 
@@ -106,15 +107,41 @@ Some files no tool output can settle: the tool cannot read them, a re-extraction
 
 `summary.attestationRequirement` states when such a record is owed, what it must carry, that every line the reference pattern matches is accounted for as a reference or in `nonReferences`, and that a second actor confirms it. It is the contract; this step only says who does what.
 
-- **First submission.** The agent that reads the file writes the record and submits it with its own `actor`: `submit({ action: "submit", path: PROJECT_ROOT, file: FACTS_OUT, resolutionEpoch, actor })`. It is stored as pending, so the file stays `uncertain`, and the response's `attested[]` entry says so. A record that leaves a matching line unexplained is refused instead, with the line numbers to read.
+- **First submission.** The agent that reads the file writes the record and submits it with its own `actor`: `mcp__plugin_filid_tools__facts({ action: "submit", path: PROJECT_ROOT, file: FACTS_OUT, resolutionEpoch, actor })`. It is stored as pending, so the file stays `uncertain`, and the response's `attested[]` entry says so. A record that leaves a matching line unexplained is refused instead, with the line numbers to read.
 - **Confirmation.** Each entry of `data.pendingAttestations` names the `path`, the `actor` that must NOT confirm it, and the `contentHash` the confirmation has to read. Brief a separate subagent with the file and those values only — never with the pending record's content — and have it read the file itself and submit its own attested record under its own `actor`. Matching records store the record and the file leaves `uncertain`.
-- **Disagreement.** A second answer that differs stores nothing and leaves the pending attestation as it was; the response names the lines that settle it. Read those lines and submit a record that settles them. If the two answers differ a second time, call `discard-pending({ action: "discard-pending", path: PROJECT_ROOT, sourcePaths })` for that file and record `facts bootstrap incomplete: step 6 attestation-mismatch` — do not send a third pair of readings, because a call identical to one already made cannot finish (step 7).
+- **Disagreement.** A second answer that differs stores nothing and leaves the pending attestation as it was; the response names the lines that settle it. Read those lines and submit a record that settles them. If the two answers differ a second time, call `mcp__plugin_filid_tools__facts({ action: "discard-pending", path: PROJECT_ROOT, sourcePaths })` for that file and record `facts bootstrap incomplete: step 6 attestation-mismatch` — do not send a third pair of readings, because a call identical to one already made cannot finish (step 8).
 - A tool-tier submission that succeeds for the same file discards the pending attestation by itself; nothing extra is owed.
 
-### 7. Finish
+### 7. Discard a judgement shard nothing can read (`facts-judgements-unreadable`)
+
+The store keeps judgements in shards. When one does not read, the adopted edges and open items it holds are invisible, so every file it covers is reported `uncertain` rather than settled — and no list can name those files, because the thing that did not read is what would have named them. The diagnostic names the shard and which of the two damages it is.
+
+- **Unreadable** — the process cannot open the file. That is an environment fault, not a store fault: restore read access to that path under the plugin cache and call `status` again. Inside a review, change nothing; record the diagnostic and follow the calling skill's rule for an incomplete bootstrap.
+- **Unparseable** — the bytes are there but are not a shard. Nothing can rewrite it in place, because the items that would be written are the ones nobody can read, so it is dropped:
+
+```text
+mcp__plugin_filid_tools__facts({ action: "discard-damaged", path: PROJECT_ROOT, shards })
+```
+
+`shards` holds the shard names exactly as the diagnostic reported them, and nothing else — a shard the store can read comes back in `data.refused` with `facts-shard-not-damaged`, and the response says to call `status` again and pass only what its judgements diagnostic reports as unparseable. `data.discarded` names what went, and `summary.affectedFiles` counts the scanned files it covered.
+
+Discarding ends the block; it does not bring the judgements back, and the response's `nextAction` is the contract for what follows. Extract those files again (step 2's subset form) and send the candidate to `compare`, which reopens every edge the store does not carry as an item to judge in step 5. A lost `dismiss` costs nothing — the edge stays where it was — but a lost `adopt` is only found again this way.
+
+### 8. Finish
 
 The bootstrap is complete when every in-scope file is `exact` or `tool-error`, and `rejected`, `unadjudicated`, `pendingAttestations` and `indeterminate` are all empty. Call `status` again after each step that changed state; when anything else remains, return to the step that owns it. Never repeat the same call with the same input: a step whose next call would be identical to its last one cannot finish, and the failure section applies.
 
 ## If the bootstrap cannot finish
 
-At this stage the bootstrap is advisory: analysis does not read facts yet, so a skipped or incomplete bootstrap leaves every result unchanged. When a step cannot finish — the `facts` tool is not registered, the scope covers no file, the extractor is not found, or a step would repeat an identical call — record one line `facts bootstrap incomplete: <step> <code or reason>` in the calling skill's report and continue with the calling skill's next step in the same turn.
+Analysis reads these facts, so an unfinished bootstrap is not free: every judgment that rests on a dependency reference is `indeterminate` until the files it needs are settled. Record one line — `facts bootstrap incomplete: <step> <code or reason>` — and then follow the calling skill's rule:
+
+| Calling skill                  | What an unfinished bootstrap means there                                                                                                                                                                                                                                                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `scan`, `guide`                | `fractal_inspect` refuses nothing. It returns the unsettled files as `unknownFiles`, each with its causes, and every reference-based axis over them comes back `indeterminate` carrying its own `nextAction`. Report the line and continue; nothing here converts an `indeterminate` into a pass.                                                     |
+| `restructure`                  | `plan` is `indeterminate` when an unsettled file is relevant to the moves; `postcondition` is `indeterminate` when the project holds any unsettled file at all, because "no new cycle" and "no new boundary violation" are claims of absence. Both name the files, and the `nextAction` is their facts — bootstrap those and call the same action again, not a new plan. |
+| `cross-review`                 | `prepare` refuses with `facts-incomplete`. Its message groups the files by cause and its `nextAction` sends each group to the list that owns it, because re-extracting answers only two of the four. Run this bootstrap that way and call `prepare` again. On a second `facts-incomplete` in the same run, end without a terminal verdict and record it in the report as a filid defect. |
+| `pull-request`                 | `handoff` shares that gate but does not refuse: the call returns `ok` with `documentSync: failed`, and carries the gate's own `facts-incomplete` diagnostic — code, message and `nextAction` — in its response `diagnostics`. Read it by code, run this bootstrap, and call `handoff` once more so the PR body carries a real sync rather than a failed one. Stage 3 runs the bootstrap before the call for the same reason. |
+| `revalidate`                   | It has no gate of its own, by design — `checkpoint` reads no reference-based evidence. Its re-measurements are `fractal_inspect validate` calls, so an unsettled file leaves that rule's evidence `indeterminate` and the accepted item stays `inconclusive`; a verdict standing on `inconclusive` items is never `PASS`. When the corrections need a fresh review instead, the chain is `checkpoint`/`seal` `review-source-hash-stale` → `prepare` → `facts-incomplete` → this bootstrap → `prepare` → `seal`, and the refusal is `prepare`'s, not `revalidate`'s. |
+| `pipeline`                     | The refusal reaches it as the result of the stage that raised it. When that stage's `nextAction` is this bootstrap, or an `adjudicate` the agent can carry out, perform it and re-run that stage once. The same refusal a second time ends the cycle with a report.                                                                                    |
+
+A step that cannot finish never repeats its own last call: a call identical to one already made cannot make progress, and that is what ends the loop. A bounded retry followed by a report is the designed ending of these rows, not a question for a person.

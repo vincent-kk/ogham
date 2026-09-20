@@ -1,4 +1,5 @@
-import { readFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -6,12 +7,10 @@ import type { z } from 'zod';
 
 import {
   FACTS_ACTIONS,
-  FACTS_ADJUDICATION_ACTOR_CODE,
-  FACTS_ADJUDICATION_REFUSALS,
-  FACTS_ADJUDICATION_STALE_CODE,
-  FACTS_DIAGNOSTIC_CODES,
-  FACTS_REJECTION_CODES,
+  FACTS_SHARD_NOT_DAMAGED_CODE,
+  FACTS_UNKNOWN_CAUSES,
 } from '../../constants/facts.js';
+import { resolveFactsStorePaths } from '../../core/facts/index.js';
 import { MCP_TOOL_INPUT_SCHEMAS } from '../../mcp/server/lifecycle/createServer.js';
 import { handleFacts } from '../../mcp/tools/facts/index.js';
 import {
@@ -31,13 +30,6 @@ const CANONICAL = readFileSync(
 const DOCUMENTED_ACTIONS = [
   ...new Set(
     [...CANONICAL.matchAll(/action: "([a-z-]+)"/g)].map(([, name]) => name),
-  ),
-];
-
-/** Every `facts-*` code the document names. */
-const DOCUMENTED_CODES = [
-  ...new Set(
-    [...CANONICAL.matchAll(/`(facts-[a-z-]+)`/g)].map(([, code]) => code),
   ),
 ];
 
@@ -84,14 +76,21 @@ const ADVERTISED_KEYS = new Set(
   ),
 );
 
-/** Every code the facts tool can return, from the constants that define them. */
-const REAL_CODES = new Set<string>([
-  ...Object.values(FACTS_DIAGNOSTIC_CODES),
-  ...Object.values(FACTS_REJECTION_CODES),
-  ...Object.values(FACTS_ADJUDICATION_REFUSALS),
-  FACTS_ADJUDICATION_ACTOR_CODE,
-  FACTS_ADJUDICATION_STALE_CODE,
-]);
+/**
+ * Make the judgement shard covering `src/only.ts` unparseable.
+ *
+ * Damage is produced rather than described: what the status diagnostic names
+ * and what `discard-damaged` will accept both come from the store's own naming.
+ * @param projectRoot Absolute root of a throwaway project.
+ * @returns The shard file name the diagnostic reports.
+ */
+function damageOneJudgementShard(projectRoot: string): string {
+  const store = resolveFactsStorePaths(projectRoot);
+  const shard = store.shardFileName(store.pathDigest('src/only.ts'));
+  mkdirSync(store.sideTableDirectory, { recursive: true });
+  writeFileSync(join(store.sideTableDirectory, shard), 'not a shard');
+  return shard;
+}
 
 /** One real status response, so field positions come from the server, not from a type read by hand. */
 let statusPayload: {
@@ -143,10 +142,13 @@ function resolveStatusField(reference: string): unknown {
 
 describe('the facts bootstrap document matches the tool it drives', () => {
   it('names only status fields the response actually holds, in the half it puts them', () => {
+    // Step 7 reads the `discard-damaged` response, not this one; its fields
+    // are checked against that payload in the damaged-shard case below.
+    const statusHalf = CANONICAL.slice(0, CANONICAL.indexOf('### 7.'));
     const referenced = [
       ...new Set(
         [
-          ...CANONICAL.matchAll(
+          ...statusHalf.matchAll(
             /`((?:summary|data)?\.?[a-zA-Z]+(?:\.[a-zA-Z]+)+)`/g,
           ),
         ].map(([, path]) => path),
@@ -214,8 +216,6 @@ describe('the facts bootstrap document matches the tool it drives', () => {
     // grow into "whatever the document has not caught up with".
     const excluded = {
       [FACTS_ACTIONS.COMPARE]: 'belongs to a verifier, not the bootstrap',
-      [FACTS_ACTIONS.DISCARD_DAMAGED]:
-        'introduced by the server in S3c; the bootstrap document routes it from the judgements diagnostic and follows separately',
     };
 
     expect(
@@ -257,13 +257,6 @@ describe('the facts bootstrap document matches the tool it drives', () => {
     ).toEqual([]);
   });
 
-  it('names only codes the tool can return', () => {
-    expect(DOCUMENTED_CODES.length).toBeGreaterThan(0);
-    expect(DOCUMENTED_CODES.filter((code) => !REAL_CODES.has(code))).toEqual(
-      [],
-    );
-  });
-
   it('reads status fields the status payload actually carries', () => {
     const documented = [
       ...new Set(
@@ -278,6 +271,45 @@ describe('the facts bootstrap document matches the tool it drives', () => {
     expect(documented).toContain('extractionList.path');
     expect(documented).toContain('extractionList.unrepresentable');
     expect(documented).toContain('data.unadjudicated.items');
+  });
+
+  it('routes a damaged judgement shard the way the tool answers it', async () => {
+    const project = createFactsProject({ 'src/only.ts': 'export const a = 1;\n' });
+    const shard = damageOneJudgementShard(project.root);
+
+    const reported = await handleFacts({ action: 'status', path: project.root });
+    const dropped = await handleFacts({
+      action: 'discard-damaged',
+      path: project.root,
+      shards: [shard],
+    });
+    const refused = await handleFacts({
+      action: 'discard-damaged',
+      path: project.root,
+      shards: [shard],
+    });
+
+    const step = CANONICAL.slice(CANONICAL.indexOf('### 7.'));
+    expect((reported.diagnostics ?? []).map(({ code }) => code)).toContain(
+      FACTS_UNKNOWN_CAUSES.JUDGEMENTS_UNREADABLE,
+    );
+    expect(step).toContain(FACTS_UNKNOWN_CAUSES.JUDGEMENTS_UNREADABLE);
+    expect(dropped.data).toMatchObject({ discarded: [shard], refused: [] });
+    expect(refused.status).toBe('indeterminate');
+    expect((refused.diagnostics ?? []).map(({ code }) => code)).toContain(
+      FACTS_SHARD_NOT_DAMAGED_CODE,
+    );
+    expect(step).toContain(FACTS_SHARD_NOT_DAMAGED_CODE);
+    // Every field step 7 sends the reader to belongs to this response.
+    const real = new Set([
+      ...Object.keys(dropped.data ?? {}).map((key) => `data.${key}`),
+      ...Object.keys(dropped.summary).map((key) => `summary.${key}`),
+    ]);
+    const spelled = [
+      ...step.matchAll(/`((?:data|summary)\.[a-zA-Z]+)`/g),
+    ].map(([, path]) => path);
+    expect(spelled.length).toBeGreaterThan(0);
+    expect(spelled.filter((path) => !real.has(path))).toEqual([]);
   });
 
   it('never tells the agent to extract everything or to run git', () => {

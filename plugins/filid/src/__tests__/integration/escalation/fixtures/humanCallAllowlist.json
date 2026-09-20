@@ -1,6 +1,22 @@
 {
   "entries": [
     {
+      "file": "skills/.shared/facts-bootstrap.md",
+      "hash": "b4615df0fdfd4473",
+      "kind": "stop",
+      "class": "N",
+      "text": "A bounded retry followed by a report is the designed ending of these rows, not a question for a person.",
+      "note": "금지문: states that the bounded retry of every row ends in a report, never in a human call (R-2, S5b)."
+    },
+    {
+      "file": "skills/.shared/facts-bootstrap.md",
+      "hash": "c642f68fdd0503ea",
+      "kind": "stop",
+      "class": "N",
+      "text": "On a second `facts-incomplete` in the same run, end without a terminal verdict and record it in the report as a filid defect. |",
+      "note": "R-2 designed termination of the bootstrap retry inside one run (S5b)."
+    },
+    {
       "file": "skills/.shared/intent-template.md",
       "hash": "2d5a5884529681c6",
       "kind": "human-call",
@@ -137,14 +153,6 @@
       "note": "금지문"
     },
     {
-      "file": "skills/cross-review/SKILL.md",
-      "hash": "dff3fd198512d284",
-      "kind": "stop",
-      "class": "S",
-      "text": "Continue only when `status: ok` and `summary.disposition: sealed`; otherwise report diagnostics and stop without a terminal verdict.",
-      "note": "S5b가 `facts-discrepancy` 분기로 바꿈(스펙 §10). 그 밖의 비정상 seal은 §10의 \"seal 비정상 반환\"(판정 대상)"
-    },
-    {
       "file": "skills/cross-review/templates.md",
       "hash": "16b5e95ed2a30fe4",
       "kind": "human-call",
@@ -242,14 +250,6 @@
     },
     {
       "file": "skills/pipeline/reference.md",
-      "hash": "9a45785d0a749fc1",
-      "kind": "stop",
-      "class": "M",
-      "text": "| `INCONCLUSIVE` | Stop. Evidence could not settle the question; a resolve run would act on unsettled findings. |",
-      "note": "초안: \"`INCONCLUSIVE` → carry out the sealed comment's agent next actions (evidence recovery), then re-run `/filid:pipeline`; stop only when the blockers are human decisions.\" (?)"
-    },
-    {
-      "file": "skills/pipeline/reference.md",
       "hash": "9d27d336498c280c",
       "kind": "stop",
       "class": "U",
@@ -271,6 +271,14 @@
       "class": "N",
       "text": "| Typecheck failure with every correction reverted (`--auto`) | Stop. The failure predates the corrections; `resolve` repaired or reverted each one it could. |",
       "note": "C39 draft applied: resolve repairs at most twice and reverts only the corrections it cannot repair; the remaining stop is a failure that predates the corrections (designed termination)."
+    },
+    {
+      "file": "skills/pipeline/reference.md",
+      "hash": "e14d300458247360",
+      "kind": "stop",
+      "class": "N",
+      "text": "A second INCONCLUSIVE for the same reason stops the cycle. |",
+      "note": "Designed termination after one facts-driven retry of the cycle (C38, S5b)."
     },
     {
       "file": "skills/pipeline/reference.md",

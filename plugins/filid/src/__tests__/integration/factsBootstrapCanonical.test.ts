@@ -19,7 +19,7 @@ const HUMAN_CALL =
 
 /**
  * Cut one numbered step out of the canonical document.
- * @param step Step number, 1 through 7.
+ * @param step Step number, 1 through 8.
  * @returns The text from that step's heading up to the next heading of the same or higher level.
  */
 function stepText(step: number): string {
@@ -101,12 +101,23 @@ describe('the canonical bootstrap walks the seven branches in order', () => {
         'nonReferences',
       ],
     ],
-    [7, ['exact', 'tool-error']],
+    [
+      7,
+      [
+        'facts-judgements-unreadable',
+        'action: "discard-damaged"',
+        'shards',
+        'facts-shard-not-damaged',
+        'data.discarded',
+        'compare',
+      ],
+    ],
+    [8, ['exact', 'tool-error']],
   ] as const)('step %i names its calls and next actions', (step, tokens) => {
     const text = stepText(step);
     for (const token of tokens) expect(text).toContain(token);
     expect(canonical.indexOf(`\n### ${step}. `)).toBeLessThan(
-      canonical.indexOf(step === 7 ? FAILURE_HEADING : `\n### ${step + 1}. `),
+      canonical.indexOf(step === 8 ? FAILURE_HEADING : `\n### ${step + 1}. `),
     );
   });
 });
@@ -142,7 +153,7 @@ describe('the canonical bootstrap bounds what the agent does', () => {
   });
 
   it('never repeats a call with the same input', () => {
-    expect(stepText(7)).toMatch(
+    expect(stepText(8)).toMatch(
       /never repeat the same call with the same input/i,
     );
   });
@@ -154,19 +165,21 @@ describe('the canonical bootstrap bounds what the agent does', () => {
     expect(hits).toEqual([]);
   });
 
-  it('decides the failure effect in one section alone', () => {
+  it('decides the failure effect in one section alone, per calling skill', () => {
     const failure = canonical.slice(canonical.indexOf(FAILURE_HEADING));
     expect(canonical.split(FAILURE_HEADING)).toHaveLength(2);
-    expect(failure).toMatch(/same turn/i);
-    expect(failure).toMatch(/advisory/i);
-    expect(canonical.match(/advisory/gi)?.length).toBe(
-      failure.match(/advisory/gi)?.length,
-    );
-    expect(
-      failure
-        .slice(FAILURE_HEADING.length)
-        .trim()
-        .split(/\n\s*\n/),
-    ).toHaveLength(1);
+    expect(failure).toMatch(/indeterminate/i);
+    for (const skill of [
+      'scan',
+      'guide',
+      'restructure',
+      'cross-review',
+      'pull-request',
+      'revalidate',
+    ])
+      expect(failure).toContain(`\`${skill}\``);
+    expect(failure).toMatch(/facts-incomplete/);
+    expect(failure).toMatch(/identical to one already made/i);
+    expect(canonical.match(/advisory/gi)).toBeNull();
   });
 });
