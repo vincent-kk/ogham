@@ -1,10 +1,10 @@
 # Code Placement
 
-> **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults — the higher source wins. Where a unit sits decides who may reach it: placement is a boundary decision, not a filing decision. Applies when the repository has adopted FCA and you are adding a unit with more than one consumer, or moving one; prefer the move at a natural seam, not mid-task.
+> **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults — the higher source wins. Where a unit sits decides who may reach it: placement is a boundary decision, not a filing decision. Applies when the repository has adopted FCA and you are adding a unit or moving one; prefer the move at a natural seam, not mid-task.
 
-## 1. Shared code sits at the lowest common fractal of its consumers
+## 1. A unit sits with the contract it implements; shared code sits at its users' lowest common fractal
 
-The consumers' common ancestor is the address; anything higher is a guess. Compute the lowest common fractal of the consumer owners and place the unit under it. A single-consumer internal unit defaults to an organ of that owner — one consumer is not shared code. A unit with an independent public contract becomes a child fractal instead, with its intent, detail and entry-point artifacts.
+A unit belongs to the fractal whose contract it implements. Only a unit serving the implementations of two or more fractals is shared: compute the lowest common fractal of the owners that use it and place the unit under it — their common ancestor is the address; anything higher is a guess. Count the consumers that use the unit: code that merely constructs it and hands it on is wiring, and counting wiring pulls everything up to the composition root. A unit with one using owner is an organ of that owner — one user is not shared code. A unit with a contract of its own, published or not, becomes a child fractal instead, with its intent, detail and entry-point artifacts.
 
 ## 2. An organ cannot be a lowest common ancestor
 
@@ -12,7 +12,7 @@ An organ has no entry point, so it cannot own a shared boundary. When the comput
 
 ## 3. No evidence for a name means a decision is required, not invented
 
-`shared` and `common` are names that can hold anything. When no meaningful organ name is supported by the evidence, the plan sets `requiresDecision: true` and stops for a human — do not invent a grab-bag name to let the plan proceed.
+`shared` and `common` are names that can hold anything. A conventional compartment name — `utils`, `helpers`, `types` and their kin — states a role and needs no evidence; the topic name inside it does. When no meaningful organ name is supported by the evidence, the plan sets `requiresDecision: true` and stops for a human — do not invent a grab-bag name to let the plan proceed.
 
 ## 4. Planning is read-only; the postcondition demands the exact target
 
@@ -24,4 +24,4 @@ Contracts lead; implementations follow: before changing a fractal, update DETAIL
 
 ---
 
-**This rule is working if:** shared units sit at an ancestor you can derive from their consumers, and DETAIL diffs precede the implementation diffs they describe. **This rule is wrong for you if:** the unit has exactly one consumer and always will — then it belongs beside that consumer, and none of this applies.
+**This rule is working if:** every unit sits in the fractal whose contract it implements, shared units sit at an ancestor you can derive from their users, and DETAIL diffs precede the implementation diffs they describe. **This rule is wrong for you if:** the unit has exactly one user and always will — then it belongs beside that user, and none of this applies.
