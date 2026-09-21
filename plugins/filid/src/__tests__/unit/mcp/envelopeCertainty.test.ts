@@ -28,11 +28,15 @@ const DOCUMENT_FINDING_DIAGNOSTICS: ToolDiagnostic[] = [
     code: BUILTIN_RULE_IDS.INTENT_DOCUMENT_CONTRACT,
     message: DOCUMENT_FINDING_MESSAGE,
     path: DOCUMENT_PATH,
+    affects: [],
+    nextAction: 'test next action',
   },
   {
     code: BUILTIN_RULE_IDS.DETAIL_DOCUMENT_CONTRACT,
     message: DOCUMENT_FINDING_MESSAGE,
     path: DOCUMENT_PATH,
+    affects: [],
+    nextAction: 'test next action',
   },
 ];
 
@@ -41,6 +45,8 @@ const CONFIG_WARNING_DIAGNOSTICS: ToolDiagnostic[] = [
     code: SNAPSHOT_TOOL_DIAGNOSTIC_CODES.CONFIG_WARNING,
     message: CONFIG_WARNING_MESSAGE,
     path: PROJECT_ROOT,
+    affects: ['dependencies', 'boundaries', 'verification'],
+    nextAction: 'test next action',
   },
 ];
 
@@ -59,6 +65,7 @@ const EXACT_SNAPSHOT: ProjectSnapshot = {
     nodePaths: [],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: [],
@@ -69,6 +76,8 @@ const EXACT_SNAPSHOT: ProjectSnapshot = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  normalizedFacts: [],
+    filesOutsideFactsScope: 0,
   collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: CREATED_AT,
 };
@@ -82,6 +91,7 @@ const DOCUMENT_VIOLATION_REPORT: ValidationReport = {
         message: DOCUMENT_FINDING_MESSAGE,
         path: DOCUMENT_PATH,
         certainty: ANALYSIS_CERTAINTIES.EXACT,
+        suggestion: 'Revise the document as the message states.',
       },
     ],
     passed: 0,
@@ -170,4 +180,21 @@ describe('envelope certainty', () => {
       ),
     ).toBe(TOOL_STATUSES.VIOLATIONS);
   });
+
+  it.each([
+    [[], TOOL_STATUSES.VIOLATIONS],
+    [
+      ['dependencies', 'boundaries', 'verification'],
+      TOOL_STATUSES.INDETERMINATE,
+    ],
+  ] as const)(
+    'maps project validation beside a config-warning with affects %j to %s',
+    (affects, status) => {
+      expect(
+        resolveProjectValidationStatus(DOCUMENT_VIOLATION_REPORT, [
+          { ...CONFIG_WARNING_DIAGNOSTICS[0]!, affects },
+        ]),
+      ).toBe(status);
+    },
+  );
 });

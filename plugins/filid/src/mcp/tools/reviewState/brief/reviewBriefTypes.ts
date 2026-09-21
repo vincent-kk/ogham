@@ -78,4 +78,14 @@ export interface RenderVerifyBriefInput {
   findings: readonly ReviewFinding[];
   /** Immutable committed-source identity. */
   sourceHash: string;
+  /**
+   * The generation this brief belongs to, when the state has one.
+   *
+   * The verifier compares its own extraction against what this review was
+   * judged on, and the brief file is all it gets — without the id here it
+   * cannot name the generation and the comparison falls back to the live
+   * store. Optional because a brief written before generations existed has
+   * none, and an old brief must keep working.
+   */
+  generationId?: string;
 }

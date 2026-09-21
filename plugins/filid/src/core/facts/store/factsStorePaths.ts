@@ -1,0 +1,87 @@
+import { createHash } from 'node:crypto';
+import { join } from 'node:path';
+
+import { canonicalizeTargetPathSync } from '@ogham/cross-platform';
+
+import {
+  FACTS_EPOCH_DRIFT_FILE,
+  FACTS_EXTRACTION_LIST_FILE,
+  FACTS_PENDING_DIRECTORY,
+  FACTS_RECORD_EXTENSION,
+  FACTS_SHARD_NAME_LENGTH,
+  FACTS_SIDE_TABLE_DIRECTORY,
+  FACTS_STORE_DIRECTORY,
+} from '../../../constants/facts.js';
+import { getCacheDir } from '../../infra/cacheManager/index.js';
+
+/** Where one project's facts state lives, outside the project tree. */
+export interface FactsStorePaths {
+  /** Directory holding the shard files. */
+  directory: string;
+  /** File holding the last computed epoch and the inputs behind it. */
+  epochSnapshotPath: string;
+  /** File holding the consecutive-epoch counter. */
+  driftPath: string;
+  /** File holding the paths an extractor should read, one per line. */
+  extractionListPath: string;
+  /** Directory holding the adjudication side table's shards. */
+  sideTableDirectory: string;
+  /** Directory holding unconfirmed attested submissions, one page per file. */
+  pendingDirectory: string;
+  /**
+   * Record key for one project-relative path.
+   * @param relativePath Path as `listScannedFilePaths` spells it.
+   * @returns The path's digest, which keys the record inside its shard.
+   */
+  pathDigest: (relativePath: string) => string;
+  /**
+   * Shard file holding one record.
+   * @param pathDigest Digest returned by `pathDigest`.
+   * @returns The shard file name.
+   */
+  shardFileName: (pathDigest: string) => string;
+}
+
+/**
+ * Resolve where a project's facts records are stored.
+ *
+ * Records are keyed by the digest of the project-relative path rather than by
+ * the path itself: a path contains separators and can exceed a filesystem's
+ * name limit, and deriving a name from caller-influenced text is the path-
+ * manipulation surface this store must not have.
+ *
+ * Records are grouped into shards named by the digest's first bytes, so a store
+ * of a few thousand records costs a couple of hundred file opens rather than
+ * one per record — per-file opens dominated reading the store when every record
+ * had its own file.
+ *
+ * The root is canonicalized before it keys anything. Callers spell the same
+ * project differently — a review resolves it through git, which answers with
+ * the real path, while another tool passes the path it was handed, and on most
+ * systems a temporary directory is reached through a symbolic link. Two
+ * spellings keying two stores would mean facts submitted by a finished
+ * bootstrap are invisible to the analysis that asked for them, which is a loop
+ * with no way out (P5). A path that does not exist yet keys itself, which is
+ * what the canonicalizer returns for it.
+ *
+ * @param projectRoot - Absolute project root the store is keyed by.
+ * @returns Absolute paths and the key functions for that project.
+ */
+export function resolveFactsStorePaths(projectRoot: string): FactsStorePaths {
+  const directory = join(
+    getCacheDir(canonicalizeTargetPathSync(projectRoot, projectRoot)),
+    FACTS_STORE_DIRECTORY,
+  );
+  return {
+    directory,
+    epochSnapshotPath: join(directory, `epoch${FACTS_RECORD_EXTENSION}`),
+    driftPath: join(directory, FACTS_EPOCH_DRIFT_FILE),
+    extractionListPath: join(directory, FACTS_EXTRACTION_LIST_FILE),
+    sideTableDirectory: join(directory, FACTS_SIDE_TABLE_DIRECTORY),
+    pendingDirectory: join(directory, FACTS_PENDING_DIRECTORY),
+    pathDigest: (relativePath) =>
+      createHash('sha256').update(relativePath, 'utf8').digest('hex'),
+    shardFileName: (pathDigest) =>
+      `${pathDigest.slice(0, FACTS_SHARD_NAME_LENGTH)}${FACTS_RECORD_EXTENSION}`,
+  };
+}

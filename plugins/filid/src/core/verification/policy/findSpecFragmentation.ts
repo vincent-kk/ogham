@@ -1,13 +1,23 @@
+import { toProjectRelativePath } from '../../../lib/toProjectRelativePath.js';
 import type {
   ContractGroupsByOwner,
   VerificationFileAnalysis,
   VerificationViolation,
 } from '../../../types/verification.js';
 
+/**
+ * Find spec documents that share an owner without linking distinct DETAIL acceptance groups.
+ * @param files Analyzed verification files; only spec documents are read.
+ * @param projectRoot Absolute project root; messages name paths relative to it.
+ * @param contractGroups DETAIL acceptance groups declared per owner fractal.
+ * @returns Unlinked, undeclared and split contract group violations.
+ */
 export function findSpecFragmentation(
   files: readonly VerificationFileAnalysis[],
+  projectRoot: string,
   contractGroups: ContractGroupsByOwner = new Map(),
 ): VerificationViolation[] {
+  const shown = (path: string) => toProjectRelativePath(projectRoot, path);
   const specsByOwner = new Map<string, VerificationFileAnalysis[]>();
   for (const file of files) {
     if (file.role !== 'spec-document') continue;
@@ -23,12 +33,24 @@ export function findSpecFragmentation(
     const claimedBy = new Map<string, string>();
 
     for (const spec of specs) {
+      if (spec.contractGroupIds === undefined) {
+        violations.push({
+          ruleId: 'spec-contract-link',
+          path: spec.path,
+          severity: 'warning',
+          certainty: 'indeterminate',
+          message: `The record for ${shown(spec.path)} reports no contract group declarations, so its link to ${shown(ownerPath)}/DETAIL.md cannot be judged.`,
+          suggestion: `Re-extract ${shown(spec.path)} with the bundled extractor and submit the record again; a record that reports an empty list is read as "declares none".`,
+        });
+        continue;
+      }
       if (spec.contractGroupIds.length === 0) {
         violations.push({
           ruleId: 'spec-contract-link',
           path: spec.path,
           severity: 'error',
-          message: `Multiple spec documents owned by ${ownerPath} must declare at least one DETAIL acceptance group.`,
+          message: `Multiple spec documents owned by ${shown(ownerPath)} must declare at least one DETAIL acceptance group.`,
+          suggestion: `Mark each spec document with a "// filid:contract <group-id>" comment naming an acceptance group declared in ${ownerPath}/DETAIL.md.`,
         });
         continue;
       }
@@ -39,7 +61,8 @@ export function findSpecFragmentation(
             ruleId: 'spec-contract-link',
             path: spec.path,
             severity: 'error',
-            message: `Contract group "${groupId}" is not declared by ${ownerPath}/DETAIL.md.`,
+            message: `Contract group "${groupId}" is not declared by ${shown(ownerPath)}/DETAIL.md.`,
+            suggestion: `Declare "### ${groupId} — <title>" under "## Acceptance Criteria" in ${ownerPath}/DETAIL.md, or correct the filid:contract comment in the spec.`,
           });
 
         const previousPath = claimedBy.get(groupId);
@@ -48,7 +71,8 @@ export function findSpecFragmentation(
             ruleId: 'spec-fragmentation',
             path: spec.path,
             severity: 'error',
-            message: `Contract group "${groupId}" is split across ${previousPath} and ${spec.path}.`,
+            message: `Contract group "${groupId}" is split across ${shown(previousPath)} and ${shown(spec.path)}.`,
+            suggestion: `Keep contract group "${groupId}" in one spec document: move its cases into ${previousPath}, or split the group in ${ownerPath}/DETAIL.md.`,
           });
         else claimedBy.set(groupId, spec.path);
       }

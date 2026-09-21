@@ -5,17 +5,9 @@ import type {
   ScopeCandidateBuildResult,
 } from '../state/reviewStateTypes.js';
 
-const SEVERITY_RANK = { info: 0, warning: 1, error: 2 } as const;
+import { compareScopeViolations } from './utils/compareScopeViolations.js';
 
-function compareViolation(
-  left: ReviewScopeViolation,
-  right: ReviewScopeViolation,
-): number {
-  if (left.path !== right.path) return left.path < right.path ? -1 : 1;
-  if (left.ruleId !== right.ruleId) return left.ruleId < right.ruleId ? -1 : 1;
-  if (left.message === right.message) return 0;
-  return left.message < right.message ? -1 : 1;
-}
+const SEVERITY_RANK = { info: 0, warning: 1, error: 2 } as const;
 
 function categoryForScope(scope: string): ReviewScopeCategory {
   if (scope === RULE_SCOPES.DOCUMENTS || scope === RULE_SCOPES.ENTRY_POINTS)
@@ -46,7 +38,9 @@ export function buildScopeCandidates(
   }
   const candidates: ScopeCandidateBuildResult['candidates'] = [];
   const informational: ScopeCandidateBuildResult['informational'] = [];
-  for (const violation of [...deduplicated.values()].sort(compareViolation)) {
+  for (const violation of [...deduplicated.values()].sort(
+    compareScopeViolations,
+  )) {
     const scope =
       violation.source === 'verification'
         ? RULE_SCOPES.VERIFICATION

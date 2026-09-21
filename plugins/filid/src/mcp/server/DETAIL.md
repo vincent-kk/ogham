@@ -16,9 +16,11 @@
 - 등록 도구: `project_setup`, `fractal_inspect`, `restructure`, `review_state`.
 - `review_state` prepare의 effort는 `auto | low | medium | high`를 광고하며, auto의 그룹별 선택과 기본값은 reviewState 계약이 소유한다.
 - `review_state` prepare는 명시적 검토 기준을 `userInstructions`로 받는다. 일반 서브에이전트는 briefPath를 읽고 outputPath에 의견을 쓰며 validate로 완료한다. 별도 context action이나 호스트 전용 actor capability는 없다.
-- `ToolResultEnvelope<Summary, Data>`는 `status`, `summary`, optional `data`, optional `artifact`, `diagnostics`를 가진다.
+- `ToolResultEnvelope<Summary, Data>`는 `status`, `summary`, optional `data`, optional `artifact`, `diagnostics`를 가진다. 진단마다 `code`, `message`와 필수 `nextAction`이 있다. `nextAction`은 호출자가 다음에 할 일을 말한다: 고칠 것, filid가 호출자에게 넘긴 단계, 또는 결정할 사람.
 - `toolResult(toolName, payload)`는 envelope를 compact MCP text content로 직렬화한다.
-- `toolError(error)`는 transport 또는 trust-boundary 실패를 `isError: true` 응답으로 변환한다. 도구 계약이 stable diagnostic code를 가진 typed error를 던지면 그 코드를 보존하고, 그 외 실행 실패만 `tool-execution-error`를 쓴다.
+- `toolError(error, code?)`는 transport 또는 trust-boundary 실패를 `isError: true` 응답으로 변환한다. 도구 계약이 stable diagnostic code를 가진 typed error(`ToolDiagnosticError`)를 던지면 그 코드와 `nextAction`을 보존하고, 그 외 실행 실패만 `tool-execution-error`를 쓴다.
+  - 입력 검증 실패의 `nextAction`은 메시지가 가리키는 인자를 스키마에 맞게 고쳐 다시 호출하라는 것이다.
+  - `tool-execution-error`의 `nextAction`은 구체 안내가 없음을 밝힌다. 메시지가 호출자가 준 인자·경로·설정을 가리키면 고쳐 다시 호출하고, 아니면 한 번 재시도한 뒤 사용자에게 보고한다.
 - `wrapHandler(toolName, schema, handler)`는 schema·handler·artifact 오류를 일관된 tool error로 격리한다.
 - `startServer()`는 stdio transport 연결 후 boot cleanup을 수행하고 동기 shutdown handler를 한 번 등록한다.
 - `fractal_inspect`의 `resolve` action은 최소 한 item의 `requests` 배열을 받고, 한 shared snapshot에서 입력 순서대로 item 결과를 반환한다.
@@ -39,7 +41,7 @@
 
 - `tools/list`는 각 도구의 필드와 enum/literal/minimum 제약을 유효한 MCP object JSON Schema로 광고한다.
 - 광고된 제약을 위반한 실제 `tools/call`도 SDK raw error가 아니라 `isError: true`인 Filid 공통 error envelope를 반환한다.
-- 입력 검증 실패는 `tool-input-invalid`, 도구 계약이 분류하지 않은 핸들러 실행 실패는 `tool-execution-error` 진단 코드를 쓴다. 도구 계약이 stable diagnostic code를 부여한 실행 실패는 그 코드를 보존한다. `review-effort-locked`와 `review-validation-policy-outdated`는 기존 error envelope로만 전달하며 data·handoff·기존 verdict를 내보내지 않는다. 입력 오류와 미분류 엔진 결함이 코드를 공유하면 호출자가 자기 인자를 고쳐야 하는지 엔진 결함인지 구분할 수 없다.
+- 입력 검증 실패는 `tool-input-invalid`, 도구 계약이 분류하지 않은 핸들러 실행 실패는 `tool-execution-error` 진단 코드를 쓴다. 세 갈래(typed error, 입력 오류, 미분류 실패) 모두 진단에 비지 않은 `nextAction`을 싣는다. 도구 계약이 stable diagnostic code를 부여한 실행 실패는 그 코드를 보존한다. `review-effort-locked`와 `review-validation-policy-outdated`는 기존 error envelope로만 전달하며 data·handoff·기존 verdict를 내보내지 않는다. 입력 오류와 미분류 엔진 결함이 코드를 공유하면 호출자가 자기 인자를 고쳐야 하는지 엔진 결함인지 구분할 수 없다.
 - 모든 도구 input schema는 필드마다 `.describe()`를 갖는다. MCP 표면이 LLM 호출자에게는 유일한 계약이므로 이름만으로 의미가 서지 않는 필드 (`fractal_inspect`의 `scan` action `maxDepth` 같은 규칙 임계값)는 설명이 계약의 일부다.
 - 도구 공통 project path 설명은 실제 root 해석과 일치한다. 공급된 절대 경로는 그대로 이 호출의 root가 되고 상향 탐색은 없다. `.filid/config.json`만 git 저장소 루트에서 읽힌다. 설명이 상향 해석을 주장하면 호출자는 하위 디렉터리를 넘겨 scope를 좁히는 동작을 예측할 수 없다.
 - `fractal_inspect.requests`는 resolve-only 필드로 `minItems: 1`을 광고하고 각 item의 target과 optional comparison paths를 설명한다. 제거된 scalar `targetPath`와 `comparePaths`는 top-level 입력으로 허용하지 않는다.
@@ -50,9 +52,10 @@
 
 ## History
 
+- 2026-09-19 — 진단마다 필수 `nextAction`을 두었다. 오류 envelope가 코드와 원문 메시지만 돌려줘, LLM 호출자가 인자를 고칠지, 재시도할지, 사용자에게 물을지 알 수 없었다.
 - 2026-09-05 — 같은 lifecycle의 기능을 action union으로 묶어 server registry를 9개에서 4개로 줄였다.
 - 2026-08-28 — `context_resolve`의 공개 입력을 shared-snapshot `requests[]` batch로 전환했다.
 
 ## Last Updated
 
-2026-09-07
+2026-09-19

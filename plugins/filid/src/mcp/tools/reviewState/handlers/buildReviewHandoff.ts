@@ -12,8 +12,10 @@ import {
   REVIEW_STATE_ACTIONS,
   type ReviewHandoffClass,
 } from '../../../../constants/reviewState.js';
+import { ANALYSIS_AXES } from '../../../../constants/analysisAxes.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
+import { affectsAnalysisAxis } from '../../utils/affectsAnalysisAxis.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { buildHandoffSeed } from '../scope/buildHandoffSeed.js';
 import { classifyHandoffFinding } from '../scope/classifyHandoffFinding.js';
@@ -38,6 +40,7 @@ import type {
 
 import { resolvePrepareBaseRef } from './utils/resolvePrepareBaseRef.js';
 import { resolvePrepareSettings } from './utils/resolvePrepareSettings.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 
 /** Validated handoff input narrowed from the public review-state action union. */
 type HandoffInput = Extract<
@@ -113,9 +116,11 @@ export async function buildReviewHandoff(
         ),
       }),
     );
-    const diagnosticFindings = computed.evidenceDiagnostics.map(
-      mapEvidenceDiagnosticToHandoffFinding,
-    );
+    // A diagnostic declaring `affects: []` changes no conclusion, so it is not
+    // an indeterminate finding and does not take one of the recorded rows.
+    const diagnosticFindings = computed.evidenceDiagnostics
+      .filter((diagnostic) => affectsAnalysisAxis(diagnostic, ANALYSIS_AXES))
+      .map(mapEvidenceDiagnosticToHandoffFinding);
     ({ seed, counts } = buildHandoffSeed({
       snapshotHash: computed.snapshotHash,
       scope,
@@ -127,6 +132,19 @@ export async function buildReviewHandoff(
     }));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
+    // This catch exists for a render or self-check failure, which is reported
+    // rather than blocking. A gate refusal is not that: it keeps its code and
+    // its next action, or the caller is told sync failed and nothing else (P5).
+    if (error instanceof ToolDiagnosticError)
+      diagnostics = [
+        {
+          code: error.code,
+          message: error.message,
+          path: input.projectRoot,
+          affects: ['dependencies', 'boundaries'],
+          nextAction: error.nextAction,
+        },
+      ];
     const callerEntries = (input.entries ?? []).map(
       normalizeHandoffCallerEntry,
     );
@@ -155,9 +173,8 @@ export async function buildReviewHandoff(
     counts = Object.fromEntries(
       REVIEW_HANDOFF_CLASS_ORDER.map((handoffClass) => [
         handoffClass,
-        completeFailureEntries.filter(
-          (entry) => entry.class === handoffClass,
-        ).length,
+        completeFailureEntries.filter((entry) => entry.class === handoffClass)
+          .length,
       ]),
     ) as Record<ReviewHandoffClass, number>;
   }

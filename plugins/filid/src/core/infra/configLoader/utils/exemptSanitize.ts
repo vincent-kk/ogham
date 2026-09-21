@@ -48,12 +48,12 @@ function isValidGlobSyntax(pattern: string): boolean {
 
 /**
  * Drop invalid / bare-`**` exempt patterns from each `RuleOverride.exempt`
- * array. Returns the sanitised config — a shallow-cloned `rules` map when
+ * array, announcing each drop with its `rules.<id>.exempt` path. Returns the sanitised config — a shallow-cloned `rules` map when
  * any override required a rewrite, the original input otherwise.
  */
 export function sanitizeExemptPatterns(
   config: FilidConfig,
-  addWarning: (msg: string) => void,
+  addWarning: (msg: string, key: readonly (string | number)[]) => void,
 ): FilidConfig {
   const rules = { ...config.rules };
   let mutated = false;
@@ -65,6 +65,7 @@ export function sanitizeExemptPatterns(
       if (pattern === '**') {
         addWarning(
           `rules["${ruleId}"].exempt: bare "**" pattern dropped — use a concrete scope such as "packages/**" instead`,
+          ['rules', ruleId, 'exempt'],
         );
         dropped = true;
         continue;
@@ -72,6 +73,7 @@ export function sanitizeExemptPatterns(
       if (!isValidGlobSyntax(pattern)) {
         addWarning(
           `rules["${ruleId}"].exempt: invalid glob syntax "${pattern}" (dropped)`,
+          ['rules', ruleId, 'exempt'],
         );
         dropped = true;
         continue;

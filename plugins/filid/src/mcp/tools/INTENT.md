@@ -1,8 +1,8 @@
-# tools — four-tool protocol handlers
+# tools — five-tool protocol handlers
 
 ## Purpose
 
-Filid 1.0의 setup/inspection/restructure/review 동작을 정확히 4개 독립 sub-fractal로 노출한다.
+Filid 1.0의 setup/inspection/restructure/review/facts 동작을 정확히 5개 독립 sub-fractal로 노출한다.
 
 ## Structure
 
@@ -12,6 +12,7 @@ Filid 1.0의 setup/inspection/restructure/review 동작을 정확히 4개 독립
 | `fractalInspect` | FCA tree, rule, verification와 context 검사   |
 | `restructure`    | placement plan과 사전·사후조건 검증           |
 | `reviewState`    | merge-track review lifecycle                  |
+| `facts`          | 제출된 사실의 상태 보고와 수용             |
 | `utils/`         | shared host guards와 진단 scoping             |
 
 ## Conventions
@@ -30,7 +31,7 @@ Filid 1.0의 setup/inspection/restructure/review 동작을 정확히 4개 독립
 
 ### Ask first
 
-- 4개 목록, action/input schema, persistence 또는 status 의미 변경
+- 5개 목록, action/input schema, persistence 또는 status 의미 변경
 
 ### Never do
 

@@ -11,6 +11,12 @@ import {
   STRUCTURE_VALIDATION_SCOPES,
   VERIFICATION_SCAN_DETAILS,
 } from '../../../constants/mcpContracts.js';
+import {
+  FACTS_ACTIONS,
+  FACTS_DECISIONS,
+  FACTS_OUTPUT_REQUIREMENT,
+  FACTS_REFERENCE_KINDS,
+} from '../../../constants/facts.js';
 import { McpToolName } from '../../../constants/mcpToolNames.js';
 import { CONTRACT_INTENTS } from '../../../constants/restructure.js';
 import {
@@ -21,8 +27,10 @@ import {
   REVIEW_VALIDATE_KINDS,
 } from '../../../constants/reviewState.js';
 import { VERSION } from '../../../version.js';
+import type { FactsResult } from '../../tools/facts/index.js';
 import type { FractalInspectResult } from '../../tools/fractalInspect/index.js';
 import {
+  handleFacts,
   handleFractalInspect,
   handleProjectSetup,
   handleRestructure,
@@ -335,6 +343,13 @@ const REVIEW_STATE_INPUT_SCHEMA = z.discriminatedUnion('action', [
     kind: z.nativeEnum(REVIEW_VALIDATE_KINDS),
     group: z.string().regex(/^\d{2,}$/),
     round: z.number().int().min(1).optional(),
+    generationId: z
+      .string()
+      .regex(/^[a-f0-9]{32}$/)
+      .optional()
+      .describe(
+        'Generation the handoff came from; a replaced generation is refused.',
+      ),
   }),
   z.object({
     ...REVIEW_STATE_COMMON_SCHEMA,
@@ -445,11 +460,204 @@ const REVIEW_STATE_ADVERTISED_INPUT_SCHEMA = z.object({
     .min(1)
     .optional()
     .describe('review validation only: one-based reviewer round.'),
+  generationId: z
+    .string()
+    .regex(/^[a-f0-9]{32}$/)
+    .optional()
+    .describe(
+      'validate only: the generationId of the handoff this opinion answers; an opinion from a generation a later prepare replaced is refused instead of merged.',
+    ),
   confirm: z
     .literal(true)
     .optional()
     .describe('cleanup only: required, since cleanup deletes artifacts.'),
 });
+
+const FACTS_FILE_SCHEMA = z
+  .string()
+  .describe(
+    `submit only: absolute path of the extraction output, a JSON array of FileFacts records. The path is resolved through any symbolic links and its real location must be a regular file outside the project tree. ${FACTS_OUTPUT_REQUIREMENT}`,
+  );
+const FACTS_EPOCH_SCHEMA = z
+  .string()
+  .describe(
+    'submit only: the resolutionEpoch the batch was extracted against, as facts status returned it. A stale value stores nothing and returns the current epoch with the paths that moved.',
+  );
+
+const FACTS_SOURCE_PATH_SCHEMA = z
+  .string()
+  .min(1)
+  .describe(
+    'adjudicate only: project-relative POSIX path of the file being judged.',
+  );
+const FACTS_SOURCE_PATHS_SCHEMA = z
+  .array(z.string().min(1))
+  .min(1)
+  .describe(
+    'discard-pending only: project-relative POSIX paths whose unconfirmed attested submission to drop. Stored records and the adjudication side table are untouched.',
+  );
+const FACTS_SHARDS_SCHEMA = z
+  .array(z.string().regex(/^[0-9a-f]+\.json$/))
+  .min(1)
+  .describe(
+    'discard-damaged only: shard file names exactly as the judgements diagnostic reported them. Only a shard the store currently reads as unparseable is dropped; a readable one is refused by name.',
+  );
+const FACTS_ACTOR_SCHEMA = z
+  .string()
+  .min(1)
+  .describe(
+    'Who is claiming. Self-declared — the server cannot verify it. Required by adjudicate, and by submit when the batch carries an attested record, because both are confirmed only by a DIFFERENT actor.',
+  );
+const FACTS_ITEMS_SCHEMA = z
+  .array(
+    z.object({
+      kind: z.nativeEnum(FACTS_REFERENCE_KINDS),
+      reference: z
+        .string()
+        .min(1)
+        .describe('The reference string exactly as the item reports it.'),
+      resolvedPath: z
+        .string()
+        .min(1)
+        .describe('The in-project path the item says the reference resolves to.'),
+      decision: z.nativeEnum(FACTS_DECISIONS),
+      reason: z
+        .string()
+        .min(1)
+        .optional()
+        .describe('Required for dismiss: why that edge is not there.'),
+    }),
+  )
+  .min(1)
+  .describe('adjudicate only: one decision per side-table item.');
+
+const FACTS_INPUT_SCHEMA = z.discriminatedUnion('action', [
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.STATUS),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.SUBMIT),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      file: FACTS_FILE_SCHEMA,
+      resolutionEpoch: FACTS_EPOCH_SCHEMA,
+      actor: FACTS_ACTOR_SCHEMA.optional(),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.DISCARD_PENDING),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      sourcePaths: FACTS_SOURCE_PATHS_SCHEMA,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.DISCARD_DAMAGED),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      shards: FACTS_SHARDS_SCHEMA,
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.COMPARE),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      file: FACTS_FILE_SCHEMA,
+      generationId: z
+        .string()
+        .regex(/^[a-f0-9]{32}$/)
+        .optional()
+        .describe(
+          'compare only: review generation whose frozen facts to compare against, as its handoff reported it. Omit it to compare against the live store.',
+        ),
+    })
+    .strict(),
+  z
+    .object({
+      action: z.literal(FACTS_ACTIONS.ADJUDICATE),
+      path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+      sourcePath: FACTS_SOURCE_PATH_SCHEMA,
+      contentHash: z
+        .string()
+        .min(1)
+        .describe(
+          'adjudicate only: the sourcePath bytes this judgement was made against. A judgement made against other bytes is refused.',
+        ),
+      actor: FACTS_ACTOR_SCHEMA,
+      items: FACTS_ITEMS_SCHEMA,
+    })
+    .strict(),
+]);
+
+const FACTS_ADVERTISED_INPUT_SCHEMA = z.object({
+  action: z
+    .nativeEnum(FACTS_ACTIONS)
+    .describe(
+      'status reports which files filid holds facts for and what it is waiting for; submit takes one batch of extracted facts and replaces the records for the files it carries; compare checks an independently extracted candidate against the store without storing it; adjudicate settles the disagreements compare recorded; discard-pending drops an unconfirmed attested submission so a file two readers keep answering differently can be started over; discard-damaged drops a judgement shard whose JSON the store cannot read, which nothing else can write.',
+    ),
+  path: z.string().describe(PROJECT_ROOT_DESCRIPTION),
+  file: FACTS_FILE_SCHEMA.optional(),
+  resolutionEpoch: FACTS_EPOCH_SCHEMA.optional(),
+  generationId: z
+    .string()
+    .regex(/^[a-f0-9]{32}$/)
+    .optional()
+    .describe(
+      'compare only: review generation whose frozen facts to compare against.',
+    ),
+  sourcePath: FACTS_SOURCE_PATH_SCHEMA.optional(),
+  sourcePaths: FACTS_SOURCE_PATHS_SCHEMA.optional(),
+  shards: FACTS_SHARDS_SCHEMA.optional(),
+  contentHash: z
+    .string()
+    .min(1)
+    .optional()
+    .describe(
+      'adjudicate only: the sourcePath bytes this judgement was made against.',
+    ),
+  actor: FACTS_ACTOR_SCHEMA.optional(),
+  items: FACTS_ITEMS_SCHEMA.optional(),
+});
+
+/**
+ * The two schemas each tool has: what it advertises to callers, and what its
+ * actions actually read.
+ *
+ * The advertised schema is what `registerTool` validates with, and it strips
+ * unknown keys, so an argument an action reads but the advertised object omits
+ * never reaches the handler. A contract test compares the two per tool, which
+ * is why this pairing is exported.
+ */
+export const MCP_TOOL_INPUT_SCHEMAS = [
+  {
+    tool: McpToolName.PROJECT_SETUP,
+    advertised: PROJECT_SETUP_ADVERTISED_INPUT_SCHEMA,
+    internal: PROJECT_SETUP_INPUT_SCHEMA,
+  },
+  {
+    tool: McpToolName.FRACTAL_INSPECT,
+    advertised: FRACTAL_INSPECT_ADVERTISED_INPUT_SCHEMA,
+    internal: FRACTAL_INSPECT_INPUT_SCHEMA,
+  },
+  {
+    tool: McpToolName.RESTRUCTURE,
+    advertised: RESTRUCTURE_ADVERTISED_INPUT_SCHEMA,
+    internal: RESTRUCTURE_INPUT_SCHEMA,
+  },
+  {
+    tool: McpToolName.REVIEW_STATE,
+    advertised: REVIEW_STATE_ADVERTISED_INPUT_SCHEMA,
+    internal: REVIEW_STATE_INPUT_SCHEMA,
+  },
+  {
+    tool: McpToolName.FACTS,
+    advertised: FACTS_ADVERTISED_INPUT_SCHEMA,
+    internal: FACTS_INPUT_SCHEMA,
+  },
+] as const;
 
 const MCP_SERVER_INFO = {
   name: MCP_SERVER_NAME,
@@ -474,6 +682,11 @@ const RESTRUCTURE_TOOL_CONFIG = {
 const REVIEW_STATE_TOOL_CONFIG = {
   description: MCP_TOOL_DESCRIPTIONS.REVIEW_STATE,
   inputSchema: deferInputValidation(REVIEW_STATE_ADVERTISED_INPUT_SCHEMA),
+};
+
+const FACTS_TOOL_CONFIG = {
+  description: MCP_TOOL_DESCRIPTIONS.FACTS,
+  inputSchema: deferInputValidation(FACTS_ADVERTISED_INPUT_SCHEMA),
 };
 
 /** Wrapped project-setup handler registered as the single five-action surface. */
@@ -512,6 +725,13 @@ const REVIEW_STATE_HANDLER = wrapHandler<
   handleReviewState(input),
 );
 
+/** Wrapped facts handler registered as the two-action submitted-facts surface. */
+const FACTS_HANDLER = wrapHandler<
+  typeof FACTS_INPUT_SCHEMA,
+  FactsResult['summary'],
+  FactsResult['data']
+>(McpToolName.FACTS, FACTS_INPUT_SCHEMA, (input) => handleFacts(input));
+
 /**
  * Creates a Filid MCP server with every supported tool registered.
  *
@@ -540,6 +760,7 @@ export function createServer(): McpServer {
     REVIEW_STATE_TOOL_CONFIG,
     REVIEW_STATE_HANDLER,
   );
+  server.registerTool(McpToolName.FACTS, FACTS_TOOL_CONFIG, FACTS_HANDLER);
 
   return server;
 }

@@ -17,7 +17,7 @@ import type { FractalNode } from '../../../types/fractal.js';
 import type {
   ContractIntent,
   PlacementBasis,
-  RestructureDecisionReason,
+  PlanningDecisionReason,
   RestructureNodeType,
   RestructureUnitKind,
 } from '../../../types/restructure.js';
@@ -27,13 +27,14 @@ export interface TargetCandidate {
   targetContainerPath: string;
   targetPath: string;
   targetNodeType: RestructureNodeType;
-  decisionReasons: RestructureDecisionReason[];
+  decisionReasons: PlanningDecisionReason[];
 }
 
 function isValidNameHint(name: string): boolean {
   return (
     !portableIsAbsolute(name) &&
     portableBasename(name) === name &&
+    name !== PORTABLE_PATH_MARKERS.CURRENT &&
     name !== PORTABLE_PATH_MARKERS.PARENT &&
     name !== PORTABLE_PATH_MARKERS.EMPTY
   );
@@ -47,7 +48,7 @@ export function buildTargetCandidate(
   consumerCount: number,
   nameHint?: string,
 ): TargetCandidate {
-  const decisionReasons: RestructureDecisionReason[] = [];
+  const decisionReasons: PlanningDecisionReason[] = [];
   const sourceName = portableBasename(sourcePath);
   const fallbackName =
     sourceName.replace(

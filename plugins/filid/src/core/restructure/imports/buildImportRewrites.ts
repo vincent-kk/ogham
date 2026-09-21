@@ -1,110 +1,45 @@
-import {
-  pathForCompare,
-  portableDirname,
-  portableIsAbsolute,
-  portableJoin,
-  portableRelative,
-  samePath,
-} from '@ogham/cross-platform';
+import { samePath } from '@ogham/cross-platform';
 
-import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';
-import {
-  RESTRUCTURE_DECISION_REASONS,
-  RESTRUCTURE_PLAN_HASH_SEPARATOR,
-} from '../../../constants/restructure.js';
 import type { ProjectSnapshot } from '../../../types/fractal.js';
 import type {
-  ImportRewrite,
   ImportRewriteBuildResult,
-  RestructureDecisionReason,
+  PlannedMove,
+  RewriteUnit,
 } from '../../../types/restructure.js';
-import { applySpecifierExtension } from '../specifiers/applySpecifierExtension.js';
-import { specifierDenotesPath } from '../specifiers/specifierDenotesPath.js';
 
-function isAtOrWithin(parentPath: string, targetPath: string): boolean {
-  if (samePath(parentPath, targetPath)) return true;
-  const relative = portableRelative(parentPath, targetPath);
-  const comparable = pathForCompare(relative);
-  return (
-    comparable !== PORTABLE_PATH_MARKERS.PARENT &&
-    !comparable.startsWith(PORTABLE_PATH_MARKERS.PARENT_PREFIX) &&
-    !portableIsAbsolute(relative)
-  );
-}
+import { collectIncomingRewrites } from './collectIncomingRewrites.js';
+import { collectOutgoingRewrites } from './collectOutgoingRewrites.js';
+import { sortUniqueImports } from './sortUniqueImports.js';
 
+/**
+ * Derive the import requirements a moved unit owns — each with the file it must
+ * load after every move and, when one can be synthesized, a suggested specifier —
+ * and the imports the moves keep resolving.
+ *
+ * Imports never block a move. A unit that stays in place breaks no import and
+ * owns none.
+ * @param snapshot - Pre-move snapshot whose dependency evidence names every consumer
+ * @param unit - Source, target and the path consumers load after the move
+ * @param orderedMoves - Executable moves of the plan in execution order; when
+ * empty the unit is taken to move alone
+ * @returns Owned requirements and preserved imports with final consumer paths,
+ * each sorted by consumer and specifier without duplicates
+ */
 export function buildImportRewrites(
   snapshot: ProjectSnapshot,
-  sourcePath: string,
-  targetPath: string,
-  consumerPaths: string[],
+  unit: RewriteUnit,
+  orderedMoves: readonly PlannedMove[] = [],
 ): ImportRewriteBuildResult {
-  const consumerIdentities = new Set(consumerPaths.map(pathForCompare));
-  const sourceIsDirectory = [...snapshot.tree.nodes.values()].some((node) =>
-    samePath(node.path, sourcePath),
-  );
-  const rewrites = new Map<string, ImportRewrite>();
-  const reasons = new Set<RestructureDecisionReason>();
-
-  for (const edge of snapshot.dependencyGraph.edges)
-    for (const evidence of edge.evidence) {
-      if (!consumerIdentities.has(pathForCompare(evidence.sourceFile)))
-        continue;
-      const referencesSource =
-        samePath(evidence.resolvedPath, sourcePath) ||
-        (sourceIsDirectory && isAtOrWithin(sourcePath, evidence.resolvedPath));
-      if (!referencesSource) continue;
-      const exactPathLike = specifierDenotesPath(
-        evidence.sourceFile,
-        evidence.rawSpecifier,
-        evidence.resolvedPath,
-      );
-      if (!exactPathLike) {
-        reasons.add(RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED);
-        continue;
-      }
-
-      const relocatedPath = samePath(evidence.resolvedPath, sourcePath)
-        ? targetPath
-        : portableJoin(
-            targetPath,
-            portableRelative(sourcePath, evidence.resolvedPath),
-          );
-      let requiredSpecifier = applySpecifierExtension(
-        portableRelative(portableDirname(evidence.sourceFile), relocatedPath),
-        evidence.rawSpecifier,
-      );
-      const comparableRequired = pathForCompare(requiredSpecifier);
-      if (
-        pathForCompare(evidence.rawSpecifier).startsWith(
-          PORTABLE_PATH_MARKERS.CURRENT_PREFIX,
-        ) &&
-        !comparableRequired.startsWith(PORTABLE_PATH_MARKERS.CURRENT_PREFIX) &&
-        !comparableRequired.startsWith(PORTABLE_PATH_MARKERS.PARENT_PREFIX)
-      )
-        requiredSpecifier =
-          PORTABLE_PATH_MARKERS.CURRENT_PREFIX + requiredSpecifier;
-      const rewrite: ImportRewrite = {
-        consumerPath: evidence.sourceFile,
-        currentSpecifier: evidence.rawSpecifier,
-        requiredSpecifier,
-      };
-      rewrites.set(
-        [
-          pathForCompare(rewrite.consumerPath),
-          rewrite.currentSpecifier,
-          rewrite.requiredSpecifier,
-        ].join(RESTRUCTURE_PLAN_HASH_SEPARATOR),
-        rewrite,
-      );
-    }
-
+  if (samePath(unit.sourcePath, unit.targetPath))
+    return { required: [], preserved: [] };
+  const moves = orderedMoves.length > 0 ? orderedMoves : [unit];
+  const incoming = collectIncomingRewrites(snapshot, unit, moves);
+  const outgoing = collectOutgoingRewrites(snapshot, unit, moves);
   return {
-    rewrites: [...rewrites.values()].sort(
-      (left, right) =>
-        pathForCompare(left.consumerPath).localeCompare(
-          pathForCompare(right.consumerPath),
-        ) || left.currentSpecifier.localeCompare(right.currentSpecifier),
-    ),
-    decisionReasons: [...reasons],
+    required: sortUniqueImports([...incoming.required, ...outgoing.required]),
+    preserved: sortUniqueImports([
+      ...incoming.preserved,
+      ...outgoing.preserved,
+    ]),
   };
 }

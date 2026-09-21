@@ -94,27 +94,27 @@ resolveVerification(projectRoot) → Promise<VerificationAdapter[]>
 ```
 discoverSourceFiles(projectRoot) → Promise<string[]>
 findEntryPoints(directoryPath)   → Promise<EntryPointDescriptor[]>
-inspectEntryPoint(path)          → Promise<EntryPointInspection>
-extractDependencies(filePath)    → Promise<DependencyReference[]>
+inspectEntryPoint(path)          → Promise<EntryPointInspection>  // manifest만
 isFrameworkOwnedPeer(filePath)   → Promise<boolean>
 suggestEntryPointPath(dirPath)   → Promise<string>
 ```
 
-**핵심 알고리즘**: 외부 native parser를 쓰지 않는 lexical scanner. 문자열·주석 구간과 괄호 nesting만 구분하며, 확실히 계산할 수 없는 구조는 값을 지어내지 않고 `indeterminate`로 반환한다. 정확성보다 **억지 PASS를 피하는 것이 우선**이다.
+**핵심 알고리즘**: 파일과 진입점의 **발견**. 소스 파일의 내용은 읽지 않는다 — 참조·표면·검증 증거는 facts 레코드에서 오고, 그 레코드를 만드는 판독은 추출 프로그램(`factsExtractor/analysis/`)이 소유한다. manifest만 JSON으로 읽는다.
 
-파일 확장자, 진입점 후보, framework convention, import/export 문법은 이 디렉터리 밖으로 새지 않는다.
+파일 확장자, 진입점 후보, framework convention, verification 이름 규칙은 이 디렉터리 밖으로 새지 않는다 — 추출 프로그램도 그 상수를 복제하지 않고 가져다 쓴다.
 
 ### ecmascript/verification/
 
 **목적**: 검증 문서 역할 판정과 의미론적 case 계산.
 
 ```
-classify(filePath)               → spec-document | test-record | unsupported
-count(filePath)                  → VerificationCaseCount
-extractContractGroupIds(filePath) → string[]
+discover(projectRoot)            → Promise<string[]>   // 이름으로 후보만
+verificationRoleFromName(path)   → spec-document | test-record | unsupported
 ```
 
-**핵심 알고리즘**: 일반 case·skip·todo는 각 1, 정적 parameterized row는 행 수만큼, 정적 parameterized suite 안의 case는 suite row 수를 곱한다. property test 선언은 생성 시행과 무관하게 1이다. 동적 table·사용자 wrapper·해석 불가 alias가 개수에 영향을 주면 `indeterminate`다. `filid:contract` 토큰은 주석에서만 추출한다.
+역할 확정, case 계수와 `filid:contract` marker 추출은 `factsExtractor/analysis/verification/`이 한다.
+
+**핵심 알고리즘**(추출 프로그램): 일반 case·skip·todo는 각 1, 정적 parameterized row는 행 수만큼, 정적 parameterized suite 안의 case는 suite row 수를 곱한다. property test 선언은 생성 시행과 무관하게 1이다. 동적 table·사용자 wrapper·해석 불가 alias가 개수에 영향을 주면 `indeterminate`다. `filid:contract` 토큰은 주석에서만 추출한다.
 
 ---
 
@@ -189,7 +189,7 @@ detectCycles(graph)                                                      → str
 getDirectDependencies / topologicalSort
 ```
 
-**핵심 알고리즘**: 어댑터의 dependency reference를 소유 fractal로 승격해 edge를 만들고, 각 edge는 `sourceFile` · `rawSpecifier` · `resolvedPath`를 증거로 갖는다. cycle은 **실제 directed closed route**를 반환한다. 그래프를 만들 수 없는 파일이 결론에 영향을 줄 수 있으면 전체 결과가 `indeterminate`다.
+**핵심 알고리즘**: dependency reference를 소유 fractal로 승격해 edge를 만들고, 각 edge는 `sourceFile` · `rawSpecifier` · `resolvedPath`를 증거로 갖는다. `references` 인자의 출처는 어댑터가 아니라 **사실 저장소**다 — snapshot이 범위 안 파일의 유효 참조(제출 ∪ adopt)를 읽어 넘기고, 레코드가 없는 범위 안 파일은 edge가 되지 않고 `unknownFiles`로 남는다. 시그니처는 그대로다. cycle은 **실제 directed closed route**를 반환한다. 그래프를 만들 수 없는 파일이 결론에 영향을 줄 수 있으면 전체 결과가 `indeterminate`다.
 
 소유 subtree 안의 organ 참조는 **edge로는 보존되지만 cycle adjacency에서 빠진다.** 부모 소유 organ을 자식 fractal이 참조할 때 생기는 `부모 → 자식 → 부모` 왕복은 승격 인공물이지 런타임 순환이 아니다. edge를 지우지 않는 이유는 `restructure`의 `plan` action이 incoming edge로 소비자를 계산하기 때문이다.
 

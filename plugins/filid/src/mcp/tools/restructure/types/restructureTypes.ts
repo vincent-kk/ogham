@@ -2,7 +2,7 @@ import type { RESTRUCTURE_ACTIONS } from '../../../../constants/mcpContracts.js'
 import type {
   RestructurePlanData,
   RestructurePlanSummary,
-  StructureValidateSummary,
+  RestructureValidationSummary,
 } from '../../../../types/report.js';
 import type {
   PlanValidationResult,
@@ -27,4 +27,4 @@ export type RestructureInput =
 /** Existing child payload variants returned by restructure actions. */
 export type RestructureResult =
   | ToolPayload<RestructurePlanSummary, RestructurePlanData>
-  | ToolPayload<StructureValidateSummary, PlanValidationResult>;
+  | ToolPayload<RestructureValidationSummary, PlanValidationResult>;

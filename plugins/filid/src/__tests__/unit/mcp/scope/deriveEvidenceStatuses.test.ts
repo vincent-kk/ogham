@@ -22,6 +22,7 @@ const SNAPSHOT: ProjectSnapshot = {
     nodePaths: [],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: [],
@@ -32,6 +33,8 @@ const SNAPSHOT: ProjectSnapshot = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  normalizedFacts: [],
+    filesOutsideFactsScope: 0,
   collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-09-04T00:00:00.000Z',
 };
@@ -44,12 +47,14 @@ describe('deriveEvidenceStatuses', () => {
         {
           code: 'unresolved-local-dependency',
           message: 'Missing ./moved.js',
+          nextAction: 'Fix the specifier.',
           path: '/project/src/a.ts',
           affects: ['dependencies', 'boundaries'],
         },
       ],
       0,
       0,
+      ANALYSIS_CERTAINTIES.EXACT,
       ANALYSIS_CERTAINTIES.EXACT,
     );
     expect(result.verification).toBe(TOOL_STATUSES.OK);
@@ -61,9 +66,17 @@ describe('deriveEvidenceStatuses', () => {
     expect(
       deriveEvidenceStatuses(
         SNAPSHOT,
-        [{ code: 'unknown', message: 'Unknown impact' }],
+        [
+          {
+            code: 'unknown',
+            message: 'Unknown impact',
+            affects: ['dependencies', 'boundaries', 'verification'],
+            nextAction: 'Report it.',
+          },
+        ],
         0,
         0,
+        ANALYSIS_CERTAINTIES.EXACT,
         ANALYSIS_CERTAINTIES.EXACT,
       ).verification,
     ).toBe(TOOL_STATUSES.INDETERMINATE);
@@ -71,7 +84,14 @@ describe('deriveEvidenceStatuses', () => {
 
   it('uses scoped verification certainty for both evidence statuses', () => {
     expect(
-      deriveEvidenceStatuses(SNAPSHOT, [], 0, 0, ANALYSIS_CERTAINTIES.EXACT),
+      deriveEvidenceStatuses(
+        SNAPSHOT,
+        [],
+        0,
+        0,
+        ANALYSIS_CERTAINTIES.EXACT,
+        ANALYSIS_CERTAINTIES.EXACT,
+      ),
     ).toEqual({
       analysisAxes: { dependencies: 'exact', verification: 'exact' },
       structure: TOOL_STATUSES.OK,

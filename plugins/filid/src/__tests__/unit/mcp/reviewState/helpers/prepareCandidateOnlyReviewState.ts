@@ -2,7 +2,7 @@ import { rmSync } from 'node:fs';
 
 import { portableJoin } from '@ogham/cross-platform';
 
-import { handleReviewState } from '../../../../../mcp/tools/reviewState/index.js';
+import { prepareWithFacts } from './prepareWithFacts.js';
 import type { ReviewPreparePayload } from '../../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
 import type { ReviewStateSealFixture } from './createReviewStateSealFixture.js';
@@ -43,7 +43,7 @@ export async function prepareCandidateOnlyReviewState(
     '-m',
     'candidate-only',
   ]);
-  return handleReviewState({
+  return prepareWithFacts({
     action: 'prepare',
     projectRoot: fixture.projectRoot,
   });

@@ -1,7 +1,4 @@
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-
-import { portableJoin, readUtf8FileIfExistsSync } from '@ogham/cross-platform';
+import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 import { describe, expect, it, vi } from 'vitest';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
@@ -17,6 +14,7 @@ import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import {
   CONTRACT_INTENTS,
   RESTRUCTURE_NODE_TYPES,
+  RESTRUCTURE_PLAN_NEXT_ACTIONS,
   RESTRUCTURE_SCHEMA_VERSION,
 } from '../../../constants/restructure.js';
 import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
@@ -24,6 +22,7 @@ import {
   TOOL_PERSISTENCE,
   TOOL_STATUSES,
 } from '../../../constants/toolEnvelope.js';
+import { computeSnapshotHash } from '../../../core/projectSnapshot/index.js';
 import { handleContextResolve } from '../../../mcp/tools/fractalInspect/contextResolve/index.js';
 import { handleFractalScan } from '../../../mcp/tools/fractalInspect/fractalScan/index.js';
 import { handleStructureValidate } from '../../../mcp/tools/fractalInspect/structureValidate/index.js';
@@ -37,6 +36,8 @@ import type { RestructurePlanSummary } from '../../../types/report.js';
 import type { RestructurePlan } from '../../../types/restructure.js';
 import type { ToolPayload } from '../../../types/toolEnvelope.js';
 
+import { persistPlanArtifact } from './helpers/persistPlanArtifact.js';
+
 const PROJECT_ROOT = '/project';
 const FEATURE_ROOT = '/project/feature';
 const SOURCE_PATH = '/project/feature/source.unit';
@@ -44,7 +45,6 @@ const CONSUMER_PATH = '/project/feature/consumer.unit';
 const VERIFICATION_PATH = '/project/feature/contract.unit';
 const UNKNOWN_PATH = '/project/feature/unknown.unit';
 const EXPECTED_DATA_MESSAGE = 'expected tool data';
-const PLAN_FILE_NAME = 'plan.json';
 const EXPECTED_VERIFICATION_SUMMARY = {
   fileCount: 1,
   specDocument: {
@@ -135,6 +135,7 @@ const SNAPSHOT: ProjectSnapshot = {
     nodePaths: [PROJECT_ROOT, FEATURE_ROOT],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture-adapter'],
@@ -159,6 +160,8 @@ const SNAPSHOT: ProjectSnapshot = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  normalizedFacts: [],
+    filesOutsideFactsScope: 0,
   collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-07-27T00:00:00.000Z',
 };
@@ -175,16 +178,22 @@ const VALID_RESTRUCTURE_PLAN: RestructurePlan = {
   planId: 'filid-restructure-test',
   projectRoot: PROJECT_ROOT,
   snapshotHash: SNAPSHOT.snapshotHash,
+  readPaths: [],
+  probePaths: [],
+  readHash: computeSnapshotHash(PROJECT_ROOT, []),
   createdAt: '2026-07-27T00:00:00.000Z',
   moves: [],
   alreadyPlaced: [],
   unresolved: [],
+  unknownFiles: { relevant: [], other: [] },
+  baseline: { cycles: [], boundaryViolations: [] },
   summary: {
     moveCount: 0,
     fractalsCreated: 0,
     organsCreated: 0,
     alreadyPlacedCount: 0,
     decisionsRequired: 0,
+    affectedImportCount: 0,
   },
 };
 
@@ -199,6 +208,7 @@ const PERSISTED_PLAN_PAYLOAD: ToolPayload<
     planId: VALID_RESTRUCTURE_PLAN.planId,
     snapshotHash: VALID_RESTRUCTURE_PLAN.snapshotHash,
     ...VALID_RESTRUCTURE_PLAN.summary,
+    nextAction: RESTRUCTURE_PLAN_NEXT_ACTIONS.NOTHING_TO_MOVE,
   },
   data: VALID_RESTRUCTURE_PLAN,
   diagnostics: [],
@@ -242,11 +252,19 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
     mockedCreateToolSnapshot.mockResolvedValueOnce({
       ...TOOL_CONTEXT,
       diagnostics: [
-        { code: 'in-feature', message: 'inside', path: SOURCE_PATH },
+        {
+          code: 'in-feature',
+          message: 'inside',
+          path: SOURCE_PATH,
+          affects: ['dependencies', 'boundaries', 'verification'],
+          nextAction: 'test next action',
+        },
         {
           code: 'outside-feature',
           message: 'elsewhere in the project',
           path: `${PROJECT_ROOT}/other.unit`,
+          affects: ['dependencies', 'boundaries', 'verification'],
+          nextAction: 'test next action',
         },
       ],
     });
@@ -349,49 +367,39 @@ describe('Filid 1.0 snapshot-backed MCP tools', () => {
     expect(result.data).toHaveProperty('result');
   });
 
-  it('reads an external plan artifact without changing it', async () => {
-    const planDirectory = portableJoin(
-      tmpdir(),
-      `filid-plan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    );
-    const planPath = portableJoin(planDirectory, PLAN_FILE_NAME);
+  it('reads a stored plan artifact without changing it', async () => {
     const planSource = JSON.stringify(VALID_RESTRUCTURE_PLAN);
-    mkdirSync(planDirectory, { recursive: true });
-    writeFileSync(planPath, planSource, 'utf8');
-    try {
-      const result = await validateRestructurePlan({
-        action: RESTRUCTURE_ACTIONS.PRECONDITION,
-        path: PROJECT_ROOT,
-        planPath,
-      });
+    const planPath = persistPlanArtifact(VALID_RESTRUCTURE_PLAN);
+    const result = await validateRestructurePlan({
+      action: RESTRUCTURE_ACTIONS.PRECONDITION,
+      path: PROJECT_ROOT,
+      planPath,
+    });
 
-      expect(result.data).toEqual({ valid: true, findings: [] });
-      expect(readUtf8FileIfExistsSync(planPath)).toBe(planSource);
-    } finally {
-      rmSync(planDirectory, { recursive: true, force: true });
-    }
+    expect(result.data).toEqual({
+      valid: true,
+      findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
+    });
+    expect(readUtf8FileIfExistsSync(planPath)).toBe(planSource);
   });
 
   it('reads a restructure plan from a persisted full tool payload', async () => {
-    const planDirectory = portableJoin(
-      tmpdir(),
-      `filid-payload-plan-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    );
-    const planPath = portableJoin(planDirectory, PLAN_FILE_NAME);
     const planSource = JSON.stringify(PERSISTED_PLAN_PAYLOAD);
-    mkdirSync(planDirectory, { recursive: true });
-    writeFileSync(planPath, planSource, 'utf8');
-    try {
-      const result = await validateRestructurePlan({
-        action: RESTRUCTURE_ACTIONS.PRECONDITION,
-        path: PROJECT_ROOT,
-        planPath,
-      });
+    const planPath = persistPlanArtifact(PERSISTED_PLAN_PAYLOAD);
+    const result = await validateRestructurePlan({
+      action: RESTRUCTURE_ACTIONS.PRECONDITION,
+      path: PROJECT_ROOT,
+      planPath,
+    });
 
-      expect(result.data).toEqual({ valid: true, findings: [] });
-      expect(readUtf8FileIfExistsSync(planPath)).toBe(planSource);
-    } finally {
-      rmSync(planDirectory, { recursive: true, force: true });
-    }
+    expect(result.data).toEqual({
+      valid: true,
+      findings: [],
+      preexisting: [],
+      unknownFiles: { relevant: [], other: [] },
+    });
+    expect(readUtf8FileIfExistsSync(planPath)).toBe(planSource);
   });
 });

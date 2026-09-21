@@ -1,18 +1,26 @@
+import { DEPENDENCY_DIAGNOSTIC_CODES } from '../../../../constants/dependencyDiagnosticCodes.js';
 import type { DependencyReference } from '../../../../types/adapters.js';
 import type {
   AnalysisCertainty,
   DependencyEvidence,
   DependencyGraph,
   DependencyGraphEdge,
+  UnknownFile,
 } from '../../../../types/fractal.js';
 import { detectCycles } from '../cycles/detectCycles.js';
 
 import { canonicalizeNodePaths } from './canonicalizeNodePaths.js';
+import { listUnknownFiles } from './listUnknownFiles.js';
 import { resolveOwnerPath } from './resolveOwnerPath.js';
 import { resolveOwningOrganPath } from './resolveOwningOrganPath.js';
 import { sortPathsDeepestFirst } from './sortPathsDeepestFirst.js';
+import { compareByBytes } from '../../../../lib/compareByBytes.js';
 
 interface DependencyGraphOptions {
+  /** Root the `unknownFiles` paths are relative to. */
+  projectRoot: string;
+  /** Entries the collector attributed outside the references: read failures, ownership conflicts, unfollowed links. */
+  unknownFiles?: readonly UnknownFile[];
   /** Classified organ paths; enables owned-organ cycle exclusion when supplied. */
   organPaths?: readonly string[];
   /**
@@ -60,17 +68,24 @@ function isOwnedOrganReference(
 /**
  * Aggregate adapter dependency references into owner-level edges and cycles.
  * @param nodePaths Non-organ owner paths that can appear as graph nodes.
- * @param references Adapter-reported references; an unresolved production
- * reference makes the graph indeterminate rather than silently dropping out.
- * @param certainty Starting certainty from the reference collector.
- * @param options Organ and verification paths excluded from cycle adjacency.
- * @returns Sorted edges with evidence, representative cycle routes and certainty.
+ * @param references Dependency references; an unresolved production reference,
+ * or any reference marked `indeterminate` (verification files included), puts
+ * its source in `unknownFiles` rather than silently dropping out or becoming an
+ * edge. An owner-less reference becomes neither: it is reported separately by
+ * `findUnownedReferences`, with its source and its owner-less target.
+ * @param certainty Starting certainty from the reference collector: `unsupported`
+ * stays; `indeterminate` stays even with an empty list, so uncertainty the
+ * caller could not attribute is not lost.
+ * @param options Project root, collector-attributed files, and the organ and
+ * verification paths excluded from cycle adjacency.
+ * @returns Sorted edges with evidence, representative cycle routes, the
+ * unknown files and the certainty derived from them.
  */
 export function buildDependencyGraph(
   nodePaths: readonly string[],
   references: readonly DependencyReference[],
-  certainty: AnalysisCertainty = 'exact',
-  options: DependencyGraphOptions = {},
+  certainty: AnalysisCertainty,
+  options: DependencyGraphOptions,
 ): DependencyGraph {
   const sortedNodePaths = canonicalizeNodePaths(nodePaths);
   // Sorted once per graph, not once per lookup: owner resolution runs for every
@@ -84,7 +99,12 @@ export function buildDependencyGraph(
   const cycleEdgeKeys = new Set<string>();
   const ownerByPath = new Map<string, string | null>();
   const organByOwnerAndFile = new Map<string, string | null>();
-  let graphCertainty = certainty;
+  const causesBySource = new Map<string, Set<string>>();
+  const attribute = (sourceFile: string, cause: string): void => {
+    const causes = causesBySource.get(sourceFile) ?? new Set<string>();
+    causes.add(cause);
+    causesBySource.set(sourceFile, causes);
+  };
 
   const resolveOwnerCached = (targetPath: string): string | null => {
     const cached = ownerByPath.get(targetPath);
@@ -96,18 +116,24 @@ export function buildDependencyGraph(
 
   for (const reference of references) {
     const isVerification = verificationPaths.has(reference.sourceFile);
+    if (reference.certainty === 'indeterminate') {
+      attribute(reference.sourceFile, DEPENDENCY_DIAGNOSTIC_CODES.UNCERTAIN);
+      if (reference.resolvedPath === null && !isVerification)
+        attribute(reference.sourceFile, DEPENDENCY_DIAGNOSTIC_CODES.UNRESOLVED);
+      continue;
+    }
     if (reference.resolvedPath === null) {
-      if (!isVerification && graphCertainty === 'exact')
-        graphCertainty = 'indeterminate';
+      if (!isVerification)
+        attribute(reference.sourceFile, DEPENDENCY_DIAGNOSTIC_CODES.UNRESOLVED);
       continue;
     }
     const fromFractalPath = resolveOwnerCached(reference.sourceFile);
     const toFractalPath = resolveOwnerCached(reference.resolvedPath);
-    if (!fromFractalPath || !toFractalPath) {
-      if (!isVerification && graphCertainty === 'exact')
-        graphCertainty = 'indeterminate';
-      continue;
-    }
+    // An owner-less end has no node, and an edge between nodes that do not
+    // exist cannot make a cycle. The reference is reported as a finding with
+    // its source and target instead; making a boundary is the user's call, so
+    // this cannot be the graph's reason to stop.
+    if (!fromFractalPath || !toFractalPath) continue;
 
     const key = `${fromFractalPath}\0${toFractalPath}`;
     const edge = grouped.get(key) ?? {
@@ -139,21 +165,32 @@ export function buildDependencyGraph(
       ...edge,
       evidence: edge.evidence.sort(
         (left, right) =>
-          left.sourceFile.localeCompare(right.sourceFile) ||
-          left.rawSpecifier.localeCompare(right.rawSpecifier) ||
-          left.resolvedPath.localeCompare(right.resolvedPath),
+          compareByBytes(left.sourceFile, right.sourceFile) ||
+          compareByBytes(left.rawSpecifier, right.rawSpecifier) ||
+          compareByBytes(left.resolvedPath, right.resolvedPath),
       ),
     }))
     .sort(
       (left, right) =>
-        left.fromFractalPath.localeCompare(right.fromFractalPath) ||
-        left.toFractalPath.localeCompare(right.toFractalPath),
+        compareByBytes(left.fromFractalPath, right.fromFractalPath) ||
+        compareByBytes(left.toFractalPath, right.toFractalPath),
     );
+  const unknownFiles = listUnknownFiles(
+    options.projectRoot,
+    causesBySource,
+    options.unknownFiles ?? [],
+  );
   const graph: DependencyGraph = {
     nodePaths: sortedNodePaths,
     edges,
     cycles: [],
-    certainty: graphCertainty,
+    unknownFiles,
+    certainty:
+      certainty === 'unsupported'
+        ? 'unsupported'
+        : unknownFiles.length > 0 || certainty === 'indeterminate'
+          ? 'indeterminate'
+          : 'exact',
   };
   graph.cycles = detectCycles({
     ...graph,

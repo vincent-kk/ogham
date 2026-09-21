@@ -1,5 +1,7 @@
 import { writeFileAtomicallySync } from '@ogham/cross-platform';
 
+import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js';
+
 import type {
   CollectChangedScopeEvidenceInput,
   CollectedChangedScopeEvidence,
@@ -16,8 +18,13 @@ import { renderEvidenceMarkdown } from './renderEvidenceMarkdown.js';
 export async function collectChangedScopeEvidence(
   input: CollectChangedScopeEvidenceInput,
 ): Promise<CollectedChangedScopeEvidence> {
-  const { evidencePath, createdAt, ...computationInput } = input;
+  const { evidencePath, factsPath, createdAt, ...computationInput } = input;
   const computed = await computeChangedScopeEvidence(computationInput);
+  // Written before the evidence it belongs to is: a generation whose facts are
+  // missing cannot be compared against, and prepare's completeness check reads
+  // both (spec §9).
+  const facts = `${JSON.stringify(computed.frozenFacts, null, 2)}\n`;
+  writeFileAtomicallySync(factsPath, facts);
   writeFileAtomicallySync(
     evidencePath,
     renderEvidenceMarkdown({
@@ -31,11 +38,15 @@ export async function collectChangedScopeEvidence(
       informational: computed.informational,
       outOfScope: computed.outOfScope,
       diagnostics: computed.evidenceDiagnostics,
+      outOfScopeDiagnostics: computed.outOfScopeDiagnostics,
     }),
   );
 
   return {
+    factsDigest: computeReviewArtifactHash(facts),
     evidenceDiagnostics: computed.evidenceDiagnostics,
+    outOfScopeDiagnostics: computed.outOfScopeDiagnostics,
+    outsideFactsScope: computed.outsideFactsScope,
     snapshotHash: computed.snapshotHash,
     evidenceComplete: computed.evidenceComplete,
     worktree: computed.worktree,

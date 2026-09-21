@@ -1,4 +1,7 @@
-import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../../constants/reviewState.js';
+import {
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
+} from '../../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../../errors/toolDiagnosticError.js';
 import { resolveBaseRef } from '../../assess/resolveBaseRef.js';
 import { executeReviewGit } from '../../hash/executeReviewGit.js';
@@ -29,13 +32,15 @@ export async function resolvePrepareBaseRef(
     } catch (cause) {
       throw new ToolDiagnosticError(
         REVIEW_STATE_DIAGNOSTIC_CODES.BASE_REF_UNRESOLVED,
-        `Review base ref could not be resolved: ${baseRef}`,
+        `Review base ref "${baseRef}" does not resolve to a commit in ${projectRoot}.`,
+        REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.BASE_REF_UNRESOLVED,
         { cause },
       );
     }
 
   throw new ToolDiagnosticError(
     REVIEW_STATE_DIAGNOSTIC_CODES.BASE_REF_UNRESOLVED,
-    'No review base ref could be resolved.',
+    `No baseRef was given and none of origin/HEAD, origin/main, origin/master, main, or master resolves in ${projectRoot}.`,
+    'Ask the user for the comparison base, then retry the same review_state call with baseRef set to it.',
   );
 }

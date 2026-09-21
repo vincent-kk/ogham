@@ -25,6 +25,7 @@
 - 공개 MCP 도구는 `project_setup`, `fractal_inspect`, `restructure`, `review_state`의 4개다.
 - `fractal_inspect`의 `resolve` action은 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
+- 참조 기반 판정을 하는 skill(`scan`, `guide`, `restructure`, `cross-review`, `revalidate`, `pull-request`)은 첫 참조 기반 분석 호출 앞에서 facts 부트스트랩 정본 `skills/.shared/facts-bootstrap.md`를 가리키는 단계 하나만 둔다. 부트스트랩의 순서·도구 호출·다음 행동은 정본 한 곳에만 쓰고, skill은 그것을 복제하지 않는다. 정본의 "If the bootstrap cannot finish" 절 하나가 부트스트랩 실패의 효과를 정한다 — 지금은 분석이 사실을 읽지 않으므로 한 줄을 기록하고 같은 turn에서 본 흐름을 잇는다.
 - merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3과 handoff 블록 §7, review report와 PR comment는 `skills/cross-review/report-formats.md`, fix request의 여덟 필드 블록은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 스킬 실행에 필요한 형식은 스킬 폴더 안에 두며 플러그인 내부 INTENT/DETAIL을 색인하지 않는다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
 - Cross-review retains review_schema 7, state schema 2 and validationPolicyVersion 2. Optional diagnostics, analysisAxes and reviewComplete preserve legacy reading; old policy still requires explicit fresh preparation. New incomplete seals, including REQUEST_CHANGES, retain identity-bound review-blockers.md. Missing or mismatched marked sidecars stop cache reuse.
 - fix request는 검증 가능한 원 claim을 포함하며, resolve가 만든 accepted FIX ID는 revalidate에서 해당 canonical request의 Severity, Category, Path, Rule, Claim, Evidence, Consequence, Recommended Action과 정확히 결합된다.
@@ -116,6 +117,13 @@
 - baseline과 correction 위임 전에 모든 warning skip/reject 사유를 완전한 Context/Decision/Consequences로 검증한다. 그 이후 decision은 다시 열지 않으며 rejection 단계는 검증된 ADR을 직렬화만 한다.
 - `--auto`는 원래 Recommendation과 이유를 보존해 표시하고 모든 Decision을 자동 적용으로 선택한 뒤 prompt 없이 진행한다.
 - 자동 resolve의 하위 문서·배치 스킬에는 `--auto-approve`를 전달한다. 대화형 resolve는 해당 플래그를 전달하지 않으며, 자동 승인도 범위를 넓히거나 미결 구조 결정을 대신하지 않는다.
+
+### AC-root-facts-bootstrap — facts 부트스트랩
+
+- 대상 skill마다 정본을 가리키는 단계가 첫 참조 기반 분석 호출보다 앞에 있고, 정본을 가리키는 skill의 집합이 대상 집합과 같다.
+- 정본은 status → 추출·제출 → 거부 회복 → 재제출 → 판정 → 종료의 여섯 갈래를 순서대로 담고, 각 갈래에 도구 호출과 다음 행동을 적는다. 범위는 서버가 정하므로 선언 갈래가 따로 없고, 유효 범위가 비면 status 갈래가 그것을 다룬다.
+- 추출 출력은 실행마다 `mktemp`로 만든 고유 파일(`${TMPDIR:-/tmp}` 아래, 프로젝트 트리 밖)에 쓴다. `dismiss`의 확인은 항목을 올리지 않은 별도 subagent가 한다.
+- 부트스트랩 절에는 사람을 부르는 문장이 없고, 실패의 효과는 한 절에만 있다.
 
 ## History
 

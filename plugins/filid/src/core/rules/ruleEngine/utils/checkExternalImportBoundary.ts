@@ -5,6 +5,7 @@ import {
   samePath,
 } from '@ogham/cross-platform';
 
+import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type {
   FractalNode,
   ProjectSnapshot,
@@ -89,8 +90,9 @@ export function checkExternalImportBoundary(context: {
         violations.push({
           ruleId: RULE_ID,
           severity: 'error',
-          message: `Import "${evidence.rawSpecifier}" reaches organ "${organPath}" from outside its owner "${targetNode.path}".`,
+          message: `Import "${evidence.rawSpecifier}" reaches organ "${toProjectRelativePath(context.snapshot.projectRoot, organPath)}" from outside its owner "${toProjectRelativePath(context.snapshot.projectRoot, targetNode.path)}".`,
           path: evidence.sourceFile,
+          importedPath: evidence.resolvedPath,
           suggestion:
             'Promote the organ to a fractal, move it to its consumers lowest common fractal, or declare the exemption with a reason under "## Boundary Exemptions" in the owner DETAIL.md.',
         });
@@ -124,6 +126,7 @@ export function checkExternalImportBoundary(context: {
         severity: 'error',
         message: `Import "${evidence.rawSpecifier}" bypasses the target module boundary.`,
         path: evidence.sourceFile,
+        importedPath: evidence.resolvedPath,
         suggestion:
           'Use the target module entry point externally and concrete files internally, or declare the exemption with a reason under "## Boundary Exemptions" in the owner DETAIL.md.',
       });

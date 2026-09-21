@@ -18,6 +18,7 @@ import { commitReviewStateFixture } from './reviewState/helpers/commitReviewStat
 import { createReviewRulePluginRoot } from './reviewState/helpers/createReviewRulePluginRoot.js';
 import { readPreparedReviewState } from './reviewState/helpers/readPreparedReviewState.js';
 import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewStateFixtureFile.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 /** Temporary repository exercised by source-hash tests. */
 let projectRoot: string;
@@ -59,7 +60,7 @@ async function sourceState() {
   });
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   fixturePluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
@@ -72,6 +73,7 @@ beforeEach(() => {
   git(['checkout', '-b', 'feature/hash']);
   writeReviewStateFixtureFile(projectRoot, 'tracked', 'feature\n');
   commitReviewStateFixture(projectRoot, 'feature');
+  await seedFacts(projectRoot);
 });
 
 afterEach(() => {

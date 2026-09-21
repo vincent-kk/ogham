@@ -150,6 +150,9 @@ describe('Codex Move destination projection', () => {
     expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
       'approximate Move projection',
     );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      're-emit a bodyless Move',
+    );
     expect(result.hookSpecificOutput?.additionalContext).toContain(
       'potential circular dependency',
     );
@@ -167,6 +170,9 @@ describe('Codex Move destination projection', () => {
     );
     expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
       'does not exist',
+    );
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'Add File',
     );
   });
 

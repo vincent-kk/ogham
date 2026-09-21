@@ -19,6 +19,8 @@
 - `collectNodeMetadata(paths, root, options, adapters, isIgnored?): Promise<NodeEntry[]>` — adapter-aware metadata.
 - `correctNodeTypes(entries, children, names): NodeEntry[]` — deepest-first classification correction.
 - `scanProject(rootPath, options?): Promise<FractalTree>` — complete read-only tree.
+- `scanFileSetOptions(config?): ScanOptions` — 어떤 **파일** 집합이 모이는지를 정하는 옵션만 만든다: 전수 traversal(`structure.maxDepth`는 rule threshold이지 traversal 한계가 아니다)과 config의 `structure.additionalExcludedDirectories`. snapshot과 같은 파일 집합을 봐야 하는 모든 호출자의 단일 정본이다.
+- `listScannedFilePaths(rootPath, options?): Promise<string[]>` — the same file set `scanProject` collects as `peerFiles`, flattened to project-relative POSIX paths sorted by raw bytes. It runs the same discovery and the same ignore filter, so the two sets cannot drift; it returns raw entry names without `pathForCompare`, because a rename that changes only case must read as a different path list.
 
 ## Acceptance Criteria
 
@@ -43,6 +45,11 @@
 
 - `**/` 접두 pattern은 중첩 경로에서도 걸린다. 다중 segment pattern은 연속된 segment 열로 대조하며 부분 일치는 통과다.
 - `**/` 접두가 없는 pattern은 스캔 root에 고정된다.
+
+### AC-fractal-tree-flat-paths — 평면 경로 목록
+
+- `listScannedFilePaths`가 돌려주는 집합은 같은 root·option에서 `scanProject`가 모은 `peerFiles`의 합집합과 정확히 같다.
+- git이 무시하는 파일, dot 항목, 제외 디렉터리 안의 파일, 깊이 한계를 넘는 디렉터리의 파일은 목록에 없다.
 
 ### AC-fractal-tree-entry — adapter ownership
 

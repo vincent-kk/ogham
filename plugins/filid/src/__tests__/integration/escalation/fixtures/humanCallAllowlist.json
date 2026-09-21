@@ -1,0 +1,836 @@
+{
+  "entries": [
+    {
+      "file": "skills/.shared/facts-bootstrap.md",
+      "hash": "b4615df0fdfd4473",
+      "kind": "stop",
+      "class": "N",
+      "text": "A bounded retry followed by a report is the designed ending of these rows, not a question for a person.",
+      "note": "금지문: states that the bounded retry of every row ends in a report, never in a human call (R-2, S5b)."
+    },
+    {
+      "file": "skills/.shared/facts-bootstrap.md",
+      "hash": "70cc0ff80c0ea265",
+      "kind": "stop",
+      "class": "N",
+      "text": "A second `facts-incomplete` over the same files in the same groups is the same refusal: end without a terminal verdict and record it in the report as a filid defect.",
+      "note": "R-2 designed termination of the bootstrap retry inside one run; a refusal over different files is progress, not a repeat (S5b)."
+    },
+    {
+      "file": "skills/.shared/intent-template.md",
+      "hash": "2d5a5884529681c6",
+      "kind": "human-call",
+      "class": "N",
+      "text": "- <change that needs a human decision>",
+      "note": "템플릿 자리표시. 호출이 아님"
+    },
+    {
+      "file": "skills/cross-review/report-formats.md",
+      "hash": "06875cf17e7ba597",
+      "kind": "human-call",
+      "class": "N",
+      "text": "## Human decision requests",
+      "note": "제목"
+    },
+    {
+      "file": "skills/cross-review/report-formats.md",
+      "hash": "270305358cc552c5",
+      "kind": "human-call",
+      "class": "N",
+      "text": "| Human decision required",
+      "note": "표 머리"
+    },
+    {
+      "file": "skills/cross-review/report-formats.md",
+      "hash": "3a3f75ad6d9a4ce3",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Human decisions require concrete options and a reason evidence alone cannot decide; missing advice is triage, not a human requirement.",
+      "note": "사람 결정 경로의 형식 계약(U 경로 자체의 정의)"
+    },
+    {
+      "file": "skills/cross-review/report-formats.md",
+      "hash": "49b3d33e9c61022a",
+      "kind": "human-call",
+      "class": "N",
+      "text": "INCONCLUSIVE never implies a human decision: agent evidence recovery and human choices are separate blocker routes.",
+      "note": "설명"
+    },
+    {
+      "file": "skills/cross-review/report-formats.md",
+      "hash": "961b00c2d01b10dc",
+      "kind": "human-call",
+      "class": "N",
+      "text": "<bounded blocker summary; Human decision requests, Needs triage, Evidence recovery; local artifact path remains plain text>",
+      "note": "자리표시"
+    },
+    {
+      "file": "skills/cross-review/report-formats.md",
+      "hash": "afb80ff1f0c3a547",
+      "kind": "stop",
+      "class": "N",
+      "text": "If every merged opinion is missing for reviewable groups, seal stops without a verdict; the documents-only/source-dirty path may still seal INCONCLUSIVE from worktree evidence.",
+      "note": "도구 동작 설명. 행동 지점은 C8 (?)"
+    },
+    {
+      "file": "skills/cross-review/reviewers/verifier.md",
+      "hash": "0f48b40a6e3c9cfb",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Human requires humanReason plus 2–5 distinct options; agent recovery needs evidence, not a human choice.",
+      "note": "사람 결정 요청의 형식 제약"
+    },
+    {
+      "file": "skills/cross-review/rules/fca.md",
+      "hash": "baf22bd0a11a1fff",
+      "kind": "human-call",
+      "class": "N",
+      "text": "When the brief's section reports `truncated > 0`, record the missing claims as an evidence gap; do not recover them from the human Change Context table.",
+      "note": "\"human\" = 사람이 쓴 표. 호출 아님"
+    },
+    {
+      "file": "skills/cross-review/SKILL.md",
+      "hash": "0c97fa1ca2903d7c",
+      "kind": "stop",
+      "class": "U",
+      "text": "If a present PR has a missing or empty base name and no explicit `--base`, run `node <skill-directory>/../pull-request/scripts/resolveBaseBranch.mjs --project-root <session cwd>` and use its JSON `baseRef` as `--base`; stop with its diagnostic only when it exits nonzero or reports `ambiguous: true`.",
+      "note": "C2 draft applied: an empty PR base is resolved by resolveBaseBranch.mjs; the remaining stop is an ambiguous or unresolvable base, U(b)."
+    },
+    {
+      "file": "skills/cross-review/SKILL.md",
+      "hash": "1b1bd434bf122251",
+      "kind": "stop",
+      "class": "N",
+      "text": "- With `--cleanup`, call `review_state({ action: \"cleanup\", projectRoot: PROJECT_ROOT, confirm: true })`, report `cleaned`, and stop.",
+      "note": "설계된 정상 종료"
+    },
+    {
+      "file": "skills/cross-review/SKILL.md",
+      "hash": "34ff8cf1b623c2bf",
+      "kind": "stop",
+      "class": "U",
+      "text": "Stop on group-budget errors: report diagnostics and the explicit restart option without dispatching actors or publishing a verdict; never auto-force them.",
+      "note": "U(c). Only the group budget still stops the run for a person; state diagnostics now mean one prepare."
+    },
+    {
+      "file": "skills/cross-review/SKILL.md",
+      "hash": "43cb233fdea046d1",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Report the verdict, review completeness, human-decision requirement and agent next action from the sealed comment.",
+      "note": "출력 항목 설명"
+    },
+    {
+      "file": "skills/cross-review/SKILL.md",
+      "hash": "512258acf32837aa",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Only a user's explicit budget change may raise it; `--force` never bypasses it.",
+      "note": "U(c). Raising the group budget is the user own spending decision."
+    },
+    {
+      "file": "skills/cross-review/SKILL.md",
+      "hash": "70a118a2c0853545",
+      "kind": "human-call",
+      "class": "N",
+      "text": "`summary.reviewComplete=false` means more evidence work remains, not that a human must decide.",
+      "note": "사람을 부르지 않는다는 설명"
+    },
+    {
+      "file": "skills/cross-review/SKILL.md",
+      "hash": "d0771cd0aabe72be",
+      "kind": "stop",
+      "class": "N",
+      "text": "- `--cleanup`: delete only this branch's review directory, then stop; default off.",
+      "note": "설계된 종료"
+    },
+    {
+      "file": "skills/cross-review/SKILL.md",
+      "hash": "d5357e682e531d7a",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Do not ask the user to resolve agent-owned evidence gaps.",
+      "note": "금지문"
+    },
+    {
+      "file": "skills/cross-review/templates.md",
+      "hash": "16b5e95ed2a30fe4",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Human requires a reason evidence alone cannot choose and 2–5 distinct nonblank options of 1–300 chars.",
+      "note": "형식 제약"
+    },
+    {
+      "file": "skills/cross-review/templates.md",
+      "hash": "4e5879424225addc",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Report reviewComplete, human-decision requirement and agent next action from the sealed comment.",
+      "note": "출력 항목"
+    },
+    {
+      "file": "skills/enrich-docs/reference.md",
+      "hash": "42f33e977110fd2b",
+      "kind": "stop",
+      "class": "N",
+      "text": "`approve` continues; `modify` removes or narrows items and re-presents the plan; `cancel` ends without writes.",
+      "note": "사람이 고른 종료"
+    },
+    {
+      "file": "skills/enrich-docs/reference.md",
+      "hash": "5993184ba6cd1803",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Two findings are deferred instead of repaired: a `stale-path` whose token matches a `structure.generatedPaths` entry (the path exists at runtime; whether the rule should exempt it is a config decision), and a `missing-field` on a Boundary Exemption whose `Reason` is empty (the reason is a human claim, never generated).",
+      "note": "생성 경로 면제 여부·경계 면제 사유는 설정·제품 결정"
+    },
+    {
+      "file": "skills/enrich-docs/reference.md",
+      "hash": "d945eccace612f0a",
+      "kind": "interactive-marker",
+      "class": "U",
+      "text": "<!-- [INTERACTIVE] -->",
+      "note": "문서 편집 승인(설계된 상호작용)"
+    },
+    {
+      "file": "skills/enrich-docs/reference.md",
+      "hash": "f084e361dfee0905",
+      "kind": "stop",
+      "class": "N",
+      "text": "`--dry-run` displays the plan and ends without writes.",
+      "note": "설계된 종료"
+    },
+    {
+      "file": "skills/migrate/reference.md",
+      "hash": "6a45c86bd0b4d2df",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Report: Show the script output to the user",
+      "note": "결과 보고"
+    },
+    {
+      "file": "skills/migrate/SKILL.md",
+      "hash": "01bde04f5b4ec64d",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Report the output to the user.",
+      "note": "결과 보고"
+    },
+    {
+      "file": "skills/migrate/SKILL.md",
+      "hash": "52efbed0159773ce",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Uses a cross-platform Node script for batch processing — the LLM only reads the script output and reports to the user.",
+      "note": "결과 보고(결정 위임 아님)"
+    },
+    {
+      "file": "skills/migrate/SKILL.md",
+      "hash": "9df85dde10392017",
+      "kind": "human-call",
+      "class": "N",
+      "text": "The LLM executes the script and reports the output to the user.",
+      "note": "결과 보고"
+    },
+    {
+      "file": "skills/migrate/SKILL.md",
+      "hash": "d0a2571a37ff21b7",
+      "kind": "human-call",
+      "class": "N",
+      "text": "The user re-runs the skill with `--execute` to apply the migration; no inline confirmation prompt is issued from this skill (the explicit `--execute` flag is the gate).",
+      "note": "Describes how the user invokes the skill; the skill calls nobody."
+    },
+    {
+      "file": "skills/migrate/SKILL.md",
+      "hash": "d8ee95aff70ab022",
+      "kind": "stop",
+      "class": "E",
+      "text": "If the script is not found, abort with an error message.",
+      "note": "플러그인 설치 결함"
+    },
+    {
+      "file": "skills/pipeline/reference.md",
+      "hash": "9d27d336498c280c",
+      "kind": "stop",
+      "class": "U",
+      "text": "| Dirty source worktree | Stop. Report the abort message verbatim. |",
+      "note": "dirty worktree(옛 U)"
+    },
+    {
+      "file": "skills/pipeline/reference.md",
+      "hash": "beee2a20c5588ddd",
+      "kind": "stop",
+      "class": "N",
+      "text": "Stop and report success.",
+      "note": "정상 종료"
+    },
+    {
+      "file": "skills/pipeline/reference.md",
+      "hash": "e1322f55e02995ff",
+      "kind": "stop",
+      "class": "N",
+      "text": "| Typecheck failure with every correction reverted (`--auto`) | Stop. The failure predates the corrections; `resolve` repaired or reverted each one it could. |",
+      "note": "C39 draft applied: resolve repairs at most twice and reverts only the corrections it cannot repair; the remaining stop is a failure that predates the corrections (designed termination)."
+    },
+    {
+      "file": "skills/pipeline/reference.md",
+      "hash": "510a7d2002c3804f",
+      "kind": "stop",
+      "class": "N",
+      "text": "A second INCONCLUSIVE for the same reason — the same next action over the same subject — stops the cycle; one asking for something else is progress. |",
+      "note": "Designed termination after one facts-driven retry of the cycle (C38); the stop is keyed on the reason, not the count (S5b)."
+    },
+    {
+      "file": "skills/pipeline/reference.md",
+      "hash": "eb9c3931f211c81b",
+      "kind": "stop",
+      "class": "N",
+      "text": "Never stops the pipeline.",
+      "note": "부정"
+    },
+    {
+      "file": "skills/pipeline/SKILL.md",
+      "hash": "1db5324b22f21f60",
+      "kind": "stop",
+      "class": "N",
+      "text": "**Omitting `hasPullRequest` reads as \"no PR\".** A branch that already has an unreviewed PR then enters `pr-create` instead of `review`, where the existing-PR overwrite confirmation stops the run for input — the one place this pipeline yields by accident.",
+      "note": "호출을 피하라는 설명. 실제 호출은 C44"
+    },
+    {
+      "file": "skills/pipeline/SKILL.md",
+      "hash": "21b84c96a15c7862",
+      "kind": "stop",
+      "class": "N",
+      "text": "Document sync never stops the cycle — its findings ride in the PR body's `FCA Handoff`, and `review` reads the body's handoff block and top sections as change context.",
+      "note": "부정"
+    },
+    {
+      "file": "skills/pipeline/SKILL.md",
+      "hash": "2fd35134d081f050",
+      "kind": "stop",
+      "class": "N",
+      "text": "Stage outcomes that stop the pipeline:",
+      "note": "제목"
+    },
+    {
+      "file": "skills/pipeline/SKILL.md",
+      "hash": "567ce665a15c359e",
+      "kind": "stop",
+      "class": "N",
+      "text": "Forwarded to `pr-create`; `--no-push` turns it off — `pr-create` then saves the body and the cycle stops there |",
+      "note": "호출자가 고른 종료"
+    },
+    {
+      "file": "skills/pipeline/SKILL.md",
+      "hash": "59a27b214a36cc07",
+      "kind": "stop",
+      "class": "N",
+      "text": "Never stops the pipeline; its verdict is the pipeline result |",
+      "note": "부정"
+    },
+    {
+      "file": "skills/pipeline/SKILL.md",
+      "hash": "86201dc2ab41b22b",
+      "kind": "stop",
+      "class": "N",
+      "text": "Stop condition |",
+      "note": "표 머리"
+    },
+    {
+      "file": "skills/pull-request/reference.md",
+      "hash": "711a427195a0a880",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Record for a human or configuration decision |",
+      "note": "설정 결정"
+    },
+    {
+      "file": "skills/pull-request/reference.md",
+      "hash": "80bc8d8d2e083db9",
+      "kind": "stop",
+      "class": "U",
+      "text": "On exit 1, report stderr and stop; never substitute another base.",
+      "note": "C41과 같음. 옛 M(`pull-request/reference.md:48`)은 U로 제안 — 추정이 모호할 때 고를 근거가 없음 (?)"
+    },
+    {
+      "file": "skills/pull-request/SKILL.md",
+      "hash": "2d85be5aab46455b",
+      "kind": "human-call",
+      "class": "N",
+      "text": "If the batch call fails, its artifact cannot be read, or `data.results` is missing after that fallback, append `{ class: \"document-sync\", ruleId: \"document-sync\", path: \".\", note: <diagnostic verbatim> }` to `HANDOFF_ENTRIES`, set `Document sync: failed`, leave the owner set empty, skip step 4, and proceed to step 7.",
+      "note": "Failure handling inside the skill; the finding it appends is machine work, not a hand-off."
+    },
+    {
+      "file": "skills/pull-request/SKILL.md",
+      "hash": "4b1f7d365fdd8061",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Caller inputs — read every `--issue`, `--spec`, `--decision`, `--screenshot`, `--focus`, and `--notes` value and preserve the normalized result as `INPUTS` through Stage 3.",
+      "note": "Names the inputs the calling agent passes; \"caller\" here is the agent, not a person."
+    },
+    {
+      "file": "skills/pull-request/SKILL.md",
+      "hash": "621fcf87b649d146",
+      "kind": "interactive-marker",
+      "class": "U",
+      "text": "3. <!-- [INTERACTIVE] --> An existing PR requires an explicit overwrite confirmation before its body is replaced.",
+      "note": "파괴적 덮어쓰기 동의"
+    },
+    {
+      "file": "skills/pull-request/SKILL.md",
+      "hash": "c2d3efe0bad4a073",
+      "kind": "human-call",
+      "class": "N",
+      "text": "A `documents-only` worktree can carry user edits, so `documents-only → all RICH → commit success` reports `committed`.",
+      "note": "설명"
+    },
+    {
+      "file": "skills/pull-request/SKILL.md",
+      "hash": "d6bb5b6cb494e38d",
+      "kind": "stop",
+      "class": "U",
+      "text": "A nonzero exit stops with its diagnostic and the §1 base-resolution message.",
+      "note": "exit 1 사유: detached branch, base 앞선 커밋 없음, 추정 불가. 근거 없는 base 선택(§1 메시지가 `--base` 지정을 안내) (?)"
+    },
+    {
+      "file": "skills/pull-request/SKILL.md",
+      "hash": "fb03059e54b17ac1",
+      "kind": "stop",
+      "class": "U",
+      "text": "abort with §1 |",
+      "note": "dirty worktree(옛 U)"
+    },
+    {
+      "file": "skills/resolve/reference.md",
+      "hash": "f2fb90f802a19473",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Reject-the-rejection cases, reported back to the developer for a second pass:",
+      "note": "U(a). The interactive resolve sheet sends a rejected rejection back to the person who wrote it."
+    },
+    {
+      "file": "skills/resolve/SKILL.md",
+      "hash": "1bba5c24129eacf2",
+      "kind": "ask-user-tool",
+      "class": "U",
+      "text": "Interactive only: use AskUserQuestion once per batch round with exactly two fixed options:",
+      "note": "설계된 결정표"
+    },
+    {
+      "file": "skills/resolve/SKILL.md",
+      "hash": "805ee36b820d1101",
+      "kind": "ask-user-tool",
+      "class": "U",
+      "text": "<!-- [INTERACTIVE] AskUserQuestion: batch decision sheet -->",
+      "note": "설계된 결정표"
+    },
+    {
+      "file": "skills/resolve/SKILL.md",
+      "hash": "a134988f92a2dd47",
+      "kind": "stop",
+      "class": "N",
+      "text": "Abort — no review to resolve.",
+      "note": "같은 칸에 \"Run `/filid:cross-review` first\" — 다음 행동 있음"
+    },
+    {
+      "file": "skills/resolve/SKILL.md",
+      "hash": "b76c46608fb2c696",
+      "kind": "stop",
+      "class": "N",
+      "text": "Abort — the source moved since the review.",
+      "note": "\"Re-run `/filid:cross-review`\" — 다음 행동 있음"
+    },
+    {
+      "file": "skills/resolve/SKILL.md",
+      "hash": "c1f7196584c9c20e",
+      "kind": "stop",
+      "class": "U",
+      "text": "- interactive → report and stop before committing;",
+      "note": "상호작용 모드의 사람 판단(`--auto` 갈래는 C39 쪽)"
+    },
+    {
+      "file": "skills/resolve/SKILL.md",
+      "hash": "ef75d123f449cfef",
+      "kind": "stop",
+      "class": "N",
+      "text": "If it fails with every correction reverted, the failure predates this run: abort with `Typecheck failed before applying fixes.`",
+      "note": "Designed termination: the tree did not compile before resolve, so no correction can be judged (C39)."
+    },
+    {
+      "file": "skills/restructure/reference.md",
+      "hash": "91e6f67d9f38cb3f",
+      "kind": "stop",
+      "class": "N",
+      "text": "`--dry-run` prints this material and ends without changes.",
+      "note": "설계된 종료"
+    },
+    {
+      "file": "skills/restructure/reference.md",
+      "hash": "a48f050a94da3b3c",
+      "kind": "stop",
+      "class": "U",
+      "text": "Preserve unrelated working-tree changes and stop on a partial operation instead of silently inventing a recovery plan.",
+      "note": "restructure 부분 실행 복구(옛 U)"
+    },
+    {
+      "file": "skills/restructure/SKILL.md",
+      "hash": "7bc9d2ec41777b9a",
+      "kind": "stop",
+      "class": "N",
+      "text": "Stop when the envelope is non-`ok` or the plan contains unresolved moves.",
+      "note": "이어지는 문장이 \"follow nextAction\" — 결정 이유별 판정은 소스 쪽(`describeDecision.ts`)"
+    },
+    {
+      "file": "skills/revalidate/reference.md",
+      "hash": "6e4816f375a462ec",
+      "kind": "stop",
+      "class": "N",
+      "text": "End without a verdict and record that the baseline cannot be reconstructed after the fact. |",
+      "note": "Designed termination of a standalone revalidate (S6 ruling C54)."
+    },
+    {
+      "file": "skills/revalidate/reference.md",
+      "hash": "820e4173426dc8a5",
+      "kind": "stop",
+      "class": "N",
+      "text": "End without a verdict and record that `resolve` has not run. |",
+      "note": "Designed termination of a standalone revalidate (S6 ruling C63); revalidate does not run resolve itself."
+    },
+    {
+      "file": "skills/scan/SKILL.md",
+      "hash": "136f99df0f0d0cbd",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Incomplete analysis never implies a human choice: report recoverable evidence as agent work, and human decisions only with concrete options and a reason.",
+      "note": "설명"
+    },
+    {
+      "file": "skills/setup/sections/section-0-rule-docs.md",
+      "hash": "f5187a03f1d5494b",
+      "kind": "stop",
+      "class": "U",
+      "text": "If still pending, return the URL and stop because the user interaction has not completed.",
+      "note": "사람이 연 설정 화면(설계된 상호작용)"
+    },
+    {
+      "file": "skills/setup/SKILL.md",
+      "hash": "0d82b9ef9e9b0290",
+      "kind": "stop",
+      "class": "N",
+      "text": "- `--rules`: run project initialization and managed-rule settings only, then stop before snapshot inspection",
+      "note": "설계된 종료"
+    },
+    {
+      "file": "skills/setup/SKILL.md",
+      "hash": "2343a3114e3e1b38",
+      "kind": "stop",
+      "class": "N",
+      "text": "If `--rules` is present, emit the managed-rule summary and stop.",
+      "note": "설계된 종료"
+    },
+    {
+      "file": "src/constants/mcpContracts.ts",
+      "hash": "76f850361486d272",
+      "kind": "human-call",
+      "class": "E",
+      "text": "Run from an installed filid plugin, where the host sets CLAUDE_PLUGIN_ROOT, or reinstall the plugin, then retry; report to the user if it persists.",
+      "note": "CLAUDE_PLUGIN_ROOT unset / plugin not installed; reinstall is outside the agent's reach."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "0386d18d2102547e",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Ask the user to make .filid/review-rules.json and its rule files regular files inside the repository.",
+      "note": "Spec: repairing review config during a review gets source protection, so not freely M; replacing a symlink may also undo an intentional share."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "038f2bb991d65de2",
+      "kind": "human-call",
+      "class": "E",
+      "text": "Ask the user to reinstall or update the filid plugin, whose installed cross-review actor files are incomplete, then retry the same call.",
+      "note": "Incomplete plugin installation; reinstall/update."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "139566a9ec2e8d38",
+      "kind": "human-call",
+      "class": "E",
+      "text": "Ask the user to make the named review directory writable, or to move it aside, then call prepare again; filid cannot change file permissions.",
+      "note": "Directory permissions are outside the agent: filid cannot make a read-only review directory writable (V2)."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "1b09a8c0182f481d",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Ask the user to correct the named review setting in the filid config, then retry the same review_state call.",
+      "note": "Spec: config repair during a review is protected; groupChurnLimit/maxGroups are the user's spending bounds."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "609874af4f9a9af2",
+      "kind": "human-call",
+      "class": "E",
+      "text": "Ask the user to reinstall or update the filid plugin, whose installed cross-review rule files are incomplete, then retry the same call.",
+      "note": "Incomplete plugin installation; reinstall/update."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "66cf9a1d2d723da7",
+      "kind": "human-call",
+      "class": "E",
+      "text": "Ask the user to reinstall or update the filid plugin, whose installed cross-review rules.json is malformed, then retry the same call.",
+      "note": "Corrupt plugin installation; reinstall/update."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "712f8c5edc46e002",
+      "kind": "human-call",
+      "class": "E",
+      "text": "Ask the user to reinstall or re-enable the filid plugin and restart the session so its MCP server receives the plugin root, then retry the same call.",
+      "note": "CLAUDE_PLUGIN_ROOT unset / plugin disabled; reinstall, re-enable, restart session."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "75cc3d73d6b7dac4",
+      "kind": "stop",
+      "class": "E",
+      "text": "Stop without dispatching actors or publishing a verdict.",
+      "note": "Stop half of the installation next actions in rows 7, 8, 9, 17; the same string names the next action (reinstall, retry), so not a dead end."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "7f8d57f46410f640",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Pass confirm: true to cleanup only after the user explicitly agrees to discard this branch's review artifacts, then call again.",
+      "note": "Explicit consent to discard review artifacts; the gate itself."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "80331b36d13c0586",
+      "kind": "human-call",
+      "class": "U",
+      "text": "If no base resolves, ask the user for an explicit base ref; never substitute the repository default.",
+      "note": "Comparison base with no evidence after the mechanical fetch; the sentence forbids substituting a default. Refinement: try the PR's baseRefName before asking."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "8aba1af05faa3415",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Ask the user to fix .filid/review-rules.json as the message describes.",
+      "note": "Spec: repairing review config during a review gets source protection, so not freely M."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "9619e98c69acfa7e",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Stop without dispatching actors and ask the user to split the PR or raise review.maxGroups in .filid/config.json; unset, the limit is filid's own default of 64 rather than a number the user chose.",
+      "note": "U(c). The sentence now names review.maxGroups in .filid/config.json and says the unset limit is filid’s own default of 64 (S6 ruling A12/R10)."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "9e4d8a84816ea0bd",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Do not report the review as complete while it remains; ask the user to fix or remove the named key in the filid config.",
+      "note": "Spec: config repair during a review is protected; blocks reporting completion."
+    },
+    {
+      "file": "src/constants/reviewState.ts",
+      "hash": "aec9a8206dc74bb7",
+      "kind": "stop",
+      "class": "N",
+      "text": "If the same diagnostic returns in this run, end without a terminal verdict and record it in the report as a filid defect.",
+      "note": "R-2 designed termination shared by every unusable-state diagnostic (PREPARE_ONCE_NEXT_ACTION)."
+    },
+    {
+      "file": "src/core/projectSnapshot/evidence/utils/createUnfollowedLinkDiagnostic.ts",
+      "hash": "2afe7dcfae7ec64c",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Otherwise, with the user's consent, replace ${} with the real file or directory, or move it out of the project.",
+      "note": "Replacing or moving a symlink is a structural change the user may have made on purpose; the preceding exclude option is already the agent's own action."
+    },
+    {
+      "file": "src/core/projectSnapshot/projectSnapshot.ts",
+      "hash": "6a0f1eabdd493f1b",
+      "kind": "human-call",
+      "class": "U",
+      "text": "With the user's agreement, make a fractal own ${} — an INTENT.md in its directory or an ancestor does that — or move the file under an existing fractal; until then no rule can see this reference.",
+      "note": "Creating a fractal (INTENT.md) or moving a file sets a module boundary; matches enrich-docs' approval gate (skills/enrich-docs/SKILL.md:37,54). The reference is a finding, not a stop: the graph is judged without it (S3c slice 5)."
+    },
+    {
+      "file": "src/core/restructure/planner/describeDecision.ts",
+      "hash": "12fdae375cc91b81",
+      "kind": "human-call",
+      "class": "U",
+      "text": "With the user's agreement, give its directory or an ancestor an INTENT.md so a fractal owns it (the enrich-docs skill drafts one), or ask the user where the unit belongs; then create a new plan.",
+      "note": "U(b). Same consent condition as projectSnapshot.ts unowned-dependency sentence (S6 ruling A31/A32)."
+    },
+    {
+      "file": "src/core/restructure/planner/describeDecision.ts",
+      "hash": "8499a6c60334b33d",
+      "kind": "human-call",
+      "class": "U",
+      "text": "If nothing uses the unit, ask the user whether to delete it rather than move it.",
+      "note": "Consent to delete a unit."
+    },
+    {
+      "file": "src/core/restructure/planner/describeDecision.ts",
+      "hash": "9d7131824c699ac1",
+      "kind": "human-call",
+      "class": "U",
+      "text": "If the evidence does not settle it, ask the user.",
+      "note": "Internal vs independent without evidence is a design decision."
+    },
+    {
+      "file": "src/core/restructure/planner/describeDecision.ts",
+      "hash": "c35f070e633c3695",
+      "kind": "human-call",
+      "class": "U",
+      "text": "If no such name is evident, ask the user for one.",
+      "note": "A name with no evidence (code-placement rule 3)."
+    },
+    {
+      "file": "src/core/restructure/planner/describeDecision.ts",
+      "hash": "c6adbdabc0c97c83",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Report it to the user; if the unit needs no public boundary of its own, the user may choose contractIntent \"internal\", which needs no entry file.",
+      "note": "Falling back to contractIntent 'internal' gives up a public boundary, a design decision; the plan request has no entry-form field (types/restructure.ts:87-90), so no agent action picks a form. Reads as S if treated as a filid limitation. (?)"
+    },
+    {
+      "file": "src/core/restructure/planner/describeOrderConflict.ts",
+      "hash": "c9188e10956e7e19",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Ask the user where any leftovers belong, and delete ${} only once it is empty.",
+      "note": "Leftovers are files filid cannot see (dot-prefixed, symlinks, git-ignored, excluded dirs), so placement has no evidence and may involve user-local files; deletion is already gated on emptiness."
+    },
+    {
+      "file": "src/core/restructure/validator/validateDependencyPostconditions.ts",
+      "hash": "55ebb38cff1011ab",
+      "kind": "human-call",
+      "class": "U",
+      "text": "If the plan's moves or import edits closed the cycle, fix the imports that close it; if it existed before the plan, report it to the user as pre-existing.",
+      "note": "Spec: a cycle created by the plan is a design judgment; adopted edges re-judged after S5b. The pre-existing branch is a report only; the code already splits baseline cycles, so that branch could follow the preexisting list instead of agent judgment."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/handlers/readReviewCheckpoint.ts",
+      "hash": "04b9a2cfd85edd17",
+      "kind": "stop",
+      "class": "N",
+      "text": "Stop without a verdict: no prepared review exists for this branch.",
+      "note": "The same nextAction names the next action (\"Run /filid:cross-review to prepare and seal a review before resolving or revalidating\"). Resolve and revalidate abort on `missing` by design (resolve/SKILL.md:37, revalidate/SKILL.md:36)."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/handlers/readReviewCheckpoint.ts",
+      "hash": "407272794c44da87",
+      "kind": "stop",
+      "class": "N",
+      "text": "Stop and run /filid:cross-review again; it re-seals the report from the validated opinions without new actor work.",
+      "note": "Names a concrete next action that needs no new actor work. A sealed state without its report is not `cached` (handlers/prepareReviewArtifacts.ts:108-111), so a new run re-seals it."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/handlers/utils/resolvePrepareBaseRef.ts",
+      "hash": "8d4cd0ec84fad1aa",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Ask the user for the comparison base, then retry the same review_state call with baseRef set to it.",
+      "note": "A base branch name with no conventional evidence (if the PR is unavailable, it may also be an auth problem). A possible pre-step, `git remote set-head origin --auto` then retry once, conflicts with cross-review Step 1 (\"do not run git\" before prepare) and does not help without a remote. (?)"
+    },
+    {
+      "file": "src/mcp/tools/reviewState/handlers/validateReviewOpinion.ts",
+      "hash": "8844e6d40512aa61",
+      "kind": "stop",
+      "class": "N",
+      "text": "Once, after all prior actors finish, call prepare again with the original arguments to start a new review; if the state goes missing again, stop without a terminal verdict.",
+      "note": "Designed bounded retry. It names the next action (one non-force prepare) and the terminal after a second failure."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/handlers/validateReviewOpinion.ts",
+      "hash": "deb86634b620612a",
+      "kind": "stop",
+      "class": "N",
+      "text": "If the source changes again, stop without a terminal verdict.",
+      "note": "Terminal of a designed one-retry loop. The sentence before it names the next action (non-force prepare that reuses validated opinions)."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/opinion/utils/reviewResolutionSchema.ts",
+      "hash": "b1621cf798feca2b",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Human decision advice requires distinct concrete options.",
+      "note": "A schema error addressed to the reviewer/verifier actor. It limits how an actor may propose a human decision and hands nothing to a person."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/opinion/utils/reviewResolutionSchema.ts",
+      "hash": "c6e20d22e29051c3",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Human decision advice requires a reason.",
+      "note": "Same as row 18: an actor-facing schema constraint, not a call to a person."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/render/renderPrComment.ts",
+      "hash": "270305358cc552c5",
+      "kind": "human-call",
+      "class": "N",
+      "text": "| Human decision required",
+      "note": "A boolean label (true when any blocker has attention `human-decision`). It reports a fact and hands nothing to a person."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/render/renderReviewBlockers.ts",
+      "hash": "4601bb7a739b554e",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Human decision requests",
+      "note": "An enum/section label."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/render/renderReviewBlockers.ts",
+      "hash": "513a2a92305c7e0e",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Missing advice means triage, not a mandatory human decision.",
+      "note": "Negates a human call: it says outright that missing advice does not require a human."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/rules/loadRepositoryRules.ts",
+      "hash": "95ea330a961c0f6e",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Ask the user to point rule \"${}\" in .filid/review-rules.json at a regular Markdown file inside the repository.",
+      "note": "Spec rule: repairing .filid/review-rules.json during a review gets the same protection as source. The correct target file is also a name with no evidence."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/rules/loadRepositoryRules.ts",
+      "hash": "a4c6ad8e706301d1",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Ask the user to create ${} or correct rule \"${}\"'s file in .filid/review-rules.json.",
+      "note": "Config repair during a review is protected like source (spec rule). The body's content, or the corrected path, is the user's rule decision."
+    },
+    {
+      "file": "src/mcp/tools/reviewState/rules/resolveFileRules.ts",
+      "hash": "9694d884edaa0978",
+      "kind": "human-call",
+      "class": "U",
+      "text": "Ask the user to rename rule \"${}\" in .filid/review-rules.json, or list the built-in id in its \"replaces\" array.",
+      "note": "Protected config repair (spec rule). Whether the rule should replace the built-in or take a new name is a product decision with no evidence."
+    },
+    {
+      "file": "templates/rules/README.md",
+      "hash": "a246396e27b5da96",
+      "kind": "human-call",
+      "class": "N",
+      "text": "The only code path that writes to `.claude/rules/` is `syncRuleDocs()` in `src/core/infra/configLoader/loaders/syncRuleDocs.ts`, which is invoked exclusively by the `mcp__plugin_filid_tools__project_setup` `rules-sync` action from the `setup` skill after the user confirms a checkbox selection.",
+      "note": "Describes the deployment path and the setup skill existing checkbox step; not a call."
+    }
+  ]
+}

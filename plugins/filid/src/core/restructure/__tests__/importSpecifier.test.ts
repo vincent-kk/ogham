@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 
 import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
-import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
 import { ALL_SNAPSHOT_AXES } from '../../../constants/snapshotAxes.js';
 import type {
   DependencyEvidence,
@@ -10,22 +9,23 @@ import type {
   ProjectSnapshot,
 } from '../../../types/fractal.js';
 import { buildImportRewrites } from '../imports/buildImportRewrites.js';
+import { formatRequiredSpecifier } from '../imports/formatRequiredSpecifier.js';
 import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { stripPathExtension } from '../specifiers/stripPathExtension.js';
-import { validateImportRewrites } from '../validator/validateImportRewrites.js';
+import { validateImportRequirements } from '../validator/validateImportRequirements.js';
 
 const PATHS = {
-  ROOT: '/root',
-  FEATURE_A: '/root/featureA',
-  FEATURE_A_FILE: '/root/featureA/index.ts',
-  FEATURE_B: '/root/featureB',
-  FEATURE_B_FILE: '/root/featureB/index.ts',
-  SOURCE: '/root/lib/logger.ts',
-  TARGET: '/root/shared/logger.ts',
-  DIRECTORY_INDEX: '/root/lib/index.ts',
-  SOURCE_DIRECTORY: '/root/lib',
-  TARGET_DIRECTORY: '/root/shared',
-  NESTED_CONSUMER: '/root/lib/deep/consumer.ts',
+  ROOT: '/filid-fixture-root',
+  FEATURE_A: '/filid-fixture-root/featureA',
+  FEATURE_A_FILE: '/filid-fixture-root/featureA/index.ts',
+  FEATURE_B: '/filid-fixture-root/featureB',
+  FEATURE_B_FILE: '/filid-fixture-root/featureB/index.ts',
+  SOURCE: '/filid-fixture-root/lib/logger.ts',
+  TARGET: '/filid-fixture-root/shared/logger.ts',
+  DIRECTORY_INDEX: '/filid-fixture-root/lib/index.ts',
+  SOURCE_DIRECTORY: '/filid-fixture-root/lib',
+  TARGET_DIRECTORY: '/filid-fixture-root/shared',
+  NESTED_CONSUMER: '/filid-fixture-root/lib/deep/consumer.ts',
 } as const;
 
 function node(path: string, name: string, depth: number): FractalNode {
@@ -48,6 +48,10 @@ function node(path: string, name: string, depth: number): FractalNode {
     depth,
     metadata: {},
   };
+}
+
+function unit(sourcePath: string, targetPath: string) {
+  return { sourcePath, targetPath, rewriteTargetPath: targetPath };
 }
 
 function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
@@ -77,6 +81,7 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
         },
       ],
       cycles: [],
+      unknownFiles: [],
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture-adapter'],
@@ -87,13 +92,15 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    normalizedFacts: [],
+    filesOutsideFactsScope: 0,
     collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: '2026-07-28T00:00:00.000Z',
   };
 }
 
-describe('import specifier rewrites under ecosystem extension conventions', () => {
-  it('rewrites a .js specifier that resolves to a .ts source', () => {
+describe('suggested specifiers under ecosystem extension conventions', () => {
+  it('suggests a .js specifier for one that resolves to a .ts source', () => {
     const result = buildImportRewrites(
       snapshotWith([
         {
@@ -102,17 +109,15 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.SOURCE,
         },
       ]),
-      PATHS.SOURCE,
-      PATHS.TARGET,
-      [PATHS.FEATURE_A_FILE],
+      unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
-    expect(result.decisionReasons).toEqual([]);
-    expect(result.rewrites).toEqual([
+    expect(result.required).toEqual([
       {
         consumerPath: PATHS.FEATURE_A_FILE,
         currentSpecifier: '../lib/logger.js',
-        requiredSpecifier: '../shared/logger.js',
+        requiredResolvedPath: PATHS.TARGET,
+        suggestedSpecifier: '../shared/logger.js',
       },
     ]);
   });
@@ -126,16 +131,13 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.SOURCE,
         },
       ]),
-      PATHS.SOURCE,
-      PATHS.TARGET,
-      [PATHS.FEATURE_A_FILE],
+      unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
-    expect(result.decisionReasons).toEqual([]);
-    expect(result.rewrites[0]?.requiredSpecifier).toBe('../shared/logger');
+    expect(result.required[0]?.suggestedSpecifier).toBe('../shared/logger');
   });
 
-  it('leaves a directory-index specifier unsupported', () => {
+  it('requires a directory-index specifier without a suggestion', () => {
     const result = buildImportRewrites(
       snapshotWith([
         {
@@ -144,19 +146,20 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.DIRECTORY_INDEX,
         },
       ]),
-      PATHS.DIRECTORY_INDEX,
-      PATHS.TARGET,
-      [PATHS.FEATURE_A_FILE],
+      unit(PATHS.DIRECTORY_INDEX, PATHS.TARGET),
     );
 
-    expect(result.rewrites).toEqual([]);
-    expect(result.decisionReasons).toEqual([
-      RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED,
+    expect(result.required).toEqual([
+      {
+        consumerPath: PATHS.FEATURE_A_FILE,
+        currentSpecifier: '../lib',
+        requiredResolvedPath: PATHS.TARGET,
+      },
     ]);
   });
 
-  it('accepts a post-move .js specifier as postcondition evidence', () => {
-    const findings = validateImportRewrites(
+  it('accepts a post-move .js specifier that resolves to the required file', () => {
+    const findings = validateImportRequirements(
       snapshotWith([
         {
           sourceFile: PATHS.FEATURE_A_FILE,
@@ -177,12 +180,53 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           {
             consumerPath: PATHS.FEATURE_A_FILE,
             currentSpecifier: '../lib/logger.js',
-            requiredSpecifier: '../shared/logger.js',
+            requiredResolvedPath: PATHS.TARGET,
+            suggestedSpecifier: '../shared/logger.js',
           },
         ],
+        preservedImports: [],
         requiresDecision: false,
         decisionReasons: [],
+        decisions: [],
       },
+      new Map(),
+    );
+
+    expect(findings).toEqual([]);
+  });
+
+  it('accepts a post-move directory reference that resolves to the required file', () => {
+    const findings = validateImportRequirements(
+      snapshotWith([
+        {
+          sourceFile: PATHS.TARGET,
+          rawSpecifier: '../featureA',
+          resolvedPath: PATHS.FEATURE_A_FILE,
+        },
+      ]),
+      {
+        sourcePath: PATHS.SOURCE,
+        targetPath: PATHS.TARGET,
+        unitKind: 'file',
+        targetNodeType: 'organ',
+        basis: 'lowest-common-fractal',
+        consumerPaths: [PATHS.FEATURE_A_FILE],
+        reason: 'moved',
+        requiredArtifacts: [],
+        affectedImports: [
+          {
+            consumerPath: PATHS.TARGET,
+            currentSpecifier: '../featureA',
+            requiredResolvedPath: PATHS.FEATURE_A_FILE,
+            suggestedSpecifier: '../featureA',
+          },
+        ],
+        preservedImports: [],
+        requiresDecision: false,
+        decisionReasons: [],
+        decisions: [],
+      },
+      new Map(),
     );
 
     expect(findings).toEqual([]);
@@ -219,12 +263,12 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
     expect(stripPathExtension('..')).toBe('..');
     expect(stripPathExtension('../..')).toBe('../..');
     expect(stripPathExtension('.')).toBe('.');
-    expect(stripPathExtension('/root/lib/.gitignore')).toBe(
-      '/root/lib/.gitignore',
+    expect(stripPathExtension('/filid-fixture-root/lib/.gitignore')).toBe(
+      '/filid-fixture-root/lib/.gitignore',
     );
   });
 
-  it('leaves a bare parent-directory specifier unsupported', () => {
+  it('preserves a bare parent-directory specifier the directory move keeps valid', () => {
     // '..' 은 path-like 판정에서 탈락해야 한다. 통과시키면 stripPathExtension이
     // '..' 을 이름+확장자로 읽어 '../../shared.' 같은 specifier를 만들어 낸다.
     const result = buildImportRewrites(
@@ -235,18 +279,20 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.SOURCE_DIRECTORY,
         },
       ]),
-      PATHS.SOURCE_DIRECTORY,
-      PATHS.TARGET_DIRECTORY,
-      [PATHS.NESTED_CONSUMER],
+      unit(PATHS.SOURCE_DIRECTORY, PATHS.TARGET_DIRECTORY),
     );
 
-    expect(result.rewrites).toEqual([]);
-    expect(result.decisionReasons).toEqual([
-      RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED,
+    expect(result.required).toEqual([]);
+    expect(result.preserved).toEqual([
+      {
+        consumerPath: '/filid-fixture-root/shared/deep/consumer.ts',
+        currentSpecifier: '..',
+        requiredResolvedPath: PATHS.TARGET_DIRECTORY,
+      },
     ]);
   });
 
-  it('still rejects a bare package specifier', () => {
+  it('requires a bare package specifier without a suggestion', () => {
     const result = buildImportRewrites(
       snapshotWith([
         {
@@ -255,14 +301,28 @@ describe('import specifier rewrites under ecosystem extension conventions', () =
           resolvedPath: PATHS.SOURCE,
         },
       ]),
-      PATHS.SOURCE,
-      PATHS.TARGET,
-      [PATHS.FEATURE_A_FILE],
+      unit(PATHS.SOURCE, PATHS.TARGET),
     );
 
-    expect(result.rewrites).toEqual([]);
-    expect(result.decisionReasons).toEqual([
-      RESTRUCTURE_DECISION_REASONS.IMPORT_REWRITE_UNSUPPORTED,
+    expect(result.required).toEqual([
+      {
+        consumerPath: PATHS.FEATURE_A_FILE,
+        currentSpecifier: '@scope/logger',
+        requiredResolvedPath: PATHS.TARGET,
+      },
     ]);
+  });
+});
+
+describe('a specifier computed from Windows paths', () => {
+  it('is separated the way a module specifier is, not the way the host is', () => {
+    expect(
+      formatRequiredSpecifier(
+        'C:\\Repo\\domain\\a\\use.ts',
+        'C:\\Repo\\domain\\model\\value.ts',
+        './value.js',
+        'file',
+      ),
+    ).toBe('../model/value.js');
   });
 });

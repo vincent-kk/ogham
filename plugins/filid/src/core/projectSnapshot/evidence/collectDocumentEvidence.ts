@@ -5,6 +5,7 @@ import {
 } from '@ogham/cross-platform';
 
 import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
+import { toProjectRelativePath } from '../../../lib/toProjectRelativePath.js';
 import type { BoundaryExemptionDeclaration } from '../../../types/documents.js';
 import type {
   DocumentContractFinding,
@@ -84,7 +85,7 @@ export function collectDocumentEvidence(
       findings.push({
         document: 'intent',
         rule: 'missing-document',
-        message: `${INTENT_MD} is required for ${node.type} node ${node.path}.`,
+        message: `${INTENT_MD} is required for ${node.type} node ${toProjectRelativePath(tree.root, node.path)}.`,
         severity: 'error',
       });
 
@@ -116,7 +117,7 @@ export function collectDocumentEvidence(
       findings.push({
         document: 'detail',
         rule: 'missing-document',
-        message: `${DETAIL_MD} is required for ${node.type} node ${node.path}.`,
+        message: `${DETAIL_MD} is required for ${node.type} node ${toProjectRelativePath(tree.root, node.path)}.`,
         severity: 'error',
       });
 
@@ -137,11 +138,19 @@ export function collectDocumentEvidence(
       ...(boundaryExemptions ? { boundaryExemptions } : {}),
     };
     diagnostics.push(
-      ...findings.map((finding) => ({
-        code: `${finding.document}-document-contract`,
-        message: finding.message,
-        path: finding.document === 'intent' ? intentPath : detailPath,
-      })),
+      ...findings.map((finding) => {
+        const path = finding.document === 'intent' ? intentPath : detailPath;
+        return {
+          code: `${finding.document}-document-contract`,
+          message: finding.message,
+          path,
+          affects: [],
+          nextAction:
+            finding.rule === 'missing-document'
+              ? `Create ${path}; the enrich-docs skill drafts it from the module's evidence.`
+              : `Revise ${path} as the message states, keeping only the current contract; the enrich-docs skill repairs contract documents. Then run again.`,
+        };
+      }),
     );
   }
 

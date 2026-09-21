@@ -1,17 +1,25 @@
+import { seedFacts } from '../../../../integration/helpers/seedFacts.js';
+
 import { runReviewStateFixtureGit } from './runReviewStateFixtureGit.js';
 import { writeReviewStateFixtureFile } from './writeReviewStateFixtureFile.js';
 
 /**
  * Configure an ignored local review policy and commit an exact source fan-out.
+ *
+ * The added files are given their facts before the helper returns: a new path
+ * moves the project's resolution epoch, which leaves every stored record
+ * needing re-resolution, and a fixture that skipped it would be reviewing a
+ * project filid knows nothing about.
  * @param projectRoot Disposable seal fixture with one existing changed source.
  * @param count Positive number of reviewable one-file groups to prepare.
  * @param review Overrides layered over the one-file grouping limit.
+ * @returns Nothing; the project holds the policy, the files and their facts.
  */
-export function configureReviewGroups(
+export async function configureReviewGroups(
   projectRoot: string,
   count: number,
   review: Record<string, unknown> = {},
-): void {
+): Promise<void> {
   writeReviewStateFixtureFile(projectRoot, '.git/info/exclude', '.filid/\n');
   writeReviewStateFixtureFile(
     projectRoot,
@@ -36,5 +44,6 @@ export function configureReviewGroups(
       '-m',
       'Add review groups',
     ]);
+    await seedFacts(projectRoot);
   }
 }

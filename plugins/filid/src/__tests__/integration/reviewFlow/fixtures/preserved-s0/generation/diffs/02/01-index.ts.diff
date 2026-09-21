@@ -1,0 +1,7 @@
+diff --git a/src/beta/index.ts b/src/beta/index.ts
+index b39e8b3..5851425 100644
+--- a/src/beta/index.ts
++++ b/src/beta/index.ts
+@@ -1 +1 @@
+-export const beta = 1;
++export const beta = 2;

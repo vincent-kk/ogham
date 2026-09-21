@@ -14,8 +14,8 @@ import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewSt
 /** Temporary Git repository and plugin root used by config-warning cases. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 
 afterEach(() => {
@@ -51,6 +51,14 @@ describe('review_state prepare config warning scope', () => {
       effort: 'medium',
       concurrency: 8,
     });
+    expect(result.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'config-warning',
+        nextAction: expect.stringMatching(
+          /^Continue the review; the dropped entry may have tightened the analysis, so seal carries this diagnostic into the review blockers with its own next action\. Do not report the review as complete while it remains; ask the user to fix or remove the named key in the filid config\. Outside this review: \S/,
+        ),
+      }),
+    );
   });
 
   it('rejects invalid review warnings after sanitization', async () => {

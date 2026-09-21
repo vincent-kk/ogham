@@ -19,8 +19,8 @@ import { refreshReviewFixtureInputs } from './helpers/refreshReviewFixtureInputs
 /** Isolated repository used to exercise real round validation and handoffs. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });

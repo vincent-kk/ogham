@@ -19,6 +19,7 @@ import type {
   StructureAdapter,
   VerificationAdapter,
 } from '../../../types/adapters.js';
+import { seedFacts } from '../../../__tests__/integration/helpers/seedFacts.js';
 import { createDefaultConfig } from '../../infra/configLoader/index.js';
 import { computeSnapshotHash, createProjectSnapshot } from '../index.js';
 
@@ -85,20 +86,6 @@ function verificationAdapter(
     async discover() {
       return [filePath];
     },
-    async classify() {
-      return 'spec-document';
-    },
-    async count() {
-      return {
-        certainty: 'exact',
-        exactCount: 1,
-        knownLowerBound: 1,
-        reasons: [],
-      };
-    },
-    async extractContractGroupIds() {
-      return [];
-    },
   };
 }
 
@@ -141,6 +128,7 @@ describe('project snapshot', () => {
   it('bundles one tree, owner graph, and verification analysis', async () => {
     const root = project();
     const fixture = writeSnapshotProject(root);
+    await seedFacts(root);
 
     const snapshot = await createProjectSnapshot(
       root,
@@ -256,7 +244,7 @@ describe('project snapshot', () => {
       }),
     );
     expect(snapshot.adapterIds).toEqual([]);
-    expect.soft(snapshot.dependencyGraph.certainty).toBe('unsupported');
+    expect.soft(snapshot.dependencyGraph.certainty).toBe('exact');
     expect.soft(snapshot.verification.certainty).toBe('unsupported');
   });
 
@@ -312,8 +300,13 @@ describe('project snapshot', () => {
     expect(snapshot.diagnostics).not.toContainEqual(
       expect.objectContaining({ code: 'ambiguous-adapter-claim' }),
     );
-    expect(snapshot.verification.files).toHaveLength(1);
-    expect(snapshot.verification.files[0]?.path).toBe(verificationFile);
+    expect(
+      snapshot.diagnostics.filter(
+        ({ code, path }) =>
+          code === 'verification-facts-unavailable' &&
+          path === verificationFile,
+      ),
+    ).toHaveLength(1);
   });
 
   it('treats relative and absolute verification claims as the same portable path', async () => {
@@ -375,8 +368,11 @@ describe('project snapshot', () => {
 
     expect(detectionCalls).toBe(1);
     expect(discoveryCalls).toBe(1);
-    expect(snapshot.verification.files).toContainEqual(
-      expect.objectContaining({ path: verificationFile }),
+    expect(snapshot.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'verification-facts-unavailable',
+        path: verificationFile,
+      }),
     );
   });
 
@@ -405,7 +401,8 @@ describe('project snapshot', () => {
     expect(snapshot.diagnostics).toContainEqual(
       expect.objectContaining({
         code: 'verification-discovery-failed',
-        message: 'verification discovery failed',
+        message:
+          'Verification file discovery failed: verification discovery failed',
       }),
     );
     expect(snapshot.verification.certainty).toBe('indeterminate');
@@ -450,9 +447,6 @@ describe('project snapshot', () => {
           hasDirectDeclarations: false,
           certainty: 'exact',
         };
-      },
-      async extractDependencies() {
-        return [];
       },
       async isFrameworkOwnedPeer() {
         return false;
@@ -515,9 +509,6 @@ describe('project snapshot', () => {
           hasDirectDeclarations: false,
           certainty: 'exact',
         };
-      },
-      async extractDependencies() {
-        return [];
       },
       async isFrameworkOwnedPeer() {
         return false;

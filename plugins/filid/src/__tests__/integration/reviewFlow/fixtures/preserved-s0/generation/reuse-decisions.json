@@ -1,0 +1,28 @@
+{
+  "generationId": "1628b866cb87ad5a03df321f286df981",
+  "sourceHash": "75d87434d91a74ebf40dd1439340f966b44f9f47f742f23bf76b63c348bf1610",
+  "decisions": [
+    {
+      "group": "01",
+      "previousGroup": null,
+      "disposition": "new",
+      "reasons": []
+    },
+    {
+      "group": "02",
+      "previousGroup": null,
+      "disposition": "new",
+      "reasons": []
+    }
+  ],
+  "summary": {
+    "reusedFiles": 0,
+    "reviewFiles": 2,
+    "reusedGroups": 0,
+    "rerunGroups": 0,
+    "newGroups": 2,
+    "removedGroups": 0,
+    "bookkeepingGroups": 0,
+    "remainingMaxReviewerHandoffs": 2
+  }
+}

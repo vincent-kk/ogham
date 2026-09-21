@@ -42,6 +42,8 @@ const SNAPSHOT_BASE = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  normalizedFacts: [],
+    filesOutsideFactsScope: 0,
   collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-07-27T00:00:00.000Z',
 };
@@ -88,6 +90,7 @@ function makeSnapshot(tree: FractalTree) {
       nodePaths: [...tree.nodes.keys()],
       edges: [],
       cycles: [],
+      unknownFiles: [],
       certainty: 'exact' as const,
     },
   };

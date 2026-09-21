@@ -6,6 +6,7 @@ import {
   RULE_DOC_ACTIONS,
   RULE_DOC_DIAGNOSTIC_CODES,
   RULE_DOC_DIAGNOSTIC_MESSAGES,
+  RULE_DOC_DIAGNOSTIC_NEXT_ACTIONS,
 } from '../../../../constants/mcpContracts.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import type {
@@ -36,6 +37,8 @@ const PLUGIN_ROOT_UNRESOLVED_DIAGNOSTICS: ReadonlyArray<
   Object.freeze({
     code: RULE_DOC_DIAGNOSTIC_CODES.PLUGIN_ROOT_UNRESOLVED,
     message: RULE_DOC_DIAGNOSTIC_MESSAGES.PLUGIN_ROOT_UNRESOLVED,
+    affects: [],
+    nextAction: RULE_DOC_DIAGNOSTIC_NEXT_ACTIONS.PLUGIN_ROOT_UNRESOLVED,
   }),
 ]);
 

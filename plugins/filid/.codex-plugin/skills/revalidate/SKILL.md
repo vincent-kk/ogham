@@ -3,7 +3,7 @@ name: revalidate
 user-invocable: true
 description: 'Re-measure the post-correction delta against the recorded resolve baseline, judge every rejection justification, and issue the final PASS or FAIL. Use after resolve corrections are committed.'
 argument-hint: '[--base REF]'
-version: '1.1.0'
+version: '1.2.0'
 complexity: complex
 plugin: filid
 ---
@@ -20,6 +20,10 @@ Resolve files relative to this `SKILL.md`:
 
 - `reference.md` — status derivation matrix, `re-validate.md` template, constitutionality rules for rejections, PR comment format (§4).
 
+## Step 0 — Facts bootstrap
+
+Run the [facts bootstrap](../.shared/facts-bootstrap.md) for `PROJECT_ROOT`, then continue to Step 1 in the same turn.
+
 ## Step 1 — Locate the state and baseline
 
 ```text
@@ -31,7 +35,7 @@ mcp__plugin_filid_tools__review_state({
 })
 ```
 
-Use `data.reviewDirectory` as `REVIEW_DIR`; never derive a directory name. `missing` aborts. `stale` is expected here — corrections moved the source — and is not an error at this stage.
+Use `data.reviewDirectory` as `REVIEW_DIR`; never derive a directory name. `missing` aborts. `stale` carrying `review-source-hash-stale` is expected here — corrections moved the source — and is not an error at this stage; any other `stale` diagnostic follows its own `nextAction` instead.
 
 Read both `REVIEW_DIR/justifications.md` and `REVIEW_DIR/fix-requests.md`. The absence of `justifications.md` means `resolve` never ran; report that and end. Take `resolve_commit_sha` from the `justifications.md` frontmatter.
 
@@ -145,7 +149,7 @@ PR comment: <posted|updated|none|unavailable|failed>
 ## Invariants
 
 - Status comes from re-measurement, never from the delta's file list alone.
-- `indeterminate` evidence never yields `PASS`.
+- `indeterminate` evidence never yields `PASS`; report each diagnostic's `nextAction` with it.
 - The baseline is `resolve_commit_sha` from `justifications.md`, never `HEAD~1` and never the review base.
 - Cleanup happens only on `PASS`, only with literal `confirm: true`, and only after the pull-request comment step has run.
 - This skill never edits source, never commits, and never pushes. The only pull-request action is posting or updating its own verdict comment.

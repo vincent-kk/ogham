@@ -1,5 +1,6 @@
 import {
   REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_VALIDATION_POLICY_VERSION,
 } from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
@@ -15,6 +16,7 @@ export function assertReviewValidationPolicy(state: ReviewStateRecord): void {
   if (state.validationPolicyVersion !== REVIEW_VALIDATION_POLICY_VERSION)
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.VALIDATION_POLICY_OUTDATED,
-      'The stored review uses an unsupported validation policy. Artifacts are preserved. After all prior actors finish, explicitly request --force to start a new review; this requires fresh review work.',
+      `The stored review was validated under policy version ${state.validationPolicyVersion}, but this filid supports only version ${REVIEW_VALIDATION_POLICY_VERSION}; its artifacts are preserved.`,
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.VALIDATION_POLICY_OUTDATED,
     );
 }

@@ -3,6 +3,7 @@
 ## Requirements
 
 - 레이어 의존 방향은 `mcp`/`hooks` → `core` → `adapters` → `types`/`constants`/`lib` 한 방향이며 역방향 edge는 0이다.
+- `factsExtractor`는 `hooks`와 같은 host 경계지만 `core`를 거치지 않는다: `factsExtractor` → `adapters` → `types`/`constants`/`lib`. `mcp`·`core`·`hooks`와 `factsExtractor` 사이의 import는 어느 방향으로도 0이다. 서버 번들과 추출 프로그램 번들이 서로의 코드를 싣지 않게 하기 위해서다.
 - `core`는 생태계 리터럴을 알지 못한다. 확장자, 진입점 파일명, import 문법, 테스트 호출 문법은 `adapters/` 안에만 존재한다.
 - `mcp`와 `hooks`는 host 경계이며 정책 판단을 하지 않는다.
 - 새 생태계는 core, policy, MCP DTO 수정 없이 어댑터 등록만으로 추가된다.
@@ -10,12 +11,14 @@
 - 통합 테스트의 transport 헬퍼는 연결할 SDK server를 검증 파일에서 인자로 받는다. 헬퍼가 MCP server 구현을 import하면 src에서 server로 역방향 의존이 생기므로 구체적인 server 생성은 검증 파일이 소유한다.
 - `version.ts`는 `scripts/injectVersion.mjs`가 만드는 생성물이며 손으로 고치지 않는다.
 - 공용 glob 변환은 고정 치환 정규식을 모듈 상수로 재사용하고, 입력별 결과 정규식은 호출마다 생성한다. 치환 순서와 glob 매칭 의미는 유지한다.
+- 스캔 결과 재사용은 요청 스코프 메모 하나로만 한다. 저장소는 `AsyncLocalStorage`에 있고 스코프를 여는 쪽이 수명을 정한다. 메모 키는 결과에 영향을 주는 인자를 **받은 철자 그대로** 담는다 — 경로 인자를 정규화하면 결과가 품고 나가는 철자가 호출자마다 달라진다. 모듈 전역 캐시는 금지한다 — 한 서버 프로세스가 여러 요청을 처리하고 요청 사이에 트리가 움직이므로, 스코프보다 오래 사는 값은 사라진 트리를 답한다. 스코프가 없으면 메모는 아무것도 저장하지 않으므로 훅과 추출 프로그램은 메모가 없을 때와 같이 동작한다. 메모는 값을 받은 그대로 저장하며, 변경 가능한 값을 돌려주는 호출자가 복사본을 만든다.
 
 ## API Contracts
 
 - MCP 도구 4개: `project_setup`, `fractal_inspect`, `restructure`, `review_state`.
 - `fractal_inspect`의 `resolve` action은 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
 - 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
+- 추출 프로그램 진입점 1개: `factsExtractor/factsExtractor.entry.ts` → `bridge/filid-facts.mjs`.
 - 소스 루트 entry point의 공개 surface는 생성된 `VERSION` 하나다.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
 
@@ -45,9 +48,10 @@
 
 ## History
 
+- 2026-09-20 — 스캔 결과 재사용을 `AsyncLocalStorage` 요청 스코프 메모 하나로 한정했다. 스냅샷 1회가 같은 git 질의와 같은 트리 워크를 다섯 번 반복하고 있었는데, 모듈 전역 캐시로 없애면 요청 사이에 움직인 트리를 답하게 된다. 스코프가 없을 때 아무것도 저장하지 않게 해서 훅과 추출 프로그램의 동작은 그대로 두었다.
 - 2026-09-05 — setup, inspection과 restructure lifecycle을 action-dispatched 도구로 병합해 MCP 표면을 4개로 줄였다.
 - 2026-08-28 — 대규모 변경의 반복 snapshot 비용을 없애기 위해 `context_resolve` 공개 DTO를 array-first batch로 바꿨다.
 
 ## Last Updated
 
-2026-09-07
+2026-09-20

@@ -113,6 +113,10 @@ const ReviewScopeFileSchema = z
     rules: z.array(z.string()),
     repositoryRules: z.array(z.string()),
     publicEntryPoint: z.boolean().optional(),
+    factsHash: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
   })
   .strict();
 
@@ -146,25 +150,31 @@ const ReviewScopeInformationalSchema = z
   .strict();
 
 /** Strict persisted prepare-scope snapshot schema. */
+/** Strict persisted non-finding diagnostic schema. */
+const StoredDiagnosticSchema = z
+  .object({
+    code: z.string(),
+    message: z.string(),
+    /** Absent for a diagnostic recorded before filid attached next actions. */
+    nextAction: z.string().optional(),
+    path: z.string().optional(),
+    causeId: z.string().optional(),
+    specifier: z.string().optional(),
+    affects: z
+      .array(z.enum(['dependencies', 'boundaries', 'verification']))
+      .optional(),
+  })
+  .strict();
+
 const ReviewScopeSchema = z
   .object({
-    diagnostics: z
-      .array(
-        z
-          .object({
-            code: z.string(),
-            message: z.string(),
-            path: z.string().optional(),
-            causeId: z.string().optional(),
-            specifier: z.string().optional(),
-            affects: z
-              .array(z.enum(['dependencies', 'boundaries', 'verification']))
-              .optional(),
-          })
-          .strict(),
-      )
-      .optional(),
+    diagnostics: z.array(StoredDiagnosticSchema).optional(),
+    outOfScopeDiagnostics: z.array(StoredDiagnosticSchema).optional(),
     snapshotHash: z.string(),
+    factsDigest: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
     evidenceComplete: z.boolean(),
     worktree: z.nativeEnum(WORKTREE_DISPOSITIONS),
     dirtyPaths: z.array(z.string()),
@@ -213,6 +223,24 @@ export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
     phase: z.nativeEnum(REVIEW_STATE_PHASES),
     preparedAt: z.string(),
     sealedAt: z.string().optional(),
+    factsAdjudications: z
+      .array(
+        z
+          .object({
+            path: z.string(),
+            kind: z.string(),
+            reference: z.string(),
+            resolvedPath: z.string(),
+            state: z.string(),
+            lineDigest: z.string(),
+          })
+          .strict(),
+      )
+      .optional(),
+    factsAdjudicationsDigest: z
+      .string()
+      .regex(/^[a-f0-9]{64}$/)
+      .optional(),
     effort: z.enum(['low', 'medium', 'high']),
     effortMode: z.enum(['auto', 'low', 'medium', 'high']).optional(),
     effortReason: z
@@ -222,6 +250,38 @@ export const ReviewStateRecordSchema: z.ZodType<ReviewStateRecord> = z
     groups: z.array(ReviewGroupSchema),
     scope: ReviewScopeSchema,
     verdict: z.enum(['APPROVED', 'REQUEST_CHANGES', 'INCONCLUSIVE']).nullable(),
+    replacedFrom: z
+      .object({
+        reason: z.string().min(1),
+        archivePath: z.string().min(1).optional(),
+        priorGenerationId: z
+          .string()
+          .regex(/^[a-f0-9]{32}$/)
+          .optional(),
+        priorVerdict: z
+          .enum(['APPROVED', 'REQUEST_CHANGES', 'INCONCLUSIVE'])
+          .optional(),
+        discardedGroups: z.array(z.string()).optional(),
+        chain: z
+          .array(
+            z
+              .object({
+                reason: z.string().min(1),
+                priorGenerationId: z
+                  .string()
+                  .regex(/^[a-f0-9]{32}$/)
+                  .optional(),
+                priorVerdict: z
+                  .enum(['APPROVED', 'REQUEST_CHANGES', 'INCONCLUSIVE'])
+                  .optional(),
+              })
+              .strict(),
+          )
+          .optional(),
+        olderCount: z.number().int().nonnegative().optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict()
   .superRefine((state, context) => {

@@ -4,10 +4,13 @@ import { resolveContainedPath } from '@ogham/cross-platform';
 
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_ERROR_MESSAGES,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { createReviewStatePayload } from '../state/createReviewStatePayload.js';
 import { resolveLegacyReviewStatePaths } from '../state/resolveReviewStatePaths.js';
@@ -25,7 +28,11 @@ export async function cleanupReviewState(
   input: CleanupInput,
 ): Promise<ReviewStatePayload> {
   if (input.confirm !== true)
-    throw new Error(REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED);
+    throw new ToolDiagnosticError(
+      REVIEW_STATE_DIAGNOSTIC_CODES.CLEANUP_CONFIRM_REQUIRED,
+      REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED,
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CLEANUP_CONFIRM_REQUIRED,
+    );
   const paths = resolveLegacyReviewStatePaths(
     input.projectRoot,
     input.branchName,

@@ -15,13 +15,22 @@ const EMPTY_MODEL = {
   informational: [],
   outOfScope: [],
   diagnostics: [],
+  outOfScopeDiagnostics: [],
 } as const;
 
 describe('renderEvidenceMarkdown', () => {
   it('uses a longer code delimiter when identifiers contain backticks', () => {
     const output = renderEvidenceMarkdown({
       ...EMPTY_MODEL,
-      diagnostics: [{ code: 'a`b', message: 'diagnostic', path: '`c``d`' }],
+      diagnostics: [
+        {
+          code: 'a`b',
+          message: 'diagnostic',
+          path: '`c``d`',
+          affects: ['dependencies', 'boundaries', 'verification'],
+          nextAction: 'Fix it.',
+        },
+      ],
     });
     expect(output).toContain('`` a`b ``');
     expect(output).toContain('``` `c``d` ```');
@@ -103,5 +112,21 @@ describe('renderEvidenceMarkdown', () => {
     );
     expect(output).not.toContain('src/a.ts');
     expect(output).not.toContain('second verification row');
+  });
+
+  it('renders affects [] as impact none, not unknown', () => {
+    const output = renderEvidenceMarkdown({
+      ...EMPTY_MODEL,
+      diagnostics: [
+        {
+          code: 'config-warning',
+          message: 'dropped exempt list',
+          affects: [],
+          nextAction: 'Fix it.',
+        },
+      ],
+    });
+    expect(output).toContain('impact: none');
+    expect(output).not.toContain('impact: unknown');
   });
 });

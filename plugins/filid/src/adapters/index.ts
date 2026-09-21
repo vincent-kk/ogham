@@ -11,4 +11,5 @@ export {
   ECMASCRIPT_ADAPTER_ID,
   ecmascriptStructureAdapter,
   ecmascriptVerificationAdapter,
+  SOURCE_EXTENSIONS,
 } from './ecmascript/index.js';

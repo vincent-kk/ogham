@@ -1,0 +1,23 @@
+export { handleFacts } from './facts.js';
+export type {
+  AdjudicateDecisionInput,
+  AdjudicateInput,
+  CompareInput,
+  FactsAdjudicateData,
+  FactsAdjudicateSummary,
+  FactsCompareData,
+  FactsCompareSummary,
+  AttestedOutcome,
+  DiscardPendingInput,
+  FactsAttestationOutcome,
+  FactsDiscardPendingData,
+  FactsDiscardPendingSummary,
+  FactsInput,
+  FactsOpenItem,
+  RejectedClaim,
+  FactsResult,
+  FactsStatusData,
+  FactsStatusSummary,
+  FactsSubmitData,
+  FactsSubmitSummary,
+} from './types/factsToolTypes.js';

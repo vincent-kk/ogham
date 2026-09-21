@@ -1,7 +1,4 @@
-import type {
-  ToolDiagnostic,
-  ToolStatus,
-} from '../../../../types/toolEnvelope.js';
+import type { ToolStatus } from '../../../../types/toolEnvelope.js';
 import type {
   ReviewFindingCategory,
   ReviewOpinion,
@@ -18,6 +15,7 @@ import type {
   ReviewScopeFile,
   ReviewScopeInformational,
   ReviewStateRecord,
+  StoredToolDiagnostic,
   WorktreeDisposition,
 } from '../state/reviewStateTypes.js';
 
@@ -222,7 +220,7 @@ export interface ReviewBlocker extends Omit<
 /** Immutable evidence identity and completeness fields consumed by the fold. */
 export interface ReviewVerdictEvidence {
   /** Prepared non-finding diagnostics; absent in legacy records. */
-  diagnostics?: readonly ToolDiagnostic[];
+  diagnostics?: readonly StoredToolDiagnostic[];
   /** Hash of the committed changed-file blobs. */
   sourceHash: string;
   /** Hash of the structural snapshot used for evidence. */

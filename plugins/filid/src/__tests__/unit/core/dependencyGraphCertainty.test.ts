@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
-import { buildDependencyGraph } from '../../../core/analysis/dependencyGraph/index.js';
+import {
+  buildDependencyGraph,
+  findUnownedReferences,
+} from '../../../core/analysis/dependencyGraph/index.js';
 import type { DependencyReference } from '../../../types/adapters.js';
 
 const sourceFile = '/project/a/consumer.unit';
@@ -14,6 +17,7 @@ const reference: DependencyReference = {
 describe('DAG certainty excludes adapter-classified verification references', () => {
   it('keeps exact certainty for an unresolved verification reference', () => {
     const graph = buildDependencyGraph(['/project/a'], [reference], 'exact', {
+      projectRoot: '/project',
       verificationPaths: [sourceFile],
     });
     expect(graph.certainty).toBe('exact');
@@ -28,7 +32,7 @@ describe('DAG certainty excludes adapter-classified verification references', ()
         [owner],
         [{ ...reference, resolvedPath: '/project/b/entry.unit' }],
         'exact',
-        { verificationPaths: [sourceFile] },
+        { projectRoot: '/project', verificationPaths: [sourceFile] },
       );
       expect(graph.certainty).toBe('exact');
       expect(graph.edges).toEqual([]);
@@ -36,16 +40,60 @@ describe('DAG certainty excludes adapter-classified verification references', ()
   );
 
   it.each([['/project/a'], ['/project/b']])(
-    'keeps production owner uncertainty in %s',
+    'draws no edge and stays exact for a production reference with no owner in %s',
     (owner) => {
+      const unowned = { ...reference, resolvedPath: '/project/b/entry.unit' };
+      const graph = buildDependencyGraph([owner], [unowned], 'exact', {
+        projectRoot: '/project',
+      });
+      expect(graph.edges).toEqual([]);
+      expect(graph.unknownFiles).toEqual([]);
+      // The owner-less end has no node, so the reference is reported by
+      // findUnownedReferences instead of making the whole graph undecided.
+      expect(graph.certainty).toBe('exact');
       expect(
-        buildDependencyGraph(
-          [owner],
-          [{ ...reference, resolvedPath: '/project/b/entry.unit' }],
-        ).certainty,
-      ).toBe('indeterminate');
+        findUnownedReferences([owner], [unowned]).map(
+          ({ unownedPath }) => unownedPath,
+        ),
+      ).toEqual([
+        owner === '/project/a' ? '/project/b/entry.unit' : sourceFile,
+      ]);
     },
   );
+
+  it('keeps an adapter-uncertain production reference out of edges', () => {
+    const graph = buildDependencyGraph(
+      ['/project/a', '/project/b'],
+      [
+        {
+          ...reference,
+          resolvedPath: '/project/b/entry.unit',
+          certainty: 'indeterminate',
+        },
+      ],
+      'exact',
+      { projectRoot: '/project' },
+    );
+    expect(graph.edges).toEqual([]);
+    expect(graph.certainty).toBe('indeterminate');
+  });
+
+  it('lets an adapter-uncertain verification reference make the graph indeterminate', () => {
+    const graph = buildDependencyGraph(
+      ['/project/a', '/project/b'],
+      [
+        {
+          ...reference,
+          resolvedPath: '/project/b/entry.unit',
+          certainty: 'indeterminate',
+        },
+      ],
+      'exact',
+      { projectRoot: '/project', verificationPaths: [sourceFile] },
+    );
+    expect(graph.edges).toEqual([]);
+    expect(graph.certainty).toBe('indeterminate');
+  });
 
   it('does not grant an exemption based on a test filename alone', () => {
     expect(
@@ -57,6 +105,8 @@ describe('DAG certainty excludes adapter-classified verification references', ()
             sourceFile: '/project/a/consumer.test.ts',
           },
         ],
+        'exact',
+        { projectRoot: '/project' },
       ).certainty,
     ).toBe('indeterminate');
   });
@@ -73,7 +123,7 @@ describe('DAG certainty excludes adapter-classified verification references', ()
           },
         ],
         'exact',
-        { verificationPaths: [sourceFile] },
+        { projectRoot: '/project', verificationPaths: [sourceFile] },
       ).certainty,
     ).toBe('indeterminate');
   });
@@ -83,6 +133,7 @@ describe('DAG certainty excludes adapter-classified verification references', ()
     (certainty) => {
       expect(
         buildDependencyGraph(['/project/a'], [reference], certainty, {
+          projectRoot: '/project',
           verificationPaths: [sourceFile],
         }).certainty,
       ).toBe(certainty);
@@ -107,7 +158,7 @@ describe('DAG certainty excludes adapter-classified verification references', ()
       nodes,
       [verification, forward, backward],
       'exact',
-      options,
+      { projectRoot: '/project', ...options },
     );
     expect(graph.certainty).toBe('exact');
     expect(graph.cycles).toEqual([['/project/a', '/project/b', '/project/a']]);
@@ -118,8 +169,10 @@ describe('DAG certainty excludes adapter-classified verification references', ()
       resolvedPath: verification.resolvedPath,
     });
     expect(
-      buildDependencyGraph(nodes, [verification, backward], 'exact', options)
-        .cycles,
+      buildDependencyGraph(nodes, [verification, backward], 'exact', {
+        projectRoot: '/project',
+        ...options,
+      }).cycles,
     ).toEqual([]);
   });
 });

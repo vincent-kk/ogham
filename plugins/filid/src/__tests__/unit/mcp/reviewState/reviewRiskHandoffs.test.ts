@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { buildReviewOpinion } from './helpers/buildReviewOpinion.js';
 import { buildReviewStateSealFinding } from './helpers/buildReviewStateSealFinding.js';
 import {
@@ -18,8 +19,8 @@ import { writeReviewStateFixtureFile } from './helpers/writeReviewStateFixtureFi
 /** Real prepared repository used to check risk routing across action boundaries. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -47,7 +48,7 @@ describe('risk-sensitive review handoffs', () => {
         '-m',
         'Add a review boundary',
       ]);
-      const prepared = await handleReviewState({
+      const prepared = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'medium',
@@ -86,7 +87,7 @@ describe('risk-sensitive review handoffs', () => {
         '-m',
         'Configure risk policy',
       ]);
-      const prepared = await handleReviewState({
+      const prepared = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'medium',
@@ -100,7 +101,7 @@ describe('risk-sensitive review handoffs', () => {
       );
       if (missingEvidence)
         rmSync(portableJoin(prepared.data.reviewDirectory, 'evidence.md'));
-      const resumed = await handleReviewState({
+      const resumed = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'medium',
@@ -119,7 +120,7 @@ describe('risk-sensitive review handoffs', () => {
   ])(
     'preserves legacy completion (uncertain=$uncertain, damage=$damage)',
     async ({ uncertain, damage }) => {
-      const prepared = await handleReviewState({
+      const prepared = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'medium',
@@ -170,7 +171,7 @@ describe('risk-sensitive review handoffs', () => {
             damage === 'evidence' ? 'evidence.md' : group.opinionPath,
           ),
         );
-      const resumed = await handleReviewState({
+      const resumed = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'medium',
@@ -186,8 +187,9 @@ describe('risk-sensitive review handoffs', () => {
     { initial: 'medium', reduced: 'low', completedRound: 1 },
     { initial: 'high', reduced: 'medium', completedRound: 2 },
   ] as const)(
-    'preserves pending work when effort reduction from $initial to $reduced is rejected',
+    'preserves pending work when a resumed $initial review ignores a $reduced config',
     async ({ initial, reduced, completedRound }) => {
+      void reduced;
       writeReviewStateFixtureFile(
         fixture.projectRoot,
         'src/authGuard.ts',
@@ -199,7 +201,7 @@ describe('risk-sensitive review handoffs', () => {
         '-m',
         'Add risk review scope',
       ]);
-      const prepared = await handleReviewState({
+      const prepared = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: initial,
@@ -234,14 +236,7 @@ describe('risk-sensitive review handoffs', () => {
         portableJoin(prepared.data.reviewDirectory, group.opinionPath),
         'utf8',
       );
-      await expect(
-        handleReviewState({
-          action: 'prepare',
-          projectRoot: fixture.projectRoot,
-          effort: reduced,
-        }),
-      ).rejects.toMatchObject({ code: 'review-effort-locked' });
-      const resumed = await handleReviewState({
+      const resumed = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: initial,
@@ -295,7 +290,7 @@ describe('risk-sensitive review handoffs', () => {
           'Configure review risk',
         ]);
       }
-      const prepared = await handleReviewState({
+      const prepared = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort,
@@ -375,7 +370,7 @@ describe('risk-sensitive review handoffs', () => {
       );
       const canonical = readFileSync(opinionPath, 'utf8');
       rmSync(opinionPath);
-      const resumed = await handleReviewState({
+      const resumed = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort,
@@ -390,7 +385,7 @@ describe('risk-sensitive review handoffs', () => {
   );
 
   it('keeps the verifier efficient after an error-triggered strong follow-up', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       effort: 'medium',

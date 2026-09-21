@@ -15,8 +15,8 @@ import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Isolated states distinguish policy compatibility from source identity. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -28,34 +28,28 @@ afterEach(() => {
 
 describe('review validation policy compatibility', () => {
   it.each([
-    ['prepared', undefined, 'prepare'],
     ['prepared', undefined, 'checkpoint'],
     ['prepared', undefined, 'validate'],
     ['prepared', undefined, 'seal'],
-    ['prepared', 99, 'prepare'],
     ['prepared', 99, 'checkpoint'],
     ['prepared', 99, 'validate'],
     ['prepared', 99, 'seal'],
-    ['prepared', 1, 'prepare'],
     ['prepared', 1, 'checkpoint'],
     ['prepared', 1, 'validate'],
     ['prepared', 1, 'seal'],
-    ['sealed', undefined, 'prepare'],
     ['sealed', undefined, 'checkpoint'],
     ['sealed', undefined, 'validate'],
     ['sealed', undefined, 'seal'],
-    ['sealed', 99, 'prepare'],
     ['sealed', 99, 'checkpoint'],
     ['sealed', 99, 'validate'],
     ['sealed', 99, 'seal'],
-    ['sealed', 1, 'prepare'],
     ['sealed', 1, 'checkpoint'],
     ['sealed', 1, 'validate'],
     ['sealed', 1, 'seal'],
   ] as const)(
     'blocks %s policy %s through %s without rewriting history',
     async (phase, version, action) => {
-      configureReviewGroups(fixture.projectRoot, 1);
+      await configureReviewGroups(fixture.projectRoot, 1);
       const prepared = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
@@ -101,7 +95,7 @@ describe('review validation policy compatibility', () => {
   );
 
   it('stamps only fresh state and reuses a current sealed cache', async () => {
-    configureReviewGroups(fixture.projectRoot, 1);
+    await configureReviewGroups(fixture.projectRoot, 1);
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
@@ -138,8 +132,8 @@ describe('review validation policy compatibility', () => {
     expect(readFileSync(prepared.data.statePath, 'utf8')).toBe(before);
   });
 
-  it('requires explicit force to replace an obsolete policy', async () => {
-    configureReviewGroups(fixture.projectRoot, 1);
+  it('replaces an obsolete policy state through prepare, keeping its bytes', async () => {
+    await configureReviewGroups(fixture.projectRoot, 1);
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
@@ -149,15 +143,45 @@ describe('review validation policy compatibility', () => {
       validationPolicyVersion: undefined,
     };
     writeFileSync(prepared.data.statePath, JSON.stringify(legacy));
+    const bytes = readFileSync(prepared.data.statePath, 'utf8');
     const fresh = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
-      force: true,
     });
     expect(fresh.summary.disposition).toBe('fresh');
     expect(readPreparedReviewState(fresh)).toHaveProperty(
       'validationPolicyVersion',
       2,
     );
+    const replaced = fresh.diagnostics.find(
+      ({ code }) => code === 'review-state-replaced',
+    );
+    expect(replaced?.message).toContain('review-validation-policy-outdated');
+    expect(readFileSync(replaced!.path!, 'utf8')).toBe(bytes);
+  });
+
+  it('reads stored diagnostics recorded with and without a next action', async () => {
+    const prepared = await handleReviewState({
+      action: 'prepare',
+      projectRoot: fixture.projectRoot,
+      effort: 'low',
+    });
+    const state = JSON.parse(readFileSync(prepared.data.statePath, 'utf8'));
+    state.scope.diagnostics = [
+      { code: 'config-warning', message: 'recorded before next actions' },
+      {
+        code: 'config-warning',
+        message: 'recorded with a next action',
+        nextAction: 'Fix the entry the message names.',
+      },
+    ];
+    writeFileSync(prepared.data.statePath, JSON.stringify(state));
+
+    await expect(
+      handleReviewState({
+        action: 'checkpoint',
+        projectRoot: fixture.projectRoot,
+      }),
+    ).resolves.toBeDefined();
   });
 });

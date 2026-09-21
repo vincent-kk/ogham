@@ -7,6 +7,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 import type { ReviewStateRecord } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
+import { seedFacts } from '../../../integration/helpers/seedFacts.js';
+
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { buildReviewOpinion } from './helpers/buildReviewOpinion.js';
 import { buildVerdictReviewFinding } from './helpers/buildVerdictReviewFinding.js';
 import { buildVerifyOpinion } from './helpers/buildVerifyOpinion.js';
@@ -18,9 +21,9 @@ import {
 
 /** Real committed histories isolate file selection from provider behavior. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 3, { groupFileLimit: 32 });
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 3, { groupFileLimit: 32 });
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -34,7 +37,7 @@ afterEach(() => {
 async function complete(
   request: { changeContext?: string; userInstructions?: string } = {},
 ) {
-  const prepared = await handleReviewState({
+  const prepared = await prepareWithFacts({
     action: 'prepare',
     projectRoot: fixture.projectRoot,
     effort: 'low',
@@ -91,7 +94,7 @@ describe('committed file incremental review', () => {
       changeContext: `Summary\n<!-- filid:handoff v1\n${JSON.stringify(seed)}\n-->`,
     };
     await complete(original);
-    const metadata = await handleReviewState({
+    const metadata = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       changeContext: original.changeContext.replace(
@@ -100,7 +103,7 @@ describe('committed file incremental review', () => {
       ),
     });
     expect(metadata.data.next).toEqual([]);
-    const changed = await handleReviewState({
+    const changed = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       changeContext: original.changeContext.replace(
@@ -135,7 +138,7 @@ describe('committed file incremental review', () => {
       join(fixture.pluginRoot, 'skills/cross-review/rules/local.md'),
       '# Local criterion\nInspect the exported value and error behavior.\n',
     );
-    const changed = await handleReviewState({
+    const changed = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -149,7 +152,7 @@ describe('committed file incremental review', () => {
   it.each(['confirmed', 'pending', 'excluded'])(
     'requires explicit resolution of an earlier %s finding after its file changes',
     async (priorStatus) => {
-      const prepared = await handleReviewState({
+      const prepared = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'low',
@@ -210,13 +213,14 @@ describe('committed file incremental review', () => {
       execFileSync('git', ['commit', '-am', 'Fix reviewed value', '-q'], {
         cwd: fixture.projectRoot,
       });
+      await seedFacts(fixture.projectRoot);
       if (priorStatus === 'excluded') {
         const configPath = join(fixture.projectRoot, '.filid/config.json');
         const config = JSON.parse(readFileSync(configPath, 'utf8'));
         config.structure = { generatedPaths: ['src/value1.ts'] };
         writeFileSync(configPath, JSON.stringify(config));
       }
-      const next = await handleReviewState({
+      const next = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
       });
@@ -292,7 +296,7 @@ describe('committed file incremental review', () => {
     execFileSync('git', ['commit', '-qm', 'Move reviewed file'], {
       cwd: fixture.projectRoot,
     });
-    const renamed = await handleReviewState({
+    const renamed = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -313,7 +317,7 @@ describe('committed file incremental review', () => {
     execFileSync('git', ['commit', '-am', 'Edit moved file', '-q'], {
       cwd: fixture.projectRoot,
     });
-    const changed = await handleReviewState({
+    const changed = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -330,7 +334,7 @@ describe('committed file incremental review', () => {
     execFileSync('git', ['commit', '-qm', 'Delete reviewed addition'], {
       cwd: fixture.projectRoot,
     });
-    const deleted = await handleReviewState({
+    const deleted = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -346,7 +350,7 @@ describe('committed file incremental review', () => {
         ?.skipReason,
     ).toBeNull();
     await complete();
-    const cached = await handleReviewState({
+    const cached = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -363,7 +367,7 @@ describe('committed file incremental review', () => {
       join(fixture.projectRoot, 'src/local.ts'),
       'export const local = true;\n',
     );
-    const current = await handleReviewState({
+    const current = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -388,7 +392,7 @@ describe('committed file incremental review', () => {
     execFileSync('git', ['commit', '-qm', 'Change one reviewed file'], {
       cwd: fixture.projectRoot,
     });
-    const next = await handleReviewState({
+    const next = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -416,7 +420,7 @@ describe('committed file incremental review', () => {
       ),
     ).toBe(original);
     await complete();
-    const cached = await handleReviewState({
+    const cached = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -436,13 +440,13 @@ describe('committed file incremental review', () => {
     execFileSync('git', ['commit', '-qam', 'Change one value'], {
       cwd: fixture.projectRoot,
     });
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       ...request,
     });
     rmSync(prepared.data.next[0].briefPath);
-    const repaired = await handleReviewState({
+    const repaired = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       ...request,
@@ -451,7 +455,7 @@ describe('committed file incremental review', () => {
     expect(brief).toContain(request.userInstructions);
     expect(brief).toContain('Changes Since Previous Review');
     expect(brief).toContain('+export const value1 = 42;');
-    await handleReviewState({
+    await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       ...request,
@@ -461,7 +465,7 @@ describe('committed file incremental review', () => {
 
   // Validating 52 real Git-backed reviews exceeds 30 seconds on Windows CI.
   it('budgets only the one changed file while retaining 51 previous file opinions', async () => {
-    configureReviewGroups(fixture.projectRoot, 52);
+    await configureReviewGroups(fixture.projectRoot, 52);
     await complete();
     const configPath = join(fixture.projectRoot, '.filid/config.json');
     const config = JSON.parse(readFileSync(configPath, 'utf8'));
@@ -474,7 +478,7 @@ describe('committed file incremental review', () => {
     execFileSync('git', ['commit', '-qam', 'Change one of 52 files'], {
       cwd: fixture.projectRoot,
     });
-    const next = await handleReviewState({
+    const next = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });

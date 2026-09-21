@@ -4,6 +4,7 @@ import {
   REVIEW_STATE_ACTIONS,
   REVIEW_STATE_ACTION_VALUES,
   REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_ERROR_MESSAGES,
 } from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
@@ -20,6 +21,7 @@ import { cleanupReviewState } from './cleanupReviewState.js';
 import { prepareReviewState } from './prepareReviewState.js';
 import { readReviewCheckpoint } from './readReviewCheckpoint.js';
 import { sealReviewState } from './sealReviewState.js';
+import { readDetachedReviewKey } from './utils/readDetachedReviewKey.js';
 import { validateReviewOpinion } from './validateReviewOpinion.js';
 
 /**
@@ -60,12 +62,10 @@ export async function dispatchReviewState(
   ).trim();
   const branchName =
     candidate.branchName ??
-    (await executeReviewGit(projectRoot, ['branch', '--show-current'])).trim();
-  if (candidate.branchName === undefined && !branchName)
-    throw new ToolDiagnosticError(
-      REVIEW_STATE_DIAGNOSTIC_CODES.BRANCH_UNRESOLVED,
-      'The current Git branch could not be resolved. Supply branchName for a detached HEAD.',
-    );
+    ((
+      await executeReviewGit(projectRoot, ['branch', '--show-current'])
+    ).trim() ||
+      (await readDetachedReviewKey(projectRoot)));
   const input = {
     ...candidate,
     projectRoot,
@@ -115,7 +115,11 @@ export async function dispatchReviewState(
       });
     case REVIEW_STATE_ACTIONS.CLEANUP:
       if (input.confirm !== true)
-        throw new Error(REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED);
+        throw new ToolDiagnosticError(
+          REVIEW_STATE_DIAGNOSTIC_CODES.CLEANUP_CONFIRM_REQUIRED,
+          REVIEW_STATE_ERROR_MESSAGES.CLEANUP_CONFIRM_REQUIRED,
+          REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CLEANUP_CONFIRM_REQUIRED,
+        );
       return cleanupReviewState(input);
     case REVIEW_STATE_ACTIONS.ASSESS:
       return assessReviewState({

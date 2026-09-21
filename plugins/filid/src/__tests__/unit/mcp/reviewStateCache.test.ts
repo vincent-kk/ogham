@@ -23,6 +23,7 @@ import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 import { createReviewRulePluginRoot } from './reviewState/helpers/createReviewRulePluginRoot.js';
 import { readPreparedReviewState } from './reviewState/helpers/readPreparedReviewState.js';
 import { validatePreparedReviewState } from './reviewState/helpers/validatePreparedReviewState.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 /** Temporary repository exercised by cache-semantic tests. */
 let projectRoot: string;
@@ -63,7 +64,7 @@ function commitFile(content: string, message: string): void {
   git(['commit', '-m', message]);
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   fixturePluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
@@ -74,6 +75,7 @@ beforeEach(() => {
   commitFile('base\n', 'base');
   git(['checkout', '-b', 'feature/cache']);
   commitFile('feature\n', 'feature');
+  await seedFacts(projectRoot);
 });
 
 afterEach(() => {

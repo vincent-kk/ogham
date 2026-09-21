@@ -4,6 +4,7 @@ export const McpToolName = {
   FRACTAL_INSPECT: 'fractal_inspect',
   RESTRUCTURE: 'restructure',
   REVIEW_STATE: 'review_state',
+  FACTS: 'facts',
 } as const;
 
 /** One registered Filid MCP tool name. */

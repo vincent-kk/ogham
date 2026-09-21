@@ -5,6 +5,8 @@ import type {
   TOOL_STATUSES,
 } from '../constants/toolEnvelope.js';
 
+import type { AnalysisAxis } from './fractal.js';
+
 type ValueOf<T> = T[keyof T];
 
 /** Subset of MCP request metadata forwarded to tool handlers. */
@@ -33,12 +35,31 @@ export interface ToolDiagnostic {
   code: string;
   message: string;
   path?: string;
-  /** Explicit affected analysis axes; absence means unknown impact. */
-  affects?: readonly ('dependencies' | 'boundaries' | 'verification')[];
+  /** Axes whose conclusions this diagnostic can change; `[]` means none. */
+  affects: readonly AnalysisAxis[];
   /** Producer-owned identity shared by repeated observations of one cause. */
   causeId?: string;
   /** Unresolved dependency target as written by the consumer. */
   specifier?: string;
+  /**
+   * 1-based line the caller has to read, when one line decides the answer.
+   *
+   * Set by a producer that knows which line its refusal is about — a disputed
+   * reference, say — so the caller does not have to search the file for it.
+   */
+  line?: number;
+  /**
+   * Who decides what happens next: `agent` when nothing needs a person.
+   *
+   * Stated rather than implied, because a diagnostic that reads like a request
+   * is how a flow ends up waiting on somebody who was never asked.
+   */
+  owner?: string;
+  /**
+   * What the caller does next: the fix to make, the step filid leaves to the
+   * caller, or who must decide.
+   */
+  nextAction: string;
 }
 
 /** Handler-level payload before common envelope materialization. */

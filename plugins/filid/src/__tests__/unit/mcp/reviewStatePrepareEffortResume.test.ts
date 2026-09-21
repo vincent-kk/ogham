@@ -19,8 +19,8 @@ import { writeReviewStateFixtureJson } from './reviewState/helpers/writeReviewSt
 /** Temporary Git repository and plugin root used by effort-resume cases. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 
 afterEach(() => {
@@ -65,15 +65,6 @@ describe('review_state prepare effort resume', () => {
     );
     const opinionBefore = readUtf8FileIfExistsSync(opinionPath);
 
-    await expect(
-      handleReviewState({
-        action: REVIEW_STATE_ACTIONS.PREPARE,
-        projectRoot: fixture.projectRoot,
-        branchName: fixture.branchName,
-        baseRef: 'main',
-        effort: 'high',
-      }),
-    ).rejects.toMatchObject({ code: 'review-effort-locked' });
     const resumed = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot: fixture.projectRoot,

@@ -6,13 +6,20 @@ import {
 
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
+  PREPARE_ONCE_NEXT_ACTION,
   REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_DIAGNOSTIC_MESSAGES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_PHASES,
   WORKTREE_DISPOSITIONS,
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
+import { readProjectFacts } from '../../../../core/facts/index.js';
+import {
+  createDefaultConfig,
+  loadConfig,
+} from '../../../../core/index.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { renderChecklistBlock } from '../render/renderChecklistBlock.js';
 import { renderFixRequests } from '../render/renderFixRequests.js';
@@ -36,7 +43,11 @@ import type {
 import { writeReviewState } from '../state/writeReviewState.js';
 import { foldReviewVerdict } from '../verdict/foldReviewVerdict.js';
 
+import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js';
+
 import { assertReviewInputsFresh } from './utils/assertReviewInputsFresh.js';
+import { detectFactsDiscrepancy } from './utils/detectFactsDiscrepancy.js';
+import { readFrozenFacts } from '../state/readFrozenFacts.js';
 import { createSealedReviewPayload } from './utils/createSealedReviewPayload.js';
 import { loadSealGroupEvidence } from './utils/loadSealGroupEvidence.js';
 import { readSealedReviewBlockers } from './utils/readSealedReviewBlockers.js';
@@ -84,12 +95,27 @@ export async function sealReviewState(
             ? REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_SCHEMA_MISMATCH
             : REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_MISSING,
           path: paths.statePath,
+          affects: [],
+          nextAction: schemaMismatch
+            ? PREPARE_ONCE_NEXT_ACTION
+            : REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.STATE_MISSING,
         },
       ],
     });
   }
   const state = restored;
   assertReviewValidationPolicy(state);
+  const replacementDiagnostics = state.replacedFrom
+    ? [
+        {
+          code: REVIEW_STATE_DIAGNOSTIC_CODES.STATE_REPLACED,
+          message: `This generation replaced ${state.replacedFrom.priorGenerationId ?? 'an earlier generation'} (${state.replacedFrom.reason})${state.replacedFrom.priorVerdict ? `, which had published ${state.replacedFrom.priorVerdict}` : ''}.`,
+          path: paths.statePath,
+          affects: [],
+          nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.STATE_REPLACED,
+        },
+      ]
+    : [];
   const source = await computeReviewSourceHash(
     input.projectRoot,
     input.baseRef ?? state.baseRef,
@@ -106,11 +132,13 @@ export async function sealReviewState(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.SOURCE_HASH_STALE,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SOURCE_HASH_STALE,
           path: paths.statePath,
+          affects: [],
+          nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.SOURCE_HASH_STALE,
         },
       ],
     });
 
-  await assertReviewInputsFresh(state, paths);
+  await assertReviewInputsFresh(state, paths, 'seal');
   const settings = resolvePrepareSettings({
     action: 'prepare',
     projectRoot: input.projectRoot,
@@ -120,23 +148,9 @@ export async function sealReviewState(
     settings.generatedPaths,
   );
   if (state.phase === REVIEW_STATE_PHASES.SEALED) {
-    if (
+    const worktreeMoved =
       worktree.dirtyPathsHash !== state.scope.dirtyPathsHash ||
-      worktree.worktree !== state.scope.worktree
-    )
-      return createReviewStatePayload({
-        action: input.action,
-        disposition: REVIEW_STATE_DISPOSITIONS.STALE,
-        paths,
-        status: TOOL_STATUSES.INDETERMINATE,
-        diagnostics: [
-          {
-            code: REVIEW_STATE_DIAGNOSTIC_CODES.WORKTREE_STALE,
-            message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.WORKTREE_STALE,
-            path: paths.statePath,
-          },
-        ],
-      });
+      worktree.worktree !== state.scope.worktree;
     const summary =
       state.verdict === null
         ? null
@@ -153,6 +167,8 @@ export async function sealReviewState(
             code: REVIEW_STATE_DIAGNOSTIC_CODES.REPORT_MISSING,
             message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.REPORT_MISSING,
             path: paths.reportPath,
+            affects: [],
+            nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.REPORT_MISSING,
           },
         ],
       });
@@ -173,6 +189,20 @@ export async function sealReviewState(
       reuse: state.incremental?.summary,
       hasFixRequests: summary.verdict === 'REQUEST_CHANGES',
       blockersPath: blockers.blockersPath,
+      diagnostics: [
+        ...replacementDiagnostics,
+        ...(worktreeMoved
+          ? [
+              {
+                code: REVIEW_STATE_DIAGNOSTIC_CODES.WORKTREE_STALE,
+                message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.WORKTREE_STALE,
+                path: paths.statePath,
+                affects: [],
+                nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.WORKTREE_STALE,
+              },
+            ]
+          : []),
+      ],
     });
   }
 
@@ -189,8 +219,53 @@ export async function sealReviewState(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.SESSION_MISSING,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SESSION_MISSING,
           path: paths.sessionPath,
+          affects: [],
+          nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.SESSION_MISSING,
         },
       ],
+    });
+
+  // Before the fold, and only while the phase can still change: a sealed
+  // generation answers from its own record, never from a store that moved
+  // after it (spec §9).
+  const frozen = readFrozenFacts(paths.factsPath, state);
+  if (frozen.status === 'unusable')
+    return createReviewStatePayload({
+      action: input.action,
+      disposition: REVIEW_STATE_DISPOSITIONS.MISSING,
+      paths,
+      status: TOOL_STATUSES.INDETERMINATE,
+      state,
+      diagnostics: [
+        {
+          code: REVIEW_STATE_DIAGNOSTIC_CODES.FACTS_FROZEN_UNUSABLE,
+          message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.FACTS_FROZEN_UNUSABLE,
+          path: paths.factsPath,
+          affects: [],
+          nextAction:
+            REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FACTS_FROZEN_UNUSABLE,
+        },
+      ],
+    });
+  const disputed =
+    frozen.status === 'none'
+      ? { diagnostics: [], items: [] }
+      : detectFactsDiscrepancy(
+          input.projectRoot,
+          frozen.facts,
+          await readProjectFacts(
+            input.projectRoot,
+            loadConfig(input.projectRoot).config ?? createDefaultConfig(),
+          ),
+        );
+  if (disputed.diagnostics.length > 0)
+    return createReviewStatePayload({
+      action: input.action,
+      disposition: REVIEW_STATE_DISPOSITIONS.STALE,
+      paths,
+      status: TOOL_STATUSES.INDETERMINATE,
+      state,
+      diagnostics: disputed.diagnostics,
     });
 
   const reviewableGroups = state.groups.filter(
@@ -221,6 +296,8 @@ export async function sealReviewState(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.OPINIONS_MISSING,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.OPINIONS_MISSING,
           path: paths.opinionsDirectory,
+          affects: [],
+          nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.OPINIONS_MISSING,
         },
       ],
     });
@@ -264,6 +341,7 @@ export async function sealReviewState(
     files: state.scope.files,
     fold,
     reuse: state.incremental?.summary,
+    ...(state.replacedFrom ? { replacedFrom: state.replacedFrom } : {}),
   };
   const report = renderReviewReport(renderInput);
   const blockers = renderReviewBlockers(renderInput);
@@ -280,6 +358,14 @@ export async function sealReviewState(
     phase: REVIEW_STATE_PHASES.SEALED,
     sealedAt: generatedAt,
     verdict: fold.verdict,
+    ...(frozen.status === 'none'
+      ? {}
+      : {
+          factsAdjudications: disputed.items,
+          factsAdjudicationsDigest: computeReviewArtifactHash(
+            JSON.stringify(disputed.items),
+          ),
+        }),
   };
 
   writeFileAtomicallySync(paths.reportPath, report);
@@ -306,5 +392,22 @@ export async function sealReviewState(
     reuse: state.incremental?.summary,
     hasFixRequests: fixRequests !== null,
     blockersPath: blockers === null ? null : paths.blockersPath,
+    diagnostics: [
+      ...replacementDiagnostics,
+      // The sealed verdict answers for files reference rules never judged, so
+      // the response that publishes it says which ones (spec §3).
+      ...(state.scope.diagnostics ?? [])
+        .filter(
+          ({ code }) =>
+            code === REVIEW_STATE_DIAGNOSTIC_CODES.FILES_OUTSIDE_FACTS_SCOPE,
+        )
+        .map((diagnostic) => ({
+          ...diagnostic,
+          affects: diagnostic.affects ?? [],
+          nextAction:
+            diagnostic.nextAction ??
+            REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.FILES_OUTSIDE_FACTS_SCOPE,
+        })),
+    ],
   });
 }

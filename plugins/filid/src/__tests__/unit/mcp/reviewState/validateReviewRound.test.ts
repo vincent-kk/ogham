@@ -12,6 +12,7 @@ import type {
 } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 import { writeReviewState } from '../../../../mcp/tools/reviewState/state/writeReviewState.js';
 
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { buildReviewOpinion } from './helpers/buildReviewOpinion.js';
 import { buildReviewStateSealFinding } from './helpers/buildReviewStateSealFinding.js';
 import { buildVerifyOpinion } from './helpers/buildVerifyOpinion.js';
@@ -32,7 +33,7 @@ let state: ReviewStateRecord;
 let paths: ReviewStatePaths;
 
 beforeEach(async () => {
-  fixture = createReviewStateSealFixture();
+  fixture = await createReviewStateSealFixture();
   state = await prepareReviewStateSealFixture(fixture);
   paths = resolveReviewStatePaths(state.projectRoot, state.branchName);
   writeFileAtomicallySync(
@@ -101,7 +102,7 @@ describe('validateReviewRound handoff', () => {
         `Record value ${value} with unchanged context`,
       ]);
     }
-    await handleReviewState({
+    await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       baseRef: 'HEAD~1',
@@ -160,6 +161,7 @@ describe('validateReviewRound handoff', () => {
     expect(reviewed.data.next).toEqual([
       {
         kind: 'verify',
+        generationId: state.generationId,
         group: group.id,
         modelTier: 'efficient',
         riskReasons: [],

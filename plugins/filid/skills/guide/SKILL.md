@@ -3,7 +3,7 @@ name: guide
 user-invocable: true
 description: 'Explain the current FCA tree, node classifications, validation findings, and evidence-based placement rules, read-only. Use for onboarding to the structure or deciding where a new module belongs.'
 argument-hint: '[path]'
-version: '2.1.0'
+version: '2.2.0'
 complexity: simple
 plugin: filid
 ---
@@ -24,6 +24,10 @@ See [reference.md](./reference.md) for exact calls, placement interpretation, an
 Use `/filid:scan` for the full audit verdict. Use `/filid:restructure` when a specific source-to-target plan and postconditions are needed.
 
 ## Workflow
+
+### Phase 0 — Facts Bootstrap
+
+Run the [facts bootstrap](../.shared/facts-bootstrap.md) for the project root, then continue to Phase 1 in the same turn.
 
 ### Phase 1 — Current Tree
 

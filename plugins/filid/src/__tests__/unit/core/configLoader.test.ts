@@ -130,7 +130,7 @@ describe('config-loader v2', () => {
 
     expect(result.config).toBeNull();
     expect(result.diagnostics).toEqual([]);
-    expect(result.warnings.some((warning) => warning.includes('version'))).toBe(
+    expect(result.warnings.some(({ message: warning }) => warning.includes('version'))).toBe(
       true,
     );
   });
@@ -208,7 +208,7 @@ describe('config-loader v2', () => {
 
       expect(result.config?.structure?.maxDepth).toBeUndefined();
       expect(
-        result.warnings.some((warning) => warning.includes('maxDepth')),
+        result.warnings.some(({ message: warning }) => warning.includes('maxDepth')),
       ).toBe(true);
     },
   );
@@ -316,7 +316,7 @@ describe('config-loader v2', () => {
     const result = loadConfig(tmpDir);
 
     expect(result.config).toBeNull();
-    expect(result.warnings.some((warning) => warning.includes('enabled'))).toBe(
+    expect(result.warnings.some(({ message: warning }) => warning.includes('enabled'))).toBe(
       true,
     );
   });

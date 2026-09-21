@@ -15,7 +15,7 @@
 - Summary는 `fragmentationCount`, 전체 `violationCount`와 certainty를 가진다.
 - `utils/summarizeVerificationRole.ts`는 한 role의 file/known-case/cap projection만 계산하고 summary builder가 이를 조합한다.
 - `detail: files` data는 filtered file analyses와 violations를 포함한다.
-- file filter가 snapshot evidence에 없는 path를 가리키면 diagnostic을 반환한다.
+- file filter가 snapshot evidence에 없는 path를 가리키면 `verification-path-not-found` diagnostic을 반환한다. `message`는 요청 경로를 담고, `nextAction`은 프로젝트 안의 파일을 주거나 `fractal_inspect` action `verification`을 `filePaths` 없이 불러 인식 가능한 파일을 나열하라고 안내한다.
 
 ## Acceptance Criteria
 
@@ -33,9 +33,10 @@
 
 ## History
 
+- 2026-09-19 — `verification-path-not-found` diagnostic이 `nextAction`을 담는다.
 - 2026-09-05 — 기존 verification payload를 `fractal_inspect`의 `verification` action 뒤 child 계약으로 이동했다.
 - 2026-08-20 — 문서 계약 finding diagnostic과 불완전 evidence를 구분했다.
 
 ## Last Updated
 
-2026-09-05
+2026-09-19

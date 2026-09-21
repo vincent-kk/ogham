@@ -41,7 +41,7 @@ export function renderBlockerSummary(
     '',
     destination === 'report'
       ? `[Full blocker report](${REVIEW_STATE_FILE_NAMES.BLOCKERS})`
-      : `Full blocker report (local artifact, not published here): ${escapeReviewBlockerText(path)}`,
+      : `Full blocker report (local artifact, not published here): ${path}`,
     '',
     'Proposed owners and actions are not assignments or permission. New evidence must be validated before reconsidering the verdict.',
   ].join('\n');

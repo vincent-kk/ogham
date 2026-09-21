@@ -7,9 +7,11 @@
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로 평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag, verification을 지원한다.
 - rule exception과 indeterminate/unsupported evidence를 PASS로 숨기지 않는다.
+- violation `message`에 적는 경로는 project root 기준 POSIX 상대 경로다(root 자신은 `.`). `path` 필드는 절대 경로 그대로다. message는 review 후보로 hash되므로 저장소 위치에 따라 달라지면 안 된다. root는 `RuleContext.tree.root`나 snapshot의 `projectRoot`에서 읽는다(둘은 같은 값이다).
 - exception과 allowed-peer scope는 portable separator/case path identity로 평가한다.
 - `legacy-criteria-ledger`는 project granularity로 snapshot evidence를 평가하고 root DETAIL migration target을 suggestion으로 반환한다.
 - `organ-no-intentmd`는 **조용히 승격된 organ**을 보고한다. 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`는 실제 snapshot에서 성립할 수 없다. 대신 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `additionalOrganNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우 — DETAIL.md도 module 진입점도 없는 상태 — 를 `warning`으로 낸다. 둘 중 하나라도 있으면 승격이 의도된 것이므로 침묵한다.
+- `external-import-boundary` 위반은 import가 풀리는 파일을 `importedPath`에 싣는다. restructure postcondition이 위반의 신원(rule, 소비자, 대상)을 계획 시점 기준선과 비교할 때 쓴다.
 - `external-import-boundary`는 대상이 organ 파일이면 진입점 경유가 아니라 **소비자 위치**로 판정한다. organ은 진입점을 갖지 않으므로 경유할 대상이 없다.
 
   | 소비자 위치         | 참조 경로            | 판정                             |
@@ -20,6 +22,7 @@
 - **소비자가 검증 파일이면 boundary를 적용하지 않는다.** 검증은 계약을 확인하는 행위이고, 내부 단위를 검사하려면 내부에 닿아야 한다. 이를 위해 진입점을 넓히면 소비자가 테스트뿐인 공개 심볼이 생겨 공개 계약이 오염된다 (`seiri_public-contract` §1). 판정 근거는 어댑터가 보고한 `snapshot.verification.files`이며, core는 파일명 패턴을 알지 못한다.
 - 대상이 fractal 내부 파일일 때도 같은 면책을 조회한다. 진입점을 경유할 수 **없는** 정당한 소비자가 존재하기 때문이다 — 표준 사례는 훅 번들이며, 배럴을 import하면 번들러가 배럴이 재노출하는 모듈 전체를 끌어온다. 면책이 없으면 기존 진입점 규칙 그대로 위반이다.
 - 면책은 소유 프랙탈 DETAIL.md의 `## Boundary Exemptions` 선언에서 온다 (`## Organ Exemptions`는 legacy 별칭으로 계속 인정한다). 선언된 `targetPath`가 대상 경로를 담고, `Direct import`가 allowed이며, consumer glob이 소비 파일에 매치하고, `Reason`이 비어 있지 않을 때만 통과시킨다.
+- 모든 violation은 `suggestion`을 채운다. `evaluateRule`은 rule 실행이 던졌을 때 재시도와 보고를 안내하고, snapshot 부재로 인한 indeterminate finding(`external-import-boundary`, `checkDependencyCycles`, `checkPureFunctionIsolation`, `checkVerificationPolicy`, `checkLegacyCriteriaLedger`)은 각자 필요한 `fractal_inspect` action을 안내한다. cycle과 graph 불확실성, entry-point surface의 세 상태(enumerated indeterminate·unsupported·opaque)도 각자 다음 행동을 담는다.
 
 ## API Contracts
 

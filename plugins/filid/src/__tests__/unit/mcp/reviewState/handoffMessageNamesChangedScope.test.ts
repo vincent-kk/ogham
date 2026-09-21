@@ -19,4 +19,13 @@ describe('handoffMessageNamesChangedScope', () => {
       ),
     ).toBe(true);
   });
+
+  it('matches a project-relative path between backticks', () => {
+    expect(
+      handoffMessageNamesChangedScope(
+        'Public surface evidence is indeterminate for `src/feature/index.ts`.',
+        ['src/feature/index.ts'],
+      ),
+    ).toBe(true);
+  });
 });

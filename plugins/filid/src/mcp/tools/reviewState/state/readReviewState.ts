@@ -1,9 +1,12 @@
 import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 
 import {
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_ERROR_MESSAGES,
   REVIEW_STATE_SCHEMA_VERSION,
 } from '../../../../constants/reviewState.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 
 import { ReviewStateRecordSchema } from './reviewStateRecordSchema.js';
 import type { ReviewStateRecord } from './reviewStateTypes.js';
@@ -42,8 +45,10 @@ export function readReviewState(
 
   const parsed = ReviewStateRecordSchema.safeParse(value);
   if (!parsed.success)
-    throw new Error(
+    throw new ToolDiagnosticError(
+      REVIEW_STATE_DIAGNOSTIC_CODES.STATE_INVALID,
       `${REVIEW_STATE_ERROR_MESSAGES.STATE_INVALID}: ${statePath}`,
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.STATE_INVALID,
     );
 
   return parsed.data;

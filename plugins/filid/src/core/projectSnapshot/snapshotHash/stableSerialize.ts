@@ -1,3 +1,5 @@
+import { compareByBytes } from '../../../lib/compareByBytes.js';
+
 export function stableSerialize(value: unknown): string {
   if (value === null) return 'null';
   if (value === undefined) return '{"$undefined":true}';
@@ -8,18 +10,18 @@ export function stableSerialize(value: unknown): string {
   if (value instanceof Map)
     return stableSerialize(
       [...value.entries()].sort(([left], [right]) =>
-        String(left).localeCompare(String(right)),
+        compareByBytes(String(left), String(right)),
       ),
     );
   if (value instanceof Set)
     return stableSerialize(
       [...value.values()].sort((left, right) =>
-        String(left).localeCompare(String(right)),
+        compareByBytes(String(left), String(right)),
       ),
     );
 
   const entries = Object.entries(value as Record<string, unknown>).sort(
-    ([left], [right]) => left.localeCompare(right),
+    ([left], [right]) => compareByBytes(left, right),
   );
   return `{${entries
     .map(([key, item]) => `${JSON.stringify(key)}:${stableSerialize(item)}`)

@@ -1,3 +1,6 @@
+import { ANALYSIS_AXES } from '../../../../constants/analysisAxes.js';
+import { affectsAnalysisAxis } from '../../utils/affectsAnalysisAxis.js';
+
 import { buildReviewBlockers } from './blockers/buildReviewBlockers.js';
 import { buildChecklist } from './buildChecklist.js';
 import { joinDecisions } from './joinDecisions.js';
@@ -106,6 +109,16 @@ export function foldReviewVerdict(
         affectsVerdict: false,
       });
   }
+
+  for (const diagnostic of input.evidence.diagnostics ?? [])
+    if (!affectsAnalysisAxis(diagnostic, ANALYSIS_AXES))
+      unresolved.push({
+        source: 'scope diagnostic',
+        path: diagnostic.path ?? '.',
+        rule: diagnostic.code,
+        detail: diagnostic.message,
+        affectsVerdict: false,
+      });
 
   for (const information of input.informational)
     unresolved.push({

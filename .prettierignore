@@ -29,3 +29,8 @@ AGENTS.md
 # the fold-replay test compares against them byte-for-byte. Reformatting breaks
 # that coupling, so every baseline-* tree stays exactly as the runner wrote it.
 .metadata/filid/cross-review-calibration/baseline-*/
+
+# filid review-flow harness fixtures are byte-compared: golden files through
+# toMatchFileSnapshot, and the preserved S0 review state replays with its state
+# and generation copies byte-identical. Reformatting either turns the harness red.
+plugins/filid/src/__tests__/integration/reviewFlow/fixtures/

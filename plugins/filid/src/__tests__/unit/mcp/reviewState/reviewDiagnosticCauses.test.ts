@@ -10,6 +10,7 @@ import { createVerdictFoldFixture } from './helpers/createVerdictFoldFixture.js'
 const DIAGNOSTIC = {
   code: 'unresolved-local-dependency',
   message: 'Cannot resolve ./moved.js from src/a.ts',
+  nextAction: 'Fix the specifier, then run again.',
   path: 'src/a.ts',
   causeId: 'dependency:a:moved',
   specifier: './moved.js',

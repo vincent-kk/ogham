@@ -1,7 +1,6 @@
+import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type { VerificationFileAnalysis } from '../../../../types/verification.js';
 import type { ReviewScopeFile } from '../state/reviewStateTypes.js';
-
-import { toProjectRelativePath } from './utils/toProjectRelativePath.js';
 
 /**
  * Select verification analyses whose files or owners intersect changed scope.

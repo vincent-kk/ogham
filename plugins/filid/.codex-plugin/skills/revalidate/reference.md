@@ -148,13 +148,13 @@ Rules:
 
 ## §5 Failure handling
 
-| Situation                                            | Action                                                                   |
-| ---------------------------------------------------- | ------------------------------------------------------------------------ |
-| `justifications.md` missing                          | Report that `resolve` has not run; end without a verdict.                |
-| Accepted FIX join missing, duplicate, or field-short | Mark the affected item `inconclusive`; do not invoke a non-FCA verifier. |
-| `resolve_commit_sha` missing or unresolvable         | Abort. The baseline cannot be reconstructed after the fact.              |
-| Empty delta with accepted items                      | Joined items are `unapplied`; join failures remain `inconclusive`.       |
-| `review_state` disposition `missing`                 | Abort. The review directory was removed before revalidation.             |
+| Situation                                            | Action                                                                                                                                        |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `justifications.md` missing                          | End without a verdict and record that `resolve` has not run.                                                                                  |
+| Accepted FIX join missing, duplicate, or field-short | Mark the affected item `inconclusive`; do not invoke a non-FCA verifier.                                                                      |
+| `resolve_commit_sha` missing or unresolvable         | End without a verdict and record that the baseline cannot be reconstructed after the fact.                                                    |
+| Empty delta with accepted items                      | Joined items are `unapplied`; join failures remain `inconclusive`.                                                                            |
+| `review_state` disposition `missing`                 | End this revalidation and re-run `/filid:pipeline`, which re-enters at the right stage; the review directory was removed before revalidation. |
 
 ## §6 What this skill does not do
 

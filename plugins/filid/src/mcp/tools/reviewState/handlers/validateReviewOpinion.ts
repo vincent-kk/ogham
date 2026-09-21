@@ -1,6 +1,8 @@
 import {
+  PREPARE_ONCE_NEXT_ACTION,
   REVIEW_STATE_DIAGNOSTIC_CODES,
   REVIEW_STATE_DIAGNOSTIC_MESSAGES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_PHASES,
   REVIEW_VALIDATE_KINDS,
@@ -50,6 +52,10 @@ export async function validateReviewOpinion(
             ? REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_SCHEMA_MISMATCH
             : REVIEW_STATE_DIAGNOSTIC_MESSAGES.STATE_MISSING,
           path: paths.statePath,
+          affects: [],
+          nextAction: schemaMismatch
+            ? PREPARE_ONCE_NEXT_ACTION
+            : 'Do not publish a verdict. Once, after all prior actors finish, call prepare again with the original arguments to start a new review; if the state goes missing again, stop without a terminal verdict.',
         },
       ],
     });
@@ -84,6 +90,9 @@ export async function validateReviewOpinion(
           code: REVIEW_STATE_DIAGNOSTIC_CODES.SOURCE_HASH_STALE,
           message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.SOURCE_HASH_STALE,
           path: paths.statePath,
+          affects: [],
+          nextAction:
+            'Do not seal or publish a verdict for this state. After every in-flight actor finishes, call prepare again with the same arguments and without force; it reuses validated opinions for unchanged files. If the source changes again, stop without a terminal verdict.',
         },
       ],
     });
@@ -100,7 +109,41 @@ export async function validateReviewOpinion(
       data: { ...base.data, problems: [] },
     };
   }
-  await assertReviewInputsFresh(restored, paths, input.group);
+  if (
+    input.generationId !== undefined &&
+    input.generationId !== restored.generationId
+  ) {
+    const base = createReviewStatePayload({
+      action: input.action,
+      disposition: REVIEW_STATE_DISPOSITIONS.STALE,
+      paths,
+      status: TOOL_STATUSES.INDETERMINATE,
+      state: restored,
+      diagnostics: [
+        {
+          code: REVIEW_STATE_DIAGNOSTIC_CODES.GENERATION_SUPERSEDED,
+          message: `This opinion was written for review generation ${input.generationId}; the active generation is ${restored.generationId ?? 'unknown'}.`,
+          path: paths.statePath,
+          affects: [],
+          nextAction:
+            REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.GENERATION_SUPERSEDED,
+        },
+      ],
+    });
+    return {
+      ...base,
+      summary: {
+        ...base.summary,
+        kind: input.kind,
+        group: input.group,
+        ...(input.round === undefined ? {} : { round: input.round }),
+        ok: false,
+        problemCount: 0,
+      },
+      data: { ...base.data, problems: [] },
+    };
+  }
+  await assertReviewInputsFresh(restored, paths, 'validate', input.group);
   if (restored.phase === REVIEW_STATE_PHASES.SEALED)
     throw new Error('sealed review state cannot validate opinions');
   const group = restored.groups.find(({ id }) => id === input.group);

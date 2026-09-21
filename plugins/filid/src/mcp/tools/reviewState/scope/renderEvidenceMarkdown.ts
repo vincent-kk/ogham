@@ -1,4 +1,5 @@
 import { REVIEW_EVIDENCE_SCHEMA_VERSION } from '../../../../constants/reviewState.js';
+import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import type { ReviewEvidenceModel } from '../state/reviewStateTypes.js';
 
 import { summarizeOutOfScopeViolations } from './summarizeOutOfScopeViolations.js';
@@ -7,9 +8,25 @@ import { renderMarkdownCodeCell } from './utils/renderMarkdownCodeCell.js';
 import { renderMarkdownTable } from './utils/renderMarkdownTable.js';
 
 /**
+ * Render diagnostics as a Markdown list with impact, cause and target.
+ * @param diagnostics Normalized diagnostics.
+ * @returns One bullet per diagnostic, or `none`.
+ */
+function renderDiagnosticList(diagnostics: readonly ToolDiagnostic[]): string {
+  if (diagnostics.length === 0) return 'none';
+  return diagnostics
+    .map(
+      (diagnostic) =>
+        `- ${renderMarkdownCodeCell(diagnostic.code)} — ${escapeMarkdownCell(diagnostic.message)}${diagnostic.path ? ` (${renderMarkdownCodeCell(diagnostic.path)})` : ''}; impact: ${escapeMarkdownCell(diagnostic.affects === undefined ? 'unknown' : diagnostic.affects.length === 0 ? 'none' : diagnostic.affects.join(', '))}${diagnostic.causeId ? `; causeId: ${renderMarkdownCodeCell(diagnostic.causeId)}` : ''}${diagnostic.specifier ? `; target: ${renderMarkdownCodeCell(diagnostic.specifier)}` : ''}`,
+    )
+    .join('\n');
+}
+
+/**
  * Render one canonical evidence.md document from deterministic scope facts.
  * @param model Snapshot identities, statuses, roster, candidates and diagnostics.
- * @returns Complete Markdown document with stable section and column order.
+ * @returns Complete Markdown document with stable section and column order; the
+ *   Out-of-scope Diagnostics section appears only when it has entries.
  */
 export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
   const changedScope = renderMarkdownTable(
@@ -54,15 +71,6 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
     ]),
     true,
   );
-  const diagnostics =
-    model.diagnostics.length === 0
-      ? 'none'
-      : model.diagnostics
-          .map(
-            (diagnostic) =>
-              `- ${renderMarkdownCodeCell(diagnostic.code)} — ${escapeMarkdownCell(diagnostic.message)}${diagnostic.path ? ` (${renderMarkdownCodeCell(diagnostic.path)})` : ''}; impact: ${escapeMarkdownCell(diagnostic.affects?.join(', ') || 'unknown')}${diagnostic.causeId ? `; causeId: ${renderMarkdownCodeCell(diagnostic.causeId)}` : ''}${diagnostic.specifier ? `; target: ${renderMarkdownCodeCell(diagnostic.specifier)}` : ''}`,
-          )
-          .join('\n');
   return [
     [
       '---',
@@ -86,7 +94,12 @@ export function renderEvidenceMarkdown(model: ReviewEvidenceModel): string {
     `## Candidates\n\n${candidates}`,
     `## Informational\n\n${informational}`,
     `## Out-of-scope Observations\n\n${outOfScope}`,
-    `## Diagnostics\n\n${diagnostics}`,
+    `## Diagnostics\n\n${renderDiagnosticList(model.diagnostics)}`,
+    ...(model.outOfScopeDiagnostics.length > 0
+      ? [
+          `## Out-of-scope Diagnostics\n\n${renderDiagnosticList(model.outOfScopeDiagnostics)}`,
+        ]
+      : []),
   ]
     .join('\n\n')
     .concat('\n');

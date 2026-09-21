@@ -1,6 +1,7 @@
 import {
   REVIEW_HANDOFF_MARKER,
   REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
 } from '../../../../constants/reviewState.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import { renderSchemaIssue } from '../opinion/utils/renderSchemaIssue.js';
@@ -25,7 +26,12 @@ const REVIEW_HANDOFF_BLOCK_PATTERN = new RegExp(
  * @returns Nonfatal diagnostic preserving the untrusted block as caller text.
  */
 function invalidDiagnostic(message: string): ToolDiagnostic {
-  return { code: REVIEW_STATE_DIAGNOSTIC_CODES.HANDOFF_INVALID, message };
+  return {
+    code: REVIEW_STATE_DIAGNOSTIC_CODES.HANDOFF_INVALID,
+    message: `The PR body's filid:handoff block is invalid: ${message}`,
+    affects: [],
+    nextAction: REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.HANDOFF_INVALID,
+  };
 }
 
 /**

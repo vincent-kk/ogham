@@ -44,8 +44,12 @@ export {
 export {
   buildDAG,
   buildDependencyGraph,
+  collectTargetNames,
+  containsPathToken,
   detectCycles,
+  classifyRelevanceTarget,
   getDirectDependencies,
+  partitionUnknownFiles,
   topologicalSort,
 } from './analysis/dependencyGraph/index.js';
 export {
@@ -107,6 +111,7 @@ export {
   writeConfig,
 } from './infra/configLoader/index.js';
 export type {
+  ConfigWarning,
   FilidConfig,
   InitResult,
   RuleDocEntry,

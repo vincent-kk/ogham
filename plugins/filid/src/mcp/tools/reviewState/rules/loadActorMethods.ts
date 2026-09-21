@@ -6,6 +6,7 @@ import {
 
 import {
   REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
   REVIEW_STATE_FILE_NAMES,
 } from '../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
@@ -23,7 +24,8 @@ export function loadActorMethods(pluginRoot: string | null): {
   if (pluginRoot === null)
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.ACTOR_METHOD_MISSING,
-      'Cross-review actor method is missing: plugin root is unavailable.',
+      'Cross-review actor methods cannot be loaded because the filid plugin root is unavailable (CLAUDE_PLUGIN_ROOT is unset and no plugin root was found).',
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.PLUGIN_ROOT_UNAVAILABLE,
     );
   const methods = [
     REVIEW_STATE_FILE_NAMES.REVIEWER_METHOD,
@@ -41,6 +43,7 @@ export function loadActorMethods(pluginRoot: string | null): {
       throw new ToolDiagnosticError(
         REVIEW_STATE_DIAGNOSTIC_CODES.ACTOR_METHOD_MISSING,
         `Cross-review actor method is missing: "${path}".`,
+        REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.ACTOR_METHOD_MISSING,
       );
     return body;
   });

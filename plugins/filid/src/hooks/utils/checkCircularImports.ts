@@ -16,7 +16,9 @@ export function checkCircularImports(
   if (circularCandidates.length > 0)
     return [
       `The following imports reference ancestor modules (potential circular dependency): ` +
-        circularCandidates.map((p) => `"${p}"`).join(', '),
+        circularCandidates.map((p) => `"${p}"`).join(', ') +
+        `. An ancestor usually re-exports its children, so importing it can close a cycle: ` +
+        `import the concrete module you need, or move the shared code into a unit both sides can import.`,
     ];
 
   return [];

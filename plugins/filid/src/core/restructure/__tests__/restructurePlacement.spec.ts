@@ -302,6 +302,15 @@ function makeSnapshot(
       nodePaths: [...tree.nodes.keys()],
       edges: tree.root === PATHS.ROOT ? BASE_EDGES : [],
       cycles: [],
+      unknownFiles:
+        certainty === ANALYSIS_CERTAINTIES.INDETERMINATE
+          ? [
+              {
+                path: 'domain/a/value.unit',
+                causes: ['uncertain-local-dependency'],
+              },
+            ]
+          : [],
       certainty,
     },
     adapterIds: ['fixture'],
@@ -312,6 +321,8 @@ function makeSnapshot(
     },
     legacyCriteriaLedger: null,
     diagnostics: [],
+    normalizedFacts: [],
+    filesOutsideFactsScope: 0,
     collectedAxes: ALL_SNAPSHOT_AXES,
     createdAt: CREATED_AT,
   };

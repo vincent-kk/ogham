@@ -2,12 +2,10 @@
 
 ## Purpose
 
-Adapter dependency reference를 owner-level evidence edge로 집계하고 실제 cycle과 certainty를 계산한다.
+Adapter dependency reference를 owner-level evidence edge로 집계하고 실제 cycle을 계산한다. 참조를 확정하지 못한 파일은 `unknownFiles`에 귀속하고, 그 파일이 주어진 대상과 관련되는지 가린다.
 
 ## Structure
 
-- `builders/` organ — owner 해석, evidence edge 집계와 graph 조립
-- `cycles/` organ — cyclic component에서 stable directed closed route 추출
 - `buildDag.ts`와 query helper — 작업 8 전 legacy characterization 경계
 - `detectCycles.ts` — legacy/target graph를 cycle algorithm에 연결
 - `index.ts` — named-export public entry point
@@ -26,7 +24,7 @@ Adapter dependency reference를 owner-level evidence edge로 집계하고 실제
 - logical path alias를 canonical owner 하나로 모으고 edge를 안정적으로 정렬
 - 각 cyclic component를 실제 directed edge로 닫히는 대표 route로 반환
 - owner identity는 portable path 비교로 판정하되 선택한 원문 path는 보존
-- unresolved가 결론에 영향을 주면 certainty를 indeterminate로 반환
+- 확정하지 못한 참조는 원인 파일의 `unknownFiles` 항목으로 남기고, certainty는 그 목록에서 파생
 
 ### Ask first
 

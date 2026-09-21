@@ -12,7 +12,11 @@ import { formatIssuePath } from '../utils/formatIssuePath.js';
 import { parseWithAllowlistWarn } from '../utils/parseWithAllowlistWarn.js';
 
 import { FilidConfigSchema } from './configSchemas.js';
-import type { ConfigDiagnostic, LoadConfigResult } from './configTypes.js';
+import type {
+  ConfigDiagnostic,
+  ConfigWarning,
+  LoadConfigResult,
+} from './configTypes.js';
 import { migrateConfigV1 } from './migrateConfigV1.js';
 
 const log = createLogger('config-loader');
@@ -33,22 +37,23 @@ const log = createLogger('config-loader');
  * @param projectRoot Anchor for the project layer and for v1 migration.
  * @param layers Layer coordinates to read. Defaults to this project's two;
  *   pass `project: null` to ask what the user layer decides alone.
- * @returns The config, plus warnings and migration diagnostics. `config` is
- *   `null` when no layer supplied one or the merge failed validation.
+ * @returns The config, plus warnings (each with the config path it dropped)
+ *   and migration diagnostics. `config` is `null` when no layer supplied one
+ *   or the merge failed validation; that failure's warnings carry a `null` path.
  */
 export function loadConfig(
   projectRoot: string,
   layers: ConfigLayerPaths = configLayers(projectRoot),
 ): LoadConfigResult {
-  const warnings: string[] = [];
+  const warnings: ConfigWarning[] = [];
   const diagnostics: ConfigDiagnostic[] = [];
-  const addWarning = (message: string): void => {
-    warnings.push(message);
+  const addWarning = (message: string, key: ConfigWarning['key']): void => {
+    warnings.push({ message, key });
     log.warn(message);
   };
 
   const documents = readConfigLayers(layers);
-  for (const warning of documents.warnings) addWarning(warning);
+  for (const warning of documents.warnings) addWarning(warning, null);
 
   const user = migrateIfV1(documents.user, diagnostics);
   const project = migrateIfV1(documents.project, diagnostics);
@@ -80,6 +85,7 @@ export function loadConfig(
   for (const issue of retry.error.issues)
     addWarning(
       `config validation failed at ${formatIssuePath(issue.path)}: ${issue.message}`,
+      null,
     );
   return { config: null, warnings, diagnostics };
 }

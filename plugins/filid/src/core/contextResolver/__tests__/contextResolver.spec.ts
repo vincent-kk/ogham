@@ -261,13 +261,16 @@ describe('context resolver', () => {
         nodePaths: [projectRoot, feature],
         edges: [],
         cycles: [],
+        unknownFiles: [],
         certainty: 'exact',
       },
       adapterIds: [],
       verification: { files: [], violations: [], certainty: 'exact' },
       legacyCriteriaLedger: null,
       diagnostics: [],
-      collectedAxes: ALL_SNAPSHOT_AXES,
+      normalizedFacts: [],
+    filesOutsideFactsScope: 0,
+    collectedAxes: ALL_SNAPSHOT_AXES,
       createdAt: '2026-07-27T00:00:00.000Z',
     };
 

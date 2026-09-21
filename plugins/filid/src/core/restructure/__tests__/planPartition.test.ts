@@ -10,13 +10,13 @@ import { createRestructurePlan } from '../planner/createRestructurePlan.js';
 import { validatePlanPostconditions } from '../validator/validatePlanPostconditions.js';
 
 const PATHS = {
-  ROOT: '/root',
-  LIB: '/root/lib',
-  SOURCE: '/root/lib/logger.ts',
-  FEATURE_A: '/root/featureA',
-  FEATURE_A_FILE: '/root/featureA/index.ts',
-  FEATURE_B: '/root/featureB',
-  FEATURE_B_FILE: '/root/featureB/index.ts',
+  ROOT: '/filid-fixture-root',
+  LIB: '/filid-fixture-root/lib',
+  SOURCE: '/filid-fixture-root/lib/logger.ts',
+  FEATURE_A: '/filid-fixture-root/featureA',
+  FEATURE_A_FILE: '/filid-fixture-root/featureA/index.ts',
+  FEATURE_B: '/filid-fixture-root/featureB',
+  FEATURE_B_FILE: '/filid-fixture-root/featureB/index.ts',
 } as const;
 
 function node(
@@ -90,6 +90,7 @@ const SNAPSHOT: ProjectSnapshot = {
       },
     ],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture-adapter'],
@@ -100,6 +101,8 @@ const SNAPSHOT: ProjectSnapshot = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  normalizedFacts: [],
+    filesOutsideFactsScope: 0,
   collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-07-28T00:00:00.000Z',
 };
@@ -186,7 +189,7 @@ describe('restructure plan partitions requests that need no move', () => {
 
     expect(plan.alreadyPlaced).toEqual([]);
     expect(plan.moves).toHaveLength(1);
-    expect(plan.moves[0]?.targetPath).toBe('/root/shared/logger.ts');
+    expect(plan.moves[0]?.targetPath).toBe('/filid-fixture-root/shared/logger.ts');
     expect(plan.summary.moveCount).toBe(1);
   });
 

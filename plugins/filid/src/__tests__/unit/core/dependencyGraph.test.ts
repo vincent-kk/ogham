@@ -173,6 +173,7 @@ describe('dependency-graph', () => {
           },
         ],
         cycles: [],
+        unknownFiles: [],
         certainty: 'exact',
       };
 
@@ -227,6 +228,7 @@ describe('dependency-graph', () => {
         ['/project/a', '/project/b'],
         references,
         'exact',
+        { projectRoot: '/project' },
       );
 
       expect(graph.cycles).toHaveLength(1);
@@ -255,7 +257,7 @@ describe('dependency-graph', () => {
         ['/project/hooks', '/project/hooks/pre'],
         references,
         'exact',
-        { organPaths: ['/project/hooks/shared'] },
+        { projectRoot: '/project', organPaths: ['/project/hooks/shared'] },
       );
 
       expect(graph.cycles).toEqual([]);
@@ -282,7 +284,7 @@ describe('dependency-graph', () => {
         ['/project/hooks', '/project/hooks/pre'],
         references,
         'exact',
-        { organPaths: ['/project/hooks/shared'] },
+        { projectRoot: '/project', organPaths: ['/project/hooks/shared'] },
       );
 
       expect(graph.cycles).toHaveLength(1);
@@ -308,7 +310,10 @@ describe('dependency-graph', () => {
         ['/project/hooks', '/project/hooks/pre'],
         references,
         'exact',
-        { verificationPaths: ['/project/hooks/pre/pre.test.ts'] },
+        {
+          projectRoot: '/project',
+          verificationPaths: ['/project/hooks/pre/pre.test.ts'],
+        },
       );
 
       expect(graph.cycles).toEqual([]);
@@ -335,6 +340,7 @@ describe('dependency-graph', () => {
         ['/project/hooks', '/project/hooks/pre'],
         references,
         'exact',
+        { projectRoot: '/project' },
       );
 
       expect(graph.cycles).toHaveLength(1);
@@ -360,6 +366,7 @@ describe('dependency-graph', () => {
         ['/project/b', '/project/a'],
         references,
         'exact',
+        { projectRoot: '/project' },
       );
 
       expect(graph.edges).toEqual([
@@ -392,7 +399,9 @@ describe('dependency-graph', () => {
         },
       ];
 
-      const graph = buildDependencyGraph(['/project/a'], references, 'exact');
+      const graph = buildDependencyGraph(['/project/a'], references, 'exact', {
+        projectRoot: '/project',
+      });
 
       expect(graph.edges).toEqual([
         {
@@ -420,7 +429,9 @@ describe('dependency-graph', () => {
         },
       ];
 
-      const graph = buildDependencyGraph(['/project/a'], references, 'exact');
+      const graph = buildDependencyGraph(['/project/a'], references, 'exact', {
+        projectRoot: '/project',
+      });
 
       expect(graph.certainty).toBe('indeterminate');
       expect(graph.cycles).toEqual([]);
@@ -440,6 +451,7 @@ describe('dependency-graph', () => {
         [String.raw`C:\project\a`, String.raw`C:\project\b`],
         references,
         'exact',
+        { projectRoot: '/project' },
       );
 
       expect(graph.edges).toEqual([
@@ -473,6 +485,7 @@ describe('dependency-graph', () => {
         [ownerA, 'c:/project/A', ownerB, 'c:/PROJECT/B'],
         references,
         'exact',
+        { projectRoot: '/project' },
       );
 
       expect(graph.nodePaths).toEqual([ownerA, ownerB]);

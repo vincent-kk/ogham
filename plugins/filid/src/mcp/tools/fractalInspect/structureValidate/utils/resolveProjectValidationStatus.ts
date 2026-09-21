@@ -1,3 +1,4 @@
+import { ANALYSIS_AXES } from '../../../../../constants/analysisAxes.js';
 import { ANALYSIS_CERTAINTIES } from '../../../../../constants/analysisCertainties.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
 import type { ValidationReport } from '../../../../../types/report.js';
@@ -5,6 +6,7 @@ import type {
   ToolDiagnostic,
   ToolStatus,
 } from '../../../../../types/toolEnvelope.js';
+import { affectsAnalysisAxis } from '../../../utils/affectsAnalysisAxis.js';
 import { isFindingDiagnostic } from '../../../utils/isFindingDiagnostic.js';
 
 /**
@@ -24,7 +26,9 @@ export function resolveProjectValidationStatus(
   if (certainties.includes(ANALYSIS_CERTAINTIES.UNSUPPORTED))
     return TOOL_STATUSES.UNSUPPORTED;
   if (
-    diagnostics.some((d) => !isFindingDiagnostic(d)) ||
+    diagnostics.some(
+      (d) => !isFindingDiagnostic(d) && affectsAnalysisAxis(d, ANALYSIS_AXES),
+    ) ||
     certainties.includes(ANALYSIS_CERTAINTIES.INDETERMINATE)
   )
     return TOOL_STATUSES.INDETERMINATE;

@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 import type { ReviewPreparePayload } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { buildReviewOpinion } from './helpers/buildReviewOpinion.js';
 import { buildReviewStateSealFinding } from './helpers/buildReviewStateSealFinding.js';
 import { buildVerifyOpinion } from './helpers/buildVerifyOpinion.js';
@@ -22,8 +23,8 @@ let fixture: ReviewStateSealFixture;
 let prepared: ReviewPreparePayload;
 
 beforeEach(async () => {
-  fixture = createReviewStateSealFixture();
-  prepared = await handleReviewState({
+  fixture = await createReviewStateSealFixture();
+  prepared = await prepareWithFacts({
     action: 'prepare',
     projectRoot: fixture.projectRoot,
     effort: 'high',
@@ -70,7 +71,7 @@ describe('recoverReviewGroups through prepare', () => {
     const path = portableJoin(zero.data.reviewDirectory, group.opinionPath);
     const canonical = readFileSync(path, 'utf8');
     writeFileAtomicallySync(path, canonical + '\n');
-    const restored = await handleReviewState({
+    const restored = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -94,7 +95,7 @@ describe('recoverReviewGroups through prepare', () => {
     group.validated = { review: null, verify: null };
     writeFileAtomicallySync(zero.data.statePath, JSON.stringify(state));
 
-    const restored = await handleReviewState({
+    const restored = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
     });
@@ -113,7 +114,7 @@ describe('recoverReviewGroups through prepare', () => {
       'opinions/review-01.r3.json',
     );
     rmSync(path);
-    const restored = await handleReviewState({
+    const restored = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       effort: 'high',
@@ -128,7 +129,7 @@ describe('recoverReviewGroups through prepare', () => {
       buildReviewOpinion(state, state.groups[0]!, 3),
     );
     writeFileAtomicallySync(path, draft);
-    await handleReviewState({
+    await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       effort: 'high',
@@ -155,7 +156,7 @@ describe('recoverReviewGroups through prepare', () => {
       group.verifyBriefPath,
     );
     rmSync(path);
-    const restored = await handleReviewState({
+    const restored = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       effort: 'high',
@@ -187,7 +188,7 @@ describe('recoverReviewGroups through prepare', () => {
       );
       if (damage === 'missing') rmSync(path);
       else writeFileAtomicallySync(path, merged + '\n');
-      const resumed = await handleReviewState({
+      const resumed = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'high',
@@ -224,7 +225,7 @@ describe('recoverReviewGroups through prepare', () => {
           `opinions/review-01.r${round}.json`,
         ),
       );
-      const resumed = await handleReviewState({
+      const resumed = await prepareWithFacts({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
         effort: 'high',
@@ -250,6 +251,17 @@ describe('recoverReviewGroups through prepare', () => {
           ),
         ),
       ).toMatchObject({ round: 1, state: 'INDETERMINATE' });
+      // Only round 1 can prove this: round 2's setup above already removes r2.json,
+      // so asserting its absence there would hold regardless of recovery behavior.
+      if (round === 1)
+        expect(
+          existsSync(
+            portableJoin(
+              prepared.data.reviewDirectory,
+              'opinions/review-01.r2.json',
+            ),
+          ),
+        ).toBe(false);
     },
   );
 
@@ -297,7 +309,7 @@ describe('recoverReviewGroups through prepare', () => {
       group.opinionPath,
     );
     rmSync(mergedPath);
-    const restored = await handleReviewState({
+    const restored = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       effort: 'high',
@@ -312,7 +324,7 @@ describe('recoverReviewGroups through prepare', () => {
     raw.findings[0].message = 'A different defect claim.';
     writeFileAtomicallySync(rawPath, JSON.stringify(raw));
     rmSync(mergedPath);
-    const changed = await handleReviewState({
+    const changed = await prepareWithFacts({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
       effort: 'high',

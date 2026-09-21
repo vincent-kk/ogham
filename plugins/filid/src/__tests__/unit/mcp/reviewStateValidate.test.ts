@@ -41,6 +41,7 @@ import { roundReviewOpinionPath } from './reviewState/helpers/roundReviewOpinion
 import { runReviewStateFixtureGit } from './reviewState/helpers/runReviewStateFixtureGit.js';
 import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewStateFixtureFile.js';
 import { writeReviewStateFixtureJson } from './reviewState/helpers/writeReviewStateFixtureJson.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 /** Source branch shared by every validation fixture. */
 const BRANCH = 'feature/validate-v7';
@@ -79,7 +80,7 @@ function artifactPath(state: ReviewStateRecord, relativePath: string): string {
   );
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   fixturePluginRoot = createReviewRulePluginRoot();
   process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
@@ -104,6 +105,7 @@ beforeEach(() => {
     'export const value = 2;\n',
   );
   commitReviewStateFixture(projectRoot, 'feature');
+  await seedFacts(projectRoot);
 });
 
 afterEach(() => {
@@ -148,6 +150,7 @@ describe('review_state validate v7', () => {
     expect(result.diagnostics).toContainEqual(
       expect.objectContaining({
         code: REVIEW_STATE_DIAGNOSTIC_CODES.STATE_MISSING,
+        nextAction: expect.stringMatching(/^Do not publish a verdict\./),
       }),
     );
   });

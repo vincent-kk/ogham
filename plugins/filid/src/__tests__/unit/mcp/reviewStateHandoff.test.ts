@@ -1,10 +1,9 @@
-import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, rmSync } from 'node:fs';
 
 import {
   ensureDirectorySync,
   portableDirname,
   portableJoin,
-  tmp,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
@@ -27,13 +26,16 @@ import {
 import { resolveReviewStatePaths } from '../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 
 import { runReviewStateFixtureGit } from './reviewState/helpers/runReviewStateFixtureGit.js';
+import { createFixtureProjectRoot } from '../../integration/helpers/createFixtureProjectRoot.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 vi.mock(
   '../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js',
   async (importOriginal) => {
-    const actual = await importOriginal<
-      typeof import('../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js')
-    >();
+    const actual =
+      await importOriginal<
+        typeof import('../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js')
+      >();
     return {
       ...actual,
       computeChangedScopeEvidence: vi.fn(actual.computeChangedScopeEvidence),
@@ -44,9 +46,10 @@ vi.mock(
 vi.mock(
   '../../../mcp/tools/reviewState/scope/parseHandoffBlock.js',
   async (importOriginal) => {
-    const actual = await importOriginal<
-      typeof import('../../../mcp/tools/reviewState/scope/parseHandoffBlock.js')
-    >();
+    const actual =
+      await importOriginal<
+        typeof import('../../../mcp/tools/reviewState/scope/parseHandoffBlock.js')
+      >();
     return { ...actual, parseHandoffBlock: vi.fn(actual.parseHandoffBlock) };
   },
 );
@@ -107,8 +110,8 @@ function buildSeed(
   });
 }
 
-beforeEach(() => {
-  projectRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-handoff-'));
+beforeEach(async () => {
+  projectRoot = createFixtureProjectRoot('filid-review-handoff-');
   runReviewStateFixtureGit(projectRoot, ['init', '--initial-branch=main']);
   runReviewStateFixtureGit(projectRoot, ['config', 'user.name', 'Filid Test']);
   runReviewStateFixtureGit(projectRoot, [
@@ -141,6 +144,7 @@ beforeEach(() => {
   writeProjectFile('src/value.ts', "export const value = 'feature';\n");
   runReviewStateFixtureGit(projectRoot, ['add', '--all']);
   runReviewStateFixtureGit(projectRoot, ['commit', '-m', 'feature']);
+  await seedFacts(projectRoot);
 });
 
 afterEach(() => {
@@ -203,6 +207,7 @@ describe('review_state handoff', () => {
       '-m',
       'add verification evidence',
     ]);
+    await seedFacts(projectRoot);
 
     const result = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.HANDOFF,
@@ -519,6 +524,8 @@ describe('review_state handoff', () => {
             code: 'adapter-unsupported',
             message: 'Adapter evidence is unavailable.',
             path: 'src/value.ts',
+            affects: ['dependencies', 'boundaries', 'verification'],
+            nextAction: 'Enable an adapter for this file.',
           },
         ],
       };
@@ -539,6 +546,8 @@ describe('review_state handoff', () => {
       code: 'adapter-unsupported',
       message: 'Adapter evidence is unavailable.',
       path: 'src/value.ts',
+      affects: ['dependencies', 'boundaries', 'verification'],
+      nextAction: 'Enable an adapter for this file.',
     });
     expect(parsed.handoff?.recorded).toContainEqual({
       class: 'indeterminate',
@@ -594,7 +603,9 @@ describe('review_state handoff', () => {
       parsed.handoff?.recorded.find(
         (entry) => entry.ruleId === 'handoff-validate',
       )?.note,
-    ).toBe('Review base ref could not be resolved: refs/heads/missing');
+    ).toContain(
+      'Review base ref "refs/heads/missing" does not resolve to a commit',
+    );
     expect(parsed.handoff?.recorded.map((entry) => entry.ruleId)).toEqual([
       'z-caller',
       'a-caller',
@@ -668,7 +679,12 @@ describe('review_state handoff', () => {
       handoff: null,
       remainder: '',
       diagnostics: [
-        { code: 'handoff-invalid', message: 'Schema mismatch at recorded.' },
+        {
+          code: 'handoff-invalid',
+          message: 'Schema mismatch at recorded.',
+          affects: [],
+          nextAction: 'Regenerate the handoff block.',
+        },
       ],
     });
 

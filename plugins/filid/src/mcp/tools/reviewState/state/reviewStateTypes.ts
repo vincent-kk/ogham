@@ -29,6 +29,20 @@ import type {
   ReviewReuseSummary,
 } from './reviewIncrementalTypes.js';
 
+/**
+ * Persisted diagnostic shape: `nextAction` is optional because review states
+ * written before filid attached next actions must remain readable without a
+ * schema bump.
+ */
+export type StoredToolDiagnostic = Omit<
+  ToolDiagnostic,
+  'nextAction' | 'affects'
+> & {
+  nextAction?: string;
+  /** Absent in a diagnostic persisted before producers declared impact; read as every axis. */
+  affects?: ToolDiagnostic['affects'];
+};
+
 /** Extracts the union of values exposed by a constant record. */
 type ValueOf<T> = T[keyof T];
 
@@ -149,6 +163,14 @@ export interface ReviewScopeFile extends ReviewChangedFile {
   repositoryRules: string[];
   /** Whether the current adapter snapshot reports this path as a public entry point. */
   publicEntryPoint?: boolean;
+  /**
+   * Digest of this file's frozen valid references (spec §9).
+   *
+   * Optional because a generation prepared before facts were frozen has none,
+   * and its `evidenceHash` keeps the tuple it was computed with — adding an
+   * element would make every in-flight review stale.
+   */
+  factsHash?: string;
 }
 
 /** Structure or verification violation normalized to a project-relative path. */
@@ -237,6 +259,8 @@ export interface ReviewEvidenceModel extends ReviewEvidenceStatuses {
   informational: readonly ReviewScopeInformational[];
   outOfScope: readonly ReviewScopeViolation[];
   diagnostics: readonly ToolDiagnostic[];
+  /** Rendered in their own section only when non-empty. */
+  outOfScopeDiagnostics: readonly ToolDiagnostic[];
 }
 
 /** Dirty paths grouped by class, with the disposition they add up to. */
@@ -312,6 +336,8 @@ export type ReviewStateInput =
       group: string;
       /** Required one-based reviewer round and forbidden for verification. */
       round?: number;
+      /** Generation the handoff was dispatched from; a replaced one is refused instead of merged. */
+      generationId?: string;
     }
   | {
       action: typeof REVIEW_STATE_ACTIONS.CLEANUP;
@@ -335,6 +361,8 @@ export type ResolvedReviewStateInput = ReviewStateInput & {
 export interface ReviewHandoff {
   /** Actor whose opinion is required next. */
   kind: 'review' | 'verify';
+  /** Generation this assignment belongs to; validate refuses an opinion returned against a later one. */
+  generationId?: string;
   /** Prepared group receiving the assignment. */
   group: string;
   /** One-based reviewer round; absent for verifier work. */
@@ -360,7 +388,37 @@ export interface ReviewHandoffPlan {
 }
 
 /** Persisted identity and lifecycle state for one branch review. */
+/** What a generation replaced, so a reader can tell a re-run from a first review. */
+export interface ReviewGenerationReplacement {
+  /** Diagnostic code or rule that made the prior generation unusable. */
+  reason: string;
+  /** Absolute path of the archived prior state bytes, when one was moved aside. */
+  archivePath?: string;
+  /** Generation this one supersedes, when the prior state could be read. */
+  priorGenerationId?: string;
+  /** Verdict the superseded generation published, when it had sealed one. */
+  priorVerdict?: 'APPROVED' | 'REQUEST_CHANGES' | 'INCONCLUSIVE';
+  /** Groups whose stored rounds were discarded and dispatched again. */
+  discardedGroups?: string[];
+  /** Replacements this one follows, newest first, bounded; `olderCount` stands for the rest. */
+  chain?: ReviewGenerationReplacementLink[];
+  /** Replacements older than the carried chain, when the chain was cut. */
+  olderCount?: number;
+}
+
+/** One earlier replacement, kept so a chain of re-runs still names the verdict it started from. */
+export interface ReviewGenerationReplacementLink {
+  /** Why that generation was replaced. */
+  reason: string;
+  /** Generation it replaced, when it was known. */
+  priorGenerationId?: string;
+  /** Verdict that generation had published, when it had one. */
+  priorVerdict?: 'APPROVED' | 'REQUEST_CHANGES' | 'INCONCLUSIVE';
+}
+
 export interface ReviewStateRecord extends ReviewEffortMetadata {
+  /** Set when prepare opened this generation instead of resuming an earlier one. */
+  replacedFrom?: ReviewGenerationReplacement;
   /** Observed-input protocol, absent in legacy sessions. */
   incremental?: ReviewIncrementalState;
   /** Isolated artifact epoch; absent only in legacy branch-root sessions. */
@@ -394,11 +452,37 @@ export interface ReviewStateRecord extends ReviewEffortMetadata {
   /** Deterministic groups and their validation handoffs. */
   groups: ReviewGroup[];
   /** Complete prepare-time evidence and roster snapshot. */
+  /**
+   * The side-table items the seal read, as it read them (spec §9).
+   *
+   * Written by a seal that had frozen facts to compare against, so a later
+   * checkpoint or re-seal answers from this record rather than from a live
+   * table that other flows keep changing. Absent before the first such seal.
+   */
+  factsAdjudications?: {
+    path: string;
+    kind: string;
+    reference: string;
+    resolvedPath: string;
+    state: string;
+    lineDigest: string;
+  }[];
+  /** Digest of that record, so a reader can tell it apart from another seal's. */
+  factsAdjudicationsDigest?: string;
   scope: {
     /** Prepared non-finding diagnostics, absent in legacy records. */
-    diagnostics?: ToolDiagnostic[];
+    diagnostics?: StoredToolDiagnostic[];
+    /** Diagnostics of unknown files outside the review scope; absent when none, and in legacy records, which keep every diagnostic in `diagnostics`. */
+    outOfScopeDiagnostics?: StoredToolDiagnostic[];
     /** FCA snapshot identity used to render evidence. */
     snapshotHash: string;
+    /**
+     * Digest of the facts this generation froze (spec §9).
+     *
+     * Absent in a generation prepared before facts were frozen, whose
+     * `evidenceHash` keeps the tuple it was computed with.
+     */
+    factsDigest?: string;
     /** Whether both structure and verification evidence are conclusive. */
     evidenceComplete: boolean;
     /** Prepare-time dirty-worktree classification. */
@@ -555,6 +639,14 @@ export interface ReviewPrepareData extends ReviewHandoffPlan {
   statePath: string;
   /** Absolute canonical evidence path. */
   evidencePath: string;
+  /**
+   * Absolute path of the generation's frozen facts.
+   *
+   * The valid references the review was judged on, kept beside the evidence so
+   * a verifier compares against what this generation saw rather than against a
+   * store that has moved on (spec §9).
+   */
+  factsPath: string;
   /** Absolute orchestration session path. */
   sessionPath: string;
   /** Machine-readable current-generation reuse decisions. */
@@ -869,6 +961,8 @@ export interface ReviewStatePaths {
   /** Canonical review blocker artifact path. */
   blockersPath: string;
   evidencePath: string;
+  /** Canonical frozen-facts artifact path of the generation (spec §9). */
+  factsPath: string;
   /** Canonical orchestration session artifact path. */
   sessionPath: string;
   /** Canonical pull-request comment artifact path. */

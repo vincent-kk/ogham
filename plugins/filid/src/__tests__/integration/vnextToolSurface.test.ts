@@ -17,6 +17,8 @@ import { buildReviewOpinion } from '../unit/mcp/reviewState/helpers/buildReviewO
 import { createReviewStateSealFixture } from '../unit/mcp/reviewState/helpers/createReviewStateSealFixture.js';
 import { readPreparedReviewState } from '../unit/mcp/reviewState/helpers/readPreparedReviewState.js';
 
+import { FACTS_OUTPUT_REQUIREMENT } from '../../constants/facts.js';
+
 import { connectTestClient } from './helpers/connectTestClient.js';
 
 const EXPECTED_TOOL_NAMES = [
@@ -24,6 +26,7 @@ const EXPECTED_TOOL_NAMES = [
   'fractal_inspect',
   'restructure',
   'review_state',
+  'facts',
 ] as const;
 
 const REMOVED_TOOL_NAMES = [
@@ -68,13 +71,10 @@ afterEach(() => {
 });
 
 describe('Filid 1.0 MCP tool surface', () => {
-  it.each([
-    'review-effort-locked',
-    'review-validation-policy-outdated',
-  ] as const)(
-    'returns %s without handoffs or a cached verdict in the MCP envelope',
+  it.each(['effort-argument', 'outdated-policy'] as const)(
+    'answers a %s prepare with a new generation in the MCP envelope',
     async (code) => {
-      const fixture = createReviewStateSealFixture();
+      const fixture = await createReviewStateSealFixture();
       let connection: Awaited<ReturnType<typeof connectTestClient>> | undefined;
       try {
         connection = await connectTestClient(createServer());
@@ -83,7 +83,7 @@ describe('Filid 1.0 MCP tool surface', () => {
           projectRoot: fixture.projectRoot,
           effort: 'medium',
         });
-        if (code === 'review-validation-policy-outdated') {
+        if (code === 'outdated-policy') {
           const state = readPreparedReviewState(prepared);
           const group = state.groups[0]!;
           writeFileSync(
@@ -115,7 +115,7 @@ describe('Filid 1.0 MCP tool surface', () => {
             effort: 'low',
           },
         });
-        expect(result.isError).toBe(true);
+        expect(result.isError ?? false).toBe(false);
         const content: unknown = Array.isArray(result.content)
           ? result.content[0]
           : null;
@@ -127,13 +127,19 @@ describe('Filid 1.0 MCP tool surface', () => {
         )
           throw new Error('Expected text error envelope');
         const envelope = JSON.parse(content.text);
-        expect(envelope).toMatchObject({
-          status: 'unsupported',
-          diagnostics: [{ code }],
-        });
-        expect(envelope.data).toBeUndefined();
-        expect(envelope.summary?.verdict).toBeUndefined();
-        expect(readFileSync(prepared.data.statePath, 'utf8')).toBe(stateBytes);
+        expect(envelope.status).toBe('ok');
+        expect(envelope.summary.generationId).not.toBe(
+          prepared.summary.generationId,
+        );
+        expect(
+          envelope.diagnostics.some(
+            ({ code: reported }: { code: string }) =>
+              reported === 'review-state-replaced',
+          ),
+        ).toBe(code === 'outdated-policy');
+        expect(readFileSync(prepared.data.statePath, 'utf8')).not.toBe(
+          stateBytes,
+        );
       } finally {
         await connection?.close();
         rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -145,7 +151,7 @@ describe('Filid 1.0 MCP tool surface', () => {
     },
   );
 
-  it('registers exactly the four action-dispatched tool names', () => {
+  it('registers exactly the five action-dispatched tool names', () => {
     const registered = collectRegisteredToolNames();
     expect(new Set(registered)).toEqual(new Set(EXPECTED_TOOL_NAMES));
     expect(registered).toHaveLength(EXPECTED_TOOL_NAMES.length);
@@ -160,6 +166,28 @@ describe('Filid 1.0 MCP tool surface', () => {
     const registered = new Set(collectRegisteredToolNames());
     for (const name of REMOVED_TOOL_NAMES)
       expect(registered.has(name)).toBe(false);
+  });
+
+  it('advertises the submission path rule facts actually enforces', async () => {
+    const connection = await connectTestClient(createServer());
+    try {
+      const tools = await connection.client.listTools();
+      const schema = tools.tools.find(({ name }) => name === 'facts')
+        ?.inputSchema as
+        | { properties?: { file?: { description?: string } } }
+        | undefined;
+      const description = schema?.properties?.file?.description ?? '';
+
+      // The guard canonicalises first and then judges the real location, so a
+      // symlinked ancestor is fine. Advertising the opposite sent callers to a
+      // directory they could not use; these two assertions are what keeps the
+      // advertised rule and FACTS_OUTPUT_REQUIREMENT from drifting apart again.
+      expect(description).toContain(FACTS_OUTPUT_REQUIREMENT);
+      expect(description).not.toMatch(/no component .* symbolic link/i);
+      expect(description).not.toMatch(/recommended output directory/i);
+    } finally {
+      await connection.close();
+    }
   });
 
   it('advertises literal cleanup confirmation for review_state', async () => {

@@ -13,8 +13,8 @@ import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Disposable repository for real prepare boundary checks. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -28,7 +28,7 @@ describe('prepare automatic review cost', () => {
   it.each([15, 16, 46, 64])(
     'selects effort after grouping %s reviewable files',
     async (count) => {
-      configureReviewGroups(fixture.projectRoot, count);
+      await configureReviewGroups(fixture.projectRoot, count);
       const prepared = await handleReviewState({
         action: 'prepare',
         projectRoot: fixture.projectRoot,
@@ -62,7 +62,7 @@ describe('prepare automatic review cost', () => {
   );
 
   it('rejects 65 groups at the default budget before dispatch', async () => {
-    configureReviewGroups(fixture.projectRoot, 65);
+    await configureReviewGroups(fixture.projectRoot, 65);
     await expect(
       handleReviewState({
         action: 'prepare',
@@ -73,7 +73,7 @@ describe('prepare automatic review cost', () => {
   });
 
   it('allows an explicit larger budget and fixed effort override', async () => {
-    configureReviewGroups(fixture.projectRoot, 65, {
+    await configureReviewGroups(fixture.projectRoot, 65, {
       maxGroups: 65,
       effort: 'low',
     });
@@ -94,7 +94,7 @@ describe('prepare automatic review cost', () => {
   });
 
   it('takes configured effort before the default and accepts explicit auto on a fresh run', async () => {
-    configureReviewGroups(fixture.projectRoot, 1, {
+    await configureReviewGroups(fixture.projectRoot, 1, {
       effort: 'high',
       autoLowEffortGroupThreshold: 1,
     });

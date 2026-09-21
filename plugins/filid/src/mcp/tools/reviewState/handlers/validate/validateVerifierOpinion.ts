@@ -2,7 +2,6 @@ import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 
 import {
   REVIEW_STATE_DIAGNOSTIC_CODES,
-  REVIEW_STATE_DIAGNOSTIC_MESSAGES,
   REVIEW_VALIDATE_KINDS,
 } from '../../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
@@ -87,8 +86,10 @@ export function validateVerifierOpinion(
       diagnostics: [
         {
           code: REVIEW_STATE_DIAGNOSTIC_CODES.OPINION_INVALID,
-          message: REVIEW_STATE_DIAGNOSTIC_MESSAGES.OPINION_INVALID,
+          message: `Verifier output for group ${group.id} is missing at ${verifyPath}.`,
           path: verifyPath,
+          affects: [],
+          nextAction: `Respawn this same handoff once so the actor writes ${verifyPath}. After a second failure mark the handoff exhausted and continue from data.next.`,
         },
       ],
       verifyPath,

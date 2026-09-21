@@ -21,10 +21,12 @@ import { recoverReviewGroups } from '../handoff/recoverReviewGroups.js';
 import { computeReviewSourceHash } from '../hash/computeReviewSourceHash.js';
 import { collectChangedScopeEvidence } from '../scope/collectChangedScopeEvidence.js';
 import { readChangeContext } from '../scope/readChangeContext.js';
+import { applyReviewContextNextAction } from '../scope/utils/applyReviewContextNextAction.js';
 import { assertReviewStatePaths } from '../state/assertReviewStatePaths.js';
 import { assertReviewValidationPolicy } from '../state/assertReviewValidationPolicy.js';
 import { clearStaleReviewArtifacts } from '../state/clearStaleReviewArtifacts.js';
 import { hasCompletePreparedArtifacts } from '../state/hasCompletePreparedArtifacts.js';
+import { readFrozenFacts } from '../state/readFrozenFacts.js';
 import { readReviewArtifactPresence } from '../state/readReviewArtifactPresence.js';
 import { readReviewState } from '../state/readReviewState.js';
 import { resolveReviewStatePaths } from '../state/resolveReviewStatePaths.js';
@@ -39,7 +41,6 @@ import type {
 import { writeReviewState } from '../state/writeReviewState.js';
 
 import { applyMissingTestRules } from './utils/applyMissingTestRules.js';
-import { assertPreparedEffortUnchanged } from './utils/assertPreparedEffortUnchanged.js';
 import { assertRenderedUnitsMatchGroups } from './utils/assertRenderedUnitsMatchGroups.js';
 import { assertReviewGroupBudget } from './utils/assertReviewGroupBudget.js';
 import { clearRecomputedReviewArtifacts } from './utils/clearRecomputedReviewArtifacts.js';
@@ -114,6 +115,7 @@ export async function prepareReviewArtifacts(
       throw new ToolDiagnosticError(
         blockers.diagnostic.code,
         blockers.diagnostic.message,
+        blockers.diagnostic.nextAction,
       );
     return createPreparedReviewPayload({
       action: input.action,
@@ -148,7 +150,16 @@ export async function prepareReviewArtifacts(
     settings.autoLowEffortGroupThreshold,
   );
   if (preserveLegacy) policy.effortReason = 'legacy-resume';
-  if (canResume) assertPreparedEffortUnchanged(existing, policy.effort);
+  if (
+    canResume &&
+    settings.effortSource !== 'argument' &&
+    policy.effort !== existing.effort
+  )
+    policy = selectReviewEffort(
+      existing.effort,
+      existing.groups.filter((group) => group.rounds > 0).length,
+      settings.autoLowEffortGroupThreshold,
+    );
   const metadataChanged =
     canResume &&
     (existing.effortMode !== policy.effortMode ||
@@ -180,7 +191,15 @@ export async function prepareReviewArtifacts(
     });
   }
 
-  if (canResume && existsSync(paths.evidencePath)) {
+  // The frozen facts are checked beside the evidence, not only in the fuller
+  // completeness check above: resuming on the evidence alone would leave a
+  // generation whose `facts.json` seal refuses, and the refusal's next action
+  // is this very call — prepare has to be what puts the file back (P5).
+  if (
+    canResume &&
+    existsSync(paths.evidencePath) &&
+    readFrozenFacts(paths.factsPath, existing).status !== 'unusable'
+  ) {
     const presence = readReviewArtifactPresence(paths, existing);
     const loadedRules = hasAllReviewBriefs(paths, existing)
       ? null
@@ -260,6 +279,7 @@ export async function prepareReviewArtifacts(
     projectRoot: input.projectRoot,
     source,
     evidencePath: paths.evidencePath,
+    factsPath: paths.factsPath,
     generatedPaths: settings.generatedPaths,
     lockfiles: settings.lockfiles,
     createdAt,
@@ -372,7 +392,11 @@ export async function prepareReviewArtifacts(
     groups,
     scope: {
       diagnostics: collected.evidenceDiagnostics,
+      ...(collected.outOfScopeDiagnostics.length > 0
+        ? { outOfScopeDiagnostics: collected.outOfScopeDiagnostics }
+        : {}),
       snapshotHash: collected.snapshotHash,
+      factsDigest: collected.factsDigest,
       evidenceComplete: collected.evidenceComplete,
       worktree: collected.worktree,
       dirtyPaths: collected.dirtyPaths,
@@ -395,7 +419,11 @@ export async function prepareReviewArtifacts(
     paths,
     status: TOOL_STATUSES.OK,
     state,
-    diagnostics: [...collected.diagnostics, ...context.diagnostics],
+    diagnostics: [
+      ...collected.diagnostics.map(applyReviewContextNextAction),
+      ...context.diagnostics,
+      ...collected.outsideFactsScope,
+    ],
     concurrency: settings.concurrency,
     handoff: planNextHandoffs({
       state,

@@ -7,9 +7,12 @@ import {
   REVIEW_LOCKFILE_BASENAMES,
   REVIEW_MAX_GROUPS,
   REVIEW_PLAN_CHURN_LIMIT,
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
 } from '../../../../../constants/reviewState.js';
 import { loadConfig } from '../../../../../core/index.js';
 import { resolvePluginRoot } from '../../../../../core/infra/index.js';
+import { ToolDiagnosticError } from '../../../../errors/toolDiagnosticError.js';
 import type { ReviewStateInput } from '../../state/reviewStateTypes.js';
 
 /** Prepare input narrowed from the public review-state action union. */
@@ -38,12 +41,16 @@ type PrepareSettingsInput =
 export function resolvePrepareSettings(input: PrepareSettingsInput) {
   const loaded = loadConfig(input.projectRoot);
   const validationFailure = loaded.warnings.find(
-    (warning) =>
-      warning.startsWith('invalid value at review') ||
-      warning.startsWith('config validation failed at review'),
-  );
+    ({ message }) =>
+      message.startsWith('invalid value at review') ||
+      message.startsWith('config validation failed at review'),
+  )?.message;
   if (validationFailure)
-    throw new Error(`config validation failed: ${validationFailure}`);
+    throw new ToolDiagnosticError(
+      REVIEW_STATE_DIAGNOSTIC_CODES.CONFIG_INVALID,
+      `config validation failed: ${validationFailure}`,
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CONFIG_INVALID,
+    );
   const config = loaded.config;
   const review = config?.review;
   const requestedEffort = 'effort' in input ? input.effort : undefined;
@@ -52,6 +59,12 @@ export function resolvePrepareSettings(input: PrepareSettingsInput) {
     effortMode,
     effortExplicit:
       requestedEffort !== undefined || review?.effort !== undefined,
+    effortSource:
+      requestedEffort !== undefined
+        ? ('argument' as const)
+        : review?.effort !== undefined
+          ? ('config' as const)
+          : ('default' as const),
     autoLowEffortGroupThreshold:
       review?.autoLowEffortGroupThreshold ??
       REVIEW_AUTO_LOW_EFFORT_GROUP_THRESHOLD,

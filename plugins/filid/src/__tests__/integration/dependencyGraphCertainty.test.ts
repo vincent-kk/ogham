@@ -8,6 +8,8 @@ import { createAdapterRegistry } from '../../adapters/index.js';
 import { createDefaultConfig } from '../../core/infra/configLoader/index.js';
 import { createProjectSnapshot } from '../../core/projectSnapshot/index.js';
 
+import { seedFacts } from './helpers/seedFacts.js';
+
 let root: string;
 
 beforeEach(() => {
@@ -25,6 +27,7 @@ describe('snapshot DAG certainty and dependency diagnostics', () => {
       sourceFile,
       "import './missing.helpers'; it('checks feature', () => {});",
     );
+    await seedFacts(root);
 
     const snapshot = await createProjectSnapshot(
       root,
@@ -46,12 +49,36 @@ describe('snapshot DAG certainty and dependency diagnostics', () => {
     expect(snapshot.dependencyGraph.cycles).toEqual([]);
   });
 
+  it('answers a project with no facts with unknown files, not an empty pass', async () => {
+    const sourceFile = join(root, '__tests__', 'feature.test.ts');
+    writeFileSync(
+      sourceFile,
+      "import './missing.helpers'; it('checks feature', () => {});",
+    );
+
+    const snapshot = await createProjectSnapshot(
+      root,
+      createAdapterRegistry(),
+      createDefaultConfig(),
+    );
+
+    expect(snapshot.dependencyGraph.certainty).toBe('indeterminate');
+    expect(snapshot.dependencyGraph.unknownFiles).toEqual([
+      { path: '__tests__/feature.test.ts', causes: ['facts-missing'] },
+      { path: 'index.ts', causes: ['facts-missing'] },
+    ]);
+    expect(snapshot.diagnostics).not.toContainEqual(
+      expect.objectContaining({ code: 'unresolved-local-dependency' }),
+    );
+  });
+
   it('keeps unclassified test-looking production imports indeterminate', async () => {
     const sourceFile = join(root, '__tests__', 'feature.test.ts');
     writeFileSync(
       sourceFile,
       "import './missing.helpers'; export const value = true;",
     );
+    await seedFacts(root);
 
     const snapshot = await createProjectSnapshot(
       root,

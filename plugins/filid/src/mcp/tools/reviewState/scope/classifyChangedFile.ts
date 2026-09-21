@@ -5,14 +5,13 @@ import {
   REVIEW_SKIP_REASONS,
 } from '../../../../constants/reviewState.js';
 import { resolveOwningFractal } from '../../../../core/index.js';
+import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import { resolveChangedFileRole } from '../select/resolveChangedFileRole.js';
 import type {
   ClassifyChangedFileOptions,
   ReviewChangedFile,
   ReviewScopeFile,
 } from '../state/reviewStateTypes.js';
-
-import { toProjectRelativePath } from './utils/toProjectRelativePath.js';
 
 /**
  * Enrich one committed roster entry with deterministic role and owner facts.

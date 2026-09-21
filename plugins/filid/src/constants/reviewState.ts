@@ -47,6 +47,12 @@ export const REVIEW_STATE_GIT_ARGUMENTS = {
   VERIFY_REF: ['rev-parse', '--verify', '--quiet'],
 } as const;
 
+/** Review key for a detached HEAD without branchName: the prefix and the length of the HEAD commit id it keeps. */
+export const REVIEW_DETACHED_BRANCH_KEY = {
+  PREFIX: 'detached-',
+  COMMIT_ID_LENGTH: 12,
+} as const;
+
 /** Supported operations on the single `review_state` tool. */
 export const REVIEW_STATE_ACTIONS = {
   PREPARE: 'prepare',
@@ -290,6 +296,7 @@ export const REVIEW_STATE_DISPOSITIONS = {
 export const REVIEW_STATE_DIRECTORY_NAMES = {
   FILID: '.filid',
   REVIEW: 'review',
+  GENERATIONS: 'generations',
   OPINIONS: 'opinions',
   DIFFS: 'diffs',
   BRIEFS: 'briefs',
@@ -303,6 +310,7 @@ export const REVIEW_STATE_FILE_NAMES = {
   BLOCKERS: 'review-blockers.md',
   PR_COMMENT: 'pr-comment.md',
   EVIDENCE: 'evidence.md',
+  FACTS: 'facts.json',
   SESSION: 'session.md',
   VERIFICATION: 'verification.md',
   VERIFICATION_METRICS_PARTIAL: 'verification.metrics-half.partial.md',
@@ -338,15 +346,29 @@ export const REVIEW_STATE_STALE_ARTIFACT_DIRECTORY_NAMES = [
   REVIEW_STATE_DIRECTORY_NAMES.BRIEFS,
 ] as const;
 
+/** Name prefix of the archived states prepare leaves beside a replaced state file. */
+export const REVIEW_STATE_REPLACED_FILE_PREFIX = 'replaced-state-';
+
+/**
+ * What every action says when the stored review state cannot be used: one
+ * prepare without force replaces it, and a repeat inside one run ends the run.
+ */
+/** How every "call prepare once" sentence ends: a repeat inside one run ends the run. */
+export const PREPARE_ONCE_REPEAT_TAIL =
+  'If the same diagnostic returns in this run, end without a terminal verdict and record it in the report as a filid defect.';
+
+export const PREPARE_ONCE_NEXT_ACTION = `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it archives this state and starts a new review generation. ${PREPARE_ONCE_REPEAT_TAIL}`;
+
 /** Stable machine-readable diagnostic codes returned by review-state handlers. */
 export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   /** A prepared assignment cannot change its effective review effort. */
   EFFORT_LOCKED: 'review-effort-locked',
+  /** Prepare opened a new generation because the requested effort differs from the prepared one. */
+  EFFORT_CHANGED: 'review-effort-changed',
   /** Persisted validation belongs to an unsupported trust policy. */
   VALIDATION_POLICY_OUTDATED: 'review-validation-policy-outdated',
   /** Configured actor-group budget would be exceeded by this review. */
   GROUP_BUDGET_EXCEEDED: 'review-group-budget-exceeded',
-  BRANCH_UNRESOLVED: 'review-branch-unresolved',
   BASE_REF_UNRESOLVED: 'review-base-ref-unresolved',
   CHANGE_CONTEXT_TRUNCATED: 'review-change-context-truncated',
   /** Caller context did not contain any configured PR template section. */
@@ -367,7 +389,43 @@ export const REVIEW_STATE_DIAGNOSTIC_CODES = {
   OPINIONS_MISSING: 'review-opinions-missing',
   OPINION_INVALID: 'review-opinion-invalid',
   SESSION_MISSING: 'review-session-missing',
+  /** A generation's frozen facts are gone or no longer match their digest. */
+  FACTS_FROZEN_UNUSABLE: 'review-facts-frozen-unusable',
   RULE_MAP_MISSING: 'review-rule-map-missing',
+  /** Legacy or unreadable-schema state without explicit force. */
+  INCREMENTAL_BOOTSTRAP_REQUIRED: 'review-incremental-bootstrap-required',
+  /** Local review inputs (instructions, rules, actor methods) changed since prepare. */
+  INPUTS_STALE: 'review-inputs-stale',
+  /** A file in the review scope has no facts the evidence can be drawn from. */
+  FACTS_INCOMPLETE: 'facts-incomplete',
+  /** Review-scope files the declared facts scope leaves unread. */
+  FILES_OUTSIDE_FACTS_SCOPE: 'review-files-outside-facts-scope',
+  /** The store disputes a reference this generation was judged on. */
+  FACTS_DISCREPANCY: 'facts-discrepancy',
+  /** Repository `.filid/review-rules.json` content or schema is invalid. */
+  REPOSITORY_RULES_INVALID: 'review-repository-rules-invalid',
+  /** A repository rule declares a body file that does not exist. */
+  REPOSITORY_RULE_BODY_MISSING: 'review-repository-rule-body-missing',
+  /** Installed built-in cross-review rule map is malformed. */
+  RULE_MAP_INVALID: 'review-rule-map-invalid',
+  /** A `review.*` config value fails schema validation. */
+  CONFIG_INVALID: 'review-config-invalid',
+  /** Persisted state JSON parses but fails the record schema. */
+  STATE_INVALID: 'review-state-invalid',
+  /** Prepare archived an unusable state and started a new generation. */
+  STATE_REPLACED: 'review-state-replaced',
+  /** An unusable state could not be moved aside, so prepare wrote nothing. */
+  STATE_ARCHIVE_FAILED: 'review-state-archive-failed',
+  /** The opinion belongs to a generation a later prepare replaced. */
+  GENERATION_SUPERSEDED: 'review-generation-superseded',
+  /** `changeContextPath` does not identify a readable regular file. */
+  CHANGE_CONTEXT_PATH_INVALID: 'review-change-context-path-invalid',
+  /** `changeContextPath` file exceeds the change-context byte limit. */
+  CHANGE_CONTEXT_TOO_LARGE: 'review-change-context-too-large',
+  /** `branchName` is empty, absolute, or contains a traversal segment. */
+  BRANCH_NAME_INVALID: 'review-branch-name-invalid',
+  /** `cleanup` was called without `confirm: true`. */
+  CLEANUP_CONFIRM_REQUIRED: 'review-cleanup-confirm-required',
 } as const;
 
 /** Human-readable counterparts for review-state diagnostic codes. */
@@ -376,7 +434,7 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   SOURCE_HASH_STALE:
     'Committed source content no longer matches the prepared review state.',
   WORKTREE_STALE:
-    'The worktree no longer matches the sealed review. Run prepare to refresh the generation.',
+    'Uncommitted worktree paths changed after this review was sealed, so the sealed verdict no longer describes the worktree.',
   REPORT_MISSING: 'The canonical review report is missing.',
   BLOCKERS_MISSING: 'The canonical review blocker report is missing.',
   BLOCKERS_INVALID:
@@ -386,7 +444,98 @@ export const REVIEW_STATE_DIAGNOSTIC_MESSAGES = {
   OPINIONS_MISSING: 'No merged review opinions exist for this review state.',
   OPINION_INVALID: 'The review opinion is missing or invalid.',
   SESSION_MISSING: 'The prepared review session artifact is missing.',
+  FACTS_FROZEN_UNUSABLE:
+    'The facts this generation recorded a digest for are not the facts on disk.',
   RULE_MAP_MISSING: 'The cross-review rule map is missing.',
+} as const;
+
+/**
+ * Next action attached where the calling action does not change the wording
+ * (`REVIEW_STATE_DIAGNOSTIC_CODES` key -> nextAction). Codes whose wording
+ * depends on the calling action or on values only the producer knows
+ * (`STATE_MISSING`, `STATE_SCHEMA_MISMATCH`, `SOURCE_HASH_STALE`,
+ * `REPORT_MISSING`, `OPINION_INVALID`, `INPUTS_STALE`, `WORKTREE_STALE`,
+ * `SESSION_MISSING`, `OPINIONS_MISSING`, `EFFORT_LOCKED`,
+ * `REPOSITORY_RULE_BODY_MISSING`) are built at their producer site instead and
+ * are not listed here. `PLUGIN_ROOT_UNAVAILABLE` is not a code:
+ * the rule-map and actor-method codes share it when no plugin root resolves.
+ */
+export const REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS = {
+  STATE_ARCHIVE_FAILED:
+    'Nothing was written. Ask the user to make the named review directory writable, or to move it aside, then call prepare again; filid cannot change file permissions.',
+  GENERATION_SUPERSEDED:
+    'Do not merge this opinion: discard it, because a later prepare replaced the generation it was written for. Continue from the handoffs the latest prepare or checkpoint returned, and record the discarded assignment in the report.',
+  WORKTREE_STALE:
+    'Report that the worktree changed after this verdict was sealed: the verdict answers for the committed source it names, and the uncommitted changes are outside it. Commit them and run /filid:cross-review again to have them reviewed.',
+  EFFORT_LOCKED:
+    'Report that the prepared review keeps its effort and that the configured effort applies to the next review; to review at another effort now, call prepare with that effort argument.',
+  VALIDATION_POLICY_OUTDATED: PREPARE_ONCE_NEXT_ACTION,
+  FACTS_DISCREPANCY_UNSETTLED:
+    'Do not publish a verdict: a reviewed file holds a reported reference this generation was not judged on, and its side-table item is still open. Read the line this diagnostic names and call facts adjudicate for that item — adopt it when the reference is real, or dismiss it with a reason, which a second actor, a separate subagent the skill stands up, then judges independently. If the stored record is the wrong one, submit that file again with the tool that reads it correctly. Then call seal again. Whether that seal publishes depends on where the settlement leaves the file\'s valid references, not on which way it was decided: a settlement that leaves them as this generation froze them seals, and one that adds or removes an edge answers with this same code and a next action asking for one prepare, which reviews only the files whose references changed. Follow whichever of the two comes back.',
+  FACTS_DISCREPANCY_FROZEN_EDGES_CHANGED:
+    'Do not publish a verdict: a reviewed file\'s valid references are no longer the ones this generation froze — an edge has been added to them, or one it was judged on is gone. Either way the review answered for a set of edges that is not the current one. Call prepare once with the same arguments and without force — only the files whose valid references changed are reviewed again — then finish those and seal.',
+  STATE_MISSING: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it prepares and reviews this branch from the start. ${PREPARE_ONCE_REPEAT_TAIL}`,
+  SOURCE_HASH_STALE: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it prepares the current commits and reuses validated opinions for unchanged files. ${PREPARE_ONCE_REPEAT_TAIL}`,
+  REPORT_MISSING: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it opens a generation from the validated opinions, so seal restores the report without new reviewer work. ${PREPARE_ONCE_REPEAT_TAIL}`,
+  SESSION_MISSING: `Do not publish a verdict. After every in-flight actor finishes, call prepare once with the same arguments and without force: it restores the session artifact and keeps validated progress. ${PREPARE_ONCE_REPEAT_TAIL}`,
+  OPINIONS_MISSING: `Do not publish a verdict: no reviewable group has a merged opinion. After every in-flight actor finishes, call prepare once with the same arguments and without force and dispatch the handoffs it returns. ${PREPARE_ONCE_REPEAT_TAIL}`,
+  FACTS_FROZEN_UNUSABLE: `Do not publish a verdict. Call prepare once with the same arguments and without force: a generation whose frozen facts do not match its digest is incomplete, so prepare freezes them again and keeps validated progress. ${PREPARE_ONCE_REPEAT_TAIL}`,
+  FILES_OUTSIDE_FACTS_SCOPE:
+    'Nothing is blocked: the review judged these files by every rule but the reference-based ones, which read facts. To have their references judged too, add their paths to facts.covers in the project .filid/config.json — an edit that belongs outside a review, because it changes the worktree a review is judging — then run the facts bootstrap (skills/.shared/facts-bootstrap.md) and call prepare again. Leaving the scope as it is remains a valid choice; this line only records what the current scope left unread.',
+  FACTS_INCOMPLETE:
+    'Do not review this branch yet: filid holds no settled facts for the files this message names, so the review would be judged on references nobody has confirmed. Run the facts bootstrap (skills/.shared/facts-bootstrap.md) and route each file by where facts status puts it, not by its state alone — re-extracting answers missing and needsResolution, and nothing else. A file in missing or needsResolution is extracted with the program named in the output requirement and submitted. A file in rejected follows that item\'s own nextAction. A file in unadjudicated is settled with facts adjudicate — a dismissal is confirmed by a second actor, which the skill stands up as a separate subagent. A file in pendingAttestations or indeterminate needs an attested record that a second actor confirms. A file in awaitingComparison lost its judgements to a discard: extract it with a program whose provenance.tool differs from that entry\'s storedTool, or read and submit it attested, then give that candidate to facts compare with no generationId. A file held by a facts-judgements-unreadable diagnostic is in no list at all, because what did not read is what would have named it — that diagnostic names the shard, and facts discard-damaged with that name moves it. Those lists and that diagnostic account for every file reported uncertain. Then call prepare again with the same arguments and without force.',
+  RULE_PATH_ESCAPE:
+    'Ask the user to make .filid/review-rules.json and its rule files regular files inside the repository. Then call review_state prepare again.',
+  ACTOR_METHOD_MISSING:
+    'Stop without dispatching actors or publishing a verdict. Ask the user to reinstall or update the filid plugin, whose installed cross-review actor files are incomplete, then retry the same call.',
+  RULE_MAP_MISSING:
+    'Stop without dispatching actors or publishing a verdict. Ask the user to reinstall or update the filid plugin, whose installed cross-review rule files are incomplete, then retry the same call.',
+  PLUGIN_ROOT_UNAVAILABLE:
+    'Stop without dispatching actors or publishing a verdict. Ask the user to reinstall or re-enable the filid plugin and restart the session so its MCP server receives the plugin root, then retry the same call.',
+  INCREMENTAL_BOOTSTRAP_REQUIRED: PREPARE_ONCE_NEXT_ACTION,
+  STATE_REPLACED:
+    'Report that the unusable review state was archived beside the named path and that no prior opinion was reused, then continue with this prepared generation.',
+  BLOCKERS_MISSING: PREPARE_ONCE_NEXT_ACTION,
+  BLOCKERS_INVALID: PREPARE_ONCE_NEXT_ACTION,
+  GROUP_BUDGET_EXCEEDED:
+    "Stop without dispatching actors and ask the user to split the PR or raise review.maxGroups in .filid/config.json; unset, the limit is filid's own default of 64 rather than a number the user chose. After the user changes grouping limits, call prepare with force: true only if the user requests it; force never bypasses review.maxGroups.",
+  BASE_REF_UNRESOLVED:
+    'Run git fetch origin to refresh origin refs, then retry the same review_state call. If no base resolves, ask the user for an explicit base ref; never substitute the repository default.',
+  HANDOFF_INVALID:
+    "Continue the review; reviewers see the invalid block as an indeterminate FCA handoff finding. Report that the PR body's handoff block is invalid and that /filid:pull-request regenerates it; a corrected PR body reaches briefs only through a later --force run.",
+  CHANGE_CONTEXT_UNTEMPLATED:
+    'Continue the review; no action is required. If the PR body should follow the filid template, suggest /filid:pull-request to the user; the new body reaches briefs only through a later --force run.',
+  CHANGE_CONTEXT_TRUNCATED:
+    "Continue the review; no action is required. Report that the PR body's Summary, Contract, and Review notes sections were truncated for the reviewers; a shorter body reaches briefs only through a later --force run.",
+  REPOSITORY_RULES_INVALID:
+    'Ask the user to fix .filid/review-rules.json as the message describes. Then call review_state prepare again; while it is invalid, prepare, checkpoint, validate, and seal all fail.',
+  RULE_MAP_INVALID:
+    'Stop without dispatching actors or publishing a verdict. Ask the user to reinstall or update the filid plugin, whose installed cross-review rules.json is malformed, then retry the same call.',
+  CONFIG_INVALID:
+    'Ask the user to correct the named review setting in the filid config, then retry the same review_state call.',
+  STATE_INVALID: PREPARE_ONCE_NEXT_ACTION,
+  CHANGE_CONTEXT_PATH_INVALID:
+    'Pass an absolute path to a readable regular file for changeContextPath, then call again.',
+  CHANGE_CONTEXT_TOO_LARGE:
+    'Shorten the file at changeContextPath below the change context file limit, or pass changeContext inline instead, then call again.',
+  BRANCH_NAME_INVALID:
+    'Pass a non-empty branchName with no path separator, traversal segment, or control character, then call again.',
+  CLEANUP_CONFIRM_REQUIRED:
+    "Pass confirm: true to cleanup only after the user explicitly agrees to discard this branch's review artifacts, then call again.",
+} as const;
+
+/** Sentence prefixed to a shared snapshot diagnostic's nextAction during a review. */
+export const REVIEW_CONTEXT_NEXT_ACTIONS = {
+  DOCUMENT_FINDING:
+    'Continue the review; this is an FCA document finding the review evaluates as a candidate, not missing evidence.',
+  EVIDENCE:
+    'Continue the review; seal carries this diagnostic into the review blockers with its own next action. Do not report the review as complete while it remains.',
+  CONFIG_WARNING:
+    'Continue the review; dropping this key changes no analysis conclusion. Report that the named key in the filid config is invalid and was dropped, so it should be fixed or removed; the review used the remaining valid settings.',
+  CONFIG_WARNING_BLOCKING:
+    'Continue the review; the dropped entry may have tightened the analysis, so seal carries this diagnostic into the review blockers with its own next action. Do not report the review as complete while it remains; ask the user to fix or remove the named key in the filid config.',
+  CONFIG_MIGRATION_REQUIRED:
+    'Continue the review. Report that the filid config is still v1; project_setup init outside this review writes the converted v2 configuration.',
 } as const;
 
 /** Schema version rendered in canonical cross-review evidence. */

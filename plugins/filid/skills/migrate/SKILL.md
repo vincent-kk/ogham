@@ -4,7 +4,7 @@ user-invocable: true
 disable-model-invocation: true
 description: 'Migrate legacy CLAUDE.md/SPEC.md names to INTENT.md/DETAIL.md via a portable dry-run-first script with post-validation.'
 argument-hint: '[path] [--execute] [--auto-commit]'
-version: '2.1.0'
+version: '2.1.1'
 complexity: simple
 plugin: filid
 ---
@@ -76,7 +76,7 @@ mcp__plugin_filid_tools__fractal_inspect({
 
 Read the findings from the returned result or, when the payload exceeds the inline envelope budget, from its artifact — a whole-project migration can push it over. An absent inline `data` is not an empty finding set.
 
-Preserve diagnostics and findings in the report. A non-`ok` result means the migration ran but compliance is not verified.
+Preserve diagnostics and findings in the report with their `nextAction` or `suggestion`. A non-`ok` result means the migration ran but compliance is not verified.
 
 ## Options
 

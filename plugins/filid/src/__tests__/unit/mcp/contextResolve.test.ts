@@ -21,15 +21,21 @@ const OWNER_DIAGNOSTIC: ToolDiagnostic = {
   code: 'owner-evidence',
   message: 'evidence inside the resolved owner',
   path: SOURCE_PATH,
+  affects: ['dependencies', 'boundaries', 'verification'],
+  nextAction: 'test next action',
 };
 const SIBLING_DIAGNOSTIC: ToolDiagnostic = {
   code: 'sibling-evidence',
   message: 'evidence in an unrelated subtree',
   path: SIBLING_SOURCE_PATH,
+  affects: ['dependencies', 'boundaries', 'verification'],
+  nextAction: 'test next action',
 };
 const GLOBAL_DIAGNOSTIC: ToolDiagnostic = {
   code: 'config-warning',
   message: 'evidence with no path',
+  affects: [],
+  nextAction: 'test next action',
 };
 
 function fractalNode(
@@ -92,6 +98,7 @@ const SNAPSHOT: ProjectSnapshot = {
     nodePaths: [PROJECT_ROOT, FEATURE_ROOT, SIBLING_ROOT],
     edges: [],
     cycles: [],
+    unknownFiles: [],
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture-adapter'],
@@ -102,6 +109,8 @@ const SNAPSHOT: ProjectSnapshot = {
   },
   legacyCriteriaLedger: null,
   diagnostics: [],
+  normalizedFacts: [],
+    filesOutsideFactsScope: 0,
   collectedAxes: ALL_SNAPSHOT_AXES,
   createdAt: '2026-07-29T00:00:00.000Z',
 };

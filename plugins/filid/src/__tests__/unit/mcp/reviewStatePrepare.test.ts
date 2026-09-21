@@ -19,10 +19,12 @@ import {
 } from '../../../constants/reviewState.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
 
+import { prepareWithFacts } from './reviewState/helpers/prepareWithFacts.js';
 import { readReviewStateFixtureJson } from './reviewState/helpers/readReviewStateFixtureJson.js';
 import { resolveReviewArtifactFromDirectory } from './reviewState/helpers/resolveReviewArtifactFromDirectory.js';
 import { writeReviewActorMethods } from './reviewState/helpers/writeReviewActorMethods.js';
 import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewStateFixtureFile.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 /** Temporary repository exercised by the prepare contract tests. */
 let projectRoot: string;
@@ -63,7 +65,7 @@ function writeProjectFile(relativePath: string, content: string): void {
   writeFileAtomicallySync(filePath, content);
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   originalPluginRoot = process.env.CLAUDE_PLUGIN_ROOT;
   fixturePluginRoot = mkdtempSync(portableJoin(tmp(), 'filid-review-plugin-'));
   process.env.CLAUDE_PLUGIN_ROOT = fixturePluginRoot;
@@ -148,6 +150,7 @@ beforeEach(() => {
   );
   git(['add', '--all']);
   git(['commit', '-m', 'feature prepare']);
+  await seedFacts(projectRoot);
 });
 
 afterEach(() => {
@@ -159,7 +162,7 @@ afterEach(() => {
 
 describe('review_state prepare v7', () => {
   it('creates evidence, session, diffs, briefs, skeletons, groups, and state', async () => {
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -210,6 +213,7 @@ describe('review_state prepare v7', () => {
         'projectRoot',
         'branchName',
         'baseRef',
+        'factsPath',
         'next',
         'sealReady',
         'candidates',
@@ -284,7 +288,7 @@ describe('review_state prepare v7', () => {
       })}\n`,
     );
     await expect(
-      handleReviewState({
+      prepareWithFacts({
         action: REVIEW_STATE_ACTIONS.PREPARE,
         projectRoot,
         branchName: BRANCH,
@@ -294,7 +298,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('keeps skipped roster entries visible while excluding them from units', async () => {
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -328,7 +332,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('restores missing artifacts while preserving existing opinions and semantic state', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -349,7 +353,7 @@ describe('review_state prepare v7', () => {
     rmSync(prepared.data.sessionPath ?? '');
     const stateBefore = readUtf8FileIfExistsSync(prepared.data.statePath);
 
-    const resumed = await handleReviewState({
+    const resumed = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -368,7 +372,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('rejects reuse when assigned rule sources cannot be observed', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -377,7 +381,7 @@ describe('review_state prepare v7', () => {
     rmSync(fixturePluginRoot, { recursive: true, force: true });
 
     await expect(
-      handleReviewState({
+      prepareWithFacts({
         action: REVIEW_STATE_ACTIONS.PREPARE,
         projectRoot,
         branchName: BRANCH,
@@ -388,7 +392,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('preserves state when missing-artifact recovery cannot observe rules', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -398,7 +402,7 @@ describe('review_state prepare v7', () => {
     rmSync(fixturePluginRoot, { recursive: true, force: true });
 
     await expect(
-      handleReviewState({
+      prepareWithFacts({
         action: REVIEW_STATE_ACTIONS.PREPARE,
         projectRoot,
         branchName: BRANCH,
@@ -409,7 +413,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('recomputes missing evidence without overwriting existing opinions', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -422,7 +426,7 @@ describe('review_state prepare v7', () => {
     writeFileAtomicallySync(opinionPath, '{"kept":true}\n');
     rmSync(prepared.data.evidencePath ?? '');
 
-    const resumed = await handleReviewState({
+    const resumed = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -437,7 +441,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('force starts a new generation and preserves previous opinions', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -449,7 +453,7 @@ describe('review_state prepare v7', () => {
     );
     writeFileAtomicallySync(staleOpinion, '{}\n');
 
-    const forced = await handleReviewState({
+    const forced = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -463,7 +467,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('preserves orphan history when no canonical state exists', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -476,7 +480,7 @@ describe('review_state prepare v7', () => {
     writeFileAtomicallySync(orphan, '{}\n');
     rmSync(prepared.data.statePath);
 
-    const refreshed = await handleReviewState({
+    const refreshed = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -491,7 +495,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('explicitly bootstraps an obsolete state while preserving its artifacts', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -519,7 +523,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('restores a sealed matching review without rewriting artifacts', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -547,7 +551,7 @@ describe('review_state prepare v7', () => {
       'session sentinel\n',
     );
 
-    const cached = await handleReviewState({
+    const cached = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -567,7 +571,7 @@ describe('review_state prepare v7', () => {
   });
 
   it('does not cache a sealed state whose report is missing', async () => {
-    const prepared = await handleReviewState({
+    const prepared = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -584,7 +588,7 @@ describe('review_state prepare v7', () => {
       })}\n`,
     );
 
-    const refreshed = await handleReviewState({
+    const refreshed = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -599,8 +603,8 @@ describe('review_state prepare v7', () => {
     );
   });
 
-  it('rejects effort changes and resumes with the prepared effort', async () => {
-    await handleReviewState({
+  it('resumes a prepared review with its own effort', async () => {
+    await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -608,16 +612,7 @@ describe('review_state prepare v7', () => {
       effort: 'low',
     });
 
-    await expect(
-      handleReviewState({
-        action: REVIEW_STATE_ACTIONS.PREPARE,
-        projectRoot,
-        branchName: BRANCH,
-        baseRef: 'main',
-        effort: 'high',
-      }),
-    ).rejects.toMatchObject({ code: 'review-effort-locked' });
-    const changed = await handleReviewState({
+    const changed = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -650,7 +645,7 @@ describe('review_state prepare v7', () => {
     git(['add', '--all']);
     git(['commit', '-m', 'candidate-only change']);
 
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -696,7 +691,7 @@ describe('review_state prepare v7', () => {
     git(['add', '--all']);
     git(['commit', '-m', 'same basename sources']);
 
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,
@@ -714,7 +709,7 @@ describe('review_state prepare v7', () => {
   it('reports generated-only dirt while still creating review artifacts', async () => {
     writeProjectFile('generated/untracked.js', 'generated dirt\n');
 
-    const result = await handleReviewState({
+    const result = await prepareWithFacts({
       action: REVIEW_STATE_ACTIONS.PREPARE,
       projectRoot,
       branchName: BRANCH,

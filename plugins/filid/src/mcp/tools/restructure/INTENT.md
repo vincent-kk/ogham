@@ -17,6 +17,7 @@ read-only placement plan 생성과 외부 실행 전·후 검증을 `restructure
 - plan ID, snapshot hash, placement evidence와 persistence 의미 보존
 - precondition과 postcondition에서 동일한 plan schema 사용
 - plan validation summary에는 canonical 전체 scope 보고
+- 모든 action summary에 다음 단계 `nextAction`을 싣고, plan artifact 오류에는 코드와 `nextAction`을 싣기
 
 ### Ask first
 

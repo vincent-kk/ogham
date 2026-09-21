@@ -10,7 +10,10 @@ import type { VerifyOpinion } from '../../opinion/verifyOpinionTypes.js';
 import { resolveReviewArtifactPath } from '../../state/resolveReviewArtifactPath.js';
 import { resolveReviewOpinionSourceHash } from '../../state/resolveReviewOpinionSourceHash.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
-import type { ReviewStatePaths } from '../../state/reviewStateTypes.js';
+import type {
+  ReviewStatePaths,
+  StoredToolDiagnostic,
+} from '../../state/reviewStateTypes.js';
 import type {
   ReviewTrustIssue,
   SealGroupEvidence,
@@ -28,7 +31,7 @@ export function loadSealGroupEvidence(
   paths: ReviewStatePaths,
   groups: readonly ReviewGroup[],
   sourceHash: string,
-  diagnostics?: import('../../../../../types/toolEnvelope.js').ToolDiagnostic[],
+  diagnostics?: StoredToolDiagnostic[],
 ): SealGroupEvidence[] {
   return groups.map((group) => {
     const issueSet = new Set<ReviewTrustIssue>();

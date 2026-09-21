@@ -1,3 +1,4 @@
+import type { NormalizedFileFacts } from '../../../../types/fractal.js';
 import type { RuleScope } from '../../../../types/rules.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
 import type {
@@ -18,6 +19,8 @@ export interface CollectChangedScopeEvidenceInput {
   source: ReviewSourceSnapshot;
   /** Canonical evidence artifact path contained by the review directory. */
   evidencePath: string;
+  /** Canonical frozen-facts artifact path contained by the review directory. */
+  factsPath: string;
   /** Effective generated-path patterns from validated configuration. */
   generatedPaths: readonly string[];
   /** Effective lockfile basenames from validated configuration or defaults. */
@@ -30,8 +33,20 @@ export interface CollectChangedScopeEvidenceInput {
 export interface CollectedChangedScopeEvidence {
   /** Normalized non-finding diagnostics persisted with the prepared snapshot. */
   evidenceDiagnostics: ToolDiagnostic[];
+  /** Normalized non-finding diagnostics of unknown files outside the review scope; they block nothing. */
+  outOfScopeDiagnostics: ToolDiagnostic[];
+  /**
+   * The one report naming review-scope files the declared facts scope drops.
+   *
+   * Empty when it drops none. Carried apart from the scope diagnostics because
+   * the prepare and seal responses echo it, while the scope list is what the
+   * blocker fold and `evidence.md` read.
+   */
+  outsideFactsScope: ToolDiagnostic[];
   /** Snapshot identity shared by every FCA observation in this collection. */
   snapshotHash: string;
+  /** Digest of the frozen facts this generation wrote (spec §9). */
+  factsDigest: string;
   /** Whether both structure and verification evidence are conclusive. */
   evidenceComplete: boolean;
   /** Classification of current uncommitted paths. */
@@ -62,13 +77,15 @@ export interface CollectedChangedScopeEvidence {
 /** Non-writing changed-scope result shared by prepare and handoff writers. */
 export interface ComputedChangedScopeEvidence extends Omit<
   CollectedChangedScopeEvidence,
-  'statuses'
+  'statuses' | 'factsDigest'
 > {
   /** Full derived statuses, including aggregate evidence completeness. */
   statuses: ReviewEvidenceStatuses;
+  /** Normalized facts of the review-scope files, for the caller to freeze. */
+  frozenFacts: NormalizedFileFacts[];
   /** All violations excluded from changed scope. */
   outOfScope: ReviewScopeViolation[];
-  /** Non-finding diagnostics normalized for persisted or returned evidence. */
+  /** Non-finding diagnostics inside the review scope, normalized for persisted or returned evidence. */
   evidenceDiagnostics: ToolDiagnostic[];
   /** Effective rule scope indexed by rule identifier. */
   ruleScopeById: ReadonlyMap<string, RuleScope>;

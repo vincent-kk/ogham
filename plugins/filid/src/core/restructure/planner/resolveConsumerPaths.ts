@@ -1,32 +1,20 @@
 import {
   pathForCompare,
-  portableIsAbsolute,
-  portableRelative,
   portableResolve,
   samePath,
 } from '@ogham/cross-platform';
 
-import { ANALYSIS_CERTAINTIES } from '../../../constants/analysisCertainties.js';
-import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';
 import { RESTRUCTURE_DECISION_REASONS } from '../../../constants/restructure.js';
-import type { ProjectSnapshot } from '../../../types/fractal.js';
-import type { RestructureDecisionReason } from '../../../types/restructure.js';
+import type { ProjectSnapshot, UnknownFile } from '../../../types/fractal.js';
+import type { PlanningDecisionReason } from '../../../types/restructure.js';
 import { resolveOwningFractal } from '../../analysis/lcaCalculator/index.js';
+import { isAtOrWithin } from '../imports/isAtOrWithin.js';
 
 export interface ConsumerPathResolution {
   paths: string[];
-  decisionReasons: RestructureDecisionReason[];
-}
-
-function isAtOrWithin(parentPath: string, targetPath: string): boolean {
-  if (samePath(parentPath, targetPath)) return true;
-  const relative = portableRelative(parentPath, targetPath);
-  const comparable = pathForCompare(relative);
-  return (
-    comparable !== PORTABLE_PATH_MARKERS.PARENT &&
-    !comparable.startsWith(PORTABLE_PATH_MARKERS.PARENT_PREFIX) &&
-    !portableIsAbsolute(relative)
-  );
+  /** Consumer paths dropped because no fractal of the project owns them. */
+  outsidePaths: string[];
+  decisionReasons: PlanningDecisionReason[];
 }
 
 function dedupePaths(paths: string[]): string[] {
@@ -37,19 +25,29 @@ function dedupePaths(paths: string[]): string[] {
   );
 }
 
+/**
+ * Consumers that place a unit: the requested ones, or the graph's.
+ * @param snapshot Pre-move snapshot.
+ * @param sourcePath Absolute source of the unit.
+ * @param relatedUnknownFiles Unknown files related to the unit; any of them may
+ *   hide a consumer the graph does not show.
+ * @param requestedPaths Caller's consumers, used as given when present.
+ * @returns Owned consumer paths, the dropped ones and the decision reasons.
+ */
 export function resolveConsumerPaths(
   snapshot: ProjectSnapshot,
   sourcePath: string,
+  relatedUnknownFiles: readonly UnknownFile[],
   requestedPaths?: string[],
 ): ConsumerPathResolution {
-  const reasons = new Set<RestructureDecisionReason>();
+  const reasons = new Set<PlanningDecisionReason>();
   let paths: string[];
   if (requestedPaths)
     paths = requestedPaths.map((path) =>
       portableResolve(snapshot.projectRoot, path),
     );
   else {
-    if (snapshot.dependencyGraph.certainty !== ANALYSIS_CERTAINTIES.EXACT)
+    if (relatedUnknownFiles.length > 0)
       reasons.add(
         RESTRUCTURE_DECISION_REASONS.DEPENDENCY_EVIDENCE_INDETERMINATE,
       );
@@ -60,21 +58,23 @@ export function resolveConsumerPaths(
       edge.evidence
         .filter(
           (evidence) =>
-            samePath(evidence.resolvedPath, sourcePath) ||
-            (sourceIsDirectory &&
-              isAtOrWithin(sourcePath, evidence.resolvedPath)),
+            (samePath(evidence.resolvedPath, sourcePath) ||
+              (sourceIsDirectory &&
+                isAtOrWithin(sourcePath, evidence.resolvedPath))) &&
+            !isAtOrWithin(sourcePath, evidence.sourceFile),
         )
         .map((evidence) => evidence.sourceFile),
     );
   }
 
   const normalized = dedupePaths(paths);
-  const owned = normalized.filter((path) => {
-    if (resolveOwningFractal(snapshot.tree, path)) return true;
+  const owned = normalized.filter((path) =>
+    resolveOwningFractal(snapshot.tree, path),
+  );
+  const outsidePaths = normalized.filter((path) => !owned.includes(path));
+  if (outsidePaths.length > 0)
     reasons.add(RESTRUCTURE_DECISION_REASONS.CONSUMER_PATH_OUTSIDE_PROJECT);
-    return false;
-  });
   if (owned.length === 0)
     reasons.add(RESTRUCTURE_DECISION_REASONS.CONSUMER_OWNER_REQUIRED);
-  return { paths: owned, decisionReasons: [...reasons] };
+  return { paths: owned, outsidePaths, decisionReasons: [...reasons] };
 }

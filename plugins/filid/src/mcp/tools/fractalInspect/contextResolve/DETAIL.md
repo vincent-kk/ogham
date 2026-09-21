@@ -27,7 +27,7 @@
 ### AC-context-minimal — Bounded chain
 
 - sibling/subtree와 무관한 문서나 문서 본문을 포함하지 않는다.
-- owner가 없는 target 또는 project 밖 target은 해당 item의 실패로 반환한다.
+- owner가 없는 target 또는 project 밖 target은 해당 item의 실패로 반환하며, 그 `context-target-unresolved` diagnostic은 `nextAction`으로 project 안의 경로를 다시 넣고 재호출하라고 안내한다.
 
 ### AC-context-batch — Shared snapshot과 독립 결과
 
@@ -55,9 +55,10 @@
 
 ## History
 
+- 2026-09-19 — `context-target-unresolved` diagnostic이 `nextAction`을 담는다.
 - 2026-09-05 — batch payload와 strict scalar-field 거부를 유지한 채 `fractal_inspect`의 `resolve` action으로 이동했다.
 - 2026-08-28 — 대규모 변경에서 snapshot 재생성과 tool 호출 수를 줄이기 위해 array-first batch 계약으로 전환했다.
 
 ## Last Updated
 
-2026-09-05
+2026-09-19

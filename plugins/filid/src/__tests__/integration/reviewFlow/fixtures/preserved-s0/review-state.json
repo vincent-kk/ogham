@@ -1,0 +1,287 @@
+{
+  "schemaVersion": 2,
+  "validationPolicyVersion": 2,
+  "projectRoot": "<PROJECT_ROOT>",
+  "branchName": "feature/review-flow",
+  "normalizedBranch": "feature-review-flow-2e365613ffba42eb360cbdad7cd561ee3e975c5b9d31ceee76372df880e8545e",
+  "baseRef": "main",
+  "baseCommit": "bf8d0e9dc9aa1ffcc11e20af3f8fcbb8c23c036b",
+  "sourceHash": "75d87434d91a74ebf40dd1439340f966b44f9f47f742f23bf76b63c348bf1610",
+  "fileHashes": {
+    "src/alpha/index.ts": "b485fe5a9bf915abaf9d01d5ee0aede32e083c88",
+    "src/beta/index.ts": "585142547c69ca61309977d48fde4d8326ade5c7"
+  },
+  "phase": "prepared",
+  "preparedAt": "2026-09-19T13:35:02.766Z",
+  "effort": "low",
+  "effortMode": "low",
+  "effortReason": "fixed",
+  "autoLowEffortGroupThreshold": 16,
+  "groups": [
+    {
+      "id": "01",
+      "units": [
+        {
+          "path": "src/alpha/index.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 1,
+              "oldEnd": 1,
+              "newStart": 1,
+              "newEnd": 1
+            }
+          ],
+          "diffPath": "diffs/01/01-index.ts.diff"
+        }
+      ],
+      "churn": 2,
+      "planRequired": false,
+      "dependsOn": [],
+      "candidateIds": [
+        "FCA-001"
+      ],
+      "briefPath": "briefs/review-01.md",
+      "coreBriefByteLength": 6312,
+      "skeletonPath": "opinions/review-01.r1.json",
+      "opinionPath": "opinions/review-01.json",
+      "verifyBriefPath": "briefs/verify-01.md",
+      "verifyPath": "opinions/verify-01.json",
+      "rounds": 1,
+      "riskReasons": [
+        "public-boundary: src/alpha/index.ts"
+      ],
+      "validated": {
+        "review": null,
+        "verify": null
+      },
+      "fileInputs": {
+        "src/alpha/index.ts": {
+          "schemaVersion": 1,
+          "assignment": [
+            {
+              "path": "@file",
+              "change": "M",
+              "chunk": null,
+              "owner": "src/alpha"
+            }
+          ],
+          "sourceHash": "4fcf971f8877a40db618e57827115405a8cf85e9e56f5a203f2025f186ddf8e7",
+          "rulesHash": "085015e382b50f6d743ad55815e8fbd7a7752717918bd35aee9f664bf8e7026a",
+          "evidenceHash": "f47a1eb9edaef629266aff858a3f9c6de1351d5fa2f40db90c87a85fa86ef3d9",
+          "contextHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "policyHash": "d6b0a505ee9a3719da737d0c61e698e3076645f86bf4f71cb82e0caa3e8ca28c",
+          "groupKey": "9d602e30c161ff7c9ee0022b22a1afe23be97a700691096b50d34ff50c66ded0",
+          "preparedInputHash": "e0876e2af3fcc015954424e7ba3bfa11b3dca1019bb7c5f4528b6c94080a0b23"
+        }
+      },
+      "input": {
+        "schemaVersion": 1,
+        "assignment": [
+          {
+            "path": "src/alpha/index.ts",
+            "change": "M",
+            "chunk": null,
+            "owner": "src/alpha"
+          }
+        ],
+        "sourceHash": "8a7eb6eb6244db27eb775d41c3c800d501b7702f8d1fd777ff978ebf5da926c9",
+        "rulesHash": "1bbd3583200e806f23b0bfee438344bfbc5a9b936a133f1dfed4b16c23a60551",
+        "evidenceHash": "a32d7a783f0a2935c16cb967aa42f25849d8391dc636a39eb61902c10eb8d483",
+        "contextHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "policyHash": "d6b0a505ee9a3719da737d0c61e698e3076645f86bf4f71cb82e0caa3e8ca28c",
+        "groupKey": "1776e491b8268933fd88363f8454d2e3278236fbbb624708b177765f918b6bbe",
+        "preparedInputHash": "260d81e7416aec5ecbc9f438d33ba49f83f4e5c111d34948f190a31b04bdf66c"
+      },
+      "priorFindings": []
+    },
+    {
+      "id": "02",
+      "units": [
+        {
+          "path": "src/beta/index.ts",
+          "change": "M",
+          "chunk": null,
+          "churn": 2,
+          "hunks": [
+            {
+              "oldStart": 1,
+              "oldEnd": 1,
+              "newStart": 1,
+              "newEnd": 1
+            }
+          ],
+          "diffPath": "diffs/02/01-index.ts.diff"
+        }
+      ],
+      "churn": 2,
+      "planRequired": false,
+      "dependsOn": [],
+      "candidateIds": [
+        "FCA-002"
+      ],
+      "briefPath": "briefs/review-02.md",
+      "coreBriefByteLength": 6300,
+      "skeletonPath": "opinions/review-02.r1.json",
+      "opinionPath": "opinions/review-02.json",
+      "verifyBriefPath": "briefs/verify-02.md",
+      "verifyPath": "opinions/verify-02.json",
+      "rounds": 1,
+      "riskReasons": [
+        "public-boundary: src/beta/index.ts"
+      ],
+      "validated": {
+        "review": null,
+        "verify": null
+      },
+      "fileInputs": {
+        "src/beta/index.ts": {
+          "schemaVersion": 1,
+          "assignment": [
+            {
+              "path": "@file",
+              "change": "M",
+              "chunk": null,
+              "owner": "src/beta"
+            }
+          ],
+          "sourceHash": "a7515ff4e1b9b3598fa868746c6430d43cbfe0d4977eb6a3f859935dce21f1d5",
+          "rulesHash": "085015e382b50f6d743ad55815e8fbd7a7752717918bd35aee9f664bf8e7026a",
+          "evidenceHash": "c04b1a60516b7a53c5e912eb3c0b9cee7dd8eee764af42f3aa69f468a8716b56",
+          "contextHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "policyHash": "d6b0a505ee9a3719da737d0c61e698e3076645f86bf4f71cb82e0caa3e8ca28c",
+          "groupKey": "5a03489b92a61676544cf4ba1bb73e1277f19460f576c211c7d80c919b894bde",
+          "preparedInputHash": "a7752e26392009734b4a2a48b68d700f9cc8af55171c90518645af78fbee4125"
+        }
+      },
+      "input": {
+        "schemaVersion": 1,
+        "assignment": [
+          {
+            "path": "src/beta/index.ts",
+            "change": "M",
+            "chunk": null,
+            "owner": "src/beta"
+          }
+        ],
+        "sourceHash": "c847d4f1a9b27daf9f987fe92f46795ab37aae450db8b1a9367ebdd9c257be69",
+        "rulesHash": "1bbd3583200e806f23b0bfee438344bfbc5a9b936a133f1dfed4b16c23a60551",
+        "evidenceHash": "ed058471424ffc840294450481e7341c8d0acc20ff50148ae545149028d28a10",
+        "contextHash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "policyHash": "d6b0a505ee9a3719da737d0c61e698e3076645f86bf4f71cb82e0caa3e8ca28c",
+        "groupKey": "cd85eb1e4e2deb4487fdeb13bdfb6f7a0a564a487fefb345a2b6924a39943670",
+        "preparedInputHash": "b67cb9b7863caf7ce30dc70749f57c79d19a54d5fced25a903da93952e23f076"
+      },
+      "priorFindings": []
+    }
+  ],
+  "scope": {
+    "diagnostics": [],
+    "snapshotHash": "6c97f95843d9c5e8a899c2b4aa57e9cf9776eed38481326299dada236f877c2f",
+    "evidenceComplete": true,
+    "worktree": "clean",
+    "dirtyPaths": [],
+    "dirtyPathsHash": "1788f993b4772e3516f5409992386cee14668f98ca23773646f1670a8ffaf8d9",
+    "statuses": {
+      "analysisAxes": {
+        "dependencies": "exact",
+        "verification": "exact"
+      },
+      "structure": "violations",
+      "verification": "ok"
+    },
+    "files": [
+      {
+        "path": "src/alpha/index.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": "src/alpha",
+        "skipReason": null,
+        "rules": [
+          "default"
+        ],
+        "repositoryRules": [],
+        "publicEntryPoint": true
+      },
+      {
+        "path": "src/beta/index.ts",
+        "change": "M",
+        "insertions": 1,
+        "deletions": 1,
+        "binary": false,
+        "role": "source",
+        "owner": "src/beta",
+        "skipReason": null,
+        "rules": [
+          "default"
+        ],
+        "repositoryRules": [],
+        "publicEntryPoint": true
+      }
+    ],
+    "candidates": [
+      {
+        "id": "FCA-001",
+        "source": "structure",
+        "scope": "documents",
+        "category": "contract",
+        "severity": "error",
+        "path": "src/alpha",
+        "rule": "intent-document-contract",
+        "message": "INTENT.md is required for fractal node /private/tmp/claude-501/filid-review-flow-KUsiSg/src/alpha."
+      },
+      {
+        "id": "FCA-002",
+        "source": "structure",
+        "scope": "documents",
+        "category": "contract",
+        "severity": "error",
+        "path": "src/beta",
+        "rule": "intent-document-contract",
+        "message": "INTENT.md is required for fractal node /private/tmp/claude-501/filid-review-flow-KUsiSg/src/beta."
+      }
+    ],
+    "informational": [],
+    "outOfScopeCount": 6,
+    "infoCount": 0
+  },
+  "verdict": null,
+  "generationId": "1628b866cb87ad5a03df321f286df981",
+  "incremental": {
+    "version": 2,
+    "headCommit": "a5b1d4653f3925c08c428118f2be6a657abeaf42",
+    "userInstructions": "",
+    "changeContext": null,
+    "pluginRoot": "<PLUGIN_ROOT>",
+    "environmentHash": "c9d3de2cffa6b2976417f2c0efd3d6afce0a9912ac6b82f4da6538e3fe246924",
+    "decisions": [
+      {
+        "group": "01",
+        "previousGroup": null,
+        "disposition": "new",
+        "reasons": []
+      },
+      {
+        "group": "02",
+        "previousGroup": null,
+        "disposition": "new",
+        "reasons": []
+      }
+    ],
+    "summary": {
+      "reusedFiles": 0,
+      "reviewFiles": 2,
+      "reusedGroups": 0,
+      "rerunGroups": 0,
+      "newGroups": 2,
+      "removedGroups": 0,
+      "bookkeepingGroups": 0,
+      "remainingMaxReviewerHandoffs": 2
+    }
+  }
+}

@@ -41,8 +41,11 @@ export interface RuleViolation {
   severity: RuleSeverity;
   message: string;
   path: string;
-  suggestion?: string;
+  /** What to do about the violation: the fix, or who must decide. */
+  suggestion: string;
   certainty?: AnalysisCertainty;
+  /** File the offending import resolves to; set by import-boundary rules on every violation except the certainty warning. */
+  importedPath?: string;
 }
 
 /** 단일 규칙 정의. `check` 함수는 순수 함수여야 하며 부작용이 없어야 한다. */

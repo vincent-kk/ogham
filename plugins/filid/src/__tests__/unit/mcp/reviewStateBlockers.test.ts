@@ -29,8 +29,8 @@ import { validateReviewStateSealGroup } from './reviewState/helpers/validateRevi
 /** Temporary repository and plugin root used by the active case. */
 let fixture: ReviewStateSealFixture;
 
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
 });
 
 afterEach(() => {
@@ -219,7 +219,7 @@ describe('review blocker artifact lifecycle', () => {
     REVIEW_STATE_ACTIONS.CHECKPOINT,
     REVIEW_STATE_ACTIONS.SEAL,
   ] as const)(
-    'refuses %s when a marked blocker artifact is missing without rewriting the seal',
+    'answers %s for a missing blocker artifact without rewriting the seal',
     async (action) => {
       const prepared = await prepareReviewBlockerFixture(fixture);
       const blockersPath = resolveContainedPath(
@@ -241,11 +241,11 @@ describe('review blocker artifact lifecycle', () => {
         ...(action === REVIEW_STATE_ACTIONS.PREPARE ? { baseRef: 'main' } : {}),
       };
 
-      if (action === REVIEW_STATE_ACTIONS.PREPARE)
-        await expect(handleReviewState(request)).rejects.toMatchObject({
-          code: REVIEW_STATE_DIAGNOSTIC_CODES.BLOCKERS_MISSING,
-        });
-      else {
+      if (action === REVIEW_STATE_ACTIONS.PREPARE) {
+        const result = await handleReviewState(request);
+        expect(result.status).toBe('ok');
+        expect(result.summary).toMatchObject({ reviewFiles: 0 });
+      } else {
         const result = await handleReviewState(request);
         expect(result.status).toBe('indeterminate');
         expect(result.summary.disposition).toBe(
@@ -257,10 +257,10 @@ describe('review blocker artifact lifecycle', () => {
             path: blockersPath,
           }),
         );
+        expect(readFileSync(prepared.paths.statePath, 'utf8')).toBe(
+          preservedState,
+        );
       }
-      expect(readFileSync(prepared.paths.statePath, 'utf8')).toBe(
-        preservedState,
-      );
       expect(readFileSync(prepared.paths.reportPath, 'utf8')).toBe(
         preservedReport,
       );
@@ -339,7 +339,6 @@ describe('review blocker artifact lifecycle', () => {
   );
 
   it.each([
-    REVIEW_STATE_ACTIONS.PREPARE,
     REVIEW_STATE_ACTIONS.CHECKPOINT,
     REVIEW_STATE_ACTIONS.SEAL,
   ] as const)(
@@ -370,15 +369,46 @@ describe('review blocker artifact lifecycle', () => {
           action,
           projectRoot: fixture.projectRoot,
           branchName: fixture.branchName,
-          ...(action === REVIEW_STATE_ACTIONS.PREPARE
-            ? { baseRef: 'main' }
-            : {}),
         }),
       ).rejects.toMatchObject({
         code: REVIEW_STATE_DIAGNOSTIC_CODES.VALIDATION_POLICY_OUTDATED,
       });
     },
   );
+
+  it('names the outdated policy, not the missing blockers, when prepare replaces the state', async () => {
+    const prepared = await prepareReviewBlockerFixture(fixture);
+    const blockersPath = resolveContainedPath(
+      prepared.paths.reviewDirectory,
+      REVIEW_STATE_FILE_NAMES.BLOCKERS,
+    );
+    await handleReviewState({
+      action: REVIEW_STATE_ACTIONS.SEAL,
+      projectRoot: fixture.projectRoot,
+      branchName: fixture.branchName,
+    });
+    const state = JSON.parse(
+      readFileSync(prepared.paths.statePath, 'utf8'),
+    ) as Record<string, unknown>;
+    delete state.validationPolicyVersion;
+    writeFileAtomicallySync(
+      prepared.paths.statePath,
+      `${JSON.stringify(state, null, 2)}\n`,
+    );
+    rmSync(blockersPath, { force: true });
+    const result = await handleReviewState({
+      action: REVIEW_STATE_ACTIONS.PREPARE,
+      projectRoot: fixture.projectRoot,
+      branchName: fixture.branchName,
+      baseRef: 'main',
+    });
+    expect(result.status).toBe('ok');
+    expect(
+      result.diagnostics.find(
+        ({ code }) => code === REVIEW_STATE_DIAGNOSTIC_CODES.STATE_REPLACED,
+      )?.message,
+    ).toContain(REVIEW_STATE_DIAGNOSTIC_CODES.VALIDATION_POLICY_OUTDATED);
+  });
 
   it('rejects a symlinked blocker artifact without reading its external target', async () => {
     const prepared = await prepareReviewBlockerFixture(fixture);

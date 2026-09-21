@@ -4,7 +4,7 @@ user-invocable: true
 disable-model-invocation: true
 description: 'Initialize Filid config and managed rule documents, inspect the FCA snapshot, and propose missing INTENT.md/DETAIL.md work.'
 argument-hint: '[path] [--rules]'
-version: '2.1.0'
+version: '2.1.1'
 complexity: medium
 plugin: filid
 ---

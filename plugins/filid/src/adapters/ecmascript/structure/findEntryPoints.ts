@@ -1,6 +1,14 @@
+/**
+ * @file findEntryPoints.ts
+ * @description Reads the request-scoped memo opened by `runWithRequestMemo`,
+ * which cannot be passed in: the adapter interface between that scope and this
+ * function carries no cache. With no scope open the directory is read on every
+ * call.
+ */
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { basename, dirname, extname, join } from 'node:path';
 
+import { memoizeWithinRequest } from '../../../lib/memoizeWithinRequest.js';
 import type { EntryPointDescriptor } from '../../../types/fractal.js';
 
 import {
@@ -23,6 +31,15 @@ import {
  * legitimate override a standing `entry-point-surface` warning.
  */
 const DECLARED_OVERRIDE_KIND = 'executable' as const;
+
+/**
+ * Memo namespace. The key carries the directory exactly as the caller spelled
+ * it, because every descriptor path is built by joining onto that spelling —
+ * keying on a resolved form would hand one caller another's spelling. The
+ * overrides are sorted: they are read by membership alone, so their order
+ * identifies nothing.
+ */
+const MEMO_NAMESPACE = 'findEntryPoints';
 
 function findNearestPackage(directoryPath: string): string | null {
   let current = directoryPath;
@@ -64,61 +81,77 @@ function detectedFrameworks(directoryPath: string): string[] {
   }
 }
 
+/**
+ * List the entry points a directory declares.
+ * @param directoryPath Absolute directory to read; it must exist.
+ * @param overrides File names this project declared as entry points, taken as given for this directory.
+ * @returns Fresh descriptors in file-name order, the manifest last — the caller owns them and may sort or filter in place.
+ * @throws When the directory cannot be read.
+ */
 export function findEntryPoints(
   directoryPath: string,
   overrides: readonly string[] = [],
 ): EntryPointDescriptor[] {
-  const frameworks = detectedFrameworks(directoryPath);
-  const entries = readdirSync(directoryPath, { withFileTypes: true })
-    .filter((entry) => entry.isFile())
-    .map((entry) => entry.name)
-    .filter((name) =>
-      SOURCE_EXTENSIONS.includes(
-        extname(name) as (typeof SOURCE_EXTENSIONS)[number],
-      ),
-    )
-    .sort();
-  const descriptors: EntryPointDescriptor[] = [];
+  const memoized = memoizeWithinRequest(
+    MEMO_NAMESPACE,
+    JSON.stringify([directoryPath, [...overrides].sort()]),
+    (): EntryPointDescriptor[] => {
+      const frameworks = detectedFrameworks(directoryPath);
+      const entries = readdirSync(directoryPath, { withFileTypes: true })
+        .filter((entry) => entry.isFile())
+        .map((entry) => entry.name)
+        .filter((name) =>
+          SOURCE_EXTENSIONS.includes(
+            extname(name) as (typeof SOURCE_EXTENSIONS)[number],
+          ),
+        )
+        .sort();
+      const descriptors: EntryPointDescriptor[] = [];
 
-  for (const name of entries) {
-    const extension = extname(name);
-    const stem = basename(name, extension);
-    let kind: EntryPointDescriptor['kind'] | null = null;
-    if ((MODULE_ENTRY_BASENAMES as readonly string[]).includes(stem))
-      kind = 'module';
-    else if (overrides.includes(name)) kind = DECLARED_OVERRIDE_KIND;
-    else if ((EXECUTABLE_ENTRY_BASENAMES as readonly string[]).includes(stem))
-      kind = 'executable';
-    else if (
-      frameworks.some((framework) =>
-        (
-          FRAMEWORK_ENTRY_BASENAMES[
-            framework as keyof typeof FRAMEWORK_ENTRY_BASENAMES
-          ] as ReadonlySet<string>
-        ).has(stem),
-      )
-    )
-      kind = 'framework';
-    if (!kind) continue;
-    descriptors.push({
-      path: join(directoryPath, name),
-      kind,
-      adapterId: ECMASCRIPT_ADAPTER_ID,
-      surface: kind === 'framework' ? 'opaque' : 'enumerated',
-    });
-  }
+      for (const name of entries) {
+        const extension = extname(name);
+        const stem = basename(name, extension);
+        let kind: EntryPointDescriptor['kind'] | null = null;
+        if ((MODULE_ENTRY_BASENAMES as readonly string[]).includes(stem))
+          kind = 'module';
+        else if (overrides.includes(name)) kind = DECLARED_OVERRIDE_KIND;
+        else if (
+          (EXECUTABLE_ENTRY_BASENAMES as readonly string[]).includes(stem)
+        )
+          kind = 'executable';
+        else if (
+          frameworks.some((framework) =>
+            (
+              FRAMEWORK_ENTRY_BASENAMES[
+                framework as keyof typeof FRAMEWORK_ENTRY_BASENAMES
+              ] as ReadonlySet<string>
+            ).has(stem),
+          )
+        )
+          kind = 'framework';
+        if (!kind) continue;
+        descriptors.push({
+          path: join(directoryPath, name),
+          kind,
+          adapterId: ECMASCRIPT_ADAPTER_ID,
+          surface: kind === 'framework' ? 'opaque' : 'enumerated',
+        });
+      }
 
-  // This directory's own manifest only. `findNearestPackage` walks up for
-  // framework evidence, which is a different question — an ancestor's manifest
-  // declares that package's surface, not this directory's.
-  const manifestPath = join(directoryPath, MANIFEST_ENTRY_FILENAME);
-  if (existsSync(manifestPath))
-    descriptors.push({
-      path: manifestPath,
-      kind: 'manifest',
-      adapterId: ECMASCRIPT_ADAPTER_ID,
-      surface: 'enumerated',
-    });
+      // This directory's own manifest only. `findNearestPackage` walks up for
+      // framework evidence, which is a different question — an ancestor's
+      // manifest declares that package's surface, not this directory's.
+      const manifestPath = join(directoryPath, MANIFEST_ENTRY_FILENAME);
+      if (existsSync(manifestPath))
+        descriptors.push({
+          path: manifestPath,
+          kind: 'manifest',
+          adapterId: ECMASCRIPT_ADAPTER_ID,
+          surface: 'enumerated',
+        });
 
-  return descriptors;
+      return descriptors;
+    },
+  );
+  return memoized.map((descriptor) => ({ ...descriptor }));
 }

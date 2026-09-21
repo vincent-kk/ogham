@@ -1,3 +1,8 @@
+import {
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
+} from '../../../../constants/reviewState.js';
+import { ToolDiagnosticError } from '../../../errors/toolDiagnosticError.js';
 import type { ReviewScopeFile } from '../state/reviewStateTypes.js';
 
 import { parseDiffHunks } from './parseDiffHunks.js';
@@ -64,7 +69,11 @@ export function chunkUnits(
   let currentChurn = 0;
   for (const piece of pieces) {
     if (piece.churn > groupChurnLimit)
-      throw new Error(`review unit exceeds churn limit for ${file.path}`);
+      throw new ToolDiagnosticError(
+        REVIEW_STATE_DIAGNOSTIC_CODES.CONFIG_INVALID,
+        `review.groupChurnLimit (${groupChurnLimit}) is smaller than an indivisible review unit (${piece.churn}) in ${file.path}.`,
+        REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.CONFIG_INVALID,
+      );
 
     if (current.length > 0 && currentChurn + piece.churn > groupChurnLimit) {
       packed.push(current);

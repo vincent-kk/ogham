@@ -62,7 +62,7 @@ const genuineGap = readFileSync(
 
 describe('cross-review v7 skill surface', () => {
   it('declares the v7 frontmatter and orchestration schema', () => {
-    expect(skill).toContain("version: '7.11.0'");
+    expect(skill).toContain("version: '7.12.0'");
     expect(skill).toContain('review_schema: 7');
     expect(skill).toContain('--effort auto|low|medium|high');
   });
@@ -184,8 +184,11 @@ describe('cross-review v7 skill surface', () => {
     expect(skill).toContain('data.next');
     expect(skill).toContain('data.sealReady');
     expect(skill).toContain('exhausted');
-    expect(skill).toContain('validate({ kind: "review", group, round })');
-    expect(skill).toContain('validate({ kind: "verify", group })');
+    expect(skill).toContain(
+      'validate({ kind: "review", group, round, generationId: <the generationId of that handoff> })',
+    );
+    expect(skill).toContain('never share one value across assignments');
+    expect(skill).toContain('review-generation-superseded');
     expect(skill).toContain('respawn once');
     expect(skill).toContain('completion notification');
     expect(skill).toContain('do not poll');
@@ -198,15 +201,16 @@ describe('cross-review v7 skill surface', () => {
     expect(genuineGap).not.toContain('resolves no verification role');
   });
 
-  it('stops policy failures without automatic restart or a terminal verdict', () => {
-    expect(skill).toContain('review-effort-locked');
+  it('sends an unusable state to one prepare and stops only the group budget', () => {
     expect(skill).toContain('review-validation-policy-outdated');
     expect(skill).toContain('review-blockers-missing');
     expect(skill).toContain('review-blockers-invalid');
-    expect(skill).toContain('Never auto-force these errors');
+    expect(skill).toContain('review-state-replaced');
+    expect(skill).toContain('one prepare without force');
+    expect(skill).toContain('never auto-force them');
     expect(skill).toContain('all prior actors have finished');
     expect(skill).toContain('no merged opinion exists');
-    expect(skill).toContain('effective effort is frozen at preparation');
+    expect(skill).toContain('the prepared effort stays in force');
   });
 
   it('routes INCONCLUSIVE readers to the separate trusted blocker report', () => {

@@ -1,6 +1,12 @@
 import { NODE_TYPES } from './nodeTypes.js';
 
-export const RESTRUCTURE_SCHEMA_VERSION = 1 as const;
+export const RESTRUCTURE_SCHEMA_VERSION = 4 as const;
+
+/** Analysis axes a restructure plan and its validations rest on; a diagnostic affecting neither leaves their status conclusive. */
+export const RESTRUCTURE_ANALYSIS_AXES = [
+  'dependencies',
+  'boundaries',
+] as const;
 export const RESTRUCTURE_PLAN_ID_PREFIX = 'filid-restructure';
 export const RESTRUCTURE_PLAN_HASH_SEPARATOR = '\0';
 export const RESTRUCTURE_HASH_ALGORITHM = 'sha256';
@@ -43,12 +49,12 @@ export const RESTRUCTURE_DECISION_REASONS = {
   CONTRACT_INTENT_UNKNOWN: 'contract-intent-unknown',
   ORGAN_NAME_REQUIRED: 'organ-name-required',
   ENTRY_POINT_EVIDENCE_REQUIRED: 'entry-point-evidence-required',
-  IMPORT_REWRITE_UNSUPPORTED: 'import-rewrite-unsupported',
   CONSUMER_OWNER_REQUIRED: 'consumer-owner-required',
   SOURCE_PATH_OUTSIDE_PROJECT: 'source-path-outside-project',
   CONSUMER_PATH_OUTSIDE_PROJECT: 'consumer-path-outside-project',
   DEPENDENCY_EVIDENCE_INDETERMINATE: 'dependency-evidence-indeterminate',
   INVALID_NAME_HINT: 'invalid-name-hint',
+  MOVE_ORDER_CONFLICT: 'move-order-conflict',
 } as const;
 
 export const RESTRUCTURE_VALIDATION_CODES = {
@@ -60,34 +66,12 @@ export const RESTRUCTURE_VALIDATION_CODES = {
   TARGET_NODE_TYPE_MISMATCH: 'target-node-type-mismatch',
   REQUIRED_ARTIFACT_MISSING: 'required-artifact-missing',
   ENTRY_POINT_MISSING: 'entry-point-missing',
+  ENTRY_POINT_SURFACE_UNSUPPORTED: 'entry-point-surface-unsupported',
   IMPORT_REWRITE_MISSING: 'import-rewrite-missing',
+  PRESERVED_IMPORT_BROKEN: 'preserved-import-broken',
   IMPORT_BOUNDARY_VIOLATION: 'import-boundary-violation',
   DEPENDENCY_CYCLE: 'dependency-cycle',
   DEPENDENCY_GRAPH_INDETERMINATE: 'dependency-graph-indeterminate',
-} as const;
-
-export const RESTRUCTURE_VALIDATION_MESSAGES = {
-  SNAPSHOT_HASH_MISMATCH:
-    'The plan snapshot hash does not match the current project snapshot.',
-  PROJECT_ROOT_MISMATCH:
-    'The plan project root does not match the current project snapshot.',
-  UNRESOLVED_DECISIONS:
-    'The plan still contains moves that require a placement decision.',
-  SOURCE_STILL_PRESENT:
-    'The planned source path is still present after execution.',
-  TARGET_MISSING: 'The exact planned target path is missing after execution.',
-  TARGET_NODE_TYPE_MISMATCH:
-    'The planned target container has a different node type.',
-  REQUIRED_ARTIFACT_MISSING: 'A required target document artifact is missing.',
-  ENTRY_POINT_MISSING:
-    'The required adapter-recognized entry point is missing.',
-  IMPORT_REWRITE_MISSING:
-    'A planned import rewrite is not present in dependency evidence.',
-  IMPORT_BOUNDARY_VIOLATION:
-    'The post-execution snapshot violates an external import boundary.',
-  DEPENDENCY_CYCLE: 'The post-execution dependency graph contains a cycle.',
-  DEPENDENCY_GRAPH_INDETERMINATE:
-    'The post-execution dependency graph is not exact.',
 } as const;
 
 export const RESTRUCTURE_REASON_TEXT = {
@@ -96,7 +80,7 @@ export const RESTRUCTURE_REASON_TEXT = {
     'Place the shared unit under the lowest common consumer fractal.',
   PUBLIC_CONTRACT: 'Create an independent fractal for the public contract.',
   DECISION_REQUIRED:
-    'Keep the placement unresolved until the recorded decisions are supplied.',
+    'Unresolved until every entry of decisions is settled; each names its next action.',
 } as const;
 
 export const RESTRUCTURE_REASON_BY_BASIS = {
@@ -105,4 +89,50 @@ export const RESTRUCTURE_REASON_BY_BASIS = {
     RESTRUCTURE_REASON_TEXT.LOWEST_COMMON_FRACTAL,
   [PLACEMENT_BASES.PUBLIC_CONTRACT]: RESTRUCTURE_REASON_TEXT.PUBLIC_CONTRACT,
   [PLACEMENT_BASES.BOUNDARY_RULE]: RESTRUCTURE_REASON_TEXT.DECISION_REQUIRED,
+} as const;
+
+/** Snapshot diagnostic code of a local import that resolves to no file; postcondition reads it for import requirements. */
+export const UNRESOLVED_IMPORT_DIAGNOSTIC_CODE = 'unresolved-local-dependency';
+
+/** Summary next actions of the restructure plan action, chosen by status and plan contents. */
+export const RESTRUCTURE_PLAN_NEXT_ACTIONS = {
+  UNSUPPORTED:
+    "Filid cannot analyze this project's dependencies, so it cannot plan or verify a restructure here; report the requests as unsupported.",
+  UNRESOLVED:
+    'Do not execute this plan: settle each unresolved entry by its decisions[].nextAction, then create a new plan.',
+  DIAGNOSTICS:
+    "Do not execute this plan: this response carries diagnostics (evidence gaps, document findings or configuration warnings). Follow each diagnostic's nextAction, then create a new plan.",
+  NOTHING_TO_MOVE:
+    "Nothing to move. Call precondition with this plan's artifact path, create any missing requiredArtifacts of the alreadyPlaced requests, then call postcondition to confirm each one is in place.",
+  READY:
+    "Call restructure precondition with this plan's artifact path. After approval, run moves in listed order — creating each move's requiredArtifacts — then change each affectedImports entry so it loads its requiredResolvedPath — its suggestedSpecifier when present, otherwise a relative path-like specifier you write — and call postcondition.",
+} as const;
+
+/** Summary next actions of the plan validation actions, keyed by action and then by status. */
+export const RESTRUCTURE_VALIDATION_NEXT_ACTIONS = {
+  precondition: {
+    ok: "Present the plan for approval. Then run moves in listed order — creating each move's requiredArtifacts — change each affectedImports entry so it loads its requiredResolvedPath (use suggestedSpecifier when present), and call postcondition with the same artifact.",
+    violations: "Do not execute this plan: follow each finding's nextAction.",
+    indeterminate:
+      "Do not execute this plan: this response carries diagnostics (evidence gaps, document findings or configuration warnings). Follow each diagnostic's nextAction and each finding's nextAction, then create a new plan.",
+  },
+  postcondition: {
+    ok: 'Restructure verified: report it complete with the number of moves applied.',
+    violations:
+      "Restructure not verified: follow each finding's nextAction, then run postcondition again. Report it as failed until it passes.",
+    indeterminate:
+      "Restructure not verified: this response carries diagnostics (evidence gaps, document findings or configuration warnings). Follow each diagnostic's nextAction and each finding's nextAction, then run postcondition again.",
+  },
+} as const;
+
+/** Next actions of the plan artifact errors, keyed like `RESTRUCTURE_PLAN_ERROR_CODES`. */
+export const RESTRUCTURE_PLAN_ERROR_NEXT_ACTIONS = {
+  PLAN_PATH_NOT_ABSOLUTE:
+    'Pass the absolute artifact path that the plan action returned.',
+  PLAN_ARTIFACT_NOT_FOUND:
+    'Pass the artifact path that the plan action returned; if that artifact is gone, create a new plan.',
+  PLAN_ARTIFACT_INVALID:
+    'Create a new plan with this filid version and validate its artifact; never edit a plan artifact by hand.',
+  PLAN_ARTIFACT_UNTRUSTED:
+    'Create a new plan and pass the artifact path the plan action returned, unchanged; never edit, copy or move a plan artifact.',
 } as const;

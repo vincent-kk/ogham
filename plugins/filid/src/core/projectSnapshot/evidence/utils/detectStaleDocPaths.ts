@@ -8,6 +8,7 @@ import {
   portableJoin,
 } from '@ogham/cross-platform';
 
+import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type { DocumentContractFinding } from '../../../../types/fractal.js';
 import {
   extractPathTokens,
@@ -94,7 +95,7 @@ export function detectStaleDocPaths(
         document,
         rule: 'stale-path',
         section: section.title,
-        message: `Path token \`${token}\` in ${where} resolves to nothing from ${nodePath}, its ancestors, or the project root — the reference has drifted or never existed.`,
+        message: `Path token \`${token}\` in ${where} resolves to nothing from ${toProjectRelativePath(projectRoot, nodePath)}, its ancestors, or the project root — the reference has drifted or never existed.`,
         severity: 'warning',
       });
     }

@@ -6,6 +6,8 @@ import type {
 } from '../../../types/verification.js';
 import { evaluateVerificationPolicy } from '../index.js';
 
+/** Project root the fixture paths sit under. */
+const PROJECT_ROOT = '/project';
 const OWNER = '/project/feature';
 
 function file(
@@ -35,38 +37,44 @@ function groups(...ids: string[]): ContractGroupsByOwner {
 
 describe('verification policy', () => {
   it('allows an exact spec-document with 15 cases', () => {
-    const result = evaluateVerificationPolicy([
-      file('/project/feature/contract.spec', 'spec-document', 15),
-    ]);
+    const result = evaluateVerificationPolicy(
+      [file('/project/feature/contract.spec', 'spec-document', 15)],
+      PROJECT_ROOT,
+    );
 
     expect(result.violations).toEqual([]);
   });
 
   it('flags an exact spec-document with 16 cases', () => {
-    const result = evaluateVerificationPolicy([
-      file('/project/feature/contract.spec', 'spec-document', 16),
-    ]);
+    const result = evaluateVerificationPolicy(
+      [file('/project/feature/contract.spec', 'spec-document', 16)],
+      PROJECT_ROOT,
+    );
 
     expect(result.violations).toContainEqual(
       expect.objectContaining({
         ruleId: 'spec-document-case-cap',
         severity: 'error',
+        suggestion:
+          'Split the spec document by contract group so each file stays within 15 cases, or merge cases that verify the same behavior.',
       }),
     );
   });
 
   it('allows an exact test-record with 32 cases', () => {
-    const result = evaluateVerificationPolicy([
-      file('/project/feature/regression.test', 'test-record', 32),
-    ]);
+    const result = evaluateVerificationPolicy(
+      [file('/project/feature/regression.test', 'test-record', 32)],
+      PROJECT_ROOT,
+    );
 
     expect(result.violations).toEqual([]);
   });
 
   it('flags an exact test-record with 33 cases', () => {
-    const result = evaluateVerificationPolicy([
-      file('/project/feature/regression.test', 'test-record', 33),
-    ]);
+    const result = evaluateVerificationPolicy(
+      [file('/project/feature/regression.test', 'test-record', 33)],
+      PROJECT_ROOT,
+    );
 
     expect(result.violations).toContainEqual(
       expect.objectContaining({
@@ -81,7 +89,9 @@ describe('verification policy', () => {
       file(`/project/feature/event-${index}.test`, 'test-record', 32),
     );
 
-    expect(evaluateVerificationPolicy(files).violations).toEqual([]);
+    expect(evaluateVerificationPolicy(files, PROJECT_ROOT).violations).toEqual(
+      [],
+    );
   });
 
   it('keeps indeterminate counts out of PASS', () => {
@@ -92,7 +102,7 @@ describe('verification policy', () => {
       reasons: ['dynamic parameter table'],
     };
 
-    const result = evaluateVerificationPolicy([analysis]);
+    const result = evaluateVerificationPolicy([analysis], PROJECT_ROOT);
 
     expect(result.certainty).toBe('indeterminate');
     expect(result.violations).toContainEqual(
@@ -111,7 +121,7 @@ describe('verification policy', () => {
       reasons: ['unsupported syntax'],
     };
 
-    const result = evaluateVerificationPolicy([analysis]);
+    const result = evaluateVerificationPolicy([analysis], PROJECT_ROOT);
 
     expect(result.certainty).toBe('unsupported');
     expect(result.violations).toContainEqual(
@@ -128,6 +138,7 @@ describe('verification policy', () => {
         file('/project/feature/create.spec', 'spec-document', 3, ['AC-create']),
         file('/project/feature/delete.spec', 'spec-document', 4, ['AC-delete']),
       ],
+      PROJECT_ROOT,
       groups('AC-create', 'AC-delete'),
     );
 
@@ -144,6 +155,7 @@ describe('verification policy', () => {
           'AC-shared',
         ]),
       ],
+      PROJECT_ROOT,
       groups('AC-shared'),
     );
 
@@ -158,6 +170,7 @@ describe('verification policy', () => {
         file('/project/feature/create.spec', 'spec-document', 3, []),
         file('/project/feature/delete.spec', 'spec-document', 4, ['AC-delete']),
       ],
+      PROJECT_ROOT,
       groups('AC-delete'),
     );
 
@@ -165,6 +178,31 @@ describe('verification policy', () => {
       expect.objectContaining({
         ruleId: 'spec-contract-link',
         path: '/project/feature/create.spec',
+      }),
+    );
+  });
+
+  it('keeps a record that never reported its group links out of PASS', () => {
+    const unreported = file('/project/feature/create.spec', 'spec-document', 3);
+    delete (unreported as { contractGroupIds?: string[] }).contractGroupIds;
+
+    const result = evaluateVerificationPolicy(
+      [
+        unreported,
+        file('/project/feature/delete.spec', 'spec-document', 4, ['AC-delete']),
+      ],
+      PROJECT_ROOT,
+      groups('AC-delete'),
+    );
+
+    // "The record does not say" is not "the file declares nothing": the error
+    // would send a reader to add a marker that may already be there.
+    expect(result.violations).toContainEqual(
+      expect.objectContaining({
+        ruleId: 'spec-contract-link',
+        path: '/project/feature/create.spec',
+        severity: 'warning',
+        certainty: 'indeterminate',
       }),
     );
   });
@@ -177,6 +215,7 @@ describe('verification policy', () => {
           'AC-missing',
         ]),
       ],
+      PROJECT_ROOT,
       groups('AC-create'),
     );
 

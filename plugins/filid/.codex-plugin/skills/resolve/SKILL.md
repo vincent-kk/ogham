@@ -125,7 +125,7 @@ Write `REVIEW_DIR/justifications.md` from the template in `reference.md` §1, wi
 
 1. Run the repository typecheck. On failure:
    - interactive → report and stop before committing;
-   - `--auto` → **abort** with `Typecheck failed after applying fixes.`
+   - `--auto` → repair the errors in the files the corrections touched and run the typecheck again, at most twice. If it still fails, revert only the corrections the remaining errors point to, record each reverted item as `unapplied` in the report, and run the typecheck once more; `revalidate` fails those items with evidence. If it fails with every correction reverted, the failure predates this run: **abort** with `Typecheck failed before applying fixes.`
 2. Stage the corrected source paths only. **Never stage `justifications.md` or anything under `.filid/review/`** — those are local inter-stage files, and an explicit `git add` overrides `.gitignore`.
 3. Commit: `fix(filid): apply cross-review corrections`.
 4. With no accepted items, skip the typecheck and the commit entirely.

@@ -1,4 +1,7 @@
-import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../../constants/reviewState.js';
+import {
+  REVIEW_STATE_DIAGNOSTIC_CODES,
+  REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS,
+} from '../../../../../constants/reviewState.js';
 import { ToolDiagnosticError } from '../../../../errors/toolDiagnosticError.js';
 import type { ReviewGroup } from '../../state/reviewGroupTypes.js';
 
@@ -19,6 +22,7 @@ export function assertReviewGroupBudget(
   if (maxGroups !== undefined && count > maxGroups)
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.GROUP_BUDGET_EXCEEDED,
-      `review group budget exceeded: ${count} groups exceed review.maxGroups=${maxGroups}. Split the PR or adjust the review budget. Use --force to apply changed grouping limits.`,
+      `Review needs ${count} reviewer groups, exceeding review.maxGroups=${maxGroups}.`,
+      REVIEW_STATE_DIAGNOSTIC_NEXT_ACTIONS.GROUP_BUDGET_EXCEEDED,
     );
 }

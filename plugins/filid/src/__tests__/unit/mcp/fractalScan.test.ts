@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { portableJoin, spawnCliSync } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 import { FRACTAL_SCAN_DETAILS } from '../../../constants/mcpContracts.js';
 import { NODE_TYPES } from '../../../constants/nodeTypes.js';
 import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scanDefaults.js';
@@ -381,7 +382,7 @@ describe('fractal-scan tool — additional-organ-names wiring', () => {
 describe('fractal-scan tool — entry names and name filter', () => {
   let tmpRoot: string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpRoot = portableJoin(
       tmpdir(),
       `filid-name-filter-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
@@ -409,6 +410,7 @@ describe('fractal-scan tool — entry names and name filter', () => {
         'utf8',
       );
     }
+    await seedFacts(tmpRoot);
   });
 
   afterEach(() => {

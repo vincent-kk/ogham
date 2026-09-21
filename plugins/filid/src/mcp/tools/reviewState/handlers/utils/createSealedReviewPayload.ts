@@ -1,6 +1,7 @@
 import type { REVIEW_STATE_ACTIONS } from '../../../../../constants/reviewState.js';
 import { REVIEW_STATE_DISPOSITIONS } from '../../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
+import type { ToolDiagnostic } from '../../../../../types/toolEnvelope.js';
 import type { ReviewReuseSummary } from '../../state/reviewIncrementalTypes.js';
 import type {
   ReviewSealPayload,
@@ -40,6 +41,8 @@ interface CreateSealedReviewPayloadInput {
   hasFixRequests: boolean;
   /** Trusted blocker path for a seal with unresolved evidence, otherwise null. */
   blockersPath: string | null;
+  /** Non-blocking observations about the returned verdict, such as later uncommitted work. */
+  diagnostics?: readonly ToolDiagnostic[];
 }
 
 /**
@@ -78,6 +81,6 @@ export function createSealedReviewPayload(
       prCommentPath: input.paths.prCommentPath,
       sessionPath: input.paths.sessionPath,
     },
-    diagnostics: [...EMPTY_SEAL_DIAGNOSTICS],
+    diagnostics: [...(input.diagnostics ?? EMPTY_SEAL_DIAGNOSTICS)],
   };
 }

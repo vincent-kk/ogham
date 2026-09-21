@@ -5,8 +5,11 @@
  * FractalTree는 프로젝트 디렉토리를 계층적 노드 그래프로 표현하며,
  * 각 노드(FractalNode)는 자신의 분류 타입(CategoryType)과 부모/자식 관계를 보유한다.
  */
+import type { ANALYSIS_AXES } from '../constants/analysisAxes.js';
 import type { ANALYSIS_CERTAINTIES } from '../constants/analysisCertainties.js';
+import type { FACTS_FILE_STATES } from '../constants/facts.js';
 
+import type { DependencyReferenceKind } from './adapters.js';
 import type { BoundaryExemptionDeclaration } from './documents.js';
 import type { VerificationProjectAnalysis } from './verification.js';
 
@@ -165,20 +168,99 @@ export interface DependencyGraphEdge {
   evidence: DependencyEvidence[];
 }
 
+/**
+ * A file whose references the analysis could not confirm, with the diagnostic
+ * codes that explain why. Conclusions that need an absence (no cycle, no
+ * boundary violation) hold only where no related file is listed.
+ */
+export interface UnknownFile {
+  /** Project-relative POSIX path. */
+  path: string;
+  /** Sorted, unique diagnostic codes attributed to the file. */
+  causes: string[];
+}
+
+/** Unknown files split by whether they bear on the units under judgement. */
+export interface UnknownFilePartition {
+  /** Files that block a conclusion about those units. */
+  relevant: UnknownFile[];
+  /** Files reported as information only. */
+  other: UnknownFile[];
+}
+
 export interface DependencyGraph {
   nodePaths: string[];
   edges: DependencyGraphEdge[];
   cycles: string[][];
+  /** Files whose references are unconfirmed, sorted by path. */
+  unknownFiles: UnknownFile[];
+  /** Display value derived from `unknownFiles`; `unsupported` when no adapter read the project. */
   certainty: AnalysisCertainty;
 }
+
+/** An analysis axis whose conclusions a diagnostic can change. */
+export type AnalysisAxis = (typeof ANALYSIS_AXES)[number];
 
 export interface SnapshotDiagnostic {
   code: string;
   message: string;
   path?: string;
-  affects?: readonly ('dependencies' | 'boundaries' | 'verification')[];
+  /** Axes whose conclusions this diagnostic can change; `[]` means none. */
+  affects: readonly AnalysisAxis[];
   causeId?: string;
   specifier?: string;
+  /** What the caller does next; carried into the tool diagnostic unchanged. */
+  nextAction: string;
+}
+
+/** One adjudicated item whose edge a file's valid references include (spec §4.5). */
+export interface NormalizedAdjudication {
+  /** `sourceText ?? specifier`, exactly as the side-table item names it. */
+  reference: string;
+  /** Project-relative path the adopted edge points at. */
+  resolvedPath: string;
+  /** Digest of the judged lines, so a freeze records what it applied. */
+  lineDigest: string;
+}
+
+/** One reference, reduced to what a conclusion can rest on. */
+export interface NormalizedReference {
+  /** `sourceText ?? specifier`, as the record spells it. */
+  reference: string;
+  /** Reference kind, as the provider reported it. */
+  kind: DependencyReferenceKind;
+  /** Project-relative path it resolves to; only in-project edges are kept. */
+  resolvedPath: string;
+}
+
+/**
+ * One file's valid references, normalized so a review can freeze them (spec §9).
+ *
+ * Valid means the record's references plus the adopted ones, which is what the
+ * rules run on; only in-project resolutions are kept, because an `external` or
+ * `unresolved` spelling difference carries no edge and would otherwise
+ * invalidate a whole review for nothing.
+ */
+export interface NormalizedFileFacts {
+  /** Project-relative POSIX path of the file these facts describe. */
+  path: string;
+  /**
+   * The file's facts state when the review froze it.
+   *
+   * An empty `references` means two different things — the store read the file
+   * and found no edge (`exact`), or no provider could read it at all
+   * (`tool-error`, which the prepare gate lets through). A comparison that
+   * cannot tell them apart demands an edge from a file nothing can extract,
+   * and nothing the caller does clears that (P5).
+   *
+   * Derived from the same constant as core's `FactsFileState`; the types are
+   * the same set, named twice because this one may not depend on core.
+   */
+  state: (typeof FACTS_FILE_STATES)[keyof typeof FACTS_FILE_STATES];
+  /** Its in-project edges, sorted, so two runs digest the same bytes. */
+  references: NormalizedReference[];
+  /** The judgements among them, empty when none applied. */
+  adjudications: NormalizedAdjudication[];
 }
 
 export interface LegacyCriteriaLedgerEvidence {
@@ -210,6 +292,31 @@ export interface ProjectSnapshot {
   verification: VerificationProjectAnalysis;
   legacyCriteriaLedger: LegacyCriteriaLedgerEvidence | null;
   diagnostics: SnapshotDiagnostic[];
+  /**
+   * The valid references behind this snapshot, one entry per `exact` file.
+   *
+   * Carried so a review can freeze what it judged (spec §9) without reading
+   * the store a second time, which could answer differently. Empty when the
+   * dependency axis was not collected.
+   */
+  normalizedFacts: NormalizedFileFacts[];
+  /**
+   * Source files the declared facts scope drops.
+   *
+   * An absence proved over files nobody looked at is not the same claim as one
+   * proved over all of them, and only this number tells the two apart. It
+   * changes no conclusion, so it is not a diagnostic and not a hash input.
+   *
+   * Counted as what the built-in default scope (the adapters' source
+   * extensions) would have covered minus what `facts.covers`/`facts.excludes`
+   * leaves in scope — a document or a manifest was never a candidate for a
+   * reference fact, and counting it would put a non-zero "unread" number on
+   * every project that declares nothing. Zero when the declared scope drops no
+   * source file. Declared limit: a language outside the default extensions
+   * enters the scope only through `facts.covers`, so a file of that language
+   * the project never declared does not count as dropped.
+   */
+  filesOutsideFactsScope: number;
   /**
    * What this snapshot actually collected. An axis reported false carries an
    * empty value with `unsupported` certainty — read this before trusting an

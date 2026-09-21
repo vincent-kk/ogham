@@ -9,15 +9,17 @@
 - 판단 우선순위: 1. exact snapshot evidence 2. 경계 보존 3. 자동화.
 - 모든 machine path 연산은 portable API를 사용한다.
 - organ은 leaf로 유지하고 분리 함수 파일을 organ 안에 flat하게 둔다.
-- evidence가 이름·계약·specifier를 확정하지 못하면 unresolved로 남긴다.
+- evidence가 이름·계약을 확정하지 못하면 unresolved로 남긴다. import 변경 요구는 불러야 할 파일(`requiredResolvedPath`)로 표현하고 postcondition은 해석 결과로만 검증한다. 제안 specifier를 합성할 수 없으면 호출자가 쓴다.
+- `moves`는 실행 순서이고 `affectedImports`는 모든 move 뒤의 최종 배치 기준이다. 자동으로 순서를 정할 수 없는 겹침만 unresolved로 남긴다.
 
 ## Boundaries
 
 ### Always do
 
-- LCA, source/target, basis와 decision reason을 각 move에 기록
+- LCA, source/target, basis와 decision reason을 각 move에 기록하고, 사유·충돌·finding마다 message와 nextAction을 싣기
 - independent fractal에 문서 두 역할과 adapter-derived entry 역할을 요구
 - non-exact graph와 stale snapshot을 PASS가 아닌 finding으로 반환
+- 계획이 싣거나 읽는 경로는 symlink를 따라간 실제 위치가 project root 안일 때만 다루기(`isPhysicallyWithin`)
 
 ### Ask first
 

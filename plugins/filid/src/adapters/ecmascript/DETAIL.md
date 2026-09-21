@@ -4,38 +4,26 @@
 
 - adapter는 현재 생태계 source file과 package/framework evidence를 탐지한다.
 - source discovery는 git이 무시하고 추적하지도 않는 파일을 제외한다. 이 결과가 dependency와 verification evidence의 입력이므로, 무시되는 build 산출물이 discovery에 남으면 DAG와 verification 계약이 산출물을 대상으로 판정한다. git이 없거나 project root가 work tree 밖이면 제외 없이 전부 탐지한다.
-- module, executable, framework과 manifest entry point를 exact path와 adapter ID로 보고한다.
+- source discovery는 symlink를 따라가지 않는다. `discoverSourceTree()`는 소스 파일과 함께, 같은 순회에서 건너뛴 symlink 중 실제 위치가 project root 밖인 것을 돌려준다. 대상은 소스 확장자를 가진 파일 symlink와 제외 이름이 아닌 디렉터리 symlink다. root 안을 가리키는 symlink는 대상이 실제 경로로 이미 탐지되므로 돌려주지 않고, 끊어진 symlink와 loop는 분석할 내용이 없으므로 돌려주지 않는다. 무시·제외 규칙은 source discovery와 같다.
+- module, executable, framework과 manifest entry point를 exact path와 adapter ID로 보고한다. descriptor는 호출자 소유의 새 객체다 — 스캐너가 결과를 그 자리에서 정렬·필터하므로 공유 배열을 돌려주면 다음 호출자가 앞 호출자의 변형을 본다.
+- 요청 스코프 메모가 열려 있으면 소스 트리 워크, git ignore 질의, 디렉터리별 entry point 판독은 한 스코프 안에서 각각 한 번만 실제로 일어난다. 키는 **호출자가 준 경로 문자열 그대로**이며 entry point는 정렬된 override 목록까지 포함한다. 결과 경로가 그 문자열에 `join`으로 붙어 만들어지므로, 키를 해석된 형태로 정규화하면 같은 디렉터리를 다른 철자로 부른 호출자가 남의 철자를 받는다. override는 멤버십으로만 읽혀 순서가 결과를 바꾸지 않으므로 키에서 정렬한다. 스코프가 없으면 매번 파일 시스템을 다시 읽는다. 한 스냅샷이 같은 트리를 여러 번 읽는 것은 지금도 "읽는 동안 트리가 움직이지 않는다"를 전제하므로, 메모는 그 전제를 완화하지 않고 강제한다.
 - 디렉터리에 `package.json`이 있으면 그것을 `kind: 'manifest'` entry point로 보고한다. 이 생태계에서 패키지의 공개 표면을 선언하는 자리는 `exports`·`main`·`bin`이고, 배럴이 없는 패키지 루트도 그 선언으로 소비자를 받는다 — 진입점이 없는 것이 아니라 module 파일이 아닌 곳에 있는 것이다. 상위 디렉터리의 `package.json`은 대상이 아니다(그건 framework 탐지용 조회다).
 - manifest는 `kind: 'module'`이 아니다. module은 분류기가 읽는 유일한 kind이므로, manifest가 module이면 `package.json`을 가진 모든 디렉터리가 fractal이 된다 — 저장소 루트까지 포함해서다. `surface`는 선언을 열거할 수 있으므로 `enumerated`이고, `framework`의 `opaque`를 쓰면 패키지 루트마다 영구 `entry-point-surface` 경고가 생긴다.
 - manifest entry의 inspection은 lexical scan이 아니라 JSON 파싱이다. `exports` 키 집합이 named surface이며, `exports`가 없으면 `main`·`bin`이 선언한 단일 진입을 `.` 하나로 보고한다.
 - 파싱은 되었으나 세 필드가 모두 없는 매니페스트는 **표면이 빈 `exact`**다. 스펙시파이어로 가져올 것이 없다는 것은 확정된 사실이며, 그것을 `indeterminate`로 보고하면 아무것도 노출하지 않기로 한 private 패키지마다 영구 `entry-point-surface` 경고가 생긴다. `indeterminate`는 파싱이 실패해 선언을 읽지 못한 경우로 한정한다 — "노출하지 않는다"와 "읽을 수 없다"는 다른 사실이다.
 - config가 이 adapter에 전달한 exact peer filename은 declared entry override로 해석하며 **`kind: 'module'`로 보고하지 않는다.** module은 adapter가 스스로 알아본 module index에만 쓰는 kind이고, 분류기는 그 kind 하나만 읽는다. override가 module이면 config 한 줄이 디렉터리를 fractal로 바꿔버린다.
 - override는 `kind: 'executable'`, `surface: 'enumerated'`로 보고한다. `framework`는 surface를 `opaque`로 끌어내려 정당한 override마다 영구적인 `entry-point-surface` 경고를 만든다 — override는 그 규칙의 입력이지 위반 원인이 아니다.
-- entry point의 named exports, direct declarations와 certainty를 lexical scan으로 판정한다.
-- static/dynamic import와 re-export 중 project-internal dependency를 추출하고 local specifier를 정규화한다.
-- package-level external dependency는 project DAG 후보에서 제외하고, 해석할 수 없는 local dependency는 `resolvedPath: null`로 보존한다.
-- local specifier의 마지막 접미사가 지원 source 확장자인 경우에만 확장자를 치환한다. `.helpers`, `.composition.fixtures` 같은 basename은 보존하며, 원래 경로와 directory index 탐색도 유지한다.
-- strings, comments와 template text 안의 가짜 syntax를 dependency나 export로 세지 않는다.
-- `import.meta`는 dependency가 아니다. `import` 뒤에 `.`이 오면 메타 속성 참조이므로 뒤따르는 문자열을 specifier로 읽지 않는다. 이를 구분하지 않으면 `join(dirname(fileURLToPath(import.meta.url)), '../..')` 같은 경로 계산이 해석 불가 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
-- re-export 탐지는 export 절 형태로 한정한다. `export {…} from`과 `export * [as x] from`(각각 `type` 접두 허용)에서 절이 닫히는 바로 그 위치의 `from` 식별자만 재export 키워드다. 위치를 보지 않고 뒤따르는 아무 `from` 토큰이나 채택하면, `from`이라는 파라미터를 쓰는 exported 함수의 다음 문자열 리터럴이 유령 dependency로 잡혀 그래프 전체가 `indeterminate`가 된다.
-- `.each`와 호출 괄호 사이의 TypeScript 타입 인자 목록은 table이 아니다. `it.each<T>([…])`에서 `<…>`를 건너뛰고 그 뒤의 정적 table을 읽는다. 건너뛰지 않으면 정적 배열 리터럴이 동적 table로 잡혀 파일 전체의 case count가 `indeterminate`가 된다 — 타입 인자는 row 수에 아무 영향이 없다.
-- 배열 table의 spread는 바깥 행을 확장할 때만 계수를 미확정으로 만든다. 행 내부 객체·배열·함수 인자의 spread와 문자열·주석 속 `...`는 바깥 행 수를 바꾸지 않으므로 정적 계수를 유지한다.
-- 같은 파일에서 사용보다 앞에 선언한 최상위 단일 `const NAME = [...]` table을 제한적으로 해석한다. 초기값은 직접 배열 리터럴이며 선택적인 `as const` 뒤에서 선언이 끝나야 한다. `as const`만으로 런타임 불변성을 가정하지 않는다.
-- 상수 table의 모든 이름 사용을 확인한다. 지원하는 `.each`의 직접 인자, `for (const element of NAME)`, 단일 요소 인자를 받는 arrow callback의 표준 `.map`만 허용한다. 변경, alias, 외부 전달, export, 이름 가려짐 또는 그 밖의 사용은 indeterminate로 남긴다. `eval`·`Function` identifier가 있는 소스도 동적 접근을 배제할 수 없어 지원하지 않는다. import·중첩 선언·동적 초기값·범용 스코프 해석은 지원하지 않는다.
-- 지원 불가능한 alias·동적 표현은 unsupported/indeterminate evidence를 남긴다.
-- verification 동작은 작업 2의 15/32와 contract-marker 계약을 구현한다.
-- verification role은 **파일명 접미사가 후보를 고르고 파일 내용이 확정한다.** `.spec`/`.test` stem은 후보일 뿐이며, 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`다. 접미사만으로 역할을 주면 프로덕션 파일을 `x.spec.ts`로 개명하는 것만으로 boundary와 DAG 면제를 얻는다 — 개명은 증거가 아니다.
+- verification file discovery는 **이름만** 읽는다. `.spec`/`.test` stem과 지원 확장자를 가진 파일이 후보이고, 그 후보가 실제로 verification인지는 파일의 facts 레코드가 말한다 — adapter는 파일을 열지 않는다. 개명만으로 boundary·DAG 면제를 얻지 못하는 것은 레코드의 role이 내용에서 나오기 때문이다(`src/factsExtractor/DETAIL.md`).
+- entry point inspection은 **manifest만** 읽는다. 소스 진입점의 표면은 그 파일의 레코드에서 오고, adapter에 물으면 `unsupported`로 답한다.
 
 ## API Contracts
 
+
 - `ecmascriptStructureAdapter: StructureAdapter` — registry에 등록되는 초기 structure adapter.
-- `scanLexicalTokens(source)` — comment/string/template와 delimiter nesting을 보존한 lexical token stream.
-- `extractDependencyReferences(filePath)` — adapter 중립 `DependencyReference[]`.
-- `findEntryPoints(directoryPath, overrides?)` — module/executable/framework/manifest/configured descriptor 배열.
-- `ecmascriptVerificationAdapter` — spec/test role, semantic case count와 contract group marker를 분석하는 초기 verification adapter.
-- `countSemanticCases(source)` — 일반/skip/todo/property와 정적 parameterized rows를 의미론적 case 수로 계산하고 동적 구조를 indeterminate로 반환.
-- `extractContractGroupIds(source)` — comment의 `filid:contract` marker 추출.
-- `ECMASCRIPT_ADAPTER_ID` — config와 evidence가 공유하는 안정 adapter ID.
+- `findEntryPoints(directoryPath, overrides?)` — module/executable/framework/manifest/configured descriptor 배열. 매 호출이 새 배열과 새 descriptor를 돌려준다.
+- `ecmascriptVerificationAdapter` — 이름으로 verification 후보를 찾는 초기 verification adapter.
+- `SOURCE_EXTENSIONS`·`ECMASCRIPT_ADAPTER_ID` 등 `structure/ecmascriptConventions.ts`의 생태계 상수 — 이 디렉터리가 확장자·entry 이름·framework 이름의 유일한 출처다.
+- `verificationRoleFromName(filePath)` — 이름이 제안하는 role. 파일을 열지 않는다.
 
 ## Acceptance Criteria
 
@@ -44,51 +32,46 @@
 - package 또는 지원 source evidence가 있으면 양수 confidence를 반환한다.
 - 알 수 없는 파일만 있는 project는 ownership을 주장하지 않는다.
 - git이 무시하는 source file은 `discoverSourceFiles()` 결과에 없고, ignore pattern에 걸려도 추적되는 파일은 남는다. git이 없으면 전부 남는다.
+- root 밖을 가리키는 소스 파일 symlink와 디렉터리 symlink는 `discoverSourceFiles()`에 없고 `discoverSourceTree()`의 `unfollowedLinks`에 있다. `discoverSourceTree()`의 `files`는 `discoverSourceFiles()`와 같다. root 안을 가리키는 symlink는 둘 다에 없다.
 
-### AC-ecmascript-structure — entry와 dependency
+### AC-ecmascript-structure — entry point
 
-- module·executable·framework·manifest entry point를 구분하고 named surface를 검사한다.
+- module·executable·framework·manifest entry point를 구분한다.
 - `package.json`을 가진 디렉터리는 `kind: 'manifest'` descriptor를 얻고, 그 kind는 분류를 유발하지 않는다 — `package.json`만 있는 디렉터리는 organ으로 남는다.
 - manifest inspection은 `exports` 키를 named surface로 반환하고, `exports` 없이 `main`만 있으면 `.` 하나를 반환한다.
 - 선언이 하나도 없는 매니페스트는 빈 표면의 `exact`이고, 파싱 실패만 `indeterminate`다.
+- 소스 진입점을 물으면 `unsupported` 표면을 돌려준다 — 그 표면은 레코드에서 온다.
 - 다른 adapter ID의 override와 섞지 않고 전달된 exact filename만 인식한다.
 - override로 주입된 경로는 `module`이 아닌 kind로 보고하고, 같은 호출에서 실제 module index는 계속 `module`로 보고한다.
-- 주석과 문자열 안의 가짜 import/export를 무시한다.
-- 외부 package import는 project DAG를 indeterminate로 만들지 않으며 해석되지 않은 local import는 숨기지 않는다.
-- dotted basename은 지원 확장자를 덧붙여 해석하며, 짧은 이름의 형제 파일이 있어도 그 파일로 잘못 연결하지 않는다. 명시적 source 확장자 치환과 directory index 탐색을 유지한다.
-- `import.meta.url`을 쓰는 경로 계산은 dependency로 잡히지 않는다.
-- `from`이라는 파라미터를 쓰는 exported 함수는 re-export dependency를 만들지 않고, `export * from`·`export * as ns from`·`export type {…} from`은 계속 추출된다.
 
-### AC-ecmascript-portability — 외부 parser 불필요
 
-- Node 20과 repository dependency만으로 adapter 테스트가 통과한다.
-
-### AC-ecmascript-verification — Semantic case evidence
-
-- 정적 parameterized row와 suite multiplier를 exact count에 반영한다.
-- 타입 인자를 동반한 `it.each<T>([…])`의 정적 row도 exact count에 반영한다. 타입 인자 안의 함수 타입도 table 판정을 흐리지 않는다.
-- 행 내부 객체·배열·함수 인자의 spread와 문자열·주석 속 `...`가 있어도 고정 행 수와 suite multiplier를 exact count에 반영한다.
-- 바깥 배열 table의 spread는 indeterminate로 유지하며, 별도로 확인한 일반 case는 known lower bound에 남긴다.
-- 허용한 읽기 사용만 가진 최상위 const 배열은 직접 table과 같은 행 수로 계수한다. 반복 참조와 parameterized suite에도 같은 수를 적용한다.
-- 배열 값의 문자열이 괄호나 쉼표여도 문법 구분자로 취급하지 않고 한 행으로 계수한다.
-- 상수 table의 길이를 확신할 수 없는 변경·참조 전달·이름 가려짐·동적 초기값은 indeterminate로 보존한다.
-- 동적 table, alias와 알 수 없는 문법은 indeterminate이며 skip, todo와 property declaration은 각각 1 case다.
-
-### AC-ecmascript-verification-role — 내용이 역할을 확정한다
+### AC-ecmascript-verification-role — 이름이 후보를 고른다
 
 - `.spec`/`.test` 접미사와 지원 확장자를 가진 파일만 후보가 된다.
-- 후보 중 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`이며 `discover()` 결과에서 빠진다 — 따라서 boundary·DAG 면제를 받지 못한다.
-- case를 담은 후보는 종전대로 `.spec` → `spec-document`, `.test` → `test-record`다.
-- count가 `indeterminate`인 후보는 verification으로 남는다. 셀 수 없는 것과 없는 것은 다르다.
+- 후보는 내용과 무관하게 `discover()` 결과에 남는다. 그 파일이 정말 verification인지는 레코드의 role이 가르며, 개명만 한 프로덕션 파일은 role이 `unsupported`라 분석에서 빠진다.
+- 상위 디렉터리와 dependency 디렉터리는 후보에서 제외한다.
+
+
+## Boundary Exemptions
+
+### `structure/` — 생태계 상수와 entry point 발견
+
+- **Consumers**: `src/factsExtractor/**`
+- **Direct import**: `allowed` — `structure/ecmascriptConventions.ts`, `structure/findEntryPoints.ts`, `structure/inspectManifestEntry.ts`
+- **Reason**: 파싱은 추출 프로그램이 소유하지만 확장자·entry 이름 같은 생태계 상수는 이 디렉터리가 유일한 출처다(INTENT의 Never do). 레코드의 `entrySurface`는 manifest 파일에 대해 manifest 선언을 실어야 하므로 그 두 모듈도 함께 필요하다. 진입점은 discovery를 함께 노출하고 그 ignore 필터가 `git ls-files`를 하위 프로세스로 부르는데, 추출기는 번들 가드로 "프로세스 시작 0"을 강제하므로 진입점을 지날 수 없다. 상수를 복제하면 두 벌이 말없이 갈라진다.
+
+### `verification/verificationRoleFromName.ts` — 이름이 제안하는 role
+
+- **Consumers**: `src/factsExtractor/**`
+- **Direct import**: `allowed`
+- **Reason**: `.spec`·`.test` 접미사는 이 디렉터리가 소유하는 생태계 규칙이고, 서버의 discovery와 추출기의 role 확정이 **같은 규칙**을 써야 한다. 두 벌로 두면 이름 규칙이 갈려 discovery가 고른 후보와 레코드의 role이 서로 다른 파일을 말하게 된다.
 
 ## History
 
-- 2026-09-06 — 최상위 const 배열 참조의 제한적 해석을 추가했다. 공급자 목록을 여러 테스트에서 공유하는 정적 table을 계수하되, 선언의 길이만 믿지 않고 허용한 사용 형태를 확인한다.
-- 2026-09-06 — spread를 바깥 배열 table의 행 확장 위치에서만 미확정으로 취급한다. 배열 원문 전체의 `...`를 찾는 방식은 행 내부 객체 속성 확장까지 동적 행으로 오인했다.
-- 2026-08-23 — `.each`와 호출 괄호 사이의 TypeScript 타입 인자 목록을 건너뛰도록 정적 table 판정을 고쳤다. 타입 인자는 row 수를 바꾸지 않는데도 table을 못 읽게 만들어 파일 전체를 indeterminate로 떨어뜨리고 있었다.
-- 2026-08-18 — re-export 탐지를 export 절 형태로 한정했다. `from`은 위치가 키워드를 만든다 — 절 경계 밖의 `from` 식별자는 재export가 아니다.
-- 2026-07-28 — verification role 판정을 접미사 후보 + 내용 확정으로 좁히고, source discovery에서 git이 무시하는 경로를 제외했다.
+- 2026-09-20 — 파일 내용을 읽는 모듈(lexer, 참조 추출, entry surface 판독, case 계수, contract marker)의 소유를 추출 프로그램으로 넘겼다. 서버가 소스를 해석하지 않는다는 것이 이 단계의 계약이고(스펙 §11-8), adapter에 남는 일은 파일과 entry point의 발견이다.
+- 2026-09-20 — discovery와 entry point 판독을 요청 스코프 메모 뒤에 두고, entry point descriptor를 호출자 소유 복사본으로 돌려준다. 같은 디렉터리를 파일 수만큼 다시 읽고 있었는데, 캐시를 공유 배열로 돌려주면 결과를 정렬하는 스캐너가 캐시를 오염시킨다.
+- 2026-07-28 — source discovery에서 git이 무시하는 경로를 제외했다.
 
 ## Last Updated
 
-2026-09-16
+2026-09-20 — 파싱 소유를 추출기로 넘기고 discovery·manifest만 남겼다.

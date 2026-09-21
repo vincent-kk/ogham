@@ -66,18 +66,22 @@ const VERIFICATION_FILES: readonly VerificationFileAnalysis[] = [
   },
 ];
 
+const VIOLATION_SUGGESTION = 'Keep each contract group in one spec document.';
+
 const VERIFICATION_VIOLATIONS: readonly VerificationViolation[] = [
   {
     ruleId: BUILTIN_RULE_IDS.SPEC_FRAGMENTATION,
     path: SPEC_PATH_B,
     severity: ERROR_SEVERITY,
     message: VIOLATION_MESSAGE,
+    suggestion: VIOLATION_SUGGESTION,
   },
   {
     ruleId: BUILTIN_RULE_IDS.SPEC_CONTRACT_LINK,
     path: SPEC_PATH_A,
     severity: ERROR_SEVERITY,
     message: VIOLATION_MESSAGE,
+    suggestion: VIOLATION_SUGGESTION,
   },
 ];
 

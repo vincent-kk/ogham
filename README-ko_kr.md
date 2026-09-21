@@ -72,20 +72,19 @@ agy의 알려진 한계: **훅이 전혀 동작하지 않습니다**(agy의 훅 
 
 **제공 컴포넌트:**
 
-| 컴포넌트 | 수량     | 예시                                                                    |
-| -------- | -------- | ----------------------------------------------------------------------- |
-| Skills   | 19       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline` |
-| MCP 도구 | 18       | 구조 분석, 드리프트 감지, AST 메트릭, 기술 부채 추적                    |
-| Agents   | 14       | Architect, Implementer, QA Reviewer, 7인 페르소나 리뷰 위원회           |
-| Hooks    | 4 events | SessionStart, PreToolUse, SubagentStart, UserPromptSubmit               |
+| 컴포넌트 | 수량     | 예시                                                                       |
+| -------- | -------- | -------------------------------------------------------------------------- |
+| Skills   | 12       | `/filid:setup`, `/filid:cross-review`, `/filid:scan`, `/filid:pipeline`    |
+| MCP 도구 | 5        | `project_setup`, `fractal_inspect`, `restructure`, `review_state`, `facts` |
+| Hooks    | 3 events | SessionStart, PreToolUse, UserPromptSubmit                                 |
 
 **주요 기능:**
 
-- **다중 페르소나 합의 리뷰** — 7인 페르소나 위원회(architect, knowledge manager, SRE, business driver, product manager, design/HCI, adjudicator)가 PR 변경사항에 대해 합의를 도출합니다
+- **2역 변경 리뷰** — `cross-review`가 변경된 파일을 reviewer와 독립 verifier로 검토하고 그룹마다 판정 하나를 봉인합니다
 - **자동 규칙 시행** — INTENT.md 50줄 제한, 3-Tier 경계 섹션 검증, organ 디렉토리 보호, 네이밍 컨벤션 검사
 - **구조적 드리프트 감지** — 코드 변경이 문서화된 구조를 벗어나면 DAG 분석으로 감지하고 자동 동기화
-- **AST 기반 분석** — `@ast-grep/napi`로 모듈 응집도(LCOM4), 순환 복잡도, 순환 의존성 검출
-- **End-to-end 파이프라인** — `pipeline`이 PR 생성 → 다중 페르소나 리뷰 → 리졸브 → 재검증을 연결
+- **확신을 밝히는 증거** — 모든 의존 사실이 `exact | indeterminate | unsupported`를 달고 다니며, 순환 검출은 그렇게 만들어진 DAG 위에서 돕니다
+- **End-to-end 파이프라인** — `pipeline`이 PR 생성 → cross-review → 리졸브 → 재검증을 연결
 
 ```
 # 프로젝트에 FCA-AI 초기화

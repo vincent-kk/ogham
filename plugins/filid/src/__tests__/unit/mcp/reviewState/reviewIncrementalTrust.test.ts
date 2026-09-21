@@ -8,6 +8,7 @@ import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
 import { resolveReviewStatePaths } from '../../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
 import type { ReviewStateRecord } from '../../../../mcp/tools/reviewState/state/reviewStateTypes.js';
 
+import { prepareWithFacts } from './helpers/prepareWithFacts.js';
 import { completeIncrementalReview } from './helpers/completeIncrementalReview.js';
 import { configureReviewGroups } from './helpers/configureReviewGroups.js';
 import {
@@ -18,9 +19,9 @@ import { runReviewStateFixtureGit } from './helpers/runReviewStateFixtureGit.js'
 
 /** Each test owns committed inputs and complete origin artifacts. */
 let fixture: ReviewStateSealFixture;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 2);
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 2);
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -37,7 +38,7 @@ afterEach(() => {
  * @returns The real prepare response.
  */
 function prepare(force = false) {
-  return handleReviewState({
+  return prepareWithFacts({
     action: 'prepare',
     projectRoot: fixture.projectRoot,
     changeContext: 'Review assigned changes.',

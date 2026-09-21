@@ -11,10 +11,10 @@ import { createReviewStateSealFixture } from './helpers/createReviewStateSealFix
 import { readPreparedReviewState } from './helpers/readPreparedReviewState.js';
 
 /** Completed committed-source opinions whose worktree can change independently. */
-let fixture: ReturnType<typeof createReviewStateSealFixture>;
-beforeEach(() => {
-  fixture = createReviewStateSealFixture();
-  configureReviewGroups(fixture.projectRoot, 1);
+let fixture: Awaited<ReturnType<typeof createReviewStateSealFixture>>;
+beforeEach(async () => {
+  fixture = await createReviewStateSealFixture();
+  await configureReviewGroups(fixture.projectRoot, 1);
 });
 afterEach(() => {
   rmSync(fixture.projectRoot, { recursive: true, force: true });
@@ -99,7 +99,7 @@ describe('seal current worktree', () => {
     },
   );
 
-  it('preserves a sealed cache and returns stale after a new dirty path', async () => {
+  it('preserves a sealed cache and reports the new dirty path with its verdict', async () => {
     const prepared = await handleReviewState({
       action: 'prepare',
       projectRoot: fixture.projectRoot,
@@ -125,11 +125,13 @@ describe('seal current worktree', () => {
       action: 'seal',
       projectRoot: fixture.projectRoot,
     });
-    expect(repeated.summary.disposition).toBe('stale');
-    expect(repeated.summary.verdict).toBeUndefined();
-    expect(repeated.diagnostics).toContainEqual(
-      expect.objectContaining({ code: 'review-worktree-stale' }),
+    expect(repeated.summary.disposition).toBe('sealed');
+    expect(repeated.summary.verdict).toBe('APPROVED');
+    const stale = repeated.diagnostics.find(
+      ({ code }) => code === 'review-worktree-stale',
     );
+    expect(stale?.nextAction).toContain('uncommitted changes are outside it');
+    expect(`${stale?.message} ${stale?.nextAction}`).not.toMatch(/\bprepare\b/);
     expect(paths.map((path) => readFileSync(path, 'utf8'))).toEqual(bytes);
   });
 });

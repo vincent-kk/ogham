@@ -78,6 +78,9 @@ export function renderVerifyBrief(input: RenderVerifyBriefInput): string {
     '---',
     `group: ${input.group.id}`,
     `source_hash: ${input.sourceHash}`,
+    ...(input.generationId === undefined
+      ? []
+      : [`generation_id: ${input.generationId}`]),
     `output: ${input.group.verifyPath}`,
     '---',
     '',

@@ -1,8 +1,9 @@
 import type { FractalTree } from '../../../types/fractal.js';
+import { compareByBytes } from '../../../lib/compareByBytes.js';
 
 export function snapshotStructureInput(tree: FractalTree): unknown[] {
   return [...tree.nodes.values()]
-    .sort((left, right) => left.path.localeCompare(right.path))
+    .sort((left, right) => compareByBytes(left.path, right.path))
     .map((node) => ({
       path: node.path,
       type: node.type,

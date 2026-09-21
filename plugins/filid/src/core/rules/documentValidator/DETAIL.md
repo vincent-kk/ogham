@@ -12,6 +12,7 @@
 - target path, 각 consumer 항목과 `Direct import` 값은 code span으로 감쌀 수 있고, 파서는 감싼 backtick을 벗긴 값을 읽는다. markdown formatter가 `__tests__`를 강조 문법으로 바꿔 버리므로 code span이 이름을 원문 그대로 지키는 유일한 표기이며, backtick이 없는 표기도 계속 읽는다.
 - `Reason`은 산문이라 code span을 벗기지 않는다. 그 안의 backtick은 저자가 쓴 그대로 남는다.
 - `Reason`이 비면 면책이 아니라 미충족 계약이므로 error다.
+- `missing-boundaries`, `duplicate-id`, acceptance group 없음(`missing-field`)의 문장은 다음 행동을 직접 담는다. hook deny 문장도 같은 문장을 그대로 쓴다.
 
 ## API Contracts
 
@@ -27,6 +28,7 @@
 
 - 필수 DETAIL section과 한 개 이상의 고유 acceptance group이 있으면 validation을 통과한다.
 - section, group ID 또는 title 누락과 duplicate ID는 error다.
+- `missing-boundaries`, `duplicate-id`, acceptance group 없음(`missing-field`) 메시지는 각각 다음 행동을 담는다: 누락된 tier를 섹션으로 추가하라, 그룹 이름을 바꿔 ID를 유일하게 하라, `## Acceptance Criteria` 아래 `### <stable-id> — <title>`을 추가하라.
 
 ### AC-detail-restructure — Append-only prohibition
 

@@ -12,6 +12,7 @@ export type {
   ConfigMigrationResult,
   ConfigPatchIssue,
   ConfigPatchValidation,
+  ConfigWarning,
   InitProjectOptions,
   InitResult,
   LoadConfigResult,
