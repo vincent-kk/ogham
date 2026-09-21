@@ -1,6 +1,7 @@
 import type { ReviewBlocker } from '../../verdict/reviewVerdictTypes.js';
 
 import { escapeReviewBlockerText } from './escapeReviewBlockerText.js';
+import { renderCodeSpan } from './renderCodeSpan.js';
 
 /**
  * Render one identifiable unresolved question and every preserved resolution proposal.
@@ -61,7 +62,7 @@ export function renderBlockerCard(blocker: ReviewBlocker): string {
     '',
     ...blocker.sources.map(
       (source) =>
-        `- ${escapeReviewBlockerText(source.artifactPath)}${source.pointer !== undefined ? ` — JSON pointer ${escapeReviewBlockerText(source.pointer || '/')}` : ''}${source.anchor ? ` — section ${escapeReviewBlockerText(source.anchor)}` : ''}`,
+        `- ${renderCodeSpan(source.artifactPath)}${source.pointer !== undefined ? ` — JSON pointer ${renderCodeSpan(source.pointer || '/')}` : ''}${source.anchor ? ` — section ${escapeReviewBlockerText(source.anchor)}` : ''}`,
     ),
   ].join('\n');
 }

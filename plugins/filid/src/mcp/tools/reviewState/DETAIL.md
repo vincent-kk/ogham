@@ -252,7 +252,8 @@
 - 첫 seal은 현재 dirty 경로를 prepare와 같은 파싱·review 산출물 제외·분류·상한·hash 규칙으로 다시 관측하여 fold·report·blocker·sealed state에 사용한다. sealed cache의 dirty path hash 또는 분류가 달라지면 `review-worktree-stale` 진단으로 반환하고 기존 artifact와 verdict는 덮어쓰지 않는다.
 
 - 신뢰 검사에 실패한 group의 gap·verifier state·observation은 canonical unresolved evidence에 복사하지 않는다. 해당 group은 artifact trust 진단으로만 판정 보류 원인을 설명한다.
-- fix request의 외부 설명·경로·규칙·branch는 줄바꿈과 Markdown 제어 문자를 escape한 데이터로 렌더링하며 새 제목·링크·FIX 항목을 만들 수 없다.
+- fix request의 외부 설명·규칙·branch는 줄바꿈과 Markdown 제어 문자를 escape한 데이터로 렌더링하며 새 제목·링크·FIX 항목을 만들 수 없다.
+- **경로와 JSON pointer는 escape하지 않고 code span으로 싣는다.** prose escape는 `\`·`:`·`_`를 바꿔 존재하지 않는 경로를 기록하고 pointer의 `~0`·`~1`을 다시 escape해 의미를 바꾼다. code span은 안쪽 backtick run보다 긴 fence로 닫고 줄바꿈과 제어 문자를 공백으로 접으므로, 값을 그대로 싣으면서도 새 제목·링크·항목을 만들 수 없다.
 
 - current hash와 session이 없으면 seal하지 않고, reviewable unit이 있는데 merged opinion이 하나도 없으면 `review-opinions-missing`으로 indeterminate다. 단, documents-only 또는 source-dirty worktree는 reviewer를 실행하지 않는 경로이므로 누락 group evidence를 포함해 `INCONCLUSIVE`로 봉인한다.
 - 현재 검증 정책·opinion 의미 검증·complete·review hash·verify hash·review/verify 결합 중 하나라도 깨진 group은 trusted input이 아니며 이유가 unresolved evidence에 남는다.
@@ -270,7 +271,7 @@
 - Evidence incomplete, dirty worktree, pending coverage, artifact trust, review gaps, verifier uncertainty and decision coverage are retained independently of disposition. Confirmed/refuted findings and neutral observations are not blockers. Same-cause aggregation preserves each affected group/path/detail and all source references.
 - 결정적 BLK ID와 정확한 원인별 중복 제거는 모든 출처를 보존한다. 동일 path의 다른 규칙을 합치지 않으며, 독립 출처의 상충하는 해소 제안은 분류 필요로 남긴다.
 - 별도 보고서에는 전 항목의 질문·현재 모르는 것·필요 증거·다음 행동·담당 제안·해소 조건·원본 참조가 있다. report/comment 앞부분은 같은 ID의 최대 5개 요약과 잔여 수·전체 위치를 표시한다. missing metadata를 구체적인 해결책으로 꾸미지 않는다.
-- actor 설명은 비실행 데이터로 escape하고 canonical artifact/anchor만 탐색 링크로 만든다. 사람 확인이나 안내문 편집만으로 판정을 해제하지 않으며 필요한 새 근거의 검증으로 재판정한다.
+- actor 설명은 비실행 데이터로 escape하고 canonical artifact/anchor만 탐색 링크로 만든다. blocker source의 artifact 경로와 JSON pointer는 code span으로 그대로 싣는다. 사람 확인이나 안내문 편집만으로 판정을 해제하지 않으며 필요한 새 근거의 검증으로 재판정한다.
 - 새 artifact에도 containment·symlink guard·stale cleanup을 적용하고 산출물을 모두 쓴 뒤 state를 마지막에 기록한다. cached 호출은 바이트를 보존하며 sidecar 유실을 자동 재준비로 숨기지 않는다.
 
 ### AC-review-assess — 관측 사실만

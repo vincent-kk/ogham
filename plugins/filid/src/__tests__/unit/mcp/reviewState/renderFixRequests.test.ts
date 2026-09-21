@@ -60,8 +60,8 @@ describe('renderFixRequests', () => {
       '## FIX-001:',
       '## FIX-002:',
     ]);
-    expect(output.indexOf('## FIX-001: USR-Z at src/z.ts')).toBeLessThan(
-      output.indexOf('## FIX-002: USR-A at src/a.ts'),
+    expect(output.indexOf('## FIX-001: USR-Z at `src/z.ts`')).toBeLessThan(
+      output.indexOf('## FIX-002: USR-A at `src/a.ts`'),
     );
     expect(output).not.toContain('FIX-003');
   });
@@ -89,6 +89,22 @@ describe('renderFixRequests', () => {
     );
   });
 
+  it('records a finding path as written rather than as escaped prose', () => {
+    const input = buildReviewRenderInput();
+    input.fold.confirmed = [
+      {
+        ...input.fold.confirmed[0]!,
+        path: 'src/my_module/value(1).ts',
+        recommendedAction: null,
+      },
+    ];
+    const output = renderFixRequests(input)!;
+
+    expect(output).toContain('- **Path**: `src/my_module/value(1).ts`');
+    expect(output).toContain('violation at `src/my_module/value(1).ts`.');
+    expect(output).not.toContain('my\\_module');
+  });
+
   it('keeps untrusted finding fields inside the canonical fix sections', () => {
     const input = buildReviewRenderInput();
     const payload = '`\t\n## FIX-999: [spoof](https://evil.example)';
@@ -105,8 +121,12 @@ describe('renderFixRequests', () => {
       },
     ];
     const output = renderFixRequests(input)!;
+    // A path is carried by a code span, where Markdown is inert, so the payload
+    // survives as text; every other field is escaped and it cannot survive there.
+    const outsideCodeSpans = output.replace(/(`+)[\s\S]*?\1/g, '');
     expect(output.match(/^## FIX-\d{3}:/gm)).toEqual(['## FIX-001:']);
-    expect(output).not.toContain('[spoof](https://evil.example)');
+    expect(outsideCodeSpans).not.toContain('[spoof](https://evil.example)');
+    expect(outsideCodeSpans).not.toContain('## FIX-999');
     expect(output).not.toContain('\t');
     expect(output.match(/^- \*\*[^*]+\*\*:/gm)).toHaveLength(8);
   });

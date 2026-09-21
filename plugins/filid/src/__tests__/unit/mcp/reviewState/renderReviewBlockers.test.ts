@@ -88,6 +88,21 @@ describe('separate review blockers report', () => {
     expect(output).toContain('https&#58;//');
   });
 
+  it('records a source path and its JSON pointer as written', () => {
+    const input = buildBlockerRenderInput(1);
+    input.fold.blockers[0]!.sources = [
+      {
+        artifactPath: 'generations/g_1/opinions/review-01.json',
+        pointer: '/gaps/~0name/~1path',
+      },
+    ];
+    const output = renderReviewBlockers(input)!;
+
+    expect(output).toContain(
+      '- `generations/g_1/opinions/review-01.json` — JSON pointer `/gaps/~0name/~1path`',
+    );
+  });
+
   it('keeps all cards for large blocker sets while limiting only the top-level summary', () => {
     const input = buildBlockerRenderInput(80);
     const output = renderReviewBlockers(input)!;
