@@ -131,7 +131,7 @@ verdict: INCONCLUSIVE
 - **Next action**: <bounded proposed action>
 - **Proposed owner**: <agent | human | unknown, with human reason when supplied>
 - **Completion condition**: <what new evidence makes the question decidable>
-- **Sources**: <canonical artifact plus JSON pointer or section; the artifact path and the pointer are code spans, so neither is escaped>
+- **Sources**: <canonical artifact plus JSON pointer or section>
 ```
 
 Proposed owners and actions are not assignments, approvals, or permission. Conflicting proposals remain visible under triage. Actor-authored values render as inert escaped text; only canonical artifacts and anchors become navigation links. Resolving a card requires validating new evidence or a recorded decision through the review workflow, never editing the card or sealed verdict.
