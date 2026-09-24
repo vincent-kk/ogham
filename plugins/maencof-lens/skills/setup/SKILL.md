@@ -27,7 +27,21 @@ Display current config as formatted table: name, path, layers, default status.
 
 ### `add <name> <path>`
 
-Add vault to config. Validates: name is unique, path exists, has `.maencof/index.json`.
+Add vault to config. Validates: name is unique and the vault passes the index check below.
+
+## Vault Index Check
+
+Require an existing vault directory and these regular files under its `.maencof/` directory:
+
+- `graph-meta.json` — the committed sharded index marker
+- `nodes.json` — serialized graph nodes
+- `edges.json` — serialized graph edges
+
+Current maencof builds remove the legacy `index.json`; its absence is expected and must not block registration. `archive-members.json` is optional and must not be required.
+
+If any required file is missing, do not write config. Report the missing files and ask the user to run `kg_build` in a maencof session, then retry setup. A legacy `index.json` alone is not sufficient: lens must not build or migrate a vault index.
+
+This is a file-presence check; actual index parsing and schema validation belong to the MCP graph loader. If a later tool call reports an unreadable index, guide the user to rebuild it in a maencof session.
 
 ### `remove <name>`
 
@@ -55,7 +69,7 @@ Config location: `<cwd>/.maencof-lens/config.json`
 **`init`**:
 
 1. Ask user for vault name and absolute path
-2. Validate vault path exists and contains `.maencof/index.json`
+2. Validate the absolute vault path using the Vault Index Check above
 3. Create config with default layers `[2, 3, 4, 5]`
 4. Write `.maencof-lens/config.json`
 5. Run `.gitignore` guard (see Step 3)
@@ -63,7 +77,7 @@ Config location: `<cwd>/.maencof-lens/config.json`
 **`add`**:
 
 1. Load existing config (error if missing — run `init` first)
-2. Validate vault name is unique and path exists with `.maencof/index.json`
+2. Validate vault name is unique and the absolute vault path passes the Vault Index Check above
 3. Append vault entry with default layers `[2, 3, 4, 5]`
 4. Write back
 5. Run `.gitignore` guard (see Step 3)

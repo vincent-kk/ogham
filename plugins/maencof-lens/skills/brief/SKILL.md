@@ -22,7 +22,8 @@ Assemble a token-budgeted context block from vault documents matching a query. F
 ## Prerequisites
 
 - `.maencof-lens/config.json` required — if missing: "Run `/maencof-lens:setup`"
-- Vault index required (`.maencof/index.json`) — if missing: "Run `kg_build` in a maencof session"
+- A committed sharded vault index is required: `.maencof/graph-meta.json`, `.maencof/nodes.json`, and `.maencof/edges.json`. The legacy `index.json` is not required; `archive-members.json` is optional.
+- If any required file is missing (including a legacy-only vault), stop before calling tools and guide the user to run `kg_build` in a maencof session. Lens must not build or migrate the index. File presence does not prove validity; use the MCP tool's load result to detect an unreadable index and give the same rebuild guidance.
 
 ## Workflow
 
