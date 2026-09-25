@@ -47,7 +47,7 @@
 
 - **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
 - **Direct import**: allowed
-- **Reason**: `loaders` 와 같은 이유다. 상태 렌더 함수(`describeDial`·`renderPostureLines`·`renderElectionLine`)는 훅 두 개가 공유하는데, 배럴을 거치면 다이얼 쓰기 경로 전체가 번들에 딸려 온다.
+- **Reason**: `loaders` 와 같은 이유다. 상태 렌더 함수(`describeDial`·`renderPostureLines`·`renderElectionLine`)는 훅이 아니라 settings MCP 도구의 `config` posture echo가 쓰는데, 배럴을 거치면 다이얼 쓰기 경로 전체가 번들에 딸려 온다.
 
 ## History
 

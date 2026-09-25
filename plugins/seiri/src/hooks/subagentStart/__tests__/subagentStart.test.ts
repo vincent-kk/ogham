@@ -5,7 +5,6 @@ import { fileURLToPath } from 'node:url';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ENV_PLUGIN_ROOT } from '../../../constants/env.js';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import { loadManifest } from '../../../core/ruleDocs/loaders/loadManifest.js';
 import { applyRuleDocs } from '../../../core/ruleDocs/sync/applyRuleDocs.js';
@@ -16,6 +15,8 @@ import {
 } from '../../__tests__/helpers/workflowHarness.js';
 import { processSubagentStart } from '../subagentStart.js';
 
+/** Environment variable hooks read the plugin install directory from. */
+const ENV_PLUGIN_ROOT = 'CLAUDE_PLUGIN_ROOT';
 /** Canonical rule package used only to seed deployed-rule fixtures. */
 const pluginRoot = fileURLToPath(new URL('../../../../', import.meta.url));
 /** A deployed rule verifies that discovery does not cause a status banner. */

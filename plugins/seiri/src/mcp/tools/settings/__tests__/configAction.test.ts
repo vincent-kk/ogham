@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { ELECTION_STRICT_LINE } from '../../../../constants/electionLines.js';
+import { ELECTION_STANDARD_LINE } from '../../../../constants/electionLines.js';
 import { writeConfig } from '../../../../core/infra/configLoader/loaders/writeConfig.js';
 import { handleSettings } from '../settings.js';
 
@@ -117,7 +117,7 @@ describe('settings config action', () => {
       config_op: 'set',
       intervention: 'strict',
     });
-    expect(strict.posture).toContain(ELECTION_STRICT_LINE);
+    expect(strict.posture).toContain(ELECTION_STANDARD_LINE);
 
     const advisory = await call(repoRoot, {
       config_op: 'set',

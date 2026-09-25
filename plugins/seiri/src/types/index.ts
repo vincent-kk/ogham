@@ -38,4 +38,3 @@ export type {
   InstructionsLoadedInput,
   HookOutput,
 } from './hooks.js';
-export type { SessionSignals } from './signals.js';

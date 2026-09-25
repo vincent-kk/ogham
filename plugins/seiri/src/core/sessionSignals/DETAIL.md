@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 워크플로우 상태는 host/session/agent 해시별 `.seiri/sessions/` 파일이다. 기존 단일 session-signals API는 호환 소비자를 위해 유지하되 훅에서는 사용하지 않는다.
+- 워크플로우 상태는 host/session/agent 해시별 `.seiri/sessions/` 파일이다.
 - UserPromptSubmit은 standard/strict에서 바인딩이 없어도 native-turn anchor를 만들고 기존 작업은 suspend한다. off/advisory에서는 기존 anchor만 무효화한다. Pre/Post는 anchor를 만들거나 교체하지 않는다.
 - SubagentStart는 자식 자신의 최초 anchor만 만든다. 부모 작업은 상속하지 않으며 새 경계를 알 수 없는 자식 재개에는 자동 보조를 하지 않는다.
 - startup/resume/clear/fork는 기존 actor를 무효화한다. compact는 유지한다.
@@ -37,12 +37,6 @@
 - **Consumers**: `**/src/hooks/**`
 - **Direct import**: `allowed`
 - **Reason**: Concrete imports keep optional hook bundles within the existing byte budget without importing the full public barrel.
-
-### `record` — legacy compatibility
-
-- **Consumers**: `**/src/hooks/**`
-- **Direct import**: `allowed`
-- **Reason**: Legacy helpers remain available to compatibility consumers without widening the hook runtime graph.
 
 ## Last Updated
 

@@ -196,10 +196,10 @@ describe('renderVerdictLine', () => {
             'G2',
           ),
         ],
-        { chainHint: '3rd consecutive; `/seiri:trace-cause` owns it' },
+        { chainHint: '3rd consecutive failure' },
       ),
     ).toBe(
-      'alpha-task G1 unmet — exit 1; beta-task G2 unjudgeable — a runnable gate needs an EXPECT that only success prints (3rd consecutive; `/seiri:trace-cause` owns it)',
+      'alpha-task G1 unmet — exit 1; beta-task G2 unjudgeable — a runnable gate needs an EXPECT that only success prints (3rd consecutive failure)',
     );
   });
 });

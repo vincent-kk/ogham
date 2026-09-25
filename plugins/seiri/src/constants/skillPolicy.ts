@@ -9,8 +9,9 @@ import type { SHIPPED_SKILLS } from './budgets.js';
  * applies to the count.
  *
  * Every skill belongs to exactly one list, and the union is `SHIPPED_SKILLS`.
- * Catalog visibility and workflow election are separate axes: a user-started
- * skill can remain visible to the model without joining the workflow chain.
+ * Catalog visibility and invocation posture are separate axes: a
+ * user-started skill can remain visible to the model without being
+ * workflow-invocable.
  */
 
 /**
@@ -62,7 +63,7 @@ export const VISIBLE_USER_STARTED_SKILLS = [
  */
 export const HIDDEN_USER_ONLY_SKILLS = ['scaffold-pr', 'setup'] as const;
 
-/** Every skill elected by the standard workflow chain. */
+/** Every skill invocable from the workflow catalog. */
 export const WORKFLOW_INVOCABLE_SKILLS = [
   ...AUTO_AUTONOMOUS_SKILLS,
   ...AUTO_CONDITIONAL_ASK_SKILLS,

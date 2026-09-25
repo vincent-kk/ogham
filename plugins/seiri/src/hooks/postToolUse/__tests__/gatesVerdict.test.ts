@@ -330,7 +330,7 @@ describe('PostToolUse gate verdicts', () => {
     expect(line).toContain(
       'unmet — expected success marker not found in output (exit 1)',
     );
-    expect(line).toContain('trace-cause');
+    expect(line).toContain('consecutive failure');
     expect(line).not.toContain('\n');
   });
 
@@ -367,7 +367,7 @@ describe('PostToolUse gate verdicts', () => {
     expect(readFileSync(path, 'utf8')).not.toContain('(via agent');
   });
 
-  it('does not record a gate when its actor observation cannot be persisted', () => {
+  it('does not record a gate when its actor observation cannot be read', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
     const sessions = portableJoin(root, '.seiri', 'sessions');
