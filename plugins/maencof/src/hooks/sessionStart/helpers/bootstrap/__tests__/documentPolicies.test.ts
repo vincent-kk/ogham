@@ -10,6 +10,7 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
+import { VERSION } from '../../../../../version.js';
 import { runSessionStart } from '../index.js';
 import body from '../metaSkillBody.md';
 
@@ -58,4 +59,59 @@ it('updates owned directives and preserves surrounding instructions', () => {
   expect(text).toContain('Read the whole existing document');
   expect(text).toContain('User prefix\n');
   expect(text).toContain('\nUser suffix\n');
+});
+
+it('delivers insight routing from the previous release and preserves same-version edits', () => {
+  mkdirSync(join(root, '.maencof'));
+  mkdirSync(join(root, '.maencof-meta'));
+  const instructions = join(root, 'CLAUDE.md');
+  writeFileSync(
+    instructions,
+    'Prefix\n<!-- MAENCOF:START -->\nLegacy capture\n<!-- MAENCOF:END -->\nSuffix\n',
+  );
+  writeFileSync(
+    join(root, '.maencof-meta/version.json'),
+    JSON.stringify({
+      version: '0.16.1',
+      installedAt: '2026-09-01T00:00:00.000Z',
+      migrationHistory: [],
+    }),
+  );
+  const output = runSessionStart({ cwd: root }).hookSpecificOutput
+    ?.additionalContext;
+  expect(output).toContain('organize --insights');
+  const updated = readFileSync(instructions, 'utf8');
+  expect(updated).toContain('organize --insights');
+  expect(updated).not.toContain('Legacy capture');
+  expect(updated).toContain('Prefix\n');
+  expect(updated).toContain('\nSuffix\n');
+  expect(
+    JSON.parse(readFileSync(join(root, '.maencof-meta/version.json'), 'utf8'))
+      .version,
+  ).toBe(VERSION);
+  const customized = updated.replace(
+    '## Auto-Insight Capture',
+    '## Auto-Insight Capture\nOwned customization',
+  );
+  writeFileSync(instructions, customized);
+  runSessionStart({ cwd: root });
+  expect(readFileSync(instructions, 'utf8')).toBe(customized);
+});
+
+it('omits capture policy when disabled without disabling knowledge recall routing', () => {
+  mkdirSync(join(root, '.maencof'));
+  mkdirSync(join(root, '.maencof-meta'));
+  writeFileSync(
+    join(root, '.maencof-meta/insight-config.json'),
+    JSON.stringify({
+      enabled: false,
+      sensitivity: 'medium',
+      max_captures_per_session: 10,
+      notify: true,
+    }),
+  );
+  const output = runSessionStart({ cwd: root }).hookSpecificOutput
+    ?.additionalContext;
+  expect(output).not.toContain('<auto-insight enabled=');
+  expect(output).toContain('insight-synthesis');
 });

@@ -77,8 +77,8 @@ export function buildDefaultDirective(
 ## Auto-Insight Capture
 
 When auto-insight capture is enabled, monitor the conversation for user insights worth preserving.
-When you detect a meaningful insight during conversation, call \`capture_insight\` to record it.
-Do NOT ask for confirmation — capture proactively. The user can review later with the insight skill's \`--recent\` view.
+Use the insight skill to search and read related accounts first. Skip unchanged claims; preserve novel evidence, conditions and exceptions through \`capture_insight\`.
+Capture eligible novel insights without repeated confirmation. Never bypass disabled capture, category rejection or limits through create/update. Multi-document consolidation belongs to \`organize --insights\` (preview, then authorized apply); \`reflect --insights\` assesses without knowledge writes. Pending notifications and the insight skill's \`--recent\` sample are not a persistent review queue.
 After capture, display: 💡 Insight recorded to L{layer}: "{title}"
 Capture criteria and sensitivity are provided via the session meta-prompt at session start.
 
@@ -89,8 +89,8 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 - Choose L2/L3/L4 topic folders from the main subject, title/gist and body, independently of tags. Reuse coherent existing folders; keep L1/L5 flat. Load the active skill's ../.shared/document-maintenance.md for the full procedure.
 - Place original source links and verified locations beside sourced claims; preserve qualifications and distinguish inference. Never fabricate source positions.
 
-- When learning new factual information during conversation, first check for an existing account of the same subject and integrate it using update. Use create with appropriate layer and tags only for a distinct document.
-- When discovering that existing vault information is outdated, MUST update the document using \`update\`.
+- For ordinary factual updates and explicit remember requests, first read the existing account and integrate the authorized change using update; use create only for a distinct document. Automatic insight candidates follow Auto-Insight Capture above.
+- When existing knowledge is outdated, apply an authorized correction through \`update\`; multi-document insight reinterpretation first uses the reviewed organize flow.
 - For temporary task context (meeting notes, debugging sessions, research in progress), MUST create Layer 4 (Action) documents with appropriate \`expires\` dates.
 - When conversation reveals connections between existing documents, MUST use \`kg_suggest_links\` and update documents to add \`[[wikilinks]]\`.
 - To group related documents within a layer (L2/L3/L4 only — L1 and L5 are flat), use subdirectories: \`create\` accepts a \`filename\` with a subdirectory prefix (e.g. \`"projects/alpha-status"\`) and \`move\` accepts \`target_subdirectory\` (max 2 levels each).
@@ -99,6 +99,7 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 
 ## Concept Document Lifecycle
 
+- Lifecycle control tags \`auto-insight\`, \`insight-synthesis\`, and \`insight-integrated\` do not trigger concept-document creation.
 - After creating a document via \`create\`, check whether concept documents exist for each tag used.
 - A concept document is a Layer 3C (topical) document that defines and explains a tag/concept (e.g., \`03_External/topical/distributed-systems.md\` for tag \`distributed-systems\`).
 - If a tag has been used 3+ times across documents but has no concept document, suggest creating one:

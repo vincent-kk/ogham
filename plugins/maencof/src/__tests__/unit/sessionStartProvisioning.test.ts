@@ -73,16 +73,18 @@ describe('runSessionStart', () => {
     );
     const result = runSessionStart({ cwd: vaultDir });
     expect(result.continue).toBe(true);
-    expect(ctxOf(result)).toContain('organize');
+    expect(ctxOf(result)).toContain(
+      '[maencof] 2 pending task(s) found. Use the organize skill to process them.',
+    );
   });
 
-  it('pending이 없으면 organize 메시지를 포함하지 않는다', () => {
+  it('pending이 없으면 pending task 알림을 포함하지 않는다', () => {
     writeFileSync(
       join(vaultDir, '.maencof-meta', 'schedule-log.json'),
       JSON.stringify({ pending: [] }),
     );
     const result = runSessionStart({ cwd: vaultDir });
-    expect(ctxOf(result)).not.toContain('organize');
+    expect(ctxOf(result)).not.toContain('pending task(s) found.');
   });
 
   it('companion-identity.json이 있으면 [maencof:이름] 인사말을 additionalContext에 포함한다', () => {
