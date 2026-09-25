@@ -288,8 +288,10 @@ jobs:
           # A markdown-only workspace (prawf) matches no lintable file.
           yarn eslint --no-error-on-unmatched-pattern "${targets[@]}"
 
-  # Seiri adapters are prepared from current runtime in isolated staging;
-  # other plugins and root adapters retain the committed-byte drift gate. This
+  # Seiri's committed runtime and adapters must equal a fresh build, and its
+  # distribution must also be preparable from source alone in isolated
+  # staging; other plugins and root adapters keep the committed-byte drift
+  # gate. This
   # job deliberately does not depend on the plan: the generator reads every
   # plugin, and the root adapters it writes (`.agents/**`) are ignored by the
   # planner, so gating it on the plan would let a root adapter drift through.
@@ -313,6 +315,17 @@ jobs:
 
       - name: Build current seiri runtime and adapters
         run: node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri
+
+      # Marketplaces install plugins/seiri from the branch as committed, so a
+      # stale bundle or adapter ships even when fresh-build checks pass.
+      - name: Committed seiri artifacts match the fresh build
+        run: |
+          changes="$(git status --porcelain --untracked-files=all -- plugins/seiri)"
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            echo "::error::plugins/seiri differs from a fresh build; rebuild seiri and commit the generated files."
+            exit 1
+          fi
 
       - name: Validate seiri distribution preparation
         run: node --test scripts/__tests__/prepareSeiriDistribution.test.mjs scripts/__tests__/checkSeiriAdapters.test.mjs

@@ -34,7 +34,7 @@ describe("checkSeiriAdapters", () => {
     );
   });
 
-  it("keeps clean runtime build before staging and other-plugin drift checks in CI", () => {
+  it("orders the clean runtime build, committed-artifact gate, staging and other-plugin drift checks in CI", () => {
     const ci = readFileSync(
       new URL("../../.github/workflows/ci.yml", import.meta.url),
       "utf8",
@@ -43,8 +43,11 @@ describe("checkSeiriAdapters", () => {
     const build = job.indexOf(
       "node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri",
     );
+    const committed = job.indexOf(
+      "git status --porcelain --untracked-files=all -- plugins/seiri",
+    );
     const staging = job.indexOf("node scripts/checkSeiriAdapters.mjs");
-    assert.ok(build >= 0 && staging > build);
+    assert.ok(build >= 0 && committed > build && staging > committed);
     assert.ok(job.indexOf("yarn plugin:adapters:check") > staging);
   });
 });
