@@ -11,4 +11,4 @@ export { buildCodexMarketplace } from "./builders/buildCodexMarketplace.js";
 export { AsyncAgentLifecycleError } from "./utils/asyncAgentLifecycleError.js";
 export { McpToolReferenceError } from "./utils/mcpToolReferenceError.js";
 export { validateMcpToolReferences } from "./utils/validateMcpToolReferences.js";
-export { CodexHookRuntimeError } from "./utils/adaptCodexHookRuntime.js";
+export { CodexHookRuntimeError } from "./utils/codexHookRuntimeError.js";

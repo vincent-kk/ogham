@@ -2,7 +2,7 @@
 /**
  * Bundle each hook into a self-contained ESM file for plugin distribution.
  *
- * Output: bridge/<name>.mjs
+ * Output: bridge/claude/<name>.mjs and bridge/codex/<name>.mjs
  *
  * Hooks must stay thin scripts — Node builtins plus the light
  * cross-platform helpers. A hook pays its cold start on every event, and
@@ -79,10 +79,7 @@ await Promise.all(
         platform: 'node',
         target: 'node20',
         format: 'esm',
-        outfile: resolve(
-          root,
-          `bridge/${host === 'codex' ? 'codex/' : ''}${name}.mjs`,
-        ),
+        outfile: resolve(root, `bridge/${host}/${name}.mjs`),
         plugins:
           host === 'codex'
             ? [
@@ -107,7 +104,9 @@ await Promise.all(
   ),
 );
 
-console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
+console.log(
+  `  Hook scripts (${hookEntries.length}) -> bridge/claude/*.mjs, bridge/codex/*.mjs`,
+);
 
 // The compiler's auxiliary host manifest routes PreToolUse through this shared runner.
 await esbuild.build({
@@ -157,10 +156,7 @@ const violations = [];
 
 for (const { name, maxBytes, forbiddenContent = [] } of hookEntries) {
   for (const host of ['claude', 'codex']) {
-    const file = resolve(
-      root,
-      `bridge/${host === 'codex' ? 'codex/' : ''}${name}.mjs`,
-    );
+    const file = resolve(root, `bridge/${host}/${name}.mjs`);
     const { size } = await stat(file);
     if (size > maxBytes)
       violations.push(

@@ -60,7 +60,7 @@ export function seiriDistributionFixture(t) {
             {
               type: "command",
               command:
-                'node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" "${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs"',
+                'node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" "${CLAUDE_PLUGIN_ROOT}/bridge/claude/pre-tool-use.mjs"',
             },
           ],
         },
@@ -74,7 +74,7 @@ export function seiriDistributionFixture(t) {
   write("skills/execute/references/sample.md", "Canonical reference\n");
   for (const file of [
     "libs/run.cjs",
-    "bridge/pre-tool-use.mjs",
+    "bridge/claude/pre-tool-use.mjs",
     "bridge/codex/pre-tool-use.mjs",
     "bridge/run-agy.mjs",
     "bridge/mcp-server.cjs",

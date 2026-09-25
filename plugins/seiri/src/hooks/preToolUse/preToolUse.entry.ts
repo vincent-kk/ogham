@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Loaded by hooks/hooks.json; bridge/pre-tool-use.mjs selects this entry.
+// Loaded by hooks/hooks.json; bridge/claude/pre-tool-use.mjs selects this entry.
 import { logHookFailure } from '@ogham/cross-platform';
 
 import { EMPTY_RESULT, PLUGIN_NAME } from '../../constants/plugin.js';

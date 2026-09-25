@@ -148,7 +148,7 @@ describe('hook entry silence', () => {
       process.execPath,
       [
         portableJoin(pluginRoot, 'libs', 'run.cjs'),
-        portableJoin(pluginRoot, 'bridge', testCase.bundle),
+        portableJoin(pluginRoot, 'bridge', 'claude', testCase.bundle),
       ],
       {
         cwd: repoRoot,
@@ -177,7 +177,7 @@ describe('hook entry silence', () => {
   it.each([
     {
       name: 'Claude',
-      directory: [],
+      directory: ['claude'],
       native: { prompt_id: 'turn-a' },
       tool: 'mcp__plugin_seiri_tools__workflow',
     },

@@ -11,7 +11,7 @@
 
 ## API Contracts
 
-- 배포 진입점은 esbuild 산출물이다: MCP 서버(`bridge/mcp-server.cjs`, 원본 `mcp/serverEntry/`)와 훅 번들 6종(`bridge/*.mjs`).
+- 배포 진입점은 esbuild 산출물이다: MCP 서버(`bridge/mcp-server.cjs`, 원본 `mcp/serverEntry/`)와 훅 번들 6종을 호스트별로 `bridge/claude/*.mjs`(Claude, Antigravity는 `bridge/run-agy.mjs` 경유)와 `bridge/codex/*.mjs`(Codex)로 각각 방출한다.
 - `src/index.ts` 는 named re-export 만 담는 공개 배럴이다.
 - 배포 compile은 dist의 JavaScript와 선언 파일을 실제 생성하여 package exports를 충족합니다. 상위 typecheck용 noEmit 설정은 build에서 해제합니다.
 - 게이트의 `CHECK` 는 실제 결과 조건을 검사하는 명령이고 `EXPECT` 는 조건 충족 시에만 관측되는 리터럴 성공 문자열이다. 결과 조건의 값은 저장소와 계획이 소유한다.

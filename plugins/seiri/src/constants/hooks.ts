@@ -22,7 +22,7 @@ export const HookEvent = {
 } as const;
 
 /**
- * `bridge/<name>.mjs` basenames — every hook seiri builds.
+ * `bridge/claude/<name>.mjs` / `bridge/codex/<name>.mjs` basenames — every hook seiri builds.
  *
  * Two places carry these and neither can import this file: the
  * `hookEntries` list in `scripts/build-hooks.mjs` that builds them, and

@@ -28,7 +28,7 @@
 
 ### AC-adapters-hook-runtime — Explicit prebuilt Codex hook companions
 
-- Explicit companions rewrite canonical bridge tokens in generated hooks only, retaining wrappers, arguments and basename; unrelated and nested source paths are unchanged.
+- Explicit companions rewrite canonical bridge tokens in generated hooks only, retaining wrappers, arguments and basename; a flat `bridge/<basename>.mjs` or a single existing host segment (`bridge/<host>/<basename>.mjs`) rewrites, unrelated and two-or-more-level nested source paths are unchanged.
 - Dedicated hook and manifest selection responds to command changes even without matcher changes. Missing opt-in retains previous output.
 - Invalid directory declarations prevent adapter emission with their own diagnostic.
 

@@ -59,7 +59,7 @@ describe("explicit Codex hook runtimes", () => {
     const canonical = facts("bridge/codex");
     canonical.hooksFile!.hooks!.SessionStart[0].hooks = [
       { command: "node bridge/setup.mjs" },
-      { command: 'node "${CLAUDE_PLUGIN_ROOT}/bridge/nested/setup.mjs"' },
+      { command: 'node "${CLAUDE_PLUGIN_ROOT}/bridge/a/b/setup.mjs"' },
       { command: 'node "${CLAUDE_PLUGIN_ROOT}/bridge/setup.mjs.backup"' },
     ];
     expect(buildCodexHooks(canonical)).toBeNull();
@@ -81,5 +81,34 @@ describe("explicit Codex hook runtimes", () => {
     const generated = JSON.stringify(buildCodexHooks(canonical));
     expect(generated).toContain("Bash|mcp__seiri__workflow");
     expect(generated).toContain("bridge/codex/setup.mjs");
+  });
+
+  it("rewrites a single existing host segment to the selected runtime directory", () => {
+    const canonical = facts("bridge/codex");
+    canonical.hooksFile!.hooks!.SessionStart[0].hooks = [
+      {
+        command:
+          'node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" "${CLAUDE_PLUGIN_ROOT}/bridge/claude/x.mjs"',
+      },
+    ];
+    const generated = JSON.stringify(buildCodexHooks(canonical));
+    expect(generated).toContain("bridge/codex/x.mjs");
+    expect(generated).not.toContain("bridge/claude/x.mjs");
+  });
+
+  it("leaves a two-level bridge path unchanged", () => {
+    const canonical = facts("bridge/codex");
+    canonical.hooksFile!.hooks!.SessionStart[0].hooks = [
+      { command: 'node "${CLAUDE_PLUGIN_ROOT}/bridge/a/b/x.mjs"' },
+    ];
+    expect(buildCodexHooks(canonical)).toBeNull();
+  });
+
+  it("leaves a libs/run.cjs token unchanged", () => {
+    const canonical = facts("bridge/codex");
+    canonical.hooksFile!.hooks!.SessionStart[0].hooks = [
+      { command: 'node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs"' },
+    ];
+    expect(buildCodexHooks(canonical)).toBeNull();
   });
 });

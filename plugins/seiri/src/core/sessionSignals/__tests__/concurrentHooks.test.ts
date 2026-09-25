@@ -48,7 +48,7 @@ async function hook(
   bundle: string,
   input: Record<string, unknown>,
 ): Promise<string> {
-  const path = portableJoin(packageRoot, 'bridge', bundle);
+  const path = portableJoin(packageRoot, 'bridge', 'claude', bundle);
   if (!existsSync(path))
     throw new Error(`Missing ${path}; run yarn seiri build:hooks`);
   const result = await spawnCli('node', [path], {

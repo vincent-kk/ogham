@@ -38,7 +38,7 @@ describe('wiring', () => {
       (name) => !DORMANT_HOOKS.includes(name),
     );
     for (const name of active)
-      expect(hooksJson).toContain(`bridge/${name}.mjs`);
+      expect(hooksJson).toContain(`bridge/claude/${name}.mjs`);
   });
 
   it('selects each watched tool by name in hooks.json', () => {
@@ -65,7 +65,7 @@ describe('wiring', () => {
   it('keeps dormant hooks out of hooks.json until re-measurement', () => {
     const hooksJson = read('hooks', 'hooks.json');
     for (const name of DORMANT_HOOKS)
-      expect(hooksJson).not.toContain(`bridge/${name}.mjs`);
+      expect(hooksJson).not.toContain(`bridge/claude/${name}.mjs`);
   });
 
   it('builds every hook that hooks.json registers', () => {
@@ -262,7 +262,10 @@ describe('wiring', () => {
       ),
     ).toBe(true);
     expect(codexHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command).toBe(
-      claudeHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command.replace('/bridge/', '/bridge/codex/'),
+      claudeHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command.replace(
+        '/bridge/claude/',
+        '/bridge/codex/',
+      ),
     );
   });
 

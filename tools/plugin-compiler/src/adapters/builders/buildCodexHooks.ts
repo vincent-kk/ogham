@@ -3,10 +3,8 @@ import {
   CODEX_HOOK_MATCHER_CAPABILITIES,
 } from "../../constants/hosts.js";
 import type { HookMatcherGroup, PluginFacts } from "../../types/index.js";
-import {
-  adaptCodexHookRuntime,
-  CodexHookRuntimeError,
-} from "../utils/adaptCodexHookRuntime.js";
+import { adaptCodexHookRuntime } from "../utils/adaptCodexHookRuntime.js";
+import { CodexHookRuntimeError } from "../utils/codexHookRuntimeError.js";
 import { validateMcpToolReferences } from "../utils/validateMcpToolReferences.js";
 
 const UNSUPPORTED_TOOL_SET = new Set(

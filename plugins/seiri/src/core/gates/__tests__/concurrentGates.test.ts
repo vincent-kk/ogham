@@ -25,7 +25,7 @@ const packageRoot = portableJoin(
 );
 
 /** Built PostToolUse hook executed by the host. */
-const bundlePath = portableJoin(packageRoot, 'bridge', 'post-tool-use.mjs');
+const bundlePath = portableJoin(packageRoot, 'bridge', 'claude', 'post-tool-use.mjs');
 
 /** Session identifier shared by concurrent hook processes. */
 const SESSION_ID = 'concurrent-gates-probe';
@@ -181,7 +181,7 @@ async function invoke(
 ): Promise<void> {
   const result = await spawnCli(
     'node',
-    [portableJoin(packageRoot, 'bridge', bundle)],
+    [portableJoin(packageRoot, 'bridge', 'claude', bundle)],
     { input: JSON.stringify(payload), timeoutMs: 5_000 },
   );
   expect({
