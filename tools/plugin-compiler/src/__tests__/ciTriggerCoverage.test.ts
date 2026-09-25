@@ -20,6 +20,7 @@ import {
   PLUGINS_DIRECTORY,
   SKILLS_DIRECTORY,
 } from "../constants/claudeArtifacts.js";
+import { COMPILER_CONFIG_PATH } from "../constants/compilerConfig.js";
 
 /**
  * `plugin:adapters:check` only ever runs inside a CI run, and a run only starts
@@ -46,6 +47,7 @@ const CANONICAL_SAMPLES = [
   `${PLUGIN_ROOT}/${CLAUDE_MANIFEST_PATH}`,
   `${PLUGIN_ROOT}/${CLAUDE_MCP_PATH}`,
   `${PLUGIN_ROOT}/${CLAUDE_HOOKS_PATH}`,
+  `${PLUGIN_ROOT}/${COMPILER_CONFIG_PATH}`,
   CLAUDE_MARKETPLACE_PATH,
 ];
 

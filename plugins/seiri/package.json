@@ -39,6 +39,11 @@
     "public",
     ".claude-plugin",
     ".mcp.json",
+    "plugin-compiler.json",
+    "plugin.json",
+    ".codex-plugin/",
+    "mcp_config.json",
+    "hooks.json",
     "README.md"
   ],
   "scripts": {

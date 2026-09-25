@@ -37,6 +37,7 @@ on:
       - "**.mjs"
       - "**.cjs"
       - "**/plugin.json"
+      - "**/plugin-compiler.json"
       - "**/marketplace.json"
       - "**/mcp_config.json"
       - "**/.mcp.json"
@@ -56,6 +57,7 @@ on:
       - "**.mjs"
       - "**.cjs"
       - "**/plugin.json"
+      - "**/plugin-compiler.json"
       - "**/marketplace.json"
       - "**/mcp_config.json"
       - "**/.mcp.json"
@@ -286,9 +288,8 @@ jobs:
           # A markdown-only workspace (prawf) matches no lintable file.
           yarn eslint --no-error-on-unmatched-pattern "${targets[@]}"
 
-  # Clean-regen gate: regenerate the host adapters from the Claude canonical
-  # files and fail if the result differs from what is committed. Catches a
-  # hand-edited adapter and a canonical change that was never re-synced. This
+  # Seiri adapters are prepared from current runtime in isolated staging;
+  # other plugins and root adapters retain the committed-byte drift gate. This
   # job deliberately does not depend on the plan: the generator reads every
   # plugin, and the root adapters it writes (`.agents/**`) are ignored by the
   # planner, so gating it on the plan would let a root adapter drift through.
@@ -310,7 +311,16 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Adapters in sync
+      - name: Build current seiri runtime and adapters
+        run: node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri
+
+      - name: Validate seiri distribution preparation
+        run: node --test scripts/__tests__/prepareSeiriDistribution.test.mjs scripts/__tests__/checkSeiriAdapters.test.mjs
+
+      - name: Check fresh seiri adapters in isolated staging
+        run: node scripts/checkSeiriAdapters.mjs
+
+      - name: Adapters in sync (including committed adapters for other plugins)
         run: yarn plugin:adapters:check
 
   # Single required status check: green when every job either passed or was
