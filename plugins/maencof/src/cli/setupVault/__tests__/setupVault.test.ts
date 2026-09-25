@@ -19,9 +19,9 @@ describe('project vault connection', () => {
   let bundlePath: string;
   beforeEach(async () => {
     root = await realpath(await mkdtemp(join(tmpdir(), 'maencof-setup-')));
-    vault = join(root, '지식 공간');
+    vault = join(root, '지식 공간\\child');
     const bridge = join(root, 'plugin', 'bridge');
-    await mkdir(vault);
+    await mkdir(vault, { recursive: true });
     await mkdir(bridge, { recursive: true });
     bundlePath = join(bridge, 'setup-vault.cjs');
     await writeFile(join(bridge, 'mcp-server.cjs'), '');
@@ -42,7 +42,7 @@ describe('project vault connection', () => {
       await expect(readFile(target)).rejects.toThrow();
       expect((await runSetupVault({ ...options, apply: true })).ok).toBe(true);
       const text = await readFile(target, 'utf8');
-      expect(text).toContain(vault);
+      expect(text).toContain(JSON.stringify(vault));
       expect(text).toContain('mcp-server.cjs');
       expect((await runSetupVault({ ...options, apply: true })).ok).toBe(true);
       expect(await readFile(target, 'utf8')).toBe(text);
