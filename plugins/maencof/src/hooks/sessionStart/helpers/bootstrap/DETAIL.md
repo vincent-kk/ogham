@@ -17,6 +17,12 @@
 
 ## Acceptance Criteria
 
+### AC-insight-policy-delivery — Insight lifecycle delivery
+
+- New-version initialization replaces only the owned project section with capture, consolidation and recall routing. Same-version initialization preserves the current owned section.
+- Active sessions receive the dialogue routing within the existing character budget; dialogue-disabled sessions omit it. Capture-disabled sessions omit the auto-insight meta-prompt.
+- Generated bridge verification and a model following the skill are distinct evidence: a subprocess output proves policy delivery, not conversational compliance.
+
 ### AC-source-locations — Session citation discipline
 
 - Active maencof sessions receive a concise original-source-and-location rule within the existing meta-skill budget. Dialogue off-switch and non-vault sessions omit it.
@@ -45,4 +51,4 @@
 
 ## Last Updated
 
-2026-08-23 — bootstrap instruction target과 host configuration registry의 교차 검증을 계약화했다.
+2026-09-26 — Insight lifecycle routing and versioned policy delivery.

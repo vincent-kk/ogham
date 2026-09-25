@@ -19,6 +19,11 @@
 
 ## Acceptance Criteria
 
+### AC-capture-policy — Capture routing
+
+- The generated meta-prompt carries the configured category allowlist and routes pre-capture duplicate checks to the insight skill. It keeps novel capture separate from reviewed consolidation and forbids create/update bypass after rejection.
+- The function formats configuration without reading or writing vault knowledge; semantic duplicate decisions remain skill-owned.
+
 ### AC-suggest-only-sensitivity — 제안 전용
 
 - `autoAdjustSensitivity` 호출 뒤 설정 파일이 바뀌지 않는다.
@@ -41,4 +46,4 @@
 
 ## Last Updated
 
-2026-07-30 — 제안 전용 민감도·가드 동기 계약과 훅 직접 import 면책을 문서화했다.
+2026-09-26 — Capture policy delivery and configured category allowlist.

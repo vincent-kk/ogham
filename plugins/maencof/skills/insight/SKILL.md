@@ -1,7 +1,7 @@
 ---
 name: insight
 user-invocable: false
-description: 'Manages auto-insight capture: enable/disable, sensitivity, per-category allowlist, and recent capture review. Use when tuning or inspecting what maencof captures automatically.'
+description: 'Checks related knowledge before automatic insight capture and manages capture settings or recent records. Use when preserving a new insight or tuning capture; use organize for consolidation.'
 argument-hint: '[--recent] [--stats] [--sensitivity high|medium|low] [--enable|--disable]'
 version: '1.1.0'
 complexity: simple
@@ -13,6 +13,10 @@ plugin: maencof
 # /maencof:insight
 
 Manage the auto-insight capture system.
+
+## Capture Workflow
+
+Load the Capture section of [insight-lifecycle.md](../.shared/insight-lifecycle.md) when an insight is detected. Read likely existing accounts before deciding whether the claim adds information. Skip duplicates; preserve novel conditions, exceptions and evidence through `mcp__plugin_maencof_tools__capture_insight`. Configuration and category gates apply before any automatic write. Consolidation belongs to `organize --insights`; `reflect --insights` previews its assessment.
 
 ## When to Use This Skill
 
@@ -26,11 +30,11 @@ Manage the auto-insight capture system.
 
 ### --recent
 
-Show recent auto-captured insights (from current session's pending captures and vault search).
+Show pending notifications and a bounded sample of stored auto-captured insights. Pending notifications can include earlier sessions and are not an unprocessed-work ledger.
 
-1. Read `.maencof-meta/pending-insight-notification.json` for current session captures
-2. Use `mcp__plugin_maencof_tools__kg_search` with tags `["auto-insight"]` and `max_results: 10` for recent vault entries
-3. Display list with path, title, layer, and creation date
+1. Read `.maencof-meta/pending-insight-notification.json` for unconsumed capture notifications; missing means empty, not no stored insights.
+2. Use `mcp__plugin_maencof_tools__kg_search` with `seed: ["auto-insight"]` and `max_results: 10`, then `mcp__plugin_maencof_tools__read` to confirm creation dates when needed.
+3. Label the search results as a ranked sample, not vault-wide chronological order. Show path, title, layer and verified date. For a complete consolidation preview, use `organize --insights` and its paginated inventory.
 
 #### Cross-event handoff semantics
 
@@ -54,7 +58,7 @@ Show auto-insight capture statistics.
 
 | Option               | Config key                 | Value                |
 | -------------------- | -------------------------- | -------------------- |
-| `--sensitivity <high | medium                     | low>`                | `sensitivity` | supplied level |
+| `--sensitivity LEVEL` | `sensitivity` | `high`, `medium`, or `low` |
 | `--enable`           | `enabled`                  | `true`               |
 | `--disable`          | `enabled`                  | `false`              |
 | `--max <N>`          | `max_captures_per_session` | positive integer `N` |
@@ -93,7 +97,9 @@ Show current status in this order:
 
 | Tool                                   | Purpose                                                         |
 | -------------------------------------- | --------------------------------------------------------------- |
-| `mcp__plugin_maencof_tools__kg_search` | Search recent auto-insight documents by tag (`--recent` option) |
+| `mcp__plugin_maencof_tools__kg_search` | Find related knowledge or a bounded auto-insight sample |
+| `mcp__plugin_maencof_tools__read` | Verify complete claims and capture dates |
+| `mcp__plugin_maencof_tools__capture_insight` | Record novel automatic insights with capture-time gates |
 
 > Note: Config file operations (`.maencof-meta/insight-config.json`, `.maencof-meta/auto-insight-stats.json`, `.maencof-meta/pending-insight-notification.json`) use filesystem Read/Write tools, not maencof MCP tools.
 

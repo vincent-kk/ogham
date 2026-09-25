@@ -20,6 +20,8 @@ maxTurns: 30
 
 An agent that evaluates and executes document transitions between Layers. The **judge module** evaluates transition candidates; the **execute module** performs the actual moves. Layer 1 (01_Core/) is read-only — never modified.
 
+For insight-mode assessment, load Assess and Relations in `../skills/.shared/insight-lifecycle.md`. The active organize/reflect agent supplies the complete inventory and scoped task; request missing bodies through the existing read tool. Return claim relationships, proposed targets and held reasons instead of TransitionDirectives. Do not run the default layer scan or apply writes for a read-only assessment. The active agent owns synthesis creation and readback verification; this mode does not extend the access matrix or tool grants.
+
 ---
 
 ## Seam Interface — judge / execute Separation

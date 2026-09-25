@@ -1,0 +1,39 @@
+{
+  "documents": [
+    {
+      "filename": "controls",
+      "layer": 2,
+      "title": "Control mechanisms age",
+      "tags": ["auto-insight", "controls"],
+      "body": "## Claim\nSpecific control mechanisms can become unnecessary as the underlying system improves.\n\n## Evidence\nIn the synthetic test service, a parser upgrade removed the need for a syntax-repair retry. [Experiment](https://example.test/experiment#parser)."
+    },
+    {
+      "filename": "control-role",
+      "layer": 2,
+      "title": "The control role can remain",
+      "tags": ["auto-insight", "controls"],
+      "body": "## Claim\nThe concrete syntax-repair retry is obsolete; validating the result remains necessary. Evaluate the mechanism and its role separately.\n\n## Evidence\n[Original observation](./controls.md#Claim). The synthetic experiment still required output validation."
+    },
+    {
+      "filename": "room-controls",
+      "layer": 2,
+      "title": "Room temperature controls",
+      "tags": ["auto-insight", "controls"],
+      "body": "## Claim\nThis room's temperature controller has a physical manual override. [Manual](https://example.test/manual#override)."
+    },
+    {
+      "filename": "control-hypothesis",
+      "layer": 5,
+      "title": "An untested hypothesis",
+      "tags": ["auto-insight", "hypothesis"],
+      "body": "## Question\nCould all validation become unnecessary? No observation or experiment supports this hypothesis yet."
+    },
+    {
+      "filename": "second-hypothesis",
+      "layer": 5,
+      "title": "Another untested impression",
+      "tags": ["insight", "hypothesis"],
+      "body": "## Question\nPerhaps validation disappears with enough system improvements. This is an impression, not an established result."
+    }
+  ]
+}

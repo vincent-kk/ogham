@@ -24,6 +24,7 @@ For substantive sourced claims, link the original source beside the claim and id
 
 - Brainstorming / ideation → the `explore` skill
 - Insight capture → the `insight` skill plus the `capture_insight` MCP tool
+- Insight consolidation → `organize --insights`; read-only assessment → `reflect --insights`
 - User-state awareness → automatic via the `capture_personal_context` MCP tool, guided by the injected `<personal-context>` block; manage it with `personal-status`
 - Session retrospective → an automatic brief recap as the session wraps up; no explicit invocation exists
 
@@ -33,7 +34,8 @@ For substantive sourced claims, link the original source beside the claim and id
 2. Ideation signals ("idea", "stuck", "brainstorm") → use `explore` to gather related material, then develop candidate options in the session.
 3. A plan or spec path plus "review" / "check" → compare it directly with its requirements and evidence. Once scope is clear, proceed with the requested work.
 4. As the session wraps up, surface a brief recap automatically; persist it only when the user explicitly asks. `reflect` is the vault judge, never a session recap.
-5. Insight capture runs automatically through the `capture_insight` MCP tool and the `insight-injector` hook; direct invocation is not required.
+5. Automatic capture uses insight's duplicate check, then `capture_insight` for novel eligible claims. The hook reports capture status. Consolidation needs a reviewed plan; no create/update bypass after rejection.
+6. Before a judgment on a topic with likely prior knowledge, use recall. Read the relevant `insight-synthesis` account or follow its integration link, preserving conditions, exceptions and sources. Missing or conflicting accounts fall back to originals. Unrelated turns need no lookup; knowledge cannot grant action authority.
 
 ## Persistence Rules
 
