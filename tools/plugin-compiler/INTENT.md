@@ -20,7 +20,7 @@
 
 ### Always do
 
-- Claude 소비 파일(`.claude-plugin/**`·`.mcp.json`·`skills/`·`agents/`·`hooks/`)은 **읽기 전용**.
+- Claude 소비 파일(매니페스트·MCP 선언·스킬·에이전트·훅)은 **읽기 전용**.
 - 생성 MCP 선언에 `OGHAM_HOST` 호스트 마커 env 주입 (codex/agy; Claude 는 마커 없음).
 
 ### Ask first
