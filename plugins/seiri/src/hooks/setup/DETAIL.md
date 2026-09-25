@@ -13,15 +13,11 @@
 
 ## Acceptance Criteria
 
-### AC-conditional-participation — Explicit scope
+### AC-session-boundary — Native session resets
 
-- Inactive sessions receive no workflow banner or gate writes.
-- Bound workflows cannot cross turns, actors, tasks or invocation generations through late results.
-
-### AC-native-invocation-provenance — Recorded host envelopes
-
-- Recorded Claude and Codex fixtures retain matched invocation identities, independent children and their distinct successful MCP response envelopes.
-- Synthetic race tests do not claim to reproduce native host scheduling.
+- A `startup`, `resume`, `clear` or `fork` SessionStart suspends an existing binding, clears the turn anchor and pending invocations, and advances the actor generation.
+- Any other source, including `compact`, leaves workflow state untouched.
+- SessionStart returns an empty nonblocking result and never creates participation on its own.
 
 ## Last Updated
 

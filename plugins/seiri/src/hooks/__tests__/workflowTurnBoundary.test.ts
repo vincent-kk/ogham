@@ -108,16 +108,47 @@ it.each(HOSTS)(
         adapter,
       ).hookSpecificOutput,
     ).toBeUndefined();
+    const mismatched = { ...input, tool_use_id: 'resume-mismatch' };
+    processToolStart(
+      { ...mismatched, hook_event_name: 'PreToolUse' },
+      adapter,
+    );
+    const mismatchedContent = [
+      {
+        type: 'text',
+        text: JSON.stringify({
+          status: 'rejected',
+          action: 'start',
+          task: 'unrelated-task',
+          intent: 'change',
+        }),
+      },
+    ];
     expect(
       processToolOutcome(
         {
-          ...input,
+          ...mismatched,
+          hook_event_name: 'PostToolUse',
+          tool_response:
+            host === 'claude'
+              ? mismatchedContent
+              : { content: mismatchedContent },
+        },
+        adapter,
+      ).hookSpecificOutput,
+    ).toBeUndefined();
+    const matched = { ...input, tool_use_id: 'resume-match' };
+    processToolStart({ ...matched, hook_event_name: 'PreToolUse' }, adapter);
+    expect(
+      processToolOutcome(
+        {
+          ...matched,
           hook_event_name: 'PostToolUse',
           tool_response: result(host),
         },
         adapter,
       ).hookSpecificOutput,
-    ).toBeUndefined();
+    ).toBeDefined();
   },
 );
 it.each(HOSTS)(

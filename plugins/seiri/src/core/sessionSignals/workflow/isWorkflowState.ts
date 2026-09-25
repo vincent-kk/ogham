@@ -1,3 +1,8 @@
+import {
+  TRACKED_CALL_IDS_CAP,
+  TRACKED_COMMANDS_CAP,
+  TRACKED_INVOCATIONS_CAP,
+} from '../../../constants/failureChain.js';
 import { TASK_NAME_PATTERN } from '../../../constants/gates.js';
 import type { WorkflowState } from '../../../types/workflow.js';
 
@@ -22,11 +27,14 @@ export function isWorkflowState(value: unknown): value is WorkflowState {
   if (value.turn !== undefined && typeof value.turn !== 'string') return false;
   if (
     !Array.isArray(value.seen) ||
-    value.seen.length > 4096 ||
+    value.seen.length > TRACKED_CALL_IDS_CAP ||
     !value.seen.every((v) => typeof v === 'string')
   )
     return false;
-  if (!record(value.invocations) || Object.keys(value.invocations).length > 128)
+  if (
+    !record(value.invocations) ||
+    Object.keys(value.invocations).length > TRACKED_INVOCATIONS_CAP
+  )
     return false;
   for (const call of Object.values(value.invocations)) {
     if (
@@ -59,7 +67,7 @@ export function isWorkflowState(value: unknown): value is WorkflowState {
     return false;
   if (
     !record(binding.counts) ||
-    Object.keys(binding.counts).length > 32 ||
+    Object.keys(binding.counts).length > TRACKED_COMMANDS_CAP ||
     !Object.values(binding.counts).every(
       (v) => Number.isSafeInteger(v) && (v as number) >= 0,
     )
@@ -67,13 +75,13 @@ export function isWorkflowState(value: unknown): value is WorkflowState {
     return false;
   if (
     !Array.isArray(binding.announced) ||
-    binding.announced.length > 32 ||
+    binding.announced.length > TRACKED_COMMANDS_CAP ||
     !binding.announced.every((v) => typeof v === 'string')
   )
     return false;
   return (
     record(binding.verdicts) &&
-    Object.keys(binding.verdicts).length <= 32 &&
+    Object.keys(binding.verdicts).length <= TRACKED_COMMANDS_CAP &&
     Object.values(binding.verdicts).every((v) => typeof v === 'string')
   );
 }

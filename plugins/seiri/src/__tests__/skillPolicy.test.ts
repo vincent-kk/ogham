@@ -73,10 +73,13 @@ describe('skill invocation policy', () => {
 
   it('keeps planning skills discoverable without a turn-scoped question ban', () => {
     for (const name of AUTO_CONDITIONAL_ASK_SKILLS) {
-      const { frontmatter } = readSkill(name);
+      const { frontmatter, body } = readSkill(name);
       expect(frontmatter).not.toContain('AskUserQuestion');
       expect(frontmatter).not.toContain('disable-model-invocation');
       expect(frontmatter).toMatch(/^user-invocable: true$/m);
+      expect(body).toMatch(
+        /ask only (?:when a|about) consequential(?: choice is unresolved| unresolved choices?)/i,
+      );
     }
   });
 

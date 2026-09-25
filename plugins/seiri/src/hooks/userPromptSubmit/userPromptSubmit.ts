@@ -8,7 +8,10 @@ import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 
 /**
  * Silently suspend previous work at a trusted user boundary; never elect a skill.
+ * @param input Native UserPromptSubmit payload for the new user turn.
+ * @param adapter Host adapter selecting the Claude/Codex ABI, fixed at build time.
  * @param now Epoch ms read once at the calling hook's outermost handler.
+ * @returns A fixed non-blocking `HookOutput`, regardless of outcome.
  */
 export function processUserPromptSubmit(
   input: UserPromptSubmitInput,

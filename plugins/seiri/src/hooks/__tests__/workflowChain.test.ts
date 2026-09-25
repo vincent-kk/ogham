@@ -128,6 +128,15 @@ describe('skill loading does not create workflow participation', () => {
     },
   );
 
+  it.each(['standard', 'strict'] as const)(
+    'activates observation at either enabled dial position: %s',
+    (dial) => {
+      const cwd = seedRepo(dial);
+      expect(turn(cwd)).toEqual({ continue: true });
+      expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(true);
+    },
+  );
+
   it('does not revive legacy Skill state after an off round trip', () => {
     const cwd = seedRepo();
     const path = portableJoin(cwd, '.seiri', 'session-signals.json');

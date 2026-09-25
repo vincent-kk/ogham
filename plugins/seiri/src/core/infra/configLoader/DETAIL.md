@@ -3,7 +3,7 @@
 ## Requirements
 
 - 훅을 완전히 건너뛰는 `off`와 세 개의 개입 강도를 한 다이얼로 읽고·쓰고·설명한다. **규칙 배포 상태는 담지 않는다** — 호스트 규칙 채널의 파일시스템이 그쪽의 단일 진실이라 사본은 드리프트만 만든다.
-- 다이얼은 3계층이다: user `config.json`(개인 기본값) · `.seiri/config.json`(커밋되는 프로젝트 기준선) · `.seiri/runtime.json`(비추적 런타임 밸브). 유효값은 `runtime ?? project ?? user ?? off` 이며 매 훅 실행마다 다시 계산한다. 기존 `advisory`·`standard`·`strict` 파일은 그대로 유효하다.
+- 다이얼은 3계층이다: user `config.json`(개인 기본값) · `.seiri/config.json`(커밋되는 프로젝트 기준선) · `RUNTIME_FILE`(비추적 런타임 밸브 — 소비 프로젝트에서 실행 중에만 생기는 파일이라 저장소에는 없으며 이름은 `src/constants/files.ts`가 정본). 유효값은 `runtime ?? project ?? user ?? off` 이며 매 훅 실행마다 다시 계산한다. 기존 `advisory`·`standard`·`strict` 파일은 그대로 유효하다.
 - 계층을 병합하지 않고 따로 읽는다. 다이얼은 한 키라 병합 문서가 `??` 체인보다 말해주는 게 없고, 렌더가 필요한 것은 **어느 계층이 그 값을 줬는지**다.
 - 읽기는 절대 throw 하지 않는다. 부재는 정상이고, 손상된 계층은 건너뛰되 `warnings` 가 그 파일과 손상 종류를 지목한다 — 조용한 오버라이드를 만들지 않되 거부된 원값은 경고에 복제하지 않는다.
 - 검증은 손으로 짠 predicate 다. 훅 경로라 검증 런타임을 들일 수 없다.

@@ -6,12 +6,12 @@ import type {
   PostToolUseInput,
 } from '../../../types/hooks.js';
 import type { WorkflowRequest } from '../../../types/workflow.js';
-import { processToolOutcome } from '../../postToolUse/postToolUse.js';
-import { processToolStart } from '../../preToolUse/preToolUse.js';
+import { processToolOutcome } from '../../postToolUse/index.js';
+import { processToolStart } from '../../preToolUse/index.js';
 import { CLAUDE_WORKFLOW_ADAPTER } from '../../shared/workflowAdapters/claude.js';
 import { CODEX_WORKFLOW_ADAPTER } from '../../shared/workflowAdapters/codex.js';
-import { processSubagentStart } from '../../subagentStart/subagentStart.js';
-import { processUserPromptSubmit } from '../../userPromptSubmit/userPromptSubmit.js';
+import { processSubagentStart } from '../../subagentStart/index.js';
+import { processUserPromptSubmit } from '../../userPromptSubmit/index.js';
 
 /** Synthetic native provenance for one explicitly participating test actor. */
 interface WorkflowActorOptions {

@@ -89,8 +89,8 @@
 
 ### Distribution preparation
 
-- 소스 커밋은 생성 runtime·adapter를 제외합니다. 지정 provider와 seiri 빌드 후 prepareSeiriDistribution이 package allowlist의 정본과 새 runtime을 복사하고 compiler로 임시 배포본의 adapters를 생성합니다. tracked adapter를 입력으로 재사용하지 않습니다.
-- CI는 해당 job에서 runtime을 먼저 빌드하고 임시 배포본의 재생성 결정성·정본 해시·manifest 일치·참조 존재를 확인합니다. 다른 플러그인과 루트의 committed-adapter drift 검사는 유지합니다.
+- 생성 runtime·adapter는 소스 커밋에 섞지 않고, 소스 커밋 뒤의 별도 build 커밋으로 커밋합니다. 지정 provider와 seiri 빌드 후 prepareSeiriDistribution이 package allowlist의 정본과 새 runtime을 복사하고 compiler로 임시 배포본의 adapters를 생성합니다. tracked adapter를 입력으로 재사용하지 않습니다.
+- CI는 해당 job에서 runtime을 먼저 빌드하고 임시 배포본의 재생성 결정성·정본 해시·manifest 일치·참조 존재를 확인합니다. marketplace는 커밋된 트리를 그대로 설치하므로, 같은 job은 새 빌드 후 커밋된 seiri runtime·adapter에 차이가 남으면 실패합니다. 다른 플러그인과 루트의 committed-adapter drift 검사도 유지합니다.
 - 로컬 generated distribution 수용과 공개 배포는 다릅니다. Vincent의 배포 채널 결정 및 설치 수용 전에는 버전 변경·공개 출시와 marketplace가 읽는 Git ref로의 push/merge를 하지 않습니다.
 
 ## Scope

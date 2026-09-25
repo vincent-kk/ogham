@@ -1,16 +1,18 @@
+/** Native shell tool name shared by the two supported hook ABIs. */
+export const BASH_TOOL = 'Bash';
+
+/** The failure event name bashOutcome.ts compares against. */
+export const POST_TOOL_FAILURE_EVENT = 'PostToolUseFailure';
+
 /**
- * Claude Code hook events seiri subscribes to.
+ * Hook events seiri subscribes to, across both supported host ABIs (Claude
+ * Code and Codex).
  *
  * A Bash command that exits non-zero fires `PostToolUseFailure`, not
  * `PostToolUse` — measured against the shipped client, whose public
  * reference documents the two as separate events. The failure-chain hook
  * therefore registers under both: one event to count on, one to reset on.
  */
-export const POST_TOOL_FAILURE_EVENT = 'PostToolUseFailure';
-
-/** Native shell tool name shared by the two supported hook ABIs. */
-export const BASH_TOOL = 'Bash';
-
 export const HookEvent = {
   SESSION_START: 'SessionStart',
   USER_PROMPT_SUBMIT: 'UserPromptSubmit',
@@ -51,6 +53,16 @@ export const HostTool = {
   BASH: BASH_TOOL,
   WORKFLOW: 'mcp__plugin_seiri_tools__workflow',
 } as const;
+
+/**
+ * Codex's server-prefixed form of {@link HostTool.WORKFLOW}.
+ *
+ * The plugin compiler's Codex adapter rewrites the Claude MCP address into
+ * this shape at build time; this constant pins the value both hosts' hook
+ * ABIs match against, sourced here alongside `HostTool` rather than
+ * restated in the Codex workflow adapter.
+ */
+export const CODEX_WORKFLOW_TOOL = 'mcp__seiri__workflow' as const;
 
 /**
  * Hooks that are built but deliberately absent from `hooks/hooks.json`.

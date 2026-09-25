@@ -9,8 +9,8 @@
 
 ## API Contracts
 
-- Optional `codexHookRuntime` facts select a prebuilt directory under `bridge/`. For supported Codex events, canonical plugin-root bridge command paths retain their basename and select that directory. A command-only change emits dedicated hooks and routes the manifest accordingly. No opt-in means byte-identical existing behavior; runtime bundles remain the plugin build's responsibility.
-- The directory consists only of nonempty ASCII alphanumeric/underscore/hyphen segments under `bridge/`. Invalid paths fail with `codex-hook-runtime`; the compiler does not guess runtime names or execute the declaration.
+- Optional `codexHookRuntime` facts select a prebuilt directory under the plugin root's bridge directory. For supported Codex events, canonical plugin-root bridge command paths retain their basename and select that directory. A command-only change emits dedicated hooks and routes the manifest accordingly. No opt-in means byte-identical existing behavior; runtime bundles remain the plugin build's responsibility.
+- The directory consists only of nonempty ASCII alphanumeric/underscore/hyphen segments under that bridge directory. Invalid paths fail with `codex-hook-runtime`; the compiler does not guess runtime names or execute the declaration.
 
 - Codex 매니페스트는 허용된 메타데이터만 복사하고 실제로 방출되는 스킬 및 훅 변이와 같은 판정으로 참조를 선택하며, MCP facts가 있을 때만 서버 선언을 포함한다.
 - MCP 변환은 `${CLAUDE_PLUGIN_ROOT}/X` 형태의 args 접두만 상대화한다. 변수가 args의 다른 위치나 command 및 env에 남으면 `Error`를 throw한다. 모든 생성 서버에는 호스트 마커를 병합하며 Codex는 충돌 없는 서버명과 `cwd: "."`를, agy는 원본 서버명을 유지한다.

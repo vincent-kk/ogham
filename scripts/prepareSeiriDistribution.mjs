@@ -29,7 +29,7 @@ const generated = [
 ];
 
 /** Return sorted file paths; symlinks cannot smuggle workspace dependencies into a distribution. */
-export function distributionFiles(root, directory = root) {
+function distributionFiles(root, directory = root) {
   return readdirSync(directory)
     .sort()
     .flatMap((name) => {

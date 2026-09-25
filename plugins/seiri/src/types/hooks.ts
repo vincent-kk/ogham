@@ -48,8 +48,6 @@ export interface PostToolUseInput extends HookBaseInput {
   tool_name: string;
   tool_input?: { command?: unknown; [key: string]: unknown };
   tool_response?: unknown;
-  /** Present only on a subagent's calls; measured on 2026-08-22. */
-  agent_id?: string;
 }
 
 /** Observation before a selected tool executes; never a permission decision. */
@@ -70,8 +68,6 @@ export interface PostToolUseFailureInput extends HookBaseInput {
   error?: string;
   /** Whether Claude reports that the user interrupted the command. */
   is_interrupt?: boolean;
-  /** Present only on a subagent's calls; measured on 2026-08-22. */
-  agent_id?: string;
 }
 
 /** SubagentStart input. `agent_type` is the matcher's field. */

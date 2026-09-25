@@ -97,16 +97,17 @@ describe('non-Bash hook host payload parity', () => {
           adapter,
         ),
       ).toEqual({ continue: true });
-      expect(
-        observeBash({
-          cwd,
-          session_id: 'session-a',
-          ...native,
-          ...failure,
-          tool_name: 'Bash',
-          tool_input: { command: 'fail' },
-        }),
-      ).toEqual({ continue: true });
+      for (let i = 0; i < 3; i++)
+        expect(
+          observeBash({
+            cwd,
+            session_id: 'session-a',
+            ...native,
+            ...failure,
+            tool_name: 'Bash',
+            tool_input: { command: 'fail' },
+          }),
+        ).toEqual({ continue: true });
     }
   });
 

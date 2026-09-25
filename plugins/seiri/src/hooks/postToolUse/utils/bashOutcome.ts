@@ -28,7 +28,10 @@ import { toCheckOutcome } from './toCheckOutcome.js';
  * Judge one Bash payload, retain failure-chain state, and inject one line.
  *
  * @param input Successful or failed Bash hook payload.
- * @returns Non-blocking gate verdict, chain hint, or empty result.
+ * @param binding Mutated in place to persist failure-chain counts, announced
+ *   hashes and verdict fingerprints.
+ * @returns Non-blocking gate verdict, chain hint, or empty result, reflecting
+ *   the failure-chain and dedup state just recorded onto `binding`.
  */
 export function bashOutcome(
   input: PostToolUseInput | PostToolUseFailureInput,

@@ -13,15 +13,11 @@
 
 ## Acceptance Criteria
 
-### AC-conditional-participation — Explicit scope
+### AC-child-boundary — Independent child actor
 
-- Inactive sessions receive no workflow banner or gate writes.
-- Bound workflows cannot cross turns, actors, tasks or invocation generations through late results.
-
-### AC-native-invocation-provenance — Recorded host envelopes
-
-- Recorded Claude and Codex fixtures retain matched invocation identities, independent children and their distinct successful MCP response envelopes.
-- Synthetic race tests do not claim to reproduce native host scheduling.
+- A child's first SubagentStart anchors only that child's actor; the parent's binding and task are never visible to the child.
+- A SubagentStart for a child whose generation is already above zero leaves it unanchored and suspends any existing binding.
+- A payload without `agent_id` or host provenance changes no state, and every call returns an empty nonblocking result.
 
 ## Last Updated
 

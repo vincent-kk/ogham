@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/plugin-compiler` 패키지 루트. 모노레포 내부 전용 어댑터 생성기로, 각 플러그인의 **Claude 산출물을 무수정 정본**으로 읽어 Codex(`.codex-plugin/plugin.json`)·Antigravity(`mcp_config.json`)·루트 마켓플레이스(`.agents/*`) 어댑터를 결정적으로 생성한다. 설계 SSoT 는 [`.metadata/plugin-compiler/`](../../.metadata/plugin-compiler/), 적용 절차는 [migration-playbook.md](../../.metadata/plugin-compiler/migration-playbook.md).
+`@ogham/plugin-compiler` 패키지 루트. 모노레포 내부 전용 어댑터 생성기로, 각 플러그인의 **Claude 산출물을 무수정 정본**으로 읽어 Codex(플러그인별 Codex 매니페스트)·Antigravity(`mcp_config.json`)·루트 마켓플레이스(`.agents/*`) 어댑터를 결정적으로 생성한다. 설계 SSoT 는 [`.metadata/plugin-compiler/`](../../.metadata/plugin-compiler/), 적용 절차는 [migration-playbook.md](../../.metadata/plugin-compiler/migration-playbook.md).
 
 ## Structure
 

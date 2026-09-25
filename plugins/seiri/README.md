@@ -83,9 +83,9 @@ node scripts/prepareSeiriDistribution.mjs --output /absolute/new/seiri-directory
 node scripts/checkSeiriAdapters.mjs
 ```
 
-Run these from the repository root. Preparation copies declared canonical inputs and current runtime, then regenerates host adapters with plugin-compiler; stale tracked adapters are not distribution inputs. Generated bundles and adapters remain outside source commits.
+Run these from the repository root. Preparation copies declared canonical inputs and current runtime, then regenerates host adapters with plugin-compiler; stale tracked adapters are not distribution inputs. Generated bundles and adapters are committed in a separate build commit rather than kept outside commits.
 
-Local distribution acceptance does not publish a release. A distribution channel and its installation acceptance must be chosen before version changes, public release, or pushing/merging this source-only change to a ref consumed by the remote marketplace.
+Local distribution acceptance does not publish a release. A distribution channel and its installation acceptance must be chosen before version changes, public release, or pushing or merging seiri changes (source and committed generated bundles/adapters) to a ref consumed by the remote marketplace.
 
 ## License
 

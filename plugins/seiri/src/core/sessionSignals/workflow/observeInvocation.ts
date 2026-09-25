@@ -1,3 +1,7 @@
+import {
+  TRACKED_CALL_IDS_CAP,
+  TRACKED_INVOCATIONS_CAP,
+} from '../../../constants/failureChain.js';
 import type {
   WorkflowIdentity,
   WorkflowRequest,
@@ -27,8 +31,8 @@ export function observeInvocation(
       return;
     if (state.seen.includes(identity.call!)) return;
     if (
-      Object.keys(state.invocations).length >= 128 ||
-      state.seen.length >= 4096
+      Object.keys(state.invocations).length >= TRACKED_INVOCATIONS_CAP ||
+      state.seen.length >= TRACKED_CALL_IDS_CAP
     )
       return;
     state.seen.push(identity.call!);

@@ -18,7 +18,11 @@ import { bashOutcome } from './utils/bashOutcome.js';
 
 /**
  * Apply only a paired result belonging to the current actor, task and turn.
+ * @param input Hook payload for a successful or failed tool invocation.
+ * @param adapter Host adapter fixed at build time; defaults to `WORKFLOW_ADAPTER`.
  * @param now Epoch ms read once at the calling hook's outermost handler.
+ * @returns A fail-open hook result: the workflow acknowledgment or mismatch
+ *   line, an injected gate verdict, or the empty result when nothing pairs.
  */
 export function processToolOutcome(
   input: PostToolUseInput | PostToolUseFailureInput,

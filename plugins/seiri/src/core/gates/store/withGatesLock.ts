@@ -6,10 +6,14 @@ import { GATES_LOCK_DIR } from '../../../constants/files.js';
 import { acquireLockDir } from '../../utils/acquireLockDir.js';
 
 /**
- * Run one task-ledger mutation under its fail-open lock directory.
+ * Run one task-ledger mutation under its lock directory. Fail-open unless
+ * `requireLock` is set.
  *
  * @param taskDir Absolute directory that owns `gates.md` and the lock.
  * @param mutate Complete read-modify-write callback.
+ * @param requireLock When `true`, throw instead of proceeding unserialised
+ *   if the lock cannot be acquired within the timeout; pass `true` for
+ *   writes that must not race. Defaults to `false` (fail-open).
  * @returns The callback result, unchanged.
  */
 export function withGatesLock<T>(

@@ -77,9 +77,9 @@ actor 상태는 7일 무관측, 호출 기록은 24시간 뒤 만료됩니다. �
 
 저장소 루트에서 shared provider와 seiri를 지정 빌드한 뒤 새 절대경로에 배포본을 준비합니다. 명령 전문은 [영문 문서](README.md#local-development-distribution)에 있습니다.
 
-`node scripts/prepareSeiriDistribution.mjs --output <새-절대경로>`는 package allowlist의 정본·새 runtime만 복사하고 plugin-compiler로 adapters를 생성합니다. 기존 tracked adapter는 입력으로 재사용하지 않으며 생성물은 소스 커밋에서 제외합니다. `node scripts/checkSeiriAdapters.mjs`는 임시 배포본의 생성 결정성과 참조를 검사합니다.
+`node scripts/prepareSeiriDistribution.mjs --output <새-절대경로>`는 package allowlist의 정본·새 runtime만 복사하고 plugin-compiler로 adapters를 생성합니다. 기존 tracked adapter는 입력으로 재사용하지 않으며 생성물은 소스 커밋과 별도의 빌드 커밋에 커밋됩니다. `node scripts/checkSeiriAdapters.mjs`는 임시 배포본의 생성 결정성과 참조를 검사합니다.
 
-로컬 수용은 공개 출시가 아닙니다. 배포 채널 결정과 그 채널의 설치 수용 전에는 버전 변경·공개 출시 및 marketplace가 읽는 Git ref로의 push/merge를 하지 않습니다.
+로컬 수용은 공개 출시가 아닙니다. 배포 채널 결정과 그 채널의 설치 수용 전에는 버전 변경·공개 출시, 그리고 seiri 변경사항(소스와 커밋된 생성 bundle/adapter)을 marketplace가 읽는 Git ref로 push하거나 merge하는 것을 하지 않습니다.
 
 ## 라이선스
 

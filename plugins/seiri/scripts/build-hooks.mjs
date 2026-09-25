@@ -160,13 +160,13 @@ for (const { name, maxBytes, forbiddenContent = [] } of hookEntries) {
     const { size } = await stat(file);
     if (size > maxBytes)
       violations.push(
-        `  ${name}.mjs: ${size} bytes > ${maxBytes} (${(size / KILO_BYTE).toFixed(1)} KB > ${(maxBytes / KILO_BYTE).toFixed(0)} KB)`,
+        `  ${host}/${name}.mjs: ${size} bytes > ${maxBytes} (${(size / KILO_BYTE).toFixed(1)} KB > ${(maxBytes / KILO_BYTE).toFixed(0)} KB)`,
       );
 
     const content = await readFile(file, 'utf8');
     for (const pattern of [...FORBIDDEN_PATTERNS, ...forbiddenContent])
       if (pattern.test(content))
-        violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
+        violations.push(`  ${host}/${name}.mjs: forbidden pattern ${pattern} matched`);
   }
 }
 
