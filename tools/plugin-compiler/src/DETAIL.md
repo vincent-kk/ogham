@@ -28,6 +28,7 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 - 자식 fractal 표면: `cli/`(`parseCommand`·`formatDiagnostics`·`formatOutcomes`·`SyncCommand`), `facts/`(`readPluginFacts`·`readMarketplaceFacts`), `adapters/`(빌더 7종, `emitsCodexSkillVariant`, lifecycle validation error), `lint/`(`lintHookEvents`·`lintHookMatchers`), `pipeline/`(`listPluginDirectories`·`planPluginAdapters`·`planRootAdapters`·`applyFiles`·`ApplyFilesError`).
 - organ 표면: `types/` 는 정본(source)·facts·계획(plan) 타입, `constants/` 는 Claude 산출물 경로·어댑터 경로·호스트 마커와 이벤트, `utils/` 는 `stableJson`.
 - 어댑터별 생성 규칙과 진단 코드 목록은 패키지 루트 `DETAIL.md` 가 소유한다. 여기서 되풀이하지 않는다.
+- Explicit MCP adaptation shares one pure validator between builders and lint. Invalid opt-in content produces its typed diagnostic before any adapter file is planned.
 
 ## Acceptance Criteria
 
@@ -73,6 +74,11 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 - 한 그룹이 `Bash|Skill`을 선언하면 Codex에는 `Bash`만 남고, 지원하지 않는 도구만 있던 그룹이나 이벤트는 사라진다.
 - Pre `Read` matcher의 `Bash` fallback과 관련 진단도 같은 capability 선언을 소비하며 정본 facts를 변경하지 않는다.
 
+### AC-seiri-mcp-surface — Canonical seiri references
+
+- The actual canonical seiri skill tree produces an in-memory Codex tree with every owned actionable MCP address adapted, relative workflow links intact and both manifest copies routed to that complete tree.
+- Canonical source bytes and exact Claude hook matchers remain unchanged; the generated Pre/Post workflow matchers use the Codex callable address.
+
 ## Last Updated
 
-2026-08-23 — Codex hook matcher capability를 생성·lint가 함께 소비하는 계약을 추가했다.
+2026-09-26 — Added shared MCP adaptation validation before adapter planning.

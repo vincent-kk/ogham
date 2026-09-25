@@ -1,6 +1,6 @@
 ## Purpose
 
-Claude 정본을 Codex 가 그대로 소비할 때 조용히 어긋나는 event와 matcher를 진단으로 표면화한다. 어댑터 생성을 막지 않는 경고 계열이며 생성물 자체는 바꾸지 않는다.
+Report host capability warnings and explicit MCP opt-in validation errors without modifying canonical inputs or generated content. The pipeline owns emission and exit decisions.
 
 ## Conventions
 

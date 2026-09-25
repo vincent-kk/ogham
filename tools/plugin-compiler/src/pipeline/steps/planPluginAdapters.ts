@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 import {
   AsyncAgentLifecycleError,
+  CodexHookRuntimeError,
   buildAgyHooks,
   buildAgyMcpConfig,
   buildCodexHooks,
@@ -17,7 +18,11 @@ import {
 } from "../../constants/adapterPaths.js";
 import { CLAUDE_MANIFEST_PATH } from "../../constants/claudeArtifacts.js";
 import { readPluginFacts } from "../../facts/index.js";
-import { lintHookEvents, lintHookMatchers } from "../../lint/index.js";
+import {
+  lintHookEvents,
+  lintHookMatchers,
+  lintMcpToolReferences,
+} from "../../lint/index.js";
 import type { AdapterPlan, GeneratedFile } from "../../types/index.js";
 import { stableJson } from "../../utils/stableJson.js";
 
@@ -41,7 +46,13 @@ export function planPluginAdapters(directory: string): AdapterPlan {
     };
 
   const facts = readPluginFacts(directory);
-  const diagnostics = [...lintHookEvents(facts), ...lintHookMatchers(facts)];
+  const diagnostics = [
+    ...lintHookEvents(facts),
+    ...lintHookMatchers(facts),
+    ...lintMcpToolReferences(facts),
+  ];
+  if (diagnostics.some((diagnostic) => diagnostic.level === "error"))
+    return { files: [], diagnostics };
 
   try {
     // One manifest, two locations — the plugin root copy is agy's marker and is
@@ -90,9 +101,11 @@ export function planPluginAdapters(directory: string): AdapterPlan {
     diagnostics.push({
       level: "error",
       code:
-        error instanceof AsyncAgentLifecycleError
-          ? "codex-skill-lifecycle"
-          : "mcp-variable-args",
+        error instanceof CodexHookRuntimeError
+          ? "codex-hook-runtime"
+          : error instanceof AsyncAgentLifecycleError
+            ? "codex-skill-lifecycle"
+            : "mcp-variable-args",
       message: `${facts.name}: ${error instanceof Error ? error.message : String(error)}`,
     });
     return { files: [], diagnostics };

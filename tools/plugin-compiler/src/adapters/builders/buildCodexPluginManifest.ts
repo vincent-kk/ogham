@@ -30,15 +30,12 @@ export function buildCodexPluginManifest(
     if (facts.manifest[field] !== undefined)
       manifest[field] = facts.manifest[field];
 
-  // Point Codex at the skill-variant tree when one is emitted (persona spawns
-  // rewritten to self-load), else the shared Claude `skills/`. emitsCodexSkillVariant
-  // is the single source of that decision — the pipeline emits the tree on the
-  // same test, so manifest and tree never disagree.
+  // The pipeline shares this predicate, so the manifest selects the complete
+  // generated tree whenever persona, lifecycle or MCP adaptation requires one.
   if (facts.hasSkills)
     manifest.skills = `./${emitsCodexSkillVariant(facts) ? CODEX_SKILLS_DIR : SKILLS_DIRECTORY}/`;
-  // Point Codex at its own Bash-extended hooks copy when one is emitted (a
-  // read-catching matcher), else the shared Claude file. buildCodexHooks is the
-  // single source of that decision — the pipeline emits the file on the same test.
+  // The pipeline shares this builder, so filtering, fallbacks and exact MCP
+  // adaptation select the same dedicated hooks file as the manifest.
   if (facts.hasHooks)
     manifest.hooks = `./${buildCodexHooks(facts) ? CODEX_HOOKS_PATH : CLAUDE_HOOKS_PATH}`;
 

@@ -23,6 +23,7 @@ Claude 정본(플러그인 산출물·루트 마켓플레이스)을 **읽기 전
 ### Always do
 
 - 필수 필드(플러그인 name, 마켓플레이스 name/source) 부재 시 즉시 throw — 조용한 기본값 금지.
+- Read optional compiler-only `plugin-compiler.json` without executing it; its runtime directory is an additive fact validated by adapters.
 
 ### Ask first
 

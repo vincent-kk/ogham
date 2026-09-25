@@ -5,18 +5,32 @@
 - 공개 빌더는 정본에서 읽은 facts를 호스트별 순수 객체로 동기 변환하며 디스크 I/O나 정본 변경을 수행하지 않는다.
 - 동일 facts는 키와 파일 경로 순서가 안정된 결과를 만들어 `stableJson` 직렬화의 바이트 결정성을 보존한다.
 - 조건부 산출물이 필요하지 않으면 `null`을 반환하고, 생성 여부 판정은 매니페스트가 가리키는 표면과 일치해야 한다.
+- MCP reference adaptation is opt-in: one valid `<!-- ogham-mcp-tools:<plugin> -->` marker in a skill file selects a complete Codex skill tree and owned exact hook-token adaptation. Unmarked plugins retain their existing output.
 
 ## API Contracts
+
+- Optional `codexHookRuntime` facts select a prebuilt directory under `bridge/`. For supported Codex events, canonical plugin-root bridge command paths retain their basename and select that directory. A command-only change emits dedicated hooks and routes the manifest accordingly. No opt-in means byte-identical existing behavior; runtime bundles remain the plugin build's responsibility.
+- The directory consists only of nonempty ASCII alphanumeric/underscore/hyphen segments under `bridge/`. Invalid paths fail with `codex-hook-runtime`; the compiler does not guess runtime names or execute the declaration.
 
 - Codex 매니페스트는 허용된 메타데이터만 복사하고 실제로 방출되는 스킬 및 훅 변이와 같은 판정으로 참조를 선택하며, MCP facts가 있을 때만 서버 선언을 포함한다.
 - MCP 변환은 `${CLAUDE_PLUGIN_ROOT}/X` 형태의 args 접두만 상대화한다. 변수가 args의 다른 위치나 command 및 env에 남으면 `Error`를 throw한다. 모든 생성 서버에는 호스트 마커를 병합하며 Codex는 충돌 없는 서버명과 `cwd: "."`를, agy는 원본 서버명을 유지한다.
 - Codex 훅 변환은 지원 이벤트만 남기고 선언된 matcher capability에 따라 exact tool과 PreToolUse fallback을 조정한다. 변환이 필요 없으면 `null`을 반환하며 Claude 정본은 바뀌지 않는다.
-- Codex 스킬 변이는 재배치 안전성이 확인된 persona-spawn allowlist 또는 명시적 async lifecycle marker로 opt-in한 플러그인을 대상으로 전체 스킬 집합과 persona를 함께 방출한다. persona registry 스폰에는 self-load 프로토콜을 주입하고, lifecycle marker의 Claude 문단은 explicit Codex spawn/join 문단으로 치환한 뒤 `relativePath` 순으로 정렬한다.
+- Codex skill variants select plugins through the relocation-safe persona-spawn allowlist, an explicit async lifecycle marker, or an explicit MCP reference marker. Every selected plugin emits its complete skill tree and personas, with MCP references adapted before lifecycle and persona-spawn content, sorted by `relativePath`.
 - Async lifecycle marker는 같은 `<plugin>:<agent>`의 `spawn` 다음 `join` 순서로 정확히 한 쌍이어야 하며 plugin 이름과 persona 파일이 facts에 존재해야 한다. 위반은 변환 실패이고 marker가 없는 콘텐츠는 바이트 동일하게 보존한다.
 - A single `ogham-async-agent:handoffs <plugin>` block selects the Codex lifecycle for ordinary, persona-free children. It requires the owning plugin name, forbids an agent suffix, and replaces only the marked Claude paragraph. Duplicate handoff blocks and malformed markers fail closed.
 - agy 훅은 PreToolUse 중 bridge 명령으로 실행되는 hook이 남을 때만 플러그인 named-group과 `*` matcher로 변환하며, marketplace 변환은 각 항목의 local source, 설치 정책, Title-case category를 보존한다.
+- Each marked file has exactly one marker naming its owning plugin. Only its canonical `mcp__plugin_<plugin>_<server>__<tool>` references are rewritten; other files and external tool references remain byte-identical. The marker is removed only from the generated copy. MCP rewriting precedes async lifecycle and persona transformations.
+- Manifest server keys remain unchanged; callable tokens replace non-ASCII-alphanumeric/underscore characters with underscores. Owned source server/tool identifiers must use ASCII letters, digits, underscores or hyphens. Referenced tools or servers that collide after normalization fail rather than selecting an arbitrary target.
+- MCP hook rewriting applies only to PreToolUse/PostToolUse exact tokens, including `|` alternatives. An opted-in owned reference inside a compound regex fails with `codex-mcp-hook-matcher`; unrelated expressions retain their existing behavior.
+- `validateMcpToolReferences(facts)` exposes the same pure validation used by builders to lint. Invalid markers, missing owned servers, unsupported names and normalized collisions throw `McpToolReferenceError` with `codex-mcp-tool-reference`; no files are produced for an invalid plugin.
 
 ## Acceptance Criteria
+
+### AC-adapters-hook-runtime — Explicit prebuilt Codex hook companions
+
+- Explicit companions rewrite canonical bridge tokens in generated hooks only, retaining wrappers, arguments and basename; unrelated and nested source paths are unchanged.
+- Dedicated hook and manifest selection responds to command changes even without matcher changes. Missing opt-in retains previous output.
+- Invalid directory declarations prevent adapter emission with their own diagnostic.
 
 ### AC-adapters-purity — 순수성과 결정성
 
@@ -42,11 +56,18 @@
 
 ### AC-adapters-skill-variant — 스킬 변이 완전성
 
-- allowlist·persona·해당 `subagent_type` 스폰 조건을 모두 만족하거나, 유효한 async lifecycle marker가 있을 때만 변이가 방출된다.
+- A variant is emitted only when the allowlist/persona/registry-spawn conditions hold or a valid async lifecycle or MCP reference marker exists.
 - 변이는 전체 스킬 집합과 persona를 포함한다. registry 스폰 콘텐츠만 self-load 주입을 받고 lifecycle marker 콘텐츠만 Codex spawn/join 치환을 받으며 결과는 `relativePath` 순이다.
 - lifecycle 생성본은 persona 선행 로드, child target 보관, final 전 `wait_agent` mailbox 대기와 sender 대조, parent 자동 재개 금지를 명시한다. 원본 Claude 문단과 source marker는 생성본에 남지 않는다.
 - marker phase·plugin·persona 검증 실패는 fail closed 하며, marker가 없는 비대상 스킬은 바이트 동일하다.
 - Handoff variants retain child targets by workflow identity, join before ending the turn, ignore unrelated or timeout notifications, and continue validation and subsequent handoffs under the workflow's existing retry and terminal conditions. They require no persona and impose no single-child respawn prohibition.
+
+### AC-adapters-mcp-references — Explicit MCP reference adaptation
+
+- A marked skill/reference opts in the full tree and manifest routing; unmarked files, relative links, external prefixes and input facts remain unchanged.
+- Single/multiple server references use the manifest naming rule and callable-name normalization. Duplicate/malformed/foreign markers, missing servers and normalized collisions fail closed.
+- Exact hook alternatives are rewritten and select dedicated hooks; owned compound expressions fail. Non-tool events and plugins without markers retain their current output.
+- MCP and async lifecycle markers compose deterministically without changing Claude inputs.
 
 ### AC-adapters-marketplace — marketplace 매핑
 
@@ -54,4 +75,4 @@
 
 ## Last Updated
 
-2026-09-10 — Added persona-free Codex handoff lifecycle selection.
+2026-09-26 — Added explicit owned MCP callable-reference and exact hook adaptation.

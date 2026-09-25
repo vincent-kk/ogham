@@ -3,7 +3,7 @@
 ## Requirements
 
 - 모든 검사는 `PluginFacts`를 읽기만 하고 `Diagnostic[]`을 반환하며 입력 facts, 생성물, 디스크 상태를 변경하지 않는다.
-- 진단은 생성 중단 조건이 아닌 `warning`으로 보고하며 종료 여부는 호출자에게 맡긴다.
+- Existing hook capability diagnostics remain warnings. Explicit MCP opt-in validation reports generation errors; the pipeline owns whether files may be emitted.
 - Codex 이벤트와 matcher 호환성 판단은 어댑터와 같은 capability 선언을 소비해 변환과 진단이 어긋나지 않게 한다.
 - hook 설정이나 matcher가 없으면 해당 검사는 진단 없이 완료한다.
 
@@ -14,6 +14,7 @@
 - exact `Read` token은 `codex-read-matcher`를 반환하며 단순 셸 읽기의 `Bash` fallback과 복합 읽기 미추적을 알린다.
 - exact `Skill` token은 `codex-unsupported-tool-matcher`를 반환하며 Codex 생성물에서 해당 token이 제거됨을 알린다.
 - 진단 메시지는 plugin 이름, event, 원래 matcher 등 문제를 식별하는 문맥을 보존한다.
+- `lintMcpToolReferences(facts)` invokes the adapters entry-point validator and converts its typed errors to `codex-mcp-tool-reference` or `codex-mcp-hook-matcher` error diagnostics. Unmarked plugins receive no new diagnostic.
 
 ## Acceptance Criteria
 
@@ -27,6 +28,11 @@
 - 대상 event의 `Read|Skill` matcher는 `codex-read-matcher`와 `codex-unsupported-tool-matcher`를 모두 반환한다.
 - matcher가 없거나 exact token이 일치하지 않으면 해당 경고를 반환하지 않는다.
 
+### AC-lint-mcp-references — Opt-in generation diagnostics
+
+- Malformed/foreign/duplicate markers, invalid owned references and normalization collisions return the typed reference error code.
+- An owned compound MCP hook regex returns the matcher error code; valid references and unmarked plugins add no diagnostic.
+
 ### AC-lint-read-only — 읽기 전용 진단
 
 - 모든 검사는 입력 facts와 생성물을 변경하지 않고 디스크 I/O 없이 완료한다.
@@ -34,4 +40,4 @@
 
 ## Last Updated
 
-2026-08-23 — Codex hook event와 matcher 호환성 진단의 현재 계약을 기록했다.
+2026-09-26 — Added typed errors for explicitly opted-in MCP references.

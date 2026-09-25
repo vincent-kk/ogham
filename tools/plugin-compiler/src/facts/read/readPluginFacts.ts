@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { COMPILER_CONFIG_PATH } from "../../constants/compilerConfig.js";
 import {
   CLAUDE_HOOKS_PATH,
   CLAUDE_MANIFEST_PATH,
@@ -39,6 +40,13 @@ export function readPluginFacts(directory: string): PluginFacts {
       ).mcpServers ?? null)
     : null;
 
+  const configPath = join(directory, COMPILER_CONFIG_PATH);
+  const compilerConfig = existsSync(configPath)
+    ? (JSON.parse(readFileSync(configPath, "utf8")) as {
+        codexHookRuntime?: string;
+      })
+    : undefined;
+
   return {
     directory,
     name,
@@ -46,6 +54,9 @@ export function readPluginFacts(directory: string): PluginFacts {
     hasSkills: existsSync(join(directory, SKILLS_DIRECTORY)),
     hasHooks,
     hooksFile,
+    ...(compilerConfig?.codexHookRuntime === undefined
+      ? {}
+      : { codexHookRuntime: compilerConfig.codexHookRuntime }),
     mcpServers,
     agentFiles: readAgentFiles(directory),
     skillFiles: readSkillFiles(directory),

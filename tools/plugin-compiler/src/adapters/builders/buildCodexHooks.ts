@@ -3,6 +3,11 @@ import {
   CODEX_HOOK_MATCHER_CAPABILITIES,
 } from "../../constants/hosts.js";
 import type { HookMatcherGroup, PluginFacts } from "../../types/index.js";
+import {
+  adaptCodexHookRuntime,
+  CodexHookRuntimeError,
+} from "../utils/adaptCodexHookRuntime.js";
+import { validateMcpToolReferences } from "../utils/validateMcpToolReferences.js";
 
 const UNSUPPORTED_TOOL_SET = new Set(
   CODEX_HOOK_MATCHER_CAPABILITIES.unsupportedExactTools,
@@ -17,6 +22,7 @@ const UNSUPPORTED_TOOL_SET = new Set(
 function rewriteMatcher(
   event: string,
   matcher: string | undefined,
+  mcpNames: Record<string, string>,
 ): string | undefined {
   if (
     !CODEX_HOOK_MATCHER_CAPABILITIES.toolMatcherEvents.includes(event) ||
@@ -27,7 +33,8 @@ function rewriteMatcher(
 
   const tools = matcher
     .split("|")
-    .filter((tool) => !UNSUPPORTED_TOOL_SET.has(tool));
+    .filter((tool) => !UNSUPPORTED_TOOL_SET.has(tool))
+    .map((tool) => mcpNames[tool] ?? tool);
   if (event === "PreToolUse")
     for (const fallback of CODEX_HOOK_MATCHER_CAPABILITIES.preToolFallbacks)
       if (tools.includes(fallback.source) && !tools.includes(fallback.target))
@@ -42,7 +49,8 @@ function rewriteMatcher(
  * Unsupported events are omitted. Tool matcher capability rewrites are limited
  * to declared tool events; matching PreToolUse groups gain `Bash`, so a shell
  * read can be promoted by @ogham/cross-platform to the Claude `Read`
- * vocabulary. Claude keeps using `hooks/hooks.json` unchanged.
+ * vocabulary. Explicit runtime declarations select prebuilt companions only in
+ * generated commands. Claude keeps using `hooks/hooks.json` unchanged.
  *
  * @param facts Canonical Claude plugin facts.
  * @returns A dedicated Codex hooks object when filtering or matcher rewriting
@@ -51,6 +59,14 @@ function rewriteMatcher(
 export function buildCodexHooks(
   facts: PluginFacts,
 ): Record<string, unknown> | null {
+  const runtime = facts.codexHookRuntime;
+  if (
+    runtime !== undefined &&
+    (typeof runtime !== "string" ||
+      !/^bridge\/(?:[A-Za-z0-9_-]+\/)*[A-Za-z0-9_-]+$/.test(runtime))
+  )
+    throw new CodexHookRuntimeError();
+  const mcpReferences = validateMcpToolReferences(facts);
   const hooks = facts.hooksFile?.hooks;
   if (!hooks) return null;
 
@@ -63,14 +79,29 @@ export function buildCodexHooks(
     }
     const rewrittenGroups: HookMatcherGroup[] = [];
     for (const group of groups) {
-      const matcher = rewriteMatcher(event, group.matcher);
+      const matcher = rewriteMatcher(
+        event,
+        group.matcher,
+        mcpReferences?.names ?? {},
+      );
       if (matcher === undefined && group.matcher !== undefined) {
         changed = true;
         continue;
       }
-      if (matcher !== group.matcher) {
+      let commandsChanged = false;
+      const commands = group.hooks?.map((hook) => {
+        const command = adaptCodexHookRuntime(hook.command, runtime);
+        if (command === hook.command) return hook;
+        commandsChanged = true;
+        return { ...hook, command };
+      });
+      if (matcher !== group.matcher || commandsChanged) {
         changed = true;
-        rewrittenGroups.push({ ...group, matcher });
+        rewrittenGroups.push({
+          ...group,
+          matcher,
+          ...(commandsChanged ? { hooks: commands } : {}),
+        });
       } else rewrittenGroups.push(group);
     }
     if (rewrittenGroups.length > 0) rewritten[event] = rewrittenGroups;
