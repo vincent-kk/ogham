@@ -43,12 +43,6 @@
 - **Direct import**: allowed
 - **Reason**: 훅은 esbuild 번들로 배송되고 크기 가드를 받는다. `index.ts` 를 거치면 배럴이 재노출하는 그래프 전체가 번들에 끌려 들어와 가드를 넘긴다. typecheck 는 이 비대를 잡지 못하고 `build:hooks` 의 가드만 잡으므로, 배럴 경유는 선택지가 아니라 빌드 실패다.
 
-### utils — Hook bundles cannot pass through the barrel
-
-- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
-- **Direct import**: allowed
-- **Reason**: `loaders` 와 같은 이유다. 상태 렌더 함수(`describeDial`·`renderPostureLines`·`renderElectionLine`)는 훅이 아니라 settings MCP 도구의 `config` posture echo가 쓰는데, 배럴을 거치면 다이얼 쓰기 경로 전체가 번들에 딸려 온다.
-
 ## History
 
 - 2026-09-05 — 잘못된 intervention 원값을 경고에서 제거했다. 경고는 fallback의 이유만 설명하고 프로젝트가 쓴 임의 문자열을 훅 컨텍스트로 운반하지 않아야 하기 때문이다.

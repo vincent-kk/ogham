@@ -11,7 +11,7 @@
 
 - `infra/configLoader` — user/project 기준선과 런타임 밸브의 읽기·쓰기·설명.
 - `ruleDocs` — 매니페스트, 배포 상태, plan/apply, 드리프트 판정.
-- sessionSignals는 host/session/agent별 참여·native-turn anchor·호출 대응·실패 카운터를 비추적 상태로 관리합니다. 구 API와 새 참여 상태를 혼합하지 않습니다.
+- sessionSignals는 host/session/agent별 참여·native-turn anchor·호출 대응·실패 카운터를 비추적 상태로 관리합니다.
 - `gates` — 작업 게이트의 파싱, 증거 기록, 포기와 상태 집계(작업 스코프, 비추적).
 - `utils/` — `findRepoRoot`, `computeFileSha256`, `writeAtomically`, `ensureSeiriDir`, `acquireLockDir`, `hashCommand`.
 

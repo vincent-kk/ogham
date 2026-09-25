@@ -5,7 +5,13 @@ import type {
 
 import { withWorkflowState } from './withWorkflowState.js';
 
-/** Record an invocation only under the already observed native turn. */
+/**
+ * Record an invocation only under the already observed native turn.
+ * @param identity Host-normalized actor identity; both `turn` and `call` must be set or the call is a no-op.
+ * @param inputHash Hash of the current invocation's input, stored for the later paired {@link completeInvocation} call to match.
+ * @param now Epoch ms read once at the calling hook's outermost handler.
+ * @param request Explicit workflow request; when absent the invocation is only recorded while a binding is already active.
+ */
 export function observeInvocation(
   identity: WorkflowIdentity,
   inputHash: string,

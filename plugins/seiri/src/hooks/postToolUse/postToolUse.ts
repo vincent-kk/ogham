@@ -16,7 +16,10 @@ import { workflowRequest } from '../shared/workflowHost/workflowRequest.js';
 
 import { bashOutcome } from './utils/bashOutcome.js';
 
-/** Apply only a paired result belonging to the current actor, task and turn. */
+/**
+ * Apply only a paired result belonging to the current actor, task and turn.
+ * @param now Epoch ms read once at the calling hook's outermost handler.
+ */
 export function processToolOutcome(
   input: PostToolUseInput | PostToolUseFailureInput,
   adapter: WorkflowHostAdapter = WORKFLOW_ADAPTER,

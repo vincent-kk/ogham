@@ -37,7 +37,7 @@
 - UserPromptSubmit은 standard/strict에서 binding이 없어도 native-turn anchor를 조용히 만들고 이전 binding을 suspend하며 진행 중 호출을 폐기합니다. 새 요청이 같은 작업을 계속하는 경우에만 모델이 resume합니다. Pre/Post는 anchor를 만들거나 교체하지 않습니다.
 - off/advisory는 신규 참여 관측과 주입을 하지 않습니다. 예외로 신뢰되는 턴·세션 경계에서는 기존 metadata/anchor를 무효화하여 이전 참여가 살아남지 않게 합니다. 기존 상태가 없으면 새 파일을 만들지 않습니다. 명시 gates API의 동작은 유지합니다.
 - startup/resume/clear/fork는 기존 actor를 무효화하며 compact는 유지합니다. 자식은 자신의 최초 native-turn anchor만 받고 부모 binding을 상속하지 않습니다. 자식도 필요한 경우 명시적으로 start합니다.
-- 상태는 host/session/agent 해시별로 격리됩니다. actor는 7일 무관측, invocation은 24시간 후 만료하며 해당 actor 접근 시 정리합니다. 사용자 task 원장은 자동 삭제하지 않습니다. 구 단일 session-signals는 호환 API에만 남고 새 훅 참여로 이관되지 않습니다.
+- 상태는 host/session/agent 해시별로 격리됩니다. actor는 7일 무관측, invocation은 24시간 후 만료하며 해당 actor 접근 시 정리합니다. 사용자 task 원장은 자동 삭제하지 않습니다. 구 `session-signals.json`/`.lock` 이름은 ignore 목록에만 남고 더 이상 읽거나 쓰지 않습니다.
 - Bash의 Pre 관측과 Post 결과가 현재 참여와 일치할 때만 활성 task의 CHECK를 기록합니다. 다른 task의 같은 명령은 건드리지 않습니다. 동일 판정/증거의 재알림은 억제하고 회귀와 agent 증거 표시는 보존합니다. 중단한 실행은 판정·실패로 세지 않습니다.
 - 락 실패 시 무잠금 mutation을 하지 않습니다. 경계 철회 실패는 revocation marker를 시도하며 marker가 있으면 같은 세션에서 재활성화하지 않습니다. actor와 marker 쓰기가 모두 실패하면 저장 복구 뒤 옛 상태가 나타날 수 있어 무누출 보장 범위 밖입니다. actor 상태와 원장은 별도 파일이므로 crash 시 정확히 한 번 기록·알림을 보장하지 않습니다.
 - 훅은 차단·허용·입력수정 결정을 반환하지 않습니다. 무주입 entry는 stdout을 비우고 오류는 진단 채널에 기록합니다. 규칙 본문, 명령 원문, 전체 출력, EXPECT 원문이나 거부한 설정값을 지시문처럼 반사하지 않습니다. 외부 timeout은 stdin fail-open deadline보다 길어야 합니다.

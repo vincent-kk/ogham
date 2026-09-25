@@ -19,18 +19,18 @@ export const GATES_LOCK_DIR = 'gates.lock';
 /** Session valve inside {@link CONFIG_DIR}. Untracked — overrides the baseline. */
 export const RUNTIME_FILE = 'runtime.json';
 
-/** Failure-chain counters inside {@link CONFIG_DIR}. Untracked, session-scoped. */
-export const SIGNALS_FILE = 'session-signals.json';
+/**
+ * Name an earlier seiri version left in {@link CONFIG_DIR}, kept so the
+ * generated `.seiri/.gitignore` keeps ignoring it. Never read or written.
+ */
+const SIGNALS_FILE = 'session-signals.json';
 
 /**
- * Lock directory inside {@link CONFIG_DIR}, held across a read-modify-write
- * of {@link SIGNALS_FILE}.
- *
- * A directory rather than a file because `mkdir` fails atomically when the
- * name is taken, which is the whole test-and-set. Hook processes are
- * separate `node` runs, so nothing in-process can serialise them.
+ * Lock directory name an earlier seiri version left in {@link CONFIG_DIR},
+ * kept so the generated `.seiri/.gitignore` keeps ignoring it. Never read
+ * or written.
  */
-export const SIGNALS_LOCK_DIR = 'session-signals.lock';
+const SIGNALS_LOCK_DIR = 'session-signals.lock';
 
 /** Actor-scoped, ignored workflow metadata. */
 export const SESSIONS_DIR = 'sessions';
@@ -41,10 +41,10 @@ export const IGNORE_FILE = '.gitignore';
 /**
  * Members of {@link CONFIG_DIR} that must never reach a commit.
  *
- * The runtime valve, signal counters, and signal lock are session state.
- * Task ledgers remain local across sessions so work can resume, but they
- * still never belong in a commit. `.seiri/.gitignore` lists all four and
- * travels with the directory rather than editing the root ignore file.
+ * The runtime valve, retired signal-file names, and session/task
+ * directories are session state or resumable local state; none belong in
+ * a commit. `.seiri/.gitignore` lists every member and travels with the
+ * directory rather than editing the root ignore file.
  */
 export const UNTRACKED_CONFIG_FILES = [
   RUNTIME_FILE,

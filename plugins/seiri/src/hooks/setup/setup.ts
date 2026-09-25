@@ -5,7 +5,10 @@ import type { WorkflowHostAdapter } from '../../types/workflow.js';
 import { WORKFLOW_ADAPTER } from '../shared/workflowAdapter.js';
 import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 
-/** Invalidate existing participation at native session resets; compaction is continuous. */
+/**
+ * Invalidate existing participation at native session resets; compaction is continuous.
+ * @param now Epoch ms read once at the calling hook's outermost handler.
+ */
 export function processSessionStart(
   input: SessionStartInput,
   adapter: WorkflowHostAdapter = WORKFLOW_ADAPTER,

@@ -10,7 +10,12 @@ import { WORKFLOW_ADAPTER } from '../workflowAdapter.js';
 
 import { workflowHash } from './workflowHash.js';
 
-/** Resolve native provenance using the adapter fixed at build time. */
+/**
+ * Resolve native provenance using the adapter fixed at build time.
+ * @param input Hook payload; `cwd` and `session_id` must both be present or the call yields `undefined`.
+ * @param adapter Host adapter fixed at build time; supplies the namespace and native turn reader.
+ * @returns The hashed actor identity, with `turn` and `call` present only when the host reported them, or `undefined` when `cwd`/`session_id` are missing or the repository root cannot be resolved.
+ */
 export function workflowIdentity(
   input: HookBaseInput,
   adapter: WorkflowHostAdapter = WORKFLOW_ADAPTER,

@@ -8,7 +8,10 @@ import { workflowHash } from '../shared/workflowHost/workflowHash.js';
 import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 import { workflowRequest } from '../shared/workflowHost/workflowRequest.js';
 
-/** Observe a paired invocation without selecting skills or affecting permissions. */
+/**
+ * Observe a paired invocation without selecting skills or affecting permissions.
+ * @param now Epoch ms read once at the calling hook's outermost handler.
+ */
 export function processToolStart(
   input: PreToolUseInput,
   adapter: WorkflowHostAdapter = WORKFLOW_ADAPTER,

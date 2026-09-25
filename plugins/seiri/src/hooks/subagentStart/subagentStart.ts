@@ -6,7 +6,10 @@ import { WORKFLOW_ADAPTER } from '../shared/workflowAdapter.js';
 import { workflowEnabled } from '../shared/workflowHost/workflowEnabled.js';
 import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 
-/** Anchor a child's first native turn without inheriting the parent's workflow. */
+/**
+ * Anchor a child's first native turn without inheriting the parent's workflow.
+ * @param now Epoch ms read once at the calling hook's outermost handler.
+ */
 export function processSubagentStart(
   input: SubagentStartInput,
   adapter: WorkflowHostAdapter = WORKFLOW_ADAPTER,

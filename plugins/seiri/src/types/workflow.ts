@@ -21,13 +21,13 @@ export interface WorkflowIdentity {
 /** Explicit participation request; the model cannot supply host identity. */
 export interface WorkflowRequest {
   /** Requested transition, sequenced by the caller. */
-  action: 'start' | 'resume' | 'pause' | 'finish';
+  action: WorkflowAction;
   /** Required absolute workspace path. */
   project_root: string;
   /** Path-safe task name; no ledger is required. */
   task: string;
   /** Required for start and resume. */
-  intent?: 'change' | 'review';
+  intent?: WorkflowIntent;
 }
 
 /** Result of one workflow tool call; only `accepted` carries the request back. */
@@ -43,7 +43,7 @@ export type WorkflowReply =
 /** Bounded observations belonging to one task and actor. */
 export interface WorkflowBinding {
   task: string;
-  intent: 'change' | 'review';
+  intent: WorkflowIntent;
   state: 'active' | 'suspended';
   counts: Record<string, number>;
   announced: string[];

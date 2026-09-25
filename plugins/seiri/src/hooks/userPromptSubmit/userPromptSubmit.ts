@@ -6,7 +6,10 @@ import { WORKFLOW_ADAPTER } from '../shared/workflowAdapter.js';
 import { workflowEnabled } from '../shared/workflowHost/workflowEnabled.js';
 import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 
-/** Silently suspend previous work at a trusted user boundary; never elect a skill. */
+/**
+ * Silently suspend previous work at a trusted user boundary; never elect a skill.
+ * @param now Epoch ms read once at the calling hook's outermost handler.
+ */
 export function processUserPromptSubmit(
   input: UserPromptSubmitInput,
   adapter: WorkflowHostAdapter = WORKFLOW_ADAPTER,
