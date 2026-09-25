@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- `move`는 vault 문서를 대상 레이어 디렉토리로 이동한다. WAL 순서(대상 쓰기 → 소스 삭제)로 원자성을 보장한다.
+- `move`는 대상 쓰기 후 소스를 삭제한다. 전체 배치 원자성이나 backlink 수리를 제공하지 않으며 분류 호출자가 참조 보존·부분 실패 복구를 수행한다.
 - 소스가 L1(Core)이면 이동을 거부한다.
 - frontmatter의 `layer`/`updated`를 갱신하고, `target_sub_layer`가 없으면 `sub_layer` 필드를 제거한다.
 - 소스가 L5 문서이고 대상이 L5 가 아니면 L5 전용 필드(`buffer_type` · `promotion_target` · `source_context`)를 자동 제거한다(승격 시 잔재 방지).
@@ -13,7 +13,7 @@
   - 첫 세그먼트가 레이어 디렉토리(`01_Core`~`05_Context`) 또는 서고(`99_Archive`)면 대소문자 무관 거부한다 — 서고 거부 메시지는 `mv` + frontmatter 편집 안내를 담는다.
   - `..` 세그먼트는 traversal로 거부한다.
   - 깊이는 `MAX_FILENAME_SUBDIR_DEPTH`(constants/filename)를 초과할 수 없다.
-  - 대상 레이어가 `FLAT_LAYERS`(constants/architecture; L1·L5)에 속하면 지정 자체를 거부한다 — 평면 레이어는 중첩 디렉토리를 갖지 않는다.
+  - 대상 레이어가 `FLAT_LAYERS`(constants/architecture; L1·L5)에 속하면 비어 있지 않은 값을 거부한다 — 빈 문자열은 root이며 평면 레이어는 중첩 디렉토리를 갖지 않는다.
 - 같은 레이어로의 이동은 `target_sub_layer` 또는 `target_subdirectory`가 지정된 경우에만 허용한다(레이어 내 재배치).
 - 소스와 대상 경로 모두 `resolveWithinVault`(core/pathGuard)로 vault 내부 봉쇄를 검증한다.
 - 쓰기 직전 갱신된 frontmatter를 `validateFrontmatter`로 검증한다(read-path와 동일 스키마).
@@ -42,6 +42,11 @@
 이동 시 파일명은 `basename(path)`을 유지한다. 소스의 중첩 디렉토리는 보존되지 않으며, 대상 배치는 `target_sub_layer`/`target_subdirectory` 조합으로만 결정된다.
 
 ## Acceptance Criteria
+
+### AC-explicit-root — Root relocation and no-op
+
+- `target_subdirectory: ""` explicitly selects the layer/sub-layer root; omission keeps the existing same-layer rejection when no sub-layer is specified.
+- Same-path relocation succeeds without writing. L1 protection, containment, collisions and depth validation remain unchanged. L3 callers specify target_sub_layer explicitly.
 
 ### AC-wal-order — 원자성 쓰기 순서
 
@@ -81,7 +86,7 @@
 
 ### AC-flat-target-rejected — 평면 대상 레이어 서브디렉토리 거부
 
-- `target_layer` 가 `FLAT_LAYERS`(1·5)에 속하면 `target_subdirectory` 지정 시 이동이 실패하고 소스가 보존된다.
+- `target_layer`가 `FLAT_LAYERS`(1·5)에 속하면 비어 있지 않은 `target_subdirectory`에서 이동이 실패하고 소스가 보존된다. 명시적 빈 문자열은 root를 가리킨다.
 
 ### AC-vault-containment — vault 봉쇄
 

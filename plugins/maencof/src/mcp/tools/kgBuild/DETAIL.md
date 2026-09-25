@@ -17,6 +17,10 @@
 
 ## Acceptance Criteria
 
+### AC-fragment-target — Document identity of anchored links
+
+- Markdown heading/block fragments identify positions inside a target document; graph edges resolve the path before `#` while source Markdown preserves the full fragment. Relative and vault-root paths follow the existing resolver semantics.
+
 ### AC-parse-failure-cap — 파싱 실패 목록 상한
 
 - 실패가 `MAX_KG_BUILD_PARSE_FAILURES` 를 넘으면 응답 목록 길이가 상한과 같고 `parseFailuresTotal` 이 절단 전 총수를 보고하며, 이내면 전체 목록에 `parseFailuresTotal` 이 실리지 않는다.

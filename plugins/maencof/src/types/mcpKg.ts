@@ -7,6 +7,52 @@ import type { KgContextScope } from '../constants/kgContext.js';
 import type { Layer, SubLayer } from './common.js';
 import type { KnowledgeNode } from './graph.js';
 
+/** Disk inventory filters; continuation is bound to these filters and the disk snapshot. */
+export interface KgInventoryInput {
+  /** Contained directory prefix or exact document path. */
+  path_prefix?: string;
+  /** Active layers to enumerate; empty means all. */
+  layer_filter?: Layer[];
+  /** Opaque continuation returned by the previous page. */
+  cursor?: string;
+  /** Page size from 1 through 200; default 100. */
+  limit?: number;
+}
+
+/** Disk document metadata; malformed documents retain their path and parse error. */
+export interface KgInventoryItem {
+  /** Vault-relative canonical scanner path. */
+  path: string;
+  /** Modification time in milliseconds. */
+  mtime: number;
+  /** Layer derived from the containing directory. */
+  layer?: Layer;
+  /** Validated title when available. */
+  title?: string;
+  /** Validated sub-layer when available. */
+  sub_layer?: SubLayer;
+  /** Validated short summary when available. */
+  gist?: string;
+  /** Existing tags, never used for enumeration. */
+  tags?: string[];
+  /** Parse failure without dropping the document. */
+  parse_error?: string;
+}
+
+/** A deterministic page independent of graph freshness. */
+export interface KgInventoryResult {
+  /** Current page of documents. */
+  items: KgInventoryItem[];
+  /** Number of paths matching the filters. */
+  total: number;
+  /** Fingerprint of all active paths, sizes and modification times. */
+  snapshot_id: string;
+  /** Absent at the end of the enumeration. */
+  next_cursor?: string;
+  /** Non-fatal metadata issues in this page. */
+  warnings?: string[];
+}
+
 /** kg_search 입력 */
 export interface KgSearchInput {
   /** 시드 노드 (경로 또는 키워드). `cluster` 와 상호 배타 — 둘 중 정확히 하나 필수 */

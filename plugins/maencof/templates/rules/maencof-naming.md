@@ -48,7 +48,7 @@ notes.txt                 # non-.md extension
 
 ### R3. 100-line Limit Warning
 
-Documents exceeding 100 lines receive a recommendation to split. Knowledge nodes should remain atomic to improve graph traversal efficiency.
+Documents exceeding 100 physical lines (including frontmatter) or 6,000 body Unicode code points receive `document_size_exceeded` from create/update/read. LF and CRLF count equally; a terminal newline adds no line. Rewrite repeated or superseded passages first, then split independent concepts while preserving context and source locations. Do not truncate facts. Verify new children before reducing the original to a linked overview; preserve cited anchors and use stable child paths on retries.
 
 ```
 ⚠️ Document exceeds 100 lines (current: {lines} lines)

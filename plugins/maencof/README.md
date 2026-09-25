@@ -83,7 +83,8 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 /maencof:reflect
 ```
 
-- **`organize`** — The memory-organizer agent recommends document moves → you confirm → it executes.
+- **`organize`** — The memory-organizer agent recommends layer transitions → you confirm → it executes. `--maintenance` rewrites or splits long documents while preserving source locations.
+- **`classify`** — Preview topic folders independently of tags; apply the reviewed plan with `--apply`. `--path` narrows moves while references are checked across active knowledge layers. Protected or ambiguous repairs are held.
 - **`reflect`** — Analysis only, no changes. Uses the judge module to assess knowledge health.
 
 ### Health Check
@@ -197,6 +198,7 @@ Alongside vault knowledge, maencof keeps a small **personal context** — transi
 | `/maencof:recall`          | Core     | Spreading Activation search                                                                          |
 | `/maencof:explore`         | Core     | Interactive graph traversal (up to 3 rounds)                                                         |
 | `/maencof:organize`        | Core     | Agent-guided document reorganization                                                                 |
+| `/maencof:classify` | Core | Preview/apply topic directories with reference preservation |
 | `/maencof:reflect`         | Core     | Read-only knowledge health analysis                                                                  |
 | `/maencof:build`           | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
 | `/maencof:checkup`         | Health   | 7 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |

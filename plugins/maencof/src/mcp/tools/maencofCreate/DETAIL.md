@@ -29,10 +29,15 @@
 
 ### Result (`MaencofCrudResult`)
 
-- 성공: `{ success: true, path: <vault 상대 경로>, message: 'Document created', warnings? }` — `warnings` 는 content dedup 경고가 있을 때만 실린다.
+- 성공: `{ success: true, path: <vault 상대 경로>, message: 'Document created', warnings? }` — `warnings`는 content dedup 및 최종 문서 크기 경고를 병합한다.
 - 실패 사유: 잘못된 layer · 파일명 해석 실패 · traversal/깊이 초과 · vault 봉쇄 위반 · frontmatter 검증 실패 · L1 gist 누락 · 대상 경로 중복
 
 ## Acceptance Criteria
+
+### AC-document-budget — Readable document size
+
+- Measure the final complete Markdown using core/documentBudget. Above 100 physical lines or 6,000 body Unicode code points, return document_size_exceeded with measurements and rewrite/split guidance.
+- Preserve existing warnings and full content; never truncate or reject solely for size. Metadata-only updates and legacy reads also report excessive size.
 
 ### AC-l3-only-sub-layer-dir — 서브레이어 디렉토리 한정
 

@@ -21,7 +21,7 @@ SessionStart 훅이 매 세션 system context에 주입하는 비호출 **메타
 
 ---
 
-## 1. 지식 관리 스킬 (5)
+## 1. 지식 관리 스킬
 
 | 스킬     | 호출                | 역할                                          | context_layers |
 | -------- | ------------------- | --------------------------------------------- | -------------- |
@@ -29,6 +29,7 @@ SessionStart 훅이 매 세션 system context에 주입하는 비호출 **메타
 | remember | `/maencof:remember` | 새 지식 기록                                  | L2, L3, L4, L5 |
 | recall   | `/maencof:recall`   | 지식 검색/회상                                | L1, L2, L3     |
 | organize | `/maencof:organize` | 기억 정리/전이                                | L2, L4, L5     |
+| classify | `/maencof:classify` | 태그와 독립적인 주제 폴더 분류 미리보기·적용, 활성 지식 영역의 참조 대상 보존 | L1–L5 읽기, L2–L4 이동 |
 | reflect  | `/maencof:reflect`  | 볼트 관점 저지먼트 리포터 (세션 recap과 직교) | L1, L2, L3     |
 
 ---

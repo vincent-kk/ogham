@@ -361,7 +361,7 @@ export function registerCrudTools(server: McpServer): void {
           .string()
           .optional()
           .describe(
-            'Subdirectory under the target layer/sub-layer directory, e.g. "projects" (max 2 levels). Segments are validated, not normalized: they are used verbatim, allowing letters, digits, Korean, ".", "_", "-". Rejected: ".." traversal, dot-leading segments, and a first segment naming a layer directory or the archive (99_Archive) — the archive is outside this tool\'s scope. Layers 1 and 5 are flat — rejected there. For reorganizing within the same sub-layer, pass target_sub_layer together.',
+            'Subdirectory under the target layer/sub-layer directory, e.g. "projects" (max 2 levels). Explicit empty string selects its root, distinct from omission. Already at the exact target is a successful no-op. Segments are validated, not normalized: they are used verbatim, allowing letters, digits, Korean, ".", "_", "-". Rejected: ".." traversal, dot-leading segments, and a first segment naming a layer directory or the archive (99_Archive) — the archive is outside this tool\'s scope. Layers 1 and 5 reject nonempty subdirectories. For reorganizing within the same L3 sub-layer, pass target_sub_layer explicitly.',
           ),
       }),
     },

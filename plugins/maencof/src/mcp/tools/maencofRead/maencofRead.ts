@@ -5,6 +5,7 @@
 import { readFile } from 'node:fs/promises';
 import { stat } from 'node:fs/promises';
 
+import { documentBudgetWarnings } from '../../../core/documentBudget/index.js';
 import {
   buildKnowledgeNode,
   parseDocument,
@@ -64,10 +65,13 @@ export async function handleMaencofRead(
       message: `Document parsing failed: ${nodeResult.error}`,
       content,
       node: {} as never,
-      warnings: nodeResult.error ? [nodeResult.error] : undefined,
+      warnings: [
+        ...(nodeResult.error ? [nodeResult.error] : []),
+        ...documentBudgetWarnings(content),
+      ],
     };
 
-  const warnings: string[] = [];
+  const warnings = documentBudgetWarnings(content);
   if (isLayer1Path(input.path))
     warnings.push(
       'This is a Layer 1 (01_Core/) document. memory-organizer only allows indirect access via kg_navigate.',

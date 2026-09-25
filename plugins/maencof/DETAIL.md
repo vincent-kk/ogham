@@ -24,6 +24,12 @@ SessionStart의 기존 지침 작성은 현재 vault 초기화·버전 갱신 �
 
 ## Acceptance Criteria
 
+### AC-project-setup — Current-directory onboarding
+
+- Setup captures the user's execution directory once and verifies `kg_status.vaultPath` before knowledge writes. Re-running preserves existing documents and configuration unless an explicit reset applies.
+- A standalone setup CLI previews or applies only a Claude/Codex project MCP connection using the shared ownership and revision-aware manager. It never writes user-scope settings or replaces drift.
+- Required-test verification runs each requested file independently and rejects absent files, missing results, empty assertions, skipped cases and child failures.
+
 ### AC-marker-scope-only — 마커 구간만 소유
 
 - 병합·제거가 `<!-- MAENCOF:START -->` / `<!-- MAENCOF:END -->` 사이만 바꾸고, 마커 밖 사용자 텍스트와 다른 소유자의 구간은 바이트 그대로 남는다.

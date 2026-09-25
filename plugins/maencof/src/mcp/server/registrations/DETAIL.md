@@ -53,6 +53,11 @@
 
 ## Acceptance Criteria
 
+### AC-inventory-disk-read — Complete active inventory
+
+- kg_inventory uses the read wrapper with needsFreshness:false and accepts path_prefix, layer_filter, cursor and a 1–200 limit. Graph state never determines which disk documents are enumerated.
+- Move describes explicit empty target_subdirectory as root relocation and same-path success as a no-op; existing protection rules remain in force.
+
 ### AC-handlers-not-inlined — 핸들러 비인라인
 
 - 등록 파일이 도구 로직을 구현하지 않고 `mcp/tools/` 핸들러를 호출만 한다.

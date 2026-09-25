@@ -83,7 +83,8 @@ maencof 스킬은 **LLM 프롬프트**이지, CLI 명령어가 아닙니다. Cla
 /maencof:reflect
 ```
 
-- **`organize`** — memory-organizer 에이전트가 문서 이동을 추천 → 확인 → 실행합니다.
+- **`organize`** — memory-organizer 에이전트가 레이어 전이를 추천 → 확인 → 실행합니다. `--maintenance`는 원문 위치를 보존하며 긴 문서를 재작성·분할합니다.
+- **`classify`** — 태그와 독립적인 주제 폴더를 미리 보고 `--apply`로 검토한 계획을 적용합니다. `--path`는 이동만 제한하며 활성 지식 레이어 전체의 참조를 확인합니다. 보호되거나 모호한 참조 수정은 보류합니다.
 - **`reflect`** — 변경 없이 분석만 수행합니다. judge 모듈로 지식 건강도를 평가합니다.
 
 ### 건강 점검
@@ -197,6 +198,7 @@ vault 지식과 별개로, maencof는 작은 **personal context** — 일시적 
 | `/maencof:recall`          | 핵심     | Spreading Activation 검색                                                                                 |
 | `/maencof:explore`         | 핵심     | 인터랙티브 그래프 탐색 (최대 3라운드)                                                                     |
 | `/maencof:organize`        | 핵심     | 에이전트 기반 문서 재구성                                                                                 |
+| `/maencof:classify` | 핵심 | 주제 폴더 분류 미리보기·적용 및 참조 보존 |
 | `/maencof:reflect`         | 핵심     | 읽기 전용 지식 건강도 분석                                                                                |
 | `/maencof:build`           | 인덱스   | 인덱스 빌드 (자동 full/incremental; `--force` 강제 rebuild, `--force --reset-cache` 캐시 제거 후 rebuild) |
 | `/maencof:checkup`         | 건강     | 7개 진단 + 자동 수정; `--quick` 로 가벼운 상태 확인 (기존 `maencof-diagnose` 흡수)                        |
