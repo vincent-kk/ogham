@@ -1,32 +1,32 @@
 # Readable Knowledge Maintenance
 
-Loaded by remember, ingest, recall and organize; this reference owns their shared writing and placement procedure.
+Loaded by remember, ingest, recall and organize; owns shared writing and placement.
 
 ## Rewrite the current account
 
-1. Search for an existing account of the same subject, then `read` its complete body before writing. Search snippets are insufficient evidence.
-2. Choose replace, merge or split. Integrate changed facts into the paragraphs they supersede; remove obsolete statements and repeated summaries. Preserve qualifications, uncertainty, dates that still matter, and original source links with their locations.
-3. Send the complete revised body to `update`, retaining the document's identity and valid metadata. Read it back and check for contradictory old/new claims and broken references. With the same information, aim for equal or shorter length. Additional facts may justify growth, but repeated corrections do not.
-4. Append only when the document's declared purpose is a chronological log, journal or source transcript. Label dated events so historical statements cannot be confused with the current account.
+1. Search for an existing account; `read` its full body before writing. Snippets are insufficient.
+2. Replace, merge or split: integrate corrections in place; remove obsolete claims and repetition. Preserve qualifications, uncertainty, relevant dates and source links/locations.
+3. `update` the complete revised body, preserving identity and valid metadata; read back for contradictions and broken references. Aim for equal or shorter length unless facts increase; repeated corrections do not justify growth.
+4. Append only to declared chronological logs, journals or source transcripts; date events to distinguish history from current claims.
 
 ## Size and semantic chunks
 
-`create`, `update` and `read` warn with `document_size_exceeded` above 100 physical Markdown lines (including frontmatter) or 6,000 body Unicode code points. LF/CRLF count equally; the final newline adds no line. Treat warnings as maintenance work, never as permission to truncate facts.
+`create`/`update`/`read` emit `document_size_exceeded` above 100 physical Markdown lines including frontmatter or 6,000 body Unicode code points. LF/CRLF count equally; final newline adds no line. Resolve warnings; never truncate facts.
 
-First remove repetition and integrate superseded passages. If independent topics remain, split at conceptual/heading boundaries. Keep a table, code block or quotation with the explanation and evidence needed to understand it. A child must stand alone without copying the whole parent context.
+Remove repetition and integrate superseded passages first; split remaining independent topics at conceptual/heading boundaries. Keep tables, code and quotations with necessary explanation/evidence. Children must stand alone without copying the whole parent context.
 
-Before splitting, capture original bytes, metadata and references in a host execution artifact outside the knowledge graph. Choose stable meaningful child paths; inspect existing children on retries and reuse matching content. Create each child through MCP and `read` it back before shortening the original. Preserve source links/locations in each relevant child and retain the original path as a concise overview linking to the children. Preserve cited headings/block IDs in the overview or explicitly repair their inbound references before retiring them. Do not give independent children one shared `cluster_key`: search collapses that key to one representative.
+Before splitting, save original bytes, metadata and references in a host execution artifact outside the graph. Choose stable, meaningful child paths; on retries inspect existing children and reuse matches. Create each child through MCP and `read` back; shorten the original only after all children verify. Preserve source links/locations in relevant children. Keep the original path as a concise linked overview; preserve cited headings/block IDs there or repair inbound references before retiring them. Never share one `cluster_key` across independent children: search collapses it to one representative.
 
-If any child fails, leave the original complete and report created/failed/unattempted children. Do not delete the only complete copy or create timestamp-suffixed duplicates on retry. Recheck changed source hashes before replacing originals; do not overwrite concurrent edits.
+On child failure, keep the original complete; report created/failed/unattempted children. Never delete the only complete copy or create timestamp-suffixed retry duplicates. Recheck changed source hashes before replacing originals; never overwrite concurrent edits.
 
 ## Place by subject
 
-Within the selected layer and L3 sub-layer, compare existing directory purposes with the title, gist and full body. Choose a folder by the principal subject and kind of information; tags and graph relevance are secondary cross-cutting hints. Reuse existing folders. Propose a new meaningful topic folder only for a coherent group or an explicit user destination; leave an isolated document where it is otherwise. Never create tag-combination folders or one folder per document.
+Within the selected layer and L3 sub-layer, compare directory purposes against title, gist and full body. Choose by principal subject and information kind; tags/graph relevance are secondary hints. Reuse folders. Propose meaningful topic folders only for coherent groups or explicit user destinations; otherwise leave isolated documents in place. Never create tag-combination or per-document folders.
 
-L2/L3/L4 allow at most two topic levels; L1/L5 remain flat. One canonical document belongs in one place; use links for secondary topics. Mixed-topic documents need a split before confident placement. Existing-vault relocation belongs to `/maencof:classify`; layer promotion remains `/maencof:organize`. Use returned actual paths rather than assuming create and move normalize names identically.
+L2/L3/L4: at most two topic levels; L1/L5: flat. Keep one canonical document in one place; link secondary topics. Split mixed topics before confident placement. Existing-vault relocation: `/maencof:classify`; layer promotion: `/maencof:organize`. Use returned actual paths; never assume create/move normalize identically.
 
-## Cite evidence where it supports a claim
+## Cite evidence beside claims
 
-Place the original source URL or vault-file link beside each substantive sourced claim, with its verified section/heading, full-file line range, page or timestamp. File line numbers include frontmatter. Prefer stable headings/anchors when appropriate. Preserve the claim's conditions and nuance; distinguish direct quotation from interpretation or inference. Read the surrounding source context before citing it.
+For each substantive sourced claim, cite its original URL or vault-file link beside it, with a verified section/heading, full-file line range (including frontmatter), page or timestamp. Prefer stable headings/anchors where appropriate. Read surrounding source context first; preserve conditions/nuance and distinguish quotation from interpretation/inference.
 
-Keep the existing `source` frontmatter as the representative source; use inline links or footnotes for multiple sources and claim-specific locations. Never invent line numbers or claim to have read inaccessible originals. Cite the secondary source actually consulted and state the limitation. Greetings and unsupported proposals do not need fabricated citations.
+Retain representative `source` frontmatter; use inline links/footnotes for multiple sources and claim-specific locations. Never invent line numbers or claim to read inaccessible originals: cite the consulted secondary source and disclose the limitation. Greetings and unsupported proposals need no fabricated citations.
