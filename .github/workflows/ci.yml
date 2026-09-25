@@ -46,6 +46,7 @@ on:
       - "**/agents/**"
       - "**/.codex-plugin/**"
       - ".agents/**"
+      - "plugins/seiri/**"
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
@@ -66,6 +67,7 @@ on:
       - "**/agents/**"
       - "**/.codex-plugin/**"
       - ".agents/**"
+      - "plugins/seiri/**"
 
 # A newer run on the same branch supersedes the older one; main is never cancelled.
 concurrency:
