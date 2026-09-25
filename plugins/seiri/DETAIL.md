@@ -23,21 +23,24 @@
 
 ### Session reporting
 
-- SessionStart 는 현재 호스트의 effective target에서 실제로 읽히는 활성 규칙 이름, dial 위치, drift 경고, 선출 계약을 주입한다 — 규칙 본문은 주입하지 않는다. 본문은 하니스가 이미 로드한다.
-- `off` 는 skills-only 기본값이다. 스킬은 설치·호출 가능한 채로 남지만 모든 훅 processor가 규칙·세션 상태 접근 전에 빠져나오고, entry는 stdout/stderr를 비운다. 정적 manifest 호출과 프로세스 cold start 자체는 남는다.
-- 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트된다. 배포된 규칙이 없는 프로젝트는 `standard` 이상에서 선출 줄만 받고, `advisory` 는 SessionStart 상태만 허용하며 `off` 는 배포 여부와 무관하게 아무것도 받지 않는다.
-- 어떤 실패든 processor에서 `{ continue: true }` 로 귀결되고 주입하지 않는다. 의미 있는 `additionalContext`가 없으면 entry가 stdout을 쓰지 않는다. 훅이 세션을 막거나 no-op 응답을 남길 수 없어야 한다.
-- 훅의 `additionalContext`는 저장소가 제공한 값을 실패 사유에 그대로 반사하지 않는다. 게이트 불일치는 `EXPECT` 원문 없이 고정 사유로 보고하고, 잘못된 intervention 경고도 거부된 원값을 포함하지 않는다.
-- 활성 훅의 외부 timeout은 stdin fail-open deadline보다 길어야 한다. 닫히지 않은 stdin을 비운 뒤 파싱·출력·종료할 여유를 남긴다.
-- PostToolUse 와 PostToolUseFailure 는 `Bash` 와 `Skill` 만 본다. Dial 이 상태 기록 전에 훅을 게이트하므로, `off` 와 `advisory` 에서는 아무것도 기록하지 않는다. 실패 체인은 세션당 명령 해시마다 최대 한 번만 알리고, 중단된 호출(`is_interrupt`)은 실패로 세지 않는다. 작업 원장의 CHECK 와 일치하는 Bash 결과는 EXPECT 로 판정해 원장에 증거를 기록하고 정확히 한 줄의 게이트 판정을 주입한다.
-- `Skill` 로드는 관측만 한다: seiri 워크플로우면 마지막 상태를 `.seiri/session-signals.json` 에 기록하고 아무것도 주입하지 않는다. 체인 밖 스킬(다른 플러그인, 호출형 게이트)은 상태를 남기지 않는다. 상태는 로드마다 재무장되고 다음 턴이 한 번만 소비한다.
-- SubagentStart 는 같은 자세를 압축 형태로 다시 주입한다. 최대 두 줄, `off` 와 `advisory` 에서는 전혀 주입하지 않는다. `off` 는 규칙 상태도 읽지 않는다. 선출 줄은 규칙 배포와 분리되어 dial 만으로 게이트되므로, 배포 0건인 `standard` 이상 프로젝트의 서브에이전트는 선출 줄 하나만 받는다.
-- UserPromptSubmit 은 매 턴 한 줄 dispatch 리마인더를 주입하고, 아직 말하지 않은 워크플로우 상태가 있으면 한 절을 덧붙인다(읽기 실패는 리마인더만 남기고 넘어간다). dial 로 게이트한다. `off` 와 `advisory` 에서는 침묵; `standard` 는 선출 어휘로 상기하며 done-claim 순간만 `/seiri:verify` 로 명시하고, `strict` 는 순간마다의 소유 스킬을 전부 이름으로 댄다. 프롬프트 본문은 읽지 않는다. 미충족 작업 원장이 있으면 작업 수와 무관하게 `/seiri:execute` 소유의 환기 한 줄을 덧붙인다.
-- InstructionsLoaded 는 구현되어 있으나 `hooks.json` 에 등록되지 않았다 (dormant). Dormant 인 동안에는 실행되지 않으며, 등록되면 훅 페이로드 전체를 보존하고 아무것도 주입하지 않는다.
+- 최초 스킬 선택은 사용자 또는 호스트에 맡깁니다. 설치, Skill 로드, 프롬프트의 완료 표현, 일반 실패만으로 참여를 시작하거나 스킬을 선출하지 않습니다.
+- SessionStart·UserPromptSubmit·SubagentStart는 모든 다이얼에서 전역 상태 배너·선출·원장 상기를 주입하지 않습니다. 비참여 작업과 평상시 무변화 이벤트의 additionalContext 및 wire stdout은 비어 있습니다. 정적 훅 프로세스 실행 비용과 MCP 스키마 비용은 남으며, 전체 토큰 절감률을 실측 없이 주장하지 않습니다.
+- standard/strict는 명시적으로 참여한 작업의 lifecycle ACK, CHECK 판정 변화와 반복 실패 관측만 제공합니다. 두 값 모두 모델의 방법 선택을 제한하지 않습니다. 규칙·다이얼·드리프트 상태는 명시적 settings 조회에서 확인합니다.
+- workflow 요청은 명시적 절대 project_root, kebab-case task, action을 받으며 start/resume에 change 또는 review intent를 요구합니다. 도구의 accepted는 입력 검증일 뿐입니다. 같은 native invocation ID·actor·turn·generation·입력에 대응하는 성공한 Post만 상태를 적용하고 ACK를 보냅니다.
+- Claude와 Codex는 build 시 고정된 host runtime을 사용하고 plugin-compiler가 Codex 경로를 선택합니다. event payload의 필드 유무로 호스트를 추측하여 다른 namespace의 참여를 만들지 않습니다.
+- start는 작업을 교체하고 카운터를 초기화합니다. resume은 같은 작업을 이어가거나 부재 상태에서 연결합니다. pause는 중단, finish는 연결 종료이며 작업 성공 인증이 아닙니다. 이미 활성인 같은 작업에서 스킬만 바뀌면 lifecycle 호출을 반복하지 않습니다.
+- UserPromptSubmit은 standard/strict에서 binding이 없어도 native-turn anchor를 조용히 만들고 이전 binding을 suspend하며 진행 중 호출을 폐기합니다. 새 요청이 같은 작업을 계속하는 경우에만 모델이 resume합니다. Pre/Post는 anchor를 만들거나 교체하지 않습니다.
+- off/advisory는 신규 참여 관측과 주입을 하지 않습니다. 예외로 신뢰되는 턴·세션 경계에서는 기존 metadata/anchor를 무효화하여 이전 참여가 살아남지 않게 합니다. 기존 상태가 없으면 새 파일을 만들지 않습니다. 명시 gates API의 동작은 유지합니다.
+- startup/resume/clear/fork는 기존 actor를 무효화하며 compact는 유지합니다. 자식은 자신의 최초 native-turn anchor만 받고 부모 binding을 상속하지 않습니다. 자식도 필요한 경우 명시적으로 start합니다.
+- 상태는 host/session/agent 해시별로 격리됩니다. actor는 7일 무관측, invocation은 24시간 후 만료하며 해당 actor 접근 시 정리합니다. 사용자 task 원장은 자동 삭제하지 않습니다. 구 단일 session-signals는 호환 API에만 남고 새 훅 참여로 이관되지 않습니다.
+- Bash의 Pre 관측과 Post 결과가 현재 참여와 일치할 때만 활성 task의 CHECK를 기록합니다. 다른 task의 같은 명령은 건드리지 않습니다. 동일 판정/증거의 재알림은 억제하고 회귀와 agent 증거 표시는 보존합니다. 중단한 실행은 판정·실패로 세지 않습니다.
+- 락 실패 시 무잠금 mutation을 하지 않습니다. 경계 철회 실패는 revocation marker를 시도하며 marker가 있으면 같은 세션에서 재활성화하지 않습니다. actor와 marker 쓰기가 모두 실패하면 저장 복구 뒤 옛 상태가 나타날 수 있어 무누출 보장 범위 밖입니다. actor 상태와 원장은 별도 파일이므로 crash 시 정확히 한 번 기록·알림을 보장하지 않습니다.
+- 훅은 차단·허용·입력수정 결정을 반환하지 않습니다. 무주입 entry는 stdout을 비우고 오류는 진단 채널에 기록합니다. 규칙 본문, 명령 원문, 전체 출력, EXPECT 원문이나 거부한 설정값을 지시문처럼 반사하지 않습니다. 외부 timeout은 stdin fail-open deadline보다 길어야 합니다.
+- InstructionsLoaded는 dormant이며 주입하지 않습니다. 실제 두 호스트의 ID·응답 형식 기록은 확보했지만, 이전 턴 Pre/Post를 새 턴 뒤로 강제 지연한 native interleave는 직접 관측하지 못했습니다. 합성 역순·지연 테스트를 native 스케줄링 수용으로 바꾸어 보고하지 않습니다.
 
 ### Configuration
 
-- Intervention dial 은 `<repoRoot>/.seiri/` 아래 두 계층에만 저장되며, 그곳에는 다른 것을 두지 않는다. `config.json` 은 커밋되는 baseline 이며 셋업 표면만 쓴다. `runtime.json` 은 추적되지 않는 세션 밸브이며 `config` 액션만 쓴다.
+- 프로젝트 다이얼의 config.json은 커밋되는 baseline이며 셋업 표면만 씁니다. runtime.json은 비추적 밸브이며 config 액션이 씁니다. 같은 .seiri 경계의 actor 상태와 task 원장은 각 소유 모듈이 별도로 관리합니다.
 - 실제로 적용되는 dial 은 `runtime ?? baseline ?? user ?? off` 이다. 훅은 실행마다 해석하므로, 변경은 세션 재시작 없이 적용된다. 기존 파일의 `advisory`·`standard`·`strict` 값은 그대로 유효하다.
 - Runtime 값이 baseline 과 다르면, dial 이 렌더되는 모든 곳에서 그 사실을 명시한다. 묵시적 override 는 금지한다.
 - 읽기는 절대 throw 하지 않는다. 손상된 계층은 건너뛰고 다음 계층을 적용하며, 무시한 파일을 경고에 명시한다.
@@ -46,13 +49,16 @@
 
 ### Skill posture
 
-- 스킬 파티션의 정본은 `src/constants/skillPolicy.ts` 다 — 자동 호출 규율 7종, 조건부 질문 스킬 2종(write-plan·review-plan), 모델 목록에 보이는 사용자 시작 스킬 5종, 모델에게 숨기는 사용자 전용 게이트 2종(setup·scaffold-pr). `skillPolicy.test.ts` 가 각 스킬의 frontmatter 와 본문 정본 문장을 검사한다.
-- 모델 목록 노출과 표준 워크플로우 선출은 별개다. 사용자 시작 스킬은 `disable-model-invocation` 없이 존재와 설명을 모델에게 알리되 워크플로우 체인에서는 제외한다. 사용자 전용 게이트만 `disable-model-invocation: true` 로 숨긴다.
+- 스킬은 적용 범위를 만족할 때 선택하며, 파일 로드나 설치만으로 수행·완료·다음 단계의 필요성을 추정하지 않습니다. 설명·읽기 전용 리뷰·짧은 조사에는 개발 계획과 원장을 강제하지 않습니다.
+- 실행 스킬은 승인된 목표와 경계를 지키되 가역적인 방법 선택을 모델에 남깁니다. 검증은 주장에 비례하며 같은 산출물·환경·범위에서 유효한 근거를 재사용합니다. 동작 변경의 fail-first, 리팩터링의 기존 동작 보존, 문서 변경의 산출물 검사를 구별합니다.
+- 원장은 지속 검증이 필요한 작업에만 두며 조회는 해당 task로 한정합니다. 관련 없는 원장이나 실패한 테스트가 사용자의 keep 선택을 막지 않습니다. 이미 승인된 독립 검토를 다시 허가받도록 요구하지 않습니다.
+- 스킬 선택 분류는 `src/constants/skillPolicy.ts`가 소유합니다. 분류는 호출 가능성을 나타내며 실행 순서나 질문을 강제하지 않습니다. 테스트는 모델 노출·명시호출 경계와 필요한 문서 계약을 검사하며, 설명 문구 일치만으로 모델 행동의 효용을 입증했다고 판단하지 않습니다.
+- 모델 목록 노출과 실제 참여는 별개입니다. 사용자 시작 스킬도 발견 가능하며, 사용자 전용 게이트만 disable-model-invocation으로 숨깁니다. 분류는 고정 실행 순서나 훅 선출을 뜻하지 않습니다.
 - `clarify-request` 는 구현 결과를 실질적으로 바꾸는 미확정 사항만 질문하고, 저장소에서 확인할 수 있는 사실은 먼저 조사한다. 낮은 위험의 가정은 밝히고 진행할 수 있지만 중대한 미결정은 지어내지 않는다.
 - `architect` 는 여러 세션이 이어서 사용할 요구사항·시스템 관점·결정을 저장소 근거로 남긴다. PRD·C4·ADR 같은 이름은 서로 다른 목적을 환기할 뿐 필수 세트·고정 형식·작성법이 아니며, 현재 상태·제안·결정·열린 질문을 구분하고 구현 계획·코드 편집·구조 강제로 내려가지 않는다.
-- `write-plan` 은 계획 포맷의 정본이 아니라 planning method 선택기다. 사용자가 명시한 방법, 저장소 planning 규칙·템플릿, 호스트의 skill-selection 규칙이 선택한 planning skill, 내장 기본법 중 처음 적용되는 방법을 택해 출처를 한 줄로 남긴다. 스킬이 설치됐다는 사실만으로 선택하지 않고, 선택된 방법의 고유 구조에 Seiri 기본 포맷을 덧씌우지 않는다. 구현 방향에 필요한 선택은 실행 가능한 계획을 만드는 판단 안에서 해결한다. 어떤 방법이든 대화 독립성·현재 상태 근거·요구사항과 검증의 연결·placeholder 금지는 지키며, `/seiri:execute` 가 수행할 때만 검증을 별도 게이트 원장으로 적응한다. 계획 중 모듈 경계·의존 방향·공개 소유권 또는 계약·장기 코드 배치를 선택하는 구조적 결정이 생기면 실제 계획 옆의 별도 `adr.md` 에 결정의 핵심을 독립 요약하고, 그런 판단이 없으면 파일을 만들지 않는다.
+- `write-plan`은 사용자 명시 방법, 저장소 규칙·템플릿, 호스트가 선택한 계획 스킬, 내장 기본법 순서로 적용 가능한 방법을 고릅니다. 선택된 방법의 고유 구조를 보존하고 대화 독립성·현재 상태 근거·요구사항과 검증의 연결·placeholder 금지를 지킵니다. 지속 검증 추적이 유용할 때만 별도 원장을 만들며 실행 스킬의 선택 자체는 원장 생성 사유가 아닙니다. 구조적 결정을 내리면 계획 옆 `adr.md`에 맥락·결정·근거·대안·영향을 독립적으로 남깁니다.
 - 자동 호출 규율은 자율 판단을 우선한다: 선택이 필요하면 보수적 기본값을 택하고 한 줄로 공개한다. 사용자만 결정할 수 있는 진짜 blocker 는 AskUserQuestion 1회로 묻되, 관례적 체크포인트 질문은 하지 않는다. frontmatter 도구 차단(`disallowed-tools`)은 사용하지 않는다.
-- `review-plan` 은 선택된 planning method와 공통 불변조건의 검토 게이트다. 사용자 요청·저장소 지침에서 method 출처를 독립 확인하고 선택된 방법의 고유 구조를 기준으로 삼으며, 선택된 방법이 없을 때만 Seiri 기본법을 적용한다. 계획의 현재 상태 주장은 도구로 접지하되 제안 상태의 부재는 정상이고 계획의 명령은 읽어서 확인할 뿐 실행하지 않는다. 트리아지를 한 줄로 선언하고(무언 스킵 금지), challenge 트리거(광역 변경·비가역 단계·이 세션이 쓰지 않은 계획)가 켜지면 위임/진행을 정확히 한 번 묻는다 — 위임은 request-review 규격 인계물을 만들고 턴을 끝낸다. 판정(cleared·grounded-only·rework-required)은 선택된 방법의 review 위치에, 그런 위치가 없으면 계획 문서에 기록한다. challenge 없이 cleared 없음, 재작업은 1회에 바뀐 주장의 scoped recheck 만.
+- `review-plan`은 선택된 방법과 공통 불변조건에 맞춰 불확실한 주장을 검토합니다. 중요한 경계 변경·이관·미해결 위험에는 독립 검토를 사용하되, 새 파일이나 다른 작성자라는 이유만으로 요구하지 않습니다. 이미 허가된 검토를 재질문하지 않고 검토 중에도 독립 작업을 계속할 수 있습니다. 독립 검토 없는 결과는 grounded-only로 기록하며 수정 후에는 바뀐 주장만 한 번 범위 검토합니다.
 - 게이트 원장은 write-plan → review-plan → execute → verify → request-review → finish 를 가로지르는 횡단 관심사이며, 포맷 정본은 `skills/execute/references/gates-format.md` 다.
 - CHECK와 EXPECT는 함께 설계한다. CHECK가 실제 결과 조건을 검사하고 충족 시에만 고정 성공 문자열을 출력하며, EXPECT는 그 문자열의 줄 단위 리터럴 매칭을 맡는다. write-plan은 이 쌍을 작성하고 review-plan은 조건 실패 시 마커가 나오지 않는지 검토한다. 정규식 모드와 구형 원장 이관은 없다.
 - scaffold-pr 는 작업 시작 게이트다: 브랜치·빈 커밋·Draft PR 만 만들고 소스 파일은 건드리지 않는다(이슈·티켓 연동 없음). git·gh 시퀀스는 동봉 `scaffold-pr.mjs` 가 결정적으로 수행하고(셸 미사용 argv spawn — 크로스플랫폼), LLM 은 브랜치·제목·본문 결정과 JSON 결과의 안정 실패 코드 해석만 맡는다. finish 가 닫는 브랜치 수명의 반대쪽 끝을 연다.
@@ -76,6 +82,12 @@
 | `settings`                                 | `action` 은 `open` · `status` · `manifest` · `plan` · `sync` · `config`; `open` 은 `{ status: saved \| closed \| pending, url, summary? }`. |
 | `settings` `action: config`                | `{ action, op, changed, dial, posture }`. `set` 은 유효한 `intervention` 필요; baseline 은 절대 쓰지 않음.                                  |
 
+### Distribution preparation
+
+- 소스 커밋은 생성 runtime·adapter를 제외합니다. 지정 provider와 seiri 빌드 후 prepareSeiriDistribution이 package allowlist의 정본과 새 runtime을 복사하고 compiler로 임시 배포본의 adapters를 생성합니다. tracked adapter를 입력으로 재사용하지 않습니다.
+- CI는 해당 job에서 runtime을 먼저 빌드하고 임시 배포본의 재생성 결정성·정본 해시·manifest 일치·참조 존재를 확인합니다. 다른 플러그인과 루트의 committed-adapter drift 검사는 유지합니다.
+- 로컬 generated distribution 수용과 공개 배포는 다릅니다. Vincent의 배포 채널 결정 및 설치 수용 전에는 버전 변경·공개 출시와 marketplace가 읽는 Git ref로의 push/merge를 하지 않습니다.
+
 ## Scope
 
 범위 밖: 아키텍처 강제, 에이전트 오케스트레이션, 작업 분해, 지식 관리, 알림, 상태 표시, 코드 검색·분석 도구. seiri 가 소유하는 것은 컨텍스트 — 저장소의 진실도, 모델의 판단도 아니다.
@@ -94,8 +106,8 @@
 ### AC-dial-precedence — 다이얼 우선순위
 
 - 유효 다이얼이 `runtime ?? project ?? user ?? off` 로 정해지고 출처가 함께 보고된다.
-- `off` 에서 모든 훅이 규칙·세션 상태 접근 전에 빠져나오고 stdout/stderr를 비운다.
-- `advisory` 에서는 SessionStart 상태만 허용하고 SubagentStart·UserPromptSubmit·PostToolUse의 워크플로우 체인·상태 기록은 침묵한다.
+- off/advisory는 신규 관측·주입 없이 동작하며, 기존 참여의 신뢰되는 경계 무효화만 허용합니다. 무주입 stdout은 비어 있습니다.
+- standard/strict도 비참여 작업에는 절차를 주입하지 않고, 실제 참여 여부는 대응하는 Pre/Post lifecycle ACK로 결정합니다.
 
 ### AC-deployment-consent — 배포 동의
 
@@ -104,18 +116,18 @@
 
 ### AC-tool-surface-fixed — 도구 표면
 
-- 등록 도구가 정확히 2개이며 새 요구는 기존 도구의 판별 값으로 흡수된다.
+- 등록 도구는 settings, gates, workflow 세 개이며 설정·지속 증거·일시적 참여의 서로 다른 계약을 소유합니다.
 
 ### AC-host-parity — 호스트가 판정을 바꾸지 않는다
 
-- 같은 저장소 상태·같은 명령·같은 원장이면 Claude Code 와 Codex 가 같은 판정 줄과 같은 원장 바이트를 낸다. 게이트 판정은 정규화된 출력 텍스트와 `EXPECT` 만으로 결정되며, exit code·훅 이벤트 이름·`tool_response` 의 형태는 판정에 들어가지 않는다.
+- 같은 활성 작업·유효한 호출 대응·저장소 상태·명령·원장이면 Claude Code와 Codex가 같은 판정 줄과 같은 원장 바이트를 냅니다. 게이트 판정은 정규화된 출력 텍스트와 `EXPECT` 만으로 결정되며, exit code·훅 이벤트 이름·`tool_response` 의 형태는 판정에 들어가지 않는다.
 - 호스트에 이벤트나 필드가 없을 때만 차이를 허용하고(Codex 의 `PostToolUseFailure`·`is_interrupt` 부재), 그 차이는 보수적 방향으로만 나타난다 — 어떤 호스트에서도 거짓 met 은 생기지 않는다.
 - 실패 연쇄는 명시적 failure 이벤트, 알려진 exit, CHECK 판정 순으로 근거를 사용한다. 앞의 두 근거가 없는 Codex 호출은 CHECK가 `unmet`이면 실패로 세고 모든 판정이 `met`이면 성공으로 초기화한다. 판정 불가능한 Codex 명령은 기존 실패 카운터를 건드리지 않는다.
 
 ### AC-skill-visibility — 모델 목록과 워크플로우 선출 분리
 
-- 모델-visible 사용자 시작 스킬에는 `disable-model-invocation`이 없고, 표준 워크플로우 체인에도 들어가지 않는다.
-- 모델에게 숨기는 사용자 전용 게이트에는 `disable-model-invocation: true`가 있고, 표준 워크플로우 체인에도 들어가지 않는다.
+- 모델-visible 사용자 시작 스킬에는 disable-model-invocation이 없으며, 설치나 발견만으로 실행되지 않습니다.
+- 모델에게 숨기는 사용자 전용 게이트에는 disable-model-invocation: true가 있으며 명시 호출 범위를 유지합니다.
 - 모든 배포 스킬은 자동 호출 규율·조건부 질문·visible 사용자 시작·hidden 사용자 전용 중 정확히 하나에 속한다.
 
 ### AC-check-expect-pair — 조건 검사와 성공 문자열은 한 쌍이다
@@ -142,7 +154,7 @@
 - 선택된 방법이 있으면 그 방법의 고유 구조를 보존하고 Seiri 기본법을 합치지 않는다. 기본법은 다른 적용 가능한 방법이 없을 때만 작업 분해와 계획 형태를 제공한다.
 - 대화 없이 실행 가능함, 현재 상태 주장의 저장소 근거, 모든 요구사항과 검증의 연결, placeholder 금지는 planning method와 무관한 불변조건이다.
 - 계획이 모듈 경계·의존 방향·공개 소유권 또는 계약·장기 코드 배치를 선택하면 실제 계획과 같은 디렉터리에 `adr.md` 를 쓴다. 이 문서만으로 맥락·결정·이유·검토한 대안·주요 영향을 파악할 수 있어야 하며 실행 단계는 계획에 남긴다. 구조적 판단이 없으면 `adr.md` 를 만들지 않는다.
-- `review-plan` 은 method 출처를 사용자 요청·저장소 지침에서 다시 확인하고 선택된 방법과 공통 불변조건을 검토한다. `/seiri:execute` 가 수행할 계획만 검증 단계를 고정 포맷의 게이트 원장으로 적응한다.
+- `review-plan`은 사용자 요청·저장소 지침에서 method 출처를 확인하고 선택된 방법과 공통 불변조건을 검토합니다. 원장은 지속 검증 추적이 필요한 경우에만 작성하며, 존재하는 원장의 CHECK/EXPECT 계약은 그대로 검사합니다.
 
 ### AC-workflow-entry-validity — 실제 진입 경로를 잃지 않는 워크플로우
 
@@ -184,9 +196,11 @@
 - `DOCUMENT_WRITING_SKILLS`의 모든 스킬 본문이 정본 문장을 바이트 단위로 담고, 목록의 모든 이름은 `SHIPPED_SKILLS`에 속한다.
 - 목록 밖 스킬(execute·explain·trace-change·request-review·scaffold-pr·기타)의 본문에는 정본 문장이 없다 — 원장·HTML·PR·인계물의 언어는 각각 원장 포맷·독자·저장소 관례가 정한다.
 - 게이트 원장 포맷은 게이트 서술·제목·ABANDON 사유를 세션 응답 언어로 쓰되 `Plan:`·`G<n>`·`CHECK:`·`EXPECT:`·`EVIDENCE:`·`ABANDON:`·`## Final`과 CHECK·EXPECT 값은 원문을 유지한다고 명시한다.
-- seiri 는 언어 설정을 저장·주입·노출하지 않는다. 훅 번들 5·도구 3·`SeiriConfig` 필드 수가 그대로다.
+- seiri는 언어 설정을 저장·주입·노출하지 않습니다. 문서 언어 선택 때문에 훅·도구·SeiriConfig 필드를 추가하지 않습니다.
 
 ## History
+
+- 2026-09-26 — 전역 선출과 스킬 로드 기반 체인을 명시적 작업 참여로 바꿨습니다. 설명·리뷰·일반 질문에서 불필요한 절차를 주입하지 않고 모델의 범위·방법 판단을 보존하기 위한 결정입니다.
 
 - 2026-09-05 — CHECK가 조건을 검사하고 EXPECT는 고정 성공 문자열만 확인하도록 책임을 정했다. 원장의 출력 증명은 유지하면서 훅에서 저장소 정규식을 실행하는 비용을 제거했다.
 - 2026-09-05 — 플러그인 검증에서 발견된 워크플로우 진입 손실과 저장소 원문 반사·timeout 경합을 바로잡기로 했다. 새 심볼·증상 전용 재현·옵션-only 호출의 실제 경로를 계약에 포함하고, 프로젝트 입력은 훅 컨텍스트에 재출력하지 않으며 stdin fail-open 뒤 종료 여유를 보장한다.
@@ -214,4 +228,4 @@
 
 ## Last Updated
 
-2026-09-05 — CHECK/EXPECT 쌍의 조건 검사와 리터럴 성공 문자열 계약을 추가했다.
+2026-09-26 — 조건부 참여, 호스트 호출 귀속, 비례 검증과 배포 경계를 반영했습니다.

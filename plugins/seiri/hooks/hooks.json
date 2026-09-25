@@ -24,6 +24,18 @@
         ]
       }
     ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash|mcp__plugin_seiri_tools__workflow",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"",
+            "timeout": 6
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Bash",
@@ -36,7 +48,7 @@
         ]
       },
       {
-        "matcher": "Skill",
+        "matcher": "mcp__plugin_seiri_tools__workflow",
         "hooks": [
           {
             "type": "command",

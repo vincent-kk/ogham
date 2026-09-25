@@ -58,6 +58,7 @@ function markAgentEvidence(
  * @param command Executed command text.
  * @param outcome Observable tool result.
  * @param agentId Optional delegated-agent provenance.
+ * @param task Optional active task; when present, other ledgers are not enumerated.
  * @returns One verdict per current matching gate, in task and source order.
  */
 export function recordCheckOutcome(
@@ -65,11 +66,20 @@ export function recordCheckOutcome(
   command: string,
   outcome: CheckOutcome,
   agentId?: string,
+  task?: string,
 ): RecordedVerdict[] {
   const commandHash = hashCommand(command);
   const results: RecordedVerdict[] = [];
 
-  for (const candidate of listTaskLedgers(projectRoot)) {
+  const selected =
+    task === undefined ? undefined : readTaskLedger(projectRoot, task);
+  const candidates =
+    task === undefined
+      ? listTaskLedgers(projectRoot)
+      : selected
+        ? [selected]
+        : [];
+  for (const candidate of candidates) {
     const initiallyMatches = candidate.ledger.gates.some(
       (gate) =>
         gate.check !== undefined && hashCommand(gate.check) === commandHash,
@@ -77,60 +87,67 @@ export function recordCheckOutcome(
     if (!initiallyMatches) continue;
 
     try {
-      const recorded = withGatesLock(candidate.dir, () => {
-        const current = readTaskLedger(projectRoot, candidate.task);
-        if (current === undefined) return [];
-        const judged = current.ledger.gates
-          .filter(
-            (gate) =>
-              gate.check !== undefined &&
-              hashCommand(gate.check) === commandHash,
-          )
-          .map((gate) => ({
-            gate,
-            ...judgeCheckOutcome(gate, outcome),
-          }));
-        if (judged.length === 0) return [];
+      const recorded = withGatesLock(
+        candidate.dir,
+        () => {
+          const current = readTaskLedger(projectRoot, candidate.task);
+          if (current === undefined) return [];
+          const judged = current.ledger.gates
+            .filter(
+              (gate) =>
+                gate.check !== undefined &&
+                hashCommand(gate.check) === commandHash,
+            )
+            .map((gate) => ({
+              gate,
+              ...judgeCheckOutcome(gate, outcome),
+            }));
+          if (judged.length === 0) return [];
 
-        let lines = current.ledger.lines;
-        let changed = false;
-        const descending = [...judged].sort(
-          (left, right) => right.gate.line - left.gate.line,
-        );
-        for (const result of descending)
-          if (result.verdict.kind === 'met') {
-            const evidence = markAgentEvidence(result.evidence ?? '', agentId);
-            if (!result.gate.checked || result.gate.evidence !== evidence) {
+          let lines = current.ledger.lines;
+          let changed = false;
+          const descending = [...judged].sort(
+            (left, right) => right.gate.line - left.gate.line,
+          );
+          for (const result of descending)
+            if (result.verdict.kind === 'met') {
+              const evidence = markAgentEvidence(
+                result.evidence ?? '',
+                agentId,
+              );
+              if (!result.gate.checked || result.gate.evidence !== evidence) {
+                lines = applyGateLines(lines, result.gate, {
+                  checked: true,
+                  evidence,
+                });
+                changed = true;
+              }
+            } else if (result.verdict.regressed) {
               lines = applyGateLines(lines, result.gate, {
-                checked: true,
-                evidence,
+                checked: false,
+                evidence: EVIDENCE_REGRESSED,
               });
               changed = true;
             }
-          } else if (result.verdict.regressed) {
-            lines = applyGateLines(lines, result.gate, {
-              checked: false,
-              evidence: EVIDENCE_REGRESSED,
-            });
-            changed = true;
-          }
 
-        if (changed) writeLedgerLines(current.path, lines);
-        const ledger = changed
-          ? parseGatesLedger(lines.join('\n'))
-          : current.ledger;
-        const status = computeLedgerStatus(
-          candidate.task,
-          current.path,
-          ledger,
-        );
-        return judged.map(({ gate, verdict }) => ({
-          task: candidate.task,
-          gate,
-          verdict,
-          status,
-        }));
-      });
+          if (changed) writeLedgerLines(current.path, lines);
+          const ledger = changed
+            ? parseGatesLedger(lines.join('\n'))
+            : current.ledger;
+          const status = computeLedgerStatus(
+            candidate.task,
+            current.path,
+            ledger,
+          );
+          return judged.map(({ gate, verdict }) => ({
+            task: candidate.task,
+            gate,
+            verdict,
+            status,
+          }));
+        },
+        task !== undefined,
+      );
       results.push(...recorded);
     } catch {
       // One unreadable or unwritable ledger does not suppress other tasks.

@@ -253,16 +253,16 @@ describe('wiring', () => {
     expect(codexHooks.hooks).not.toHaveProperty('PostToolUseFailure');
     expect(
       claudeHooks.hooks.PostToolUse?.some(
-        (group) => group.matcher === HostTool.SKILL,
+        (group) => group.matcher === HostTool.WORKFLOW,
       ),
     ).toBe(true);
     expect(
       codexHooks.hooks.PostToolUse?.some(
-        (group) => group.matcher === HostTool.SKILL,
+        (group) => group.matcher === 'mcp__seiri__workflow',
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(codexHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command).toBe(
-      claudeHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command,
+      claudeHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command.replace('/bridge/', '/bridge/codex/'),
     );
   });
 

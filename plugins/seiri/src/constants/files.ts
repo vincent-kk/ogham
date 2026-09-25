@@ -32,6 +32,9 @@ export const SIGNALS_FILE = 'session-signals.json';
  */
 export const SIGNALS_LOCK_DIR = 'session-signals.lock';
 
+/** Actor-scoped, ignored workflow metadata. */
+export const SESSIONS_DIR = 'sessions';
+
 /** Ignore file that keeps {@link UNTRACKED_CONFIG_FILES} out of commits. */
 export const IGNORE_FILE = '.gitignore';
 
@@ -47,6 +50,7 @@ export const UNTRACKED_CONFIG_FILES = [
   RUNTIME_FILE,
   SIGNALS_FILE,
   SIGNALS_LOCK_DIR,
+  `${SESSIONS_DIR}/`,
   `${TASKS_DIR}/`,
 ] as const;
 

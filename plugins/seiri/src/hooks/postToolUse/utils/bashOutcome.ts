@@ -1,17 +1,26 @@
-import { FAILURE_CHAIN_LINE } from '../../../constants/failureChain.js';
+import {
+  FAILURE_CHAIN_LINE,
+  FAILURE_CHAIN_THRESHOLD,
+  TRACKED_COMMANDS_CAP,
+} from '../../../constants/failureChain.js';
 import { CHAIN_HINT } from '../../../constants/gatesLines.js';
-import { HookEvent, HostTool } from '../../../constants/hooks.js';
+import {
+  BASH_TOOL,
+  POST_TOOL_FAILURE_EVENT,
+} from '../../../constants/hooks.js';
 import { EMPTY_RESULT, INJECTION_PREFIX } from '../../../constants/plugin.js';
+import { judgeCheckOutcome } from '../../../core/gates/record/judgeCheckOutcome.js';
 import { recordCheckOutcome } from '../../../core/gates/record/recordCheckOutcome.js';
 import { renderVerdictLine } from '../../../core/gates/render/renderVerdictLine.js';
-import { recordBashFailure } from '../../../core/sessionSignals/record/recordBashFailure.js';
-import { recordBashSuccess } from '../../../core/sessionSignals/record/recordBashSuccess.js';
+import { hashCommand } from '../../../core/utils/hashCommand.js';
 import type { RecordedVerdict } from '../../../types/gates.js';
 import type {
   HookOutput,
   PostToolUseFailureInput,
   PostToolUseInput,
 } from '../../../types/hooks.js';
+import type { WorkflowBinding } from '../../../types/workflow.js';
+import { workflowHash } from '../../shared/workflowHost.js';
 
 import { toCheckOutcome } from './toCheckOutcome.js';
 
@@ -23,10 +32,11 @@ import { toCheckOutcome } from './toCheckOutcome.js';
  */
 export function bashOutcome(
   input: PostToolUseInput | PostToolUseFailureInput,
+  binding: WorkflowBinding,
 ): HookOutput {
   const command = input.tool_input?.command;
   if (
-    input.tool_name !== HostTool.BASH ||
+    input.tool_name !== BASH_TOOL ||
     typeof command !== 'string' ||
     command.trim() === ''
   )
@@ -37,7 +47,13 @@ export function bashOutcome(
 
   let verdicts: RecordedVerdict[];
   try {
-    verdicts = recordCheckOutcome(input.cwd, command, outcome, input.agent_id);
+    verdicts = recordCheckOutcome(
+      input.cwd,
+      command,
+      outcome,
+      input.agent_id,
+      binding.task,
+    );
   } catch {
     verdicts = [];
   }
@@ -49,7 +65,7 @@ export function bashOutcome(
 
   /** True when failure is known, false when success is known, or undefined. */
   const failed =
-    input.hook_event_name === HookEvent.POST_TOOL_USE_FAILURE
+    input.hook_event_name === POST_TOOL_FAILURE_EVENT
       ? true
       : outcome.exit !== undefined
         ? outcome.exit !== 0
@@ -60,15 +76,46 @@ export function bashOutcome(
             : undefined;
 
   let announce = false;
-  try {
-    if (failed === true)
-      announce = recordBashFailure(input.cwd, input.session_id, command);
-    else if (failed === false)
-      recordBashSuccess(input.cwd, input.session_id, command);
-    // Unknown host outcomes leave any existing chain untouched.
-  } catch {
-    // Failure-chain persistence is optional; a recorded verdict is not.
+  const key = hashCommand(command);
+  if (failed === true) {
+    binding.counts[key] = (binding.counts[key] ?? 0) + 1;
+    announce =
+      binding.counts[key] >= FAILURE_CHAIN_THRESHOLD &&
+      !binding.announced.includes(key);
+    if (announce) binding.announced.push(key);
+  } else if (failed === false) {
+    delete binding.counts[key];
+    binding.announced = binding.announced.filter((hash) => hash !== key);
   }
+  for (const old of Object.keys(binding.counts).slice(
+    0,
+    -TRACKED_COMMANDS_CAP,
+  )) {
+    delete binding.counts[old];
+    binding.announced = binding.announced.filter((hash) => hash !== old);
+  }
+
+  const fingerprint = workflowHash(
+    JSON.stringify([
+      verdicts.map((result) => {
+        const { verdict, evidence } = judgeCheckOutcome(result.gate, outcome);
+        return [
+          result.gate.id,
+          verdict.kind,
+          verdict.kind === 'met' ? evidence : verdict.reason,
+        ];
+      }),
+      input.agent_id,
+    ]),
+  );
+  const repeated = binding.verdicts[key] === fingerprint;
+  binding.verdicts[key] = fingerprint;
+  for (const old of Object.keys(binding.verdicts).slice(
+    0,
+    -TRACKED_COMMANDS_CAP,
+  ))
+    delete binding.verdicts[old];
+  if (repeated && !announce) return EMPTY_RESULT;
 
   if (verdicts.length === 0) {
     if (!announce) return EMPTY_RESULT;

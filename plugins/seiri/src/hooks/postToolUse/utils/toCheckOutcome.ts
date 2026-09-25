@@ -69,7 +69,11 @@ export function toCheckOutcome(
     response !== null
       ? { exit: 0 }
       : {}),
-    ...('is_interrupt' in input && input.is_interrupt === true
+    ...(('is_interrupt' in input && input.is_interrupt === true) ||
+    (typeof response === 'object' &&
+      response !== null &&
+      'interrupted' in response &&
+      response.interrupted === true)
       ? { interrupted: true }
       : {}),
   };

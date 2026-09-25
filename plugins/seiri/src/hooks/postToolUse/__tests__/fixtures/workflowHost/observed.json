@@ -1,0 +1,1014 @@
+{
+  "recorded": "2026-09-26",
+  "hosts": {
+    "claude": "2.1.282",
+    "codex": "0.157.0"
+  },
+  "scenarios": {
+    "claude-main": [
+      {
+        "event": "SessionStart",
+        "session": "session-1",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-1",
+        "prompt": "prompt-1"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-1",
+        "prompt": "prompt-1",
+        "invocation": "invocation-1",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-1",
+        "prompt": "prompt-1",
+        "invocation": "invocation-1",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-1",
+        "prompt": "prompt-1",
+        "invocation": "invocation-2",
+        "tool": "Bash",
+        "inputHash": "inputHash-2"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-1",
+        "prompt": "prompt-1",
+        "invocation": "invocation-2",
+        "tool": "Bash",
+        "inputHash": "inputHash-2",
+        "responseShape": {
+          "stdout": "string",
+          "stderr": "string",
+          "interrupted": "boolean",
+          "isImage": "boolean",
+          "noOutputExpected": "boolean"
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-1",
+        "prompt": "prompt-1",
+        "invocation": "invocation-3",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-1",
+        "prompt": "prompt-1",
+        "invocation": "invocation-3",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      }
+    ],
+    "claude-subagent": [
+      {
+        "event": "SessionStart",
+        "session": "session-2",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-2",
+        "prompt": "prompt-2"
+      },
+      {
+        "event": "SubagentStart",
+        "session": "session-2",
+        "prompt": "prompt-2",
+        "agent": "agent-1"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-2",
+        "prompt": "prompt-2",
+        "agent": "agent-1",
+        "invocation": "invocation-4",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-2",
+        "prompt": "prompt-2",
+        "agent": "agent-1",
+        "invocation": "invocation-4",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-2",
+        "prompt": "prompt-2",
+        "agent": "agent-1",
+        "invocation": "invocation-5",
+        "tool": "Bash",
+        "inputHash": "inputHash-4"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-2",
+        "prompt": "prompt-2",
+        "agent": "agent-1",
+        "invocation": "invocation-5",
+        "tool": "Bash",
+        "inputHash": "inputHash-4",
+        "responseShape": {
+          "stdout": "string",
+          "stderr": "string",
+          "interrupted": "boolean",
+          "isImage": "boolean",
+          "noOutputExpected": "boolean"
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-2",
+        "prompt": "prompt-2",
+        "agent": "agent-1",
+        "invocation": "invocation-6",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-2",
+        "prompt": "prompt-2",
+        "agent": "agent-1",
+        "invocation": "invocation-6",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      }
+    ],
+    "claude-compact-and-turn": [
+      {
+        "event": "SessionStart",
+        "session": "session-3",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-3",
+        "prompt": "prompt-3"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-3",
+        "prompt": "prompt-3",
+        "invocation": "invocation-7",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-3",
+        "prompt": "prompt-3",
+        "invocation": "invocation-7",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-3",
+        "prompt": "prompt-3",
+        "invocation": "invocation-8",
+        "tool": "Bash",
+        "inputHash": "inputHash-4"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-3",
+        "prompt": "prompt-3",
+        "invocation": "invocation-8",
+        "tool": "Bash",
+        "inputHash": "inputHash-4",
+        "responseShape": {
+          "stdout": "string",
+          "stderr": "string",
+          "interrupted": "boolean",
+          "isImage": "boolean",
+          "noOutputExpected": "boolean"
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-3",
+        "prompt": "prompt-3",
+        "invocation": "invocation-9",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-3",
+        "prompt": "prompt-3",
+        "invocation": "invocation-9",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      },
+      {
+        "event": "SessionStart",
+        "session": "session-3",
+        "prompt": "prompt-4",
+        "source": "compact"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-3",
+        "prompt": "prompt-5"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-3",
+        "prompt": "prompt-5",
+        "invocation": "invocation-10",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-3",
+        "prompt": "prompt-5",
+        "invocation": "invocation-10",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-3",
+        "prompt": "prompt-5",
+        "invocation": "invocation-11",
+        "tool": "Bash",
+        "inputHash": "inputHash-5"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-3",
+        "prompt": "prompt-5",
+        "invocation": "invocation-11",
+        "tool": "Bash",
+        "inputHash": "inputHash-5",
+        "responseShape": {
+          "stdout": "string",
+          "stderr": "string",
+          "interrupted": "boolean",
+          "isImage": "boolean",
+          "noOutputExpected": "boolean"
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-3",
+        "prompt": "prompt-5",
+        "invocation": "invocation-12",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-3",
+        "prompt": "prompt-5",
+        "invocation": "invocation-12",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      }
+    ],
+    "claude-parallel": [
+      {
+        "event": "SessionStart",
+        "session": "session-4",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-4",
+        "prompt": "prompt-6"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-4",
+        "prompt": "prompt-6",
+        "invocation": "invocation-13",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-6"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-4",
+        "prompt": "prompt-6",
+        "invocation": "invocation-14",
+        "tool": "Bash",
+        "inputHash": "inputHash-4"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-4",
+        "prompt": "prompt-6",
+        "invocation": "invocation-15",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-7"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-4",
+        "prompt": "prompt-6",
+        "invocation": "invocation-15",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-7",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-4",
+        "prompt": "prompt-6",
+        "invocation": "invocation-14",
+        "tool": "Bash",
+        "inputHash": "inputHash-4",
+        "responseShape": {
+          "stdout": "string",
+          "stderr": "string",
+          "interrupted": "boolean",
+          "isImage": "boolean",
+          "noOutputExpected": "boolean"
+        }
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-4",
+        "prompt": "prompt-6",
+        "invocation": "invocation-13",
+        "tool": "mcp__seiri-probe__workflow",
+        "inputHash": "inputHash-6",
+        "responseShape": [
+          {
+            "type": "string",
+            "text": "string"
+          }
+        ]
+      }
+    ],
+    "codex-plain": [
+      {
+        "event": "SessionStart",
+        "session": "session-5",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-5",
+        "turn": "turn-1"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-5",
+        "turn": "turn-1",
+        "invocation": "invocation-16",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-5",
+        "turn": "turn-1",
+        "invocation": "invocation-16",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-5",
+        "turn": "turn-1",
+        "invocation": "invocation-17",
+        "tool": "Bash",
+        "inputHash": "inputHash-8"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-5",
+        "turn": "turn-1",
+        "invocation": "invocation-17",
+        "tool": "Bash",
+        "inputHash": "inputHash-8",
+        "responseShape": "string"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-5",
+        "turn": "turn-1",
+        "invocation": "invocation-18",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-5",
+        "turn": "turn-1",
+        "invocation": "invocation-18",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      }
+    ],
+    "codex-code": [
+      {
+        "event": "SessionStart",
+        "session": "session-6",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-6",
+        "turn": "turn-2"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-6",
+        "turn": "turn-2",
+        "invocation": "invocation-19",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-6",
+        "turn": "turn-2",
+        "invocation": "invocation-19",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-6",
+        "turn": "turn-2",
+        "invocation": "invocation-20",
+        "tool": "Bash",
+        "inputHash": "inputHash-8"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-6",
+        "turn": "turn-2",
+        "invocation": "invocation-20",
+        "tool": "Bash",
+        "inputHash": "inputHash-8",
+        "responseShape": "string"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-6",
+        "turn": "turn-2",
+        "invocation": "invocation-21",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-6",
+        "turn": "turn-2",
+        "invocation": "invocation-21",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      }
+    ],
+    "codex-agents": [
+      {
+        "event": "SessionStart",
+        "session": "session-7",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-7",
+        "turn": "turn-3"
+      },
+      {
+        "event": "SubagentStart",
+        "session": "session-7",
+        "turn": "turn-4",
+        "agent": "agent-2"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-7",
+        "turn": "turn-4",
+        "agent": "agent-2",
+        "invocation": "invocation-22",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-7",
+        "turn": "turn-4",
+        "agent": "agent-2",
+        "invocation": "invocation-22",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-7",
+        "turn": "turn-4",
+        "agent": "agent-2",
+        "invocation": "invocation-23",
+        "tool": "Bash",
+        "inputHash": "inputHash-8"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-7",
+        "turn": "turn-4",
+        "agent": "agent-2",
+        "invocation": "invocation-23",
+        "tool": "Bash",
+        "inputHash": "inputHash-8",
+        "responseShape": "string"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-7",
+        "turn": "turn-4",
+        "agent": "agent-2",
+        "invocation": "invocation-24",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-7",
+        "turn": "turn-4",
+        "agent": "agent-2",
+        "invocation": "invocation-24",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      }
+    ],
+    "codex-turns": [
+      {
+        "event": "SessionStart",
+        "session": "session-8",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-8",
+        "turn": "turn-5"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-8",
+        "turn": "turn-5",
+        "invocation": "invocation-25",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-8",
+        "turn": "turn-5",
+        "invocation": "invocation-25",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-8",
+        "turn": "turn-5",
+        "invocation": "invocation-26",
+        "tool": "Bash",
+        "inputHash": "inputHash-8"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-8",
+        "turn": "turn-5",
+        "invocation": "invocation-26",
+        "tool": "Bash",
+        "inputHash": "inputHash-8",
+        "responseShape": "string"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-8",
+        "turn": "turn-5",
+        "invocation": "invocation-27",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-8",
+        "turn": "turn-5",
+        "invocation": "invocation-27",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "SessionStart",
+        "session": "session-8",
+        "source": "resume"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-8",
+        "turn": "turn-6"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-8",
+        "turn": "turn-6",
+        "invocation": "invocation-28",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-8",
+        "turn": "turn-6",
+        "invocation": "invocation-28",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-8",
+        "turn": "turn-6",
+        "invocation": "invocation-29",
+        "tool": "Bash",
+        "inputHash": "inputHash-8"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-8",
+        "turn": "turn-6",
+        "invocation": "invocation-29",
+        "tool": "Bash",
+        "inputHash": "inputHash-8",
+        "responseShape": "string"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-8",
+        "turn": "turn-6",
+        "invocation": "invocation-30",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-8",
+        "turn": "turn-6",
+        "invocation": "invocation-30",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      }
+    ],
+    "codex-compact": [
+      {
+        "event": "SessionStart",
+        "session": "session-9",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-9",
+        "turn": "turn-7"
+      },
+      {
+        "event": "PreCompact",
+        "session": "session-9",
+        "turn": "turn-7"
+      },
+      {
+        "event": "PostCompact",
+        "session": "session-9",
+        "turn": "turn-7"
+      },
+      {
+        "event": "SessionStart",
+        "session": "session-9",
+        "source": "compact"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-9",
+        "turn": "turn-7",
+        "invocation": "invocation-31",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-9",
+        "turn": "turn-7",
+        "invocation": "invocation-31",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-1",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "PreCompact",
+        "session": "session-9",
+        "turn": "turn-7"
+      },
+      {
+        "event": "PostCompact",
+        "session": "session-9",
+        "turn": "turn-7"
+      },
+      {
+        "event": "SessionStart",
+        "session": "session-9",
+        "source": "compact"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-9",
+        "turn": "turn-7",
+        "invocation": "invocation-32",
+        "tool": "Bash",
+        "inputHash": "inputHash-8"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-9",
+        "turn": "turn-7",
+        "invocation": "invocation-32",
+        "tool": "Bash",
+        "inputHash": "inputHash-8",
+        "responseShape": "string"
+      },
+      {
+        "event": "PreCompact",
+        "session": "session-9",
+        "turn": "turn-7"
+      },
+      {
+        "event": "PostCompact",
+        "session": "session-9",
+        "turn": "turn-7"
+      },
+      {
+        "event": "SessionStart",
+        "session": "session-9",
+        "source": "compact"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-9",
+        "turn": "turn-7",
+        "invocation": "invocation-33",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-9",
+        "turn": "turn-7",
+        "invocation": "invocation-33",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-3",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "PreCompact",
+        "session": "session-9",
+        "turn": "turn-7"
+      }
+    ],
+    "codex-parallel": [
+      {
+        "event": "SessionStart",
+        "session": "session-10",
+        "source": "startup"
+      },
+      {
+        "event": "UserPromptSubmit",
+        "session": "session-10",
+        "turn": "turn-8"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-10",
+        "turn": "turn-8",
+        "invocation": "invocation-34",
+        "tool": "Bash",
+        "inputHash": "inputHash-8"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-10",
+        "turn": "turn-8",
+        "invocation": "invocation-35",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-7"
+      },
+      {
+        "event": "PreToolUse",
+        "session": "session-10",
+        "turn": "turn-8",
+        "invocation": "invocation-36",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-6"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-10",
+        "turn": "turn-8",
+        "invocation": "invocation-35",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-7",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-10",
+        "turn": "turn-8",
+        "invocation": "invocation-34",
+        "tool": "Bash",
+        "inputHash": "inputHash-8",
+        "responseShape": "string"
+      },
+      {
+        "event": "PostToolUse",
+        "session": "session-10",
+        "turn": "turn-8",
+        "invocation": "invocation-36",
+        "tool": "mcp__seiri_probe__workflow",
+        "inputHash": "inputHash-6",
+        "responseShape": {
+          "content": [
+            {
+              "type": "string",
+              "text": "string"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

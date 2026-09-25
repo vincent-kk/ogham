@@ -25,25 +25,25 @@
       value: DIAL_OFF,
       label: 'Skills only',
       description:
-        'Skills remain available and can be called explicitly. Hooks add no context, record no session state, and emit no workflow response.',
+        'Skills remain available. Automatic workflow assistance is disabled. Existing participation is invalidated at new turn boundaries.',
     },
     {
       value: DIAL_ADVISORY,
       label: DIAL_ADVISORY,
       description:
-        'Status only: session start names the active rules and any drift, without workflow chaining or per-turn reminders.',
+        'Keep automatic workflow assistance silent. Rule and configuration status remains available through explicit settings queries.',
     },
     {
       value: DIAL_STANDARD,
       label: DIAL_STANDARD,
       description:
-        'States the dial position, names the workflow that owns each moment — including in subagents, which inherit nothing else — and adds a brief skill-dispatch reminder at the start of every turn.',
+        'Offer task-scoped evidence and repeated-failure hints after explicit workflow participation. General questions and explanations remain silent.',
     },
     {
       value: 'strict',
       label: 'strict',
       description:
-        'Also restates the precedence chain each session — useful where repository conventions and these rules meet often — names every moment’s owning skill outright, and widens that per-turn reminder to borderline work.',
+        'Uses the same explicit participation boundary as standard. Verification remains proportional to the claim and valid evidence can be reused.',
     },
   ];
 

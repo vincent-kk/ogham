@@ -1,118 +1,143 @@
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { portableJoin } from '@ogham/cross-platform';
+import { afterEach, describe, expect, it } from 'vitest';
 
-import { ENV_PLUGIN_ROOT } from '../../constants/env.js';
 import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.js';
-import type {
-  SessionStartInput,
-  SubagentStartInput,
-  UserPromptSubmitInput,
-} from '../../types/hooks.js';
 import { processSessionStart } from '../setup/setup.js';
+import { CLAUDE_WORKFLOW_ADAPTER } from '../shared/workflowAdapters/claude.js';
+import { CODEX_WORKFLOW_ADAPTER } from '../shared/workflowAdapters/codex.js';
 import { processSubagentStart } from '../subagentStart/subagentStart.js';
 import { processUserPromptSubmit } from '../userPromptSubmit/userPromptSubmit.js';
 
-/** Canonical plugin root used by status-rendering hooks. */
-const pluginRoot = fileURLToPath(new URL('../../../', import.meta.url));
+import { activateWorkflow, observeBash } from './helpers/workflowHarness.js';
 
-/** Temporary repositories created by cross-host comparisons. */
-const createdRoots: string[] = [];
+/** Tests select concrete adapters; production bundles fix one adapter at build time. */
+const HOSTS = [
+  {
+    adapter: CLAUDE_WORKFLOW_ADAPTER,
+    native: { prompt_id: 'turn-a' },
+    next: { prompt_id: 'turn-b' },
+    child: { prompt_id: 'turn-a' },
+    failure: { hook_event_name: 'PostToolUseFailure', error: 'Exit code 1' },
+  },
+  {
+    adapter: CODEX_WORKFLOW_ADAPTER,
+    native: { turn_id: 'turn-a' },
+    next: { turn_id: 'turn-b' },
+    child: { turn_id: 'turn-child' },
+    failure: { hook_event_name: 'PostToolUse', tool_response: 'Exit code 1' },
+  },
+] as const;
 
-/**
- * Create a strict repository whose hook output is non-empty and deterministic.
- *
- * @returns Repository root with project configuration.
- */
+/** Temporary repositories isolate each host's actor state. */
+const roots: string[] = [];
+afterEach(() => {
+  for (const root of roots.splice(0))
+    rmSync(root, { recursive: true, force: true });
+});
+
+/** Make a project that permits explicit participation for either host. */
 function seedRepo(): string {
-  const root = mkdtempSync(join(tmpdir(), 'seiri-hook-host-parity-'));
-  createdRoots.push(root);
-  mkdirSync(join(root, '.git'));
-  writeConfig(root, 'project', { intervention: 'strict' });
-  return root;
+  const cwd = mkdtempSync(portableJoin(tmpdir(), 'seiri-hook-host-parity-'));
+  roots.push(cwd);
+  mkdirSync(portableJoin(cwd, '.git'));
+  writeConfig(cwd, 'project', { intervention: 'strict' });
+  return cwd;
 }
 
 describe('non-Bash hook host payload parity', () => {
-  let previousPluginRoot: string | undefined;
+  it.each(['startup', 'resume', 'clear', 'fork'])(
+    'silently suspends participation on %s in either host',
+    (source) => {
+      for (const { adapter, native, failure } of HOSTS) {
+        const cwd = seedRepo();
+        expect(activateWorkflow(cwd, native).hookSpecificOutput).toBeDefined();
+        expect(
+          processSessionStart(
+            {
+              cwd,
+              session_id: 'session-a',
+              ...native,
+              hook_event_name: 'SessionStart',
+              source,
+            },
+            adapter,
+          ),
+        ).toEqual({ continue: true });
+        for (let i = 0; i < 3; i++)
+          expect(
+            observeBash({
+              cwd,
+              session_id: 'session-a',
+              ...native,
+              ...failure,
+              tool_name: 'Bash',
+              tool_input: { command: 'fail' },
+            }),
+          ).toEqual({ continue: true });
+      }
+    },
+  );
 
-  beforeEach(() => {
-    previousPluginRoot = process.env[ENV_PLUGIN_ROOT];
-    process.env[ENV_PLUGIN_ROOT] = pluginRoot;
+  it('silently replaces native user-turn provenance on either host', () => {
+    for (const { adapter, native, next, failure } of HOSTS) {
+      const cwd = seedRepo();
+      expect(activateWorkflow(cwd, native).hookSpecificOutput).toBeDefined();
+      expect(
+        processUserPromptSubmit(
+          {
+            cwd,
+            session_id: 'session-a',
+            ...next,
+            hook_event_name: 'UserPromptSubmit',
+            prompt: 'ignored',
+          },
+          adapter,
+        ),
+      ).toEqual({ continue: true });
+      expect(
+        observeBash({
+          cwd,
+          session_id: 'session-a',
+          ...native,
+          ...failure,
+          tool_name: 'Bash',
+          tool_input: { command: 'fail' },
+        }),
+      ).toEqual({ continue: true });
+    }
   });
 
-  afterEach(() => {
-    if (previousPluginRoot === undefined) delete process.env[ENV_PLUGIN_ROOT];
-    else process.env[ENV_PLUGIN_ROOT] = previousPluginRoot;
-    for (const root of createdRoots.splice(0))
-      rmSync(root, { recursive: true, force: true });
-  });
-
-  it('keeps SessionStart output identical with Codex fields', () => {
-    const cwd = seedRepo();
-    const claude: SessionStartInput = {
-      cwd,
-      session_id: 'session-a',
-      hook_event_name: 'SessionStart',
-      source: 'startup',
-    };
-    const codex = {
-      ...claude,
-      turn_id: 'turn-a',
-      model: 'gpt-5',
-      permission_mode: 'default',
-    };
-
-    expect(processSessionStart(codex)).toEqual(processSessionStart(claude));
-    expect(processSessionStart(codex).hookSpecificOutput?.hookEventName).toBe(
-      'SessionStart',
-    );
-  });
-
-  it('keeps UserPromptSubmit output identical with Codex fields', () => {
-    const cwd = seedRepo();
-    const claude: UserPromptSubmitInput = {
-      cwd,
-      session_id: 'session-a',
-      hook_event_name: 'UserPromptSubmit',
-      prompt: 'ignored',
-    };
-    const codex = {
-      ...claude,
-      turn_id: 'turn-a',
-      model: 'gpt-5',
-      permission_mode: 'default',
-    };
-
-    expect(processUserPromptSubmit(codex)).toEqual(
-      processUserPromptSubmit(claude),
-    );
-    expect(
-      processUserPromptSubmit(codex).hookSpecificOutput?.hookEventName,
-    ).toBe('UserPromptSubmit');
-  });
-
-  it('keeps SubagentStart output identical with Codex fields', () => {
-    const cwd = seedRepo();
-    const claude: SubagentStartInput = {
-      cwd,
-      session_id: 'session-a',
-      hook_event_name: 'SubagentStart',
-      agent_id: 'agent-a',
-      agent_type: 'worker',
-    };
-    const codex = {
-      ...claude,
-      turn_id: 'turn-a',
-      model: 'gpt-5',
-      permission_mode: 'default',
-    };
-
-    expect(processSubagentStart(codex)).toEqual(processSubagentStart(claude));
-    expect(processSubagentStart(codex).hookSpecificOutput?.hookEventName).toBe(
-      'SubagentStart',
-    );
+  it('keeps a child independent of its parent on either host', () => {
+    for (const { adapter, native, child, failure } of HOSTS) {
+      const cwd = seedRepo();
+      expect(activateWorkflow(cwd, native).hookSpecificOutput).toBeDefined();
+      expect(
+        processSubagentStart(
+          {
+            cwd,
+            session_id: 'session-a',
+            ...child,
+            agent_id: 'child-a',
+            hook_event_name: 'SubagentStart',
+          },
+          adapter,
+        ),
+      ).toEqual({ continue: true });
+      for (let i = 0; i < 3; i++)
+        expect(
+          observeBash({
+            cwd,
+            session_id: 'session-a',
+            ...child,
+            ...failure,
+            agent_id: 'child-a',
+            tool_name: 'Bash',
+            tool_input: { command: 'fail' },
+          }),
+        ).toEqual({ continue: true });
+    }
   });
 });

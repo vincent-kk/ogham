@@ -5,7 +5,7 @@
 - 서버가 공통 `resolveInitialConfigScope`로 계산한 `initialScope`를 초기 선택으로 사용한다. project 설정이 있으면 project, user 설정만 있으면 user, 둘 다 없으면 project다. 페이지는 이 조건을 재판단하지 않는다.
 
 - 폼은 두 가지를 한 화면에서 정한다: 배포할 규칙 선택과 훅 workflow mode. mode는 `off`·`advisory`·`standard`·`strict` 네 값이고, 새 설정의 기본 `off`는 `Skills only`로 표시한다.
-- `Skills only`는 스킬 설치·명시 호출을 유지하고 훅 context·상태 변경·wire 응답을 없앤다는 뜻이다. 다른 세 값은 기존 다이얼 의미를 유지한다.
+- Skills only와 advisory는 스킬 선택을 유지하면서 자동 주입·신규 관측을 하지 않습니다. 기존 참여의 신뢰되는 경계 철회는 허용합니다. standard/strict는 명시적 활성 작업만 보조하며 모든 mode에서 전역 배너·선출을 하지 않습니다.
 - `scope`(user/project) 는 결정 하나다 — 다이얼이 저장될 레이어와 규칙이 배포될 레이어를 함께 정한다.
 - 모든 요청에 `?token=` 을 부착한다. 저장 본문은 JSON 이다.
 - `/plan` 이 준 revision 을 `/save` 로 왕복시키고, stale 응답이 오면 다시 검토하게 만든다.

@@ -6,11 +6,17 @@
  * reference documents the two as separate events. The failure-chain hook
  * therefore registers under both: one event to count on, one to reset on.
  */
+export const POST_TOOL_FAILURE_EVENT = 'PostToolUseFailure';
+
+/** Native shell tool name shared by the two supported hook ABIs. */
+export const BASH_TOOL = 'Bash';
+
 export const HookEvent = {
   SESSION_START: 'SessionStart',
   USER_PROMPT_SUBMIT: 'UserPromptSubmit',
+  PRE_TOOL_USE: 'PreToolUse',
   POST_TOOL_USE: 'PostToolUse',
-  POST_TOOL_USE_FAILURE: 'PostToolUseFailure',
+  POST_TOOL_USE_FAILURE: POST_TOOL_FAILURE_EVENT,
   SUBAGENT_START: 'SubagentStart',
   INSTRUCTIONS_LOADED: 'InstructionsLoaded',
 } as const;
@@ -27,6 +33,7 @@ export const HookEvent = {
 export const HookName = {
   SETUP: 'setup',
   USER_PROMPT_SUBMIT: 'user-prompt-submit',
+  PRE_TOOL_USE: 'pre-tool-use',
   POST_TOOL_USE: 'post-tool-use',
   SUBAGENT_START: 'subagent-start',
   INSTRUCTIONS_LOADED: 'instructions-loaded',
@@ -41,8 +48,8 @@ export const HookName = {
  * manifest. The wiring test keeps both host surfaces in step.
  */
 export const HostTool = {
-  BASH: 'Bash',
-  SKILL: 'Skill',
+  BASH: BASH_TOOL,
+  WORKFLOW: 'mcp__plugin_seiri_tools__workflow',
 } as const;
 
 /**

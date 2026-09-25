@@ -2,18 +2,22 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
+import { portableJoin as join } from '@ogham/cross-platform';
 import { afterEach, describe, expect, it } from 'vitest';
 
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';
 import type { HookOutput } from '../../../types/hooks.js';
-import { processToolOutcome } from '../postToolUse.js';
+import {
+  activateWorkflow,
+  observeBash,
+} from '../../__tests__/helpers/workflowHarness.js';
 
 /**
  * The failure-chain signal. Its whole risk is misfiring into a deliberate
@@ -37,6 +41,7 @@ describe('bash failure chain', () => {
     tempDirs.push(repoRoot);
     mkdirSync(join(repoRoot, '.git'));
     writeConfig(repoRoot, 'project', { intervention });
+    activateWorkflow(repoRoot);
     return repoRoot;
   }
 
@@ -45,7 +50,7 @@ describe('bash failure chain', () => {
     command = COMMAND,
     extra: Record<string, unknown> = {},
   ): HookOutput {
-    return processToolOutcome({
+    return observeBash({
       cwd,
       session_id: SESSION,
       hook_event_name: 'PostToolUseFailure',
@@ -57,7 +62,7 @@ describe('bash failure chain', () => {
   }
 
   function succeed(cwd: string, command = COMMAND): HookOutput {
-    return processToolOutcome({
+    return observeBash({
       cwd,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -120,22 +125,22 @@ describe('bash failure chain', () => {
     fail(repoRoot);
     fail(repoRoot);
     expect(injected(fail(repoRoot))).toBeUndefined();
-    expect(existsSync(join(repoRoot, '.seiri', 'session-signals.json'))).toBe(
-      false,
-    );
+    expect(existsSync(join(repoRoot, '.seiri', 'sessions'))).toBe(false);
   });
 
-  it('starts over rather than throwing when its own state file is damaged', () => {
+  it('requires explicit reactivation after its actor state is damaged', () => {
     const repoRoot = seedRepo();
     fail(repoRoot);
-    writeFileSync(
-      join(repoRoot, '.seiri', 'session-signals.json'),
-      '{ not json',
-      'utf8',
-    );
+    const sessions = join(repoRoot, '.seiri', 'sessions');
+    const state = readdirSync(sessions).find((name) => name.endsWith('.json'))!;
+    writeFileSync(join(sessions, state), '{ not json', 'utf8');
 
     expect(() => fail(repoRoot)).not.toThrow();
     expect(injected(fail(repoRoot))).toBeUndefined();
+    expect(injected(fail(repoRoot))).toBeUndefined();
+    activateWorkflow(repoRoot);
+    fail(repoRoot);
+    fail(repoRoot);
     expect(injected(fail(repoRoot))).toContain('trace-cause');
   });
 });

@@ -12,11 +12,16 @@ import { acquireLockDir } from '../../utils/acquireLockDir.js';
  * @param mutate Complete read-modify-write callback.
  * @returns The callback result, unchanged.
  */
-export function withGatesLock<T>(taskDir: string, mutate: () => T): T {
+export function withGatesLock<T>(
+  taskDir: string,
+  mutate: () => T,
+  requireLock = false,
+): T {
   if (!existsSync(taskDir)) return mutate();
 
   const lockPath = portableJoin(taskDir, GATES_LOCK_DIR);
   const held = acquireLockDir(lockPath);
+  if (!held && requireLock) throw new Error('Task ledger lock unavailable');
   try {
     return mutate();
   } finally {

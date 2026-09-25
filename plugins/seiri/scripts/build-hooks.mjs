@@ -43,6 +43,7 @@ const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 // lists render lines this hook never emits — tree-shaking regression
 // canaries: their presence means a constants file stopped shaking.
 const hookEntries = [
+  { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: LIGHT_HOOK_BYTES },
   { name: 'setup', entry: 'setup', maxBytes: LIGHT_HOOK_BYTES },
   {
     name: 'user-prompt-submit',
@@ -53,7 +54,8 @@ const hookEntries = [
   {
     name: 'post-tool-use',
     entry: 'postToolUse',
-    maxBytes: LIGHT_HOOK_BYTES,
+    // Paired provenance, atomic actor state and gate judging share this entry.
+    maxBytes: 20 * KILO_BYTE,
     forbiddenContent: [/Election/, /A plan was produced/],
   },
   {
@@ -69,22 +71,56 @@ const hookEntries = [
 ];
 
 await Promise.all(
-  hookEntries.map(async ({ name, entry }) =>
-    esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
-      bundle: true,
-      platform: 'node',
-      target: 'node20',
-      format: 'esm',
-      outfile: resolve(root, `bridge/${name}.mjs`),
-      minify: true,
-      sourcemap: false,
-      treeShaking: true,
-    }),
+  hookEntries.flatMap(({ name, entry }) =>
+    ['claude', 'codex'].map(async (host) =>
+      esbuild.build({
+        entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
+        bundle: true,
+        platform: 'node',
+        target: 'node20',
+        format: 'esm',
+        outfile: resolve(
+          root,
+          `bridge/${host === 'codex' ? 'codex/' : ''}${name}.mjs`,
+        ),
+        plugins:
+          host === 'codex'
+            ? [
+                {
+                  name: 'seiri-codex-hook-adapter',
+                  setup(build) {
+                    build.onResolve({ filter: /workflowAdapter\.js$/ }, () => ({
+                      path: resolve(
+                        root,
+                        'src/hooks/shared/workflowAdapters/codexEntry.ts',
+                      ),
+                    }));
+                  },
+                },
+              ]
+            : [],
+        minify: true,
+        sourcemap: false,
+        treeShaking: true,
+      }),
+    ),
   ),
 );
 
 console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
+
+// The compiler's auxiliary host manifest routes PreToolUse through this shared runner.
+await esbuild.build({
+  entryPoints: [
+    fileURLToPath(import.meta.resolve('@ogham/cross-platform/agy-runner/main')),
+  ],
+  bundle: true,
+  platform: 'node',
+  target: 'node20',
+  format: 'esm',
+  outfile: resolve(root, 'bridge/run-agy.mjs'),
+  minify: true,
+});
 
 const FORBIDDEN_PATTERNS = [
   // Glob family
@@ -120,17 +156,22 @@ const FORBIDDEN_PATTERNS = [
 const violations = [];
 
 for (const { name, maxBytes, forbiddenContent = [] } of hookEntries) {
-  const file = resolve(root, `bridge/${name}.mjs`);
-  const { size } = await stat(file);
-  if (size > maxBytes)
-    violations.push(
-      `  ${name}.mjs: ${size} bytes > ${maxBytes} (${(size / KILO_BYTE).toFixed(1)} KB > ${(maxBytes / KILO_BYTE).toFixed(0)} KB)`,
+  for (const host of ['claude', 'codex']) {
+    const file = resolve(
+      root,
+      `bridge/${host === 'codex' ? 'codex/' : ''}${name}.mjs`,
     );
+    const { size } = await stat(file);
+    if (size > maxBytes)
+      violations.push(
+        `  ${name}.mjs: ${size} bytes > ${maxBytes} (${(size / KILO_BYTE).toFixed(1)} KB > ${(maxBytes / KILO_BYTE).toFixed(0)} KB)`,
+      );
 
-  const content = await readFile(file, 'utf8');
-  for (const pattern of [...FORBIDDEN_PATTERNS, ...forbiddenContent])
-    if (pattern.test(content))
-      violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
+    const content = await readFile(file, 'utf8');
+    for (const pattern of [...FORBIDDEN_PATTERNS, ...forbiddenContent])
+      if (pattern.test(content))
+        violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
+  }
 }
 
 if (violations.length > 0) {
@@ -138,12 +179,12 @@ if (violations.length > 0) {
   for (const violation of violations) console.error(violation);
   console.error(
     `\nHooks must stay thin (Node builtins + light cross-platform helpers).\n` +
-      `Per-hook cap: ${LIGHT_HOOK_BYTES} bytes. External runtimes belong in\n` +
+      `Per-hook caps are declared in hookEntries. External runtimes belong in\n` +
       `the MCP or skill paths, which pay their cost once per session.`,
   );
   process.exit(1);
 }
 
 console.log(
-  `  Hook bundle guards passed (each <= ${LIGHT_HOOK_BYTES} bytes, no forbidden modules)`,
+  '  Hook bundle guards passed (declared per-hook byte caps, no forbidden modules)',
 );

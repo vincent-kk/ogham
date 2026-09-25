@@ -6,6 +6,12 @@ export interface HookBaseInput {
   transcript_path?: string;
   /** Codex turn identifier when the host supplies one. */
   turn_id?: string;
+  /** Claude native user-turn identifier. */
+  prompt_id?: string;
+  /** Native invocation identity shared by pre and post events. */
+  tool_use_id?: string;
+  /** Native child identity; absence denotes the main actor. */
+  agent_id?: string;
   /** Active model identifier when the host supplies one. */
   model?: string;
   /** Active permission posture when the host supplies one. */
@@ -44,6 +50,13 @@ export interface PostToolUseInput extends HookBaseInput {
   tool_response?: unknown;
   /** Present only on a subagent's calls; measured on 2026-08-22. */
   agent_id?: string;
+}
+
+/** Observation before a selected tool executes; never a permission decision. */
+export interface PreToolUseInput extends HookBaseInput {
+  hook_event_name: 'PreToolUse';
+  tool_name: string;
+  tool_input?: { command?: unknown; [key: string]: unknown };
 }
 
 /**

@@ -1,100 +1,68 @@
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
 
+import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { INJECTION_PREFIX } from '../../../constants/plugin.js';
-import {
-  TURN_REMINDER_STANDARD,
-  TURN_REMINDER_STRICT,
-} from '../../../constants/turnReminders.js';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';
 import { processUserPromptSubmit } from '../userPromptSubmit.js';
 
-/**
- * The per-turn dispatch reminder. Its safety rests on staying silent at
- * advisory — the level the dispatch rates were measured against — so the
- * cases that matter are that advisory injects nothing and that each raised
- * dial carries its own line: standard reminding, strict widening. The hook
- * reads only the dial, so a temp repo with a written config is the whole
- * fixture.
- */
-describe('per-turn dispatch reminder', () => {
-  const tempDirs: string[] = [];
+/** Isolated projects owned by this suite. */
+const roots: string[] = [];
 
-  afterEach(() => {
-    for (const dir of tempDirs.splice(0))
-      rmSync(dir, { recursive: true, force: true });
-  });
+afterEach(() => {
+  for (const root of roots.splice(0))
+    rmSync(root, { recursive: true, force: true });
+});
 
-  function seedRepo(intervention: InterventionLevel): string {
-    const repoRoot = mkdtempSync(join(tmpdir(), 'seiri-turn-'));
-    tempDirs.push(repoRoot);
-    mkdirSync(join(repoRoot, '.git'));
-    writeConfig(repoRoot, 'project', { intervention });
-    return repoRoot;
-  }
+/** Create a project whose dial is independent of the user's settings. */
+function seedRepo(intervention: InterventionLevel): string {
+  const root = mkdtempSync(portableJoin(tmpdir(), 'seiri-turn-'));
+  roots.push(root);
+  mkdirSync(portableJoin(root, '.git'));
+  writeConfig(root, 'project', { intervention });
+  return root;
+}
 
-  function remind(cwd: string): string | undefined {
-    const output = processUserPromptSubmit({
-      cwd,
-      session_id: 'session-a',
-      hook_event_name: 'UserPromptSubmit',
-    });
-    expect(output.continue).toBe(true);
-    return output.hookSpecificOutput?.additionalContext;
-  }
+describe('silent user-turn boundary', () => {
+  it.each(['off', 'advisory', 'standard', 'strict'] as const)(
+    'does not elect skills at %s',
+    (intervention) => {
+      expect(
+        processUserPromptSubmit({
+          cwd: seedRepo(intervention),
+          session_id: 'session-a',
+          prompt_id: 'turn-a',
+          hook_event_name: 'UserPromptSubmit',
+        }),
+      ).toEqual({ continue: true });
+    },
+  );
 
-  it('injects nothing at advisory — the measured baseline stays intact', () => {
-    expect(remind(seedRepo('advisory'))).toBeUndefined();
-  });
-
-  it('reminds with the standard line from standard up', () => {
-    expect(remind(seedRepo('standard'))).toBe(
-      `${INJECTION_PREFIX} ${TURN_REMINDER_STANDARD}`,
-    );
-  });
-
-  it('widens to the strict line at strict', () => {
-    expect(remind(seedRepo('strict'))).toBe(
-      `${INJECTION_PREFIX} ${TURN_REMINDER_STRICT}`,
-    );
-  });
-
-  it('gives standard and strict distinct lines', () => {
-    expect(TURN_REMINDER_STANDARD).not.toBe(TURN_REMINDER_STRICT);
-  });
-
-  it('leads both lines with skill dispatch — the failure it closes', () => {
-    expect(TURN_REMINDER_STANDARD.toLowerCase()).toContain('skill');
-    expect(TURN_REMINDER_STRICT.toLowerCase()).toContain('skill');
-  });
-
-  it("reaches a done-claim said or heard, not only the model's own", () => {
-    for (const line of [TURN_REMINDER_STANDARD, TURN_REMINDER_STRICT]) {
-      expect(line).toContain('said or heard');
-      expect(line).toContain("user's");
-    }
-  });
-
-  it('routes a fresh plan through review — and a skip past it — at strict', () => {
-    expect(TURN_REMINDER_STRICT).toContain(
-      'a fresh plan → `/seiri:review-plan`',
-    );
-    expect(TURN_REMINDER_STRICT).toContain(
-      'or its stated skip → `/seiri:execute`',
-    );
-  });
+  it.each(['I am done', 'Review this plan', 'The test failed'])(
+    'does not choose a workflow from the prompt: %s',
+    (prompt) => {
+      expect(
+        processUserPromptSubmit({
+          cwd: seedRepo('strict'),
+          session_id: 'session-a',
+          prompt_id: 'turn-a',
+          hook_event_name: 'UserPromptSubmit',
+          prompt,
+        }),
+      ).toEqual({ continue: true });
+    },
+  );
 
   it('never blocks a turn when cwd is missing', () => {
-    const output = processUserPromptSubmit({
-      cwd: '',
-      session_id: 'session-a',
-      hook_event_name: 'UserPromptSubmit',
-    });
-    expect(output.continue).toBe(true);
-    expect(output.hookSpecificOutput).toBeUndefined();
+    expect(
+      processUserPromptSubmit({
+        cwd: '',
+        session_id: 'session-a',
+        prompt_id: 'turn-a',
+        hook_event_name: 'UserPromptSubmit',
+      }),
+    ).toEqual({ continue: true });
   });
 });

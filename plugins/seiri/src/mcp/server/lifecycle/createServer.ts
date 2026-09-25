@@ -6,12 +6,13 @@ import { ToolName } from '../../../constants/toolNames.js';
 import { VERSION } from '../../../version.js';
 import { handleGates } from '../../tools/gates/index.js';
 import { handleSettings } from '../../tools/settings/index.js';
+import { handleWorkflow } from '../../tools/workflow/index.js';
 import { wrapHandler } from '../serialization/wrapHandler.js';
 
 /**
  * Assemble the seiri MCP server.
  *
- * Two tools, all about state: which rules are deployed, where the dial
+ * Three tools, all about state: which rules are deployed, where the dial
  * sits, and whether task gates are met. There is deliberately no tool for
  * reading, searching or analysing code — the harness already provides those,
  * and every schema registered here is context spent whether called or not.
@@ -48,7 +49,7 @@ export function createServer(): McpServer {
           .enum(['off', 'advisory', 'standard', 'strict'])
           .nullish()
           .describe(
-            'Dial position for config_op "set". off keeps skills available while hooks emit and record nothing; advisory reports session status without workflow chaining; standard announces the workflow chain; strict also widens borderline moments and puts a verification run behind completion claims.',
+            'Dial position for config_op "set". off and advisory disable automatic assistance; existing participation is invalidated at turn boundaries. standard and strict offer observations only after explicit workflow participation. No position elects skills.',
           ),
         selections: z
           .record(z.string(), z.boolean())
@@ -103,5 +104,28 @@ export function createServer(): McpServer {
     wrapHandler(handleGates),
   );
 
+  server.registerTool(
+    ToolName.WORKFLOW,
+    {
+      description:
+        'Optional workflow participation after a skill has been selected. Sequence lifecycle calls. accepted validates the request; only the matching PostToolUse acknowledgment confirms participation. No ledger is required. Missing acknowledgment or disabled assistance never blocks work. finish ends participation, not proof of success.',
+      inputSchema: {
+        action: z.enum(['start', 'resume', 'pause', 'finish']),
+        project_root: z
+          .string()
+          .describe(
+            'Required absolute workspace root; never infer it from the MCP server working directory.',
+          ),
+        task: z
+          .string()
+          .describe('Kebab-case task name, with or without a gate ledger.'),
+        intent: z
+          .enum(['change', 'review'])
+          .optional()
+          .describe('Required for start and resume.'),
+      },
+    },
+    wrapHandler(handleWorkflow),
+  );
   return server;
 }
