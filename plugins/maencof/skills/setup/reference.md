@@ -11,15 +11,16 @@ Comprehensive reference for the setup interview's target schema, dynamic discove
 ```
 Welcome to maencof. I am here to help you build a knowledge space that truly resonates with your way of thinking.
 
-To begin, we need to choose a secure folder where your thoughts and records will be stored.
-The default path is ~/.maencof/. Please let me know if you have a preferred location.
+We will initialize your knowledge space in the current execution directory: {vaultRoot}.
+This captured path remains the destination throughout setup.
 ```
 
-### T1-2: Path Confirmation
+### T1-2: Connection Verification
 
 ```
-Knowledge space path: {path}
-Shall we prepare your space at this location?
+Knowledge space path: {vaultRoot}
+Connected server vault path: {verified_vault_path}
+We will continue after these canonical paths match. Existing documents and settings are preserved.
 ```
 
 ### T1-3: Initialization Report

@@ -35,10 +35,17 @@ Rule of thumb: vault does not yet exist, or Core Identity needs reset → `setup
 
 ### Stage 1 — Welcome & Space Initialization (Path Setup)
 
-Collect the vault absolute path via `AskUserQuestion`. → Use templates T1-1, T1-2, T1-3 from reference.md.
+Capture the user's execution directory once as canonical absolute `vaultRoot`. Keep this value across all stages, `--step` resumes, and later directory changes. Announce it using T1-1 through T1-3; do not interview for a default path or use the MCP process CWD.
 
-- Default: `~/.maencof/`
-- If the path does not exist, confirm whether to create it.
+Before any scaffolding and **before any knowledge write**, compare canonical `kg_status.vaultPath` with `vaultRoot`. If they match, do not write connection settings. If the server is unavailable or points elsewhere:
+
+1. Preview `node <pluginRoot>/bridge/setup-vault.cjs --host <claude|codex> --vault-root <vaultRoot>` using safely quoted absolute arguments.
+2. Apply the authorized setup connection with the same arguments and `--apply`. The command uses the shared project MCP manager; it preserves unrelated servers, rejects foreign ownership/drift, and never writes user-scope settings. Do not manually overwrite a conflicting configuration.
+3. Reconnect/reload the host and call the actual `kg_status` connection that subsequent writes will use. Verify `kg_status.vaultPath` again. If plugin and project servers coexist, select the verified project connection consistently. Stop knowledge writes if the host cannot select/override it; report the specific reconnect requirement. Never fall back to user scope or the old vault.
+
+Use only `vaultRoot` for scaffolding, provisioning, trust-level, Core Identity, project directives and indexing. An existing `MAENCOF_VAULT_PATH` must not override this captured setup destination. Unsupported hosts require a supported project connection, not a guessed plugin directory.
+
+- Re-running is non-destructive: detect existing vault documents/configuration and provision only missing files. Preserve Core Identity; only an explicit reset request may change its authorized scope.
 - Also create the `.maencof/` cache directory and `.maencof-meta/` metadata directory.
 - **Provision default config files**: After creating directories, provision all missing config files with defaults (insight-config.json, vault-commit.json, lifecycle.json, data-sources.json, auto-insight-stats.json, usage-stats.json). Display the list of provisioned files to the user.
 
@@ -98,13 +105,13 @@ Create and initialize `01_Core/trust-level.json` at Level 0:
 }
 ```
 
-**Creation method**: Use the `Bash` tool to write `trust-level.json` directly to the **absolute vault root path collected in Stage 1** (NOT a CWD-relative path — Stage 5 may run from any subdirectory of the vault). Substitute the literal absolute path; do not rely on CWD. If `MAENCOF_VAULT_PATH` is set in the env, prefer it as a fallback:
+**Creation method**: Write this JSON configuration only when missing, or when an explicit `--reset` authorizes resetting autonomy. Use the fixed absolute `vaultRoot` from Stage 1, with safe shell quoting; never reevaluate CWD or substitute an environment override:
 
 ```bash
-echo '{"current_level":0,"interaction_count":0,"success_count":0,"last_escalation_date":null,"lock_status":false}' > "${MAENCOF_VAULT_PATH:-<vault-root>}/01_Core/trust-level.json"
+echo '{"current_level":0,"interaction_count":0,"success_count":0,"last_escalation_date":null,"lock_status":false}' > '<vaultRoot>/01_Core/trust-level.json'
 ```
 
-The `layer-guard` PreToolUse hook matches only `Write|Edit`, so `Bash` is not intercepted regardless of vault state. This applies to both initial setup and `--reset` mode.
+This direct configuration write is limited to this JSON file; do not bypass knowledge-document protections.
 
 > Note: This `Bash` pattern applies only to `trust-level.json` (a JSON config file that cannot use `mcp__plugin_maencof_tools__create`). Markdown L1 documents must always go through the `identity-guardian` agent.
 
@@ -148,10 +155,10 @@ setup skill starts
 
 ## Error Handling
 
-- **Vault path does not exist**: Ask the user to confirm creation before proceeding.
+- **Invocation directory unavailable**: Stop and report the missing captured directory; do not choose another root.
 - **`mcp__plugin_maencof_tools__create` failure**: Report error and skip to next document; resume at failed stage on retry.
 - **`identity-guardian` unavailable**: Proceed without L1 Frontmatter verification and note in completion summary.
-- **Already initialized**: Warn that re-running will overwrite existing Core Identity documents; require explicit `--reset` confirmation.
+- **Already initialized**: Preserve existing Core Identity and configuration, report what was reused, and resume only missing stages. Apply `--reset` only to its explicitly requested scope.
 
 ## Acceptance Criteria
 
