@@ -1,0 +1,33 @@
+---
+name: review-plan
+user-invocable: true
+description: 'Review a plan against its selected planning method, common invariants, and repository evidence before execution.'
+argument-hint: '[path to the plan]'
+version: '0.1.0'
+complexity: moderate
+plugin: seiri
+---
+
+# review-plan — respect the method; prove the claims
+
+Use when a plan has material uncertainty or needs independent review. Reuse a valid review of the same scope and repository state. Choose review depth autonomously; ask only when a consequential choice is unresolved. Do not ask again for independent review the user has already authorized.
+
+## Workflow
+
+For sustained review assistance, use [workflow lifecycle](../execute/references/workflow-lifecycle.md) with review intent; a standalone plan review needs no activation.
+
+**1. Choose the depth.** State it briefly when it affects execution. Ground uncertain current-state claims. Seek independent challenge for consequential boundary changes, migrations, or unresolved risk; a new file or another author alone does not require it. Record why existing evidence is sufficient when reusing a review.
+
+**2. Resolve the review contract.** Review the plan against its selected planning method and the common invariants. Confirm the method from the user's request, repository instructions, or the host's skill-selection rules — the plan's own label records the choice but does not grant it authority. Read the selected method before judging its structure. Apply the default method only when no other method was selected. Do not impose the default method's structure on a selected method.
+
+**3. Ground every current-state claim.** Confirm existing paths, symbols, signatures, consumers, and commands with tools — never from memory or the plan's prose. Check requirement coverage in both directions without demanding a particular table or heading. Proposed files are expected to be absent; only claims about what exists now can fail grounding. Read commands but do not rehearse them: a migration run during review is the damage it was meant to prevent. An unconfirmed claim is a finding, not a footnote. If this task has a ledger, review it too: every gate states a result rather than an activity, CHECK tests the actual result condition and emits its literal EXPECT marker only on success, and every reported number has a measuring gate. A command that only reports data needs an assertion before its success marker. A runnable gate without EXPECT is rework. A CHECK or EXPECT outside a Markdown code span is rework. A delegated challenge receives the ledger with the plan.
+
+**4. Obtain the needed review.** If independent review is authorized and useful, provide scope, original requirements, known risks, applicable rules, and any ledger to a separate reviewer. Continue independent work while it runs. Without independent review, call the verdict `grounded-only`; do not impersonate a second reviewer. Ask only when delegation needs authorization that is not already present.
+
+**5. Return findings to the selected method, once.** Record `cleared`, `grounded-only`, or `rework-required` with every finding and its evidence in the selected method's normal review location; when it has none, use the plan file. Fixes follow that method plus the common invariants. A wrong approach reopens `/seiri:write-plan`; changed claims receive one scoped recheck, never a second full review.
+
+## Rules
+
+- The verdict and every finding cite tool output or the reviewer's words — a review's claims are claims too.
+- Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
+- Hand off: a `cleared` or `grounded-only` plan — or a stated skip — is `/seiri:execute`'s moment; `rework-required` hands back to `/seiri:write-plan`.
