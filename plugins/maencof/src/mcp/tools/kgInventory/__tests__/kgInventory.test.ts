@@ -82,6 +82,7 @@ it('enforces directory boundaries, layer filters and scan exclusions', async () 
 });
 it.each([
   { limit: 0 },
+  { path_prefix: '/' },
   { limit: 201 },
   { path_prefix: '../escape' },
   { cursor: 'invalid' },

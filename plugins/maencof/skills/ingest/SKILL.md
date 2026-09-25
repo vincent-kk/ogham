@@ -57,6 +57,8 @@ Tags are auto-extracted as core keywords from the content.
 
 ### Step 4 — Call `mcp__plugin_maencof_tools__create`
 
+Before creating, search for an existing account of the same subject and read its complete body. Integrate repeated or updated source information through `update` when it belongs there, preserving each claim's source and location; skip creation in that case. For a distinct document, choose a topic directory from its title/gist/body and existing folder purpose, independently of tags. Use that prefix in filename within L2/L3/L4's two-level budget; L5 stays flat. Treat timestamps as chronology only, not as a collision workaround.
+
 ```
 mcp__plugin_maencof_tools__create({
   layer: 3, 4, or 5,

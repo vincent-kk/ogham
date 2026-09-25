@@ -1,3 +1,4 @@
+/** The CLI runtime supplies process.execPath so the MCP server uses the same Node installation. */
 import { access, realpath } from 'node:fs/promises';
 import { dirname, isAbsolute, resolve } from 'node:path';
 

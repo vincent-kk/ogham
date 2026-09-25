@@ -1,8 +1,7 @@
 /**
  * @file kg.ts
- * @description Registers 7 KG tools via the wrapper organ:
- * 5 fresh reads (kg_search/navigate/context/suggest_links/timeline)
- * + 2 plain reads (kg_status, kg_build).
+ * @description Registers graph queries and disk inventory through the read wrapper.
+ * Inventory stays independent of graph freshness and rebuilding.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';

@@ -9,12 +9,10 @@ import type {
   KgInventoryResult,
 } from '../../../types/mcpKg.js';
 
-import {
-  inventoryFilters,
-  inventoryLayer,
-  inventoryOffset,
-  inventorySnapshot,
-} from './helpers/snapshot.js';
+import { inventoryFilters } from './helpers/inventoryFilters.js';
+import { inventoryLayer } from './helpers/inventoryLayer.js';
+import { inventoryOffset } from './helpers/inventoryOffset.js';
+import { inventorySnapshot } from './helpers/inventorySnapshot.js';
 
 /** Read a page from disk independently of graph availability; detect snapshot drift before returning. */
 export async function handleKgInventory(

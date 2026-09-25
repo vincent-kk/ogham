@@ -89,7 +89,7 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 - Choose L2/L3/L4 topic folders from the main subject, title/gist and body, independently of tags. Reuse coherent existing folders; keep L1/L5 flat. Load the active skill's ../.shared/document-maintenance.md for the full procedure.
 - Place original source links and verified locations beside sourced claims; preserve qualifications and distinguish inference. Never fabricate source positions.
 
-- When learning new factual information during conversation, MUST create a vault document using \`create\` with appropriate layer and tags.
+- When learning new factual information during conversation, first check for an existing account of the same subject and integrate it using update. Use create with appropriate layer and tags only for a distinct document.
 - When discovering that existing vault information is outdated, MUST update the document using \`update\`.
 - For temporary task context (meeting notes, debugging sessions, research in progress), MUST create Layer 4 (Action) documents with appropriate \`expires\` dates.
 - When conversation reveals connections between existing documents, MUST use \`kg_suggest_links\` and update documents to add \`[[wikilinks]]\`.

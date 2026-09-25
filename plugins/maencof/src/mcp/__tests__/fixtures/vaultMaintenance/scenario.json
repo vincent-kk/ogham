@@ -1,0 +1,18 @@
+{
+  "documents": [
+    {"path":"02_Derived/pg-locks.md","title":"PostgreSQL locks","tags":["concurrency"],"body":"# PostgreSQL locks\n\n## Scope\nWith concurrent writers, row locks can block updates. [Original](https://www.postgresql.org/docs/current/explicit-locking.html#LOCKING-ROWS) — Row-Level Locks section.\n\n[Timeout](./pg-timeouts.md#Scope)\n"},
+    {"path":"02_Derived/pg-timeouts.md","title":"PostgreSQL timeouts","tags":["operations"],"body":"# PostgreSQL timeouts\n\n## Scope\nFor this project, the configured timeout is 30 seconds.\n"},
+    {"path":"02_Derived/gardening.md","title":"Garden watering","tags":["operations"],"body":"# Garden watering\n\nWatering schedules depend on soil moisture.\n"},
+    {"path":"02_Derived/mixed.md","title":"Project and kitchen","tags":["operations"],"body":"# Project and kitchen\n\n## Project\nThe local project uses PostgreSQL.\n\n## Kitchen\nThe recipe calls for two eggs.\n"},
+    {"path":"02_Derived/a/note.md","title":"Protected reference","tags":["operations"],"body":"# Protected reference\n\n## Scope\nThis target has an L1 inbound reference.\n"},
+    {"path":"02_Derived/z/note.md","title":"Other note","tags":["operations"],"body":"# Other note\n\n## Scope\nAn unrelated namesake.\n"},
+    {"path":"01_Core/identity.md","title":"Identity","tags":["identity"],"body":"# Identity\n\n[[02_Derived/a/note#Scope|Protected]]\n"},
+    {"path":"04_Action/review.md","title":"Review","tags":["review"],"body":"# Review\n\n[[pg-locks#Scope|Lock guide]]\n[[note#Scope|Ambiguous]]\n`[[pg-locks]]`\n"}
+  ],
+  "repeatedReferences": 205,
+  "reviewedMoves": {
+    "02_Derived/pg-locks.md": "02_Derived/databases/postgresql/pg-locks.md",
+    "02_Derived/pg-timeouts.md": "02_Derived/databases/postgresql/pg-timeouts.md"
+  },
+  "held": {"02_Derived/mixed.md":"split independent topics", "02_Derived/a/note.md":"L1 inbound and ambiguous basename", "02_Derived/z/note.md":"ambiguous basename"}
+}

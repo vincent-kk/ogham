@@ -21,4 +21,5 @@ it('counts code points and excludes only a complete opening frontmatter block', 
     'body_chars',
   );
   expect(measureDocumentBudget('---\nunfinished').body_chars).toBe(14);
+  expect(measureDocumentBudget('---\n---\nText').body_chars).toBe(4);
 });

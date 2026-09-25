@@ -28,8 +28,8 @@ const REMOVED_SKILLS = [
   'refine',
   'suggest',
 ];
-// Portfolio after adding craft-library as the public library scaffold skill.
-const EXPECTED_COUNT = 25;
+/** Public skills include topic classification alongside layer maintenance. */
+const EXPECTED_COUNT = 26;
 
 describe('maencof skill portfolio invariants', () => {
   it(`skills/ contains exactly ${EXPECTED_COUNT} skill directories`, () => {

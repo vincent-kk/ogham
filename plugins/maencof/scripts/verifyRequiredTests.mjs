@@ -1,44 +1,14 @@
 #!/usr/bin/env node
 /** Loaded by focused verification gates; each argument must identify a runnable test file. */
-import { spawn } from 'node:child_process';
-import { mkdtemp, readFile, realpath, rm, stat } from 'node:fs/promises';
+import { mkdtemp, realpath, rm, stat } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { runChild } from './helpers/verifyRequiredTests/runChild.mjs';
+import { verifyReport } from './helpers/verifyRequiredTests/verifyReport.mjs';
 
 /** Package root is independent of the caller's working directory. */
 const packageRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
-
-/** Spawn the package's designated test command with literal argv; return its exit status. */
-function runChild(command, args, options) {
-  return new Promise((fulfill, reject) => {
-    const child = spawn(command, args, {
-      ...options,
-      stdio: 'inherit',
-      shell: false,
-    });
-    child.once('error', reject);
-    child.once('exit', (code) => fulfill(code));
-  });
-}
-
-/** Reject missing, mismatched, empty or partially executed assertion reports. */
-async function verifyReport(reportPath, expected) {
-  const report = JSON.parse(await readFile(reportPath, 'utf8'));
-  const matches = report.testResults?.filter(
-    (result) => resolve(result.name) === expected,
-  );
-  if (matches?.length !== 1)
-    throw new Error(`Missing exact result: ${expected}`);
-  const assertions = matches[0].assertionResults;
-  if (
-    !Array.isArray(assertions) ||
-    assertions.length === 0 ||
-    assertions.some((assertion) => assertion.status !== 'passed')
-  ) {
-    throw new Error(`Required assertions did not all pass: ${expected}`);
-  }
-}
 
 /** Run each package-relative file independently; throws on any missing file or unsuccessful run. */
 export async function verifyRequiredTests(

@@ -13,7 +13,7 @@
   - 첫 세그먼트가 레이어 디렉토리(`01_Core`~`05_Context`) 또는 서고(`99_Archive`)면 대소문자 무관 거부한다 — 서고 거부 메시지는 `mv` + frontmatter 편집 안내를 담는다.
   - `..` 세그먼트는 traversal로 거부한다.
   - 깊이는 `MAX_FILENAME_SUBDIR_DEPTH`(constants/filename)를 초과할 수 없다.
-  - 대상 레이어가 `FLAT_LAYERS`(constants/architecture; L1·L5)에 속하면 지정 자체를 거부한다 — 평면 레이어는 중첩 디렉토리를 갖지 않는다.
+  - 대상 레이어가 `FLAT_LAYERS`(constants/architecture; L1·L5)에 속하면 비어 있지 않은 값을 거부한다 — 빈 문자열은 root이며 평면 레이어는 중첩 디렉토리를 갖지 않는다.
 - 같은 레이어로의 이동은 `target_sub_layer` 또는 `target_subdirectory`가 지정된 경우에만 허용한다(레이어 내 재배치).
 - 소스와 대상 경로 모두 `resolveWithinVault`(core/pathGuard)로 vault 내부 봉쇄를 검증한다.
 - 쓰기 직전 갱신된 frontmatter를 `validateFrontmatter`로 검증한다(read-path와 동일 스키마).
@@ -86,7 +86,7 @@
 
 ### AC-flat-target-rejected — 평면 대상 레이어 서브디렉토리 거부
 
-- `target_layer` 가 `FLAT_LAYERS`(1·5)에 속하면 `target_subdirectory` 지정 시 이동이 실패하고 소스가 보존된다.
+- `target_layer`가 `FLAT_LAYERS`(1·5)에 속하면 비어 있지 않은 `target_subdirectory`에서 이동이 실패하고 소스가 보존된다. 명시적 빈 문자열은 root를 가리킨다.
 
 ### AC-vault-containment — vault 봉쇄
 

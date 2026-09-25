@@ -85,11 +85,13 @@ mcp__plugin_maencof_tools__kg_search(
 )
 ```
 
-If a similar document is found, require the user to choose **Create new**, **Update existing**, or **Cancel** before proceeding.
+If a document covers the same subject, read it fully and integrate the new information using the shared maintenance procedure. An explicit update request already authorizes that scope. Ask **Create new**, **Update existing**, or **Cancel** only when the intended relationship is ambiguous; independent subjects remain separate documents.
 
 ### Step 5 — Document Creation
 
-Create the document with the `mcp__plugin_maencof_tools__create` MCP tool:
+For a new document, first choose its directory from the main subject and existing folder purposes using the shared maintenance reference. Tags do not determine the folder. Use the selected topic prefix in filename (L2/L3/L4, at most two levels); preserve flat L1/L5. If Step 4 selected an update, rewrite that document and skip creation.
+
+Create a distinct new document with the `mcp__plugin_maencof_tools__create` MCP tool:
 
 **L2 Frontmatter**:
 
@@ -183,6 +185,6 @@ To explore related documents, use the `explore` skill with `{tag}`.
 ## Error Handling
 
 - **Attempt to create L1**: "Layer 1 can only be created via `/maencof:setup`."
-- **Duplicate filename**: automatically append a timestamp suffix
+- **Duplicate filename**: read the existing document and compare subject/content before choosing update or a distinct meaningful path. Reuse an existing matching document on retry; do not automatically append a timestamp suffix.
 - **Tags not extracted**: ask user to enter them directly
 - **No index**: skip kg_search and proceed directly to creation

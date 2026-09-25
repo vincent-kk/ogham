@@ -3,7 +3,7 @@ export function measureDocumentBudget(markdown: string) {
   const normalized = markdown.replace(/\r\n/g, '\n');
   const total_lines =
     normalized === '' ? 0 : normalized.replace(/\n$/, '').split('\n').length;
-  const body = normalized.replace(/^---\n[\s\S]*?\n---(?:\n|$)/, '');
+  const body = normalized.replace(/^---\n(?:[\s\S]*?\n)?---(?:\n|$)/, '');
   const body_chars = Array.from(body).length;
   const reasons: string[] = [];
   if (total_lines > 100) reasons.push('total_lines');

@@ -284,13 +284,12 @@ export async function handleMaencofUpdate(
   // 기존 본문 추출 (Frontmatter 이후 부분)
   const existingBody = fmMatch ? existing.slice(fmMatch[0].length) : existing;
   // content가 생략되면 기존 본문 유지
-  const dedup =
-    input.content !== undefined
-      ? deduplicateContent(input.content, {
-          title: undefined,
-          generatedKeys: [...AUTO_GENERATED_FM_KEYS],
-        })
-      : { content: existingBody, warnings: [] };
+  const dedup = input.content
+    ? deduplicateContent(input.content, {
+        title: undefined,
+        generatedKeys: [...AUTO_GENERATED_FM_KEYS],
+      })
+    : { content: existingBody, warnings: [] };
   const bodyToWrite = dedup.content;
 
   if (fmMatch) {

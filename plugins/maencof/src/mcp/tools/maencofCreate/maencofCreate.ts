@@ -292,10 +292,11 @@ export async function handleMaencofCreate(
       // backlink 갱신 실패는 경고만
     }
 
+  const warnings = [...dedup.warnings, ...documentBudgetWarnings(fileContent)];
   return {
     success: true,
     path: relativePath,
     message: 'Document created',
-    warnings: [...dedup.warnings, ...documentBudgetWarnings(fileContent)],
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 }

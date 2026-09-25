@@ -198,6 +198,7 @@ Alongside vault knowledge, maencof keeps a small **personal context** — transi
 | `/maencof:recall`          | Core     | Spreading Activation search                                                                          |
 | `/maencof:explore`         | Core     | Interactive graph traversal (up to 3 rounds)                                                         |
 | `/maencof:organize`        | Core     | Agent-guided document reorganization                                                                 |
+| `/maencof:classify` | Core | Preview/apply topic directories with reference preservation |
 | `/maencof:reflect`         | Core     | Read-only knowledge health analysis                                                                  |
 | `/maencof:build`           | Index    | Build index (auto full/incremental; `--force` for rebuild, `--force --reset-cache` to discard cache) |
 | `/maencof:checkup`         | Health   | 7 diagnostics + auto-fix; `--quick` for lightweight status check (absorbs former `maencof-diagnose`) |
