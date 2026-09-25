@@ -14,6 +14,8 @@ A diff is ordered for application, not understanding. Build the smallest working
 
 ## Build the explanation
 
+Standalone change explanation does not activate a workflow or require a ledger, including when it uses trace or verification skills.
+
 1. **Resolve the comparison.** Establish the exact base and head, intended scope, and reader. Exclude generated noise and unrelated working-tree edits.
 2. **Explore the background.** Read the diff and tests, then follow enough entry points, callers, data, and contracts to explain where the change sits and why the old path made sense. Make deep beginner context skippable.
 3. **Teach the essence.** Carry a small concrete input through before and after. Explain the pressure, intervention, observable effect, and the boundaries that stay unchanged. Give independent themes their own examples.

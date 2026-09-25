@@ -1,7 +1,7 @@
 ---
 name: finish
 user-invocable: true
-description: 'Close out a development branch deliberately — verify in full, then choose: integrate, push for review, keep, or discard.'
+description: 'Close out the requested development branch: integrate, push for review, keep, or discard. Match verification to that choice and the task scope.'
 argument-hint: '[branch]'
 version: '0.1.0'
 complexity: simple
@@ -10,13 +10,15 @@ plugin: seiri
 
 # finish — verified first, then the user chooses
 
+<!-- ogham-mcp-tools:seiri -->
+
 You were invoked by the user, so ask what the decision needs. The integration choice is theirs; the verification is yours.
 
 ## Workflow
 
-**0. Read every ledger.** Call `mcp__plugin_seiri_tools__gates({ action: "status" })`: an unmet ledger means there is nothing to finish yet — report it and stop. Suggest clearing `.seiri/tasks/` for finished work; never delete it yourself.
+**0. Identify this work.** Read the relevant plan and, if it has a ledger, call `mcp__plugin_seiri_tools__gates({ action: "status", task })`. Do not let unrelated task ledgers govern this branch. Preserve task records.
 
-**1. Verify before offering anything.** Run this repository's designated verification in full. Failing: report what fails and stop — there is nothing to finish yet.
+**1. Establish the state.** Inspect changes and valid verification evidence. Integration requires the repository's designated checks. Missing or failing checks must be disclosed; they do not prevent the user from keeping the branch or requesting review of incomplete work.
 
 **2. Present the real options, with the branch's state.** Ahead/behind its base, uncommitted files, where it diverged. Then, in one question: integrate into the base branch · push for review · keep as-is · discard.
 
@@ -27,7 +29,7 @@ You were invoked by the user, so ask what the decision needs. The integration ch
 - Keep: report where everything stands and stop.
 - Discard: destructive and irreversible. Name a backup ref first, require the user to type the word "discard", and only then delete.
 
-**4. Clean up only what this work created.** A workspace the harness or the user owns stays untouched.
+**4. Close assistance and clean up only what this work created.** If this task used hooks, follow [workflow lifecycle](../execute/references/workflow-lifecycle.md): keep or pending review means pause; completed or cancelled work means finish. Do not start assistance just to close a branch. A workspace the harness or the user owns stays untouched.
 
 ## Rules
 

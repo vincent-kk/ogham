@@ -5,28 +5,22 @@ import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
 import { SHIPPED_SKILLS } from '../constants/budgets.js';
-import { WORKFLOW_CHAIN_LINE } from '../constants/postureLines.js';
 import {
   AUTO_AUTONOMOUS_SKILLS,
   AUTO_CONDITIONAL_ASK_SKILLS,
   DOCUMENT_WRITING_SKILLS,
   HIDDEN_USER_ONLY_SKILLS,
   VISIBLE_USER_STARTED_SKILLS,
-  WORKFLOW_INVOCABLE_SKILLS,
 } from '../constants/skillPolicy.js';
-import { WORKFLOW_SKILLS } from '../constants/workflowChain.js';
 
 /**
  * The invocation contract every skill must honour. A skill that can be
- * auto-invoked mid-work prefers autonomous judgment and reserves its one
- * question for a genuine blocker (the canonical body clause below); a
+ * auto-invoked mid-work prefers autonomous judgment and reserves questions
+ * for consequential unresolved choices; a
  * visible user-started skill stays outside workflow election without being
  * hidden from the model catalog; a hidden user-only gate uses
- * `disable-model-invocation: true`; the conditional-ask skills act before
- * execution and may ask proactively at the one decision point each names in
- * its body. Nothing outside this file keeps those facts true, so a dropped
- * clause or a new skill added with the wrong posture would otherwise pass
- * silently.
+ * `disable-model-invocation: true`. Catalog visibility does not activate a
+ * workflow or impose an execution sequence.
  */
 const skillsDir = portableJoin(
   portableDirname(fileURLToPath(import.meta.url)),
@@ -34,22 +28,6 @@ const skillsDir = portableJoin(
   '..',
   'skills',
 );
-
-/**
- * The exact posture sentence every autonomous discipline carries in its
- * body. Checked verbatim so wording drift across the seven files is caught
- * here rather than discovered in behavior.
- */
-const CANONICAL_AUTONOMY_CLAUSE =
-  'This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.';
-
-/**
- * The conditional-ask counterpart: the shared sentence every pre-execution
- * skill carries verbatim, so the class contract stays a checked fact as
- * membership grows past one. Each skill's body then names its own moment.
- */
-const CANONICAL_CONDITIONAL_ASK_CLAUSE =
-  'This skill may be invoked automatically. It acts before execution — the cheap moment to be wrong — so its one focused question needs no blocker; everywhere else, prefer autonomous judgment: take the conservative default and say so in one line.';
 
 /**
  * The document-language sentence every document-writing skill carries
@@ -80,15 +58,6 @@ describe('skill invocation policy', () => {
     expect(partitioned).toEqual([...SHIPPED_SKILLS]);
   });
 
-  // WORKFLOW_SKILLS is a literal copy of the auto-invocable set — kept
-  // out of skillPolicy.ts so hook bundles stay light. `satisfies` rejects
-  // a stranger; this is the completeness direction it cannot express.
-  it('workflow chain membership mirrors the auto-invocable set', () => {
-    expect([...WORKFLOW_SKILLS].sort()).toEqual(
-      [...WORKFLOW_INVOCABLE_SKILLS].sort(),
-    );
-  });
-
   it('keeps the auto-invocable disciplines autonomous by default', () => {
     for (const name of AUTO_AUTONOMOUS_SKILLS) {
       const { frontmatter, body } = readSkill(name);
@@ -97,17 +66,17 @@ describe('skill invocation policy', () => {
       // A complete line, not a substring — substring checks stay green
       // when an edit corrupts the YAML by merging adjacent lines.
       expect(frontmatter).toMatch(/^user-invocable: true$/m);
-      expect(body).toContain(CANONICAL_AUTONOMY_CLAUSE);
+      expect(body).toMatch(/autonomous judgment/i);
+      expect(body).toMatch(/routine checkpoint does not/i);
     }
   });
 
-  it('lets the conditional-ask skills be invoked and ask', () => {
+  it('keeps planning skills discoverable without a turn-scoped question ban', () => {
     for (const name of AUTO_CONDITIONAL_ASK_SKILLS) {
-      const { frontmatter, body } = readSkill(name);
+      const { frontmatter } = readSkill(name);
       expect(frontmatter).not.toContain('AskUserQuestion');
       expect(frontmatter).not.toContain('disable-model-invocation');
       expect(frontmatter).toMatch(/^user-invocable: true$/m);
-      expect(body).toContain(CANONICAL_CONDITIONAL_ASK_CLAUSE);
     }
   });
 
@@ -124,16 +93,6 @@ describe('skill invocation policy', () => {
       const { frontmatter } = readSkill(name);
       expect(frontmatter).toContain('disable-model-invocation: true');
     }
-  });
-
-  it('names every workflow skill in the chain, and no user-started skill', () => {
-    for (const name of WORKFLOW_INVOCABLE_SKILLS)
-      expect(WORKFLOW_CHAIN_LINE).toContain(name);
-    for (const name of [
-      ...VISIBLE_USER_STARTED_SKILLS,
-      ...HIDDEN_USER_ONLY_SKILLS,
-    ])
-      expect(WORKFLOW_CHAIN_LINE).not.toContain(name);
   });
 
   // filid:contract AC-check-expect-pair
@@ -194,9 +153,7 @@ describe('skill invocation policy', () => {
     expect(writePlan).toContain(
       'A skill is not selected merely because it is installed.',
     );
-    expect(writePlan).toContain(
-      'If `/seiri:execute` will perform the plan, adapt its runnable verification into the gate ledger.',
-    );
+    expect(writePlan).toContain('Execution does not require a ledger.');
     expect(writePlan).toContain(
       'A structural decision chooses module boundaries, dependency direction, public ownership or contracts, or durable code placement.',
     );

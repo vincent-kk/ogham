@@ -14,6 +14,8 @@ An explanation succeeds when the reader holds the needed concepts, sees how they
 
 ## Understand before writing
 
+Standalone explanation does not activate a workflow or require a ledger, including when it uses trace or verification skills.
+
 1. **Frame the question.** State what the reader must come to understand. Load `/seiri:trace-structure` and trace the needed entry points, callers, state, tests, and contracts.
 2. **Follow the connections.** Never explain from the pointed-at material alone: follow what it links to — callers and callees, configs, tests, docs, conventions — until behavior is understood rather than guessed. Comments and docs show intent, not runtime behavior.
 3. **Map the concepts.** List the terms the reader must hold, give each a concrete one-sentence definition, and name its relationships to the others — calls, owns, precedes, constrains. This map is the article's backbone; a concept unrelated to the question is cut.

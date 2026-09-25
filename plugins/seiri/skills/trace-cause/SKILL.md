@@ -1,7 +1,7 @@
 ---
 name: trace-cause
 user-invocable: true
-description: 'Trace a failure to where it started rather than where it surfaced. Use when a test fails, an error is thrown, or a fix did not hold.'
+description: 'Diagnose an unexplained failure or a fix that did not hold. Skip expected red tests, search no-match results, and straightforward tool-input corrections.'
 argument-hint: '[the failing test or symptom]'
 version: '0.1.0'
 complexity: moderate
@@ -13,6 +13,10 @@ plugin: seiri
 This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
+
+Standalone diagnosis does not activate a workflow. Return to the enclosing task; use [workflow lifecycle](../execute/references/workflow-lifecycle.md) only if an actual change chain needs assistance.
+
+First distinguish an unexplained defect from an expected red test, a search with no matches, or a straightforward tool-input correction. Correct the latter locally and continue the original task.
 
 **1. Reproduce first.** Use the reported symptom's reproduction command; use this repo's designated verification command when it reproduces that symptom. Capture the failure to a scratch file outside the repo, and quote it — re-running a suite to grep it differently pays twice. Without a reproduction there is nothing to verify a fix against; say so rather than guess.
 

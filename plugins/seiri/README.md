@@ -2,19 +2,23 @@
 
 > Welsh `saer`, "craftsman" — plural. Rules for the discipline of making.
 
-A Claude Code plugin that follows one principle: **code should be legible to the agents that read it.** It ships a small set of rules about code authoring, review discipline, and development method, and deploys the ones you choose into your repository.
+A plugin for Claude Code and Codex that follows one principle: **code should be legible to the agents that read it.** It ships a small set of rules about code authoring, review discipline, and development method, and deploys the ones you choose into your repository.
 
 Korean documentation: [README-ko_kr.md](./README-ko_kr.md)
 
 ## What it does
 
-Rules you select are written to `.claude/rules/seiri_*.md`. The harness loads them at the start of every session — seiri does not inject their text, because that would spend the same context twice.
+Rules you select are deployed to the host's project rule channel: Claude's rule files or Codex's managed AGENTS.md sections. The host loads them directly; seiri does not duplicate their text.
 
-Hooks are `off` by default. In this **Skills only** mode, every skill remains available for explicit use, while hooks add no context, write no session state, and leave no no-op response on stdout. Existing `advisory`, `standard`, and `strict` settings remain explicit opt-ins.
+Skills remain available through user invocation or the host's normal skill selection. Hooks never select the first skill. Explanations, standalone traces, review-only requests, and routine edits do not acquire a development plan or ledger merely because seiri is installed.
 
-`advisory` reports SessionStart rule status without workflow chaining. At `standard` and `strict`, seiri also supplies the **election contract** and re-raises a short reminder at the start of every turn, plus a one-line hand-off note when a workflow skill just ran. `standard` frames the procedure and names `/seiri:verify` for done-claims; `strict` names every moment's owning skill outright.
+Hooks default to **Skills only** (off). Off and advisory add no automatic context or new observations; trusted turn/session boundaries may invalidate existing participation. Standard and strict enable assistance only for a task explicitly started through the workflow tool. Unselected tasks receive no status banner, election reminder, or gate updates.
 
-Each plan task has runnable gates in `.seiri/tasks/<name>/gates.md`. Run each `CHECK` verbatim in Bash and the PostToolUse hook records the evidence; until the ledger is full, `/seiri:verify` sends a done-claim back to `/seiri:execute`. The task name, not the session, owns the ledger.
+A workflow request needs an explicit repository root and task name. An accepted MCP reply validates input; a paired hook acknowledgement confirms participation. New user turns silently suspend it. Resume only when the request continues that task, pause when leaving it open, and finish when its connection should end. A lifecycle finish is not proof that the work passed.
+
+Ledgers are optional. For an active task with a ledger, paired Bash calls matching CHECK record evidence against EXPECT. Other tasks stay untouched; unchanged evidence does not repeatedly inject a verdict. Reuse valid verification evidence and choose checks appropriate to behavior changes, refactors, or documents.
+
+Actor state expires after seven inactive days and invocation records after 24 hours. Missing host provenance or storage failures suppress assistance. A simultaneous failure to persist both revocation and its fallback marker cannot guarantee revocation survives storage recovery. Recorded native host identities and envelopes are covered; deliberately delayed native events crossing a new user turn remain an explicit acceptance limit.
 
 ## Install
 
@@ -55,19 +59,33 @@ Invoked by you:
 | `/seiri:explain`         | Explain how the code behaves through its concepts          |
 | `/seiri:trace-change`    | Explain a code change for a reader, layer by layer         |
 
-Dispatched automatically when the moment fits:
+Available for host selection when their scope fits; no fixed chain is enforced:
 
 | Skill                    | Use                                          |
 | ------------------------ | -------------------------------------------- |
-| `/seiri:write-plan`      | Break multi-step work into reviewable tasks  |
+| `/seiri:write-plan`      | Plan substantial changes that need durable coordination  |
 | `/seiri:review-plan`     | Prove a plan's claims before executing it    |
 | `/seiri:execute`         | Carry a written plan to done                 |
-| `/seiri:implement`       | Make a change test-first                     |
+| `/seiri:implement`       | Choose behavior, refactor, or artifact verification                     |
 | `/seiri:trace-structure` | Map connections and data flow before judging |
 | `/seiri:trace-cause`     | Trace a failure to where it started          |
 | `/seiri:verify`          | Check a completion claim before it is made   |
 | `/seiri:request-review`  | Hand work to review with a fixed scope       |
 | `/seiri:receive-review`  | Fold review feedback back into the code      |
+
+## Local development distribution
+
+Build the shared providers and seiri before preparing a local plugin directory:
+
+```sh
+node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri
+node scripts/prepareSeiriDistribution.mjs --output /absolute/new/seiri-directory
+node scripts/checkSeiriAdapters.mjs
+```
+
+Run these from the repository root. Preparation copies declared canonical inputs and current runtime, then regenerates host adapters with plugin-compiler; stale tracked adapters are not distribution inputs. Generated bundles and adapters remain outside source commits.
+
+Local distribution acceptance does not publish a release. A distribution channel and its installation acceptance must be chosen before version changes, public release, or pushing/merging this source-only change to a ref consumed by the remote marketplace.
 
 ## License
 

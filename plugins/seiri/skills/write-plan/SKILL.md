@@ -1,7 +1,7 @@
 ---
 name: write-plan
 user-invocable: true
-description: 'Write an implementation plan before multi-step work. Follow a user-, repository-, or host-selected planning method when one applies; otherwise use the minimal default.'
+description: 'Plan substantial changes that need a durable implementation path. Follow the selected planning method; skip short investigations, explanations, and routine edits.'
 argument-hint: '[the spec or goal to plan]'
 version: '0.1.0'
 complexity: moderate
@@ -10,7 +10,7 @@ plugin: seiri
 
 # write-plan — choose the method; keep the plan session-independent
 
-This skill may be invoked automatically. It acts before execution — the cheap moment to be wrong — so its one focused question needs no blocker; everywhere else, prefer autonomous judgment: take the conservative default and say so in one line. Ask only for a material method conflict or a high-blast-radius choice the method leaves unresolved.
+Plan substantial changes; choose reversible details autonomously. Ask only about consequential unresolved choices. Explanations and short investigations need no plan. Use [workflow lifecycle](../execute/references/workflow-lifecycle.md) only for useful sustained change assistance.
 
 ## Choose the planning method
 
@@ -32,7 +32,7 @@ Regardless of method:
 - Connect every requirement to implementation work and observable verification; do not add work with no requirement.
 - Resolve the implementation direction needed for an executable plan within planning.
 - Leave no unresolved placeholder disguised as a step. A real unresolved decision names its owner and stops the affected work.
-- If `/seiri:execute` will perform the plan, adapt its runnable verification into the gate ledger. Write `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md`. Design each CHECK/EXPECT pair together: CHECK tests the actual result condition and emits a fixed literal EXPECT marker only on success. Every CHECK and EXPECT value stays in a Markdown code span. Keep the ledger's fixed machine format separate from the plan's chosen human format.
+- When durable verification tracking is useful, write `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md`. Execution does not require a ledger. Design each CHECK/EXPECT pair together: CHECK tests the actual result condition and emits a fixed literal EXPECT marker only on success. Every CHECK and EXPECT value stays in a Markdown code span. Keep the ledger's fixed machine format separate from the plan's chosen human format.
 - A structural decision chooses module boundaries, dependency direction, public ownership or contracts, or durable code placement. When one occurs while planning, write `adr.md` beside the plan. Otherwise do not create it.
 - Make the ADR readable without the plan: state the context, decision, reasons, rejected alternatives, and consequences. Keep implementation steps in the plan.
 
@@ -51,4 +51,4 @@ Use this only when no other planning method applies:
 
 - Let the selected method or repository choose the plan location. When neither does, name the task in kebab-case (`^[a-z0-9]+(?:-[a-z0-9]+)*$`) and save the default plan to `.seiri/tasks/<name>/plan.md`; the ledger's `Plan:` line points to the actual plan.
 - Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
-- Hand off: a landed plan is `/seiri:review-plan`'s moment — it checks the selected method, common invariants, and repository claims before `/seiri:execute` performs them. A single surgical change does not need a plan.
+- Review before execution when unresolved risk warrants it. Reuse a valid review of the same plan; changed claims need only a scoped recheck. A single surgical change does not need a plan.

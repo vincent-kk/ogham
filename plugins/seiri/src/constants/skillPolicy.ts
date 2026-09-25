@@ -33,13 +33,9 @@ export const AUTO_AUTONOMOUS_SKILLS = [
 ] as const;
 
 /**
- * Auto-invocable, and permitted to ask proactively at the one decision
- * point each names in its body — no blocker required. Both act before
- * execution, the cheap moment to be wrong, so one focused question is
- * worth the interrupt: write-plan's on conflicting planning methods or a
- * high-blast-radius choice its selected method leaves unresolved;
- * review-plan's on a challenge trigger — delegate the review to
- * unprejudiced eyes, or proceed on grounding alone.
+ * Discoverable planning skills that ask only when a material choice remains
+ * unresolved. Selection does not mandate a question, a ledger, or another
+ * review; existing authorization and valid evidence remain effective.
  */
 export const AUTO_CONDITIONAL_ASK_SKILLS = [
   'review-plan',

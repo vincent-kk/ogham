@@ -11,6 +11,8 @@ plugin: seiri
 
 # setup — choose this repository's rules
 
+<!-- ogham-mcp-tools:seiri -->
+
 Deploys the rules you select to the active host's project rule channel, which the harness loads every session. Nothing is written before you confirm.
 
 ## Workflow
@@ -32,4 +34,4 @@ Deploys the rules you select to the active host's project rule channel, which th
 - Never skip the plan step or omit its revision from sync. Rule files become standing instructions read every session; the user decides what lands before it lands.
 - A rule id left out of `selections` is opted out, which **removes** its deployed file. Say so when a selection would delete something.
 - Pass a rule id in `resync` only when the user asked for that rule's edits to be discarded. Report drift; do not resolve it for them.
-- Offering gate scaffolds follows the dial (`mcp__plugin_seiri_tools__settings({ action: "config" })`): silent at off and advisory, offered once at standard, urged at strict.
+- Setup does not activate a development workflow or create a task ledger. The selected dial permits assistance for explicitly participating tasks; it does not elect skills for unrelated work.

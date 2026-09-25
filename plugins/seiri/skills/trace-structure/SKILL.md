@@ -16,6 +16,8 @@ The first plausible reading of complex code is usually wrong somewhere that matt
 
 ## Workflow
 
+Standalone tracing does not activate a workflow. In an assisted task, retain its existing connection per [workflow lifecycle](../execute/references/workflow-lifecycle.md); loading this supporting skill needs no extra call.
+
 **1. Name the question.** State what the original problem needs from the codebase. Tracing without a question is sightseeing.
 
 **2. Find the true entry points.** Locate where the behaviour actually starts — registration, wiring, configuration — not the first grep hit.
@@ -33,4 +35,4 @@ The first plausible reading of complex code is usually wrong somewhere that matt
 - Stop tracing when no unresolved edge can change the answer.
 - Mark untraced paths as untraced, never as understood.
 - Do not modify files while tracing; the enclosing task decides changes.
-- Hand off: when the enclosing work is multi-step, the brief feeds `/seiri:write-plan`.
+- Return to the enclosing task. An explanation or review ends with its answer; create an implementation plan only when substantial changes are actually requested.

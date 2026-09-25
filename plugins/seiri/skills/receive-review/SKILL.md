@@ -14,11 +14,13 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 ## Workflow
 
+If these findings continue an assisted task after a new user turn, resume it per [workflow lifecycle](../execute/references/workflow-lifecycle.md). Reading feedback alone needs no activation.
+
 **1. Read every item before acting on any.** Items relate; partial understanding produces wrong fixes.
 
 **2. Check each claim against this codebase.** Does it hold here? Would the fix break something that works? Is there a reason the code is the way it is? Feedback describes a codebase the reviewer imagines — yours is the one that counts.
 
-**3. Sound items: fix in order.** Breaking issues, then simple, then complex — each verified individually.
+**3. Sound items: fix by dependency and risk.** Address breaking issues first. Batch related corrections and run the verification that covers them together; retain evidence for each finding without repeating identical checks.
 
 **4. Unsound items: push back with evidence.** A working check outranks an opinion. If you push back and turn out wrong, state the correction factually and fix it — no ceremony either way.
 
