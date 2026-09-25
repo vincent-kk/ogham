@@ -18,11 +18,11 @@ export async function runSetupVaultCommand() {
   if (
     (values.host !== 'claude' && values.host !== 'codex') ||
     !values['vault-root']
-  ) {
+  )
     throw new Error(
       'Usage: setup-vault --host <claude|codex> --vault-root <absolute-path> [--apply]',
     );
-  }
+
   const result = await runSetupVault({
     host: values.host,
     vaultRoot: values['vault-root'],
