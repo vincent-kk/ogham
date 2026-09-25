@@ -2,7 +2,7 @@
 name: organize
 user-invocable: false
 description: 'Consolidates accumulated insights into current accounts, maintains document content, or reviews layer transitions. Use for insight distillation, memory organization, and L5 buffer triage.'
-argument-hint: '[--insights [--path PREFIX] [--apply|--dry-run]] [--maintenance] [--layer 3|4|5]'
+argument-hint: '[--insights [--path PREFIX] [--apply|--dry-run]] [--maintenance] [--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]'
 version: '1.0.0'
 complexity: complex
 context_layers: [1, 2, 3, 4, 5]
