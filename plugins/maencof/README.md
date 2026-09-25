@@ -83,7 +83,8 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 /maencof:reflect
 ```
 
-- **`organize`** — The memory-organizer agent recommends document moves → you confirm → it executes.
+- **`organize`** — The memory-organizer agent recommends layer transitions → you confirm → it executes. `--maintenance` rewrites or splits long documents while preserving source locations.
+- **`classify`** — Preview topic folders independently of tags; apply the reviewed plan with `--apply`. `--path` narrows moves while references are checked across active knowledge layers. Protected or ambiguous repairs are held.
 - **`reflect`** — Analysis only, no changes. Uses the judge module to assess knowledge health.
 
 ### Health Check

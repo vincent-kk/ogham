@@ -50,6 +50,7 @@ export function buildDefaultDirective(
 | Action | Use | Do NOT Use |
 |---|---|---|
 | Search vault documents | kg_search, kg_navigate | Grep, Glob |
+| Enumerate active documents | kg_inventory (all pages) | search top results, Glob |
 | Read vault documents | read | Read |
 | Create vault documents | create | Write |
 | Update vault documents | update | Edit |
@@ -69,6 +70,7 @@ export function buildDefaultDirective(
 | /maencof:recall | Search past knowledge |
 | /maencof:explore | Explore knowledge graph |
 | /maencof:organize | Organize/review knowledge |
+| /maencof:classify | Preview/apply topic directories independently of tags |
 | /maencof:reflect | Reflect on knowledge |
 | /maencof:insight | Manage auto-insight capture |
 

@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- `move`는 vault 문서를 대상 레이어 디렉토리로 이동한다. WAL 순서(대상 쓰기 → 소스 삭제)로 원자성을 보장한다.
+- `move`는 대상 쓰기 후 소스를 삭제한다. 전체 배치 원자성이나 backlink 수리를 제공하지 않으며 분류 호출자가 참조 보존·부분 실패 복구를 수행한다.
 - 소스가 L1(Core)이면 이동을 거부한다.
 - frontmatter의 `layer`/`updated`를 갱신하고, `target_sub_layer`가 없으면 `sub_layer` 필드를 제거한다.
 - 소스가 L5 문서이고 대상이 L5 가 아니면 L5 전용 필드(`buffer_type` · `promotion_target` · `source_context`)를 자동 제거한다(승격 시 잔재 방지).
@@ -42,6 +42,11 @@
 이동 시 파일명은 `basename(path)`을 유지한다. 소스의 중첩 디렉토리는 보존되지 않으며, 대상 배치는 `target_sub_layer`/`target_subdirectory` 조합으로만 결정된다.
 
 ## Acceptance Criteria
+
+### AC-explicit-root — Root relocation and no-op
+
+- `target_subdirectory: ""` explicitly selects the layer/sub-layer root; omission keeps the existing same-layer rejection when no sub-layer is specified.
+- Same-path relocation succeeds without writing. L1 protection, containment, collisions and depth validation remain unchanged. L3 callers specify target_sub_layer explicitly.
 
 ### AC-wal-order — 원자성 쓰기 순서
 

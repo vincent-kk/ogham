@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { KgContextScope } from '../../../../constants/kgContext.js';
 import { McpToolName } from '../../../../constants/mcpToolNames.js';
 import { SubLayerSchema } from '../../../../types/frontmatter.js';
+import { handleKgInventory } from '../../../tools/index.js';
 import { handleKgContext } from '../../../tools/kgContext/index.js';
 import { handleKgNavigate } from '../../../tools/kgNavigate/index.js';
 import { handleKgSearch } from '../../../tools/kgSearch/index.js';
@@ -39,6 +40,26 @@ const timeWindowFields = {
 };
 
 export function registerKgTools(server: McpServer): void {
+  registerReadTool(
+    server,
+    McpToolName.KG_INVENTORY,
+    {
+      description:
+        'Enumerate active L1-L5 Markdown files from disk independently of graph freshness, tags and relevance. Page until next_cursor is absent. Includes malformed files with parse_error; inventory_changed requires restarting. Archive and non-layer files are excluded.',
+      inputSchema: z.object({
+        path_prefix: z.string().optional(),
+        layer_filter: z.array(z.number().int().min(1).max(5)).optional(),
+        cursor: z.string().optional(),
+        limit: z.number().int().min(1).max(200).optional(),
+      }),
+    },
+    async (vaultPath, args) =>
+      handleKgInventory(vaultPath, {
+        ...args,
+        layer_filter: args.layer_filter as (1 | 2 | 3 | 4 | 5)[] | undefined,
+      }),
+    { needsFreshness: false },
+  );
   // ─── kg_search (fresh read) ──────────────────────────────────────
   registerReadTool(
     server,

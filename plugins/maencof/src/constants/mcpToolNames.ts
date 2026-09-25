@@ -10,6 +10,7 @@ export const McpToolName = {
   KG_CONTEXT: 'kg_context',
   KG_STATUS: 'kg_status',
   KG_TIMELINE: 'kg_timeline',
+  KG_INVENTORY: 'kg_inventory',
   KG_BUILD: 'kg_build',
   KG_SUGGEST_LINKS: 'kg_suggest_links',
   CLAUDEMD_MERGE: 'claudemd_merge',

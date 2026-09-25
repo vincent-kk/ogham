@@ -130,7 +130,7 @@ function resolveTargetSubdirectory(
 
 /**
  * `move` 핸들러 — Layer 간 문서 전이
- * WAL 기반 원자적 이동: 쓰기 → 확인 → 삭제 순서
+ * Writes the destination then removes the source; callers own backlink repair and batch recovery.
  */
 export async function handleMaencofMove(
   vaultPath: string,
@@ -208,7 +208,7 @@ export async function handleMaencofMove(
     nodeResult.success &&
     nodeResult.node?.layer === targetLayerNum &&
     !input.target_sub_layer &&
-    !input.target_subdirectory
+    input.target_subdirectory === undefined
   )
     return {
       success: false,
@@ -246,6 +246,13 @@ export async function handleMaencofMove(
     return { success: false, path: input.path, message: resolvedDst.error };
   const newAbsPath = resolvedDst.absolutePath;
 
+  if (newAbsPath === srcAbsPath)
+    return {
+      success: true,
+      path: newRelativePath,
+      message: 'Already at target path; unchanged.',
+    };
+
   // 대상 파일 중복 확인
   try {
     await access(newAbsPath);
@@ -280,7 +287,7 @@ export async function handleMaencofMove(
       message: `Frontmatter validation failed: ${validation.errors.join('; ')}`,
     };
 
-  // WAL 기반 원자적 이동: 대상 쓰기 → 소스 삭제
+  // A failed source removal can leave both files; callers must reconcile partial moves.
   await mkdir(dirname(newAbsPath), { recursive: true });
   await writeFile(newAbsPath, updatedContent, 'utf-8');
   await unlink(srcAbsPath);
