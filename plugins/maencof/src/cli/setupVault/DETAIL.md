@@ -12,7 +12,7 @@ The executable is loaded by the `build:setup` esbuild entry. It accepts `--host`
 
 ## Acceptance Criteria
 
-### AC-project-connection
+### AC-project-connection — Project vault connection
 
 - Both hosts preview without writing, apply to project scope, preserve unrelated settings, and rerun without drift.
 - Foreign server names and edited owned entries produce conflicts without replacement.

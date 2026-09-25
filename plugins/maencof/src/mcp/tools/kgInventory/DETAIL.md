@@ -12,7 +12,7 @@ Items include path, mtime and available validated title/layer/sub_layer/gist/tag
 
 ## Acceptance Criteria
 
-### AC-enumeration
+### AC-enumeration — Disk inventory
 
 - More than 200 documents paginate exactly once without a graph; damaged documents remain countable.
 - Filter boundaries, limit bounds, changed files, changed filters and symlink exclusions are enforced.

@@ -12,7 +12,7 @@ Warn about oversized documents without discarding knowledge.
 
 ## Acceptance Criteria
 
-### AC-measurement
+### AC-measurement — Document measurement
 
 - Empty content, exact thresholds, CRLF, trailing newlines, frontmatter and supplementary Unicode characters follow the declared counting rules.
 - Measurement and warnings never modify content.
