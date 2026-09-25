@@ -1,11 +1,11 @@
-/** Loaded by build:setup; the bundle location determines the sibling MCP server. */
+/** Loaded by this fractal's index for build:setup; the bundle location determines the sibling MCP server. */
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { runSetupVault } from './index.js';
+import { runSetupVault } from '../src/cli/setupVault/index.js';
 
 /** Parse literal CLI arguments and translate connection outcomes to process status. */
-async function main() {
+export async function runSetupVaultCommand() {
   const { values } = parseArgs({
     options: {
       host: { type: 'string' },
@@ -32,10 +32,3 @@ async function main() {
   console.log(JSON.stringify(result));
   if (!result.ok) process.exitCode = 1;
 }
-
-main().catch(() => {
-  console.error(
-    'Project vault connection failed. Check the host, absolute vault root, installed server, and configuration ownership.',
-  );
-  process.exitCode = 1;
-});

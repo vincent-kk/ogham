@@ -9,7 +9,7 @@ import { build } from 'esbuild';
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const outfile = resolve(root, 'bridge/setup-vault.cjs');
 const result = await build({
-  entryPoints: [resolve(root, 'src/cli/setupVault/setupVault.entry.ts')],
+  entryPoints: [resolve(root, 'setupVault.entry/index.ts')],
   bundle: true,
   platform: 'node',
   target: 'node20',

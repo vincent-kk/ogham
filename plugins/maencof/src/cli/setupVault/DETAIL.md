@@ -8,7 +8,7 @@ Setup uses a canonical absolute vault root captured from the user's invocation d
 
 `runSetupVault({host, vaultRoot, bundlePath, apply?})` returns a redacted connection summary. Only Claude and Codex are supported. Preview is the default. Apply uses the shared manager's unchanged plan with `replaceDrift:false`. The bundle's sibling MCP entry must exist. Errors leave knowledge and unrelated connections untouched.
 
-The executable is loaded by the `build:setup` esbuild entry. It accepts `--host`, `--vault-root` and optional `--apply`; its location determines the distributed MCP server path, independent of CWD.
+The standalone command is owned by the sibling command fractal. It calls this module through its public entry point and locates the distributed MCP server beside the resulting bundle, independent of CWD.
 
 ## Acceptance Criteria
 
