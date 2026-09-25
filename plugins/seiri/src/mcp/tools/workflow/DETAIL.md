@@ -8,7 +8,7 @@
 
 ## API Contracts
 
-- handleWorkflow는 validated request의 action/task/intent와 status를 반환하며 invalid 입력은 오류다.
+- handleWorkflow는 WorkflowReply를 반환한다: disabled는 status와 effective dial(off/advisory)의 reason만, accepted는 status와 validated request의 action/task/intent를 담는다. invalid 입력은 오류다.
 
 ## Acceptance Criteria
 

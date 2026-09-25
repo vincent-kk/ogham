@@ -23,6 +23,7 @@ const CALL_TTL = 24 * 60 * 60 * 1000;
  * Run one optional actor transaction. Lock failure skips all effects.
  * @param identity Host-normalized actor identity.
  * @param create Whether a trusted boundary may create metadata.
+ * @param now Epoch ms read once at the calling hook's outermost handler.
  * @param mutate Callback under the actor lock; ledger effects take their lock inside it.
  * @param revokeOnFailure Persist a revocation marker if boundary invalidation fails.
  * @returns Callback result only after state is persisted, or undefined on failure.
@@ -30,6 +31,7 @@ const CALL_TTL = 24 * 60 * 60 * 1000;
 export function withWorkflowState<T>(
   identity: WorkflowIdentity,
   create: boolean,
+  now: number,
   mutate: (state: WorkflowState) => T,
   revokeOnFailure = false,
 ): T | undefined {
@@ -48,7 +50,7 @@ export function withWorkflowState<T>(
     held = acquireLockDir(lock);
     if (!held) throw new Error('Actor lock unavailable');
     let state = readState(path);
-    if (state && Date.now() - state.lastObservedAt > ACTOR_TTL) {
+    if (state && now - state.lastObservedAt > ACTOR_TTL) {
       unlinkSync(path);
       if (existsSync(revoked)) unlinkSync(revoked);
       state = undefined;
@@ -61,15 +63,15 @@ export function withWorkflowState<T>(
     state ??= {
       version: 1,
       generation: 0,
-      lastObservedAt: Date.now(),
+      lastObservedAt: now,
       invocations: {},
       seen: [],
     };
     for (const [key, invocation] of Object.entries(state.invocations))
-      if (!invocation || Date.now() - invocation.startedAt > CALL_TTL)
+      if (!invocation || now - invocation.startedAt > CALL_TTL)
         delete state.invocations[key];
     const result = mutate(state);
-    state.lastObservedAt = Date.now();
+    state.lastObservedAt = now;
     writeAtomically(path, JSON.stringify(state));
     return result;
   } catch {

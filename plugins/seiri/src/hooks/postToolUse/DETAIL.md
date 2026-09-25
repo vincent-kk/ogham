@@ -17,6 +17,7 @@
 
 - Inactive sessions receive no workflow banner or gate writes.
 - Bound workflows cannot cross turns, actors, tasks or invocation generations through late results.
+- A resume, pause or finish naming a task other than the bound one leaves state untouched and injects one mismatch line instead of the acknowledgment.
 
 ### AC-native-invocation-provenance — Recorded host envelopes
 

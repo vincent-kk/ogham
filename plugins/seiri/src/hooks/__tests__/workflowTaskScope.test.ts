@@ -1,6 +1,7 @@
 import {
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   symlinkSync,
@@ -11,6 +12,7 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
+import { INJECTION_PREFIX } from '../../constants/plugin.js';
 import { processToolOutcome } from '../postToolUse/postToolUse.js';
 import { processToolStart } from '../preToolUse/preToolUse.js';
 
@@ -52,6 +54,11 @@ function ledger(cwd: string, task: string) {
     portableJoin(cwd, '.seiri/tasks', task, 'gates.md'),
     'utf8',
   );
+}
+function sessionState(cwd: string) {
+  const dir = portableJoin(cwd, '.seiri/sessions');
+  const name = readdirSync(dir).find((entry) => entry.endsWith('.json'))!;
+  return JSON.parse(readFileSync(portableJoin(dir, name), 'utf8'));
 }
 afterEach(() =>
   roots
@@ -113,6 +120,44 @@ it('does not apply a late Bash result after replacing its task', () => {
   expect(processToolOutcome(input).hookSpecificOutput).toBeUndefined();
   expect(ledger(input.cwd, 'task-a')).toContain('[ ] G1');
   expect(ledger(input.cwd, 'task-b')).toContain('[ ] G1');
+});
+it('rejects resume for a different task with a mismatch result and leaves state untouched', () => {
+  const input = fixture();
+  const before = sessionState(input.cwd);
+  const req = {
+    action: 'resume',
+    project_root: input.cwd,
+    task: 'task-b',
+    intent: 'change',
+  };
+  const call = {
+    ...input,
+    tool_use_id: 'resume-mismatch',
+    tool_name: 'mcp__plugin_seiri_tools__workflow',
+    tool_input: req,
+  };
+  processToolStart({ ...call, hook_event_name: 'PreToolUse' });
+  const result = processToolOutcome({
+    ...call,
+    tool_response: [
+      {
+        type: 'text',
+        text: JSON.stringify({
+          status: 'accepted',
+          action: 'resume',
+          task: 'task-b',
+          intent: 'change',
+        }),
+      },
+    ],
+  });
+  expect(result.hookSpecificOutput?.additionalContext).toBe(
+    `${INJECTION_PREFIX} Workflow task-b: resume not applied; another task is bound — use start for new work.`,
+  );
+  const after = sessionState(input.cwd);
+  expect(after.binding).toEqual(before.binding);
+  expect(after.generation).toBe(before.generation);
+  expect(after.invocations).toEqual(before.invocations);
 });
 it('does not record evidence if the task ledger lock is held', () => {
   const input = fixture();

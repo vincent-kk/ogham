@@ -50,8 +50,11 @@ it('accepts a request without creating an actor state or ledger', () => {
     false,
   );
 });
-it.each(['off', 'advisory'])('reports disabled at %s', (level) => {
-  expect(handleWorkflow(fixture(level)).status).toBe('disabled');
+it.each(['off', 'advisory'] as const)('reports disabled at %s with its reason', (level) => {
+  expect(handleWorkflow(fixture(level))).toEqual({
+    status: 'disabled',
+    reason: level,
+  });
 });
 it('rejects relative paths, traversal task names, unknown actions and missing start intent', () => {
   const valid = fixture();

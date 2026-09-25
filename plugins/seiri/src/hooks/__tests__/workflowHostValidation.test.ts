@@ -6,7 +6,7 @@ import { afterEach, expect, it } from 'vitest';
 
 import { toCheckOutcome } from '../postToolUse/utils/toCheckOutcome.js';
 import { CODEX_WORKFLOW_ADAPTER } from '../shared/workflowAdapters/codex.js';
-import { workflowRequest } from '../shared/workflowHost.js';
+import { workflowRequest } from '../shared/workflowHost/workflowRequest.js';
 
 const roots: string[] = [];
 function fixture() {

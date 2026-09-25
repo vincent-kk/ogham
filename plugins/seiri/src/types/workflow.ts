@@ -1,5 +1,11 @@
 import type { HookBaseInput } from './hooks.js';
 
+/** Requested lifecycle transition, sequenced by the caller. */
+export type WorkflowAction = 'start' | 'resume' | 'pause' | 'finish';
+
+/** Declared purpose of a start or resume request. */
+export type WorkflowIntent = 'change' | 'review';
+
 /** Host-neutral identity, hashed at the hook boundary. */
 export interface WorkflowIdentity {
   /** Resolved repository working directory. */
@@ -23,6 +29,16 @@ export interface WorkflowRequest {
   /** Required for start and resume. */
   intent?: 'change' | 'review';
 }
+
+/** Result of one workflow tool call; only `accepted` carries the request back. */
+export type WorkflowReply =
+  | { status: 'disabled'; reason: 'off' | 'advisory' }
+  | {
+      status: 'accepted';
+      action: WorkflowAction;
+      task: string;
+      intent?: WorkflowIntent;
+    };
 
 /** Bounded observations belonging to one task and actor. */
 export interface WorkflowBinding {

@@ -8,13 +8,12 @@ import type {
   WorkflowIdentity,
   WorkflowRequest,
 } from '../../../types/workflow.js';
-import {
-  completeInvocation,
-  observeBoundary,
-  observeInvocation,
-  transitionWorkflow,
-} from '../workflow/transitions.js';
+import { completeInvocation } from '../workflow/completeInvocation.js';
+import { observeBoundary } from '../workflow/observeBoundary.js';
+import { observeInvocation } from '../workflow/observeInvocation.js';
+import { transitionWorkflow } from '../workflow/transitionWorkflow.js';
 
+const NOW = 1_700_000_000_000;
 const roots: string[] = [];
 function fixture() {
   const root = mkdtempSync(portableJoin(tmpdir(), 'seiri-invocation-'));
@@ -32,9 +31,11 @@ function fixture() {
     intent: 'change',
     project_root: root,
   };
-  observeBoundary(id, true);
-  observeInvocation(id, 'start', req);
-  completeInvocation(id, 'start', (state) => transitionWorkflow(state, req));
+  observeBoundary(id, true, NOW);
+  observeInvocation(id, 'start', NOW, req);
+  completeInvocation(id, 'start', NOW, (state) =>
+    transitionWorkflow(state, req),
+  );
   return id;
 }
 afterEach(() =>
@@ -45,22 +46,30 @@ afterEach(() =>
 
 it('consumes a Bash invocation only once, even if pre is replayed', () => {
   const id = { ...fixture(), call: 'bash' };
-  observeInvocation(id, 'command');
-  expect(completeInvocation(id, 'command', () => 'effect')).toBe('effect');
-  observeInvocation(id, 'command');
-  expect(completeInvocation(id, 'command', () => 'duplicate')).toBeUndefined();
+  observeInvocation(id, 'command', NOW);
+  expect(completeInvocation(id, 'command', NOW, () => 'effect')).toBe(
+    'effect',
+  );
+  observeInvocation(id, 'command', NOW);
+  expect(
+    completeInvocation(id, 'command', NOW, () => 'duplicate'),
+  ).toBeUndefined();
 });
 it('rejects stale post after a new turn', () => {
   const id = { ...fixture(), call: 'bash' };
-  observeInvocation(id, 'command');
-  observeBoundary({ ...id, turn: 'next' }, true);
-  expect(completeInvocation(id, 'command', () => 'stale')).toBeUndefined();
+  observeInvocation(id, 'command', NOW);
+  observeBoundary({ ...id, turn: 'next' }, true, NOW);
+  expect(
+    completeInvocation(id, 'command', NOW, () => 'stale'),
+  ).toBeUndefined();
 });
 it('rejects late pre as well as post after a new turn', () => {
   const id = { ...fixture(), call: 'bash' };
-  observeBoundary({ ...id, turn: 'next' }, true);
-  observeInvocation(id, 'command');
-  expect(completeInvocation(id, 'command', () => 'stale')).toBeUndefined();
+  observeBoundary({ ...id, turn: 'next' }, true, NOW);
+  observeInvocation(id, 'command', NOW);
+  expect(
+    completeInvocation(id, 'command', NOW, () => 'stale'),
+  ).toBeUndefined();
 });
 it('does not let a late lifecycle result replace the current task', () => {
   const id = fixture();
@@ -71,43 +80,43 @@ it('does not let a late lifecycle result replace the current task', () => {
     project_root: id.root,
   } as const;
   const second = { ...first, task: 'second' };
-  observeInvocation({ ...id, call: 'first' }, 'first', first);
-  observeInvocation({ ...id, call: 'second' }, 'second', second);
+  observeInvocation({ ...id, call: 'first' }, 'first', NOW, first);
+  observeInvocation({ ...id, call: 'second' }, 'second', NOW, second);
   expect(
-    completeInvocation({ ...id, call: 'second' }, 'second', (s) =>
+    completeInvocation({ ...id, call: 'second' }, 'second', NOW, (s) =>
       transitionWorkflow(s, second),
     ),
-  ).toBe(true);
+  ).toBe('applied');
   expect(
-    completeInvocation({ ...id, call: 'first' }, 'first', (s) =>
+    completeInvocation({ ...id, call: 'first' }, 'first', NOW, (s) =>
       transitionWorkflow(s, first),
     ),
   ).toBeUndefined();
-  observeInvocation({ ...id, call: 'first' }, 'first', first);
+  observeInvocation({ ...id, call: 'first' }, 'first', NOW, first);
   expect(
-    completeInvocation({ ...id, call: 'first' }, 'first', () => 'replay'),
+    completeInvocation({ ...id, call: 'first' }, 'first', NOW, () => 'replay'),
   ).toBeUndefined();
 });
 it('matches exact actor, turn, invocation and input without consuming a mismatch', () => {
   const id = { ...fixture(), call: 'bash' };
-  observeInvocation(id, 'command');
+  observeInvocation(id, 'command', NOW);
   expect(
-    completeInvocation({ ...id, actor: 'other' }, 'command', () => true),
+    completeInvocation({ ...id, actor: 'other' }, 'command', NOW, () => true),
   ).toBeUndefined();
   expect(
-    completeInvocation({ ...id, turn: 'other' }, 'command', () => true),
+    completeInvocation({ ...id, turn: 'other' }, 'command', NOW, () => true),
   ).toBeUndefined();
   expect(
-    completeInvocation({ ...id, call: 'other' }, 'command', () => true),
+    completeInvocation({ ...id, call: 'other' }, 'command', NOW, () => true),
   ).toBeUndefined();
-  expect(completeInvocation(id, 'other', () => true)).toBeUndefined();
-  expect(completeInvocation(id, 'command', () => true)).toBe(true);
+  expect(completeInvocation(id, 'other', NOW, () => true)).toBeUndefined();
+  expect(completeInvocation(id, 'command', NOW, () => true)).toBe(true);
 });
 it('does not reactivate a resumed child with no trusted new boundary', () => {
   const id = fixture();
-  observeBoundary(id, true, true);
-  observeInvocation({ ...id, call: 'bash' }, 'command');
+  observeBoundary(id, true, NOW, true);
+  observeInvocation({ ...id, call: 'bash' }, 'command', NOW);
   expect(
-    completeInvocation({ ...id, call: 'bash' }, 'command', () => true),
+    completeInvocation({ ...id, call: 'bash' }, 'command', NOW, () => true),
   ).toBeUndefined();
 });

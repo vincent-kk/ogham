@@ -20,7 +20,7 @@ import type {
   PostToolUseInput,
 } from '../../../types/hooks.js';
 import type { WorkflowBinding } from '../../../types/workflow.js';
-import { workflowHash } from '../../shared/workflowHost.js';
+import { workflowHash } from '../../shared/workflowHost/workflowHash.js';
 
 import { toCheckOutcome } from './toCheckOutcome.js';
 
