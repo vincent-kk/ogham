@@ -65,6 +65,8 @@ mcp__plugin_maencof_tools__kg_navigate(path: selected_node_path, include_inbound
 
 ### Step 4 — Context Assembly (kg_context)
 
+For insight results, load Recall and Relations in [insight-lifecycle.md](../.shared/insight-lifecycle.md). Use `mcp__plugin_maencof_tools__read` to follow relevant current accounts and verify conditions and exceptions before summarizing. Preserve requested layer filters and fall back to readable original evidence on broken or conflicting relations. This bounded lookup remains within the current query; it does not initiate an interactive exploration or modify the vault.
+
 Assemble context for the top activated nodes.
 
 ```
@@ -113,6 +115,7 @@ For more detail, use the `recall` skill with `{query} --detail`.
 | `mcp__plugin_maencof_tools__kg_search`   | Keyword-based seed node search                                   |
 | `mcp__plugin_maencof_tools__kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
 | `mcp__plugin_maencof_tools__kg_context`  | Assemble node context                                            |
+| `mcp__plugin_maencof_tools__read` | Read current accounts and verify source passages |
 
 ## Options
 

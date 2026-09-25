@@ -1,8 +1,8 @@
 ---
 name: reflect
 user-invocable: false
-description: 'Generates a read-only vault analysis report — layer transition candidates, duplicates, hub health, sub-layer distribution — with no filesystem changes. Use to preview what organize would do.'
-argument-hint: '[--layer 3|4|5] [--show-all]'
+description: 'Previews insight consolidation or reports layer transitions, duplicates and hub health without knowledge writes. Use to assess accumulated insights or preview organize changes.'
+argument-hint: '[--insights [--path PREFIX]] [--layer 3|4|5] [--show-all]'
 version: '1.0.0'
 complexity: medium
 context_layers: [1, 2, 3, 4, 5]
@@ -12,7 +12,13 @@ plugin: maencof
 
 # reflect — Knowledge Vault Analysis Report
 
-Runs only the **judge module** of memory-organizer to analyze transition candidates and duplicate documents. Generates a pure analysis report with no filesystem changes.
+Runs the **judge module** of memory-organizer for transition analysis, or the active agent for insight assessment. Generates a report without vault knowledge writes; insight previews may retain review snapshots in a host execution artifact outside the vault.
+
+## Insight Assessment
+
+For `reflect --insights [--path VAULT_RELATIVE_PREFIX]`, load Assess and Relations in [insight-lifecycle.md](../.shared/insight-lifecycle.md). The active agent runs the same complete inventory and claim assessment as organize's insight preview, with no knowledge writes. This replaces the default index-dependent workflow below. Preserve parse errors and unvalidated L5 material as held items. Report proposed source/target changes and reasons; hand an authorized application to `organize --insights --apply`.
+
+Reject `--apply`, `--maintenance`, or transition options (`--layer`, `--show-all`) combined with `--insights`; `--path` requires this mode. Use `mcp__plugin_maencof_tools__kg_inventory`, `mcp__plugin_maencof_tools__read`, and optional `mcp__plugin_maencof_tools__kg_search`. Missing search does not prevent disk assessment. Do not run the Apply section or clear pending notifications.
 
 ## When to Use This Skill
 
@@ -23,7 +29,7 @@ Runs only the **judge module** of memory-organizer to analyze transition candida
 
 ## When to Use vs Adjacent Skills
 
-- **`reflect`** — read-only judge. No filesystem changes, ever. Use for diagnostic reports and dry-run-style previews of organize candidates.
+- **`reflect`** — read-only vault assessment. Use for diagnostic reports and previews of organize candidates; host review snapshots remain outside the vault.
 - **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move` after user confirmation. Use when you are ready to apply the transitions `reflect` surfaced.
 
 Rule of thumb: inspect without side effects → `reflect`; apply transitions → `organize`.
@@ -94,13 +100,15 @@ Execute memory-organizer judge logic:
 - Recommended action: use the `organize` skill
 ```
 
-## MCP Tools (used by memory-organizer.judge)
+## MCP Tools
 
 | Tool                                     | Purpose                     |
 | ---------------------------------------- | --------------------------- |
 | `mcp__plugin_maencof_tools__kg_status`   | Query vault status          |
 | `mcp__plugin_maencof_tools__kg_navigate` | Traverse link relationships |
 | `mcp__plugin_maencof_tools__read`        | Read document Frontmatter   |
+| `mcp__plugin_maencof_tools__kg_inventory` | Enumerate all insight candidates in insight mode |
+| `mcp__plugin_maencof_tools__kg_search` | Locate related accounts in insight mode |
 
 ## Error Handling
 

@@ -75,6 +75,8 @@ Extract 3–5 relevant lowercase English tags, using hyphens for multiword tags.
 
 ### Step 4 — Pre-creation Duplicate Check
 
+For insights, load Capture and Relations in [insight-lifecycle.md](../.shared/insight-lifecycle.md). Read any relevant current synthesis before choosing a new document; explicit updates retain the authorization below. Control tags do not justify new concept documents.
+
 Search for similar documents with `mcp__plugin_maencof_tools__kg_search` to prevent duplicates:
 
 ```

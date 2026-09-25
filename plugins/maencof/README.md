@@ -84,6 +84,8 @@ Creates a new document with automatic layer recommendation, tag extraction, fron
 ```
 
 - **`organize`** — The memory-organizer agent recommends layer transitions → you confirm → it executes. `--maintenance` rewrites or splits long documents while preserving source locations.
+- **Insight consolidation** — `organize --insights` previews related claims and current accounts; `--path` narrows the sources and `--apply` applies the reviewed, authorized changes. Originals and their evidence remain available. Unvalidated L5 hypotheses stay held. `reflect --insights` performs the same assessment without knowledge writes.
+- **Insight reuse** — Automatic capture checks related accounts and skips unchanged claims. `recall` reads relevant syntheses with their conditions, exceptions and source links; capture settings and the bounded recent-record view remain in `insight`.
 - **`classify`** — Preview topic folders independently of tags; apply the reviewed plan with `--apply`. `--path` narrows moves while references are checked across active knowledge layers. Protected or ambiguous repairs are held.
 - **`reflect`** — Analysis only, no changes. Uses the judge module to assess knowledge health.
 
