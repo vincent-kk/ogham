@@ -2,7 +2,7 @@
 name: organize
 user-invocable: false
 description: 'Reorganizes the vault by promoting or retiring documents across layers via the memory-organizer agent, executing moves only after explicit confirmation. Use for memory organization, L5 buffer triage, or applying reflect results.'
-argument-hint: '[--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]'
+argument-hint: '[--maintenance] [--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]'
 version: '1.0.0'
 complexity: complex
 context_layers: [1, 2, 3, 4, 5]
@@ -13,6 +13,10 @@ plugin: maencof
 # organize — Knowledge Transition Orchestration
 
 Runs the memory-organizer agent to recommend and execute document transitions between Layers. The judge module evaluates candidates, then the execute module performs the actual move after user confirmation.
+
+## Maintenance Mode
+
+With `--maintenance`, load [document-maintenance.md](../.shared/document-maintenance.md) and review full documents for superseded claims, repetition and independent topics. Present a rewrite/split plan with source preservation and size measurements; apply the authorized scope without repeating approval. Use the active agent for child creation and verification. The memory-organizer may review or update within its existing access matrix; this mode grants no new L1/create/bulk permissions. Keep the complete original until every child is created and verified, then retain its path as a linked overview. Reruns reuse verified children. Default invocation retains the layer-transition workflow below. Same-layer directory classification belongs to `/maencof:classify`.
 
 ## When to Use This Skill
 

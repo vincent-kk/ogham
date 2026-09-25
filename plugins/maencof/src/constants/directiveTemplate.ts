@@ -82,6 +82,11 @@ Capture criteria and sensitivity are provided via the session meta-prompt at ses
 
 ## Auto-Document Lifecycle (MUST)
 
+- Read the whole existing document before updating. Replace superseded passages and merge repetitions into a coherent current account; do not append corrections that contradict earlier paragraphs. Preserve facts, conditions and source locations. Append only to intentional logs or transcripts.
+- Respond to document_size_exceeded (over 100 total lines or 6,000 body Unicode code points) by rewriting or semantic splitting via /maencof:organize --maintenance. Verify children before reducing the original to a linked overview; preserve cited anchors and avoid shared cluster_key for independent chunks. Never truncate facts to meet a limit.
+- Choose L2/L3/L4 topic folders from the main subject, title/gist and body, independently of tags. Reuse coherent existing folders; keep L1/L5 flat. Load the active skill's ../.shared/document-maintenance.md for the full procedure.
+- Place original source links and verified locations beside sourced claims; preserve qualifications and distinguish inference. Never fabricate source positions.
+
 - When learning new factual information during conversation, MUST create a vault document using \`create\` with appropriate layer and tags.
 - When discovering that existing vault information is outdated, MUST update the document using \`update\`.
 - For temporary task context (meeting notes, debugging sessions, research in progress), MUST create Layer 4 (Action) documents with appropriate \`expires\` dates.

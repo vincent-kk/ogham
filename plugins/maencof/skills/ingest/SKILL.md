@@ -16,6 +16,8 @@ Fetches content from external data sources (GitHub issues, Slack messages, web p
 
 ## When to Use This Skill
 
+Load [document-maintenance.md](../.shared/document-maintenance.md) before writing or summarizing vault knowledge. Read full existing documents, integrate corrections in place, preserve source links with verified locations, and choose topic directories independently of tags. Handle size warnings with rewriting or semantic splitting; search snippets alone do not establish a claim.
+
 - When you want to record a GitHub issue or PR in the knowledge vault
 - When you want to save external reference materials as Layer 3
 - When you want to quickly record temporary work notes as Layer 4

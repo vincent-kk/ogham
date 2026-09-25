@@ -53,6 +53,8 @@ User confirmation is required before crossing the seam boundary when:
 
 ## Workflow
 
+For `organize --maintenance`, load `../skills/.shared/document-maintenance.md`. Review full documents and replace superseded passages instead of appending corrections. Recommend semantic splits when budgets are exceeded; the active skill creates and verifies children before this agent shortens an authorized original. Preserve source locations and cited anchors. This mode retains the access matrix below, especially no L1 writes or new create authority.
+
 ### Phase 1 — judge: Evaluate Transition Candidates
 
 ```

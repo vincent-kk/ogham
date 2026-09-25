@@ -12,6 +12,7 @@ import {
 } from '../../../constants/architecture.js';
 import { MAX_FILENAME_SUBDIR_DEPTH } from '../../../constants/filename.js';
 import { deduplicateContent } from '../../../core/contentDedup/index.js';
+import { documentBudgetWarnings } from '../../../core/documentBudget/index.js';
 import { sanitizeSegment } from '../../../core/filenameSlug/index.js';
 import { resolveWithinVault } from '../../../core/pathGuard/index.js';
 import { quoteYamlValue } from '../../../core/yamlParser/index.js';
@@ -295,6 +296,6 @@ export async function handleMaencofCreate(
     success: true,
     path: relativePath,
     message: 'Document created',
-    ...(dedup.warnings.length > 0 && { warnings: dedup.warnings }),
+    warnings: [...dedup.warnings, ...documentBudgetWarnings(fileContent)],
   };
 }

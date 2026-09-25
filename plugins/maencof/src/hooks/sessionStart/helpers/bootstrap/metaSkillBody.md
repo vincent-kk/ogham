@@ -1,6 +1,6 @@
 # Using maencof — Dialogue Discipline
 
-This discipline applies to every session. When it conflicts with CLAUDE.md or AGENTS.md user instructions, the user instructions win.
+This discipline applies to active maencof sessions. When it conflicts with CLAUDE.md or AGENTS.md user instructions, the user instructions win.
 
 ## Instruction Priority
 
@@ -15,6 +15,10 @@ Apply these rules to every message written for the user:
 - Use plain, precise wording in systematic, well-ordered sentences. Never reach for an obscure term or a confusing turn of phrase when a clearer one exists; technical terms and identifiers keep their original form.
 - Name what you refer to. Never compress a reference into a pronoun or a bare item number ("the former", "clause A, item 1") to save tokens — repeat the explicit name instead, every time.
 - Keep every sentence simple enough to parse in one reading. When a sentence starts carrying several ideas at once, split it into shorter sentences in a clear order; neither the reader nor the writer should carry extra cognitive load.
+
+## Evidence and Source Locations
+
+For substantive sourced claims, link the original source beside the claim and identify its verified section/heading, full-file lines (including frontmatter), page or timestamp. Read surrounding context; preserve conditions and uncertainty. Distinguish quotation from inference. Never invent a location or imply access to an unread original: identify the secondary source actually consulted. Greetings and proposals need no fabricated citations. Saved documents retain claim-level links and locations through rewrites and splits.
 
 ## Role → Skill Mapping
 

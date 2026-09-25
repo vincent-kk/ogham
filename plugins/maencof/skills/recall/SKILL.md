@@ -16,6 +16,8 @@ Accepts a natural-language query, traverses the maencof knowledge graph using th
 
 ## When to Use This Skill
 
+Load [document-maintenance.md](../.shared/document-maintenance.md) before writing or summarizing vault knowledge. Read full existing documents, integrate corrections in place, preserve source links with verified locations, and choose topic directories independently of tags. Handle size warnings with rewriting or semantic splitting; search snippets alone do not establish a claim.
+
 - When searching for knowledge recorded in the past
 - When looking for documents related to a specific topic
 - When loading context from the knowledge space

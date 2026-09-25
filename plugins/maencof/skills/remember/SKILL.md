@@ -16,6 +16,8 @@ Extracts knowledge from the current conversation or user input and saves it as a
 
 ## When to Use This Skill
 
+Load [document-maintenance.md](../.shared/document-maintenance.md) before writing or summarizing vault knowledge. Read full existing documents, integrate corrections in place, preserve source links with verified locations, and choose topic directories independently of tags. Handle size warnings with rewriting or semantic splitting; search snippets alone do not establish a claim.
+
 - When you want to record a new concept, skill, or insight
 - When adding external references (documents, links, frameworks) to the knowledge tree
 - When saving current session work context or to-dos as Layer 4

@@ -34,6 +34,11 @@
 
 ## Acceptance Criteria
 
+### AC-document-budget — Readable document size
+
+- Measure the final complete Markdown using core/documentBudget. Above 100 physical lines or 6,000 body Unicode code points, return document_size_exceeded with measurements and rewrite/split guidance.
+- Preserve existing warnings and full content; never truncate or reject solely for size. Metadata-only updates and legacy reads also report excessive size.
+
 ### AC-l3-only-sub-layer-dir — 서브레이어 디렉토리 한정
 
 - `sub_layer` 가 경로에 반영되는 것은 `layer === 3` 일 때뿐이다. L5 문서는 `buffer_type` 을 가져도 레이어 디렉토리 루트에 생성된다.

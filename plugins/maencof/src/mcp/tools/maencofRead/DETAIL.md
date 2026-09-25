@@ -15,6 +15,11 @@
 
 ## Acceptance Criteria
 
+### AC-document-budget — Readable document size
+
+- Measure the final complete Markdown using core/documentBudget. Above 100 physical lines or 6,000 body Unicode code points, return document_size_exceeded with measurements and rewrite/split guidance.
+- Preserve existing warnings and full content; never truncate or reject solely for size. Metadata-only updates and legacy reads also report excessive size.
+
 ### AC-content-plus-node — 전문과 메타
 
 - 성공 응답은 파일 원문 전문 `content` 와 `FrontmatterSchema` 를 통과한 `node` 를 함께 담는다.

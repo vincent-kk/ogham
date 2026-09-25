@@ -17,6 +17,11 @@
 
 ## Acceptance Criteria
 
+### AC-source-locations — Session citation discipline
+
+- Active maencof sessions receive a concise original-source-and-location rule within the existing meta-skill budget. Dialogue off-switch and non-vault sessions omit it.
+- Version-triggered project directive updates carry document maintenance rules while preserving all text outside owned markers.
+
 ### AC-marker-scoped-write — 마커 범위 쓰기
 
 - 지침 파일에서 MAENCOF 마커 밖 내용이 변경되지 않는다.
