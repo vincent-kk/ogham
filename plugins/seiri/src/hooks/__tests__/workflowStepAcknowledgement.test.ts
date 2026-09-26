@@ -6,7 +6,6 @@ import { afterEach, expect, it } from 'vitest';
 
 import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.js';
 import { processToolOutcome } from '../postToolUse/postToolUse.js';
-import { controlVerbAck } from '../postToolUse/utils/controlVerbAck.js';
 import { processToolStart } from '../preToolUse/preToolUse.js';
 import { renderCreatedAck } from '../shared/progressLine/renderCreatedAck.js';
 import { renderSwitchedAck } from '../shared/progressLine/renderSwitchedAck.js';
@@ -93,14 +92,7 @@ it('a same-task non-entry step is silent, while resume and pause on the same tas
         intent: 'change',
       },
     ).hookSpecificOutput?.additionalContext,
-  ).toBe(
-    controlVerbAck({
-      action: 'resume',
-      project_root: base.cwd,
-      task: 'task-a',
-      intent: 'change',
-    }),
-  );
+  ).toBe('[seiri] Workflow task-a: resume acknowledged (change).');
   expect(
     call(
       base,
@@ -108,9 +100,7 @@ it('a same-task non-entry step is silent, while resume and pause on the same tas
       { action: 'pause', project_root: base.cwd, task: 'task-a' },
       { status: 'accepted', action: 'pause', task: 'task-a' },
     ).hookSpecificOutput?.additionalContext,
-  ).toBe(
-    controlVerbAck({ action: 'pause', project_root: base.cwd, task: 'task-a' }),
-  );
+  ).toBe('[seiri] Workflow task-a: pause acknowledged (participation only).');
 });
 it('an entry step for a different task switches, naming the old task; the created binding starts at that step', () => {
   const base = fixture();

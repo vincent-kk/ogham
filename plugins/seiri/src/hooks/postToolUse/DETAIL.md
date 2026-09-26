@@ -3,7 +3,7 @@
 ## Requirements
 
 - Only an exact paired invocation in the active actor/turn/generation can transition the runtime state machine or record the active task's Bash evidence. Skill loading has no effect.
-- `created` and `switched` transitions inject one progress-line-formatted acknowledgment naming the task, intent, and current step; `mismatch` injects one notice naming the bound task and how to close or switch it. `rejected` injects nothing. `updated` injects nothing only for a same-task `step`; an explicit `resume`, `pause`, or `finish` acknowledges on `updated`; a different bound task yields the mismatch notice instead, in the prior control-verb ACK text.
+- `created` and `switched` transitions inject one progress-line-formatted acknowledgment naming the task, intent, and current step; `mismatch` injects one notice naming the bound task and the ways out: finish it, or enter the requested task through an entry step. `rejected` injects nothing. `updated` injects nothing only for a same-task `step`; an explicit `resume`, `pause`, or `finish` acknowledges on `updated` in the prior control-verb ACK text; a request naming a different bound task yields the mismatch notice instead.
 - off/advisory suppress new observations and injection; trusted boundaries still suspend existing participation.
 
 ## API Contracts

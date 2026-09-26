@@ -26,8 +26,9 @@ export interface SessionStartRenderInput {
 
 /**
  * Compose SessionStart's standard/strict injection, in a fixed order: an
- * active-rule summary and drift warning when rule status is available,
- * the effective dial, the election line, the chain line, at strict only
+ * active-rule summary when rule status is available, the effective dial,
+ * a drift warning when any active rule drifted, the election line, the
+ * chain line, at strict only
  * the posture line, and last — only when `binding` is given — the
  * progress line naming its task, intent and chain position. A missing or
  * unreadable `ruleStatuses` omits only the rule-summary lines; election,

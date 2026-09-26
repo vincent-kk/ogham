@@ -37,7 +37,7 @@
 ### AC-hooks-bundle-isolation — 번들 격리
 
 - 훅 번들에 검증 런타임·MCP SDK·glob 엔진이 포함되지 않는다.
-- setup과 post-tool-use는 metafile의 모든 모듈에 호출 경로(전체 import 사슬)를 기록하고 경로 없는 모듈을 제거한 뒤 실측값 바로 위 KiB를 상한으로 둡니다. 나머지 훅은 16KiB를 유지합니다. 금지 의존 검사는 그대로 적용합니다.
+- setup과 post-tool-use는 `scripts/build-hooks.mjs`에 고정한 22KiB 상한을 두며, 번들이 그 값을 넘으면 실측한 뒤 상한과 그 사유 주석을 손으로 갱신합니다. 나머지 훅은 16KiB를 유지합니다. 금지 의존 검사는 그대로 적용합니다.
 - 진입점에서 배럴 import 가 0건이다.
 - user-prompt-submit·post-tool-use·subagent-start 번들에는 `/Election/` 리터럴이 없다(선출 문구는 `hooks/setup/render/` 전용). post-tool-use 번들에는 `/A plan was produced/` 리터럴이 없다.
 
