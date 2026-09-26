@@ -31,6 +31,7 @@
 - 바인딩 없는 일반 작업·Skill 읽기는 바인딩·원장·진행 줄을 만들지 않는다. dial 범위 안내(SessionStart 선출·체인, strict의 활성 바인딩이 없는 턴의 체인 한 줄)는 훅 렌더 소관이다.
 - main actor의 이전 native turn·자식의 이전 generation·다른 actor·교체 전 task의 호출 결과와 중복·역순·늦은 결과는 효과를 만들지 않는다. 부모의 native turn만 바뀐 자식 호출은 같은 generation 안에서 계속 유효하다. 비진입 `step`·`resume`·`pause`·`finish`가 다른 task를 가리키면 상태 변경 없이 짧은 불일치 결과만 돌려준다.
 - lock 획득 실패와 손상 파일은 자동 참여를 만들지 않는다.
+- 배포 훅의 프로세스 간 검증은 두 Pre 관측 뒤 Post를 정방향·역방향으로 처리하여 호출과 카운터 보존을 확인합니다. actor lock을 명시적으로 유지한 별도 경우에는 동시 Post가 상태를 바꾸지 않고 종료하며, 잠금 해제 후 같은 Post를 다시 전달하면 정상 처리됨을 확인합니다. CI는 임의 동시 실행이 항상 잠금 제한 시간 안에 성공한다고 가정하지 않습니다.
 - `resume`은 기존 바인딩(같은 task의 active 또는 paused)만 갱신하며 새 바인딩을 만들지 않는다.
 
 ### AC-workflow-observations — 작업 범위 증거

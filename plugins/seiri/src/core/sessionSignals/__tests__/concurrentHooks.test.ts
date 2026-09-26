@@ -4,9 +4,10 @@ import {
   mkdtempSync,
   readFileSync,
   readdirSync,
-  rmSync,
+  utimesSync,
   writeFileSync,
 } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
@@ -21,13 +22,12 @@ const packageRoot = portableJoin(
   '..',
   '..',
 );
-/** A bounded stress run exercises both Pre and Post read-modify-write races. */
-const ROUNDS = 12;
 /** Projects created by this bundle-level suite. */
 const roots: string[] = [];
 
-afterAll(() => {
-  for (const root of roots) rmSync(root, { recursive: true, force: true });
+afterAll(async () => {
+  for (const root of roots)
+    await rm(root, { recursive: true, force: true, maxRetries: 3 });
 });
 
 /** Create the project configuration consumed by the actual hook bundles. */
@@ -74,14 +74,19 @@ function state(root: string) {
   };
 }
 
-describe('concurrent paired hook processes', () => {
-  it('preserves both in-flight calls and both failure counters', async () => {
-    const cwd = makeProjectRoot();
-    for (let round = 0; round < ROUNDS; round++) {
+describe('paired hook process isolation', () => {
+  it.each([
+    { scenario: 'in order', reverse: false, contended: false },
+    { scenario: 'in reverse order', reverse: true, contended: false },
+    { scenario: 'after lock contention', reverse: false, contended: true },
+  ])(
+    'preserves both calls $scenario',
+    async ({ reverse, contended }) => {
+      const cwd = makeProjectRoot();
       const native = {
         cwd,
         session_id: 'concurrent-hooks-probe',
-        prompt_id: `turn-${round}`,
+        prompt_id: 'turn',
       };
       await hook('user-prompt-submit.mjs', {
         ...native,
@@ -95,7 +100,7 @@ describe('concurrent paired hook processes', () => {
       };
       const start = {
         ...native,
-        tool_use_id: `start-${round}`,
+        tool_use_id: 'start',
         tool_name: 'mcp__plugin_seiri_tools__runtime',
         tool_input: request,
       };
@@ -120,32 +125,60 @@ describe('concurrent paired hook processes', () => {
       });
       const calls = ['first', 'second'].map((name) => ({
         ...native,
-        tool_use_id: `${name}-${round}`,
+        tool_use_id: name,
         tool_name: 'Bash',
         tool_input: { command: `exit 1 # ${name}` },
       }));
 
-      await Promise.all(
-        calls.map((call) =>
-          hook('pre-tool-use.mjs', { ...call, hook_event_name: 'PreToolUse' }),
-        ),
-      );
+      for (const call of calls)
+        await hook('pre-tool-use.mjs', {
+          ...call,
+          hook_event_name: 'PreToolUse',
+        });
       expect(Object.keys(state(cwd).invocations)).toHaveLength(2);
-      await Promise.all(
-        calls.map((call) =>
-          hook('post-tool-use.mjs', {
-            ...call,
-            hook_event_name: 'PostToolUseFailure',
-            error: 'Exit code 1',
-            is_interrupt: false,
-          }),
-        ),
-      );
 
+      const posts = calls.map((call) => ({
+        ...call,
+        hook_event_name: 'PostToolUseFailure',
+        error: 'Exit code 1',
+        is_interrupt: false,
+      }));
+      if (contended) {
+        const dir = portableJoin(cwd, '.seiri', 'sessions');
+        const actor = readdirSync(dir).find((name) => name.endsWith('.json'))!;
+        const heldLock = portableJoin(dir, `${actor}.lock`);
+        const before = state(cwd);
+        mkdirSync(heldLock);
+        // Keep the fixture lock fresh for the entire test, even on a slow runner.
+        const freshUntil = new Date(Date.now() + 60_000);
+        utimesSync(heldLock, freshUntil, freshUntil);
+        try {
+          await Promise.all(
+            posts.map((post) => hook('post-tool-use.mjs', post)),
+          );
+          expect(state(cwd)).toEqual(before);
+          expect(existsSync(heldLock)).toBe(true);
+        } finally {
+          await rm(heldLock, { recursive: true, force: true, maxRetries: 3 });
+        }
+      }
+
+      if (reverse) posts.reverse();
+      for (const [index, post] of posts.entries()) {
+        await hook('post-tool-use.mjs', post);
+        const stored = state(cwd);
+        expect(Object.values(stored.binding.counts)).toEqual(
+          Array(index + 1).fill(1),
+        );
+        expect(Object.keys(stored.invocations)).toHaveLength(
+          posts.length - index - 1,
+        );
+      }
       const stored = state(cwd);
       expect(stored.binding.task).toBe('concurrent-checks');
       expect(Object.values(stored.binding.counts)).toEqual([1, 1]);
       expect(stored.invocations).toEqual({});
-    }
-  }, 60_000);
+    },
+    60_000,
+  );
 });
