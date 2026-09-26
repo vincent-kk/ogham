@@ -16,5 +16,5 @@ export const LEDGER_OWNER_ONE = '`/seiri:execute` owns it.';
 /** Workflow owner reminder for multiple open task ledgers. */
 export const LEDGER_OWNER_MANY = '`/seiri:execute` owns them.';
 
-/** Failure-chain ownership hint appended at the configured threshold. */
-export const CHAIN_HINT = `${FAILURE_CHAIN_THRESHOLD}rd consecutive; \`/seiri:trace-cause\` owns it`;
+/** Failure-chain observation appended at the configured threshold. */
+export const CHAIN_HINT = `${FAILURE_CHAIN_THRESHOLD}rd consecutive failure`;

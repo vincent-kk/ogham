@@ -1,6 +1,8 @@
 import { CODEX_MCP_CWD, HOST_MARKERS } from "../../constants/hosts.js";
 import type { McpServerSource, PluginFacts } from "../../types/index.js";
 import { buildPortableMcpServer } from "../utils/buildPortableMcpServer.js";
+import { resolveCodexMcpServerName } from "../utils/resolveCodexMcpServerName.js";
+import { validateMcpToolReferences } from "../utils/validateMcpToolReferences.js";
 
 /** Codex-only shape — agy's MCP schema has no `cwd`, so it stays off the shared source type. */
 export interface CodexMcpServer extends McpServerSource {
@@ -10,13 +12,13 @@ export interface CodexMcpServer extends McpServerSource {
 export function buildCodexMcpServers(
   facts: PluginFacts,
 ): Record<string, CodexMcpServer> | null {
+  validateMcpToolReferences(facts);
   if (!facts.mcpServers) return null;
 
   const sourceEntries = Object.entries(facts.mcpServers);
   const servers: Record<string, CodexMcpServer> = {};
   for (const [serverName, source] of sourceEntries) {
-    const codexName =
-      sourceEntries.length === 1 ? facts.name : `${facts.name}-${serverName}`;
+    const codexName = resolveCodexMcpServerName(facts, serverName);
     const portable = buildPortableMcpServer(source, HOST_MARKERS.codex);
     servers[codexName] = {
       command: portable.command,

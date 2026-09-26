@@ -37,6 +37,7 @@ on:
       - "**.mjs"
       - "**.cjs"
       - "**/plugin.json"
+      - "**/plugin-compiler.json"
       - "**/marketplace.json"
       - "**/mcp_config.json"
       - "**/.mcp.json"
@@ -45,6 +46,7 @@ on:
       - "**/agents/**"
       - "**/.codex-plugin/**"
       - ".agents/**"
+      - "plugins/seiri/**"
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
@@ -56,6 +58,7 @@ on:
       - "**.mjs"
       - "**.cjs"
       - "**/plugin.json"
+      - "**/plugin-compiler.json"
       - "**/marketplace.json"
       - "**/mcp_config.json"
       - "**/.mcp.json"
@@ -64,6 +67,7 @@ on:
       - "**/agents/**"
       - "**/.codex-plugin/**"
       - ".agents/**"
+      - "plugins/seiri/**"
 
 # A newer run on the same branch supersedes the older one; main is never cancelled.
 concurrency:
@@ -286,9 +290,10 @@ jobs:
           # A markdown-only workspace (prawf) matches no lintable file.
           yarn eslint --no-error-on-unmatched-pattern "${targets[@]}"
 
-  # Clean-regen gate: regenerate the host adapters from the Claude canonical
-  # files and fail if the result differs from what is committed. Catches a
-  # hand-edited adapter and a canonical change that was never re-synced. This
+  # Seiri's committed runtime and adapters must equal a fresh build, and its
+  # distribution must also be preparable from source alone in isolated
+  # staging; other plugins and root adapters keep the committed-byte drift
+  # gate. This
   # job deliberately does not depend on the plan: the generator reads every
   # plugin, and the root adapters it writes (`.agents/**`) are ignored by the
   # planner, so gating it on the plan would let a root adapter drift through.
@@ -310,7 +315,27 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Adapters in sync
+      - name: Build current seiri runtime and adapters
+        run: node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri
+
+      # Marketplaces install plugins/seiri from the branch as committed, so a
+      # stale bundle or adapter ships even when fresh-build checks pass.
+      - name: Committed seiri artifacts match the fresh build
+        run: |
+          changes="$(git status --porcelain --untracked-files=all -- plugins/seiri)"
+          if [ -n "$changes" ]; then
+            echo "$changes"
+            echo "::error::plugins/seiri differs from a fresh build; rebuild seiri and commit the generated files."
+            exit 1
+          fi
+
+      - name: Validate seiri distribution preparation
+        run: node --test scripts/__tests__/prepareSeiriDistribution.test.mjs scripts/__tests__/checkSeiriAdapters.test.mjs
+
+      - name: Check fresh seiri adapters in isolated staging
+        run: node scripts/checkSeiriAdapters.mjs
+
+      - name: Adapters in sync (including committed adapters for other plugins)
         run: yarn plugin:adapters:check
 
   # Single required status check: green when every job either passed or was

@@ -7,6 +7,8 @@ export interface PluginFacts {
   hasSkills: boolean;
   hasHooks: boolean;
   hooksFile: HooksFileSource | null;
+  /** Optional prebuilt Codex bridge directory from inert compiler-only JSON. */
+  codexHookRuntime?: string;
   mcpServers: Record<string, McpServerSource> | null;
   /** `agents/*.md` basename → file content. Empty when the plugin has no `agents/` dir. */
   agentFiles: Record<string, string>;

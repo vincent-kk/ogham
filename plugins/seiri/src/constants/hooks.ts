@@ -1,5 +1,15 @@
+import { PLUGIN_NAME } from './plugin.js';
+import { ToolName } from './toolNames.js';
+
+/** Native shell tool name shared by the two supported hook ABIs. */
+export const BASH_TOOL = 'Bash';
+
+/** The failure event name bashOutcome.ts compares against. */
+export const POST_TOOL_FAILURE_EVENT = 'PostToolUseFailure';
+
 /**
- * Claude Code hook events seiri subscribes to.
+ * Hook events seiri subscribes to, across both supported host ABIs (Claude
+ * Code and Codex).
  *
  * A Bash command that exits non-zero fires `PostToolUseFailure`, not
  * `PostToolUse` — measured against the shipped client, whose public
@@ -9,14 +19,15 @@
 export const HookEvent = {
   SESSION_START: 'SessionStart',
   USER_PROMPT_SUBMIT: 'UserPromptSubmit',
+  PRE_TOOL_USE: 'PreToolUse',
   POST_TOOL_USE: 'PostToolUse',
-  POST_TOOL_USE_FAILURE: 'PostToolUseFailure',
+  POST_TOOL_USE_FAILURE: POST_TOOL_FAILURE_EVENT,
   SUBAGENT_START: 'SubagentStart',
   INSTRUCTIONS_LOADED: 'InstructionsLoaded',
 } as const;
 
 /**
- * `bridge/<name>.mjs` basenames — every hook seiri builds.
+ * `bridge/claude/<name>.mjs` / `bridge/codex/<name>.mjs` basenames — every hook seiri builds.
  *
  * Two places carry these and neither can import this file: the
  * `hookEntries` list in `scripts/build-hooks.mjs` that builds them, and
@@ -27,23 +38,42 @@ export const HookEvent = {
 export const HookName = {
   SETUP: 'setup',
   USER_PROMPT_SUBMIT: 'user-prompt-submit',
+  PRE_TOOL_USE: 'pre-tool-use',
   POST_TOOL_USE: 'post-tool-use',
   SUBAGENT_START: 'subagent-start',
   INSTRUCTIONS_LOADED: 'instructions-loaded',
 } as const;
 
 /**
- * Host tool names the PostToolUse matchers select on.
+ * The server key seiri's `.mcp.json` declares — its only MCP server.
  *
- * `hooks.json` cannot import this file, so each name is stated twice: once as
- * a matcher there, once as the payload check here. `Skill` is a Claude-only
- * observed tool; the plugin compiler removes it from Codex's generated hook
- * manifest. The wiring test keeps both host surfaces in step.
+ * Claude addresses a plugin tool as `mcp__plugin_<plugin>_<server>__<tool>`;
+ * for a single-server plugin the plugin compiler's Codex adapter maps that
+ * to `mcp__<plugin>__<tool>`. Both workflow addresses below compose from
+ * {@link PLUGIN_NAME}, this key and {@link ToolName.WORKFLOW}.
+ */
+const MCP_SERVER_KEY = 'tools';
+
+/**
+ * Host tool names the PreToolUse/PostToolUse matchers select on.
+ *
+ * `hooks.json` cannot import this file, so each name is stated twice: once
+ * as a matcher there, once as the payload check here. This constant pins
+ * the names `src/__tests__/wiring.test.ts` checks against `hooks.json` to
+ * keep the two in step.
  */
 export const HostTool = {
-  BASH: 'Bash',
-  SKILL: 'Skill',
+  BASH: BASH_TOOL,
+  WORKFLOW: `mcp__plugin_${PLUGIN_NAME}_${MCP_SERVER_KEY}__${ToolName.WORKFLOW}`,
 } as const;
+
+/**
+ * Codex's server-prefixed form of {@link HostTool.WORKFLOW}, composed from
+ * the same parts. `src/__tests__/wiring.test.ts` checks it against the
+ * matcher the compiler emits in `.codex-plugin/hooks.json`.
+ */
+export const CODEX_WORKFLOW_TOOL =
+  `mcp__${PLUGIN_NAME}__${ToolName.WORKFLOW}` as const;
 
 /**
  * Hooks that are built but deliberately absent from `hooks/hooks.json`.

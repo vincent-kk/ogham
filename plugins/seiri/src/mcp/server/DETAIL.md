@@ -10,14 +10,14 @@
 
 ## API Contracts
 
-- `lifecycle/` — `createServer`(서버 생성 + 도구 2개 등록), `startServer`(stdio 연결).
+- `lifecycle/` — `createServer`(서버 생성 + 도구 3개 등록), `startServer`(stdio 연결).
 - `serialization/` — `toolResult`(compact JSON), `wrapHandler`(throw → 오류 결과).
 
 ## Acceptance Criteria
 
 ### AC-tool-count — 도구 개수 고정
 
-- 등록 도구가 정확히 2개이고 각각 `wrapHandler` 를 거친다.
+- 등록 도구가 정확히 3개이고 각각 `wrapHandler` 를 거친다. workflow의 project_root는 필수 절대경로이고 task는 kebab-case다. start/resume은 intent가 필요하다. off/advisory에서 disabled, 나머지에서 accepted를 반환한다. accepted는 hook ACK와 구별된다.
 
 ### AC-compact-serialization — 응답 크기
 
@@ -25,4 +25,4 @@
 
 ## Last Updated
 
-2026-09-05
+2026-09-26 — 명시적 조건부 참여와 비차단 호스트 계약을 반영했습니다.

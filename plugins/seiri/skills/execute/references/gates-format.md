@@ -1,5 +1,7 @@
 # Gate ledger format
 
+<!-- ogham-mcp-tools:seiri -->
+
 The ledger is the task's durable proof surface. Machines and people read the same Markdown.
 
 ```markdown
@@ -76,7 +78,7 @@ The tool never executes a command and never creates a ledger.
 
 ## Hook verdicts
 
-A command matching CHECK receives exactly one line, in one of these forms — the same on every host:
+A command matching CHECK in the explicitly active task can produce a verdict line in one of these forms, on either host. Automatic recording requires the [workflow lifecycle](workflow-lifecycle.md) acknowledgement; inactive tasks are untouched and unchanged verdict/evidence pairs are not repeatedly injected:
 
 1. `[seiri] payment-refactor G3 met — evidence recorded (4/7, next G5)` — EXPECT matched the observed output.
 2. `[seiri] payment-refactor G3 unmet — EXPECT "8/8 passed" not in output (exit 1)` — the output did not carry it.

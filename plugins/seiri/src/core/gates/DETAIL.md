@@ -61,6 +61,8 @@
 
 - 한 작업의 수동 기록과 포기는 다른 이름의 원장을 바꾸지 않는다.
 - 같은 `CHECK` 가 여러 원장에 있으면 각 원장을 독립적으로 갱신한다.
+- 자동 워크플로우 훅은 `recordCheckOutcome`의 선택적 task 인자로 active task 원장 하나만 조회한다. task 생략 시 기존 전체 작업 API 의미를 유지한다.
+- task를 지정한 자동 기록은 gate lock 획득 실패 시 쓰지 않는다. 기존 명시 API의 fail-open 호환성은 유지한다.
 
 ### AC-gates-no-state-outside-ledger — 원장 밖에 상태 없음
 

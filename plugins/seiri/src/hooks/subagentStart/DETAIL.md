@@ -2,36 +2,23 @@
 
 ## Requirements
 
-- 서브에이전트는 부모의 SessionStart 컨텍스트를 물려받지 않는다. 아무것도 하지 않으면 프로젝트가 무엇에 옵트인했는지 모른 채 일하므로, 축약 상태를 재주입한다.
-- 렌더는 `shared/renderStatusLines` 의 `compact` 모드이며 **최대 2줄**(활성 규칙 + 선출 계약)이다. 렌더 로직을 복제하지 않는다 — 부모 렌더가 바뀌면 축약본도 같은 함수에서 나온다.
-- **선출 줄은 규칙 배포와 분리된다.** 게이팅은 다이얼뿐이라 배포 0건이면 활성 규칙 줄만 빠지고 선출 줄은 남는다.
-- 드리프트·저장 파일 경고·우선순위 사슬은 넣지 않는다. 앞의 둘은 부모 몫이고 우선순위는 서브에이전트가 읽는 규칙 파일에 있다.
-- off 면 규칙 상태를 읽기 전에 skip하고, advisory 면 렌더 결과가 비어 있다.
-- 규칙 이름만 말한다. 매 스폰마다 본문을 복제하면 SessionStart 가 피하는 이중 비용을 서브에이전트 수만큼 곱한다.
-- 읽기 전용이다 — `.claude/rules/` 와 `.seiri/` 에 쓰지 않는다.
-- stdin 타임아웃(`shared/readStdin`)이 방어선이다. 일부 환경은 훅의 stdin 을 닫지 않으며, 스폰을 막는 훅은 있어서는 안 된다.
-- 동작에 쓰는 입력은 두 호스트 공통의 `cwd`·`session_id`·`hook_event_name`이며 Codex 추가 필드는 결과를 바꾸지 않는다.
+- Create only the child actor's first native-turn anchor, without inheriting the parent's task. Remain silent.
+- Hooks never block a tool or inject global election instructions. Missing host provenance or storage failure yields no assistance.
+- off/advisory suppress new observations and injection; trusted boundaries still invalidate existing participation.
 
 ## API Contracts
 
-- `processSubagentStart(input: SubagentStartInput): HookOutput` — off를 먼저 판정하고 축약 상태를 렌더해 주입한다. 어떤 실패에도 `{ continue: true }`; 무주입 wire stdout은 entry가 생략한다.
+- The processor accepts the native host payload and returns a nonblocking HookOutput. Empty additional context produces no stdout.
+- Shared normalization preserves Claude prompt_id, Codex turn_id, tool_use_id and independent child agent_id. No IDs come from model arguments.
 
 ## Acceptance Criteria
 
-### AC-compact-budget — 축약 분량
+### AC-child-boundary — Independent child actor
 
-- 주입이 2줄을 넘지 않는다.
-
-### AC-election-line-independence — 선출 줄 독립
-
-- 규칙 배포가 0건이어도 선출 줄이 남는다.
-- off 와 advisory 에서는 두 줄 모두 나오지 않고, off는 규칙 상태도 읽지 않는다.
-
-### AC-spawn-non-blocking — 스폰 비차단
-
-- stdin 이 닫히지 않는 환경에서도 타임아웃으로 빠져나와 스폰을 지연시키지 않는다.
-- Codex 추가 필드가 있어도 같은 상태에서 Claude 형태와 같은 `hookEventName`·`additionalContext`를 반환한다.
+- A child's first SubagentStart anchors only that child's actor; the parent's binding and task are never visible to the child.
+- A SubagentStart for a child whose generation is already above zero leaves it unanchored and suspends any existing binding.
+- A payload without `agent_id` or host provenance changes no state, and every call returns an empty nonblocking result.
 
 ## Last Updated
 
-2026-09-03 — `off` 조기 skip과 빈 wire stdout 계약을 추가했다.
+2026-09-26

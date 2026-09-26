@@ -6,7 +6,6 @@ import type {
   RecordedVerdict,
   TaskLedgerStatus,
 } from '../../../types/gates.js';
-import { renderLedgerReminder } from '../render/renderLedgerReminder.js';
 import { renderVerdictLine } from '../render/renderVerdictLine.js';
 
 /** Stable gate fields that verdict rendering does not inspect. */
@@ -196,61 +195,10 @@ describe('renderVerdictLine', () => {
             'G2',
           ),
         ],
-        { chainHint: '3rd consecutive; `/seiri:trace-cause` owns it' },
+        { chainHint: '3rd consecutive failure' },
       ),
     ).toBe(
-      'alpha-task G1 unmet — exit 1; beta-task G2 unjudgeable — a runnable gate needs an EXPECT that only success prints (3rd consecutive; `/seiri:trace-cause` owns it)',
+      'alpha-task G1 unmet — exit 1; beta-task G2 unjudgeable — a runnable gate needs an EXPECT that only success prints (3rd consecutive failure)',
     );
-  });
-});
-
-describe('renderLedgerReminder', () => {
-  it('renders one open ledger', () => {
-    const status = makeResult(
-      { kind: 'unmet', reason: 'pending', regressed: false },
-      'payment-refactor',
-      'G3',
-      { abandoned: 1 },
-    ).status;
-
-    expect(renderLedgerReminder([status])).toBe(
-      'Ledger payment-refactor: 4/7 met, 1 abandoned — next G5; `/seiri:execute` owns it.',
-    );
-  });
-
-  it('renders multiple open ledgers on one line', () => {
-    const first = makeResult(
-      { kind: 'unmet', reason: 'pending', regressed: false },
-      'payment-refactor',
-    ).status;
-    const second = makeResult(
-      { kind: 'unmet', reason: 'pending', regressed: false },
-      'login-fix',
-      'G2',
-      { total: 3, met: 2, unmet: 1, next: 'G3' },
-    ).status;
-    const complete = makeResult({ kind: 'met' }, 'finished-task', 'G1', {
-      total: 1,
-      met: 1,
-      unmet: 0,
-      all_met: true,
-      next: undefined,
-    }).status;
-
-    expect(renderLedgerReminder([first, complete, second])).toBe(
-      'Ledgers: payment-refactor 4/7, login-fix 2/3 — `/seiri:execute` owns them.',
-    );
-  });
-
-  it('returns nothing when every ledger is resolved', () => {
-    const complete = makeResult({ kind: 'met' }, 'finished-task', 'G1', {
-      total: 1,
-      met: 1,
-      unmet: 0,
-      all_met: true,
-      next: undefined,
-    }).status;
-
-    expect(renderLedgerReminder([complete])).toBeUndefined();
   });
 });

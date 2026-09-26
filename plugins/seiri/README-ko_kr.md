@@ -2,19 +2,23 @@
 
 > 웨일스어 `saer`("장인")의 복수형. 만드는 손의 규율을 다루는 규칙.
 
-**에이전트가 파악하기 좋은 코드 구조를 추종한다** — 이 하나를 제1원칙으로 삼는 Claude Code 플러그인입니다. 코드 작성·리뷰 규율·개발 방법론에 관한 소수의 규칙을 담고, 그중 고른 것만 저장소에 배포합니다.
+**에이전트가 파악하기 좋은 코드 구조를 추종한다** — 이 하나를 제1원칙으로 삼는 Claude Code와 Codex용 플러그인입니다. 코드 작성·리뷰 규율·개발 방법론에 관한 소수의 규칙을 담고, 그중 고른 것만 저장소에 배포합니다.
 
 English: [README.md](./README.md)
 
 ## 무엇을 하는가
 
-선택한 규칙은 `.claude/rules/seiri_*.md` 로 쓰이고, 하니스가 세션 시작마다 자동으로 읽어 들입니다. seiri 는 규칙 본문을 주입하지 않습니다 — 같은 컨텍스트를 두 번 쓰게 되기 때문입니다.
+선택한 규칙은 Claude의 프로젝트 규칙 파일 또는 Codex의 AGENTS.md 관리 영역에 배포됩니다. 하니스가 직접 읽으므로 seiri는 규칙 본문을 다시 주입하지 않습니다.
 
-훅은 기본적으로 `off`입니다. 이 **Skills only** 모드에서는 모든 스킬을 명시적으로 사용할 수 있지만, 훅은 컨텍스트를 더하지 않고 세션 상태를 기록하지 않으며 no-op 응답도 stdout에 남기지 않습니다. 기존 `advisory`·`standard`·`strict` 설정은 명시적으로 선택했을 때 그대로 동작합니다.
+최초 스킬 선택은 사용자나 호스트의 일반 스킬 선택에 맡깁니다. 설명, 단독 추적·검증, 읽기 전용 리뷰, 간단한 수정에 개발 계획이나 원장을 강요하지 않습니다.
 
-`advisory`는 워크플로우 체이닝 없이 SessionStart 규칙 상태만 보고합니다. `standard`와 `strict`에서는 **선출 계약**과 매 턴의 짧은 리마인더, 그리고 워크플로우 스킬 실행 뒤 한 줄 핸드오프 노트를 제공합니다. `standard`는 완료 선언의 소유자 `/seiri:verify`를 명시하고, `strict`는 모든 순간의 소유 스킬을 직접 명시합니다.
+기본 **Skills only**(off)와 advisory는 자동 컨텍스트나 신규 관측을 추가하지 않습니다. 기존 참여가 다음 요청으로 이어지지 않도록 신뢰되는 턴·세션 경계의 무효화는 허용합니다. standard/strict에서도 workflow 도구로 실제 참여한 작업만 보조하며 비참여 작업에는 상태 배너·선출·원장 갱신이 없습니다.
 
-계획의 각 태스크에는 `.seiri/tasks/<name>/gates.md`의 실행 가능한 게이트가 있습니다. 각 `CHECK`를 Bash로 그대로 실행하면 PostToolUse 훅이 증거를 기록하고, 원장이 다 차기 전의 완료 주장은 `/seiri:verify`가 `/seiri:execute`로 되돌립니다. 세션이 아니라 작업 이름이 원장을 소유합니다.
+workflow는 명시적 저장소 절대경로와 작업 이름을 받습니다. accepted 응답은 입력 검증이며, 짝이 맞는 훅 ACK가 참여를 확정합니다. 새 사용자 턴에는 자동 중단되므로 같은 작업을 계속할 때만 resume합니다. 남겨 둘 작업은 pause, 연결을 끝낼 작업은 finish하며 finish 자체는 완료 증명이 아닙니다.
+
+원장은 선택 사항입니다. 활성 작업에 원장이 있으면 대응하는 Bash 호출의 CHECK/EXPECT로 증거를 기록하고, 다른 작업 원장은 건드리지 않습니다. 동일 증거는 반복 주입하지 않습니다. 검증은 주장과 변경 유형에 맞추며 여전히 유효한 결과를 재사용합니다.
+
+actor 상태는 7일 무관측, 호출 기록은 24시간 뒤 만료됩니다. 호스트 귀속이 없거나 저장에 실패하면 보조를 생략합니다. 철회 상태와 대체 marker를 모두 저장하지 못한 장애 후에는 과거 참여가 복구될 수 있다는 한계가 있습니다. 두 호스트의 native ID·응답 형식은 기록했지만 이전 턴 이벤트를 새 턴 뒤로 강제 지연한 native interleave는 직접 관측하지 못했습니다.
 
 ## 설치
 
@@ -55,19 +59,27 @@ English: [README.md](./README.md)
 | `/seiri:explain`         | 개념과 관계 중심으로 코드 동작을 설명            |
 | `/seiri:trace-change`    | 코드 변경을 독자를 위한 계층으로 설명            |
 
-순간이 맞으면 자동으로 발동하는 것:
+적용 범위에 맞으면 호스트가 선택할 수 있는 것 — 고정 체인은 강제하지 않습니다:
 
 | 스킬                     | 용도                                  |
 | ------------------------ | ------------------------------------- |
-| `/seiri:write-plan`      | 다단계 작업을 리뷰 가능한 태스크로    |
+| `/seiri:write-plan`      | 지속적 계획이 필요한 큰 변경을 계획    |
 | `/seiri:review-plan`     | 실행 전에 계획의 주장을 검증          |
 | `/seiri:execute`         | 작성된 계획을 완료까지 수행           |
-| `/seiri:implement`       | 변경을 테스트 우선으로 구현           |
+| `/seiri:implement`       | 동작·리팩터링·문서별 검증으로 구현           |
 | `/seiri:trace-structure` | 판단 전에 연결관계와 데이터 흐름 추적 |
 | `/seiri:trace-cause`     | 실패를 드러난 곳이 아니라 시작점까지  |
 | `/seiri:verify`          | 완료를 선언하기 전에 주장 검증        |
 | `/seiri:request-review`  | 범위를 고정해 리뷰에 넘김             |
 | `/seiri:receive-review`  | 리뷰 피드백을 코드에 반영             |
+
+## 로컬 개발 배포본
+
+저장소 루트에서 shared provider와 seiri를 지정 빌드한 뒤 새 절대경로에 배포본을 준비합니다. 명령 전문은 [영문 문서](README.md#local-development-distribution)에 있습니다.
+
+`node scripts/prepareSeiriDistribution.mjs --output <새-절대경로>`는 package allowlist의 정본·새 runtime만 복사하고 plugin-compiler로 adapters를 생성합니다. 기존 tracked adapter는 입력으로 재사용하지 않으며 생성물은 소스 커밋과 별도의 빌드 커밋에 커밋됩니다. `node scripts/checkSeiriAdapters.mjs`는 임시 배포본의 생성 결정성과 참조를 검사합니다.
+
+로컬 수용은 공개 출시가 아닙니다. 배포 채널 결정과 그 채널의 설치 수용 전에는 버전 변경·공개 출시, 그리고 seiri 변경사항(소스와 커밋된 생성 bundle/adapter)을 marketplace가 읽는 Git ref로 push하거나 merge하는 것을 하지 않습니다.
 
 ## 라이선스
 

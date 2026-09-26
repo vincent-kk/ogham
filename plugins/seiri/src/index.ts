@@ -18,11 +18,6 @@ export {
   resolveRulesDir,
   resolveTemplatePath,
 } from './core/ruleDocs/index.js';
-export {
-  recordBashFailure,
-  recordBashSuccess,
-  resolveSignalsPath,
-} from './core/sessionSignals/index.js';
 export { handleGates } from './mcp/tools/gates/index.js';
 export { VERSION } from './version.js';
 export type {
@@ -46,6 +41,5 @@ export type {
   RuleDocsManifest,
   SeiriConfig,
   SeiriConfigScope,
-  SessionSignals,
   SyncRuleDocsOptions,
 } from './types/index.js';

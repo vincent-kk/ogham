@@ -2,14 +2,9 @@ import { ELECTION_RENDER } from '../../../../constants/electionLines.js';
 import type { InterventionLevel } from '../../../../types/config.js';
 
 /**
- * D7-E (Arm S): the election line for a dial position. `undefined` at
- * `off` and `advisory`, where callers render no workflow election.
- *
- * Separate from `renderPostureLines` because the two are gated
- * differently: posture lines ride along with the deployed-rule status,
- * this one is gated on the dial alone and renders on every surface that
- * echoes the dial — SessionStart, the SubagentStart compact path, and the
- * `settings` action `config` posture echo.
+ * The workflow-participation line for a dial position, consumed by the
+ * settings MCP tool's `config` posture echo. `undefined` at `off` and
+ * `advisory`, where the tool renders no participation line.
  */
 export function renderElectionLine(
   level: InterventionLevel,

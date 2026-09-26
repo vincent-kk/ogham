@@ -4,6 +4,7 @@
 
 export { processSessionStart } from './setup/index.js';
 export { processToolOutcome } from './postToolUse/index.js';
+export { processToolStart } from './preToolUse/index.js';
 export { processSubagentStart } from './subagentStart/index.js';
 export { processUserPromptSubmit } from './userPromptSubmit/index.js';
 export { processInstructionsLoaded } from './instructionsLoaded/index.js';

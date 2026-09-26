@@ -109,6 +109,28 @@ describe('hook entry silence', () => {
         source: 'project',
       },
     },
+    {
+      name: 'PreToolUse with explicit off',
+      configuration: 'off',
+      bundle: 'pre-tool-use.mjs',
+      payload: {
+        hook_event_name: 'PreToolUse',
+        tool_use_id: 'bash-a',
+        tool_name: 'Bash',
+        tool_input: { command: 'echo OK' },
+      },
+    },
+    {
+      name: 'PreToolUse with the built-in default',
+      configuration: 'default',
+      bundle: 'pre-tool-use.mjs',
+      payload: {
+        hook_event_name: 'PreToolUse',
+        tool_use_id: 'bash-a',
+        tool_name: 'Bash',
+        tool_input: { command: 'echo OK' },
+      },
+    },
   ] as const)('$name exits without a wire response', (testCase) => {
     const repoRoot = mkdtempSync(portableJoin(tmpdir(), 'seiri-hook-silence-'));
     createdRoots.push(repoRoot);
@@ -126,7 +148,7 @@ describe('hook entry silence', () => {
       process.execPath,
       [
         portableJoin(pluginRoot, 'libs', 'run.cjs'),
-        portableJoin(pluginRoot, 'bridge', testCase.bundle),
+        portableJoin(pluginRoot, 'bridge', 'claude', testCase.bundle),
       ],
       {
         cwd: repoRoot,
@@ -135,6 +157,7 @@ describe('hook entry silence', () => {
         input: JSON.stringify({
           cwd: repoRoot,
           session_id: 'session-a',
+          prompt_id: 'turn-a',
           ...testCase.payload,
         }),
         windowsHide: true,
@@ -144,47 +167,113 @@ describe('hook entry silence', () => {
     expect(result.status).toBe(0);
     expect(result.stdout).toBe('');
     expect(result.stderr).toBe('');
-    expect(
-      existsSync(portableJoin(repoRoot, '.seiri', 'session-signals.json')),
-    ).toBe(false);
+    expect(existsSync(portableJoin(repoRoot, '.seiri', 'sessions'))).toBe(
+      false,
+    );
     if (testCase.bundle === 'instructions-loaded.mjs')
       expect(existsSync(observationLogPath())).toBe(false);
   });
 
-  it('preserves meaningful context through the manifest runner', () => {
-    const repoRoot = mkdtempSync(portableJoin(tmpdir(), 'seiri-hook-context-'));
-    createdRoots.push(repoRoot);
-    mkdirSync(portableJoin(repoRoot, '.git'));
-    mkdirSync(portableJoin(repoRoot, '.seiri'));
-    writeFileSync(
-      portableJoin(repoRoot, '.seiri', 'config.json'),
-      `${JSON.stringify({ intervention: 'standard' })}\n`,
-      'utf8',
-    );
+  it.each([
+    {
+      name: 'Claude',
+      directory: ['claude'],
+      native: { prompt_id: 'turn-a' },
+      tool: 'mcp__plugin_seiri_tools__workflow',
+    },
+    {
+      name: 'Codex',
+      directory: ['codex'],
+      native: { turn_id: 'turn-a' },
+      tool: 'mcp__seiri__workflow',
+    },
+  ] as const)(
+    'preserves an explicit workflow acknowledgment through the $name manifest runner',
+    (host) => {
+      const repoRoot = mkdtempSync(
+        portableJoin(tmpdir(), 'seiri-hook-context-'),
+      );
+      createdRoots.push(repoRoot);
+      mkdirSync(portableJoin(repoRoot, '.git'));
+      mkdirSync(portableJoin(repoRoot, '.seiri'));
+      writeFileSync(
+        portableJoin(repoRoot, '.seiri', 'config.json'),
+        '{"intervention":"standard"}',
+      );
 
-    const result = spawnSync(
-      process.execPath,
-      [
-        portableJoin(pluginRoot, 'libs', 'run.cjs'),
-        portableJoin(pluginRoot, 'bridge', 'setup.mjs'),
-      ],
-      {
+      const native = {
         cwd: repoRoot,
-        encoding: 'utf8',
-        env: { ...process.env, CLAUDE_PLUGIN_ROOT: pluginRoot },
-        input: JSON.stringify({
-          cwd: repoRoot,
-          session_id: 'session-a',
-          hook_event_name: 'SessionStart',
-          source: 'startup',
-        }),
-        windowsHide: true,
-      },
-    );
-    const output = JSON.parse(result.stdout) as HookOutput;
-
-    expect(result.status).toBe(0);
-    expect(result.stderr).toBe('');
-    expect(output.hookSpecificOutput?.additionalContext).toContain('Election');
-  });
+        session_id: 'session-a',
+        ...host.native,
+      };
+      const run = (bundle: string, payload: Record<string, unknown>) =>
+        spawnSync(
+          process.execPath,
+          [
+            portableJoin(pluginRoot, 'libs', 'run.cjs'),
+            portableJoin(pluginRoot, 'bridge', ...host.directory, bundle),
+          ],
+          {
+            cwd: repoRoot,
+            encoding: 'utf8',
+            env: { ...process.env, CLAUDE_PLUGIN_ROOT: pluginRoot },
+            input: JSON.stringify({ ...native, ...payload }),
+            windowsHide: true,
+          },
+        );
+      const boundary = run('user-prompt-submit.mjs', {
+        hook_event_name: 'UserPromptSubmit',
+      });
+      expect({
+        status: boundary.status,
+        stdout: boundary.stdout,
+        stderr: boundary.stderr,
+      }).toEqual({ status: 0, stdout: '', stderr: '' });
+      const request = {
+        action: 'start',
+        project_root: repoRoot,
+        task: 'runner-proof',
+        intent: 'change',
+      };
+      const invocation = {
+        tool_use_id: 'workflow-start',
+        tool_name: host.tool,
+        tool_input: request,
+      };
+      const pre = run('pre-tool-use.mjs', {
+        ...invocation,
+        hook_event_name: 'PreToolUse',
+      });
+      expect({
+        status: pre.status,
+        stdout: pre.stdout,
+        stderr: pre.stderr,
+      }).toEqual({ status: 0, stdout: '', stderr: '' });
+      const content = [
+        {
+          type: 'text',
+          text: JSON.stringify({
+            status: 'accepted',
+            action: 'start',
+            task: 'runner-proof',
+            intent: 'change',
+          }),
+        },
+      ];
+      const result = run('post-tool-use.mjs', {
+        ...invocation,
+        hook_event_name: 'PostToolUse',
+        tool_response: host.name === 'Claude' ? content : { content },
+      });
+      expect(result.status).toBe(0);
+      expect(result.stderr).toBe('');
+      const output = JSON.parse(result.stdout) as HookOutput;
+      expect(output.hookSpecificOutput?.additionalContext).toContain(
+        'runner-proof',
+      );
+      expect(output.hookSpecificOutput?.additionalContext).not.toContain(
+        'Election',
+      );
+    },
+  );
 });

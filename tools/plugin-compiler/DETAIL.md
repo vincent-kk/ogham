@@ -2,12 +2,16 @@
 
 `@ogham/plugin-compiler` 는 in-place 멀티호스트 체제의 어댑터 생성기다. 4대 요구:
 
-1. **Claude 무결손** — Claude 가 소비하는 파일(`.claude-plugin/**`·`.mcp.json`·`skills/`·`agents/`·`hooks/`)을 **읽기만** 하고 절대 쓰지 않는다. 쓰기 대상은 어댑터 6종뿐(매니페스트·agy MCP·agy 훅·Codex 훅·Codex 스킬 변이·마켓플레이스).
+1. **Claude 무결손** — Claude 가 소비하는 파일(`<p>/.claude-plugin/**`·`<p>/.mcp.json`·`<p>/skills/`·`<p>/agents/`·`<p>/hooks/`)을 **읽기만** 하고 절대 쓰지 않는다. 쓰기 대상은 어댑터 6종뿐(매니페스트·agy MCP·agy 훅·Codex 훅·Codex 스킬 변이·마켓플레이스).
 2. **결정성** — 동일 정본 → 바이트 동일 어댑터(`stableJson`). `sync` 직후 `sync --check` 는 항상 통과.
 3. **호환성 표면화** — Codex 가 조용히 무시/오동작할 항목(미지원 훅 이벤트, `Read` matcher, MCP env/command 변수)을 진단으로 노출.
 4. **무배선 실행** — `tsx` 로 즉시 실행, dist 없음. 루트 스크립트 `plugin:adapters`·`plugin:adapters:check` 가 유일한 진입.
 
+경로 표기 `<p>/…` 는 각 플러그인 루트(`plugins/<p>/`) 기준이다 — 컴파일러는 플러그인마다 같은 상대 배치를 읽고 쓴다. 저장소 루트 파일은 이 문서 위치 기준 `../../` 상대경로로 적는다.
+
 ## API Contracts
+
+- Optional `plugin-compiler.json` is build input only. Its `codexHookRuntime` directory selects a prebuilt Codex companion for canonical `${CLAUDE_PLUGIN_ROOT}/bridge/<basename>.mjs` command paths. Only opted-in plugins rewrite that prefix; basenames, other commands and Claude sources are preserved. The compiler never builds or copies hook runtimes.
 
 ### CLI (`src/main.ts`)
 
@@ -15,44 +19,47 @@
 node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ...]
 ```
 
-- 인자 없음: 저장소 루트의 `plugins/*`(`.claude-plugin/plugin.json` 보유 디렉터리) 전부 + 루트 어댑터 2종.
+- 인자 없음: 저장소 루트의 `plugins/*`(`<p>/.claude-plugin/plugin.json` 보유 디렉터리) 전부 + 루트 어댑터 2종.
 - `pluginDir ...`: 해당 플러그인만 (루트 어댑터 제외).
 - `--check`: 디스크에 쓰지 않고 재생성-비교. 불일치(stale/missing) 또는 error 진단 시 exit 1.
 - 출력: 진단(⚠/✗) → stderr, 파일별 액션(created/updated/unchanged/stale) 요약 → stdout.
 
 ### 생성물 (어댑터 7종)
 
-| 파일                                    | 소스                                                  | 규칙                                                                                                                                                                                                                                           |
-| --------------------------------------- | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plugins/<p>/plugin.json`               | (= 아래 Codex 매니페스트와 **바이트 동일**)           | 플러그인 루트 매니페스트 — **agy 의 플러그인 마커이자 Codex 가 실제로 읽는 경로**. 아래 항목과 같은 빌더에서 나온다                                                                                                                            |
-| `plugins/<p>/.codex-plugin/plugin.json` | `.claude-plugin/plugin.json` + `.mcp.json` + 디렉터리 | 메타 필드 복사, `skills`/`hooks` 존재 시 명시 선언, `mcpServers` 인라인(서버명=플러그인명, args 상대화, **`cwd:"."` 명시**, `type` 생략, `env.OGHAM_HOST="codex"` 주입)                                                                        |
-| `plugins/<p>/mcp_config.json`           | `.mcp.json`                                           | 동일 래퍼 + args 상대화, 서버명 원본 유지, `env.OGHAM_HOST="agy"` 주입. MCP 없으면 미생성                                                                                                                                                      |
-| `plugins/<p>/hooks.json`                | `hooks/hooks.json` 의 **PreToolUse**                  | **agy named-group** — 플러그인명 키, `*` matcher, `node bridge/run-agy.mjs PreToolUse bridge/<handler>.mjs`. PreToolUse 없으면 미생성(현재 filid·imbas·maencof 3곳)                                                                            |
-| `plugins/<p>/.codex-plugin/hooks.json`  | `hooks/hooks.json`                                    | **Codex 전용** — 지원 이벤트만 복사하고 read 잡는 PreToolUse matcher(`Read\|…`)에 `\|Bash` 추가. 이벤트 제거·matcher 변환이 없을 때만 미생성                                                                                                   |
-| `plugins/<p>/.codex-plugin/skills/**`   | `skills/` 전체 + `agents/`                            | **Codex 전용** — allowlist의 `subagent_type: "<p>:<id>"` persona 스폰 또는 명시적 async lifecycle marker로 opt-in. 전 스킬 copy-all + persona self-load/host lifecycle 변환 + `agents/<id>.md`→`.shared/personas/`. 매니페스트 `skills` 재지정 |
-| `.agents/plugins/marketplace.json`      | `.claude-plugin/marketplace.json`                     | 항목별 `{name, source:{source:"local",path}, policy:{AVAILABLE,ON_INSTALL}, category(Title-case)}`                                                                                                                                             |
+| 파일                                    | 소스                                                  | 규칙                                                                                                                                                                                                                                                         |
+| --------------------------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `plugins/<p>/plugin.json`               | (= 아래 Codex 매니페스트와 **바이트 동일**)           | 플러그인 루트 매니페스트 — **agy 의 플러그인 마커이자 Codex 가 실제로 읽는 경로**. 아래 항목과 같은 빌더에서 나온다                                                                                                                                          |
+| `plugins/<p>/.codex-plugin/plugin.json` | `<p>/.claude-plugin/plugin.json` + `<p>/.mcp.json` + 디렉터리 | 메타 필드 복사, `skills`/`hooks` 존재 시 명시 선언, `mcpServers` 인라인(서버명=플러그인명, args 상대화, **`cwd:"."` 명시**, `type` 생략, `env.OGHAM_HOST="codex"` 주입)                                                                                      |
+| `plugins/<p>/mcp_config.json`           | `.mcp.json`                                           | 동일 래퍼 + args 상대화, 서버명 원본 유지, `env.OGHAM_HOST="agy"` 주입. MCP 없으면 미생성                                                                                                                                                                    |
+| `plugins/<p>/hooks.json`                | `<p>/hooks/hooks.json` 의 **PreToolUse**                  | **agy named-group** — 플러그인명 키, `*` matcher, `node bridge/run-agy.mjs PreToolUse bridge/<handler>.mjs`. PreToolUse 없으면 미생성(현재 filid·imbas·maencof 3곳)                                                                                          |
+| `plugins/<p>/.codex-plugin/hooks.json`  | `<p>/hooks/hooks.json`                                    | **Codex 전용** — 방출 트리거는 넷: 미지원 이벤트 제거, read 잡는 PreToolUse matcher(`Read\|…`)의 `\|Bash` fallback, opt-in한 정확한 MCP 도구 토큰 이름 변환, 선언된 `codexHookRuntime`의 command 경로 재작성. 넷 중 어느 것도 소스를 바꾸지 않을 때만 미생성                                                                                                                 |
+| `plugins/<p>/.codex-plugin/skills/**`   | `<p>/skills/` 전체 + `<p>/agents/`                            | **Codex 전용** — allowlist의 `subagent_type: "<p>:<id>"` persona 스폰 또는 명시적 async lifecycle/MCP reference marker로 opt-in. 전 스킬 copy-all + persona self-load/host lifecycle 변환 + `<p>/agents/<id>.md`→`<p>/.codex-plugin/skills/.shared/personas/<id>.md`. 매니페스트 `skills` 재지정 |
+| `../../.agents/plugins/marketplace.json` | `../../.claude-plugin/marketplace.json`               | 항목별 `{name, source:{source:"local",path}, policy:{AVAILABLE,ON_INSTALL}, category(Title-case)}`                                                                                                                                                           |
 
 - args 상대화: `${CLAUDE_PLUGIN_ROOT}/X` 접두를 `X` 로. 변수가 접두 이외 위치·env·command 에 있으면 **error** (생성물이 깨지므로).
 - **Codex 서버명 오버라이드**: ogham 플러그인은 `tools`·`t` 같은 범용 서버명을 공유하는데 Codex 의 도구 네임스페이스는 플러그인 단위로 스코프되지 않아 충돌한다(실측: 도구명은 `mcp__<server>__<tool>` 이고 Codex 시스템 프롬프트가 "use tool provenance to tell which plugin they come from" 이라 명시). 서버가 하나면 플러그인명, 둘 이상이면 `<plugin>-<server>` 로 바꾼다. agy 는 플러그인 단위로 네임스페이스하므로 원본 이름을 유지한다.
 - **Codex `cwd:"."` (필수)**: 생략하면 Codex 는 플러그인 MCP 서버를 **세션 cwd** 로 띄운다 — 상대 args 가 사용자 프로젝트 기준으로 풀려 서버가 initialize 중 죽고, `codex exec` 는 그 실패를 **조용히 삼킨다**(TUI 만 경고). 설치 경로는 생성 시점에 알 수 없어 절대 args 는 불가능하므로 이것이 유일 해법이다. agy 스키마엔 `cwd` 필드가 없으므로 **codex 빌더에서만** 부여한다(`buildCodexMcpServers`).
-- **매니페스트 2곳, 내용 1개 (실측 기반)**: agy 는 플러그인 루트 `plugin.json` 을 **플러그인 마커**로 요구한다 — 없으면 플러그인을 Claude 임포트로 처리하며 `mcp_config.json` 을 `.mcp.json` 에서 재생성해 **덮어쓰고 `OGHAM_HOST` 를 파괴**한다. 그런데 Codex 도 그 경로를 탐색하며 **`.codex-plugin/plugin.json` 을 가린다** — 따라서 루트 매니페스트가 `{"name":…}` 같은 최소 마커면 **Codex 의 MCP 가 통째로 죽는다**. 해법은 두 경로에 **같은 전체 매니페스트**를 방출하는 것이고, 같은 빌더에서 나오므로 갈라질 수 없다(스펙으로 고정: `planPluginAdapters`). Claude 는 `.claude-plugin/plugin.json` 만 읽으므로 무영향(실측 확인 — `--plugin-dir` 로딩 로그·경고 수 동일).
-- **인라인 `mcpServers`**: Codex 매니페스트가 서버를 직접 선언해 Claude 전용 `.mcp.json`(변수 args)을 Codex 가 읽지 않게 차단한다. `hooks` 는 변환할 것이 없을 때만 Claude 와 **같은 파일**(`hooks/hooks.json`)을 가리키고, 미지원 이벤트 제거 또는 read matcher 변환이 필요하면 Codex 전용 사본(`.codex-plugin/hooks.json`)을 가리킨다.
-- **Codex 훅 채널 (`.codex-plugin/hooks.json`)**: `buildCodexHooks` 는 공식 지원 이벤트 집합만 복사해 Claude 전용 이벤트를 Codex 로 넘기지 않는다. 또한 Codex 는 Read 도구가 없어 파일을 셸(`cat`/`head`)로 읽으므로 read 잡는 PreToolUse matcher 에 `|Bash` 를 더한다. Codex 훅이 셸 읽기에 발화하면 `@ogham/cross-platform` `parseBashRead` 가 `cat foo`→`Read` 로 승격해 같은 핸들러의 read 컨텍스트 주입을 복구한다. 경로 해석은 플러그인-루트 기준(실측)이라 `./.codex-plugin/hooks.json` 이 어느 매니페스트 사본에서도 같은 파일로 풀린다. **Claude 는 `hooks/hooks.json` 을 그대로 써 무영향**이다. 잔여 한계: 복합 셸 읽기(파이프·grep)는 미추적.
-- **Codex skill variants (`.codex-plugin/skills/`)**: `buildCodexSkills` copies the complete skill tree because Codex discovery replaces the source directory. Registry spawns receive relative persona self-loading; explicit lifecycle markers select either persona-first spawn/join or ordinary handoff waiting. Marker validation checks the phase, owning plugin, and any required persona. The persona allowlist retains its relocation restrictions; marker opt-in declares that the source tree can be relocated. The Codex manifest points to the generated tree. Claude continues to consume the canonical skills and agents, which the compiler never writes.
-- **agy 훅 채널 (루트 `hooks.json`)**: 세 호스트의 훅 발견 경로가 **완전히 분리**된다 — Claude=`hooks/hooks.json` 자동발견, Codex=매니페스트 `hooks` 선언, **agy=루트 `hooks.json`**(agy named-group). agy 는 Claude 포맷을 오독해 0개 로드하므로(matrix §4.3 G5) `buildAgyHooks` 가 **PreToolUse 만** agy 포맷으로 재작성한다. PreToolUse 만인 이유: agy 는 `{decision:"deny"}` 를 강제하나(게이팅 실측), 컨텍스트 주입(SessionStart·UserPromptSubmit→PreInvocation)은 agy 1.1.2 가 injectSteps 를 렌더하지 않아 매 턴 스폰만 하는 死코드가 된다(F4). 각 핸들러는 `bridge/run-agy.mjs`(agyRunner main, 플러그인 build-hooks 가 번들·`bridge/` 로 커밋)를 경유해 agy camelCase 페이로드를 Claude 계약으로 번역한다. matcher 는 `*` — agy 도구 어휘가 Claude 와 달라 도구 regex 번역 대신 러너가 비대상 도구를 allow no-op 처리한다. **커맨드 문자열이 `bridge/run-agy.mjs` 를 참조하는 계약이 build-hooks 의 번들 출력명과 맞물린다**(`constants/adapterPaths.ts` AGY_RUNNER_BRIDGE).
-- **`.agents/plugins.json`(agy declared)은 폐기됐다** — 항목별 경로·컨테이너 경로·마커 조합 3종 모두 플러그인을 로드하지 못했다(실측). agy 는 `.agents/plugins/<n>/` 디렉터리 스캔으로만 플러그인을 찾는다.
-- **호스트 마커 env**: 생성되는 MCP 선언에 `OGHAM_HOST` (`codex`/`agy`)를 주입한다. Claude `.mcp.json` 은 무수정이므로 마커 부재 = claude. 호스트 결합 런타임 쓰기(maencof `CLAUDE.md`, filid `.claude/rules/`)가 이 값으로 분기한다(런타임 분기 구현은 플레이북 Stage 4). 훅 프로세스의 호스트 감지는 Codex 주입 env `PLUGIN_DATA` 유무.
-- 버전 동기화: `scripts/injectVersion.mjs` 가 `.claude-plugin/plugin.json` 과 함께 **어댑터 매니페스트 2곳**(`plugin.json`·`.codex-plugin/plugin.json`, 존재 시)을 갱신 — sync 재실행 없이 릴리즈 가능.
-- npm 파리티: 각 플러그인 `package.json:files` 에 `plugin.json`·`.codex-plugin`·`mcp_config.json` 포함. PreToolUse 플러그인은 루트 `hooks.json` 도 추가(`bridge/` 는 이미 포함되어 `run-agy.mjs` 는 자동 배포).
+- **매니페스트 2곳, 내용 1개 (실측 기반)**: agy 는 플러그인 루트 `plugin.json` 을 **플러그인 마커**로 요구한다 — 없으면 플러그인을 Claude 임포트로 처리하며 `mcp_config.json` 을 `.mcp.json` 에서 재생성해 **덮어쓰고 `OGHAM_HOST` 를 파괴**한다. 그런데 Codex 도 그 경로를 탐색하며 **`<p>/.codex-plugin/plugin.json` 을 가린다** — 따라서 루트 매니페스트가 `{"name":…}` 같은 최소 마커면 **Codex 의 MCP 가 통째로 죽는다**. 해법은 두 경로에 **같은 전체 매니페스트**를 방출하는 것이고, 같은 빌더에서 나오므로 갈라질 수 없다(스펙으로 고정: `planPluginAdapters`). Claude 는 `<p>/.claude-plugin/plugin.json` 만 읽으므로 무영향(실측 확인 — `--plugin-dir` 로딩 로그·경고 수 동일).
+- **인라인 `mcpServers`**: Codex 매니페스트가 서버를 직접 선언해 Claude 전용 `.mcp.json`(변수 args)을 Codex 가 읽지 않게 차단한다. `hooks` 는 변환할 것이 없을 때만 Claude 와 **같은 파일**(`<p>/hooks/hooks.json`)을 가리키고, 미지원 이벤트 제거 또는 read matcher 변환이 필요하면 Codex 전용 사본(`<p>/.codex-plugin/hooks.json`)을 가리킨다.
+- **Codex 훅 채널 (`<p>/.codex-plugin/hooks.json`)**: `buildCodexHooks` 는 공식 지원 이벤트 집합만 복사해 Claude 전용 이벤트를 Codex 로 넘기지 않는다. 또한 Codex 는 Read 도구가 없어 파일을 셸(`cat`/`head`)로 읽으므로 read 잡는 PreToolUse matcher 에 `|Bash` 를 더한다. Codex 훅이 셸 읽기에 발화하면 `@ogham/cross-platform` `parseBashRead` 가 `cat foo`→`Read` 로 승격해 같은 핸들러의 read 컨텍스트 주입을 복구한다. 경로 해석은 플러그인-루트 기준(실측)이라 매니페스트의 `./` 접두 `hooks` 값이 어느 매니페스트 사본에서도 같은 `<p>/.codex-plugin/hooks.json` 으로 풀린다. **Claude 는 `<p>/hooks/hooks.json` 을 그대로 써 무영향**이다. 잔여 한계: 복합 셸 읽기(파이프·grep)는 미추적.
+- **Codex skill variants (`<p>/.codex-plugin/skills/`)**: `buildCodexSkills` copies the complete skill tree because Codex discovery replaces the source directory. Registry spawns receive relative persona self-loading; explicit lifecycle markers select either persona-first spawn/join or ordinary handoff waiting. Marker validation checks the phase, owning plugin, and any required persona. The persona allowlist retains its relocation restrictions; marker opt-in declares that the source tree can be relocated. The Codex manifest points to the generated tree. Claude continues to consume the canonical skills and agents, which the compiler never writes.
+- **agy 훅 채널 (루트 `hooks.json`)**: 세 호스트의 훅 발견 경로가 **완전히 분리**된다 — Claude=`<p>/hooks/hooks.json` 자동발견, Codex=매니페스트 `hooks` 선언, **agy=루트 `hooks.json`**(agy named-group). agy 는 Claude 포맷을 오독해 0개 로드하므로(matrix §4.3 G5) `buildAgyHooks` 가 **PreToolUse 만** agy 포맷으로 재작성한다. PreToolUse 만인 이유: agy 는 `{decision:"deny"}` 를 강제하나(게이팅 실측), 컨텍스트 주입(SessionStart·UserPromptSubmit→PreInvocation)은 agy 1.1.2 가 injectSteps 를 렌더하지 않아 매 턴 스폰만 하는 死코드가 된다(F4). 각 핸들러는 `<p>/bridge/run-agy.mjs`(agyRunner main, 플러그인 build-hooks 가 번들·`<p>/bridge/` 로 커밋)를 경유해 agy camelCase 페이로드를 Claude 계약으로 번역한다. matcher 는 `*` — agy 도구 어휘가 Claude 와 달라 도구 regex 번역 대신 러너가 비대상 도구를 allow no-op 처리한다. **커맨드 문자열이 `<p>/bridge/run-agy.mjs` 를 참조하는 계약이 build-hooks 의 번들 출력명과 맞물린다**(`src/constants/adapterPaths.ts` AGY_RUNNER_BRIDGE).
+- **agy 플러그인 발견**: agy 는 `.agents/plugins/<n>/` 디렉터리 스캔으로만 플러그인을 찾으므로 선언형 목록 파일을 생성하지 않는다(폐기 경위는 History).
+- **호스트 마커 env**: 생성되는 MCP 선언에 `OGHAM_HOST` (`codex`/`agy`)를 주입한다. Claude `.mcp.json` 은 무수정이므로 마커 부재 = claude. 호스트 결합 런타임 쓰기(maencof `CLAUDE.md`, filid `<project>/.claude/rules/`)가 이 값으로 분기한다(런타임 분기 구현은 플레이북 Stage 4). 훅 프로세스의 호스트 감지는 Codex 주입 env `PLUGIN_DATA` 유무.
+- 버전 동기화: `../../scripts/injectVersion.mjs` 가 `<p>/.claude-plugin/plugin.json` 과 함께 **어댑터 매니페스트 2곳**(`<p>/plugin.json`·`<p>/.codex-plugin/plugin.json`, 존재 시)을 갱신 — sync 재실행 없이 릴리즈 가능.
+- npm 파리티: 각 플러그인 `package.json:files` 에 `plugin.json`·`.codex-plugin`·`mcp_config.json` 포함. PreToolUse 플러그인은 루트 `hooks.json` 도 추가(`<p>/bridge/` 는 이미 포함되어 `run-agy.mjs` 는 자동 배포).
 
 ### 진단
 
-| level   | code                    | 조건                                                                                      |
-| ------- | ----------------------- | ----------------------------------------------------------------------------------------- |
-| error   | `mcp-variable-args`     | `${CLAUDE_PLUGIN_ROOT}` 가 args 접두 이외 위치·command·env 에 존재                        |
-| error   | `codex-skill-lifecycle` | async lifecycle marker의 구문·phase 쌍·plugin·persona 참조가 유효하지 않음                |
-| warning | `codex-unknown-event`   | hooks.json 에 Codex 공식 지원 집합 밖 이벤트 — 생성물에서는 제거하고 정본 차이는 진단     |
-| warning | `codex-read-matcher`    | matcher 에 `Read` — Codex 는 Read 미발화(단순 셸 읽기만 Bash 채널 복구, 복합 읽기 미추적) |
+| level   | code                       | 조건                                                                                                 |
+| ------- | -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| error   | `mcp-variable-args`        | `${CLAUDE_PLUGIN_ROOT}` 가 args 접두 이외 위치·command·env 에 존재                                   |
+| error   | `codex-skill-lifecycle`    | async lifecycle marker의 구문·phase 쌍·plugin·persona 참조가 유효하지 않음                           |
+| error   | `codex-mcp-tool-reference` | Explicit MCP marker, owned server/tool reference or normalized callable name is invalid or colliding |
+| error   | `codex-mcp-hook-matcher`   | An opted-in owned MCP reference uses a compound hook expression instead of exact tokens              |
+| error   | `codex-hook-runtime`      | An explicit prebuilt Codex hook directory is outside the supported relative bridge path syntax       |
+| warning | `codex-unknown-event`      | hooks.json 에 Codex 공식 지원 집합 밖 이벤트 — 생성물에서는 제거하고 정본 차이는 진단                |
+| warning | `codex-read-matcher`       | matcher 에 `Read` — Codex 는 Read 미발화(단순 셸 읽기만 Bash 채널 복구, 복합 읽기 미추적)            |
 
 ## Acceptance Criteria
 
@@ -64,14 +71,15 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 
 - `yarn plugin:adapters` 2회 연속 실행 시 2회째 전 파일 `unchanged`.
 - `yarn plugin:adapters:check` 가 어댑터 손편집·정본 변경 후 미재생성을 exit 1 로 검출.
-- 루트 `plugin.json` 과 `.codex-plugin/plugin.json` 은 **바이트 동일** — `planPluginAdapters` 스펙이 고정한다.
+- 루트 `<p>/plugin.json` 과 `<p>/.codex-plugin/plugin.json` 은 **바이트 동일** — `planPluginAdapters` 스펙이 고정한다.
 
 ### AC-emission-scope — 어댑터 방출 범위
 
-- Codex `.codex-plugin/skills/**` 는 allowlist + persona registry spawn 조건 또는 유효한 async lifecycle marker 조건으로만 방출된다. registry spawn 스킬만 self-load 프로토콜을 받고, marker 스킬만 Codex lifecycle 치환을 받으며, 나머지는 바이트 복사된다. 모든 persona는 `.shared/personas/` 로 복사되고 Claude 원본은 생성기가 수정하지 않는다.
+- Codex skill variants require the allowlist/persona registry-spawn conditions, a valid async lifecycle marker, or a valid MCP reference marker. All skills and personas are copied together. Only the applicable files receive MCP, lifecycle, or persona-spawn transformations; Claude sources are never modified.
 - Async lifecycle markers require either one ordered `spawn`/`join` pair per `<plugin>:<agent>` with an existing persona, or one `handoffs <plugin>` block without a persona suffix. Both retain child targets and wait before ending the parent turn; handoffs continue the workflow's existing validation and next-handoff loop. Invalid markers fail closed.
+- A valid `<!-- ogham-mcp-tools:<plugin> -->` file marker also selects the whole Codex skill tree. Only marked files rewrite owned canonical MCP references, and owned exact Pre/Post hook tokens use the same server-name mapping. Callable names are normalized separately from unchanged manifest keys; invalid markers, missing servers, collisions and owned compound hook regexes prevent emission.
 - agy `hooks.json` 은 PreToolUse 보유 플러그인에만 방출된다(현재 filid·imbas·maencof 3곳; cennad·maencof-lens 는 PreToolUse 없어 미생성).
-- Codex `.codex-plugin/hooks.json` 은 read 잡는 PreToolUse matcher 또는 미지원 이벤트가 있는 플러그인에 방출된다. 변환할 것이 없는 훅은 Claude 파일을 직접 가리킨다.
+- Dedicated Codex hooks are emitted whenever capability filtering, read fallbacks, opted-in exact MCP tokens or declared prebuilt runtime selection changes the source. Unchanged hooks keep their canonical path.
 
 ### AC-compat-diagnostics — 호환성 진단
 
@@ -79,12 +87,16 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 
 ### AC-ci-trigger-coverage — CI 트리거 커버리지
 
-- 정본(`skills/`·`agents/`·`.claude-plugin/**`·`.mcp.json`·`hooks/hooks.json`)과 어댑터 7종의 경로가 전부 `.github/workflows/ci.yml` 의 `paths` 필터에 걸린다. 어느 한쪽이 빠지면 그 변경은 CI 를 띄우지 않아 `plugin:adapters:check` 가 desync 를 잡을 기회를 잃는다 — 특히 어댑터의 다수는 `.codex-plugin/skills/**` 의 **마크다운**이라 확장자 기준 필터로는 걸리지 않는다. `push`·`pull_request` 두 목록은 동일하다(GitHub Actions 가 YAML 앵커를 지원하지 않아 중복이 강제된다). `src/__tests__/ciTriggerCoverage.test.ts` 가 고정한다.
+- 정본(`<p>/skills/`·`<p>/agents/`·`<p>/.claude-plugin/**`·`<p>/.mcp.json`·`<p>/hooks/hooks.json`)과 어댑터 7종의 경로가 전부 `../../.github/workflows/ci.yml` 의 `paths` 필터에 걸린다. 어느 한쪽이 빠지면 그 변경은 CI 를 띄우지 않아 `plugin:adapters:check` 가 desync 를 잡을 기회를 잃는다 — 특히 어댑터의 다수는 `<p>/.codex-plugin/skills/**` 의 **마크다운**이라 확장자 기준 필터로는 걸리지 않는다. `push`·`pull_request` 두 목록은 동일하다(GitHub Actions 가 YAML 앵커를 지원하지 않아 중복이 강제된다). `src/__tests__/ciTriggerCoverage.test.ts` 가 고정한다.
 
 ### AC-spec-suite — 스펙 통과
 
 - 순수 변환(adapters·lint·cli·utils)과 I/O 계약(pipeline·facts)을 `yarn plugin-compiler test:run` 이 검증. `applyFiles` 의 check 모드는 어떤 쓰기도 하지 않음이 스펙으로 고정된다.
 
+## History
+
+- agy 선언형 플러그인 목록(`.agents` 아래 `plugins.json`)은 폐기했다 — 항목별 경로·컨테이너 경로·마커 조합 3종 모두 플러그인을 로드하지 못했다(실측).
+
 ## Last Updated
 
-2026-09-10 — Added persona-free Codex handoff lifecycle selection.
+2026-09-26 — Plugin-root paths are spelled `<p>/…`; added explicit owned MCP callable-reference and exact hook adaptation.

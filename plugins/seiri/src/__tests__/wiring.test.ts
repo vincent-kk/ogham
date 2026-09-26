@@ -6,7 +6,12 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
-import { DORMANT_HOOKS, HookName, HostTool } from '../constants/hooks.js';
+import {
+  CODEX_WORKFLOW_TOOL,
+  DORMANT_HOOKS,
+  HookName,
+  HostTool,
+} from '../constants/hooks.js';
 import { Route, STATE_PLACEHOLDER } from '../constants/http.js';
 import { INTERVENTION_LEVELS } from '../constants/intervention.js';
 import { RULE_ID_PREFIX } from '../constants/plugin.js';
@@ -38,7 +43,7 @@ describe('wiring', () => {
       (name) => !DORMANT_HOOKS.includes(name),
     );
     for (const name of active)
-      expect(hooksJson).toContain(`bridge/${name}.mjs`);
+      expect(hooksJson).toContain(`bridge/claude/${name}.mjs`);
   });
 
   it('selects each watched tool by name in hooks.json', () => {
@@ -65,7 +70,7 @@ describe('wiring', () => {
   it('keeps dormant hooks out of hooks.json until re-measurement', () => {
     const hooksJson = read('hooks', 'hooks.json');
     for (const name of DORMANT_HOOKS)
-      expect(hooksJson).not.toContain(`bridge/${name}.mjs`);
+      expect(hooksJson).not.toContain(`bridge/claude/${name}.mjs`);
   });
 
   it('builds every hook that hooks.json registers', () => {
@@ -253,16 +258,19 @@ describe('wiring', () => {
     expect(codexHooks.hooks).not.toHaveProperty('PostToolUseFailure');
     expect(
       claudeHooks.hooks.PostToolUse?.some(
-        (group) => group.matcher === HostTool.SKILL,
+        (group) => group.matcher === HostTool.WORKFLOW,
       ),
     ).toBe(true);
     expect(
       codexHooks.hooks.PostToolUse?.some(
-        (group) => group.matcher === HostTool.SKILL,
+        (group) => group.matcher === CODEX_WORKFLOW_TOOL,
       ),
-    ).toBe(false);
+    ).toBe(true);
     expect(codexHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command).toBe(
-      claudeHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command,
+      claudeHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command.replace(
+        '/bridge/claude/',
+        '/bridge/codex/',
+      ),
     );
   });
 

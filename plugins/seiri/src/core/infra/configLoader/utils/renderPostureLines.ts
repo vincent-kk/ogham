@@ -5,14 +5,10 @@ import {
 import type { InterventionLevel } from '../../../../types/config.js';
 
 /**
- * How wide the automatic skills should fire at this dial position.
- *
- * Empty at `off` and `advisory`. The former disables every hook surface;
- * the latter retains status reporting without workflow-chain posture.
- *
- * These lines do not create dispatch; the skill descriptions already do
- * that. They only move the edge — which borderline moments count, and
- * what a completion claim owes before it is made.
+ * The posture lines for a dial position, consumed by the settings MCP
+ * tool's `config` posture echo: empty at `off` and `advisory`, the
+ * workflow-chain line alone at `standard`, and the workflow-chain line
+ * plus the strict posture line at `strict`.
  */
 export function renderPostureLines(level: InterventionLevel): string[] {
   if (level === 'off' || level === 'advisory') return [];

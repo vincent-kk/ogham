@@ -10,17 +10,21 @@ plugin: seiri
 
 # execute — the plan governs, the ledger remembers
 
+<!-- ogham-mcp-tools:seiri -->
+
 This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 
-**0. Start — or resume — from the ledger.** Call `mcp__plugin_seiri_tools__gates({ action: "status", task })`: it says which gates are met, whichever session wrote them.
+When task-scoped hook assistance is useful, follow [workflow lifecycle](references/workflow-lifecycle.md). Start or resume for this task only; moving between skills within its active chain needs no extra call.
+
+**0. Resume from the plan and its evidence.** If this task has a ledger, call `mcp__plugin_seiri_tools__gates({ action: "status", task })`. Otherwise use the plan's completion criteria; do not create a ledger merely to run this skill.
 
 **1. Read the plan critically before task one.** Contradictions, gaps that block starting, steps that fight the repository's conventions — report them in one batch, not one interrupt per discovery. Nothing blocking: begin.
 
-**2. Close tasks through their gates.** The ledger is `.seiri/tasks/<name>/gates.md`. Closing a task means its gates are met — run each CHECK verbatim in Bash; the PostToolUse hook records the evidence and answers with one verdict line. A delegate's return re-runs its CHECKs here. "All tasks complete" is `status` saying `all_met`. Leaving a gate behind is `abandon` with a reason — never silence.
+**2. Close outcomes with evidence.** When a ledger exists, run its CHECKs and inspect the task's status; an unmet gate is not completed work. Reuse evidence only while its artifact, environment, and scope remain valid. A delegate's report needs inspection; rerun checks when their evidence is missing or invalidated. Record a deliberately omitted gate with its reason.
 
-**3. Per task, follow the steps exactly.** The implement discipline carries each change; verify closes the task; a failure mid-task is trace-cause's job, not a cue to improvise around the plan.
+**3. Preserve the outcome and boundaries.** Adjust reversible implementation details as the repository provides better evidence. Record material deviations and reopen decisions whose assumptions fail. Use diagnosis for an unexplained failure; an expected red test or a corrected tool argument does not require a separate workflow.
 
 **4. Do not pause between tasks to ask whether to continue.** The plan was the approval. Stop only for: a blocker you cannot resolve, ambiguity that genuinely prevents progress, or all tasks complete.
 
@@ -28,5 +32,5 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 ## Rules
 
-- Deviations from the plan are recorded in the ledger with the reason, in the same turn they happen.
-- All tasks done: run this repository's designated verification in full, then hand off — load `/seiri:request-review` for the work; suggest `/seiri:finish` to the user for the integration decision.
+- Record material deviations in the plan or its ledger with the reason.
+- Before handing off substantial changes, complete the repository's required verification and any needed review. Reuse valid evidence; integration remains the user's decision.

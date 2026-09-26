@@ -25,7 +25,7 @@ const packageRoot = portableJoin(
 );
 
 /** Built PostToolUse hook executed by the host. */
-const bundlePath = portableJoin(packageRoot, 'bridge', 'post-tool-use.mjs');
+const bundlePath = portableJoin(packageRoot, 'bridge', 'claude', 'post-tool-use.mjs');
 
 /** Session identifier shared by concurrent hook processes. */
 const SESSION_ID = 'concurrent-gates-probe';
@@ -96,10 +96,18 @@ function makeProject(): { root: string; ledgerPath: string } {
  * @param stdout Observable proof text.
  * @returns JSON stdin for one hook process.
  */
-function hookPayload(root: string, command: string, stdout: string): string {
+function hookPayload(
+  root: string,
+  command: string,
+  stdout: string,
+  call: string,
+  session: string,
+): string {
   return JSON.stringify({
     cwd: root,
-    session_id: SESSION_ID,
+    session_id: session,
+    prompt_id: 'turn-a',
+    tool_use_id: call,
     hook_event_name: 'PostToolUse',
     tool_name: 'Bash',
     tool_input: { command },
@@ -129,39 +137,104 @@ function provenGates(ledgerPath: string): string[] {
   });
 }
 
+/** Activate one independent actor so concurrent gate writers retain distinct locks. */
+async function activate(root: string, session: string): Promise<void> {
+  const native = { cwd: root, session_id: session, prompt_id: 'turn-a' };
+  await invoke('user-prompt-submit.mjs', {
+    ...native,
+    hook_event_name: 'UserPromptSubmit',
+  });
+  const request = {
+    action: 'start',
+    project_root: root,
+    task: 'concurrent-task',
+    intent: 'change',
+  };
+  const call = {
+    ...native,
+    tool_use_id: 'start',
+    tool_name: 'mcp__plugin_seiri_tools__workflow',
+    tool_input: request,
+  };
+  await invoke('pre-tool-use.mjs', { ...call, hook_event_name: 'PreToolUse' });
+  await invoke('post-tool-use.mjs', {
+    ...call,
+    hook_event_name: 'PostToolUse',
+    tool_response: [
+      {
+        type: 'text',
+        text: JSON.stringify({
+          status: 'accepted',
+          action: 'start',
+          task: request.task,
+          intent: 'change',
+        }),
+      },
+    ],
+  });
+}
+
+/** Run the packaged hook and retain process failures as test failures. */
+async function invoke(
+  bundle: string,
+  payload: Record<string, unknown>,
+): Promise<void> {
+  const result = await spawnCli(
+    'node',
+    [portableJoin(packageRoot, 'bridge', 'claude', bundle)],
+    { input: JSON.stringify(payload), timeoutMs: 5_000 },
+  );
+  expect({
+    code: result.code,
+    timedOut: result.timedOut,
+    stderr: result.stderr,
+  }).toEqual({ code: 0, timedOut: false, stderr: '' });
+}
+
+/** Pair one gate observation with the same native invocation identity. */
+async function observe(
+  root: string,
+  run: (typeof GATE_RUNS)[number],
+  round: number,
+): Promise<void> {
+  const payload = JSON.parse(
+    hookPayload(
+      root,
+      run.command,
+      run.proof,
+      `${run.id}-${round}`,
+      `${SESSION_ID}-${run.id}`,
+    ),
+  ) as Record<string, unknown>;
+  await invoke('pre-tool-use.mjs', {
+    ...payload,
+    hook_event_name: 'PreToolUse',
+  });
+  await invoke('post-tool-use.mjs', payload);
+}
+
 describe('gate hook writes', () => {
   it('records every proof when hook processes do not contend', async () => {
     const { root, ledgerPath } = makeProject();
-
-    for (const run of GATE_RUNS)
-      await spawnCli('node', [bundlePath], {
-        input: hookPayload(root, run.command, run.proof),
-      });
-
+    for (const run of GATE_RUNS) {
+      await activate(root, `${SESSION_ID}-${run.id}`);
+      await observe(root, run, 0);
+    }
     expect(provenGates(ledgerPath)).toEqual(['G1', 'G2']);
   }, 30_000);
 
   it('leaves a legal single-writer ledger under concurrency', async () => {
     const { root, ledgerPath } = makeProject();
     const outcomes: string[][] = [];
+    for (const run of GATE_RUNS)
+      await activate(root, `${SESSION_ID}-${run.id}`);
 
     for (let round = 0; round < ROUNDS; round += 1) {
       writeFileSync(ledgerPath, LEDGER);
-
-      await Promise.all(
-        GATE_RUNS.map((run) =>
-          spawnCli('node', [bundlePath], {
-            input: hookPayload(root, run.command, run.proof),
-          }),
-        ),
-      );
-
+      await Promise.all(GATE_RUNS.map((run) => observe(root, run, round)));
       outcomes.push(provenGates(ledgerPath));
     }
 
-    // A serialised round proves both gates; a round that fails open keeps the
-    // last writer's proof. An empty round means no writer's proof survived at
-    // all, which the atomic replacement is supposed to make impossible.
     expect(outcomes.filter((proven) => proven.length === 0)).toEqual([]);
   }, 60_000);
 });

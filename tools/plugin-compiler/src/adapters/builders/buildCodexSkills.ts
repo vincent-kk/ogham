@@ -1,6 +1,8 @@
 import { CODEX_SKILLS_DIR } from "../../constants/adapterPaths.js";
 import type { CodexSkillFile, PluginFacts } from "../../types/index.js";
 import { adaptAsyncAgentLifecycle } from "../utils/adaptAsyncAgentLifecycle.js";
+import { adaptMcpToolReferences } from "../utils/adaptMcpToolReferences.js";
+import { validateMcpToolReferences } from "../utils/validateMcpToolReferences.js";
 import { AsyncAgentLifecycleError } from "../utils/asyncAgentLifecycleError.js";
 import {
   containsPersonaSpawn,
@@ -11,7 +13,7 @@ import {
 /**
  * Plugins verified relocation-safe for the persona-registry Codex skill shadow.
  * This allowlist only governs inferred `subagent_type` adaptation. An explicit
- * async-agent lifecycle marker is its own author-controlled opt-in and bypasses
+ * async-agent lifecycle or MCP marker is an author-controlled opt-in and bypasses
  * the list — not every unmarked `agents/` + `subagent_type` plugin qualifies:
  * a plugin whose worker prompt loads a persona by an actionable bare
  * `../../agents/<id>.md` climb (e.g. prawf: `prompt-templates.md` "Give the
@@ -39,11 +41,15 @@ const VARIANT_ENABLED_PLUGINS = new Set([
 
 /**
  * Whether this plugin emits a Codex skill variant: either a valid explicit
- * lifecycle marker exists, or the plugin is allowlisted and has a persona spawn
+ * lifecycle/MCP marker exists, or the plugin is allowlisted and has a persona spawn
  * that needs registry adaptation. The manifest builder shares this predicate so
  * its `skills` path and the emitted tree never disagree.
+ * @param facts Canonical inputs used by both skills and manifest builders.
+ * @returns Whether a complete Codex skill tree must be emitted.
+ * @throws Error for invalid explicit markers or referenced personas/tools.
  */
 export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
+  const hasMcpAdaptation = validateMcpToolReferences(facts) !== null;
   let hasLifecycleAdaptation = false;
   for (const [relativePath, content] of Object.entries(facts.skillFiles)) {
     const adaptation = adaptAsyncAgentLifecycle(
@@ -55,7 +61,7 @@ export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
     assertPersonasExist(facts, adaptation.personaFiles, relativePath);
     hasLifecycleAdaptation = true;
   }
-  if (hasLifecycleAdaptation) return true;
+  if (hasLifecycleAdaptation || hasMcpAdaptation) return true;
 
   if (!VARIANT_ENABLED_PLUGINS.has(facts.name)) return false;
   if (Object.keys(facts.agentFiles).length === 0) return false;
@@ -73,18 +79,25 @@ export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
  * Output is sorted by path for deterministic, idempotent re-emission. Claude's
  * own `skills/` is never written here (facts carry the pristine source), so
  * re-runs never double-inject.
+ * @param facts Canonical skill, persona and server inputs, left unchanged.
+ * @returns The complete sorted generated tree, or null without variant selection.
+ * @throws Error when explicit lifecycle or MCP adaptation is invalid.
  */
 export function buildCodexSkills(facts: PluginFacts): CodexSkillFile[] | null {
   if (!emitsCodexSkillVariant(facts)) return null;
+  const mcpReferences = validateMcpToolReferences(facts);
 
   const files: CodexSkillFile[] = [];
   for (const [relativePath, content] of Object.entries(facts.skillFiles)) {
+    const selectedMcp = mcpReferences?.skillPaths.includes(relativePath)
+      ? adaptMcpToolReferences(content, mcpReferences.names)
+      : content;
     const lifecycle = adaptAsyncAgentLifecycle(
-      content,
+      selectedMcp,
       relativePath,
       facts.name,
     );
-    const selectedContent = lifecycle?.content ?? content;
+    const selectedContent = lifecycle?.content ?? selectedMcp;
     const emitted = containsPersonaSpawn(selectedContent, facts.name)
       ? injectSpawnProtocol(selectedContent, relativePath, facts.name)
       : selectedContent;

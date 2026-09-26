@@ -2,6 +2,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -13,7 +14,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';
 import type { PostToolUseFailureInput } from '../../../types/hooks.js';
-import { processToolOutcome } from '../postToolUse.js';
+import {
+  activateWorkflow,
+  observeBash,
+} from '../../__tests__/helpers/workflowHarness.js';
 
 /** Hook session shared by the isolated test calls. */
 const SESSION = 'session-a';
@@ -53,6 +57,7 @@ function makeRepoRoot(intervention: InterventionLevel = 'standard'): string {
   createdRoots.push(root);
   mkdirSync(portableJoin(root, '.git'));
   writeConfig(root, 'project', { intervention });
+  activateWorkflow(root);
   return root;
 }
 
@@ -77,7 +82,7 @@ describe('PostToolUse gate verdicts', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -99,7 +104,7 @@ describe('PostToolUse gate verdicts', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -118,7 +123,7 @@ describe('PostToolUse gate verdicts', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUseFailure',
@@ -138,7 +143,7 @@ describe('PostToolUse gate verdicts', () => {
     const root = makeRepoRoot();
     seedTask(root, 'payment-refactor', LEDGER);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUseFailure',
@@ -157,7 +162,7 @@ describe('PostToolUse gate verdicts', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUseFailure',
@@ -173,12 +178,12 @@ describe('PostToolUse gate verdicts', () => {
     expect(readFileSync(path, 'utf8')).toBe(LEDGER);
   });
 
-  it('updates two matching tasks and injects one combined line', () => {
+  it('records only the selected task when two CHECKs match', () => {
     const root = makeRepoRoot();
     const paymentPath = seedTask(root, 'payment-refactor', LEDGER);
     const loginPath = seedTask(root, 'login-fix', LEDGER);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -188,19 +193,20 @@ describe('PostToolUse gate verdicts', () => {
     });
 
     const line = output.hookSpecificOutput?.additionalContext ?? '';
-    expect(line).toContain('login-fix');
+    expect(line).not.toContain('login-fix');
     expect(line).toContain('payment-refactor');
     expect(line).not.toContain('\n');
     expect(readFileSync(paymentPath, 'utf8')).toContain('- [x] G1');
-    expect(readFileSync(loginPath, 'utf8')).toContain('- [x] G1');
+    expect(readFileSync(loginPath, 'utf8')).toBe(LEDGER);
   });
 
-  it('keeps agent provenance in a multi-task verdict line', () => {
+  it('keeps agent provenance limited to its selected task', () => {
     const root = makeRepoRoot();
     seedTask(root, 'payment-refactor', LEDGER);
     seedTask(root, 'login-fix', LEDGER);
+    activateWorkflow(root, { agent_id: 'aa8d87f5564af18d4' });
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -211,7 +217,7 @@ describe('PostToolUse gate verdicts', () => {
     });
 
     const line = output.hookSpecificOutput?.additionalContext ?? '';
-    expect(line).toContain('login-fix G1 met via agent aa8d87f5');
+    expect(line).not.toContain('login-fix');
     expect(line).toContain('payment-refactor G1 met via agent aa8d87f5');
     expect(line).not.toContain('\n');
   });
@@ -219,7 +225,7 @@ describe('PostToolUse gate verdicts', () => {
   it('reports and records regression after a formerly met gate fails', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
-    processToolOutcome({
+    observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -228,7 +234,7 @@ describe('PostToolUse gate verdicts', () => {
       tool_response: { stdout: '8/8 passed', stderr: '' },
     });
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -249,7 +255,7 @@ describe('PostToolUse gate verdicts', () => {
     const root = makeRepoRoot('advisory');
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -266,7 +272,7 @@ describe('PostToolUse gate verdicts', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUseFailure',
@@ -294,14 +300,14 @@ describe('PostToolUse gate verdicts', () => {
     };
 
     expect(
-      processToolOutcome(input).hookSpecificOutput?.additionalContext,
+      observeBash(input).hookSpecificOutput?.additionalContext,
     ).toBeUndefined();
     expect(
-      processToolOutcome(input).hookSpecificOutput?.additionalContext,
+      observeBash(input).hookSpecificOutput?.additionalContext,
     ).toBeUndefined();
-    expect(
-      processToolOutcome(input).hookSpecificOutput?.additionalContext,
-    ).toContain('trace-cause');
+    expect(observeBash(input).hookSpecificOutput?.additionalContext).toContain(
+      'trace-cause',
+    );
   });
 
   it('merges the third-failure hint into a CHECK verdict line', () => {
@@ -317,15 +323,14 @@ describe('PostToolUse gate verdicts', () => {
       is_interrupt: false,
     };
 
-    processToolOutcome(input);
-    processToolOutcome(input);
-    const line =
-      processToolOutcome(input).hookSpecificOutput?.additionalContext ?? '';
+    observeBash(input);
+    observeBash(input);
+    const line = observeBash(input).hookSpecificOutput?.additionalContext ?? '';
 
     expect(line).toContain(
       'unmet — expected success marker not found in output (exit 1)',
     );
-    expect(line).toContain('trace-cause');
+    expect(line).toContain('consecutive failure');
     expect(line).not.toContain('\n');
   });
 
@@ -333,7 +338,8 @@ describe('PostToolUse gate verdicts', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
 
-    const agentOutput = processToolOutcome({
+    activateWorkflow(root, { agent_id: 'aa8d87f5564af18d4' });
+    const agentOutput = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -350,7 +356,7 @@ describe('PostToolUse gate verdicts', () => {
       /EVIDENCE: .* \(via agent aa8d87f5\)$/m,
     );
 
-    processToolOutcome({
+    observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUse',
@@ -361,12 +367,16 @@ describe('PostToolUse gate verdicts', () => {
     expect(readFileSync(path, 'utf8')).not.toContain('(via agent');
   });
 
-  it('keeps a recorded verdict when session-signal persistence fails', () => {
+  it('does not record a gate when its actor observation cannot be read', () => {
     const root = makeRepoRoot();
     const path = seedTask(root, 'payment-refactor', LEDGER);
-    mkdirSync(portableJoin(root, '.seiri', 'session-signals.json'));
+    const sessions = portableJoin(root, '.seiri', 'sessions');
+    const state = readdirSync(sessions).find((name) => name.endsWith('.json'))!;
+    const statePath = portableJoin(sessions, state);
+    rmSync(statePath);
+    mkdirSync(statePath);
 
-    const output = processToolOutcome({
+    const output = observeBash({
       cwd: root,
       session_id: SESSION,
       hook_event_name: 'PostToolUseFailure',
@@ -376,9 +386,7 @@ describe('PostToolUse gate verdicts', () => {
       is_interrupt: false,
     });
 
-    expect(output.hookSpecificOutput?.additionalContext).toContain(
-      'met — evidence recorded (1/2, next G2)',
-    );
-    expect(readFileSync(path, 'utf8')).toContain('- [x] G1');
+    expect(output.hookSpecificOutput).toBeUndefined();
+    expect(readFileSync(path, 'utf8')).toBe(LEDGER);
   });
 });

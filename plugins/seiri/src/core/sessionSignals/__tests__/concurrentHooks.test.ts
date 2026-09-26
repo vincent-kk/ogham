@@ -3,6 +3,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -12,30 +13,7 @@ import { fileURLToPath } from 'node:url';
 import { portableDirname, portableJoin, spawnCli } from '@ogham/cross-platform';
 import { afterAll, describe, expect, it } from 'vitest';
 
-/**
- * Two hook processes, one state file.
- *
- * `hooks.json` runs every hook as its own `node` process, so one message
- * that calls `Skill` and `Bash` together puts two PostToolUse handlers on
- * `.seiri/session-signals.json` at the same instant. Each does read →
- * modify → write; without serialisation the later writer holds a snapshot
- * taken before the earlier one landed, and silently drops the field it
- * never knew about. Which field disappears is down to timing: the workflow
- * hand-off, costing the next turn its state clause, or the failure counter,
- * costing a repeating command its chain warning. Both were measured before
- * the lock — 10/20 and 5/20 over the same 20 rounds — so both are checked
- * here; asserting one direction would pass while the other still lost
- * writes.
- *
- * Run against `bridge/`, because that bundle is the artifact `hooks.json`
- * actually executes — verifying the sources it was built from would pass
- * while the shipped hook still lost writes.
- *
- * The Bash side must be a *failure*: `recordBashSuccess` returns without
- * writing when there is no chain to forget, and a path that never writes
- * cannot race. A success payload here would report a green that means
- * nothing.
- */
+/** Manifest hook bundles are the artifact executed by separate host processes. */
 const packageRoot = portableJoin(
   portableDirname(fileURLToPath(import.meta.url)),
   '..',
@@ -43,21 +21,20 @@ const packageRoot = portableJoin(
   '..',
   '..',
 );
-const bundlePath = portableJoin(packageRoot, 'bridge', 'post-tool-use.mjs');
-const SESSION_ID = 'concurrent-hooks-probe';
+/** A bounded stress run exercises both Pre and Post read-modify-write races. */
 const ROUNDS = 12;
-
-const createdRoots: string[] = [];
+/** Projects created by this bundle-level suite. */
+const roots: string[] = [];
 
 afterAll(() => {
-  for (const root of createdRoots)
-    rmSync(root, { recursive: true, force: true });
+  for (const root of roots) rmSync(root, { recursive: true, force: true });
 });
 
-/** A throwaway project root holding a strict dial, so the hooks do not gate out. */
+/** Create the project configuration consumed by the actual hook bundles. */
 function makeProjectRoot(): string {
-  const root = mkdtempSync(portableJoin(tmpdir(), 'seiri-signals-'));
-  createdRoots.push(root);
+  const root = mkdtempSync(portableJoin(tmpdir(), 'seiri-concurrent-'));
+  roots.push(root);
+  mkdirSync(portableJoin(root, '.git'));
   mkdirSync(portableJoin(root, '.seiri'));
   writeFileSync(
     portableJoin(root, '.seiri', 'config.json'),
@@ -66,61 +43,109 @@ function makeProjectRoot(): string {
   return root;
 }
 
-/** One hook invocation's stdin payload, shaped as the host delivers it. */
-function hookPayload(root: string, event: string, tool: string): string {
-  const toolInput =
-    tool === 'Skill'
-      ? { skill: 'seiri:verify' }
-      : { command: 'exit 1 # concurrent-probe' };
-  return JSON.stringify({
-    cwd: root,
-    session_id: SESSION_ID,
-    hook_event_name: event,
-    tool_name: tool,
-    tool_input: toolInput,
-    error: 'probe',
-    is_interrupt: false,
+/** Execute one packaged hook with native-shaped JSON and check process success. */
+async function hook(
+  bundle: string,
+  input: Record<string, unknown>,
+): Promise<string> {
+  const path = portableJoin(packageRoot, 'bridge', 'claude', bundle);
+  if (!existsSync(path))
+    throw new Error(`Missing ${path}; run yarn seiri build:hooks`);
+  const result = await spawnCli('node', [path], {
+    input: JSON.stringify(input),
+    timeoutMs: 5_000,
   });
+  expect({
+    code: result.code,
+    timedOut: result.timedOut,
+    stderr: result.stderr,
+  }).toEqual({ code: 0, timedOut: false, stderr: '' });
+  return result.stdout;
 }
 
-describe('concurrent PostToolUse hooks', () => {
-  it('keeps both fields when two hooks write at the same instant', async () => {
-    if (!existsSync(bundlePath))
-      throw new Error(
-        `bridge bundle missing at ${bundlePath} — run \`yarn build:hooks\` before this suite`,
-      );
+/** Read the only actor in this isolated repository, without copying its hash algorithm. */
+function state(root: string) {
+  const dir = portableJoin(root, '.seiri', 'sessions');
+  const names = readdirSync(dir).filter((name) => name.endsWith('.json'));
+  expect(names).toHaveLength(1);
+  return JSON.parse(readFileSync(portableJoin(dir, names[0]!), 'utf8')) as {
+    binding: { task: string; counts: Record<string, number> };
+    invocations: Record<string, unknown>;
+  };
+}
 
-    const root = makeProjectRoot();
-    const signalsPath = portableJoin(root, '.seiri', 'session-signals.json');
-    const lostWorkflow: number[] = [];
-    const lostCounts: number[] = [];
-
-    for (let round = 0; round < ROUNDS; round += 1) {
-      writeFileSync(
-        signalsPath,
-        JSON.stringify({ sessionId: SESSION_ID, counts: {}, announced: [] }),
-      );
-
-      await Promise.all([
-        spawnCli('node', [bundlePath], {
-          input: hookPayload(root, 'PostToolUse', 'Skill'),
-        }),
-        spawnCli('node', [bundlePath], {
-          input: hookPayload(root, 'PostToolUseFailure', 'Bash'),
-        }),
-      ]);
-
-      const stored = JSON.parse(readFileSync(signalsPath, 'utf8')) as {
-        workflow?: unknown;
-        counts?: Record<string, number>;
+describe('concurrent paired hook processes', () => {
+  it('preserves both in-flight calls and both failure counters', async () => {
+    const cwd = makeProjectRoot();
+    for (let round = 0; round < ROUNDS; round++) {
+      const native = {
+        cwd,
+        session_id: 'concurrent-hooks-probe',
+        prompt_id: `turn-${round}`,
       };
-      if (stored.workflow === undefined) lostWorkflow.push(round);
-      if (Object.keys(stored.counts ?? {}).length === 0) lostCounts.push(round);
-    }
+      await hook('user-prompt-submit.mjs', {
+        ...native,
+        hook_event_name: 'UserPromptSubmit',
+      });
+      const request = {
+        action: 'start',
+        project_root: cwd,
+        task: 'concurrent-checks',
+        intent: 'change',
+      };
+      const start = {
+        ...native,
+        tool_use_id: `start-${round}`,
+        tool_name: 'mcp__plugin_seiri_tools__workflow',
+        tool_input: request,
+      };
+      await hook('pre-tool-use.mjs', {
+        ...start,
+        hook_event_name: 'PreToolUse',
+      });
+      await hook('post-tool-use.mjs', {
+        ...start,
+        hook_event_name: 'PostToolUse',
+        tool_response: [
+          {
+            type: 'text',
+            text: JSON.stringify({
+              status: 'accepted',
+              action: 'start',
+              task: request.task,
+              intent: 'change',
+            }),
+          },
+        ],
+      });
+      const calls = ['first', 'second'].map((name) => ({
+        ...native,
+        tool_use_id: `${name}-${round}`,
+        tool_name: 'Bash',
+        tool_input: { command: `exit 1 # ${name}` },
+      }));
 
-    expect({ lostWorkflow, lostCounts }).toEqual({
-      lostWorkflow: [],
-      lostCounts: [],
-    });
+      await Promise.all(
+        calls.map((call) =>
+          hook('pre-tool-use.mjs', { ...call, hook_event_name: 'PreToolUse' }),
+        ),
+      );
+      expect(Object.keys(state(cwd).invocations)).toHaveLength(2);
+      await Promise.all(
+        calls.map((call) =>
+          hook('post-tool-use.mjs', {
+            ...call,
+            hook_event_name: 'PostToolUseFailure',
+            error: 'Exit code 1',
+            is_interrupt: false,
+          }),
+        ),
+      );
+
+      const stored = state(cwd);
+      expect(stored.binding.task).toBe('concurrent-checks');
+      expect(Object.values(stored.binding.counts)).toEqual([1, 1]);
+      expect(stored.invocations).toEqual({});
+    }
   }, 60_000);
 });

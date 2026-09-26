@@ -20,6 +20,21 @@ export const FAILURE_CHAIN_THRESHOLD = 3;
 export const TRACKED_COMMANDS_CAP = 32;
 
 /**
+ * In-flight invocations tracked per actor state before observation stops
+ * recording new ones. Shared by `observeInvocation` (what it stops
+ * recording at) and `isWorkflowState` (what it validates the persisted
+ * state against) so the two never drift apart.
+ */
+export const TRACKED_INVOCATIONS_CAP = 128;
+
+/**
+ * Native call ids remembered per actor state before observation stops
+ * recording new ones. Shared by `observeInvocation` and `isWorkflowState`
+ * for the same reason as {@link TRACKED_INVOCATIONS_CAP}.
+ */
+export const TRACKED_CALL_IDS_CAP = 4096;
+
+/**
  * The one line the chain is allowed to inject.
  *
  * It concedes the fail-first case in its own text rather than trying to

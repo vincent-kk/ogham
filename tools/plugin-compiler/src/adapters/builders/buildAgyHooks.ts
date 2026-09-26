@@ -2,13 +2,15 @@ import { AGY_RUNNER_BRIDGE } from "../../constants/adapterPaths.js";
 import type { PluginFacts } from "../../types/index.js";
 
 /**
- * Pull the handler bundle (`bridge/<name>.mjs`) out of a Claude hook command.
- * Claude commands run as `node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs"
- * "${CLAUDE_PLUGIN_ROOT}/bridge/<name>.mjs"`; only the handler lives under
- * `bridge/`, so the first (and only) `bridge/*.mjs` match is it.
+ * Pull the handler bundle (`bridge/<name>.mjs` or `bridge/<host>/<name>.mjs`)
+ * out of a Claude hook command. Claude commands run as `node
+ * "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" "${CLAUDE_PLUGIN_ROOT}/bridge/<name>.mjs"`
+ * (or with one host segment, e.g. `bridge/claude/<name>.mjs`); only the
+ * handler lives under `bridge/`, so the first (and only) `bridge/*.mjs` match
+ * is it.
  */
 function handlerBridge(command: string | undefined): string | null {
-  const match = command?.match(/bridge\/[\w.-]+\.mjs/);
+  const match = command?.match(/bridge\/(?:[\w-]+\/)?[\w.-]+\.mjs/);
   return match ? match[0] : null;
 }
 

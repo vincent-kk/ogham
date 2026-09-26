@@ -123,4 +123,27 @@ describe("buildAgyHooks", () => {
     );
     expect(built).toBeNull();
   });
+
+  it("extracts a nested host-segment bridge handler (e.g. seiri's bridge/claude/<name>.mjs)", () => {
+    const built = buildAgyHooks(
+      facts({
+        hooks: {
+          PreToolUse: [
+            {
+              matcher: "*",
+              hooks: [
+                {
+                  command:
+                    'node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" "${CLAUDE_PLUGIN_ROOT}/bridge/claude/pre-tool-use.mjs"',
+                },
+              ],
+            },
+          ],
+        },
+      }),
+    ) as { filid: { PreToolUse: [{ hooks: { command: string }[] }] } };
+    expect(built.filid.PreToolUse[0].hooks.map((h) => h.command)).toEqual([
+      "node bridge/run-agy.mjs PreToolUse bridge/claude/pre-tool-use.mjs",
+    ]);
+  });
 });

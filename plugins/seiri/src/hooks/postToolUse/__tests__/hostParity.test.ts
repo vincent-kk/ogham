@@ -1,8 +1,8 @@
 import {
-  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
+  readdirSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -19,7 +19,10 @@ import type {
   PostToolUseFailureInput,
   PostToolUseInput,
 } from '../../../types/hooks.js';
-import { processToolOutcome } from '../postToolUse.js';
+import {
+  activateWorkflow,
+  observeBash,
+} from '../../__tests__/helpers/workflowHarness.js';
 import { toCheckOutcome } from '../utils/toCheckOutcome.js';
 
 /** Runnable command shared by every host payload fixture. */
@@ -84,9 +87,19 @@ function assertHostPayload({
   checked,
 }: HostPayloadCase): void {
   const { root, path } = seedRepo();
-  const payload = input(root);
+  const raw = input(root);
+  const codex = 'tool_response' in raw && typeof raw.tool_response === 'string';
+  const payload = {
+    ...raw,
+    ...(codex ? { turn_id: 'turn-a' } : { prompt_id: 'turn-a' }),
+  };
+  activateWorkflow(root, {
+    task: 'host-parity',
+    session_id: payload.session_id,
+    ...(codex ? { turn_id: 'turn-a' } : {}),
+  });
   expect(toCheckOutcome(payload)).toEqual(outcome);
-  const output = processToolOutcome(payload);
+  const output = observeBash(payload);
   expect(output.hookSpecificOutput?.additionalContext).toContain(verdict);
   const ledger = readFileSync(path, 'utf8');
   expect(ledger).toContain(`- [${checked ? 'x' : ' '}] G1`);
@@ -198,6 +211,15 @@ describe('PostToolUse host payload parity', () => {
   it('keeps a codex failure chain at Claude parity for an unmet CHECK', () => {
     const claudeRoot = seedRepo().root;
     const codexRoot = seedRepo().root;
+    activateWorkflow(claudeRoot, {
+      task: 'host-parity',
+      session_id: 'session-chain',
+    });
+    activateWorkflow(codexRoot, {
+      task: 'host-parity',
+      session_id: 'session-chain',
+      turn_id: 'turn-a',
+    });
     const claudeInput: PostToolUseFailureInput = {
       cwd: claudeRoot,
       session_id: 'session-chain',
@@ -208,6 +230,7 @@ describe('PostToolUse host payload parity', () => {
     };
     const codexInput = {
       cwd: codexRoot,
+      turn_id: 'turn-a',
       session_id: 'session-chain',
       hook_event_name: 'PostToolUse',
       tool_name: 'Bash',
@@ -217,13 +240,11 @@ describe('PostToolUse host payload parity', () => {
 
     const claudeContexts = Array.from(
       { length: 3 },
-      () =>
-        processToolOutcome(claudeInput).hookSpecificOutput?.additionalContext,
+      () => observeBash(claudeInput).hookSpecificOutput?.additionalContext,
     );
     const codexContexts = Array.from(
       { length: 3 },
-      () =>
-        processToolOutcome(codexInput).hookSpecificOutput?.additionalContext,
+      () => observeBash(codexInput).hookSpecificOutput?.additionalContext,
     );
 
     expect(
@@ -237,9 +258,15 @@ describe('PostToolUse host payload parity', () => {
 
   it('resets a codex failure chain only after a met CHECK', () => {
     const { root } = seedRepo();
+    activateWorkflow(root, {
+      task: 'host-parity',
+      session_id: 'session-reset',
+      turn_id: 'turn-a',
+    });
     const input = {
       cwd: root,
       session_id: 'session-reset',
+      turn_id: 'turn-a',
       hook_event_name: 'PostToolUse',
       tool_name: 'Bash',
       tool_input: { command: COMMAND },
@@ -247,11 +274,11 @@ describe('PostToolUse host payload parity', () => {
     } as PostToolUseInput;
 
     const contexts = [
-      processToolOutcome(input),
-      processToolOutcome(input),
-      processToolOutcome({ ...input, tool_response: 'HOST_PARITY_OK' }),
-      processToolOutcome(input),
-      processToolOutcome(input),
+      observeBash(input),
+      observeBash(input),
+      observeBash({ ...input, tool_response: 'HOST_PARITY_OK' }),
+      observeBash(input),
+      observeBash(input),
     ].map((output) => output.hookSpecificOutput?.additionalContext);
 
     expect(contexts.every((text) => !text?.includes(CHAIN_HINT))).toBe(true);
@@ -260,9 +287,15 @@ describe('PostToolUse host payload parity', () => {
   it('leaves codex failure chain state untouched outside the gate ledger', () => {
     const command = 'yarn outside-ledger';
     const freshRoot = seedRepo().root;
+    activateWorkflow(freshRoot, {
+      task: 'host-parity',
+      session_id: 'session-outside',
+      turn_id: 'turn-a',
+    });
     const freshInput = {
       cwd: freshRoot,
       session_id: 'session-outside',
+      turn_id: 'turn-a',
       hook_event_name: 'PostToolUse',
       tool_name: 'Bash',
       tool_input: { command },
@@ -271,34 +304,47 @@ describe('PostToolUse host payload parity', () => {
 
     const freshContexts = Array.from(
       { length: 3 },
-      () =>
-        processToolOutcome(freshInput).hookSpecificOutput?.additionalContext,
+      () => observeBash(freshInput).hookSpecificOutput?.additionalContext,
     );
     expect(freshContexts).toEqual([undefined, undefined, undefined]);
+    const sessions = portableJoin(freshRoot, '.seiri', 'sessions');
+    const states = readdirSync(sessions)
+      .filter((name) => name.endsWith('.json'))
+      .map((name) =>
+        JSON.parse(readFileSync(portableJoin(sessions, name), 'utf8')),
+      );
     expect(
-      existsSync(portableJoin(freshRoot, '.seiri', 'session-signals.json')),
-    ).toBe(false);
+      states.every(
+        (state) => Object.keys(state.binding?.counts ?? {}).length === 0,
+      ),
+    ).toBe(true);
 
     const preservedRoot = seedRepo().root;
-    const claudeInput: PostToolUseFailureInput = {
+    activateWorkflow(preservedRoot, {
+      task: 'host-parity',
+      session_id: 'session-preserved',
+      turn_id: 'turn-a',
+    });
+    const knownFailure: PostToolUseInput = {
       cwd: preservedRoot,
       session_id: 'session-preserved',
-      hook_event_name: 'PostToolUseFailure',
+      turn_id: 'turn-a',
+      hook_event_name: 'PostToolUse',
       tool_name: 'Bash',
       tool_input: { command },
-      error: 'Exit code 1\nFAIL',
+      tool_response: 'Exit code 1\nFAIL',
     };
     const codexInput = {
       ...freshInput,
       cwd: preservedRoot,
       session_id: 'session-preserved',
     };
-    processToolOutcome(claudeInput);
-    processToolOutcome(claudeInput);
-    Array.from({ length: 3 }, () => processToolOutcome(codexInput));
+    observeBash(knownFailure);
+    observeBash(knownFailure);
+    Array.from({ length: 3 }, () => observeBash(codexInput));
 
     const preservedContext =
-      processToolOutcome(claudeInput).hookSpecificOutput?.additionalContext;
+      observeBash(knownFailure).hookSpecificOutput?.additionalContext;
     expect(preservedContext).toBeDefined();
     expect(preservedContext).toContain(FAILURE_CHAIN_LINE);
   });
