@@ -1,5 +1,7 @@
 # context-query — Minimal Context Reference
 
+
+
 ## Section 1 — Parse the Question
 
 Extract:
@@ -15,7 +17,7 @@ If no target path can be derived, ask for one concise path. Do not substitute a 
 Call exactly once:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "resolve",
   path: "<project-path>",
   requests: [{ targetPath: "<target-path>" }]

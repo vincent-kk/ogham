@@ -231,6 +231,10 @@ describe('cross-review v7 skill surface', () => {
     expect(templates).toContain('`riskPlan`');
   });
 
+  it('keeps host-specific tool names out of the reviewer method injected verbatim', () => {
+    expect(reviewer).not.toMatch(/\bmcp__/);
+  });
+
   it('keeps actor and orchestration documents within their line budgets', () => {
     expect(skill.split('\n').length - 1).toBeLessThanOrEqual(120);
     expect(templates.split('\n').length - 1).toBeLessThanOrEqual(110);

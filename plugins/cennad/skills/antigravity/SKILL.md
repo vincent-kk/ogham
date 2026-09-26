@@ -7,6 +7,8 @@ argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refin
 
 # antigravity
 
+<!-- ogham-mcp-tools:cennad -->
+
 Do not delegate local-code or short-text reasoning that needs no web grounding.
 
 ## Input and tier

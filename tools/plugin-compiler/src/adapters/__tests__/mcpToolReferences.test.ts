@@ -64,6 +64,55 @@ describe("explicit MCP tool references", () => {
     ]);
   });
 
+  it("rewrites marked persona copies and keeps unmarked personas verbatim", () => {
+    const facts = mcpToolFacts({
+      agentFiles: {
+        "courier.md":
+          "<!-- ogham-mcp-tools:seiri -->\nCall `mcp__plugin_seiri_tools__settings`.",
+        "helper.md": "mcp__plugin_seiri_tools__settings",
+      },
+    });
+    const personas = Object.fromEntries(
+      (buildCodexSkills(facts) ?? [])
+        .filter((file) => file.relativePath.includes("/.shared/personas/"))
+        .map((file) => [file.relativePath.split("/").pop(), file.content]),
+    );
+    expect(personas).toEqual({
+      "courier.md": "\nCall `mcp__seiri__settings`.",
+      "helper.md": "mcp__plugin_seiri_tools__settings",
+    });
+  });
+
+  it("emits the skill variant when only a persona carries the marker", () => {
+    const facts = mcpToolFacts({
+      skillFiles: { "x/SKILL.md": "mcp__plugin_seiri_tools__workflow" },
+      agentFiles: {
+        "courier.md":
+          "<!-- ogham-mcp-tools:seiri -->\nmcp__plugin_seiri_tools__workflow",
+      },
+    });
+    expect(buildCodexSkills(facts)?.map((file) => file.content)).toEqual([
+      "\nmcp__seiri__workflow",
+      "mcp__plugin_seiri_tools__workflow",
+    ]);
+    expect(buildCodexPluginManifest(facts).skills).toBe(
+      "./.codex-plugin/skills/",
+    );
+  });
+
+  it("emits no skill variant for a plugin without skills even when a persona is marked", () => {
+    const facts = mcpToolFacts({
+      hasSkills: false,
+      skillFiles: {},
+      agentFiles: {
+        "courier.md":
+          "<!-- ogham-mcp-tools:seiri -->\nmcp__plugin_seiri_tools__workflow",
+      },
+    });
+    expect(buildCodexSkills(facts)).toBeNull();
+    expect(buildCodexPluginManifest(facts).skills).toBeUndefined();
+  });
+
   it("preserves similarly prefixed external tool names", () => {
     const source =
       "<!-- ogham-mcp-tools:seiri -->\nmcp__plugin_seiri-extra_tools__workflow mcp__other__gates";

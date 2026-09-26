@@ -1,5 +1,7 @@
 # Preconditions
 
+
+
 From state.json:
 
 - `refine.status == "completed"`
@@ -14,7 +16,7 @@ If refine passed but `estimate.status == "pending"`, ask the user:
 
 > "Man-day estimation has not run for this document. Skip it and split now, or run /imbas:estimate first?"
 
-- **Skip** → call `mcp__plugin_imbas_tools__run_transition` with `action: "skip_phases"`, `phases: ["estimate"]` (sets `estimate.status = "skipped"`), then continue.
+- **Skip** → call `mcp__imbas__run_transition` with `action: "skip_phases"`, `phases: ["estimate"]` (sets `estimate.status = "skipped"`), then continue.
 - **Estimate first** → stop with guidance: "Run /imbas:estimate, then re-run /imbas:split."
 
 If `estimate.status == "in_progress"`, an estimation is underway — stop with: "Finish or skip the estimate phase before splitting."

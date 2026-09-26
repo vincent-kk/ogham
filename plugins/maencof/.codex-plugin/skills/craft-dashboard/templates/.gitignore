@@ -1,0 +1,12 @@
+node_modules/
+dist/
+backend/app/static/*
+!backend/app/static/.gitkeep
+*.log
+.DS_Store
+.env
+.run/
+.dashboard-priming.md
+.dashboard-spec.draft.md
+.dashboard-runtime.json
+dashboard-spec.json.bak

@@ -12,6 +12,8 @@ plugin: maencof
 
 # organize — Knowledge Transition Orchestration
 
+<!-- ogham-mcp-tools:maencof -->
+
 Runs the memory-organizer agent to recommend and execute document transitions between Layers. The judge module evaluates candidates, then the execute module performs the actual move after user confirmation.
 
 ## Insight Mode

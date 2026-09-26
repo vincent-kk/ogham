@@ -12,6 +12,8 @@ plugin: maencof
 
 # cleanup — Vault and CLAUDE.md Cleanup
 
+<!-- ogham-mcp-tools:maencof -->
+
 Manages cleanup operations across two domains: deleting vault documents and managing maencof sections in CLAUDE.md.
 
 ## When to Use This Skill

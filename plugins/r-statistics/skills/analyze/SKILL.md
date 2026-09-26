@@ -8,6 +8,8 @@ complexity: complex
 plugin: r-statistics
 ---
 
+<!-- ogham-mcp-tools:r-statistics -->
+
 > **EXECUTION MODEL (Tier-2a Anti-Yield)**: Run the pipeline as a SINGLE CONTINUOUS OPERATION. After each agent (`Task`) returns or an MCP tool completes, IMMEDIATELY chain the next step in the same turn. State transitions are internal — never ask the user which state to resume from. Large agent outputs (SAP, R results, validator findings) are working data; summarize them to the user only at a checkpoint, not after every step.
 >
 > **Valid reasons to yield**:

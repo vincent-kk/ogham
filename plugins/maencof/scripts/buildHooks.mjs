@@ -3,7 +3,7 @@
  * Build script for hook entry point bundles
  * Bundles each hook into a self-contained ESM file for plugin distribution
  *
- * Output: bridge/<name>.mjs
+ * Output: bridge/claude/<name>.mjs and bridge/codex/<name>.mjs
  *
  * One bundle per Claude Code event: each bridge is a dispatcher that folds that
  * event's concern handlers into a single process (entries live at
@@ -119,6 +119,11 @@ const POST_TOOL_USE_BYTES = 12 * 1024;
 // FORBIDDEN_PATTERNS below, not this cap, is the isolation guarantee.
 const PRE_TOOL_USE_BYTES = 15 * 1024;
 
+// Each hook is bundled once per host runtime directory. Claude (and Antigravity
+// through run-agy) loads bridge/claude; the compiler's `codexHookRuntime`
+// setting points Codex at bridge/codex.
+const HOOK_HOSTS = ['claude', 'codex'];
+
 // `name` is the bridge output basename (kebab — referenced by hooks.json and
 // kept stable). `entryPath` is the esbuild entry relative to src/hooks.
 const hookEntries = [
@@ -152,37 +157,41 @@ const ESM_CJS_REQUIRE_BANNER =
   'const require = __cpCreateRequire(import.meta.url);\n';
 
 await Promise.all(
-  hookEntries.map(async ({ name, entryPath }) =>
-    esbuild.build({
-      entryPoints: [resolve(root, 'src/hooks', entryPath)],
-      bundle: true,
-      platform: 'node',
-      target: 'node20',
-      format: 'esm',
-      outfile: resolve(outputBridge, `${name}.mjs`),
-      minify: true,
-      sourcemap: false,
-      treeShaking: true,
-      loader: { '.md': 'text' },
-      banner:
-        name === 'user-prompt-submit'
-          ? { js: ESM_CJS_REQUIRE_BANNER }
-          : undefined,
-    }),
+  hookEntries.flatMap(({ name, entryPath }) =>
+    HOOK_HOSTS.map(async (host) =>
+      esbuild.build({
+        entryPoints: [resolve(root, 'src/hooks', entryPath)],
+        bundle: true,
+        platform: 'node',
+        target: 'node20',
+        format: 'esm',
+        outfile: resolve(outputBridge, host, `${name}.mjs`),
+        minify: true,
+        sourcemap: false,
+        treeShaking: true,
+        loader: { '.md': 'text' },
+        banner:
+          name === 'user-prompt-submit'
+            ? { js: ESM_CJS_REQUIRE_BANNER }
+            : undefined,
+      }),
+    ),
   ),
 );
 
-console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
+console.log(
+  `  Hook scripts (${hookEntries.length}) -> bridge/claude/*.mjs, bridge/codex/*.mjs`,
+);
 
 // `sideEffects: false` makes root-barrel-only inputs non-contributing; emitted bytes and patterns guard regressions.
 
 // agy hook runner (shared — bundled from @ogham/cross-platform, not this
 // plugin's src). The emitted agy hooks.json (plugin root, named-group format)
 // routes each event through this runner, which translates agy's camelCase
-// payload to the Claude contract, runs the same bridge/<event>.mjs handler, and
+// payload to the Claude contract, runs the same bridge/claude/<event>.mjs handler, and
 // translates the reply back. Bundling it here ships it in bridge/ so
 // `agy plugin install` distributes it. Contract: tools/plugin-compiler
-// buildAgyHooks emits `node bridge/run-agy.mjs <ClaudeEvent> bridge/<handler>.mjs`.
+// buildAgyHooks emits `node bridge/run-agy.mjs <ClaudeEvent> bridge/claude/<handler>.mjs`.
 // It pulls only Node builtins (spawnSync + the pure agy-hooks translation), so
 // it stays under the light cap and trips no FORBIDDEN_PATTERNS.
 const RUN_AGY_HOOK_BYTES = 12 * 1024;
@@ -237,17 +246,20 @@ const SESSION_START_FORBIDDEN_PATTERNS = [/\bPATHEXT\b/, /\bisexe\b/];
 
 const violations = [];
 
+const hookBundles = hookEntries.flatMap(({ name, maxBytes }) =>
+  HOOK_HOSTS.map((host) => ({ name, bundle: `${host}/${name}.mjs`, maxBytes })),
+);
 const guardedBundles = [
-  ...hookEntries,
-  { name: 'run-agy', maxBytes: RUN_AGY_HOOK_BYTES },
+  ...hookBundles,
+  { name: 'run-agy', bundle: 'run-agy.mjs', maxBytes: RUN_AGY_HOOK_BYTES },
 ];
 
-for (const { name, maxBytes } of guardedBundles) {
-  const file = resolve(outputBridge, `${name}.mjs`);
+for (const { name, bundle, maxBytes } of guardedBundles) {
+  const file = resolve(outputBridge, bundle);
   const { size } = await stat(file);
   if (size > maxBytes) {
     violations.push(
-      `  ${name}.mjs: ${size} bytes > ${maxBytes} (${(size / 1024).toFixed(1)} KB > ${(maxBytes / 1024).toFixed(0)} KB)`,
+      `  ${bundle}: ${size} bytes > ${maxBytes} (${(size / 1024).toFixed(1)} KB > ${(maxBytes / 1024).toFixed(0)} KB)`,
     );
   }
   const content = await readFile(file, 'utf8');
@@ -257,7 +269,7 @@ for (const { name, maxBytes } of guardedBundles) {
       : FORBIDDEN_PATTERNS;
   for (const pattern of forbiddenPatterns) {
     if (pattern.test(content)) {
-      violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
+      violations.push(`  ${bundle}: forbidden pattern ${pattern} matched`);
     }
   }
 }
@@ -282,7 +294,7 @@ console.log(
 if (checkOnly) {
   const generatedFiles = [
     'run-hook.cmd',
-    ...hookEntries.map(({ name }) => `${name}.mjs`),
+    ...hookBundles.map(({ bundle }) => bundle),
     'run-agy.mjs',
   ];
   const drift = [];

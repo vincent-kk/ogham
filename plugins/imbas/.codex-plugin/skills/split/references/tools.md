@@ -19,15 +19,17 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 # Tools Used
 
+
+
 ## imbas MCP Tools
 
 | Tool                                                  | Usage                                                                        |
 | ----------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `mcp__plugin_imbas_tools__config_get` (declared-only) | Provider, language, labels — invoked from the creation skeleton in SKILL.md  |
-| `mcp__plugin_imbas_tools__run_get`                    | Load run state, verify preconditions, run selection                          |
-| `mcp__plugin_imbas_tools__run_transition`             | skip_phases(estimate), start_phase/complete_phase/escape_phase(split)        |
-| `mcp__plugin_imbas_tools__manifest_save`              | Save stories-manifest.json (after decomposition and after EACH created item) |
-| `mcp__plugin_imbas_tools__manifest_validate`          | Validate manifest structural integrity                                       |
+| `mcp__imbas__config_get` (declared-only) | Provider, language, labels — invoked from the creation skeleton in SKILL.md  |
+| `mcp__imbas__run_get`                    | Load run state, verify preconditions, run selection                          |
+| `mcp__imbas__run_transition`             | skip_phases(estimate), start_phase/complete_phase/escape_phase(split)        |
+| `mcp__imbas__manifest_save`              | Save stories-manifest.json (after decomposition and after EACH created item) |
+| `mcp__imbas__manifest_validate`          | Validate manifest structural integrity                                       |
 
 Manifest reads use the Read tool directly on `stories-manifest.json` / `estimation.json` — there is no manifest_get tool.
 

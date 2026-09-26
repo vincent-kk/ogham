@@ -1,5 +1,7 @@
 # comment
 
+<!-- ogham-mcp-tools:atlassian -->
+
 | Operation      | Method | Endpoint                    | Notes                                                                                       |
 | -------------- | ------ | --------------------------- | ------------------------------------------------------------------------------------------- |
 | List comments  | GET    | `/issue/{key}/comment`      | Cloud. On Server/DC use `comment_thread` (below)                                            |
@@ -10,7 +12,7 @@
 
 ## comment_thread (Server/DC)
 
-`mcp__plugin_atlassian_tools__comment_thread` (Codex: `mcp__atlassian__comment_thread`) lists comments and merges replies stored by third-party reply plugins when the site has a saved profile. Cloud sites are rejected — use `fetch` there. For JSM customer-visible comments, see [JSM comments](#jsm-comments).
+`mcp__plugin_atlassian_tools__comment_thread` lists comments and merges replies stored by third-party reply plugins when the site has a saved profile. Cloud sites are rejected — use `fetch` there. For JSM customer-visible comments, see [JSM comments](#jsm-comments).
 
 | Parameter                    | Mode         | Notes                                                                    |
 | ---------------------------- | ------------ | ------------------------------------------------------------------------ |

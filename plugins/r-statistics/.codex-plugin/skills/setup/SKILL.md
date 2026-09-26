@@ -9,6 +9,8 @@ complexity: simple
 plugin: r-statistics
 ---
 
+
+
 <!-- [INTERACTIVE] — installation changes the system; never run an installer without explicit consent. -->
 
 # setup — Detect & Install R
@@ -19,7 +21,7 @@ Confirm R is available for the execution tools, and when it is missing, guide an
 
 `--packages` runs only the package check (Step 6); it still needs a working Rscript, so if detection fails, install R first.
 
-1. **Detect.** Call `mcp__plugin_r-statistics_tools__run_r` with a trivial script (e.g. `cat(R.version.string)`, `executionMode: "sync"`).
+1. **Detect.** Call `mcp__r_statistics__run_r` with a trivial script (e.g. `cat(R.version.string)`, `executionMode: "sync"`).
    - Result returned → R works. Report the version and continue to **Step 6**.
    - `R_NOT_FOUND` error → R is missing or off-PATH. Do Steps 2–5, then Step 6.
 2. **Identify the OS** (or honor `--os`) and load the matching reference: [windows.md](./references/windows.md) · [macos.md](./references/macos.md) · [linux.md](./references/linux.md).

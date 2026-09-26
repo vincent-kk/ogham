@@ -7,6 +7,8 @@ argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refin
 
 # claude
 
+<!-- ogham-mcp-tools:cennad -->
+
 The child inherits no session context or customizations, but retains Claude Code's built-in tools in the spawned working directory, bounded by the configured permission mode.
 
 ## Input and tier

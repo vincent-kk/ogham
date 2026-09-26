@@ -2,6 +2,8 @@
 
 # migrate — Vault Architecture Migration
 
+<!-- ogham-mcp-tools:maencof -->
+
 Upgrades the vault directory structure to v3: L3 sub-layers, a flat Layer 5, and cross-layer hubs carried as a frontmatter attribute instead of a sub-layer.
 
 Two upgrade paths run through the same plan — a v1 vault (flat 5-Layer) needs the L3 split, and a v2 vault additionally needs Layer 5 flattened and its boundary documents converted to hubs. The plan emits only the operations the vault actually needs, so running it on a partially-migrated vault is safe.

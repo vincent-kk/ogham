@@ -7,6 +7,8 @@ description: 'Open the cennad settings UI in your browser to configure providers
 
 # setup
 
+<!-- ogham-mcp-tools:cennad -->
+
 Open the cennad settings UI in a local browser.
 
 ## Steps

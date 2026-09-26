@@ -10,6 +10,8 @@ plugin: filid
 
 # restructure — Plan, Approve, Execute, Verify
 
+
+
 Move units to their FCA target locations through one persisted `restructure` `plan` action. Filid decides placement and validates the result; the calling environment owns all actual file moves and import edits.
 
 ## When to Use
@@ -56,7 +58,7 @@ Filid MCP never moves a file and never rewrites an import. This skill does not t
 Every move and every import edit is done, so the tree is still again. In this order, in the same turn:
 
 1. Run the [facts bootstrap](../.shared/facts-bootstrap.md) once for the whole repository — one `status`, one extraction over the list it names, one `submit`. Moved files are new paths and their consumers changed, so a partial batch leaves the graph half-old.
-2. Have a **separate subagent** extract the same scope with its own Bash call and send `mcp__plugin_filid_tools__facts({ action: "compare", path: PROJECT_ROOT, file: <its extraction output> })` — no `generationId`, since this settles the live store rather than a review generation. That subagent reports what the comparison returned and judges nothing: an actor that confirms its own reading confirms nothing.
+2. Have a **separate subagent** extract the same scope with its own Bash call and send `mcp__filid__facts({ action: "compare", path: PROJECT_ROOT, file: <its extraction output> })` — no `generationId`, since this settles the live store rather than a review generation. That subagent reports what the comparison returned and judges nothing: an actor that confirms its own reading confirms nothing.
 3. Adjudicate the items the comparison opened, through the bootstrap's adjudicate step. A `dismiss` is confirmed by a different subagent there, not here.
 
 ### 6. Validate exact postconditions

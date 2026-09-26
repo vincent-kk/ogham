@@ -1,5 +1,10 @@
 # Maencof Public Contract
 
+## Structure
+
+- `bridge/claude`는 Claude 런타임이며 Antigravity도 runner를 거쳐 이 번들을 실행한다. `bridge/codex`는 compiler 설정 `codexHookRuntime`이 선택하는 Codex 런타임이다. bridge 루트의 MCP 서버·vault setup CLI·Antigravity runner·Windows shim은 모든 호스트가 공유한다.
+- 두 호스트 모두 플러그인 디렉터리 전체를 설치한다 — 이 분리는 설치 범위가 아니라 실행 경로를 나눈다.
+
 ## Requirements
 
 - Maencof 지침은 프로젝트에서 호스트가 실제로 읽는 Claude/Codex 지침 후보의 `<!-- MAENCOF:START -->` / `<!-- MAENCOF:END -->` 구간만 소유한다.

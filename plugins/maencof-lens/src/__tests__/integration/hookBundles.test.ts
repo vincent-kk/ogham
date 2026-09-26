@@ -21,11 +21,11 @@ describe("hook bundle smoke tests", () => {
     if (cwd) rmSync(cwd, { recursive: true, force: true });
   });
 
-  const bundle = resolve(bridgeDir, "session-start.mjs");
+  describe.each(["claude", "codex"])("bridge/%s", (host) => {
+    const bundle = resolve(bridgeDir, host, "session-start.mjs");
 
-  it.skipIf(!existsSync(bundle))(
-    "session-start.mjs spawns, exits 0, stdout is empty or valid JSON, stderr clean",
-    () => {
+    it("session-start.mjs spawns, exits 0, stdout is empty or valid JSON, stderr clean", () => {
+      expect(existsSync(bundle)).toBe(true);
       const result = spawnSync(process.execPath, [bundle], {
         cwd,
         encoding: "utf8",
@@ -48,6 +48,6 @@ describe("hook bundle smoke tests", () => {
       expect(result.stderr).not.toMatch(
         /Dynamic require|Cannot find module|^Error:/m,
       );
-    },
-  );
+    });
+  });
 });

@@ -1,12 +1,14 @@
 # Tools Used — Provider-agnostic
 
+
+
 Provider-specific tools are in `jira/tools.md` and `github/tools.md`.
 
 ## imbas MCP Tools (all providers)
 
 | Tool                                  | Usage                                           |
 | ------------------------------------- | ----------------------------------------------- |
-| `mcp__plugin_imbas_tools__config_get` | Read `config.provider` to route Step 0 dispatch |
+| `mcp__imbas__config_get` | Read `config.provider` to route Step 0 dispatch |
 
 ## Skill Invocations
 

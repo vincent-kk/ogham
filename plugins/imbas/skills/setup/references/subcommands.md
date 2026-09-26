@@ -1,5 +1,7 @@
 # Subcommand Behaviors
 
+<!-- ogham-mcp-tools:imbas -->
+
 ## show
 
 1. Call `mcp__plugin_imbas_tools__config_get` (no field — returns full config).

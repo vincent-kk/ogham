@@ -12,6 +12,8 @@ plugin: maencof
 
 # /maencof:insight
 
+<!-- ogham-mcp-tools:maencof -->
+
 Manage the auto-insight capture system.
 
 ## Capture Workflow

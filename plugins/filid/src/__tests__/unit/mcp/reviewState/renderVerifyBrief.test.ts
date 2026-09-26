@@ -57,6 +57,20 @@ describe('renderVerifyBrief', () => {
     );
   });
 
+  it('spells Filid tool calls with the Codex prefix only for a Codex reader', () => {
+    const call =
+      'Send `mcp__plugin_filid_tools__facts({ action: "compare" })`.';
+    const base = buildVerifyBriefInput();
+    const input = {
+      ...base,
+      verifierMethod: `${base.verifierMethod}${call}\n`,
+    };
+    const codex = renderVerifyBrief({ ...input, host: 'codex' });
+    expect(codex).toContain('Send `mcp__filid__facts({ action: "compare" })`.');
+    expect(codex).not.toContain('mcp__plugin_filid_tools__');
+    expect(renderVerifyBrief({ ...input, host: 'claude' })).toContain(call);
+  });
+
   it('keeps out-of-diff findings citing FCA-1 and USR- rules assigned', () => {
     const input = buildVerifyBriefInput();
     input.findings = [

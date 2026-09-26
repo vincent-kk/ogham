@@ -1,5 +1,7 @@
 # Init Workflow
 
+<!-- ogham-mcp-tools:imbas -->
+
 ```
 Step 0 — Environment Health Check (non-blocking)
   Check remote tool availability and determine available providers.
@@ -67,7 +69,7 @@ Step 3 — Settings Page (browser; the ONLY interactive configuration step)
 
 Step 4 — GitHub label provisioning (only when summary.provider == "github"
           AND summary.provisionLabels == true)
-  1. Load config.labels via mcp__plugin_imbas_tools__config_get.
+  1. Load config.labels via `mcp__plugin_imbas_tools__config_get`.
   2. gh label list --repo <repo> --json name → existing set.
   3. For each config label value NOT in existing:
      gh label create "<value>" --repo <repo> --color c5def5

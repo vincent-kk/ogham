@@ -1,5 +1,7 @@
 # digest Workflow — Provider-agnostic skeleton
 
+
+
 This file owns Steps 0–5. Step 6 (preview / publish) is delegated to the provider-specific workflow file selected by `config.provider`:
 
 - `jira` → `jira/workflow.md` Step 6
@@ -8,7 +10,7 @@ This file owns Steps 0–5. Step 6 (preview / publish) is delegated to the provi
 
 ## Step 0 — Provider routing
 
-Read `config.provider` via `mcp__plugin_imbas_tools__config_get`. Note the target workflow file for Step 6, but do not read it yet.
+Read `config.provider` via `mcp__imbas__config_get`. Note the target workflow file for Step 6, but do not read it yet.
 
 ## Step 1 — Read issue (full depth)
 

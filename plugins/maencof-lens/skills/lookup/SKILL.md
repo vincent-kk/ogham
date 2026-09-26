@@ -10,6 +10,8 @@ plugin: maencof-lens
 
 # lookup — Vault Knowledge Lookup
 
+<!-- ogham-mcp-tools:maencof-lens -->
+
 Search → Read → Summarize pipeline for single-document quick reference. For multi-doc context assembly, use `/maencof-lens:brief` instead.
 
 ## When to Use

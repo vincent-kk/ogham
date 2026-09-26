@@ -12,6 +12,8 @@ plugin: maencof
 
 # reflect — Knowledge Vault Analysis Report
 
+<!-- ogham-mcp-tools:maencof -->
+
 Runs the **judge module** of memory-organizer for transition analysis, or the active agent for insight assessment. Generates a report without vault knowledge writes; insight previews may retain review snapshots in a host execution artifact outside the vault.
 
 ## Insight Assessment

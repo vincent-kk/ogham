@@ -10,6 +10,8 @@ plugin: maencof-lens
 
 # brief — Vault Context Assembly
 
+<!-- ogham-mcp-tools:maencof-lens -->
+
 Assemble a token-budgeted context block from vault documents matching a query. For single-doc quick reference, use `/maencof-lens:lookup` instead.
 
 ## When to Use

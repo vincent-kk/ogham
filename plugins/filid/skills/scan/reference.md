@@ -1,5 +1,7 @@
 # scan — FCA Audit Reference
 
+<!-- ogham-mcp-tools:filid -->
+
 This reference defines the only full-project FCA audit workflow. The workflow is read-only and uses one snapshot-oriented pass from each retained audit surface.
 
 ## Section 1 — Project Snapshot Summary

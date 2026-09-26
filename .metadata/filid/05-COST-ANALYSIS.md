@@ -118,16 +118,16 @@ MCP 서버는 세션당 1회 기동 후 상주한다. 기동 비용은 초기 1�
 
 ## 번들 크기
 
-| 파일                            | 크기                    | 형식 |
-| ------------------------------- | ----------------------- | ---- |
-| `bridge/mcp-server.cjs`         | 416,185 B               | CJS  |
-| `bridge/pre-tool-use.mjs`       | 26,949 B                | ESM  |
-| `bridge/user-prompt-submit.mjs` | 12,162 B                | ESM  |
-| `bridge/setup.mjs`              | 9,449 B                 | ESM  |
-| `bridge/run-agy.mjs`            | 3,351 B                 | ESM  |
-| `bridge/run-hook.cmd`           | 54 B                    | cmd  |
-| `public/settings.html`          | 30,263 B                | HTML |
-| **합계**                        | **498,413 B (≈487 KB)** |      |
+| 파일                                   | 크기                    | 형식 |
+| -------------------------------------- | ----------------------- | ---- |
+| `bridge/mcp-server.cjs`                | 416,185 B               | CJS  |
+| `bridge/<host>/pre-tool-use.mjs`       | 26,949 B                | ESM  |
+| `bridge/<host>/user-prompt-submit.mjs` | 12,162 B                | ESM  |
+| `bridge/<host>/setup.mjs`              | 9,449 B                 | ESM  |
+| `bridge/run-agy.mjs`                   | 3,351 B                 | ESM  |
+| `bridge/run-hook.cmd`                  | 54 B                    | cmd  |
+| `public/settings.html`                 | 30,263 B                | HTML |
+| **합계**                               | **498,413 B (≈487 KB)** |      |
 
 훅 3개 합계는 48,560 B다. `dist/` 라이브러리 산출물은 1.0에 존재하지 않는다.
 

@@ -8,7 +8,7 @@ complexity: complex
 plugin: filid
 ---
 
-# cross-review — Deterministic Changed-Scope Review
+# cross-review — Deterministic Changed-Scope Review 
 
 Run this skill as one continuous operation. Keep intermediate artifacts on disk; yield only for an unrecoverable source-state error or after a sealed verdict and its pull-request delivery.
 
@@ -30,7 +30,7 @@ delivery or explicit stop condition.
 
 ## Step 0 — Load the tool and bootstrap facts
 
-If the `review_state` schema is absent, call `ToolSearch` once with `select:mcp__plugin_filid_tools__review_state`. Then run the [facts bootstrap](../.shared/facts-bootstrap.md) for the absolute session cwd and continue to Step 1 in the same turn.
+If the `review_state` schema is absent, call `ToolSearch` once with `select:mcp__filid__review_state`. Then run the [facts bootstrap](../.shared/facts-bootstrap.md) for the absolute session cwd and continue to Step 1 in the same turn.
 
 ## Step 1 — Read the PR
 

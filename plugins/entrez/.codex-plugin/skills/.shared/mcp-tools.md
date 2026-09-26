@@ -1,6 +1,8 @@
 # entrez MCP tools (contract mirror)
 
-SSoT is the MCP server (`src/mcp/tools/*`) + design `mcp-tools.md`. This is a lazy reference for skills/agent. Tools are exposed under the `tools` server: call them as `mcp__plugin_entrez_tools__<name>`. All are `[Internal]` — invoked by the entrez agent/skills, not the user directly.
+
+
+SSoT is the MCP server (`src/mcp/tools/*`) + design `mcp-tools.md`. This is a lazy reference for skills/agent. Tools are exposed under the `tools` server: call each by its full name, for example `mcp__entrez__paper_search` for `paper_search`. All are `[Internal]` — invoked by the entrez agent/skills, not the user directly.
 
 ## paper_search (readOnly, non-idempotent)
 

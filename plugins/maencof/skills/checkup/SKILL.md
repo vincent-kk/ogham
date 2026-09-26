@@ -12,6 +12,8 @@ plugin: maencof
 
 # checkup — Knowledge Vault Diagnosis
 
+<!-- ogham-mcp-tools:maencof -->
+
 Checks knowledge vault health across 8 diagnostic items and suggests auto-fixes. Delegates detailed analysis to the checkup agent. Also supports a lightweight `--quick` mode that short-circuits to a single `mcp__plugin_maencof_tools__kg_status` call and renders a compact health report (absorbs the former `maencof-diagnose` skill).
 
 ## When to Use This Skill

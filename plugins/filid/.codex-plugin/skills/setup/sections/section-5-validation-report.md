@@ -1,11 +1,13 @@
 # setup — Validation and Report
 
+
+
 > Reference for Phase 3–4 of `/filid:setup`.
 
 Validate the post-initialization snapshot:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "validate",
   path: "<target-path>",
   scopes: ["documents", "nodes", "entry-points"]

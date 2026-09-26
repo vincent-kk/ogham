@@ -28,7 +28,7 @@ packages/cennad/
 │   └── courier.md               # 디스패치 스킬이 background spawn 하는 위임 실행 에이전트 (plugin.json 필드 없이 자동 발견)
 ├── scripts/
 │   ├── buildMcpServer.mjs       # esbuild → bridge/mcp-server.cjs (CJS)
-│   ├── buildHooks.mjs           # esbuild → bridge/<name>.mjs (ESM, thin-script 가드)
+│   ├── buildHooks.mjs           # esbuild → bridge/<host>/<name>.mjs (ESM, thin-script 가드)
 │   └── buildSettingsHtml.mjs    # FE → src/mcp/tools/openSettings/__generated__/settingsHtml.ts
 ├── bridge/                      # build artifact (committed — package.json:files)
 ├── src/                         # fractal root
@@ -219,13 +219,13 @@ hooks/inject*    →  hooks/shared (only)        ← core/ import 금지
 }
 ```
 
-| 단계 | 명령                                 | 산출물                                                     |
-| ---- | ------------------------------------ | ---------------------------------------------------------- |
-| 1    | `yarn version:sync`                  | `src/version.ts`                                           |
-| 2    | `node scripts/buildSettingsHtml.mjs` | `src/mcp/tools/openSettings/__generated__/settingsHtml.ts` |
-| 3    | `tsc -p tsconfig.build.json`         | `dist/`                                                    |
-| 4    | `node scripts/buildMcpServer.mjs`    | `bridge/mcp-server.cjs` (esbuild CJS 번들)                 |
-| 5    | `node scripts/buildHooks.mjs`        | `bridge/injectStatic.mjs`, `bridge/injectDynamic.mjs`      |
+| 단계 | 명령                                 | 산출물                                                              |
+| ---- | ------------------------------------ | ------------------------------------------------------------------- |
+| 1    | `yarn version:sync`                  | `src/version.ts`                                                    |
+| 2    | `node scripts/buildSettingsHtml.mjs` | `src/mcp/tools/openSettings/__generated__/settingsHtml.ts`          |
+| 3    | `tsc -p tsconfig.build.json`         | `dist/`                                                             |
+| 4    | `node scripts/buildMcpServer.mjs`    | `bridge/mcp-server.cjs` (esbuild CJS 번들)                          |
+| 5    | `node scripts/buildHooks.mjs`        | `bridge/<host>/injectStatic.mjs`, `bridge/<host>/injectDynamic.mjs` |
 
 `bridge/mcp-server.cjs` 파일명은 filid · atlassian 의 컨벤션을 유지 (외부 `.mcp.json` 에 박혀 있어 변경 비용이 크고, 빌드 산출물 명명은 별도 컨벤션).
 

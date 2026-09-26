@@ -2,6 +2,8 @@
 
 # l4-archive — Legacy L4 Archive → 99_Archive/actions Relocation
 
+<!-- ogham-mcp-tools:maencof -->
+
 Relocates the L4 expired-document archive from the legacy metadata location `.maencof-meta/archive/04_Action/` to the vault store `99_Archive/actions/` and rewrites every in-place stub's `archive_path` to match. Since maencof 0.14.0 the `archiveExpired` boot hook writes new expiries directly to `99_Archive/actions/` and treats the legacy root as a read-only backfill fallback; this migration converges an existing vault on the new canonical location so the fallback has nothing left to serve.
 
 The mechanical work is done by the bundled zero-dependency script — run it via Bash, never load it into context:

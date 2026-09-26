@@ -1,5 +1,7 @@
 # Workflow — Part B: Creation (Steps 8–11)
 
+
+
 Runs immediately after Step 7 (decomposition review) in the same continuous operation. Provider-specific execution (Step 9 drift check and Step 10 batch execution) lives in `jira/workflow.md`, `github/workflow.md`, or `local/workflow.md`, selected by `config.provider`. In those files, "Step 2.5" is this Step 9 and "Step 4 / Phases 4a–4d" is this Step 10.
 
 ## Step 8 — Approval Gate (user decision point)
@@ -15,7 +17,7 @@ Then branch:
 
 - `--dry-run` → display the full planned actions (Epic creation, issues by id/title/type, links from → to, transitions) and STOP with terminal marker: "Split complete (dry-run): manifest saved, nothing created."
 - Otherwise ask: **"Proceed with issue creation? (y/n)"**
-  - `n` → complete the phase without creating: `mcp__plugin_imbas_tools__run_transition(action: "complete_phase", phase: "split", pending_review: true, stories_created: 0)` and stop with: "Manifest saved for later. Re-run /imbas:split --run <run-id> to create."
+  - `n` → complete the phase without creating: `mcp__imbas__run_transition(action: "complete_phase", phase: "split", pending_review: true, stories_created: 0)` and stop with: "Manifest saved for later. Re-run /imbas:split --run <run-id> to create."
   - Modification request → return to Step 3 (decomposition) with the targeted Stories only, then re-verify and re-review.
   - `y` → proceed to Step 9 IN THE SAME TURN.
 
@@ -29,13 +31,13 @@ Skip entirely for fresh runs (no `issue_ref` anywhere in the manifest). Otherwis
 
 Resetting an item to `pending` also resets every `manifest.links` entry whose `from` or any `to` target references that item (by manifest ID or its old `issue_ref`) back to `status = "pending"` — the re-created entity must get its links back in Step 10, and a link re-apply is idempotent because every provider branch checks for an existing identical link before adding.
 
-If any DRIFT was detected: display the drift summary table and save the reconciled manifest via `mcp__plugin_imbas_tools__manifest_save` before Step 10.
+If any DRIFT was detected: display the drift summary table and save the reconciled manifest via `mcp__imbas__manifest_save` before Step 10.
 
 ## Step 10 — Batch Execution — provider-specific
 
 Route by provider workflow file. Both branches must honor:
 
-- **Per-item save**: after EACH item, immediately `mcp__plugin_imbas_tools__manifest_save` so re-runs resume cleanly.
+- **Per-item save**: after EACH item, immediately `mcp__imbas__manifest_save` so re-runs resume cleanly.
 - **Idempotency**: check `status` and `issue_ref` before acting; skip if `issue_ref` already set.
 - **Estimation note**: when a Story carries `estimate_manday`, append a line to the issue description: `Estimated: <n> man-days (imbas)`.
 - **Labels**: apply lifecycle labels per [label-transitions.md](./label-transitions.md) — jira/github only; the local provider has no label surface.
@@ -70,7 +72,7 @@ For each source issue successfully transitioned to Done in Step 10 (any provider
 
 ## Step 11 — Result Report & Phase Completion
 
-1. Call `mcp__plugin_imbas_tools__run_transition`:
+1. Call `mcp__imbas__run_transition`:
    - action: "complete_phase", phase: "split"
    - pending_review: false
    - stories_created: `<created count>`

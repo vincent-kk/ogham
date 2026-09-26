@@ -1,5 +1,7 @@
 # setup
 
+
+
 `.imbas/` 디렉토리 초기화, provider 선택, config.json 생성, 프로젝트 메타데이터 캐싱을 수행하는 설정 스킬.
 
 ## 개요
@@ -52,9 +54,9 @@ imbas를 사용하기 위한 최초 설정을 담당한다. 원격 도구(Atlass
 
 | 도구                                     | 출처              | 용도                                  |
 | ---------------------------------------- | ----------------- | ------------------------------------- |
-| `mcp__plugin_imbas_tools__open_settings` | imbas MCP         | 설정 웹폼 (init·labels edit)          |
-| `mcp__plugin_imbas_tools__config_get`    | imbas MCP         | 설정 읽기                             |
-| `mcp__plugin_imbas_tools__config_set`    | imbas MCP         | 설정 생성/수정 (headless 폴백)        |
+| `mcp__imbas__open_settings` | imbas MCP         | 설정 웹폼 (init·labels edit)          |
+| `mcp__imbas__config_get`    | imbas MCP         | 설정 읽기                             |
+| `mcp__imbas__config_set`    | imbas MCP         | 설정 생성/수정 (headless 폴백)        |
 | Read / Write / Glob                      | 내장              | `.imbas/<KEY>/cache/*.json` 직접 관리 |
 | `[OP: get_projects]`                     | Jira ([OP:])      | 프로젝트 목록 조회                    |
 | `[OP: get_issue_types]`                  | Jira ([OP:])      | 이슈 타입 조회                        |

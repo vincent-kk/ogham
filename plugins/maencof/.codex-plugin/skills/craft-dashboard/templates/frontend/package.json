@@ -1,0 +1,25 @@
+{
+  "name": "@dashboard/frontend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc --noEmit && vite build",
+    "dev": "vite",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5",
+    "dayjs": "latest",
+    "react": "^19",
+    "react-dom": "^19",
+    "recharts": "latest",
+    "zustand": "latest"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^5",
+    "typescript": "^5",
+    "vite": "^6"
+  }
+}

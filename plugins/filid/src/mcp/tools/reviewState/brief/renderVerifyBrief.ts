@@ -3,6 +3,7 @@ import { escapeMarkdownCell } from '../scope/utils/escapeMarkdownCell.js';
 import { renderMarkdownTable } from '../scope/utils/renderMarkdownTable.js';
 
 import type { RenderVerifyBriefInput } from './reviewBriefTypes.js';
+import { adaptMethodToolNames } from './utils/adaptMethodToolNames.js';
 import { renderBriefDiffs } from './utils/renderBriefDiffs.js';
 import { renderReviewUnitRow } from './utils/renderReviewUnitRow.js';
 import { renderVerifyOpinionExample } from './utils/renderVerifyOpinionExample.js';
@@ -12,7 +13,7 @@ const DELIVERABLE_HEADING_PATTERN = /^## Deliverable\r?$/m;
 
 /**
  * Render one verifier brief containing only independently assigned findings.
- * @param input Group files, located findings, method, diffs, and source identity.
+ * @param input Group files, located findings, method, reading host, diffs, and source identity.
  * @returns Verifier Markdown containing the exact v7 output contract.
  */
 export function renderVerifyBrief(input: RenderVerifyBriefInput): string {
@@ -84,7 +85,7 @@ export function renderVerifyBrief(input: RenderVerifyBriefInput): string {
     `output: ${input.group.verifyPath}`,
     '---',
     '',
-    input.verifierMethod.slice(deliverable),
+    adaptMethodToolNames(input.verifierMethod.slice(deliverable), input.host),
     '',
     '## Files',
     '',

@@ -1,5 +1,7 @@
 # status — Subcommand Behaviors
 
+<!-- ogham-mcp-tools:imbas -->
+
 > **Provider scope**: This skill is fully provider-agnostic and is NOT partitioned. It reads only imbas run state (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__run_list`) and manifest summary counts. Issue-count displays work identically for every provider because they count `issue_ref` presence, which is provider-agnostic by schema (see `src/types/manifest.ts:StoryItemSchema.issue_ref`).
 
 ## (default) — Current Run Status

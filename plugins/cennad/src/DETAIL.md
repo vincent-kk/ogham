@@ -10,7 +10,7 @@
 
 ## API Contracts
 
-- 실행 진입점은 esbuild 산출물이다: MCP 서버(`bridge/mcp-server.cjs`)와 훅 번들 2종(`bridge/*.mjs`).
+- 실행 진입점은 esbuild 산출물이다: MCP 서버(`bridge/mcp-server.cjs`)와 호스트별 훅 번들 2종(`bridge/<host>/*.mjs`).
 - `src/index.ts` 는 타입체크·테스트가 소비하는 집합 배럴이다. `package.json` 에 `main: dist/index.js` 와 `files: ["dist", ...]` 가 남아 있지만 이 패키지에는 `publish:npm` 스크립트가 없어 npm 으로 배송되지 않으며, 워크스페이스 안에서 `@ogham/cennad` 를 소비하는 패키지도 없다.
 - 배럴은 `mcp/` 를 재노출하지 않는다 — `mcp/server/lifecycle/createServer.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
 - host-session resolver는 core와 훅의 내부 concrete import이며 `src/index.ts` 공개 표면에 노출하지 않는다.

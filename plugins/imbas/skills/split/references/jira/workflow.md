@@ -1,5 +1,7 @@
 # Manifest Execution Workflow — Jira Provider
 
+<!-- ogham-mcp-tools:imbas -->
+
 This file is loaded by the manifest skill when `config.provider === 'jira'`. Provider-agnostic preamble (manifest loading, dry-run preview, user confirmation, result report) lives in `../workflow.md`. This file owns the Jira-specific execution steps (Step 2.5 drift check, Step 4 batch execution).
 
 ## Step 2.5 — Drift Check (Jira-specific branch)

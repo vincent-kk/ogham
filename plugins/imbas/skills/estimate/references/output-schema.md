@@ -1,5 +1,7 @@
 # estimate — Output Schema (estimation.json)
 
+<!-- ogham-mcp-tools:imbas -->
+
 Validated by `EstimationManifestSchema` (`src/types/manifest.ts`) via `mcp__plugin_imbas_tools__manifest_save(type: "estimation")`. Canonical contract: `.metadata/imbas/estimation.md` §2.1.
 
 ```jsonc

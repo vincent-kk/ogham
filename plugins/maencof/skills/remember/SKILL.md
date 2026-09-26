@@ -12,6 +12,8 @@ plugin: maencof
 
 # remember — Record New Knowledge
 
+<!-- ogham-mcp-tools:maencof -->
+
 Extracts knowledge from the current conversation or user input and saves it as a markdown document in the appropriate Layer. Performs automatic Layer recommendation, tag extraction, and pre-creation duplicate document checking.
 
 ## When to Use This Skill

@@ -10,6 +10,8 @@ plugin: filid
 
 # scan — Full FCA Audit
 
+
+
 Run Filid's only complete FCA audit entry point. The workflow is read-only: it collects snapshot, structure, and verification evidence and returns one prioritized verdict.
 
 See [reference.md](./reference.md) for exact calls, consolidation rules, and the report format.
@@ -34,11 +36,11 @@ Run the [facts bootstrap](../.shared/facts-bootstrap.md) for the project root, t
 
 ### Phase 1 — Snapshot Summary
 
-Call `mcp__plugin_filid_tools__fractal_inspect` with `action: "scan"` and `detail: "summary"`.
+Call `mcp__filid__fractal_inspect` with `action: "scan"` and `detail: "summary"`.
 
 ### Phase 2 — Full Structural Validation
 
-Call `mcp__plugin_filid_tools__fractal_inspect` with `action: "validate"` and all six canonical scopes:
+Call `mcp__filid__fractal_inspect` with `action: "validate"` and all six canonical scopes:
 
 - `documents`
 - `nodes`
@@ -49,7 +51,7 @@ Call `mcp__plugin_filid_tools__fractal_inspect` with `action: "validate"` and al
 
 ### Phase 3 — Verification Documents
 
-Call `mcp__plugin_filid_tools__fractal_inspect` with `action: "verification"`, `detail: "files"`, and no `filePaths`, so both verification roles and fragmentation links are audited across the whole project.
+Call `mcp__filid__fractal_inspect` with `action: "verification"`, `detail: "files"`, and no `filePaths`, so both verification roles and fragmentation links are audited across the whole project.
 
 ### Phase 4 — Consolidated Verdict
 
@@ -67,9 +69,9 @@ End with `Scan complete: <N> findings`.
 
 | Tool + action                                             | Purpose                                                  |
 | --------------------------------------------------------- | -------------------------------------------------------- |
-| `mcp__plugin_filid_tools__fractal_inspect` `scan`         | snapshot identity, adapters, certainty, and node summary |
-| `mcp__plugin_filid_tools__fractal_inspect` `validate`     | complete FCA structural rule evaluation                  |
-| `mcp__plugin_filid_tools__fractal_inspect` `verification` | per-role case caps, fragmentation, and contract links    |
+| `mcp__filid__fractal_inspect` `scan`         | snapshot identity, adapters, certainty, and node summary |
+| `mcp__filid__fractal_inspect` `validate`     | complete FCA structural rule evaluation                  |
+| `mcp__filid__fractal_inspect` `verification` | per-role case caps, fragmentation, and contract links    |
 
 ## Invariants
 

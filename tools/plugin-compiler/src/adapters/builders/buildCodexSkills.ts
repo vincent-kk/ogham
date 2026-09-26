@@ -42,13 +42,16 @@ const VARIANT_ENABLED_PLUGINS = new Set([
 /**
  * Whether this plugin emits a Codex skill variant: either a valid explicit
  * lifecycle/MCP marker exists, or the plugin is allowlisted and has a persona spawn
- * that needs registry adaptation. The manifest builder shares this predicate so
- * its `skills` path and the emitted tree never disagree.
+ * that needs registry adaptation. A plugin without a skills directory never
+ * emits one: its personas are reachable only through skills, and its manifest
+ * has no `skills` path to point at the tree. The manifest builder shares this
+ * predicate so its `skills` path and the emitted tree never disagree.
  * @param facts Canonical inputs used by both skills and manifest builders.
  * @returns Whether a complete Codex skill tree must be emitted.
  * @throws Error for invalid explicit markers or referenced personas/tools.
  */
 export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
+  if (!facts.hasSkills) return false;
   const hasMcpAdaptation = validateMcpToolReferences(facts) !== null;
   let hasLifecycleAdaptation = false;
   for (const [relativePath, content] of Object.entries(facts.skillFiles)) {
@@ -75,7 +78,8 @@ export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
  * `null` when it does not qualify. Every skill file is copied (discovery is
  * REPLACE, so the manifest can only point at a complete dir); registry-spawn
  * files self-load their persona and lifecycle-marked files select Codex child
- * semantics. Each `agents/<id>.md` is dropped at `.shared/personas/<id>.md`.
+ * semantics. Each `agents/<id>.md` is dropped at `.shared/personas/<id>.md`,
+ * with owned MCP references rewritten when the persona carries the MCP marker.
  * Output is sorted by path for deterministic, idempotent re-emission. Claude's
  * own `skills/` is never written here (facts carry the pristine source), so
  * re-runs never double-inject.
@@ -109,7 +113,9 @@ export function buildCodexSkills(facts: PluginFacts): CodexSkillFile[] | null {
   for (const [basename, content] of Object.entries(facts.agentFiles))
     files.push({
       relativePath: `${CODEX_SKILLS_DIR}/${PERSONA_SUBDIR}/${basename}`,
-      content,
+      content: mcpReferences?.personaFiles.includes(basename)
+        ? adaptMcpToolReferences(content, mcpReferences.names)
+        : content,
     });
 
   files.sort((a, b) =>

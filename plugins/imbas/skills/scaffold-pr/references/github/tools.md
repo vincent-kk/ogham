@@ -1,5 +1,7 @@
 # Tools Used — GitHub Provider
 
+<!-- ogham-mcp-tools:imbas -->
+
 ## Bash Commands
 
 | Command                                                  | Usage                        |

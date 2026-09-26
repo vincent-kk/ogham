@@ -6,6 +6,7 @@ import {
   resolveContainedPath,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
+import type { Host } from '@ogham/cross-platform';
 
 import { REVIEW_STATE_ERROR_MESSAGES } from '../../../../../constants/reviewState.js';
 import { renderOpinionSkeleton } from '../../brief/renderOpinionSkeleton.js';
@@ -32,6 +33,8 @@ import type {
 interface WritePreparedReviewArtifactsInput extends ReviewEffortMetadata {
   /** Verbatim actor methods, needed only when a brief must be rendered. */
   actorMethods: { reviewer: string; verifier: string } | null;
+  /** Host whose agents read the rendered briefs. */
+  host: Host;
   /** Sanitized untrusted summary for the session and reviewer brief. */
   changeContext: string;
   /** Validated untrusted claims rendered only when a reviewer brief is written. */
@@ -139,6 +142,7 @@ export function writePreparedReviewArtifacts(
           verifyBriefPath,
           renderVerifyBrief({
             verifierMethod: input.actorMethods.verifier,
+            host: input.host,
             diffs: [],
             group,
             files: input.files,

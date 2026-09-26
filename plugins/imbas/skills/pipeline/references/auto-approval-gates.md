@@ -1,5 +1,7 @@
 # Auto-Approval Gates
 
+<!-- ogham-mcp-tools:imbas -->
+
 Pipeline replaces manual user-review steps with automated quality gates. Each gate evaluates specific fields and either auto-approves or stops the pipeline.
 
 ---

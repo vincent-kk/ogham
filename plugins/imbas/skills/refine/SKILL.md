@@ -8,6 +8,8 @@ complexity: moderate
 plugin: imbas
 ---
 
+<!-- ogham-mcp-tools:imbas -->
+
 > **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, subagent (`analyst`) returns, or [OP: get_confluence] / [OP: search_confluence] operations.
 >
 > **Valid reasons to yield**:

@@ -1,8 +1,10 @@
 # Subcommand Behaviors
 
+
+
 ## show
 
-1. Call `mcp__plugin_imbas_tools__config_get` (no field — returns full config).
+1. Call `mcp__imbas__config_get` (no field — returns full config).
 2. For each configured project key, Read `.imbas/<KEY>/cache/cached_at.json` and list the cache files present (Glob `.imbas/<KEY>/cache/*.json`); TTL is expired when now - cached_at > ttl_hours.
 3. Display:
    - config.json contents (formatted)
@@ -11,14 +13,14 @@
 
 ## set-project <KEY>
 
-1. Call `mcp__plugin_imbas_tools__config_set` with `updates: { "defaults.project_ref": "<KEY>" }` and `scope: "project"` — a default project key belongs to the workspace that has it.
+1. Call `mcp__imbas__config_set` with `updates: { "defaults.project_ref": "<KEY>" }` and `scope: "project"` — a default project key belongs to the workspace that has it.
 2. Execute cache population flow (Step 5 of Init Workflow) for the new project key.
 3. Display confirmation with new default project.
 
 ## set-language <field> <lang>
 
 1. Validate field is one of: `documents`, `skills`, `issue_content`, `reports`.
-2. Call `mcp__plugin_imbas_tools__config_set` with `updates: { "language.<field>": "<lang>" }` and `scope: "project"`. Use `scope: "user"` only when the user explicitly requests a global language setting.
+2. Call `mcp__imbas__config_set` with `updates: { "language.<field>": "<lang>" }` and `scope: "project"`. Use `scope: "user"` only when the user explicitly requests a global language setting.
 3. Display updated language settings.
 
 ## refresh-cache [KEY]
@@ -32,7 +34,7 @@
 1. Validate provider is one of: `jira`, `github`, `local`.
 2. Run health check for the target provider's dependencies.
    - If dependencies not met → display warning and confirm with user.
-3. Call `mcp__plugin_imbas_tools__config_set` with `updates: { "provider": "<PROVIDER>" }` and `scope: "project"` — the tracker a repository files issues into is a property of that repository.
+3. Call `mcp__imbas__config_set` with `updates: { "provider": "<PROVIDER>" }` and `scope: "project"` — the tracker a repository files issues into is a property of that repository.
 4. If switching to `local` from a remote provider:
    - Display banner: "Switching to local will not migrate existing remote issues. Export manually before changing provider."
 5. If switching to a remote provider:
@@ -43,21 +45,21 @@
 
 ### labels show
 
-1. Call `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
+1. Call `mcp__imbas__config_get` with field `"labels"`.
 2. Display label table:
 
    Key | Value | Applied When -----------------+------------------+------------------------------- managed | <value> | Issue creation (all types) review_pending | <value> | Split decomposition complete review_complete | <value> | Review approved dev_waiting | <value> | Issue creation complete dev_in_progress | <value> | (external trigger only) dev_done | <value> | (external trigger only)
 
 ### labels edit
 
-1. Call `mcp__plugin_imbas_tools__open_settings` (absolute `project_root`) — the settings page's Labels section edits all six values with the current values prefilled. Dispatch on `status` as in the init workflow (Step 3).
-2. Headless fallback: call `mcp__plugin_imbas_tools__config_set` with an updated `labels` section from chat-provided values, and `scope: "project"` — labels are provisioned against one repository's tracker.
+1. Call `mcp__imbas__open_settings` (absolute `project_root`) — the settings page's Labels section edits all six values with the current values prefilled. Dispatch on `status` as in the init workflow (Step 3).
+2. Headless fallback: call `mcp__imbas__config_set` with an updated `labels` section from chat-provided values, and `scope: "project"` — labels are provisioned against one repository's tracker.
 3. Display confirmation with updated values.
 
 ### labels provision (GitHub only)
 
 1. If `config.provider !== 'github'`: Display: "Provisioning is GitHub-only. Jira labels are free-form and created automatically." Return.
-2. Load `config.labels` values via `mcp__plugin_imbas_tools__config_get`.
+2. Load `config.labels` values via `mcp__imbas__config_get`.
 3. Run: `gh label list --repo <config.github.repo> --json name` → parse existing label names.
 4. Compute missing labels: config label values NOT in existing set.
 5. For each missing label: `gh label create "<value>" --repo <config.github.repo> --color c5def5`
@@ -65,7 +67,7 @@
 
 ### labels sync
 
-1. Load `config.labels` values via `mcp__plugin_imbas_tools__config_get`.
+1. Load `config.labels` values via `mcp__imbas__config_get`.
 2. [github]
    - Run: `gh label list --repo <config.github.repo> --json name` → existing set.
    - Compare config label values against existing:

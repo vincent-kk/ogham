@@ -1,5 +1,7 @@
 # restructure — Reference Documentation
 
+
+
 Detailed plan, approval, external execution, and postcondition contract for [SKILL.md](./SKILL.md).
 
 ## Section 1 — Placement Requests
@@ -24,7 +26,7 @@ Use placement requests explicitly supplied by the user or copied from a previous
 Call:
 
 ```text
-mcp__plugin_filid_tools__restructure(<RestructureInput>)
+mcp__filid__restructure(<RestructureInput>)
 ```
 
 The tool is read-only. It returns a summary plus an artifact for the full plan regardless of plan size. The artifact stores a common `ToolPayload`; read its `.data` as the `RestructurePlan`. Verify that the artifact SHA-256 matches the envelope before using it.
@@ -40,7 +42,7 @@ The plan contains exact `sourcePath -> targetPath` moves, target node type, plac
 Before presenting a plan for approval, call:
 
 ```text
-mcp__plugin_filid_tools__restructure({
+mcp__filid__restructure({
   action: "precondition",
   path: "<project-path>",
   planPath: "<absolute-plan-artifact-path>"
@@ -85,7 +87,7 @@ Record which plan instruction produced each filesystem change. The skill does no
 Call the same validator against the same artifact after all approved external operations:
 
 ```text
-mcp__plugin_filid_tools__restructure({
+mcp__filid__restructure({
   action: "postcondition",
   path: "<project-path>",
   planPath: "<absolute-plan-artifact-path>"

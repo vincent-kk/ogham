@@ -1,7 +1,7 @@
 import { realpathSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { VERSION } from '../version.js';
+import { VERSION } from '../constants/version.js';
 
 import type {
   FactsProvenance,

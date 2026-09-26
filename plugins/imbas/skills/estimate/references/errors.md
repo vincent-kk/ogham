@@ -1,5 +1,7 @@
 # estimate — Error Handling
 
+<!-- ogham-mcp-tools:imbas -->
+
 | Error                                                     | Action                                                                                                              |
 | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | No eligible run (refine not passed)                       | Display: "Phase 1 (refine) must pass first. Run /imbas:refine <source>."                                            |

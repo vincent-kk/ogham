@@ -1,5 +1,7 @@
 # GitHub Provider — Label Bootstrap Protocol
 
+
+
 Documents the startup label verification and creation protocol for the manifest skill. Implements the label bootstrap protocol (SPEC-provider-github.md §3.3).
 
 ## Purpose
@@ -35,7 +37,7 @@ Additionally, all values from `config.labels` are required (lifecycle labels):
 | `<config.labels.dev_in_progress>` | `c5def5`    | lifecycle |
 | `<config.labels.dev_done>`        | `c5def5`    | lifecycle |
 
-Load these values via `mcp__plugin_imbas_tools__config_get` with field `"labels"` at the start of Step B1. If `config.labels` is absent (legacy config), Zod defaults apply.
+Load these values via `mcp__imbas__config_get` with field `"labels"` at the start of Step B1. If `config.labels` is absent (legacy config), Zod defaults apply.
 
 ## Bootstrap protocol
 
@@ -73,7 +75,7 @@ If `gh label create` exits non-zero AND stderr contains "403" or "resource not a
    ```
    gh label create failed: insufficient scopes. Run 'gh auth refresh -s repo' and retry.
    ```
-2. Call `mcp__plugin_imbas_tools__run_transition` → `blocked` state.
+2. Call `mcp__imbas__run_transition` → `blocked` state.
 3. STOP execution immediately. Do NOT proceed to `gh issue create`.
 
 **No degraded mode.** Issues MUST NOT be created without the required labels. This aligns with the jira provider's fail-fast semantics for missing custom fields.

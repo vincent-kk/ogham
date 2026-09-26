@@ -7,6 +7,8 @@ description: "Open the local deilen settings page to adjust theme, auto-open, ti
 
 # setup
 
+<!-- ogham-mcp-tools:deilen -->
+
 Open the deilen settings UI in a local browser.
 
 ## Steps

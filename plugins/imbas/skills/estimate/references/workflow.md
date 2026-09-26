@@ -1,5 +1,7 @@
 # estimate — Workflow
 
+<!-- ogham-mcp-tools:imbas -->
+
 ```
 Step 1 — Load Run & Verify Preconditions
   1. Load config via mcp__plugin_imbas_tools__config_get (estimation coefficients,

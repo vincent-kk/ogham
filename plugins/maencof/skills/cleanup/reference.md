@@ -1,5 +1,7 @@
 # cleanup — Reference
 
+<!-- ogham-mcp-tools:maencof -->
+
 Detailed mode workflows, safety checks, and error handling.
 
 ## Document Mode — Vault Document Deletion

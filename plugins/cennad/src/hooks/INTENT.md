@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigravity, claude)를 지원한다. SessionStart 에서 정적 정책 1회, UserPromptSubmit 마다 호출 카운터 + drift 상태를 `additionalContext` 로 주입한다. 엔트리 파일(`*.entry.ts`)은 esbuild 가 `bridge/*.mjs` 로 번들링.
+Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigravity, claude)를 지원한다. SessionStart 에서 정적 정책 1회, UserPromptSubmit 마다 호출 카운터 + drift 상태를 `additionalContext` 로 주입한다. 엔트리 파일(`*.entry.ts`)은 esbuild 가 `bridge/<host>/*.mjs` 로 번들링.
 
 ## Conventions
 
@@ -14,7 +14,7 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 - 세션 동일성은 공유 `hostSessionIdentity` resolver로 판정한다. non-blank `CENNAD_HOST_SESSION_ID`를 우선하고 유효한 `CLAUDE_PID`를 fallback하며 `process.ppid`는 세션 식별에 쓰지 않는다
 - 엔트리는 try/catch → 항상 `{ continue: true }` 출력 후 `process.exit(0)`
 - 응답 JSON: `{ continue: true, hookSpecificOutput: { hookEventName, additionalContext } }`
-- 수정 후 `yarn cennad build` 로 `bridge/*.mjs` 재생성
+- 수정 후 `yarn cennad build` 로 `bridge/<host>/*.mjs` 재생성
 
 ## Boundaries
 

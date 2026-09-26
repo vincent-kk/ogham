@@ -7,6 +7,8 @@ argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refin
 
 # antigravity
 
+
+
 Do not delegate local-code or short-text reasoning that needs no web grounding.
 
 ## Input and tier
@@ -59,4 +61,4 @@ Relay the report: all text after its FIRST standalone `---`, `session_id` in bac
 
 ## Stop
 
-Ending the courier does not stop `agy`. On stop/cancel/abandon, call `mcp__plugin_cennad_tools__stop_conversation`: use known `session_id`, else `provider: antigravity`; omit both only for stop-all. Never stop wanted work. Report `count: 0` once as normal.
+Ending the courier does not stop `agy`. On stop/cancel/abandon, call `mcp__cennad__stop_conversation`: use known `session_id`, else `provider: antigravity`; omit both only for stop-all. Never stop wanted work. Report `count: 0` once as normal.

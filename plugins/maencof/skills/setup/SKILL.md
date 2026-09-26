@@ -13,6 +13,8 @@ plugin: maencof
 
 # setup — maencof Onboarding Consultation
 
+<!-- ogham-mcp-tools:maencof -->
+
 A 7-stage goal-driven dynamic interview for first-time maencof setup or Core Identity reset. Instead of a rigid questionnaire, the AI acts as a **"Professional Counselor"**—logical, empathetic, and structured. It helps you explore your knowledge management patterns and organically constructs your Core Identity schema.
 
 ## When to Use This Skill

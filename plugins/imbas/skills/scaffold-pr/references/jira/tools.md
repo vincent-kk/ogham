@@ -1,5 +1,7 @@
 # Tools Used — Jira Provider
 
+<!-- ogham-mcp-tools:imbas -->
+
 ## Jira Operations
 
 | Operation                                                     | Usage                                          |

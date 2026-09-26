@@ -1,0 +1,140 @@
+---
+name: recall
+user-invocable: false
+description: 'Searches the knowledge vault with a natural-language query using Spreading Activation, returning ranked documents across all five layers in one shot. Use when looking up past knowledge on a specific topic.'
+argument-hint: '<query> [--layer N] [--sub-layer NAME] [--summary] [--detail] [--limit N]'
+version: '1.0.0'
+complexity: simple
+context_layers: [1, 2, 3, 4, 5]
+orchestrator: recall skill
+plugin: maencof
+---
+
+# recall — Knowledge Search/Recall
+
+
+
+Accepts a natural-language query, traverses the maencof knowledge graph using the Spreading Activation (SA) algorithm, finds related documents, assembles context, and returns it.
+
+## When to Use This Skill
+
+Load [document-maintenance.md](../.shared/document-maintenance.md) before writing or summarizing vault knowledge. Read full existing documents, integrate corrections in place, preserve source links with verified locations, and choose topic directories independently of tags. Handle size warnings with rewriting or semantic splitting; search snippets alone do not establish a claim.
+
+- When searching for knowledge recorded in the past
+- When looking for documents related to a specific topic
+- When loading context from the knowledge space
+- When a lightweight single-query alternative to `/maencof:explore` is needed
+
+## When to Use vs Adjacent Skills
+
+- **`recall`** — one-shot Spreading Activation search. Returns a ranked list + optional excerpts in a single turn; no follow-up rounds.
+- **`explore`** — interactive multi-round graph traversal (up to 3 rounds). Selects a node, inspects neighbors, optionally re-seeds from a neighbor. Use when you expect to drill down or pivot several times.
+
+Rule of thumb: know what you want → `recall`. Want to wander → `explore`.
+
+## Prerequisites
+
+- The maencof index must be built (`.maencof/index.json` must exist)
+- If no index: "No index found. Please run `/maencof:build` first."
+
+## Workflow
+
+### Step 1 — Query Parsing
+
+Extract core keywords and intent from user input.
+
+- Cross-language recall: include each key concept in BOTH the user's working language and English as **separate** seed items (they are unioned), since vault docs may be tagged or titled in either language. Do not anchor to one language, and never combine two languages in a single seed item (a multi-word item is AND-matched).
+- Mode detection: `--summary` (summary mode, default) / `--detail` (detail mode)
+- Layer filter detection: `--layer=1` through `--layer=5`
+
+### Step 2 — Call kg_search
+
+Call the `mcp__maencof__kg_search` MCP tool to find seed nodes. The search reports index freshness: if no index exists, stop and guide the user to `/maencof:build`; if the index is stale, surface a brief warning and continue.
+
+```
+mcp__maencof__kg_search(seed: [keyword1, keyword2, ...], max_results=10, layer_filter?, sub_layer?)
+```
+
+If no results: "No related documents found. Try different keywords."
+
+### Step 3 — Neighbor Exploration (kg_navigate)
+
+Traverse inbound and outbound links from seed nodes.
+
+```
+mcp__maencof__kg_navigate(path: selected_node_path, include_inbound=true, include_outbound=true, include_hierarchy=true)
+```
+
+### Step 4 — Context Assembly (kg_context)
+
+For insight results, load Recall and Relations in [insight-lifecycle.md](../.shared/insight-lifecycle.md). Use `mcp__maencof__read` to follow relevant current accounts and verify conditions and exceptions before summarizing. Preserve requested layer filters and fall back to readable original evidence on broken or conflicting relations. This bounded lookup remains within the current query; it does not initiate an interactive exploration or modify the vault.
+
+Assemble context for the top activated nodes.
+
+```
+mcp__maencof__kg_context(query: search_query_string, token_budget=2000)
+```
+
+### Step 5 — Result Formatting
+
+**Summary mode (default)**:
+
+```
+## Search Results: "{query}"
+
+Found {N} related documents.
+
+1. **{title}** (Layer {N}{sub_layer ? ` / ${sub_layer}` : ''}, relevance {score}%)
+   {1-2 line summary}
+   Path: {path}
+
+2. ...
+
+For more detail, use the `recall` skill with `{query} --detail`.
+```
+
+**Detail mode (`--detail`)**:
+
+```
+## Search Results: "{query}"
+
+### {title}
+- **Path**: {path}
+- **Layer**: {layer_name}
+- **Tags**: {tags}
+- **Relevance**: {score}%
+- **Linked documents**: {linked_docs}
+
+{excerpt of document main content}
+
+---
+```
+
+## MCP Tools
+
+| Tool                                     | Purpose                                                          |
+| ---------------------------------------- | ---------------------------------------------------------------- |
+| `mcp__maencof__kg_search`   | Keyword-based seed node search                                   |
+| `mcp__maencof__kg_navigate` | Neighbor node lookup (inbound/outbound/hierarchy link traversal) |
+| `mcp__maencof__kg_context`  | Assemble node context                                            |
+| `mcp__maencof__read` | Read current accounts and verify source passages |
+
+## Options
+
+```
+/maencof:recall <query> [options]
+```
+
+| Option          | Default | Description                                                  |
+| --------------- | ------- | ------------------------------------------------------------ |
+| `--summary`     | default | Summary mode (title + 1-2 line summary)                      |
+| `--detail`      | —       | Detail mode (full content excerpt)                           |
+| `--layer=N`     | all     | Search a specific Layer only (1-5)                           |
+| `--sub-layer=X` | none    | Filter by sub-layer: relational/structural/topical (L3 only) |
+| `--limit=N`     | 10      | Maximum number of results                                    |
+
+## Error Handling
+
+- **No index**: guide to run `/maencof:build`
+- **No results**: suggest similar keywords and offer the `explore` skill for interactive exploration
+- **Stale index**: display stale warning and continue

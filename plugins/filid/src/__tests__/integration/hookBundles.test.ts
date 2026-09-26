@@ -34,6 +34,8 @@ const SHARED_RUNNER_NAME = {
   HOST: 'run-hook.cmd',
 } as const;
 
+const HOOK_HOSTS = ['claude', 'codex'] as const;
+
 const RETIRED_AGENT_BUNDLE = 'agent-enforcer.mjs';
 const PACKAGE_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
 const BRIDGE_DIR = portableResolve(PACKAGE_ROOT, 'bridge');
@@ -43,10 +45,9 @@ const CANONICAL_HOOKS_PATH = portableResolve(
   'hooks.json',
 );
 const EXPECTED_HOOK_EVENTS = Object.values(HOOK_EVENT_NAME);
-const EXPECTED_HOOK_ARTIFACTS = [
-  ...Object.values(HOOK_BUNDLE_NAME).map((name) => `${name}.mjs`),
-  ...Object.values(SHARED_RUNNER_NAME),
-];
+const EXPECTED_HOOK_BUNDLES = Object.values(HOOK_BUNDLE_NAME).map(
+  (name) => `${name}.mjs`,
+);
 
 interface HookCase {
   name: string;
@@ -72,7 +73,9 @@ function runPreToolUseBundle(
   toolName: string,
   toolInput: Record<string, unknown>,
 ): PreToolUseBundleResult {
-  const bundle = portableResolve(BRIDGE_DIR, 'pre-tool-use.mjs');
+  // apply_patch payloads come from Codex; every other tool name from Claude.
+  const host = toolName === 'apply_patch' ? 'codex' : 'claude';
+  const bundle = portableResolve(BRIDGE_DIR, host, 'pre-tool-use.mjs');
   expect(existsSync(bundle)).toBe(true);
   const spawned = spawnSync(process.execPath, [bundle], {
     input: JSON.stringify({
@@ -137,9 +140,17 @@ describe('hook bundle registration', () => {
 
   it('keeps only active hook bundles and shared runners', () => {
     const artifacts = listDirectoryIfExistsSync(BRIDGE_DIR);
-    for (const artifact of EXPECTED_HOOK_ARTIFACTS)
+    for (const artifact of Object.values(SHARED_RUNNER_NAME))
       expect(artifacts).toContain(artifact);
     expect(artifacts).not.toContain(RETIRED_AGENT_BUNDLE);
+    for (const host of HOOK_HOSTS) {
+      const hostArtifacts = listDirectoryIfExistsSync(
+        portableResolve(BRIDGE_DIR, host),
+      );
+      for (const artifact of EXPECTED_HOOK_BUNDLES)
+        expect(hostArtifacts).toContain(artifact);
+      expect(hostArtifacts).not.toContain(RETIRED_AGENT_BUNDLE);
+    }
   });
 });
 
@@ -154,23 +165,24 @@ describe('hook bundle smoke tests', () => {
     if (cwd) rmSync(cwd, { recursive: true, force: true });
   });
 
-  for (const { name, buildInput } of HOOK_CASES)
-    it(`${name}.mjs spawns, exits 0, returns valid JSON, stderr clean`, () => {
-      const bundle = portableResolve(BRIDGE_DIR, `${name}.mjs`);
-      expect(existsSync(bundle)).toBe(true);
+  for (const host of HOOK_HOSTS)
+    for (const { name, buildInput } of HOOK_CASES)
+      it(`${host}/${name}.mjs spawns, exits 0, returns valid JSON, stderr clean`, () => {
+        const bundle = portableResolve(BRIDGE_DIR, host, `${name}.mjs`);
+        expect(existsSync(bundle)).toBe(true);
 
-      const result = spawnSync(process.execPath, [bundle], {
-        input: JSON.stringify(buildInput(cwd)),
-        encoding: 'utf8',
-        timeout: 10_000,
+        const result = spawnSync(process.execPath, [bundle], {
+          input: JSON.stringify(buildInput(cwd)),
+          encoding: 'utf8',
+          timeout: 10_000,
+        });
+
+        expect(result.status).toBe(0);
+        expect(() => JSON.parse(result.stdout)).not.toThrow();
+        expect(result.stderr).not.toMatch(
+          /Dynamic require|Cannot find module|^Error:/m,
+        );
       });
-
-      expect(result.status).toBe(0);
-      expect(() => JSON.parse(result.stdout)).not.toThrow();
-      expect(result.stderr).not.toMatch(
-        /Dynamic require|Cannot find module|^Error:/m,
-      );
-    });
 });
 
 describe('pre-tool-use bundle delivery pointer', () => {

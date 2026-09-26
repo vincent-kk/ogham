@@ -6,7 +6,7 @@
 - 세 provider(codex·antigravity·claude)를 지원한다.
 - **어느 훅도 세션을 차단하지 않는다.** 어떤 예외에도 정상 종료한다.
 - config·counter 파일에 쓰지 않는다 — 훅은 읽기 전용이다.
-- 진입점(`*.entry.ts`)은 esbuild 가 `bridge/*.mjs` 로 번들한다. 훅 도달 코드는 배럴이 아니라 concrete 파일을 직접 import 한다.
+- 진입점(`*.entry.ts`)은 esbuild 가 `bridge/<host>/*.mjs` 로 번들한다. 훅 도달 코드는 배럴이 아니라 concrete 파일을 직접 import 한다.
 - `additionalContext` 에 cwd·session ID·프롬프트 원문을 싣지 않는다. 매치된 키워드만 노출한다.
 
 ## API Contracts

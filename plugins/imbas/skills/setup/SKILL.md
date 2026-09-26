@@ -11,6 +11,8 @@ plugin: imbas
 
 # setup — Initialization & Configuration
 
+<!-- ogham-mcp-tools:imbas -->
+
 Initialize the `.imbas/` working directory, configure everything (provider, project reference, labels, languages, models, estimation coefficients) in the **browser settings page** opened by `mcp__plugin_imbas_tools__open_settings`, and populate metadata caches. Cache files under `.imbas/<KEY>/cache/` are managed directly with Read/Write — there are no cache MCP tools. Entry point for all imbas workflows. The open_settings call blocks until the user saves — after it returns, continue the init workflow in the same response (never yield between steps).
 
 ## When to Use This Skill

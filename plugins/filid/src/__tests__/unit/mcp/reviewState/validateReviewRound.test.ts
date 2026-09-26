@@ -221,6 +221,32 @@ describe('validateReviewRound handoff', () => {
     expect(verified.data).toMatchObject({ next: [], sealReady: true });
   });
 
+  it('spells the written verify brief with Codex tool names on the Codex channel', async () => {
+    process.env.OGHAM_HOST = 'codex';
+    try {
+      const result = await handleReviewState({
+        action: 'validate',
+        projectRoot: fixture.projectRoot,
+        kind: 'review',
+        group: '01',
+        round: 1,
+      });
+      expect(result.summary.ok).toBe(true);
+      const updated = readPersistedReviewState(
+        fixture.projectRoot,
+        state.normalizedBranch,
+      );
+      const brief = readFileSync(
+        portableJoin(paths.reviewDirectory, updated.groups[0]!.verifyBriefPath),
+        'utf8',
+      );
+      expect(brief).toContain('mcp__filid__');
+      expect(brief).not.toContain('mcp__plugin_filid_tools__');
+    } finally {
+      delete process.env.OGHAM_HOST;
+    }
+  });
+
   it('makes seal distrust a tampered auto-verify artifact', async () => {
     await handleReviewState({
       action: 'validate',

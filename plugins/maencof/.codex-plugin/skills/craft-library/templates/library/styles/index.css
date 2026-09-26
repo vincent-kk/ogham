@@ -1,0 +1,36 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+main {
+  margin: 0 auto;
+  max-width: 64rem;
+  padding: 2rem 1rem;
+}
+
+input[type='search'] {
+  box-sizing: border-box;
+  display: block;
+  margin-block: 0.5rem 1.5rem;
+  max-width: 32rem;
+  padding: 0.5rem;
+  width: 100%;
+}
+
+.library-group + .library-group {
+  margin-top: 2rem;
+}
+
+.library-entry {
+  margin-block: 0.75rem;
+}
+
+.library-entry-meta {
+  font-size: 0.875rem;
+  opacity: 0.75;
+}

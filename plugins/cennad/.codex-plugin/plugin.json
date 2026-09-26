@@ -17,7 +17,7 @@
     "multi-agent"
   ],
   "skills": "./.codex-plugin/skills/",
-  "hooks": "./hooks/hooks.json",
+  "hooks": "./.codex-plugin/hooks.json",
   "mcpServers": {
     "cennad": {
       "command": "node",

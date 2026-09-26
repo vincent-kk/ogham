@@ -19,20 +19,22 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 # estimate — Workflow
 
+
+
 ```
 Step 1 — Load Run & Verify Preconditions
-  1. Load config via mcp__plugin_imbas_tools__config_get (estimation coefficients,
+  1. Load config via mcp__imbas__config_get (estimation coefficients,
      languages). Apply --team-size / --buffer overrides for this run only
      (recorded in estimation.json config_used; config files are not modified).
-  2. If --run provided: mcp__plugin_imbas_tools__run_get(project_ref, run_id).
-     Else: mcp__plugin_imbas_tools__run_get(project_ref) → most recent run.
+  2. If --run provided: mcp__imbas__run_get(project_ref, run_id).
+     Else: mcp__imbas__run_get(project_ref) → most recent run.
   3. Verify refine.status == "completed" and refine.result in
      ["PASS", "PASS_WITH_WARNINGS"] — else error:
      "Phase 1 (refine) must pass first. Run /imbas:refine <source>."
   4. Verify estimate.status in ["pending", "skipped"] — a completed estimate is
      re-run only after user confirmation ("Re-estimate and overwrite?").
      Re-running a skipped estimate is allowed (skipped → start is a restart).
-  5. mcp__plugin_imbas_tools__run_transition:
+  5. mcp__imbas__run_transition:
      - action: "start_phase", phase: "estimate"
 
 Step 2 — estimator Agent Spawn
@@ -52,11 +54,11 @@ Step 2 — estimator Agent Spawn
   - Agent returns: { estimation: <json>, report: <markdown> }
 
 Step 3 — Validated Save
-  1. mcp__plugin_imbas_tools__manifest_save:
+  1. mcp__imbas__manifest_save:
      - project_ref, run_id, type: "estimation", manifest: <estimation json>
      → Zod-validated write to estimation.json; returns summary
        { units, sum_expected, buffered_total, total_weeks }
-  2. mcp__plugin_imbas_tools__manifest_validate(type: "estimation")
+  2. mcp__imbas__manifest_validate(type: "estimation")
      → integrity check (deps, track uniqueness, confidence interval);
        on errors: fix the payload with the estimator's data and re-save.
 
@@ -71,7 +73,7 @@ Step 4 — Report Render
   - single_view confirmation list ("only the <view> view surfaced these — confirm")
 
 Step 5 — State Update & Summary
-  1. mcp__plugin_imbas_tools__run_transition:
+  1. mcp__imbas__run_transition:
      - action: "complete_phase", phase: "estimate"
      - estimated_manday: <rollup.buffered_total>
   2. Display the summary block and next-step guidance:

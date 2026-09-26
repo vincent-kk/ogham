@@ -1,0 +1,228 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-ui, system-ui, -apple-system, 'Segoe UI', sans-serif);
+  background: var(--bg, #0b0c0f);
+  color: var(--fg, #e8e8ea);
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: var(--space-3, 16px);
+  gap: var(--space-3, 16px);
+}
+
+.header-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-2, 8px);
+}
+
+.header-title {
+  font-weight: 600;
+  font-size: 1.05rem;
+}
+
+.header-sse {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  color: var(--muted, #8c8c95);
+}
+
+.sse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted, #8c8c95);
+}
+.header-sse[data-status='open'] .sse-dot {
+  background: var(--accent-up, #2eb872);
+}
+.header-sse[data-status='closed'] .sse-dot {
+  background: var(--accent-down, #d54a4a);
+}
+
+.stale-banner {
+  padding: 8px 12px;
+  border-radius: var(--radius, 6px);
+  font-size: 0.9rem;
+}
+.stale-banner.warn {
+  background: rgba(225, 175, 60, 0.15);
+  color: #e1af3c;
+}
+.stale-banner.critical {
+  background: rgba(213, 74, 74, 0.18);
+  color: #ff8080;
+}
+
+.search-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  position: relative;
+}
+.search-modes {
+  display: flex;
+  gap: 4px;
+}
+.search-modes button {
+  background: transparent;
+  border: 1px solid var(--muted, #3a3a3f);
+  color: inherit;
+  padding: 4px 10px;
+  border-radius: var(--radius, 6px);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.search-modes button[aria-pressed='true'] {
+  background: var(--accent, #4a8fff);
+  border-color: var(--accent, #4a8fff);
+  color: #fff;
+}
+.search-bar input[type='search'] {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--muted, #3a3a3f);
+  color: inherit;
+  padding: 8px 12px;
+  border-radius: var(--radius, 6px);
+  font: inherit;
+}
+.search-results {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--muted, #3a3a3f);
+  border-radius: var(--radius, 6px);
+  max-height: 320px;
+  overflow: auto;
+}
+.search-results li {
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.search-results li:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+.search-results a {
+  color: inherit;
+  text-decoration: none;
+}
+.search-empty {
+  padding: 6px 10px;
+  color: var(--muted, #888);
+  font-size: 0.9rem;
+}
+.tag-chips {
+  display: flex;
+  gap: 4px;
+}
+.tag {
+  font-size: 0.75rem;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--muted, #aaa);
+}
+
+.search-loading {
+  position: absolute;
+  right: 10px;
+  top: 32px;
+  color: var(--muted, #888);
+}
+
+.grid.bento {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: var(--space-3, 16px);
+}
+.col-3 {
+  grid-column: span 3;
+}
+.col-4 {
+  grid-column: span 4;
+}
+.col-6 {
+  grid-column: span 6;
+}
+.col-8 {
+  grid-column: span 8;
+}
+.col-9 {
+  grid-column: span 9;
+}
+.col-12 {
+  grid-column: span 12;
+}
+
+@media (max-width: 900px) {
+  .col-3,
+  .col-4,
+  .col-6,
+  .col-8,
+  .col-9 {
+    grid-column: span 12;
+  }
+}
+
+.panel {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius, 8px);
+  padding: var(--space-3, 16px);
+  min-height: 120px;
+}
+.panel.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted, #888);
+}
+.panel-title {
+  font-size: 0.85rem;
+  color: var(--muted, #aaa);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vault-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.vault-table th,
+.vault-table td {
+  padding: 6px 8px;
+  text-align: left;
+}
+.vault-table tr + tr td {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+code {
+  font-family: var(--font-mono, ui-monospace, SFMono-Regular, monospace);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}

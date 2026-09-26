@@ -15,14 +15,17 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const here = fileURLToPath(import.meta.url);
 const packageRoot = resolve(here, '../../../..');
-const bridgeDir = resolve(packageRoot, 'bridge');
+const HOOK_HOSTS = ['claude', 'codex'];
+// Behavioral cases drive Codex apply_patch payloads, so they run the copy Codex
+// loads; the smoke loop covers every host copy.
+const bridgeDir = resolve(packageRoot, 'bridge', 'codex');
 
 interface HookCase {
   name: string;
   buildInput: (cwd: string) => Record<string, unknown>;
 }
 
-// 이벤트당 하나의 디스패처 번들 — bridge/<event>.mjs 와 1:1.
+// 이벤트당 하나의 디스패처 번들 — bridge/<host>/<event>.mjs 와 1:1.
 const HOOK_CASES: HookCase[] = [
   {
     name: 'session-start',
@@ -88,25 +91,26 @@ describe('hook bundle smoke tests', () => {
     if (cwd) rmSync(cwd, { recursive: true, force: true });
   });
 
-  for (const { name, buildInput } of HOOK_CASES) {
-    const bundle = resolve(bridgeDir, `${name}.mjs`);
+  for (const host of HOOK_HOSTS)
+    for (const { name, buildInput } of HOOK_CASES) {
+      const bundle = resolve(packageRoot, 'bridge', host, `${name}.mjs`);
 
-    it(`${name}.mjs spawns, exits 0, returns valid JSON, stderr clean`, () => {
-      expect(existsSync(bundle)).toBe(true);
-      const result = spawnSync(process.execPath, [bundle], {
-        input: JSON.stringify(buildInput(cwd)),
-        encoding: 'utf8',
-        timeout: 10_000,
-        windowsHide: true,
+      it(`${host}/${name}.mjs spawns, exits 0, returns valid JSON, stderr clean`, () => {
+        expect(existsSync(bundle)).toBe(true);
+        const result = spawnSync(process.execPath, [bundle], {
+          input: JSON.stringify(buildInput(cwd)),
+          encoding: 'utf8',
+          timeout: 10_000,
+          windowsHide: true,
+        });
+
+        expect(result.status).toBe(0);
+        expect(() => JSON.parse(result.stdout)).not.toThrow();
+        expect(result.stderr).not.toMatch(
+          /Dynamic require|Cannot find module|^Error:/m,
+        );
       });
-
-      expect(result.status).toBe(0);
-      expect(() => JSON.parse(result.stdout)).not.toThrow();
-      expect(result.stderr).not.toMatch(
-        /Dynamic require|Cannot find module|^Error:/m,
-      );
-    });
-  }
+    }
 
   it('pre-tool-use.mjs denies when a later patch operation targets Layer 1', () => {
     const bundle = resolve(bridgeDir, 'pre-tool-use.mjs');

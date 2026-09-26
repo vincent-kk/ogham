@@ -8,6 +8,12 @@ maencof 플러그인 소스 루트. 5-Layer Knowledge Model v3 기반 개인 지
 
 - `core/` 는 순수 비즈니스 로직 소유가 원칙이지만 vault I/O 경계도 여기서 끝난다 — I/O 를 한 층에 몰아두기 위한 결정이며, 예외 모듈 목록은 아래 `Always do` 가 정본이다.
 
+## Conventions
+
+- 라이브러리 표면은 `index.ts` 하나이고 export 를 이름으로 열거한다 — 여기 없는 심볼은 계약이 아니다
+- 서버 생성 함수(`createServer`·`startServer`)는 표면에 올리지 않는다. 배럴이 서버 모듈을 끌어오면 `version.ts` 참조와 맞물려 src → mcp → mcp/server → src 순환이 된다
+- 세션 마감은 MCP 서버 수명주기(shutdown·다음 부팅 bootSweep)가 소유한다. 훅은 매 턴 `session-touch` 만 기록하고, 세션 종료 기록의 주소는 sessionStore 하나다
+
 ## Boundaries
 
 ### Always do

@@ -19,11 +19,13 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 # Workflow
 
+
+
 ## Phase 0 — SMART DEFAULTS & CONFIRMATION
 
 ```
 Step 0.1 — Option Resolution
-  1. Call mcp__plugin_imbas_tools__config_get to load config.json.
+  1. Call mcp__imbas__config_get to load config.json.
   2. Resolve each option:
      - project_ref: --project argument > config.defaults.project_ref > STOP
        ("No project key. Run /imbas:setup or pass --project.")
@@ -57,14 +59,14 @@ Step 0.3 — Confirmation Banner (display, then IMMEDIATELY continue)
 Replicates the `imbas:refine` skill workflow (skills/refine/references/workflow.md Steps 1–5) with the automatic gate replacing the manual next-step decision:
 
 ```
-1. mcp__plugin_imbas_tools__run_create (project_ref, source, supplements)
-2. mcp__plugin_imbas_tools__run_transition start_phase(refine)
+1. mcp__imbas__run_create (project_ref, source, supplements)
+2. mcp__imbas__run_transition start_phase(refine)
 3. Resolve document source (local file | [OP: get_confluence] for URLs;
    [OP: search_confluence] for referenced pages → supplements)
 4. Spawn `analyst` (subagent_type: "imbas:analyst",
    model: config.defaults.llm_model.refine):
    5-type validation + restructuring into refined.md standard sections
-5. Save refined.md + validation-report.md; mcp__plugin_imbas_tools__run_transition complete_phase(refine,
+5. Save refined.md + validation-report.md; mcp__imbas__run_transition complete_phase(refine,
    result, blocking_issues, warning_issues)
 
 >>> GATE 1: Refine Result (auto-approval-gates.md)
@@ -81,24 +83,24 @@ Replicates the `imbas:refine` skill workflow (skills/refine/references/workflow.
 
 ```
 IF --skip-estimate:
-  mcp__plugin_imbas_tools__run_transition skip_phases(["estimate"]) → estimate.status = "skipped"
+  mcp__imbas__run_transition skip_phases(["estimate"]) → estimate.status = "skipped"
   → continue to Phase 3.
 
 ELSE — replicate the `imbas:estimate` skill workflow
 (skills/estimate/references/workflow.md):
-1. mcp__plugin_imbas_tools__run_transition start_phase(estimate)
+1. mcp__imbas__run_transition start_phase(estimate)
 2. Spawn `estimator` (subagent_type: "imbas:estimator",
    model: config.defaults.llm_model.estimate):
    3-view decomposition → reconciliation → PERT → schedule,
    using refined.md + config.estimation coefficients
-3. mcp__plugin_imbas_tools__manifest_save(type: "estimation") — schema-validated
+3. mcp__imbas__manifest_save(type: "estimation") — schema-validated
 4. Save estimation-report.md; display the summary block (total man-days,
    confidence interval, total weeks, top risks)
-5. mcp__plugin_imbas_tools__run_transition complete_phase(estimate,
+5. mcp__imbas__run_transition complete_phase(estimate,
    estimated_manday: <rollup.buffered_total>)
 
 >>> GATE 2: Estimation Integrity (auto-approval-gates.md)
-  - mcp__plugin_imbas_tools__manifest_validate(type: "estimation") valid → continue
+  - mcp__imbas__manifest_validate(type: "estimation") valid → continue
   - invalid → STOP: blocker report with validation errors
 
 >>> --stop-at estimate? → emit progress report ("STOPPED AT estimate"), exit
@@ -112,13 +114,13 @@ Replicates the `imbas:split` skill workflow with GATE 3 replacing the interactiv
 
 ```
 Decompose — skills/split/references/workflow.md Steps 1–7:
-1. mcp__plugin_imbas_tools__run_transition start_phase(split)   (estimate already completed/skipped)
+1. mcp__imbas__run_transition start_phase(split)   (estimate already completed/skipped)
 2. Epic decision comes from Phase 0 resolution (no interactive question)
 3. Spawn `planner` on refined.md (+ estimation.json when present) →
    INVEST issue list with estimate_manday mapping
 4. 3→1→2 verification per Story (`analyst` reverse-inference)
 5. Size check → horizontal split / umbrella as needed
-6. mcp__plugin_imbas_tools__manifest_save(type: "stories") + mcp__plugin_imbas_tools__manifest_validate
+6. mcp__imbas__manifest_save(type: "stories") + mcp__imbas__manifest_validate
 
 >>> GATE 3: Split Quality (auto-approval-gates.md)
   - All verification fields PASS + manifest valid → auto-approve:
@@ -136,8 +138,8 @@ as in split):
    with --strict-drift → STOP with blocker report instead.
 9. Provider batch execution per config.provider
    (references under skills/split/references/<provider>/ — per-item
-   mcp__plugin_imbas_tools__manifest_save, idempotent resume, estimate_manday note, lifecycle labels).
-10. mcp__plugin_imbas_tools__run_transition complete_phase(split, pending_review: false,
+   mcp__imbas__manifest_save, idempotent resume, estimate_manday note, lifecycle labels).
+10. mcp__imbas__run_transition complete_phase(split, pending_review: false,
     stories_created: N)
 
 >>> GATE 4: Execution Result (auto-approval-gates.md)

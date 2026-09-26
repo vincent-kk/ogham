@@ -19,16 +19,18 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 # Tools Used — Combined
 
+
+
 ## imbas MCP Tools
 
 | Tool                                               | Phases    | Usage                                                                  |
 | -------------------------------------------------- | --------- | ---------------------------------------------------------------------- |
-| `mcp__plugin_imbas_tools__config_get`              | 0         | Option resolution (project, provider, estimation coefficients, labels) |
-| `mcp__plugin_imbas_tools__run_create`              | 1         | Run directory + source snapshot + initial state                        |
-| `mcp__plugin_imbas_tools__run_get` (declared-only) | all       | State reads between phases                                             |
-| `mcp__plugin_imbas_tools__run_transition`          | all       | start/complete/skip/escape phase transitions                           |
-| `mcp__plugin_imbas_tools__manifest_save`           | 2, 3      | estimation.json / stories-manifest.json (validated save, per-item)     |
-| `mcp__plugin_imbas_tools__manifest_validate`       | GATE 2, 3 | Estimation and stories manifest integrity                              |
+| `mcp__imbas__config_get`              | 0         | Option resolution (project, provider, estimation coefficients, labels) |
+| `mcp__imbas__run_create`              | 1         | Run directory + source snapshot + initial state                        |
+| `mcp__imbas__run_get` (declared-only) | all       | State reads between phases                                             |
+| `mcp__imbas__run_transition`          | all       | start/complete/skip/escape phase transitions                           |
+| `mcp__imbas__manifest_save`           | 2, 3      | estimation.json / stories-manifest.json (validated save, per-item)     |
+| `mcp__imbas__manifest_validate`       | GATE 2, 3 | Estimation and stories manifest integrity                              |
 
 Manifest and artifact reads use the Read tool directly (refined.md, estimation.json, stories-manifest.json).
 

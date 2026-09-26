@@ -10,6 +10,8 @@ plugin: filid
 
 # context-query — Minimal FCA Context
 
+<!-- ogham-mcp-tools:filid -->
+
 Answer a focused ownership, boundary, public-contract, or placement-context question from the smallest relevant document chain.
 
 See [reference.md](./reference.md) for evidence selection, the three-round budget, and response shape.

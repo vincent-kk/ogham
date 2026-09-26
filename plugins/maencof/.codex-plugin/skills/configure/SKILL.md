@@ -1,0 +1,84 @@
+---
+name: configure
+user-invocable: false
+description: 'Health-checks the host environment — MCP servers, skills, agents, rules, hooks, instructions — and routes to the right configuration sub-skill. Use when diagnosing config drift or unsure which config skill applies.'
+argument-hint: '[component to configure]'
+version: '1.1.0'
+complexity: medium
+context_layers: []
+orchestrator: configurator
+plugin: maencof
+---
+
+# configure — Unified Environment Configuration
+
+Scan, diagnose, and manage the current runtime host's project environment from a single entry point. Routes to specialized sub-skills for resolution.
+
+Before scanning, load `../.shared/host-configuration.md` and select the current runtime host row. Use its instruction, behavioral-rule capability, and project/user agent surfaces exactly; do not reconstruct host paths or state-root environment overrides inside this skill. A Codex `unsupported` rule result is a capability result to route to `/maencof:instruct`, not a missing or healthy directory.
+
+## When to Use This Skill
+
+- Run a health check on project configuration
+- Discover and fix configuration issues
+- Navigate to the right sub-skill when unsure which to use
+- Migrate legacy configuration formats
+
+> This skill scans, delegates, and performs previewed migrations. It modifies files directly only for a confirmed migration.
+
+## When to Use vs Adjacent Skills
+
+- **`configure`** — ongoing configuration router. Scans, health-checks, and delegates to 5 sub-skills (bridge, instruct, rule, lifecycle, checkup). Call whenever environment drift or a specific config component needs attention after initial onboarding.
+- **`setup`** — one-time onboarding consultation. Runs a 7-stage "Professional Counselor" interview that creates the vault, Core Identity, AI companion, Layer directories, and initial index. Call once per project; `configure` takes over afterwards.
+
+Rule of thumb: vault does not yet exist → `setup`. Vault exists and something needs tuning → `configure`.
+
+## Scope
+
+For project instructions, behavioral rules, and agents, the generated shared host reference overrides the Claude examples in this table. The remaining rows keep their existing component-specific routing.
+
+| Area      | Path                                          | Access                                                              |
+| --------- | --------------------------------------------- | ------------------------------------------------------------------- |
+| Execution | `{CWD}/.mcp.json`                             | Read → `/maencof:bridge`                                            |
+| Execution | `{CWD}/.claude/settings.json`                 | Read → sub-skills                                                   |
+| Execution | `{CWD}/CLAUDE.md`                             | Read → `/maencof:instruct`                                          |
+| Execution | `{CWD}/.claude/rules/`                        | Read → `/maencof:rule`                                              |
+| Execution | `{CWD}/.maencof-meta/lifecycle.json`          | Read → `/maencof:lifecycle`                                         |
+| Execution | `{CWD}/.maencof-meta/companion-identity.json` | Read → `companion_edit` tool / `/maencof:setup --reset --companion` |
+| Execution | `{CWD}/.maencof-meta/` (other)                | Read → `/maencof:checkup`                                           |
+| Execution | `{CWD}/.claude/settings.local.json`           | **Never**                                                           |
+
+> **Companion persona (v2)**: For incremental tuning of the AI companion — add/update/remove a persona `section`, or adjust `inject`/`salience`/`brief`/`detail` (each a string or an array of strings joined with `|`) — route to the `companion_edit` MCP tool (preview → commit, backup + schema + monotone per-turn budget gate — the tool states the char cap and lets an over-budget persona converge without worsening). For a full re-author, use `/maencof:setup --reset --companion`. Never edit `companion-identity.json` directly.
+
+## Workflow
+
+### Step 1 — Environment Scan
+
+Check all config files/directories for existence, format, and spec compliance.
+
+### Step 2 — Health Report
+
+Display issues by severity (error/warning/info). Skip if clean.
+
+### Step 3 — Migration (when applicable)
+
+Handle legacy format conversion with diff preview and confirmation.
+
+> Load `reference.md` for health check details, migration guidance, and error handling.
+
+## Resources
+
+| File           | Content                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------- |
+| `reference.md` | Scan targets, health report format, migration workflow, error handling, acceptance criteria |
+
+## Options
+
+```
+/maencof:configure [options]
+```
+
+| Option      | Description                                  |
+| ----------- | -------------------------------------------- |
+| `--scan`    | Scan and report only (no modifications)      |
+| `--fix`     | Auto-fix detected issues (with confirmation) |
+| `--migrate` | Run legacy migration only                    |

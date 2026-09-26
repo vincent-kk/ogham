@@ -12,6 +12,8 @@ plugin: maencof
 
 # explore — Interactive Knowledge Exploration
 
+<!-- ogham-mcp-tools:maencof -->
+
 Interactively traverses the knowledge graph using Spreading Activation (SA). Energy spreads from a seed node, uncovering unexpected connections along the way.
 
 ## When to Use This Skill

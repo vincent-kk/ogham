@@ -1,5 +1,7 @@
 # R package check & install (Steps 6–9 detail)
 
+<!-- ogham-mcp-tools:r-statistics -->
+
 Load this once R itself is confirmed present (SKILL.md Steps 1–5) and you are proceeding to packages — the `--packages` path, or the tail of a fresh install. Every install here is **consent-gated** and runs through the **terminal, never `run_r`** (`run_r` blocks `install.packages`).
 
 ## Step 6 — Check packages

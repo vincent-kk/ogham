@@ -1,5 +1,7 @@
 # read-issue Workflow — Provider-agnostic skeleton
 
+<!-- ogham-mcp-tools:imbas -->
+
 This file defines the overall flow. Steps 1–4 are delegated to the provider-specific workflow file (`jira/workflow.md`, `github/workflow.md`, or `local/workflow.md`), selected by `config.provider`. Step 5 (structured output) is shared.
 
 ## Step 0 — Provider routing

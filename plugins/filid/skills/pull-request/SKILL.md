@@ -10,6 +10,8 @@ plugin: filid
 
 # pull-request — Documented PR Creation
 
+<!-- ogham-mcp-tools:filid -->
+
 Run this skill as one continuous operation. Do not ask whether to continue between stages. Yield only at the marked overwrite confirmation, for an unrecoverable source-state error, or after the terminal output.
 
 The PR is where document work happens: Stage 1 drafts missing documents, repairs document-contract findings for the fractals this branch touched, commits those documents, and records everything it could not repair in the PR body's `FCA Handoff` section. Document sync never blocks publication.

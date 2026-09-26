@@ -12,6 +12,8 @@ plugin: maencof
 
 # recall — Knowledge Search/Recall
 
+<!-- ogham-mcp-tools:maencof -->
+
 Accepts a natural-language query, traverses the maencof knowledge graph using the Spreading Activation (SA) algorithm, finds related documents, assembles context, and returns it.
 
 ## When to Use This Skill

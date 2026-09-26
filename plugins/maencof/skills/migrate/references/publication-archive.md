@@ -2,6 +2,8 @@
 
 # publications — Publication → 99_Archive + clusterseed Migration
 
+<!-- ogham-mcp-tools:maencof -->
+
 Converts a legacy vault where publications (periodic feed documents: CVE advisories, news items, digests, …) are scattered across layer directories into the formalized structure:
 
 - **Bodies** live under `99_Archive/<series>/` — outside the knowledge graph (not nodes; enumerable via `kg_search { cluster }`) by design (scan allowlist + node path gate), so they produce zero lexical noise. Explicit-path `read`/`update` still work on them.

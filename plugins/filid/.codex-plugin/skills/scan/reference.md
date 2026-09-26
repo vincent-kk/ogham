@@ -1,5 +1,7 @@
 # scan — FCA Audit Reference
 
+
+
 This reference defines the only full-project FCA audit workflow. The workflow is read-only and uses one snapshot-oriented pass from each retained audit surface.
 
 ## Section 1 — Project Snapshot Summary
@@ -7,7 +9,7 @@ This reference defines the only full-project FCA audit workflow. The workflow is
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "scan",
   path: "<target-path>",
   detail: "summary"
@@ -21,7 +23,7 @@ Retain the project root, snapshot hash, adapter IDs, node counts, depth, violati
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "validate",
   path: "<target-path>",
   scopes: [
@@ -51,7 +53,7 @@ The structural pass covers:
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "verification",
   path: "<target-path>",
   detail: "files"

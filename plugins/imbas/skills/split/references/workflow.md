@@ -1,5 +1,7 @@
 # Workflow — Part A: Decomposition (Steps 1–7)
 
+<!-- ogham-mcp-tools:imbas -->
+
 Creation continues in [creation-workflow.md](./creation-workflow.md) (Steps 8–11) in the same continuous operation.
 
 ```

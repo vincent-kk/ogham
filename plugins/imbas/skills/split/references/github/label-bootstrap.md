@@ -1,5 +1,7 @@
 # GitHub Provider — Label Bootstrap Protocol
 
+<!-- ogham-mcp-tools:imbas -->
+
 Documents the startup label verification and creation protocol for the manifest skill. Implements the label bootstrap protocol (SPEC-provider-github.md §3.3).
 
 ## Purpose

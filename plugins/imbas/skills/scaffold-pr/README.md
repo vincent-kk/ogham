@@ -1,5 +1,7 @@
 # `imbas:scaffold-pr`
 
+<!-- ogham-mcp-tools:imbas -->
+
 Jira Story나 GitHub 이슈로부터 서브태스크 체크리스트가 포함된 Draft PR을 생성하는 스킬.
 
 ## 개요

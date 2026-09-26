@@ -10,13 +10,15 @@ import { resolveMcpToolName } from "./resolveMcpToolName.js";
 export interface McpToolReferences {
   /** Only these relative skill paths may have their MCP references rewritten. */
   skillPaths: string[];
+  /** Only these `agents/` persona basenames may have their copies rewritten. */
+  personaFiles: string[];
   /** Canonical token to Codex callable token, shared with exact hook alternatives. */
   names: Record<string, string>;
 }
 
 /**
  * Validate plugin opt-in before any builder emits a partial variant.
- * @param facts Canonical skill, hook and server facts; inputs remain unchanged.
+ * @param facts Canonical skill, persona, hook and server facts; inputs remain unchanged.
  * @returns Selected file paths and complete mappings, or null without opt-in.
  * @throws McpToolReferenceError for invalid markers, names, matchers or collisions.
  */
@@ -26,9 +28,13 @@ export function prepareMcpToolReferences(
   const marked = Object.entries(facts.skillFiles).filter(([path, content]) =>
     readMcpToolMarker(content, path, facts.name),
   );
-  if (marked.length === 0) return null;
+  const markedPersonas = Object.entries(facts.agentFiles).filter(
+    ([basename, content]) =>
+      readMcpToolMarker(content, `agents/${basename}`, facts.name),
+  );
+  if (marked.length === 0 && markedPersonas.length === 0) return null;
   const prefixes = createMcpServerPrefixes(facts);
-  const tokens = marked.flatMap(
+  const tokens = [...marked, ...markedPersonas].flatMap(
     ([, content]) => content.match(MCP_TOOL_TOKEN) ?? [],
   );
   tokens.push(...collectMcpHookTokens(facts));
@@ -46,5 +52,9 @@ export function prepareMcpToolReferences(
       );
     names[token] = target;
   }
-  return { skillPaths: marked.map(([path]) => path), names };
+  return {
+    skillPaths: marked.map(([path]) => path),
+    personaFiles: markedPersonas.map(([basename]) => basename),
+    names,
+  };
 }

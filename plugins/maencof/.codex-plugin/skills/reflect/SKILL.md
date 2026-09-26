@@ -1,0 +1,139 @@
+---
+name: reflect
+user-invocable: false
+description: 'Previews insight consolidation or reports layer transitions, duplicates and hub health without knowledge writes. Use to assess accumulated insights or preview organize changes.'
+argument-hint: '[--insights [--path PREFIX]] [--layer 3|4|5] [--show-all]'
+version: '1.0.0'
+complexity: medium
+context_layers: [1, 2, 3, 4, 5]
+orchestrator: memory-organizer
+plugin: maencof
+---
+
+# reflect — Knowledge Vault Analysis Report
+
+
+
+Runs the **judge module** of memory-organizer for transition analysis, or the active agent for insight assessment. Generates a report without vault knowledge writes; insight previews may retain review snapshots in a host execution artifact outside the vault.
+
+## Insight Assessment
+
+For `reflect --insights [--path VAULT_RELATIVE_PREFIX]`, load Assess and Relations in [insight-lifecycle.md](../.shared/insight-lifecycle.md). The active agent runs the same complete inventory and claim assessment as organize's insight preview, with no knowledge writes. This replaces the default index-dependent workflow below. Preserve parse errors and unvalidated L5 material as held items. Report proposed source/target changes and reasons; hand an authorized application to `organize --insights --apply`.
+
+Reject `--apply`, `--maintenance`, or transition options (`--layer`, `--show-all`) combined with `--insights`; `--path` requires this mode. Use `mcp__maencof__kg_inventory`, `mcp__maencof__read`, and optional `mcp__maencof__kg_search`. Missing search does not prevent disk assessment. Do not run the Apply section or clear pending notifications.
+
+## When to Use This Skill
+
+- When you want to understand the current state of the knowledge vault (without making changes)
+- When you want to preview which documents are transition candidates
+- When you only want to see the duplicate document detection results
+- "reflection", "knowledge status", "check transition candidates"
+
+## When to Use vs Adjacent Skills
+
+- **`reflect`** — read-only vault assessment. Use for diagnostic reports and previews of organize candidates; host review snapshots remain outside the vault.
+- **`organize`** — judge + execute. Mutates the vault via `mcp__maencof__move` after user confirmation. Use when you are ready to apply the transitions `reflect` surfaced.
+
+Rule of thumb: inspect without side effects → `reflect`; apply transitions → `organize`.
+
+## Agent Collaboration Sequence
+
+```
+[reflect skill] -> [memory-organizer.judge] -> TransitionDirective[]
+                                           |
+                               generate analysis report (no file changes)
+```
+
+**Orchestrator**: the reflect skill calls only the judge module and skips execute. Use `reflect` for a diagnostic report (hub health, sub-layer distribution, duplicates, auto-insight stats); use `organize --dry-run` for a plain directive preview immediately before executing.
+
+## Workflow
+
+### Step 1 — Query Vault Status
+
+Query the current index status, node count, and stale node list via `mcp__maencof__kg_status`.
+
+### Step 2 — Run judge Module
+
+Execute memory-organizer judge logic:
+
+- Full scan of Layer 3/4/5 (including sub-layer directories)
+- Calculate transition score for each node (access frequency, tags, connection density, confidence)
+- Detect duplicate candidate pairs
+- **Hub analysis**: Evaluate cross-layer connection effectiveness — identify hub documents (`hub: true`, any layer) with zero CROSS_LAYER edges (no tag overlap with anything) or capped connections (50 targets)
+
+### Step 3 — Generate Report
+
+```markdown
+## Knowledge Vault Analysis Report
+
+### Transition Candidates (Layer 3 -> Layer 2)
+
+| File | Sub-Layer | Access Count | Tag Matching | confidence | Recommendation |
+| ---- | --------- | ------------ | ------------ | ---------- | -------------- |
+
+### Transition Candidates (Layer 4 -> Layer 3)
+
+| File | Last Accessed | Expiration | Target Sub-Layer | Recommendation |
+
+### Layer 5 Promotion Candidates
+
+| File | Age (days) | Connections | Recommended Target |
+
+### Hub Health
+
+| Hub Document | Layer | hub_kind | CROSS_LAYER Edges | Status |
+(OK / No edges / Overcrowded)
+
+### Duplicate Detection
+
+| File A | File B | Common Tags | Similarity |
+
+### Sub-Layer Distribution
+
+| Layer | Sub-Layer | Count |
+(L3: relational/structural/topical)
+
+### Summary
+
+- Transition candidates: N
+- Buffer promotion candidates: N
+- Hub health issues: N
+- Duplicate document pairs: N
+- Recommended action: use the `organize` skill
+```
+
+## MCP Tools
+
+| Tool                                     | Purpose                     |
+| ---------------------------------------- | --------------------------- |
+| `mcp__maencof__kg_status`   | Query vault status          |
+| `mcp__maencof__kg_navigate` | Traverse link relationships |
+| `mcp__maencof__read`        | Read document Frontmatter   |
+| `mcp__maencof__kg_inventory` | Enumerate all insight candidates in insight mode |
+| `mcp__maencof__kg_search` | Locate related accounts in insight mode |
+
+## Error Handling
+
+- **No index**: "No index found. Please run `/maencof:build` first."
+- **memory-organizer unavailable**: abort and guide to retry
+- **No candidates found**: display empty report with summary "No transition candidates at current threshold."
+
+### Auto-Insight Status
+
+Include in reflection output:
+
+- Auto-insight capture: enabled/disabled, sensitivity level
+- Recent capture stats: total, L2, L5
+- Noise ratio estimate: archived / total (if available)
+- Recommendation: adjust sensitivity if noise ratio > 50%
+
+## Options
+
+```
+/maencof:reflect [--layer <3|4|5>] [--show-all]
+```
+
+| Option       | Default | Description                                  |
+| ------------ | ------- | -------------------------------------------- |
+| `--layer`    | 3,4,5   | Target Layer(s) to analyze                   |
+| `--show-all` | false   | Show all candidates regardless of confidence |

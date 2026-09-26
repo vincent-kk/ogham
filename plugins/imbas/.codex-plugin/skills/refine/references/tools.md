@@ -19,16 +19,18 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 # refine — Tools Used & Agent Spawn
 
+
+
 ## Tools Used
 
 ### imbas MCP Tools
 
 | Tool                                      | Usage                                                             |
 | ----------------------------------------- | ----------------------------------------------------------------- |
-| `mcp__plugin_imbas_tools__config_get`     | Load config.json for language/default project resolution (Step 1) |
-| `mcp__plugin_imbas_tools__run_create`     | Create run directory, copy source, initialize state.json          |
-| `mcp__plugin_imbas_tools__run_get`        | Read current run state for precondition checks (declared-only)    |
-| `mcp__plugin_imbas_tools__run_transition` | start_phase (refine) → complete_phase (refine) with result        |
+| `mcp__imbas__config_get`     | Load config.json for language/default project resolution (Step 1) |
+| `mcp__imbas__run_create`     | Create run directory, copy source, initialize state.json          |
+| `mcp__imbas__run_get`        | Read current run state for precondition checks (declared-only)    |
+| `mcp__imbas__run_transition` | start_phase (refine) → complete_phase (refine) with result        |
 
 ### Jira Operations ([OP:])
 

@@ -8,7 +8,7 @@ complexity: complex
 plugin: filid
 ---
 
-# cross-review — Deterministic Changed-Scope Review
+# cross-review — Deterministic Changed-Scope Review <!-- ogham-mcp-tools:filid -->
 
 Run this skill as one continuous operation. Keep intermediate artifacts on disk; yield only for an unrecoverable source-state error or after a sealed verdict and its pull-request delivery.
 

@@ -9,6 +9,8 @@ plugin: atlassian
 
 # confluence
 
+<!-- ogham-mcp-tools:atlassian -->
+
 Resolves a Confluence request to an endpoint and an `mcp__plugin_atlassian_tools__fetch` call. Parameters: [`mcp-tools.md`](../.shared/mcp-tools.md). Errors: [`error-handling.md`](../.shared/error-handling.md).
 
 ## Execution model

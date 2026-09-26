@@ -1,5 +1,7 @@
 # Tools Used — GitHub Provider
 
+
+
 ## Bash Commands
 
 | Command                                                  | Usage                        |
@@ -11,4 +13,4 @@
 
 | Tool                                  | Usage                                              |
 | ------------------------------------- | -------------------------------------------------- |
-| `mcp__plugin_imbas_tools__config_get` | Read `config.github.repo` for bare `#N` resolution |
+| `mcp__imbas__config_get` | Read `config.github.repo` for bare `#N` resolution |

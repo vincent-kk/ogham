@@ -17,6 +17,16 @@ describe("invalid MCP opt-in", () => {
     ).toThrow(/MCP.*marker/i);
   });
 
+  it("names the persona file that carries a foreign marker", () => {
+    expect(() =>
+      buildCodexSkills(
+        mcpToolFacts({
+          agentFiles: { "courier.md": "<!-- ogham-mcp-tools:other -->" },
+        }),
+      ),
+    ).toThrow(/agents\/courier\.md/);
+  });
+
   it("rejects an unknown owned server", () => {
     expect(() =>
       buildCodexSkills(

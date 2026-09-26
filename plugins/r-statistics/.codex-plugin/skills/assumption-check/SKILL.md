@@ -10,7 +10,9 @@ plugin: r-statistics
 
 # assumption-check — Verify Method Assumptions
 
-Run the statistical assumptions a chosen method requires and produce `assumption.{id}` artifacts (each with a `passed` boolean) that `assert_analysis_plan` consumes. Execution runs through `mcp__plugin_r-statistics_tools__run_r`.
+
+
+Run the statistical assumptions a chosen method requires and produce `assumption.{id}` artifacts (each with a `passed` boolean) that `assert_analysis_plan` consumes. Execution runs through `mcp__r_statistics__run_r`.
 
 ## Steps
 

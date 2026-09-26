@@ -7,6 +7,8 @@ argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refin
 
 # claude
 
+
+
 The child inherits no session context or customizations, but retains Claude Code's built-in tools in the spawned working directory, bounded by the configured permission mode.
 
 ## Input and tier
@@ -59,4 +61,4 @@ Relay the report: everything after its FIRST standalone `---`, `session_id` in b
 
 ## Stop
 
-Ending the courier does not stop `claude`. On stop/cancel/abandon, call `mcp__plugin_cennad_tools__stop_conversation` with known `session_id`, else `provider: claude`; omit both only for stop-all. Never stop wanted work. Report `count: 0` once.
+Ending the courier does not stop `claude`. On stop/cancel/abandon, call `mcp__cennad__stop_conversation` with known `session_id`, else `provider: claude`; omit both only for stop-all. Never stop wanted work. Report `count: 0` once.

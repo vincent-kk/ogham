@@ -1,5 +1,7 @@
 # Error Handling — Provider-agnostic
 
+
+
 Provider-specific errors are in `jira/errors.md`, `github/errors.md`, and `local/errors.md`.
 
 ## Decomposition (Steps 1–7)
@@ -12,7 +14,7 @@ Provider-specific errors are in `jira/errors.md`, `github/errors.md`, and `local
 | Epic key not found                            | Display: "Epic <KEY> not found. Check the key or choose 'Create new Epic'." |
 | `planner` produces no Stories                 | Trigger escape E2-3 if document is already atomic; otherwise E2-1.          |
 | Manifest validation fails                     | Log errors, attempt auto-fix (ID dedup, link resolution), re-validate.      |
-| mcp__plugin_imbas_tools__run_transition fails | Display precondition error from tool.                                       |
+| mcp__imbas__run_transition fails | Display precondition error from tool.                                       |
 
 ## Creation (Steps 8–11)
 

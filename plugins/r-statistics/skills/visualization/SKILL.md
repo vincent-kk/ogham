@@ -10,6 +10,8 @@ plugin: r-statistics
 
 # visualization — ggplot2 Statistical Plots
 
+<!-- ogham-mcp-tools:r-statistics -->
+
 Generate a statistical figure with `ggplot2` and save it as an image artifact. Execution runs through `mcp__plugin_r-statistics_tools__run_r`.
 
 ## Steps

@@ -31,7 +31,7 @@ yarn build
 claude --plugin-dir ./plugins/cennad
 ```
 
-Building produces `bridge/mcp-server.cjs`, `bridge/injectStatic.mjs`, and `bridge/injectDynamic.mjs`.
+Building produces `bridge/mcp-server.cjs` and the `injectStatic.mjs` and `injectDynamic.mjs` hook bundles under `bridge/claude/` (Claude) and `bridge/codex/` (Codex).
 
 ### Prerequisites
 

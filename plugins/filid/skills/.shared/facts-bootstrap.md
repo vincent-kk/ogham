@@ -1,5 +1,7 @@
 # Facts Bootstrap
 
+<!-- ogham-mcp-tools:filid -->
+
 Canonical procedure for every filid skill whose judgments read dependency references. Each such skill links here from one short step placed before its first reference-based analysis call; the steps live only in this file.
 
 Run the steps in order, in the same turn as the calling skill, and return to the calling skill's next step when step 8 or the failure section ends the bootstrap. `PROJECT_ROOT` is the absolute project root the calling skill analyses.

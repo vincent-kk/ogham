@@ -1,5 +1,7 @@
 # migrate Reference
 
+
+
 Detailed reference for the `migrate.mjs` script that handles CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md batch migration.
 
 ---
@@ -179,7 +181,7 @@ The workflow must:
 1. **Dry-run first**: Always run without `--execute` first
 2. **Report**: Show the script output to the user
 3. **Use the execution gate**: Only run mutations when the invocation explicitly includes `--execute`; never promote a dry run to execution automatically
-4. **Post-validate**: After execution call `mcp__plugin_filid_tools__fractal_inspect` with `action: "validate"` and scopes `documents`, `nodes`, and `entry-points`
+4. **Post-validate**: After execution call `mcp__filid__fractal_inspect` with `action: "validate"` and scopes `documents`, `nodes`, and `entry-points`
 
 The common envelope status, diagnostics, and findings are reported verbatim. Read the findings from the returned result or, when the payload exceeds the inline envelope budget, from its artifact — an absent inline `data` is not an empty finding set. A non-`ok` result is not presented as a verified migration.
 

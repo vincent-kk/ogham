@@ -1,5 +1,7 @@
 # Manifest Execution Workflow — Local Provider
 
+
+
 This file is loaded by the manifest skill when `config.provider === 'local'`. Provider-agnostic preamble (manifest loading, dry-run preview, user confirmation, result report) lives in `../workflow.md`. This file owns the local-specific execution steps.
 
 ## Storage target
@@ -31,7 +33,7 @@ Local files cannot drift out of band the way Jira issues can, but files may be m
    - DRIFT_DELETED: file missing → WARN "Local issue `<ID>` was deleted. Reset to pending? [y/N]"
      - Yes → clear `issue_ref`, set `status = "pending"`. Also reset every `manifest.links` entry referencing the item (by manifest ID or the deleted `issue_ref`) to `status = "pending"`, and `Edit` the counterpart files' frontmatter to drop `links[]` entries pointing at the deleted ID. Phase 4c then re-creates both sides against the re-allocated ID — the scrub is what prevents stale entries when the new ID differs from the old one.
      - No → mark `status = "skipped"`.
-4. If any drift detected, display summary table and save reconciled manifest via `mcp__plugin_imbas_tools__manifest_save` before Step 3.
+4. If any drift detected, display summary table and save reconciled manifest via `mcp__imbas__manifest_save` before Step 3.
 5. Skip entirely for fresh runs (no `issue_ref` anywhere).
 
 ## Step 4 — Batch Execution (Local)
@@ -43,7 +45,7 @@ CRITICAL invariant: **allocate-then-write per item.** Never pre-compute all IDs 
 3. `Write` the file immediately with full frontmatter + `## Description` body
    - empty `## Digest` section (see `file-format.md`).
 4. Update manifest item: `status = "created"`, `issue_ref = <ID>`.
-5. `mcp__plugin_imbas_tools__manifest_save` immediately.
+5. `mcp__imbas__manifest_save` immediately.
 
 This ensures crash recovery leaves no orphan IDs. A mid-batch kill means the next run's Glob will pick up from the highest written file.
 
@@ -70,7 +72,7 @@ For each item in `manifest.stories` where `status == "pending"`, route by the it
    - `## Description` body from `item.description`.
    - Empty `## Digest` section.
 3. Update the manifest item: `status = "created"`, `issue_ref = "<ID>"`.
-4. `mcp__plugin_imbas_tools__manifest_save` immediately.
+4. `mcp__imbas__manifest_save` immediately.
 
 #### Phase 4c — Link Creation (bidirectional)
 

@@ -1,5 +1,7 @@
 # enrich-docs — Reference
 
+<!-- ogham-mcp-tools:filid -->
+
 Evidence, planning, editing, and validation details for [SKILL.md](./SKILL.md).
 
 ## §1 Tool calls and evidence

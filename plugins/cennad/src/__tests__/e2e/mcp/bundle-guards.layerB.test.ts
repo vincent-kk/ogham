@@ -22,7 +22,10 @@ const FORBIDDEN_PATTERNS: RegExp[] = [
   /Dynamic require of/,
 ];
 
-const HOOK_BUNDLES = ['injectStatic.mjs', 'injectDynamic.mjs'];
+const HOOK_BUNDLES = ['claude', 'codex'].flatMap((host) => [
+  `${host}/injectStatic.mjs`,
+  `${host}/injectDynamic.mjs`,
+]);
 
 function bridgeDir(): string {
   const dir = process.env.CENNAD_E2E_BRIDGE;

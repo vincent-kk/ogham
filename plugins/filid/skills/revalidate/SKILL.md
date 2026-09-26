@@ -10,6 +10,8 @@ plugin: filid
 
 # revalidate — Delta Re-measurement and Final Verdict
 
+<!-- ogham-mcp-tools:filid -->
+
 Run this skill as one continuous operation. Do not ask whether to continue between steps. Yield only for an unrecoverable state error or after the terminal verdict.
 
 This is the only stage that decides whether the review cycle closed. It re-measures rather than trusting `resolve` — an accepted item is resolved when the evidence moved, not when someone said it was applied.

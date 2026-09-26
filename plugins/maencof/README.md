@@ -37,7 +37,7 @@ claude --plugin-dir ./plugins/maencof
 Building produces two outputs:
 
 - `bridge/mcp-server.cjs` — MCP server (21 knowledge tools)
-- `bridge/*.mjs` — 4 event dispatchers (session-start, user-prompt-submit, pre-tool-use, post-tool-use), each running that event's concern handlers in a single process. Session finalization (record close, archiving, auto-commit) lives in the MCP server lifecycle (boot sweep + shutdown), not in a hook.
+- `bridge/<host>/*.mjs` — 4 event dispatchers (session-start, user-prompt-submit, pre-tool-use, post-tool-use), each running that event's concern handlers in a single process. They are built once per host runtime: `claude` (Claude, and Antigravity through `bridge/run-agy.mjs`) and `codex`. Session finalization (record close, archiving, auto-commit) lives in the MCP server lifecycle (boot sweep + shutdown), not in a hook.
 
 > **Performance note**: maencof registers one hook per event. The `UserPromptSubmit` dispatcher runs context injection → lifecycle actions → vault auto-commit → the insight banner sequentially in a single process — one node start per event instead of one per concern. The first prompt of a session additionally builds the context cache. The per-event timeouts in `hooks.json` are kill-switches, not expected latency, and every concern fast-fails outside a vault. The only path that runs git is the vault auto-commit, and it requires three conditions to fire: vault opt-in (`vault-commit.json::enabled=true`) + a prompt matching `/clear` (or a configured `skip_patterns` entry) + dirty vault — i.e., only when the user explicitly signals "wrap up this session", at which point a ~1–2s commit is the intended cost.
 

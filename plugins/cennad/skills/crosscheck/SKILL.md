@@ -7,6 +7,8 @@ argument-hint: '[--tier apex|high|mid|low] [--no-converge] -- "prompt"'
 
 # crosscheck
 
+<!-- ogham-mcp-tools:cennad -->
+
 Never send secrets: every enabled vendor receives the prompt. Use one provider's skill when its strengths suffice. Crosscheck never uses the courier or refinement.
 
 `--continue` is unsupported: abort before dispatch and point to `/cennad:<provider> --continue <id>`, echoing the ID. Accept only an optional `--tier`, `--no-converge`, and the required prompt. Forward the SAME prompt verbatim. Pass `tier` only when the user supplied it; never raise it yourself. `--no-converge` ends after first synthesis.

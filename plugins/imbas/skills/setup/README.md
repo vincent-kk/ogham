@@ -1,5 +1,7 @@
 # setup
 
+<!-- ogham-mcp-tools:imbas -->
+
 `.imbas/` 디렉토리 초기화, provider 선택, config.json 생성, 프로젝트 메타데이터 캐싱을 수행하는 설정 스킬.
 
 ## 개요

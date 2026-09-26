@@ -2,13 +2,13 @@
 
 ## Requirements
 
-- Claude Code 플러그인의 Layer 1 자동 실행 계층이다. 2개 lifecycle 이벤트를 `bridge/*.mjs` 스크립트에 매핑하는 정적 설정 노드다.
+- Claude Code 플러그인의 Layer 1 자동 실행 계층이다. 2개 lifecycle 이벤트를 `bridge/claude/*.mjs` 스크립트에 매핑하는 정적 설정 노드다.
 - 로직을 담지 않는다 — 매핑만 있다. 구현은 `src/hooks/` 소관이다.
 - 등록된 스크립트 이름은 빌드 산출물 이름과 일치해야 한다. 어긋나면 훅이 조용히 실행되지 않는다.
 
 ## API Contracts
 
-- `hooks.json` — SessionStart → `bridge/inject-static.mjs`, UserPromptSubmit → `bridge/inject-dynamic.mjs` 매핑.
+- `hooks.json` — SessionStart → `bridge/claude/injectStatic.mjs`, UserPromptSubmit → `bridge/claude/injectDynamic.mjs` 매핑.
 
 ## Acceptance Criteria
 

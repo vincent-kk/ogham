@@ -7,6 +7,8 @@ argument-hint: '[--continue <session_id>] [--tier apex|high|mid|low] [--no-refin
 
 # codex
 
+<!-- ogham-mcp-tools:cennad -->
+
 Do not delegate trivial reasoning or material exceeding Codex's context window.
 
 ## Input and tier

@@ -1,0 +1,32 @@
+{
+  "name": "@dashboard/backend",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^8",
+    "@fastify/static": "^7",
+    "chokidar": "latest",
+    "fast-glob": "latest",
+    "fastify": "^4",
+    "fastify-sse-v2": "^4",
+    "fuse.js": "latest",
+    "gray-matter": "latest",
+    "markdown-it": "latest",
+    "markdown-it-task-lists": "latest",
+    "zod": "^3"
+  },
+  "devDependencies": {
+    "@types/markdown-it": "latest",
+    "@types/node": "latest",
+    "tsx": "latest",
+    "typescript": "latest"
+  },
+  "optionalDependencies": {
+    "@ogham/maencof": "latest"
+  }
+}

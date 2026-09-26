@@ -1,6 +1,10 @@
-import { existsSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 
-import { portableJoin, writeFileAtomicallySync } from '@ogham/cross-platform';
+import {
+  portableJoin,
+  tmp,
+  writeFileAtomicallySync,
+} from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { handleReviewState } from '../../../../mcp/tools/reviewState/index.js';
@@ -169,6 +173,51 @@ describe('recoverReviewGroups through prepare', () => {
     expect(brief).toContain('R01-001');
     expect(brief).toContain('R01-002');
     expect(brief).toContain('## Deliverable');
+  });
+
+  it('spells a rebuilt verify brief with Codex tool names on the Codex channel', async () => {
+    process.env.OGHAM_HOST = 'codex';
+    const codexHome = mkdtempSync(portableJoin(tmp(), 'filid-codex-home-'));
+    process.env.CODEX_HOME = codexHome;
+    try {
+      const state = readPreparedReviewState(prepared);
+      const group = state.groups[0]!;
+      writeFileAtomicallySync(
+        portableJoin(
+          prepared.data.reviewDirectory,
+          'opinions/review-01.r3.json',
+        ),
+        JSON.stringify(buildReviewOpinion(state, group, 3)),
+      );
+      await handleReviewState({
+        action: 'validate',
+        projectRoot: fixture.projectRoot,
+        kind: 'review',
+        group: '01',
+        round: 3,
+      });
+      const path = portableJoin(
+        prepared.data.reviewDirectory,
+        group.verifyBriefPath,
+      );
+      rmSync(path);
+      const restored = await prepareWithFacts({
+        action: 'prepare',
+        projectRoot: fixture.projectRoot,
+        effort: 'high',
+      });
+      expect(restored.data.next[0]).toMatchObject({
+        kind: 'verify',
+        briefPath: path,
+      });
+      const brief = readFileSync(path, 'utf8');
+      expect(brief).toContain('mcp__filid__');
+      expect(brief).not.toContain('mcp__plugin_filid_tools__');
+    } finally {
+      delete process.env.OGHAM_HOST;
+      delete process.env.CODEX_HOME;
+      rmSync(codexHome, { recursive: true, force: true });
+    }
   });
 
   it.each(['missing', 'tampered'] as const)(
