@@ -37,7 +37,7 @@ claude --plugin-dir ./plugins/maencof
 빌드하면 두 가지 산출물이 생성됩니다:
 
 - `bridge/mcp-server.cjs` — MCP 서버 (지식 도구 21개)
-- `bridge/*.mjs` — 이벤트 디스패처 4개 (session-start, user-prompt-submit, pre-tool-use, post-tool-use). 각 디스패처가 해당 이벤트의 관심사 핸들러를 한 프로세스에서 실행합니다. 세션 종료 마감(레코드 마감·아카이빙·자동 커밋)은 훅이 아니라 MCP 서버 수명주기(boot sweep + shutdown)가 담당합니다.
+- `bridge/<host>/*.mjs` — 이벤트 디스패처 4개 (session-start, user-prompt-submit, pre-tool-use, post-tool-use). 각 디스패처가 해당 이벤트의 관심사 핸들러를 한 프로세스에서 실행합니다. 호스트 런타임마다 한 벌씩 빌드합니다: `claude`(Claude, Antigravity는 `bridge/run-agy.mjs` 경유)와 `codex`. 세션 종료 마감(레코드 마감·아카이빙·자동 커밋)은 훅이 아니라 MCP 서버 수명주기(boot sweep + shutdown)가 담당합니다.
 
 > **성능 안내**: maencof는 이벤트당 hook을 1개만 등록합니다. `UserPromptSubmit` 디스패처는 컨텍스트 주입 → lifecycle 액션 → vault 자동 커밋 → insight 배너를 한 프로세스에서 순차 실행합니다 — 관심사마다 node를 띄우는 대신 이벤트당 1회만 띄웁니다. 세션 첫 프롬프트는 추가로 컨텍스트 캐시를 빌드합니다. `hooks.json`의 이벤트별 timeout 값은 kill-switch이지 expected latency가 아니며, 각 관심사는 vault 밖에서 즉시 fast-fail 합니다. git을 실제로 실행하는 경로는 vault 자동 커밋 하나뿐이며, 세 조건이 동시에 충족돼야 동작합니다: vault opt-in (`vault-commit.json::enabled=true`) + 프롬프트가 `/clear` 또는 설정된 `skip_patterns` 중 하나와 매칭 + vault dirty. 즉 사용자가 명시적으로 "이번 세션을 마무리한다"는 신호를 보낸 시점에만 ~1–2s commit 비용이 발생하며, 이는 의도된 동작입니다.
 

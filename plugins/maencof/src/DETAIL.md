@@ -37,7 +37,7 @@
 | 산출물                                 | 생성기                                      | 소스                                  |
 | -------------------------------------- | ------------------------------------------- | ------------------------------------- |
 | `src/version.ts`                       | `version:sync` 빌드 단계                    | `package.json` 버전                   |
-| `bridge/<event>.mjs`                   | `scripts/buildHooks.mjs`                    | `src/hooks/<event>/<event>.entry.ts`  |
+| `bridge/<host>/<event>.mjs`            | `scripts/buildHooks.mjs`                    | `src/hooks/<event>/<event>.entry.ts`  |
 | `bridge/mcp-server.cjs`                | `scripts/buildMcpServer.mjs`                | `src/mcp/serverEntry/serverEntry.ts`  |
 | `skills/.shared/host-configuration.md` | `scripts/syncHostConfigurationReference.ts` | `src/core/hostConfigurationSurfaces/` |
 

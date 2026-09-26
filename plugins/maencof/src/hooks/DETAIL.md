@@ -23,14 +23,14 @@
 
 ### 실행 표면 (bridge)
 
-| Event            | 소스 entry                                   | 번들 산출물                     |
-| ---------------- | -------------------------------------------- | ------------------------------- |
-| SessionStart     | `sessionStart/sessionStart.entry.ts`         | `bridge/session-start.mjs`      |
-| UserPromptSubmit | `userPromptSubmit/userPromptSubmit.entry.ts` | `bridge/user-prompt-submit.mjs` |
-| PreToolUse       | `preToolUse/preToolUse.entry.ts`             | `bridge/pre-tool-use.mjs`       |
-| PostToolUse      | `postToolUse/postToolUse.entry.ts`           | `bridge/post-tool-use.mjs`      |
+| Event            | 소스 entry                                   | 번들 산출물                            |
+| ---------------- | -------------------------------------------- | -------------------------------------- |
+| SessionStart     | `sessionStart/sessionStart.entry.ts`         | `bridge/<host>/session-start.mjs`      |
+| UserPromptSubmit | `userPromptSubmit/userPromptSubmit.entry.ts` | `bridge/<host>/user-prompt-submit.mjs` |
+| PreToolUse       | `preToolUse/preToolUse.entry.ts`             | `bridge/<host>/pre-tool-use.mjs`       |
+| PostToolUse      | `postToolUse/postToolUse.entry.ts`           | `bridge/<host>/post-tool-use.mjs`      |
 
-산출물 basename 은 `hooks.json` 이 참조하므로 안정적으로 유지한다. agy 호스트는 같은 핸들러를 `bridge/run-agy.mjs` 러너를 통해 호출한다.
+각 번들은 호스트 런타임 디렉터리(`claude`, `codex`)마다 같은 basename 으로 방출되고, basename 은 `hooks.json` 이 참조하므로 안정적으로 유지한다. agy 호스트는 Claude 번들을 `bridge/run-agy.mjs` 러너를 통해 호출한다.
 
 ### 빌드 가드
 

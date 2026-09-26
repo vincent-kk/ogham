@@ -10,7 +10,7 @@
 
 ## API Contracts
 
-- `sessionStart.entry.ts` — 브리지 진입점. stdin → selfProbe → orchestrator → stdout. esbuild 가 `bridge/session-start.mjs` 로 번들한다.
+- `sessionStart.entry.ts` — 브리지 진입점. stdin → selfProbe → orchestrator → stdout. esbuild 가 `bridge/<host>/session-start.mjs` 로 번들한다.
 - `orchestrateSessionStart(input)` — bootstrap 과 lifecycle 결과를 단일 envelope 으로 병합한다.
 
 ## Acceptance Criteria
