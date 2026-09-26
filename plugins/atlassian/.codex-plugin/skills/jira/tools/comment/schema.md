@@ -12,7 +12,7 @@
 
 ## comment_thread (Server/DC)
 
-`mcp__atlassian__comment_thread` (Codex: `mcp__atlassian__comment_thread`) lists comments and merges replies stored by third-party reply plugins when the site has a saved profile. Cloud sites are rejected — use `fetch` there. For JSM customer-visible comments, see [JSM comments](#jsm-comments).
+`mcp__atlassian__comment_thread` lists comments and merges replies stored by third-party reply plugins when the site has a saved profile. Cloud sites are rejected — use `fetch` there. For JSM customer-visible comments, see [JSM comments](#jsm-comments).
 
 | Parameter                    | Mode         | Notes                                                                    |
 | ---------------------------- | ------------ | ------------------------------------------------------------------------ |
