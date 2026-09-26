@@ -34,7 +34,7 @@ A session startup, resume, clear, or fork (not compaction) suspends the prior bi
 
 A new user turn does not itself suspend assistance at standard/strict; only a session boundary, an off/advisory turn, or `pause` suspends it, and `finish` or a different task's entry `step`/`start` ends or replaces it. Within the same active task, loading another workflow skill needs only that skill's `step` call (a silent update); no `start` or `resume` is needed to move between implementation, diagnosis, and verification. Serialize binding-changing calls (`start`, `resume`, `pause`, `finish`, an entry `step`); do not issue them in parallel with each other or task checks whose results need attribution.
 
-Pause before deliberately leaving work open, waiting for review, or switching to unrelated work within the same turn. Finish when the assisted task is completed or cancelled; retain the actual verification evidence separately. A child agent needs its own explicit `start` or entry `step` and receives no parent binding beyond a one-time progress-line handoff. Only request child assistance when it helps that child's assigned work.
+Pause before deliberately leaving work open, waiting for review, or switching to unrelated work within the same turn. Finish when the assisted task is completed or cancelled; retain the actual verification evidence separately. Invoking `/seiri:finish` always finishes, even when it pushes for review or keeps the branch. A child agent needs its own explicit `start` or entry `step` and receives no parent binding beyond a one-time progress-line handoff. Only request child assistance when it helps that child's assigned work.
 
 ## Acknowledgement and fallback
 

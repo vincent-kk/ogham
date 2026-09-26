@@ -20,6 +20,8 @@ Ledgers are optional. For an active task with a ledger, paired Bash calls matchi
 
 Actor state expires after seven inactive days and invocation records after 24 hours. Missing host provenance or storage failures suppress assistance. A simultaneous failure to persist both revocation and its fallback marker cannot guarantee revocation survives storage recovery. Recorded native host identities and envelopes are covered; deliberately delayed native events crossing a new user turn remain an explicit acceptance limit.
 
+At MCP server startup, seiri removes `sessions` and `tasks` entries unmodified for more than 72 hours regardless of git tracking or ignore status. Startup cleanup is skipped when the host cannot resolve the workspace.
+
 ## Install
 
 ```

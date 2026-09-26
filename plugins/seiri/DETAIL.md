@@ -37,7 +37,7 @@
 - UserPromptSubmit은 standard/strict에서 binding이 없어도 native-turn anchor를 조용히 만들되 이전 binding을 suspend하지 않고 활성 바인딩이면 진행 줄을 유지합니다(paused는 standard에서 무주입, strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄). off/advisory에서는 이전 binding을 suspend합니다. 어느 다이얼에서도 진행 중 호출은 폐기합니다. suspend된 바인딩(off/advisory 턴·세션 경계 뒤)이나 pause한 작업을 이어 갈 때만 모델이 task 이름으로 resume합니다. Pre/Post는 anchor를 만들거나 교체하지 않습니다.
 - off/advisory는 신규 참여 관측과 주입을 하지 않습니다. 예외로 신뢰되는 턴·세션 경계에서는 기존 metadata/anchor를 무효화하여 이전 참여가 살아남지 않게 합니다. 기존 상태가 없으면 새 파일을 만들지 않습니다. 명시 gates API의 동작은 유지합니다.
 - startup/resume/clear/fork는 기존 바인딩을 suspend하며 compact는 유지합니다. 자식은 자신의 최초 agent-stable turn anchor만 받고 부모 binding을 상속하지 않습니다. 자식도 필요한 경우 명시적 `start`나 진입 `step`을 호출합니다.
-- 상태는 host/session/agent 해시별로 격리됩니다. actor는 7일 무관측, invocation은 24시간 후 만료하며 해당 actor 접근 시 정리합니다. 사용자 task 원장은 자동 삭제하지 않습니다. 구 `session-signals.json`/`.lock` 이름은 ignore 목록에만 남고 더 이상 읽거나 쓰지 않습니다.
+- 상태는 host/session/agent 해시별로 격리됩니다. actor는 7일 무관측, invocation은 24시간 후 만료하며 해당 actor 접근 시 정리합니다. 별도로 MCP 서버 시작 시 72시간 넘게 수정되지 않은 `sessions`·`tasks` 항목을 정리하며 git 추적·ignore 여부는 보지 않습니다. 구 `session-signals.json`/`.lock` 이름은 ignore 목록에만 남고 더 이상 읽거나 쓰지 않습니다.
 - Bash의 Pre 관측과 Post 결과가 현재 참여와 일치할 때만 활성 task의 CHECK를 기록합니다. 다른 task의 같은 명령은 건드리지 않습니다. 동일 판정/증거의 재알림은 억제하고 회귀와 agent 증거 표시는 보존합니다. 중단한 실행은 판정·실패로 세지 않습니다.
 - 락 실패 시 무잠금 mutation을 하지 않습니다. 경계 철회 실패는 revocation marker를 시도합니다. marker가 있는 동안 관측·완료·전이와 바인딩 읽기는 거부되고, 같은 actor의 다음 경계 트랜잭션(UserPromptSubmit·SessionStart·SubagentStart)이 커밋하면 실패한 경계의 suspend 의도를 적용하고 generation을 올려 진행 중 호출을 폐기한 뒤 자신이 본 marker를 지웁니다. actor와 marker 쓰기가 모두 실패하면 저장 복구 뒤 옛 상태가 나타날 수 있어 무누출 보장 범위 밖입니다. actor 상태와 원장은 별도 파일이므로 crash 시 정확히 한 번 기록·알림을 보장하지 않습니다.
 - 훅은 차단·허용·입력수정 결정을 반환하지 않습니다. 무주입 entry는 stdout을 비우고 오류는 진단 채널에 기록합니다. 규칙 본문, 명령 원문, 전체 출력, EXPECT 원문이나 거부한 설정값을 지시문처럼 반사하지 않습니다. 외부 timeout은 stdin fail-open deadline보다 길어야 합니다.
@@ -49,7 +49,7 @@
 - 실제로 적용되는 dial 은 `runtime ?? baseline ?? user ?? off` 이다. 훅은 실행마다 해석하므로, 변경은 세션 재시작 없이 적용된다. 기존 파일의 `advisory`·`standard`·`strict` 값은 그대로 유효하다.
 - Runtime 값이 baseline 과 다르면, dial 이 렌더되는 모든 곳에서 그 사실을 명시한다. 묵시적 override 는 금지한다.
 - 읽기는 절대 throw 하지 않는다. 손상된 계층은 건너뛰고 다음 계층을 적용하며, 무시한 파일을 경고에 명시한다.
-- `.seiri/` 에 처음 쓸 때(설정 저장·밸브 조작 어느 쪽이든) `.gitignore` 도 만들어, 그 디렉터리의 untracked 구성원을 나열한다. 저장소 루트 ignore 파일은 절대 편집하지 않는다.
+- 소비 프로젝트의 설정 디렉터리(`CONFIG_DIR`)에 처음 쓸 때(설정 저장·밸브 조작 어느 쪽이든) `.gitignore` 도 만들어, 그 디렉터리의 untracked 구성원을 나열한다. 저장소 루트 ignore 파일은 절대 편집하지 않는다.
 - 이미 있는 `.gitignore` 는 seiri 가 쓴 것일 때만 손댄다 — 헤더로 판별하고, 빠진 구성원만 덧붙이며 기존 줄은 지우지 않는다. 헤더가 없으면 사용자가 쓴 파일이므로 그대로 둔다. 구성원이 늘어도 기존 프로젝트가 갱신을 받지 못하면, 새 untracked 파일이 커밋에 흘러든다.
 
 ### Skill posture
@@ -78,8 +78,8 @@
 | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
 | `loadConfig(projectRoot)`                  | Baseline 계층만: `{ config \| null, path, warning? }`. 절대 throw 하지 않음.                                                     |
 | `loadIntervention(projectRoot)`            | 세 계층: `{ effective, source, baseline, user, runtime, warnings }`. 절대 throw 하지 않음.                                       |
-| `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 쓴 경로를 반환.                                                         |
-| `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 경로를 반환.                                                                 |
+| `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고 설정 디렉터리의 `.gitignore` 도 처리; 쓴 경로를 반환.                                               |
+| `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 설정 디렉터리의 `.gitignore` 도 처리; 경로를 반환.                                                       |
 | `clearRuntime(projectRoot)`                | 밸브를 제거하고, 존재 여부를 반환.                                                                                               |
 | `loadManifest(pluginRoot)`                 | 잘못된 manifest 또는 없는 `templateHash` 에서 throw.                                                                             |
 | `getRuleDocsStatus(projectRoot, plugin)`   | 현재 호스트 채널의 규칙별 스냅샷 (`inSync` 포함).                                                                                |
@@ -233,4 +233,4 @@
 
 ## Last Updated
 
-2026-09-26 — 조건부 참여, 호스트 호출 귀속, 비례 검증과 배포 경계를 반영했습니다.
+2026-09-27 — MCP 시작 시 git 추적·ignore 여부와 무관한 72시간 유휴 상태 정리를 반영했습니다.

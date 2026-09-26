@@ -34,6 +34,11 @@
 - `build:hooks` 의 바이트 캡을 넘는 번들이 생기지 않는다.
 - setup과 post-tool-use는 `build:hooks`에 고정한 22KiB 상한을 두며, 번들이 그 값을 넘으면 실측한 뒤 상한과 그 사유 주석을 손으로 갱신합니다. 나머지는 16KiB를 유지하며 금지 의존 검사도 유지합니다.
 
+### AC-mcp-bundle-wiring — 배포 MCP 번들 검증
+
+- 실제 배포 번들에 연결하여 선언된 도구 목록과 객체 입력 스키마를 검증합니다.
+- 클라이언트 종료 요청 직후에도 Windows가 작업 폴더를 잠글 수 있으므로, 임시 폴더 정리는 비동기 삭제로 일시적 잠금을 제한적으로 재시도합니다. 재시도를 소진한 오류는 테스트 실패로 보고합니다.
+
 ## Boundary Exemptions
 
 ### version.ts — Generated version constant has no entry point
@@ -48,4 +53,4 @@
 
 ## Last Updated
 
-2026-09-26 — 명시적 조건부 참여와 비차단 호스트 계약을 반영했습니다.
+2026-09-27 — 배포 MCP 번들 검증의 비동기 임시 폴더 정리 계약을 반영했습니다.

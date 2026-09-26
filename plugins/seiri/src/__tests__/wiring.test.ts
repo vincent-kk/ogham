@@ -1,4 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
@@ -229,10 +231,13 @@ describe('wiring', () => {
   });
 
   it('exposes every declared tool from the shipped MCP bundle', async () => {
+    // An empty cwd keeps the bundle's startup sweep off the runner's repository.
+    const workspace = mkdtempSync(portableJoin(tmpdir(), 'seiri-wiring-'));
     const client = new Client({ name: 'seiri-wiring-test', version: '1.0.0' });
     const transport = new StdioClientTransport({
       command: process.execPath,
       args: [portableJoin(packageRoot, 'bridge', 'mcp-server.cjs')],
+      cwd: workspace,
     });
 
     try {
@@ -248,6 +253,13 @@ describe('wiring', () => {
         expect(tool.inputSchema.type).toBe('object');
     } finally {
       await client.close();
+      // SDK close() signals termination before the child releases its Windows cwd.
+      await rm(workspace, {
+        recursive: true,
+        force: true,
+        maxRetries: 3,
+        retryDelay: 100,
+      });
     }
   });
 

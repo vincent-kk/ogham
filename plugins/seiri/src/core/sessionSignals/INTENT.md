@@ -12,6 +12,7 @@ Own ephemeral actor-scoped workflow participation and observations. The host and
 - Only an entry step (`write-plan`, `execute`) or `start` can create a binding or switch it to another task; `resume` and every other step only update an existing same-task binding.
 - A read of another actor's binding (for a one-time handoff) never locks or writes that actor's state.
 - Store hashes and bounded counters, never commands, prompts, outputs, or transcripts.
+- MCP startup retires actor files unmodified for more than 72 hours; access-time expiry remains seven days.
 
 ## Boundaries
 
