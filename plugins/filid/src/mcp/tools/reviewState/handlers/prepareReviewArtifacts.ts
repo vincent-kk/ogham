@@ -174,6 +174,7 @@ export async function prepareReviewArtifacts(
       selected,
       paths,
       settings.pluginRoot,
+      settings.host,
     );
     return createPreparedReviewPayload({
       action: input.action,
@@ -222,6 +223,7 @@ export async function prepareReviewArtifacts(
       assertRenderedUnitsMatchGroups(renderedUnits, existing.groups);
     const groups = writePreparedReviewArtifacts({
       actorMethods: loadedRules?.actorMethods ?? null,
+      host: settings.host,
       changeContext: context.changeContext,
       handoff: context.handoff,
       paths,
@@ -246,6 +248,7 @@ export async function prepareReviewArtifacts(
       selected,
       paths,
       settings.pluginRoot,
+      settings.host,
     );
     return createPreparedReviewPayload({
       action: input.action,
@@ -358,6 +361,7 @@ export async function prepareReviewArtifacts(
   if (canResume) groups = existing.groups;
   groups = writePreparedReviewArtifacts({
     actorMethods,
+    host: settings.host,
     changeContext: context.changeContext,
     handoff: context.handoff,
     paths,
@@ -411,7 +415,12 @@ export async function prepareReviewArtifacts(
     verdict: null,
   };
   if (canResume)
-    state = await recoverReviewGroups(state, paths, settings.pluginRoot);
+    state = await recoverReviewGroups(
+      state,
+      paths,
+      settings.pluginRoot,
+      settings.host,
+    );
   else writeReviewState(paths.statePath, state);
   return createPreparedReviewPayload({
     action: input.action,

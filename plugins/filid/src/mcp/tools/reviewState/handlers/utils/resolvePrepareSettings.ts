@@ -1,3 +1,5 @@
+import { detectHost } from '@ogham/cross-platform';
+
 import type { REVIEW_STATE_ACTIONS } from '../../../../../constants/reviewState.js';
 import {
   REVIEW_AUTO_LOW_EFFORT_GROUP_THRESHOLD,
@@ -77,5 +79,6 @@ export function resolvePrepareSettings(input: PrepareSettingsInput) {
     lockfiles: review?.lockfiles ?? REVIEW_LOCKFILE_BASENAMES,
     generatedPaths: config?.structure?.generatedPaths ?? [],
     pluginRoot: resolvePluginRoot(),
+    host: detectHost(),
   };
 }

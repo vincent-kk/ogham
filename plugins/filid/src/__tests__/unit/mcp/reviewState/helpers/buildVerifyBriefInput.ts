@@ -11,6 +11,7 @@ export function buildVerifyBriefInput(): RenderVerifyBriefInput {
   return {
     verifierMethod:
       '# Verifier\n\n## Re-verification Mode\n\nResume-only method.\n\n## Deliverable\n\nWrite independent decisions.\n',
+    host: 'claude',
     diffs: [],
     group: review.group,
     files: review.files,

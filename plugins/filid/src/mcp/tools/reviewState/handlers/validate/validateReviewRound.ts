@@ -1,4 +1,5 @@
 import {
+  detectHost,
   readUtf8FileIfExistsSync,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
@@ -238,6 +239,7 @@ export async function validateReviewRound(
     verifyBriefPath,
     renderVerifyBrief({
       verifierMethod: loadActorMethods(resolvePluginRoot()).verifier,
+      host: detectHost(),
       diffs: readInlineReviewDiffs(paths, group),
       group,
       files: state.scope.files,

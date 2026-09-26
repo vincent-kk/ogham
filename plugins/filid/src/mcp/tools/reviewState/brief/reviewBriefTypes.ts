@@ -1,3 +1,5 @@
+import type { Host } from '@ogham/cross-platform';
+
 import type { RenderedReviewUnit } from '../diff/reviewUnitDiffTypes.js';
 import type { ReviewFinding } from '../opinion/reviewOpinionTypes.js';
 import type { ReviewHandoffSeed } from '../scope/reviewHandoffSeedSchema.js';
@@ -68,6 +70,8 @@ export interface RenderSessionMarkdownInput extends ReviewEffortMetadata {
 export interface RenderVerifyBriefInput {
   /** Canonical verifier method whose Deliverable section begins normal review. */
   verifierMethod: string;
+  /** Host whose agent reads the brief; a Codex reader gets Codex tool names. */
+  host: Host;
   /** Materialized group diffs, or null when their combined bytes exceed the budget. */
   diffs: readonly RenderedReviewUnit[] | null;
   /** Group whose assigned reviewer findings require decisions. */

@@ -4,6 +4,7 @@ import {
   readUtf8FileIfExistsSync,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
+import type { Host } from '@ogham/cross-platform';
 
 import { REVIEW_STATE_DIAGNOSTIC_CODES } from '../../../../constants/reviewState.js';
 import { renderOpinionSkeleton } from '../brief/renderOpinionSkeleton.js';
@@ -39,6 +40,7 @@ export async function recoverReviewGroups(
   initial: ReviewStateRecord,
   paths: ReviewStatePaths,
   pluginRoot: string | null,
+  host: Host,
 ): Promise<ReviewStateRecord> {
   let state = initial;
   const discardedGroups: string[] = [];
@@ -142,6 +144,7 @@ export async function recoverReviewGroups(
               ? {}
               : { generationId: state.generationId }),
             verifierMethod: loadActorMethods(pluginRoot).verifier,
+            host,
             diffs: readInlineReviewDiffs(paths, group),
           }),
         );
