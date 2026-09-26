@@ -76,12 +76,28 @@ function state(root: string) {
 
 describe('paired hook process isolation', () => {
   it.each([
-    { scenario: 'in order', reverse: false, contended: false },
-    { scenario: 'in reverse order', reverse: true, contended: false },
-    { scenario: 'after lock contention', reverse: false, contended: true },
+    { scenario: 'in order', reverse: false, contended: false, race: false },
+    {
+      scenario: 'in reverse order',
+      reverse: true,
+      contended: false,
+      race: false,
+    },
+    {
+      scenario: 'after lock contention',
+      reverse: false,
+      contended: true,
+      race: false,
+    },
+    {
+      scenario: 'racing for a free lock',
+      reverse: false,
+      contended: false,
+      race: true,
+    },
   ])(
     'preserves both calls $scenario',
-    async ({ reverse, contended }) => {
+    async ({ reverse, contended, race }) => {
       const cwd = makeProjectRoot();
       const native = {
         cwd,
@@ -130,11 +146,10 @@ describe('paired hook process isolation', () => {
         tool_input: { command: `exit 1 # ${name}` },
       }));
 
-      for (const call of calls)
-        await hook('pre-tool-use.mjs', {
-          ...call,
-          hook_event_name: 'PreToolUse',
-        });
+      const pre = (call: (typeof calls)[number]) =>
+        hook('pre-tool-use.mjs', { ...call, hook_event_name: 'PreToolUse' });
+      if (race) await Promise.all(calls.map(pre));
+      else for (const call of calls) await pre(call);
       expect(Object.keys(state(cwd).invocations)).toHaveLength(2);
 
       const posts = calls.map((call) => ({
@@ -164,16 +179,19 @@ describe('paired hook process isolation', () => {
       }
 
       if (reverse) posts.reverse();
-      for (const [index, post] of posts.entries()) {
-        await hook('post-tool-use.mjs', post);
-        const stored = state(cwd);
-        expect(Object.values(stored.binding.counts)).toEqual(
-          Array(index + 1).fill(1),
-        );
-        expect(Object.keys(stored.invocations)).toHaveLength(
-          posts.length - index - 1,
-        );
-      }
+      if (race)
+        await Promise.all(posts.map((post) => hook('post-tool-use.mjs', post)));
+      else
+        for (const [index, post] of posts.entries()) {
+          await hook('post-tool-use.mjs', post);
+          const stored = state(cwd);
+          expect(Object.values(stored.binding.counts)).toEqual(
+            Array(index + 1).fill(1),
+          );
+          expect(Object.keys(stored.invocations)).toHaveLength(
+            posts.length - index - 1,
+          );
+        }
       const stored = state(cwd);
       expect(stored.binding.task).toBe('concurrent-checks');
       expect(Object.values(stored.binding.counts)).toEqual([1, 1]);
