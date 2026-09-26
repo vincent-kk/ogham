@@ -9,6 +9,17 @@ import {
 import { readSkillFiles } from "../facts/read/readSkillFiles.js";
 import type { PluginFacts } from "../types/index.js";
 
+const MCP_MARKER = "<!-- ogham-mcp-tools:filid -->";
+
+/** Expected Codex bytes of a canonical file: marked files call Codex tool names. */
+function asCodex(text: string): string {
+  return text.includes(MCP_MARKER)
+    ? text
+        .replace(MCP_MARKER, "")
+        .replaceAll("mcp__plugin_filid_tools__", "mcp__filid__")
+    : text;
+}
+
 const FILID_ROOT = resolve(
   dirname(fileURLToPath(import.meta.url)),
   "../../../../plugins/filid",
@@ -25,7 +36,10 @@ describe("filid host lifecycle surfaces", () => {
       hasSkills: true,
       hasHooks: false,
       hooksFile: null,
-      mcpServers: null,
+      // filid skills name tools on this declared server through the MCP marker.
+      mcpServers: {
+        tools: { command: "node", args: ["bridge/mcp-server.cjs"] },
+      },
       agentFiles: {},
       skillFiles,
     };
@@ -52,13 +66,13 @@ describe("filid host lifecycle surfaces", () => {
     expect(codex).not.toContain("ogham-async-agent:");
 
     // Everything outside the host paragraph, including validation/retry/seal,
-    // is the exact canonical workflow; all sibling references travel with it.
+    // is the canonical workflow with Codex tool names; siblings travel with it.
     const stripHost = (text: string) =>
       text.replace(
         /<!-- (?:ogham|codex)-async-agent:handoffs[^\n]*-->\r?\n[\s\S]*?<!-- (?:ogham|codex)-async-agent:end -->/,
         "",
       );
-    expect(stripHost(codex)).toBe(stripHost(claude));
+    expect(stripHost(codex)).toBe(stripHost(asCodex(claude)));
     expect(files!.map((file) => file.relativePath)).toEqual(
       Object.keys(original)
         .sort()
@@ -67,7 +81,7 @@ describe("filid host lifecycle surfaces", () => {
     for (const file of files!) {
       const path = file.relativePath.slice(".codex-plugin/skills/".length);
       if (path !== "cross-review/SKILL.md")
-        expect(file.content).toBe(original[path]);
+        expect(file.content).toBe(asCodex(original[path]));
     }
     expect(buildCodexSkills(facts)).toEqual(files);
   });
