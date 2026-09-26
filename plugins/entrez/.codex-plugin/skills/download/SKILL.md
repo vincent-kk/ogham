@@ -10,11 +10,13 @@ plugin: entrez
 
 # download — PMC Open Access full text
 
+
+
 Fetch full text for PMIDs/PMCIDs (or records from a prior `search`). Principle: **OA → save; non-OA → report links**. Licenses are checked (a PMCID does not imply redistribution rights).
 
 ## Procedure
 
-1. Call `mcp__plugin_entrez_tools__fetch_fulltext` with `{ ids[], formats?, outDir?, overwrite?, extractFromTgz? }` (formats default `[PDF]`).
+1. Call `mcp__entrez__fetch_fulltext` with `{ ids[], formats?, outDir?, overwrite?, extractFromTgz? }` (formats default `[PDF]`).
 2. Report:
    - `downloaded[]` — saved files with `path`, `sha256`, `bytes`, `license`, `oaStatus`.
    - `unavailable[]` — `reason` (NO_PMCID | NOT_OA | NOT_FOUND | FETCH_FAILED | OA_LINK_DEAD | FORMAT_NOT_OFFERED | IDCONV_MOVED | LICENSE_UNVERIFIED) with fallback `links` (doi / publisher).
