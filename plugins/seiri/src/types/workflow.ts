@@ -17,7 +17,7 @@ export interface WorkflowIdentity {
   root: string;
   /** Hash of host, native session and actor. */
   actor: string;
-  /** Hash of the native turn, absent on some boundaries. */
+  /** Hash of the main actor's native turn or a child's agent-stable turn; absent when a main-actor boundary reports none. */
   turn?: string;
   /** Hash of the native tool invocation. */
   call?: string;

@@ -6,14 +6,14 @@
 - 예외는 fail-open으로 처리하고 logHookFailure로 진단합니다. stdin deadline은 외부 timeout보다 짧습니다.
 - off/advisory는 신규 관측·주입을 금지하지만 기존 참여의 신뢰되는 턴·세션 경계 철회는 허용합니다.
 - 훅은 concrete 내부 파일만 import하고 검증 런타임·MCP SDK·glob 엔진을 포함하지 않습니다. 공유 패키지는 공개 진입점으로 사용합니다.
-- 호스트는 build 시 선택하고 compiler가 Codex 전용 runtime 경로를 가리킵니다. 해당 호스트의 Claude prompt_id 또는 Codex turn_id, 공통 tool_use_id 및 native agent_id를 경계에서 정규화합니다. 누락한 identity나 vendor를 모델 인자·프롬프트·runtime 추론으로 보충하지 않습니다.
+- 호스트는 build 시 선택하고 compiler가 Codex 전용 runtime 경로를 가리킵니다. main actor의 turn은 Claude prompt_id 또는 Codex turn_id를 해시하고, native agent_id가 있는 자식의 turn은 두 호스트 모두 `JSON.stringify(['agent', agent_id])`를 해시해 부모 turn 변경과 독립적으로 유지합니다. 공통 tool_use_id 및 host/session/agent identity도 경계에서 정규화합니다. 누락한 identity나 vendor를 모델 인자·프롬프트·runtime 추론으로 보충하지 않습니다.
 - 실행 진입점과 정적 manifest 등록은 wiring 검사로 맞춥니다. dormant InstructionsLoaded는 빌드되지만 등록하지 않습니다.
 
 ## API Contracts
 
 - SessionStart는 startup/resume/clear/fork에서 기존 바인딩을 suspend하고(`suspendActor(identity, now)`) compact를 유지하며, standard/strict에서 선출·체인·규칙 요약·다이얼·drift를 주입합니다. 규칙 상태를 읽지 못해도 선출·체인 줄은 나옵니다. compact에서 이 actor 자신의 바인딩이 active로 읽히면(`readActorBinding`, 무락·무쓰기) 진행 줄을 마지막에 덧붙입니다.
 - UserPromptSubmit은 최신 native-turn anchor를 기록합니다. off/advisory는 이전 binding을 suspend하고(`suspend: !enabled`) 항상 침묵하며, standard/strict는 suspend하지 않고 활성 바인딩이 있으면 진행 줄을(standard의 paused 바인딩은 무주입), strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다.
-- SubagentStart는 부모 binding을 상속하지 않고 자식의 첫 anchor만 생성합니다. 부모가 main actor이고 활성 바인딩이 있으면(`readActorBinding`, 무락·무쓰기) 진행 줄을 1회 주입합니다.
+- SubagentStart는 부모 binding을 상속하지 않고 자식의 첫 agent-stable turn anchor만 생성합니다. 부모가 main actor이고 활성 바인딩이 있으면(`readActorBinding`, 무락·무쓰기) 진행 줄을 1회 주입합니다. generation이 `0`보다 큰 재개 자식은 진행 줄 없이 binding을 suspend하고 anchor를 제거하며, generation 증가와 진행 중 호출 폐기로 늦은 결과를 무효화합니다.
 - PreToolUse는 기존 anchor와 일치하는 runtime 참여 액션(`step`·`start`·`resume`·`pause`·`finish`; `dial`은 제외)이나 Bash invocation만 기록하며 권한 결정·입력수정을 하지 않습니다.
 - PostToolUse와 Claude Failure는 정확한 paired invocation의 현재 generation/actor/task에만 효과를 적용합니다. runtime의 `created`·`switched`는 진행 줄 형식 ACK, `mismatch`는 안내 문구를 내고, `rejected`는 무주입입니다. `updated`는 같은 task `step`이면 무주입이고, `resume`·`pause`·`finish`는 기존 control-verb ACK 문구로 응답합니다. Bash는 활성 task의 증거/실패 변화만 제공합니다.
 - 훅 밖 소비자는 공개 배럴을 사용할 수 있으나 executable entry는 concrete 구현을 사용합니다.

@@ -9,7 +9,7 @@
 ## API Contracts
 
 - The processor accepts the native host payload and returns a nonblocking HookOutput. Empty additional context produces no stdout.
-- Shared normalization preserves Claude prompt_id, Codex turn_id, tool_use_id and independent child agent_id. No IDs come from model arguments.
+- Shared normalization hashes Claude `prompt_id` or Codex `turn_id` as the main actor's turn and `JSON.stringify(['agent', agent_id])` as a child's turn; `tool_use_id` identifies the call. No IDs come from model arguments.
 
 ## Acceptance Criteria
 

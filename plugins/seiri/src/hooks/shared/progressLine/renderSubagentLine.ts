@@ -4,7 +4,7 @@ import type { WorkflowIntent, WorkflowStep } from '../../../types/workflow.js';
 import { renderProgressBody } from './renderProgressBody.js';
 
 /**
- * Hands a subagent its parent's task once, on the child's first native turn only.
+ * Hands a subagent its parent's task once, on the child's first SubagentStart only.
  * @param task Parent main actor's bound task name.
  * @param intent Parent main actor's bound task intent.
  * @param step Chain skill recorded on the parent's binding, when one is.

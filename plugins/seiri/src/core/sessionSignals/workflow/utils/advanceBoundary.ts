@@ -9,7 +9,7 @@ import type {
  * and `suspendActor` (which never does), so the create-capable and
  * create-free callers apply the same turn-advancing effect.
  * @param state Actor state, mutated in place.
- * @param turn Native turn hash to record as the current anchor, or
+ * @param turn Turn hash (native for the main actor, agent-stable for a child) to record as the current anchor, or
  *   `undefined` to leave the actor with no anchored turn.
  * @param suspend Whether an existing binding is suspended by this boundary.
  * @returns The binding snapshot from inside the same actor transaction.

@@ -2,12 +2,12 @@
 
 ## Purpose
 
-Establish only a child's first native-turn anchor; child participation belongs to that actor and is never copied from its parent's state. Under standard/strict, hand the child one read-only progress line when its main-actor parent has an active binding, so the child knows the task it was spawned into without starting its own chain.
+Establish only a child's first agent-stable turn anchor; child participation belongs to that actor and is never copied from its parent's state. Under standard/strict, hand the child one read-only progress line when its main-actor parent has an active binding, so the child knows the task it was spawned into without starting its own chain.
 
 ## Conventions
 
-- Require the native child agent ID and turn provenance.
-- Keep resumed children without a trusted new boundary unassisted.
+- Require native session and child agent IDs; derive the child turn from the agent ID, independently of the parent's native turn.
+- Recognize resumed children by generation, suspend their bindings, revoke their anchors and pending calls, and inject no progress line.
 - Disabled assistance creates no new child state and no progress line.
 - Read the parent binding through `readActorBinding`; never lock or write it from this hook.
 

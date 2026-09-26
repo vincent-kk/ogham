@@ -11,7 +11,7 @@ import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 import { workflowMainIdentity } from '../shared/workflowHost/workflowMainIdentity.js';
 
 /**
- * Anchor a child's first native turn without inheriting the parent's workflow.
+ * Anchor a child's first agent-stable turn without inheriting the parent's workflow.
  * On that first turn only, hand the child one line naming the parent
  * main actor's active task, when it has one; a resumed child gets nothing.
  * @param now Epoch ms read once at the calling hook's outermost handler.

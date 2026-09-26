@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Apply acknowledged lifecycle requests, inject their progress-line acknowledgment, and record Bash evidence only for the active actor, native turn, generation, and task. Skill loading has no effect.
+Apply acknowledged lifecycle requests, inject their progress-line acknowledgment, and record Bash evidence only for the active actor, turn (native for the main actor, agent-stable for a child), generation, and task. Skill loading has no effect.
 
 ## Conventions
 
