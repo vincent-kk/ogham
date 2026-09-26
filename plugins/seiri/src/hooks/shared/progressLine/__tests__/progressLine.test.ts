@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
-import { renderChainLine } from '../progressLine/renderChainLine.js';
-import { renderCreatedAck } from '../progressLine/renderCreatedAck.js';
-import { renderMismatchNotice } from '../progressLine/renderMismatchNotice.js';
-import { renderProgressLine } from '../progressLine/renderProgressLine.js';
-import { renderSubagentLine } from '../progressLine/renderSubagentLine.js';
-import { renderSwitchedAck } from '../progressLine/renderSwitchedAck.js';
+import { renderChainLine } from '../renderChainLine.js';
+import { renderCreatedAck } from '../renderCreatedAck.js';
+import { renderMismatchNotice } from '../renderMismatchNotice.js';
+import { renderProgressLine } from '../renderProgressLine.js';
+import { renderSubagentLine } from '../renderSubagentLine.js';
+import { renderSwitchedAck } from '../renderSwitchedAck.js';
 
 describe('progressLine renderers', () => {
   it('renders the plain chain with no phrase when no step is recorded', () => {

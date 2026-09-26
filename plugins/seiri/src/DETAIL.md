@@ -32,7 +32,7 @@
 ### AC-hook-bundle-size — 번들 크기 가드
 
 - `build:hooks` 의 바이트 캡을 넘는 번들이 생기지 않는다.
-- setup과 post-tool-use는 metafile로 모든 모듈의 호출 경로(전체 import 사슬)를 추적해 경로 없는 모듈을 제거한 뒤, 실측값 바로 위 KiB를 상한으로 둡니다. 나머지는 16KiB를 유지하며 금지 의존 검사도 유지합니다.
+- setup과 post-tool-use는 `build:hooks`에 고정한 22KiB 상한을 두며, 번들이 그 값을 넘으면 실측한 뒤 상한과 그 사유 주석을 손으로 갱신합니다. 나머지는 16KiB를 유지하며 금지 의존 검사도 유지합니다.
 
 ## Boundary Exemptions
 

@@ -62,6 +62,12 @@
 - **Direct import**: allowed
 - **Reason**: `loaders` 와 같은 이유다. SessionStart·SubagentStart 가 배포 상태 스냅샷 하나만 필요로 하는데, 배럴을 거치면 apply 경로까지 번들에 들어온다.
 
+### utils — Hook bundles cannot pass through the barrel
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: `loaders` 와 같은 이유다. SessionStart 는 프로젝트 규칙 대상 경로 하나만 해석하면 되는데, 배럴을 거치면 sync·plan·apply 그래프까지 번들에 들어와 크기 가드를 넘긴다. 이 해석 함수는 훅만 쓰므로 배럴에 재노출하지 않는다.
+
 ## Last Updated
 
-2026-07-30 — 규칙 배포 계약과 훅 직접 import 면책을 문서화했다.
+2026-09-26 — 훅의 `utils` 직접 import 면책을 선언했다.
