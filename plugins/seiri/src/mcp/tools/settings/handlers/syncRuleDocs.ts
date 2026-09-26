@@ -10,7 +10,6 @@ import type {
   SettingsInput,
   SettingsOutput,
 } from '../types/settingsContract.js';
-import { applyConfigAction } from '../utils/applyConfigAction.js';
 
 /**
  * Inspect or reconcile the active host's rule channel.
@@ -21,24 +20,9 @@ import { applyConfigAction } from '../utils/applyConfigAction.js';
  *
  * `plan` answers the same question as `sync` without writing, so a caller
  * that cannot render the settings page can still show the diff first.
- *
- * `config` is the dial rather than the rule files, but it shares this
- * settings surface because every registered schema is context spent on
- * every turn.
  */
 export function syncRuleDocs(input: SettingsInput): SettingsOutput {
   const root = projectRoot(input.project_root);
-
-  // Before the plugin-root check: the dial lives in the project, so
-  // reading or lowering it must work even where the shipped templates do
-  // not resolve — that is exactly when someone wants to turn seiri down.
-  if (input.action === 'config')
-    return applyConfigAction(
-      root,
-      input.config_op ?? 'get',
-      input.intervention,
-    );
-
   const plugin = pluginRoot();
   if (plugin === null)
     throw new Error(

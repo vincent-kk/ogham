@@ -11,7 +11,7 @@ import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
 import type { WorkflowRequest } from '../../../../types/workflow.js';
-import { handleWorkflow } from '../workflow.js';
+import { handleWorkflow } from '../handlers/handleWorkflow.js';
 
 const roots: string[] = [];
 function fixture(level = 'standard'): WorkflowRequest {
@@ -61,6 +61,7 @@ it('rejects relative paths, traversal task names, unknown actions and missing st
   for (const invalid of [
     { project_root: '.' },
     { task: '../escape' },
+    { task: undefined },
     { action: 'activate' },
     { intent: undefined },
   ])

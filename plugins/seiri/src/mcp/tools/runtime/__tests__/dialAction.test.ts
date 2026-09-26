@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { ELECTION_STANDARD_LINE } from '../../../../constants/electionLines.js';
 import { writeConfig } from '../../../../core/infra/configLoader/loaders/writeConfig.js';
-import { handleSettings } from '../settings.js';
+import { handleRuntime } from '../runtime.js';
 
 /**
  * The dial's conversational surface. `set` and `clear` are the opt-out the
@@ -14,7 +14,7 @@ import { handleSettings } from '../settings.js';
  * result itself states the posture now in effect — the call is the only
  * moment the session learns the dial moved.
  */
-describe('settings config action', () => {
+describe('runtime dial action', () => {
   const tempDirs: string[] = [];
 
   afterEach(() => {
@@ -23,30 +23,28 @@ describe('settings config action', () => {
   });
 
   function seedRepo(): string {
-    const repoRoot = mkdtempSync(join(tmpdir(), 'seiri-config-action-'));
+    const repoRoot = mkdtempSync(join(tmpdir(), 'seiri-dial-action-'));
     tempDirs.push(repoRoot);
     mkdirSync(join(repoRoot, '.git'));
     return repoRoot;
   }
 
-  async function call(
-    project_root: string,
-    extra: Record<string, unknown> = {},
-  ) {
-    const result = await handleSettings({
-      action: 'config',
+  function call(project_root: string, extra: Record<string, unknown> = {}) {
+    const result = handleRuntime({
+      action: 'dial',
       project_root,
       ...extra,
     });
-    if (result.action !== 'config') throw new Error('expected a config result');
+    if (!('action' in result) || result.action !== 'dial')
+      throw new Error('expected a dial result');
     return result;
   }
 
-  it('reports the dial without touching anything', async () => {
+  it('reports the dial without touching anything', () => {
     const repoRoot = seedRepo();
     writeConfig(repoRoot, 'project', { intervention: 'standard' });
 
-    const result = await call(repoRoot);
+    const result = call(repoRoot);
     expect(result.op).toBe('get');
     expect(result.changed).toBe(false);
     expect(result.dial).toMatchObject({
@@ -56,12 +54,12 @@ describe('settings config action', () => {
     expect(existsSync(join(repoRoot, '.seiri', 'runtime.json'))).toBe(false);
   });
 
-  it('turns the valve and states the posture that is now in effect', async () => {
+  it('turns the valve and states the posture that is now in effect', () => {
     const repoRoot = seedRepo();
     writeConfig(repoRoot, 'project', { intervention: 'advisory' });
 
-    const result = await call(repoRoot, {
-      config_op: 'set',
+    const result = call(repoRoot, {
+      dial_op: 'set',
       intervention: 'strict',
     });
     expect(result.changed).toBe(true);
@@ -74,12 +72,12 @@ describe('settings config action', () => {
     expect(result.posture).toContain('baseline: advisory');
   });
 
-  it('accepts off and reports only the explicit dial state', async () => {
+  it('accepts off and reports only the explicit dial state', () => {
     const repoRoot = seedRepo();
     writeConfig(repoRoot, 'project', { intervention: 'standard' });
 
-    const result = await call(repoRoot, {
-      config_op: 'set',
+    const result = call(repoRoot, {
+      dial_op: 'set',
       intervention: 'off',
     });
     expect(result.changed).toBe(true);
@@ -94,54 +92,52 @@ describe('settings config action', () => {
     expect(result.posture).not.toContain('Workflow');
   });
 
-  it('restores the baseline on clear, and says when there was nothing to clear', async () => {
+  it('restores the baseline on clear, and says when there was nothing to clear', () => {
     const repoRoot = seedRepo();
     writeConfig(repoRoot, 'project', { intervention: 'standard' });
-    await call(repoRoot, { config_op: 'set', intervention: 'advisory' });
+    call(repoRoot, { dial_op: 'set', intervention: 'advisory' });
 
-    const cleared = await call(repoRoot, { config_op: 'clear' });
+    const cleared = call(repoRoot, { dial_op: 'clear' });
     expect(cleared.changed).toBe(true);
     expect(cleared.dial).toMatchObject({
       effective: 'standard',
       source: 'baseline',
     });
 
-    expect((await call(repoRoot, { config_op: 'clear' })).changed).toBe(false);
+    expect(call(repoRoot, { dial_op: 'clear' }).changed).toBe(false);
   });
 
-  it('carries the election line for the effective dial, and stays silent at advisory', async () => {
+  it('carries the election line for the effective dial, and stays silent at advisory', () => {
     const repoRoot = seedRepo();
     writeConfig(repoRoot, 'project', { intervention: 'standard' });
 
-    const strict = await call(repoRoot, {
-      config_op: 'set',
+    const strict = call(repoRoot, {
+      dial_op: 'set',
       intervention: 'strict',
     });
     expect(strict.posture).toContain(ELECTION_STANDARD_LINE);
 
-    const advisory = await call(repoRoot, {
-      config_op: 'set',
+    const advisory = call(repoRoot, {
+      dial_op: 'set',
       intervention: 'advisory',
     });
     expect(advisory.posture).not.toContain('Election');
   });
 
-  it('refuses a set without a valid dial position rather than storing junk', async () => {
+  it('refuses a set without a valid dial position rather than storing junk', () => {
     const repoRoot = seedRepo();
-    await expect(call(repoRoot, { config_op: 'set' })).rejects.toThrow(
-      /intervention/,
-    );
-    await expect(
-      call(repoRoot, { config_op: 'set', intervention: 'loud' }),
-    ).rejects.toThrow(/intervention/);
+    expect(() => call(repoRoot, { dial_op: 'set' })).toThrow(/intervention/);
+    expect(() =>
+      call(repoRoot, { dial_op: 'set', intervention: 'loud' }),
+    ).toThrow(/intervention/);
     expect(existsSync(join(repoRoot, '.seiri', 'runtime.json'))).toBe(false);
   });
 
-  it('never writes the committed baseline — that stays a setup-surface act', async () => {
+  it('never writes the committed baseline — that stays a setup-surface act', () => {
     const repoRoot = seedRepo();
-    await call(repoRoot, { config_op: 'set', intervention: 'strict' });
+    call(repoRoot, { dial_op: 'set', intervention: 'strict' });
 
     expect(existsSync(join(repoRoot, '.seiri', 'config.json'))).toBe(false);
-    expect((await call(repoRoot)).dial.baseline).toBeNull();
+    expect(call(repoRoot).dial.baseline).toBeNull();
   });
 });

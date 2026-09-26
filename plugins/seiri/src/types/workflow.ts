@@ -30,7 +30,7 @@ export interface WorkflowRequest {
   intent?: WorkflowIntent;
 }
 
-/** Result of one workflow tool call; only `accepted` carries the request back. */
+/** Result of one runtime participation call; only `accepted` carries the request back. */
 export type WorkflowReply =
   | { status: 'disabled'; reason: 'off' | 'advisory' }
   | {
@@ -77,7 +77,7 @@ export interface WorkflowHostAdapter {
   /** Namespace fixed for the lifetime of this hook bundle. */
   name: 'claude' | 'codex';
   /** Fully qualified callable tool address emitted for this host. */
-  workflowTool: string;
+  runtimeTool: string;
   /** Read this host's native turn identity, without inference. */
   turn(input: HookBaseInput): string | undefined;
   /** Read this host's successful MCP content envelope. */

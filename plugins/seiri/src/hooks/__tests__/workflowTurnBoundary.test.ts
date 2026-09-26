@@ -34,8 +34,8 @@ function fixture(host: string) {
     tool_use_id: 'resume',
     tool_name:
       host === 'claude'
-        ? 'mcp__plugin_seiri_tools__workflow'
-        : 'mcp__seiri__workflow',
+        ? 'mcp__plugin_seiri_tools__runtime'
+        : 'mcp__seiri__runtime',
     tool_input: {
       action: 'resume',
       project_root: cwd,

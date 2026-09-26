@@ -153,7 +153,7 @@ async function activate(root: string, session: string): Promise<void> {
   const call = {
     ...native,
     tool_use_id: 'start',
-    tool_name: 'mcp__plugin_seiri_tools__workflow',
+    tool_name: 'mcp__plugin_seiri_tools__runtime',
     tool_input: request,
   };
   await invoke('pre-tool-use.mjs', { ...call, hook_event_name: 'PreToolUse' });

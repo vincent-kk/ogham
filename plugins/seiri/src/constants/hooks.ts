@@ -49,8 +49,8 @@ export const HookName = {
  *
  * Claude addresses a plugin tool as `mcp__plugin_<plugin>_<server>__<tool>`;
  * for a single-server plugin the plugin compiler's Codex adapter maps that
- * to `mcp__<plugin>__<tool>`. Both workflow addresses below compose from
- * {@link PLUGIN_NAME}, this key and {@link ToolName.WORKFLOW}.
+ * to `mcp__<plugin>__<tool>`. Both runtime addresses below compose from
+ * {@link PLUGIN_NAME}, this key and {@link ToolName.RUNTIME}.
  */
 const MCP_SERVER_KEY = 'tools';
 
@@ -64,16 +64,16 @@ const MCP_SERVER_KEY = 'tools';
  */
 export const HostTool = {
   BASH: BASH_TOOL,
-  WORKFLOW: `mcp__plugin_${PLUGIN_NAME}_${MCP_SERVER_KEY}__${ToolName.WORKFLOW}`,
+  RUNTIME: `mcp__plugin_${PLUGIN_NAME}_${MCP_SERVER_KEY}__${ToolName.RUNTIME}`,
 } as const;
 
 /**
- * Codex's server-prefixed form of {@link HostTool.WORKFLOW}, composed from
+ * Codex's server-prefixed form of {@link HostTool.RUNTIME}, composed from
  * the same parts. `src/__tests__/wiring.test.ts` checks it against the
  * matcher the compiler emits in `.codex-plugin/hooks.json`.
  */
-export const CODEX_WORKFLOW_TOOL =
-  `mcp__${PLUGIN_NAME}__${ToolName.WORKFLOW}` as const;
+export const CODEX_RUNTIME_TOOL =
+  `mcp__${PLUGIN_NAME}__${ToolName.RUNTIME}` as const;
 
 /**
  * Hooks that are built but deliberately absent from `hooks/hooks.json`.

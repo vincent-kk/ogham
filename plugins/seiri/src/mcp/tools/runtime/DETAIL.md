@@ -10,6 +10,7 @@
 
 ## API Contracts
 
+- `handleRuntime`이 도구의 진입점이다: `action`으로 분기해 `dial`은 `applyDial`로, 나머지는 `handleWorkflow`로 보낸다.
 - `handleWorkflow`는 참여 액션(`step`·`start`·`resume`·`pause`·`finish`)의 `WorkflowReply`를 반환한다: disabled는 status와 effective dial(off/advisory)의 reason만, accepted는 status와 validated request의 action/task/step?/intent를 담는다. invalid 입력은 오류다.
 - `applyDial`는 `dial` 액션을 처리해 `{ action: 'dial', op, changed, dial, posture }`를 반환한다. `dial_op: set`은 유효한 `intervention`을 요구한다.
 

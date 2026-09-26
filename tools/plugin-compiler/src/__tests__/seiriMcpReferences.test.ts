@@ -58,7 +58,7 @@ describe("seiri canonical MCP surfaces", () => {
       expect(file.content).not.toContain("mcp__plugin_seiri_");
       expect(file.content).not.toContain("ogham-mcp-tools:");
     }
-    for (const name of ["workflow", "gates", "settings"])
+    for (const name of ["runtime", "gates", "settings"])
       expect(
         files.some((file) => file.content.includes(`mcp__seiri__${name}`)),
       ).toBe(true);
@@ -85,12 +85,12 @@ describe("seiri canonical MCP surfaces", () => {
     const emitted = JSON.stringify(buildCodexHooks(facts));
     expect(facts.codexHookRuntime).toBe("bridge/codex");
     expect(emitted).toContain("bridge/codex/post-tool-use.mjs");
-    expect(emitted).toContain("Bash|mcp__seiri__workflow");
-    expect(emitted).not.toContain("mcp__plugin_seiri_tools__workflow");
+    expect(emitted).toContain("Bash|mcp__seiri__runtime");
+    expect(emitted).not.toContain("mcp__plugin_seiri_tools__runtime");
     for (const event of ["PreToolUse", "PostToolUse"])
       expect(
         facts.hooksFile!.hooks![event].some((group) =>
-          group.matcher?.includes("mcp__plugin_seiri_tools__workflow"),
+          group.matcher?.includes("mcp__plugin_seiri_tools__runtime"),
         ),
       ).toBe(true);
   });

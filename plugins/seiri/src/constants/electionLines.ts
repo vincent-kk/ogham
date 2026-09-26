@@ -1,7 +1,7 @@
 import { INTERVENTION } from './intervention.js';
 
 /**
- * Returned by the settings MCP tool's config posture echo at standard and
+ * Returned by the runtime MCP tool's dial posture echo at standard and
  * strict.
  */
 export const ELECTION_STANDARD_LINE =

@@ -99,7 +99,7 @@ it('does not apply a late Bash result after replacing its task', () => {
   const call = {
     ...input,
     tool_use_id: 'switch',
-    tool_name: 'mcp__plugin_seiri_tools__workflow',
+    tool_name: 'mcp__plugin_seiri_tools__runtime',
     tool_input: req,
   };
   processToolStart({ ...call, hook_event_name: 'PreToolUse' });
@@ -133,7 +133,7 @@ it('rejects resume for a different task with a mismatch result and leaves state 
   const call = {
     ...input,
     tool_use_id: 'resume-mismatch',
-    tool_name: 'mcp__plugin_seiri_tools__workflow',
+    tool_name: 'mcp__plugin_seiri_tools__runtime',
     tool_input: req,
   };
   processToolStart({ ...call, hook_event_name: 'PreToolUse' });
@@ -172,4 +172,39 @@ it('records into the physical workspace when the native cwd is a nested symlink'
   const alias = portableJoin(outside, 'alias'); symlinkSync(sub, alias, 'junction');
   observeBash({ ...input, cwd: alias });
   expect(ledger(input.cwd, 'task-a')).toContain('[x] G1');
+});
+it('leaves a dial call unpaired: no invocation, no acknowledgment, no actor-state change', () => {
+  const input = fixture();
+  const before = sessionState(input.cwd);
+  const call = {
+    ...input,
+    tool_use_id: 'dial-call',
+    tool_name: 'mcp__plugin_seiri_tools__runtime',
+    tool_input: {
+      action: 'dial',
+      project_root: input.cwd,
+      task: 'task-b',
+      intent: 'change',
+      dial_op: 'get',
+    },
+  };
+  processToolStart({ ...call, hook_event_name: 'PreToolUse' });
+  expect(sessionState(input.cwd)).toEqual(before);
+  expect(
+    processToolOutcome({
+      ...call,
+      tool_response: [
+        {
+          type: 'text',
+          text: JSON.stringify({
+            status: 'accepted',
+            action: 'dial',
+            task: 'task-b',
+            intent: 'change',
+          }),
+        },
+      ],
+    }).hookSpecificOutput,
+  ).toBeUndefined();
+  expect(sessionState(input.cwd)).toEqual(before);
 });

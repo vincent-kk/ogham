@@ -5,8 +5,8 @@ import {
 import type { InterventionLevel } from '../../../../types/config.js';
 
 /**
- * The posture lines for a dial position, consumed by the settings MCP
- * tool's `config` posture echo: empty at `off` and `advisory`, the
+ * The posture lines for a dial position, consumed by the runtime MCP
+ * tool's `dial` posture echo: empty at `off` and `advisory`, the
  * workflow-chain line alone at `standard`, and the workflow-chain line
  * plus the strict posture line at `strict`.
  */

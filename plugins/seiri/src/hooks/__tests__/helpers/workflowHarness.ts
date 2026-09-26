@@ -64,7 +64,7 @@ export function activateWorkflow(
     ...native,
     tool_use_id: randomUUID(),
     tool_input: { ...request },
-    tool_name: adapter.workflowTool,
+    tool_name: adapter.runtimeTool,
   };
   processToolStart({ ...invocation, hook_event_name: 'PreToolUse' }, adapter);
   const content = [

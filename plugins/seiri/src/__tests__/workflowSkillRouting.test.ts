@@ -41,7 +41,7 @@ describe('workflow skill routing contract', () => {
 
   it('keeps callable workflow transitions in one shared reference', () => {
     const callers = documents(skills).filter((path) =>
-      readFileSync(path, 'utf8').includes('mcp__plugin_seiri_tools__workflow'),
+      readFileSync(path, 'utf8').includes('mcp__plugin_seiri_tools__runtime'),
     );
     expect(callers).toEqual([
       portableJoin(skills, 'execute/references/workflow-lifecycle.md'),
@@ -106,7 +106,7 @@ describe('workflow skill routing contract', () => {
         /standalone[^\n]+(?:activate|activation)/i,
       );
       expect(skill(name), name).not.toContain(
-        'mcp__plugin_seiri_tools__workflow',
+        'mcp__plugin_seiri_tools__runtime',
       );
     }
   });

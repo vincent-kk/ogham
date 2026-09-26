@@ -5,8 +5,8 @@ import { PLUGIN_NAME } from '../../../constants/plugin.js';
 import { ToolName } from '../../../constants/toolNames.js';
 import { VERSION } from '../../../version.js';
 import { handleGates } from '../../tools/gates/index.js';
+import { handleRuntime } from '../../tools/runtime/index.js';
 import { handleSettings } from '../../tools/settings/index.js';
-import { handleWorkflow } from '../../tools/workflow/index.js';
 import { wrapHandler } from '../serialization/wrapHandler.js';
 
 /**
@@ -16,6 +16,10 @@ import { wrapHandler } from '../serialization/wrapHandler.js';
  * sits, and whether task gates are met. There is deliberately no tool for
  * reading, searching or analysing code — the harness already provides those,
  * and every schema registered here is context spent whether called or not.
+ *
+ * Tool name is `runtime`; the participation state machine it drives is
+ * `workflow` (`core/sessionSignals/workflow`), which the `Workflow <task>`
+ * ACK reports.
  */
 export function createServer(): McpServer {
   const server = new McpServer({ name: PLUGIN_NAME, version: VERSION });
@@ -24,12 +28,12 @@ export function createServer(): McpServer {
     ToolName.SETTINGS,
     {
       description:
-        'Unified seiri settings surface. action: open opens the browser page and waits for saved | closed | pending; prefer open when a browser is available. Other actions provide the headless fallback for status, manifest, plan, sync, and the intervention dial through config. Never call from a session hook.',
+        'Unified seiri settings surface. action: open opens the browser page and waits for saved | closed | pending; prefer open when a browser is available. Other actions provide the headless fallback for status, manifest, plan, sync. Never call from a session hook.',
       inputSchema: {
         action: z
-          .enum(['open', 'status', 'manifest', 'plan', 'sync', 'config'])
+          .enum(['open', 'status', 'manifest', 'plan', 'sync'])
           .describe(
-            'Settings action to perform. open starts or resumes the browser settings page. plan previews the same change sync would apply. config reads or moves the intervention dial and touches no rule file.',
+            'Settings action to perform. open starts or resumes the browser settings page. plan previews the same change sync would apply.',
           ),
         project_root: z
           .string()
@@ -39,18 +43,6 @@ export function createServer(): McpServer {
           .number()
           .optional()
           .describe('Bounded wait for the save event (default 300, max 600).'),
-        config_op: z
-          .enum(['get', 'set', 'clear'])
-          .nullish()
-          .describe(
-            'For action "config", default get. set stores an untracked session valve that overrides the committed baseline; clear drops it so the baseline applies again. Neither writes the committed baseline — that stays a setup-surface act.',
-          ),
-        intervention: z
-          .enum(['off', 'advisory', 'standard', 'strict'])
-          .nullish()
-          .describe(
-            'Dial position for config_op "set". off and advisory disable automatic assistance; existing participation is invalidated at turn boundaries. standard and strict offer observations only after explicit workflow participation. No position elects skills.',
-          ),
         selections: z
           .record(z.string(), z.boolean())
           .nullish()
@@ -105,12 +97,16 @@ export function createServer(): McpServer {
   );
 
   server.registerTool(
-    ToolName.WORKFLOW,
+    ToolName.RUNTIME,
     {
       description:
-        'Optional workflow participation after a skill has been selected. Sequence lifecycle calls. accepted validates the request; only the matching PostToolUse acknowledgment confirms participation. No ledger is required. Missing acknowledgment or disabled assistance never blocks work. finish ends participation, not proof of success.',
+        'Session runtime: optional workflow participation after a skill has been selected, plus the intervention dial. Sequence participation lifecycle calls (start, resume, pause, finish); accepted validates the request, and only the matching PostToolUse acknowledgment confirms participation. No ledger is required. Missing acknowledgment or disabled assistance never blocks work. finish ends participation, not proof of success. dial reads or moves the intervention valve immediately, with no acknowledgment pair.',
       inputSchema: {
-        action: z.enum(['start', 'resume', 'pause', 'finish']),
+        action: z
+          .enum(['start', 'resume', 'pause', 'finish', 'dial'])
+          .describe(
+            'Participation transition to sequence, or dial to read or move the intervention valve.',
+          ),
         project_root: z
           .string()
           .describe(
@@ -118,14 +114,29 @@ export function createServer(): McpServer {
           ),
         task: z
           .string()
-          .describe('Kebab-case task name, with or without a gate ledger.'),
+          .optional()
+          .describe(
+            'Kebab-case task name, with or without a gate ledger. Required for start, resume, pause and finish.',
+          ),
         intent: z
           .enum(['change', 'review'])
           .optional()
           .describe('Required for start and resume.'),
+        dial_op: z
+          .enum(['get', 'set', 'clear'])
+          .nullish()
+          .describe(
+            'For action "dial", default get. set stores an untracked session valve that overrides the committed baseline; clear drops it so the baseline applies again. Neither writes the committed baseline — that stays a setup-surface act.',
+          ),
+        intervention: z
+          .enum(['off', 'advisory', 'standard', 'strict'])
+          .nullish()
+          .describe(
+            'Dial position for dial_op "set". off and advisory disable automatic assistance; existing participation is invalidated at turn boundaries. standard and strict offer observations only after explicit workflow participation. No position elects skills.',
+          ),
       },
     },
-    wrapHandler(handleWorkflow),
+    wrapHandler(handleRuntime),
   );
   return server;
 }

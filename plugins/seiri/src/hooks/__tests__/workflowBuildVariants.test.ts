@@ -24,14 +24,14 @@ it.each(['claude', 'codex'])('%s bundle contains only its workflow ABI', host =>
   const source = readFileSync(portableJoin(pluginRoot, 'bridge', host, 'post-tool-use.mjs'), 'utf8');
   expect(source).toContain(host === 'codex' ? '.turn_id' : '.prompt_id');
   expect(source).not.toContain(host === 'codex' ? '.prompt_id' : '.turn_id');
-  expect(source).not.toContain(host === 'codex' ? 'mcp__plugin_seiri_tools__workflow' : 'mcp__seiri__workflow');
+  expect(source).not.toContain(host === 'codex' ? 'mcp__plugin_seiri_tools__runtime' : 'mcp__seiri__runtime');
   expect(Buffer.byteLength(source)).toBeLessThanOrEqual(20 * 1024);
 });
 it.each(['claude', 'codex'])('%s manifest runtime acknowledges only its native paired lifecycle', host => {
   const cwd = fixture();
   const native = { cwd, session_id: 'session', ...(host === 'codex' ? { turn_id: 'turn' } : { prompt_id: 'turn' }) };
   expect(run(host, 'user-prompt-submit', { ...native, hook_event_name: 'UserPromptSubmit' })).toBe('');
-  const input = { ...native, tool_use_id: 'start', tool_name: host === 'codex' ? 'mcp__seiri__workflow' : 'mcp__plugin_seiri_tools__workflow', tool_input: { action: 'start', task: 'test-task', project_root: cwd, intent: 'change' } };
+  const input = { ...native, tool_use_id: 'start', tool_name: host === 'codex' ? 'mcp__seiri__runtime' : 'mcp__plugin_seiri_tools__runtime', tool_input: { action: 'start', task: 'test-task', project_root: cwd, intent: 'change' } };
   const content = [{ type: 'text', text: JSON.stringify({ status: 'accepted', action: 'start', task: 'test-task', intent: 'change' }) }];
   expect(run(host, 'pre-tool-use', { ...input, hook_event_name: 'PreToolUse' })).toBe('');
   const post = { ...input, hook_event_name: 'PostToolUse', tool_response: host === 'codex' ? { content } : content };

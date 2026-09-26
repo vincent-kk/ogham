@@ -3,15 +3,10 @@ import type {
   RuleDocSyncResult,
   RuleDocsManifest,
 } from '../../../../types/manifest.js';
-import type {
-  ConfigActionResult,
-  ConfigOp,
-} from '../utils/applyConfigAction.js';
 
 import type { SaveSummary } from './settingsTypes.js';
 
-export type SettingsAction =
-  'open' | 'status' | 'manifest' | 'plan' | 'sync' | 'config';
+export type SettingsAction = 'open' | 'status' | 'manifest' | 'plan' | 'sync';
 
 export interface SettingsInput {
   action: SettingsAction;
@@ -23,10 +18,6 @@ export interface SettingsInput {
   resync?: string[] | null;
   /** Optional revision returned by `plan`; stale revisions are not applied. */
   revision?: string | null;
-  /** Operation for `action: "config"`; defaults to reading the dial. */
-  config_op?: ConfigOp | null;
-  /** Dial position for `config_op: "set"`. */
-  intervention?: string | null;
 }
 
 export interface SettingsToolExtra {
@@ -47,5 +38,4 @@ export type SettingsOutput =
       action: 'plan' | 'sync';
       result: RuleDocSyncResult;
       selected: string[];
-    }
-  | ConfigActionResult;
+    };
