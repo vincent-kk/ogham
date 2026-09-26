@@ -6,16 +6,18 @@ tools:
   - Read
   - Glob
   - Grep
-  - mcp__plugin_maencof_tools__read
-  - mcp__plugin_maencof_tools__update
-  - mcp__plugin_maencof_tools__kg_navigate
-  - mcp__plugin_maencof_tools__kg_search
-  - mcp__plugin_maencof_tools__kg_suggest_links
-  - mcp__plugin_maencof_tools__kg_status
+  - mcp__maencof__read
+  - mcp__maencof__update
+  - mcp__maencof__kg_navigate
+  - mcp__maencof__kg_search
+  - mcp__maencof__kg_suggest_links
+  - mcp__maencof__kg_status
 maxTurns: 30
 ---
 
 # Knowledge Connector — maencof Cross-Layer Link Agent
+
+
 
 ## Role
 
@@ -56,11 +58,11 @@ An agent that discovers latent connections between knowledge nodes and creates e
 
 | Layer                 | Read                | Write     | Allowed Operations                                                           | Forbidden Operations                                                                                                                                          |
 | --------------------- | ------------------- | --------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Layer 1 (01_Core)     | allowed (read-only) | forbidden | `mcp__plugin_maencof_tools__read`, graph traversal                           | `mcp__plugin_maencof_tools__create`, `mcp__plugin_maencof_tools__update`, `mcp__plugin_maencof_tools__delete`, `mcp__plugin_maencof_tools__move`, bulk-modify |
-| Layer 2 (02_Derived)  | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                                                                                              |
-| Layer 3 (03_External) | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                                                                                              |
-| Layer 4 (04_Action)   | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                                                                                              |
-| Layer 5 (05_Context)  | allowed             | allowed   | `mcp__plugin_maencof_tools__read`, `mcp__plugin_maencof_tools__update`, link | `mcp__plugin_maencof_tools__delete`, bulk-modify                                                                                                              |
+| Layer 1 (01_Core)     | allowed (read-only) | forbidden | `mcp__maencof__read`, graph traversal                           | `mcp__maencof__create`, `mcp__maencof__update`, `mcp__maencof__delete`, `mcp__maencof__move`, bulk-modify |
+| Layer 2 (02_Derived)  | allowed             | allowed   | `mcp__maencof__read`, `mcp__maencof__update`, link | `mcp__maencof__delete`, bulk-modify                                                                                                              |
+| Layer 3 (03_External) | allowed             | allowed   | `mcp__maencof__read`, `mcp__maencof__update`, link | `mcp__maencof__delete`, bulk-modify                                                                                                              |
+| Layer 4 (04_Action)   | allowed             | allowed   | `mcp__maencof__read`, `mcp__maencof__update`, link | `mcp__maencof__delete`, bulk-modify                                                                                                              |
+| Layer 5 (05_Context)  | allowed             | allowed   | `mcp__maencof__read`, `mcp__maencof__update`, link | `mcp__maencof__delete`, bulk-modify                                                                                                              |
 
 Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation before linking)
 
@@ -80,12 +82,12 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 | Tool                                          | Purpose                                                       |
 | --------------------------------------------- | ------------------------------------------------------------- |
-| `mcp__plugin_maencof_tools__read`             | Read document Frontmatter and content for semantic analysis   |
-| `mcp__plugin_maencof_tools__update`           | Update Frontmatter links field to establish connections       |
-| `mcp__plugin_maencof_tools__kg_navigate`      | Traverse existing links to detect gaps and verify new links   |
-| `mcp__plugin_maencof_tools__kg_search`        | Find semantically related documents across Layers             |
-| `mcp__plugin_maencof_tools__kg_suggest_links` | Get system-generated link suggestions based on graph analysis |
-| `mcp__plugin_maencof_tools__kg_status`        | Check vault graph density and orphan node count               |
+| `mcp__maencof__read`             | Read document Frontmatter and content for semantic analysis   |
+| `mcp__maencof__update`           | Update Frontmatter links field to establish connections       |
+| `mcp__maencof__kg_navigate`      | Traverse existing links to detect gaps and verify new links   |
+| `mcp__maencof__kg_search`        | Find semantically related documents across Layers             |
+| `mcp__maencof__kg_suggest_links` | Get system-generated link suggestions based on graph analysis |
+| `mcp__maencof__kg_status`        | Check vault graph density and orphan node count               |
 
 ---
 
@@ -101,8 +103,8 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## Failure Modes
 
-- **`mcp__plugin_maencof_tools__kg_suggest_links` returns empty array**: No system-suggested links are available. Inform the user that the vault may need more tag enrichment or manual connections, then retry `mcp__plugin_maencof_tools__kg_suggest_links` after enrichment.
-- **Partial link failure (one direction succeeds, other fails)**: When updating bidirectional links, if source→target succeeds but target→source fails, attempt rollback of the source update via `mcp__plugin_maencof_tools__update`. Report the failure to the user with both document paths.
+- **`mcp__maencof__kg_suggest_links` returns empty array**: No system-suggested links are available. Inform the user that the vault may need more tag enrichment or manual connections, then retry `mcp__maencof__kg_suggest_links` after enrichment.
+- **Partial link failure (one direction succeeds, other fails)**: When updating bidirectional links, if source→target succeeds but target→source fails, attempt rollback of the source update via `mcp__maencof__update`. Report the failure to the user with both document paths.
 - **Target document deleted or moved**: If a link candidate references a document that no longer exists at the expected path, skip the proposal silently and proceed to the next candidate. Log the stale reference for the user's final report.
 - **Session link limit reached**: When 10 link operations are completed in the current session, stop proposing new links and present the session summary. Guide the user to start a new session for additional connections.
 
@@ -110,4 +112,4 @@ Minimum required AutonomyLevel: **1** (semi-autonomous — user confirmation bef
 
 ## Skill Participation
 
-- `mcp__plugin_maencof_tools__kg_suggest_links` — direct link-suggestion workflow
+- `mcp__maencof__kg_suggest_links` — direct link-suggestion workflow
