@@ -3,7 +3,7 @@
 ## Requirements
 
 - `templates/rules/*.md` 를 호출자가 고른 레이어의 호스트 채널과 조정한다. `project`(기본값)는 저장소 채널, `user` 는 호스트 상태 루트다.
-- 호스트마다 채널이 다르다: Claude 는 `rules/` 디렉터리 파일, Codex 는 유효한 `AGENTS*.md` 의 소유 섹션이다.
+- 호스트마다 채널이 다르다: Claude 는 `RULES_DIR` 디렉터리 파일, Codex 는 유효한 `AGENTS*.md` 의 소유 섹션이다.
 - **배포 상태의 진실은 파일시스템이다.** config 에 미러링하지 않는다 — 사본은 드리프트만 만든다.
 - 사용자 파일을 건드리는 동작은 dry-run 짝을 갖는다. 계획과 실행은 같은 계획을 쓴다.
 - 해시는 raw 바이트 기준이다. 그래서 `.gitattributes` 가 규칙 템플릿을 LF 로 고정하고 루트 `.prettierignore` 가 포매터를 막는다.

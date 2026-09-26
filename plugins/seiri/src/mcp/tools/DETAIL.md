@@ -12,7 +12,7 @@
 
 - `settings/` — 브라우저 폼과 bounded long-poll, 헤드리스 폴백(`status`·`manifest`·`plan`·`sync`).
 - `gates/` — 작업별 게이트 원장의 상태 조회·포기·수동 증거 기록. 명령을 실행하거나 원장을 생성하지 않는다.
-- `runtime/` — `step`·`start`·`resume`·`pause`·`finish`·`dial` 요청을 검증합니다. 필수 절대 project_root와 task를 받고 start/resume에 intent를 요구하고 `step`의 intent는 생략 시 유도하며 native identity는 입력받지 않습니다. off/advisory는 참여 액션에서 disabled이며 상태 적용은 성공한 paired Post의 책임입니다. `dial`(`dial_op`: get/set/clear)은 훅 짝 없이 `.seiri/runtime.json` 밸브에 즉시 적용됩니다.
+- `runtime/` — `step`·`start`·`resume`·`pause`·`finish`·`dial` 요청을 검증합니다. 필수 절대 project_root와 task를 받고 start/resume에 intent를 요구하고 `step`의 intent는 생략 시 유도하며 native identity는 입력받지 않습니다. off/advisory는 참여 액션에서 disabled이며 상태 적용은 성공한 paired Post의 책임입니다. `dial`(`dial_op`: get/set/clear)은 훅 짝 없이 gitignore된 런타임 밸브 파일(`RUNTIME_FILE`)에 즉시 적용됩니다.
 
 ## Acceptance Criteria
 

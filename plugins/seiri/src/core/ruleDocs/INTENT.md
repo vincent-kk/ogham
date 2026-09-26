@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`templates/rules/*.md` 를 호출자가 고른 레이어의 호스트 채널과 조정한다. `project`(기본값 — 기존 배포가 전부 여기 있다)는 저장소 채널, `user` 는 호스트 상태 루트다. Claude 는 `rules/` 디렉터리 파일, Codex 는 유효한 `AGENTS*.md` 의 소유 섹션을 사용한다. 배포 상태의 진실은 파일시스템이며 config 에 미러링하지 않는다.
+`templates/rules/*.md` 를 호출자가 고른 레이어의 호스트 채널과 조정한다. `project`(기본값 — 기존 배포가 전부 여기 있다)는 저장소 채널, `user` 는 호스트 상태 루트다. Claude 는 `RULES_DIR` 디렉터리 파일, Codex 는 유효한 `AGENTS*.md` 의 소유 섹션을 사용한다. 배포 상태의 진실은 파일시스템이며 config 에 미러링하지 않는다.
 
 ## Structure
 

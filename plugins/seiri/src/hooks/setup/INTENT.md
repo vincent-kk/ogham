@@ -8,7 +8,7 @@ Suspend existing actor participation on native session startup, resume, clear, o
 
 - SessionStart can lack a turn ID; suspend the build-selected host's existing actor without creating an anchor.
 - Rule deployment stays an explicit settings operation; this hook only reports status.
-- Election, posture, and rule-summary text live in `hooks/setup/render/`, kept out of every other hook's bundle; the one-line chain comes from `WORKFLOW_CHAIN_LINE` (`constants/workflowChain.ts`) via `renderPostureLines`, the same source UserPromptSubmit's fallback chain line reads through `hooks/shared/progressLine/`. The compact progress line reuses `renderProgressLine` from `hooks/shared/progressLine/`, the same function and arguments UserPromptSubmit uses for an active binding.
+- Election, posture, and rule-summary text live in this hook's own render organ, kept out of every other hook's bundle; the one-line chain comes from `WORKFLOW_CHAIN_LINE` via `renderPostureLines`, the same source UserPromptSubmit's fallback chain line reads through the shared progress-line organ. The compact progress line reuses that organ's `renderProgressLine`, the same function and arguments UserPromptSubmit uses for an active binding.
 
 ## Boundaries
 

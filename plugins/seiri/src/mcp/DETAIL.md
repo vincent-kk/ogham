@@ -18,7 +18,7 @@
 
 ### AC-tool-surface-fixed — 고정된 표면
 
-- 등록 도구가 정확히 3개다. 참여 액션은 입력만 검증하며 호스트 세션을 추측하거나 상태를 직접 활성화하지 않는다. `dial`은 `.seiri/runtime.json`만 쓴다.
+- 등록 도구가 정확히 3개다. 참여 액션은 입력만 검증하며 호스트 세션을 추측하거나 상태를 직접 활성화하지 않는다. `dial`은 gitignore된 런타임 밸브 파일(`RUNTIME_FILE`)만 쓴다.
 
 ### AC-mcp-no-code-tools — 코드 도구 부재
 
