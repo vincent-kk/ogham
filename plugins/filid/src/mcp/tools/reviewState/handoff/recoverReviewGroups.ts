@@ -33,6 +33,7 @@ import { writeCandidateOnlyReviewOpinion } from './utils/writeCandidateOnlyRevie
  * @param initial Prepared state after missing diffs and reviewer briefs are written.
  * @param paths Contained canonical artifacts owned by this branch review.
  * @param pluginRoot Resolved actor-method root, read only when a brief is missing.
+ * @param host Host whose agent reads a verify brief rendered here; a Codex reader gets Codex tool names. Used only when the brief is missing.
  * @returns Recovered state, atomically persisted after the recovery effects.
  * @throws When stored raw rounds cannot be validated or paths cannot be read.
  */
