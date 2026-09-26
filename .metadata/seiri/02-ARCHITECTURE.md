@@ -343,14 +343,14 @@ _"핵심 명사가 두 라운드 불변"_). 수치를 뺀 것은 정확성 손�
 
 `hooks/hooks.json` — filid 형식(`libs/run.cjs`를 통해 `bridge/claude/*.mjs` 실행). 등록 정본은 `hooks.json`, dormant 목록은 `DORMANT_HOOKS`(constants)이며 wiring 테스트가 둘을 대조합니다.
 
-| 이벤트 (matcher)                | 진입점                                 | 역할                                                                    | 다이얼 게이팅                 | 상태                                 |
-| ------------------------------- | -------------------------------------- | ----------------------------------------------------------------------- | ----------------------------- | ------------------------------------ |
-| **SessionStart** (`*`)          | `bridge/claude/setup.mjs`              | 활성 규칙 · 유효 다이얼 · 드리프트 경고 · 발동 폭 라인                  | 블록 선택                     | 등록                                 |
-| **UserPromptSubmit** (`*`)      | `bridge/claude/user-prompt-submit.mjs` | 매 턴 스킬 발동·규칙 준수 상기 1줄 + 미충족 원장 환기 1줄               | **standard↑** (advisory 침묵) | 등록                                 |
-| **PostToolUseFailure** (`Bash`) | `bridge/claude/post-tool-use.mjs`      | 같은 명령 연쇄 실패 신호 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄 | **standard↑** (advisory 침묵) | 등록                                 |
-| **PostToolUse** (`Bash`)        | `bridge/claude/post-tool-use.mjs`      | 성공 연쇄 해제 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄           | **standard↑** (advisory 침묵) | 등록 (같은 번들)                     |
-| **SubagentStart** (`*`)         | `bridge/subagent-start.mjs`            | 서브에이전트에 상태 요약 재주입 (렌더 축약판 재사용)                    | SessionStart와 동일           | 등록                                 |
-| **InstructionsLoaded**          | `bridge/instructions-loaded.mjs`       | 지시 파일 로드 관측 (주입 없음)                                         | —                             | **dormant** — 미등록, 재측정 시 복원 |
+| 이벤트 (matcher)                | 진입점                                  | 역할                                                                    | 다이얼 게이팅                 | 상태                                 |
+| ------------------------------- | --------------------------------------- | ----------------------------------------------------------------------- | ----------------------------- | ------------------------------------ |
+| **SessionStart** (`*`)          | `bridge/claude/setup.mjs`               | 활성 규칙 · 유효 다이얼 · 드리프트 경고 · 발동 폭 라인                  | 블록 선택                     | 등록                                 |
+| **UserPromptSubmit** (`*`)      | `bridge/claude/user-prompt-submit.mjs`  | 매 턴 스킬 발동·규칙 준수 상기 1줄 + 미충족 원장 환기 1줄               | **standard↑** (advisory 침묵) | 등록                                 |
+| **PostToolUseFailure** (`Bash`) | `bridge/claude/post-tool-use.mjs`       | 같은 명령 연쇄 실패 신호 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄 | **standard↑** (advisory 침묵) | 등록                                 |
+| **PostToolUse** (`Bash`)        | `bridge/claude/post-tool-use.mjs`       | 성공 연쇄 해제 · CHECK 일치 시 게이트 판정·원장 기록·판정 1줄           | **standard↑** (advisory 침묵) | 등록 (같은 번들)                     |
+| **SubagentStart** (`*`)         | `bridge/claude/subagent-start.mjs`      | 서브에이전트에 상태 요약 재주입 (렌더 축약판 재사용)                    | SessionStart와 동일           | 등록                                 |
+| **InstructionsLoaded**          | `bridge/claude/instructions-loaded.mjs` | 지시 파일 로드 관측 (주입 없음)                                         | —                             | **dormant** — 미등록, 재측정 시 복원 |
 
 **실패는 Claude 에서만 별개 이벤트입니다** (페이로드 실측 — Claude Code 2.1.218·2.1.240, codex-cli 0.149.0). Claude 는 비-0 종료를 `PostToolUseFailure` 로 보내고 그 페이로드에는 `tool_response` 대신 `error`(= `Exit code N` + 명령 출력 전체)와 `is_interrupt` 가 실립니다. Codex 에는 그 이벤트가 없고 `PostToolUse` 하나가 성공·실패를 모두 나르며, `tool_response` 는 객체가 아니라 **문자열**(모델이 보는 출력)이고 코드모드 exec 은 exit code 를 싣지 않습니다.
 
@@ -508,16 +508,16 @@ seiri가 **자기 효능에 대한 오라클**을 갖는 유일한 공식 경로
 
 **헌법이 문서로만 있으면 드리프트합니다.** 기계 검사로 고정합니다.
 
-| 검사          | 규칙                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 우선순위 사슬 | 모든 규칙 첫 블록에 `> **Precedence**:`                                                                                  |
-| **형식 근거** | manifest `grounding`에 `rests on a property` **또는** `rests on properties` 1건 이상 — **P5 게이트**. 배포 본문에는 없음 |
-| 이중 반증     | `This rule is working if:` **와** `is wrong for you if:`                                                                 |
-| 크기          | 규칙 ≤200줄, 스킬 `SKILL.md` ≤2KB (`references/`는 무제한)                                                               |
-| **임계 금칙** | 본문에 독립 숫자 임계 금지                                                                                               |
-| **언어 금칙** | 러너명(`npm `·`pytest`·`cargo ` 등) 금지                                                                                 |
-| **배선**      | 모든 `templates/rules/*.md`가 manifest 등재 · 모든 `bridge/claude/*.mjs`가 `hooks.json` 등록                             |
-| **해시 최신** | `sync-rule-hashes` 실행 후 diff 없음                                                                                     |
+| 검사          | 규칙                                                                                                                                                               |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 우선순위 사슬 | 모든 규칙 첫 블록에 `> **Precedence**:`                                                                                                                            |
+| **형식 근거** | manifest `grounding`에 `rests on a property` **또는** `rests on properties` 1건 이상 — **P5 게이트**. 배포 본문에는 없음                                           |
+| 이중 반증     | `This rule is working if:` **와** `is wrong for you if:`                                                                                                           |
+| 크기          | 규칙 ≤200줄, 스킬 `SKILL.md` ≤2KB (`references/`는 무제한)                                                                                                         |
+| **임계 금칙** | 본문에 독립 숫자 임계 금지                                                                                                                                         |
+| **언어 금칙** | 러너명(`npm `·`pytest`·`cargo ` 등) 금지                                                                                                                           |
+| **배선**      | 모든 `templates/rules/*.md`가 manifest 등재 · 모든 활성 훅 번들(`DORMANT_HOOKS` 제외)의 `bridge/claude/<hook>.mjs`가 `hooks.json`에 등록되고 dormant 번들은 미등록 |
+| **해시 최신** | `sync-rule-hashes` 실행 후 diff 없음                                                                                                                               |
 
 ⇒ 이 테스트가 **"우리가 우리 규칙을 지키는가"의 오라클**입니다.
 

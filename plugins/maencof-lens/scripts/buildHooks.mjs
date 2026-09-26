@@ -38,9 +38,9 @@ const MAX_HOOK_BYTES = 40 * 1024;
 // kept stable). `entry` is the camelCase src module/dir basename.
 const hookEntries = [{ name: "session-start", entry: "sessionStart" }];
 
-// Each hook is bundled once per host runtime directory. Claude (and Antigravity
-// through its runner) loads bridge/claude; the compiler's `codexHookRuntime`
-// setting points Codex at bridge/codex.
+// Each hook is bundled once per host runtime directory. Claude loads
+// bridge/claude; the compiler's `codexHookRuntime` setting points Codex at
+// bridge/codex.
 const HOOK_HOSTS = ["claude", "codex"];
 
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require

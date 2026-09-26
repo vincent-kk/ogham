@@ -4,7 +4,7 @@
 
 ## Tool list
 
-Five tools, registered by the plugin MCP server. Names below are the Claude/agy form; the Codex adapter registers the same server as `atlassian`, so there the tools appear as `mcp__atlassian__<tool>`.
+Five tools, registered by the plugin MCP server; each host's copy of this document lists the names that host calls.
 
 | Tool                                          | Purpose                                                                                                               |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |

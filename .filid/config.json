@@ -125,6 +125,9 @@
         "basename": "vitest.e2e.globalSetup.ts"
       },
       {
+        "basename": "vitest.globalSetup.ts"
+      },
+      {
         "basename": "playwright.config.ts"
       },
       {

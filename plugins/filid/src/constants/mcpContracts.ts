@@ -5,10 +5,10 @@ import { RULE_SCOPES } from './ruleScopes.js';
 export const MCP_SERVER_NAME = 'filid';
 
 /** Tool-name prefix Claude Code gives the plugin's `tools` server; skills and actor methods spell this one. */
-export const CLAUDE_MCP_TOOL_PREFIX = 'mcp__plugin_filid_tools__';
+export const CLAUDE_MCP_TOOL_PREFIX = `mcp__plugin_${MCP_SERVER_NAME}_tools__`;
 
 /** Tool-name prefix Codex gives the plugin's single server, keyed by the plugin name in the Codex manifest. */
-export const CODEX_MCP_TOOL_PREFIX = 'mcp__filid__';
+export const CODEX_MCP_TOOL_PREFIX = `mcp__${MCP_SERVER_NAME}__`;
 
 /** Detail projections supported by the inspection scan action. */
 export const FRACTAL_SCAN_DETAILS = {

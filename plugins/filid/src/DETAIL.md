@@ -44,7 +44,7 @@
 
 - **Consumers**: `**/src/**`
 - **Direct import**: allowed
-- **Reason**: 같은 fractal 내부 소비자는 자기 entry point를 경유하지 않고 concrete peer를 직접 참조한다. `version.ts`는 생성된 단일 상수 파일이고 아무것도 import하지 않아 런타임 순환을 만들지 않는다.
+- **Reason**: 같은 fractal 내부 소비자는 자기 entry point를 경유하지 않고 concrete peer를 직접 참조한다. `version.ts`는 생성된 단일 상수 파일이고 아무것도 import하지 않아 런타임 순환을 만들지 않는다. 자식 fractal은 루트 파일을 직접 import하면 `src`로 가는 의존 edge가 생기므로 `constants` organ의 재노출을 경유한다.
 
 ## History
 
