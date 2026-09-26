@@ -1,5 +1,10 @@
 # maencof-lens — Contract
 
+## Structure
+
+- `bridge/claude`는 Claude 런타임이고, `bridge/codex`는 compiler 설정 `codexHookRuntime`이 선택하는 Codex 런타임이다. bridge 루트의 MCP 서버와 Windows shim은 모든 호스트가 공유한다.
+- 두 호스트 모두 플러그인 디렉터리 전체를 설치한다 — 이 분리는 설치 범위가 아니라 실행 경로를 나눈다.
+
 ## Requirements
 
 - 이 패키지는 볼트에 대해 읽기 전용이다. 볼트 파일시스템에 쓰지 않고, `@ogham/maencof` 의 `kg_build`·mutation 핸들러를 import 하지도 호출하지도 않는다. 패키지가 수행하는 유일한 쓰기는 `writeConfig` 의 렌즈 설정 갱신이며, 그 대상은 호스트 워크스페이스(또는 사용자 config 레이어)의 런타임 파일이라 어떤 볼트 루트 아래에도 없다.

@@ -1,7 +1,7 @@
 /**
  * @file sessionStart.entry.ts
  * @description esbuild entry point for SessionStart hook.
- * Bundled to bridge/session-start.mjs.
+ * Bundled to bridge/claude/session-start.mjs and bridge/codex/session-start.mjs.
  */
 import { errorLogPath, logHookFailure } from "@ogham/cross-platform";
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Build script for hook entry point bundles
- * Output: bridge/<name>.mjs
+ * Output: bridge/claude/<name>.mjs and bridge/codex/<name>.mjs
  *
  * Hook isolation guards: hooks must remain thin scripts (Node builtins only).
  * The `@ogham/maencof` alias keeps monorepo dev ergonomic, but anything pulled
@@ -38,6 +38,11 @@ const MAX_HOOK_BYTES = 40 * 1024;
 // kept stable). `entry` is the camelCase src module/dir basename.
 const hookEntries = [{ name: "session-start", entry: "sessionStart" }];
 
+// Each hook is bundled once per host runtime directory. Claude (and Antigravity
+// through its runner) loads bridge/claude; the compiler's `codexHookRuntime`
+// setting points Codex at bridge/codex.
+const HOOK_HOSTS = ["claude", "codex"];
+
 // esbuild's ESM output wraps `require` in a throwing shim ("Dynamic require
 // of X is not supported"). cross-spawn (CJS, pulled by the
 // @ogham/cross-platform selfProbe export) calls require('child_process') at load time, so without this
@@ -48,26 +53,30 @@ const ESM_CJS_REQUIRE_BANNER =
   "const require = __cpCreateRequire(import.meta.url);\n";
 
 await Promise.all(
-  hookEntries.map(async ({ name, entry }) =>
-    esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
-      bundle: true,
-      platform: "node",
-      target: "node20",
-      format: "esm",
-      outfile: resolve(root, `bridge/${name}.mjs`),
-      minify: true,
-      sourcemap: false,
-      treeShaking: true,
-      banner: { js: ESM_CJS_REQUIRE_BANNER },
-      alias: {
-        "@ogham/maencof": resolve(root, "../maencof/src"),
-      },
-    }),
+  hookEntries.flatMap(({ name, entry }) =>
+    HOOK_HOSTS.map(async (host) =>
+      esbuild.build({
+        entryPoints: [resolve(root, `src/hooks/${entry}/${entry}.entry.ts`)],
+        bundle: true,
+        platform: "node",
+        target: "node20",
+        format: "esm",
+        outfile: resolve(root, `bridge/${host}/${name}.mjs`),
+        minify: true,
+        sourcemap: false,
+        treeShaking: true,
+        banner: { js: ESM_CJS_REQUIRE_BANNER },
+        alias: {
+          "@ogham/maencof": resolve(root, "../maencof/src"),
+        },
+      }),
+    ),
   ),
 );
 
-console.log(`  Hook scripts (${hookEntries.length}) -> bridge/*.mjs`);
+console.log(
+  `  Hook scripts (${hookEntries.length}) -> bridge/claude/*.mjs, bridge/codex/*.mjs`,
+);
 
 const FORBIDDEN_PATTERNS = [
   // Glob family
@@ -114,24 +123,27 @@ const FORBIDDEN_ALIAS_PATTERNS = [/@ogham\/maencof\b/, /\bscanVault\b/];
 const violations = [];
 
 for (const { name } of hookEntries) {
-  const file = resolve(root, `bridge/${name}.mjs`);
-  const { size } = await stat(file);
-  if (size > MAX_HOOK_BYTES) {
-    violations.push(
-      `  ${name}.mjs: ${size} bytes > ${MAX_HOOK_BYTES} (${(size / 1024).toFixed(1)} KB > ${(MAX_HOOK_BYTES / 1024).toFixed(0)} KB)`,
-    );
-  }
-  const content = await readFile(file, "utf8");
-  for (const pattern of FORBIDDEN_PATTERNS) {
-    if (pattern.test(content)) {
-      violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
-    }
-  }
-  for (const pattern of FORBIDDEN_ALIAS_PATTERNS) {
-    if (pattern.test(content)) {
+  for (const host of HOOK_HOSTS) {
+    const bundle = `${host}/${name}.mjs`;
+    const file = resolve(root, "bridge", bundle);
+    const { size } = await stat(file);
+    if (size > MAX_HOOK_BYTES) {
       violations.push(
-        `  ${name}.mjs: alias whitelist violation — ${pattern} matched (Option A: hook must not pull from @ogham/maencof)`,
+        `  ${bundle}: ${size} bytes > ${MAX_HOOK_BYTES} (${(size / 1024).toFixed(1)} KB > ${(MAX_HOOK_BYTES / 1024).toFixed(0)} KB)`,
       );
+    }
+    const content = await readFile(file, "utf8");
+    for (const pattern of FORBIDDEN_PATTERNS) {
+      if (pattern.test(content)) {
+        violations.push(`  ${bundle}: forbidden pattern ${pattern} matched`);
+      }
+    }
+    for (const pattern of FORBIDDEN_ALIAS_PATTERNS) {
+      if (pattern.test(content)) {
+        violations.push(
+          `  ${bundle}: alias whitelist violation — ${pattern} matched (Option A: hook must not pull from @ogham/maencof)`,
+        );
+      }
     }
   }
 }
