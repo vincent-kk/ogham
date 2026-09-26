@@ -65,10 +65,7 @@
         "basename": "mcp_config.json"
       },
       {
-        "basename": "plugin-compiler.json",
-        "paths": [
-          "**/plugins/seiri"
-        ]
+        "basename": "plugin-compiler.json"
       },
       {
         "basename": "SKILL.md"
