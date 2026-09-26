@@ -13,6 +13,7 @@
 - `loadManifest` 는 throw 한다 — 깨진 매니페스트는 사용자 상태가 아니라 빌드 결함이다. 세션 경로 소비자가 이를 흡수한다.
 - 세션 훅에서 `applyRuleDocs` 를 부르지 않는다. 배포는 setup 표면 전담이다.
 - 배럴은 훅 밖 소비자 전용이다. 훅은 concrete 파일을 직접 import 한다.
+- 훅은 `project` 레이어만 읽으므로 `getRuleDocsStatus`(양쪽 레이어)를 거치지 않고 `buildRuleDocsStatus` + `resolveSeiriProjectRuleTarget`(project 전용 대상 해석)을 직접 쓴다 — `user` 레이어의 해석 코드가 훅 번들에 들어오지 않는다.
 
 ## API Contracts
 

@@ -2,8 +2,9 @@ import { INTERVENTION } from '../../constants/intervention.js';
 import { EMPTY_RESULT } from '../../constants/plugin.js';
 import { renderElectionLine } from '../../core/infra/configLoader/utils/renderElectionLine.js';
 import { renderPostureLines } from '../../core/infra/configLoader/utils/renderPostureLines.js';
-import { getRuleDocsStatus } from '../../core/ruleDocs/status/getRuleDocsStatus.js';
-import { observeBoundary } from '../../core/sessionSignals/workflow/observeBoundary.js';
+import { buildRuleDocsStatus } from '../../core/ruleDocs/status/buildRuleDocsStatus.js';
+import { resolveSeiriProjectRuleTarget } from '../../core/ruleDocs/utils/resolveSeiriProjectRuleTarget.js';
+import { suspendActor } from '../../core/sessionSignals/workflow/suspendActor.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 import type { RuleDocStatus } from '../../types/manifest.js';
 import type { WorkflowHostAdapter } from '../../types/workflow.js';
@@ -30,7 +31,7 @@ export function processSessionStart(
 ): HookOutput {
   if (NATIVE_BOUNDARY_SOURCES.includes(input.source ?? '')) {
     const identity = workflowIdentity(input, adapter);
-    if (identity) observeBoundary(identity, false, now, { suspend: true });
+    if (identity) suspendActor(identity, now);
   }
 
   if (!input.cwd) return EMPTY_RESULT;
@@ -76,7 +77,9 @@ export function processSessionStart(
 function readRuleStatuses(cwd: string): RuleDocStatus[] | undefined {
   try {
     const plugin = process.env.CLAUDE_PLUGIN_ROOT;
-    return plugin ? getRuleDocsStatus(cwd, plugin) : undefined;
+    return plugin
+      ? buildRuleDocsStatus(plugin, () => resolveSeiriProjectRuleTarget(cwd))
+      : undefined;
   } catch {
     return undefined;
   }

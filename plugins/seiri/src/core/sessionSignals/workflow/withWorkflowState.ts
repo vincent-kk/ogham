@@ -12,7 +12,6 @@ import { findRepoRoot } from '../../utils/findRepoRoot.js';
 import { writeAtomically } from '../../utils/writeAtomically.js';
 
 import { isActorFresh } from './isActorFresh.js';
-import { prepareDirectory } from './prepareDirectory.js';
 import { readState } from './readState.js';
 
 /** Incomplete invocations expire independently of actor activity. */
@@ -21,7 +20,8 @@ const CALL_TTL = 24 * 60 * 60 * 1000;
 /**
  * Run one optional actor transaction. Lock failure skips all effects.
  * @param identity Host-normalized actor identity.
- * @param create Whether a trusted boundary may create metadata.
+ * @param create Directory preparer when a trusted boundary may create
+ *   metadata; `false` otherwise.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @param mutate Callback under the actor lock; ledger effects take their lock inside it.
  * @param revokeOnFailure Persist a revocation marker if boundary invalidation fails.
@@ -29,7 +29,7 @@ const CALL_TTL = 24 * 60 * 60 * 1000;
  */
 export function withWorkflowState<T>(
   identity: WorkflowIdentity,
-  create: boolean,
+  create: false | ((root: string) => string | undefined),
   now: number,
   mutate: (state: WorkflowState) => T,
   revokeOnFailure = false,
@@ -45,7 +45,7 @@ export function withWorkflowState<T>(
   let held = false;
   try {
     if (!existsSync(path) && !create) return undefined;
-    if (create && !prepareDirectory(identity.root)) return undefined;
+    if (create && !create(identity.root)) return undefined;
     held = acquireLockDir(lock);
     if (!held) throw new Error('Actor lock unavailable');
     let state = readState(path);
@@ -55,7 +55,11 @@ export function withWorkflowState<T>(
       state = undefined;
     }
     if (existsSync(revoked)) {
-      logHookFailure('seiri', 'workflow-state', 'Actor remains revoked; use a new host session to resume optional assistance.');
+      logHookFailure(
+        'seiri',
+        'workflow-state',
+        'Actor remains revoked; use a new host session to resume optional assistance.',
+      );
       return undefined;
     }
     if (!state && !create) return undefined;

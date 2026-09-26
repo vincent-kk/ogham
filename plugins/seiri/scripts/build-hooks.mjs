@@ -49,7 +49,7 @@ const hookEntries = [
     entry: 'setup',
     // One session-start read of rule status, dial and configLoader chains,
     // plus the fixed election/chain/posture render. Runs once per session.
-    maxBytes: 21 * KILO_BYTE,
+    maxBytes: 20 * KILO_BYTE,
   },
   {
     name: 'user-prompt-submit',
@@ -62,7 +62,7 @@ const hookEntries = [
     entry: 'postToolUse',
     // Paired provenance, atomic actor state, gate judging and progress-line
     // rendering share this entry.
-    maxBytes: 23 * KILO_BYTE,
+    maxBytes: 22 * KILO_BYTE,
     forbiddenContent: [/Election/, /A plan was produced/],
   },
   {

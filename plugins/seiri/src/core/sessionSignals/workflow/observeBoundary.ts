@@ -3,6 +3,8 @@ import type {
   WorkflowIdentity,
 } from '../../../types/workflow.js';
 
+import { prepareDirectory } from './prepareDirectory.js';
+import { advanceBoundary } from './utils/advanceBoundary.js';
 import { withWorkflowState } from './withWorkflowState.js';
 
 /** Options narrowing one boundary observation beyond identity, dial and time. */
@@ -33,17 +35,16 @@ export function observeBoundary(
   const { firstChild = false, suspend = false } = options;
   return withWorkflowState(
     identity,
-    enabled && !!identity.turn,
+    enabled && !!identity.turn && prepareDirectory,
     now,
-    (state) => {
-      const active = firstChild && state.generation > 0 ? false : enabled;
-      state.generation++;
-      state.turn = active ? identity.turn : undefined;
-      state.invocations = {};
-      state.seen = [];
-      if (suspend && state.binding) state.binding.state = 'suspended';
-      return state.binding;
-    },
+    (state) =>
+      advanceBoundary(
+        state,
+        (firstChild && state.generation > 0 ? false : enabled)
+          ? identity.turn
+          : undefined,
+        suspend,
+      ),
     true,
   );
 }

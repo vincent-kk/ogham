@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Session boundaries suspend existing participation (`observeBoundary(..., { suspend: true })`); compact preserves it.
+- Session boundaries suspend existing participation (`suspendActor(identity, now)`); compact preserves it.
 - Hooks never block a tool. Missing host provenance or storage failure yields no assistance beyond the render's own fallback.
 - off/advisory suppress new observations and injection; trusted boundaries still suspend existing participation.
 - standard/strict compose `renderSessionStart({ dial, ruleStatuses?, election, chain })`, in this order: an active-rule-status summary, the effective dial, a drift warning, a fixed election line that names, by work moment and never by word signal, `seiri:write-plan`, `seiri:execute`, `seiri:trace-cause`, and `seiri:verify` in host-neutral form, and a one-line chain summary. In strict, the election slot carries the owner contract instead — the four standard owners plus review-plan, implement, request-review, and receive-review — and a posture line follows the chain. A missing or unreadable `ruleStatuses` still yields the election and chain lines.

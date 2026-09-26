@@ -12,6 +12,7 @@ import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
 import { observeBoundary } from '../workflow/observeBoundary.js';
+import { prepareDirectory } from '../workflow/prepareDirectory.js';
 import { withWorkflowState } from '../workflow/withWorkflowState.js';
 
 const NOW = 1_700_000_000_000;
@@ -47,7 +48,9 @@ it('revokes subsequent automatic effects when a boundary cannot acquire its lock
   observeBoundary({ ...id, turn: 'next' }, true, NOW);
   rmSync(`${path}.lock`, { recursive: true });
   expect(existsSync(`${path}.revoked`)).toBe(true);
-  expect(withWorkflowState(id, true, NOW, () => 'effect')).toBeUndefined();
+  expect(
+    withWorkflowState(id, prepareDirectory, NOW, () => 'effect'),
+  ).toBeUndefined();
 });
 it('does not overwrite a user-owned ignore file or create unignored metadata', () => {
   const { id, path } = fixture();
