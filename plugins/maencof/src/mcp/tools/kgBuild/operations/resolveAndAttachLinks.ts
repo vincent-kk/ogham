@@ -24,11 +24,14 @@ export function resolveAndAttachLinks(
   for (const link of allLinks) {
     if (!linksBySource.has(link.from)) linksBySource.set(link.from, []);
     const sourceDir = posix.dirname(link.from);
-    const isRelative = link.to.startsWith('./') || link.to.startsWith('../');
+    const targetPath = link.to.split('#')[0];
+    if (!targetPath) continue;
+    const isRelative =
+      targetPath.startsWith('./') || targetPath.startsWith('../');
     // 상대 경로 해석: ./、../ → vault-root-relative
     let resolved = isRelative
-      ? posix.normalize(posix.join(sourceDir, link.to))
-      : link.to;
+      ? posix.normalize(posix.join(sourceDir, targetPath))
+      : targetPath;
 
     // stem-only 폴백: 직접 매칭 실패 시 파일명으로 역인덱스 조회
     if (!isRelative && !nodePathSet.has(resolved)) {

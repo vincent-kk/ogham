@@ -11,6 +11,8 @@ export interface ScannedFile {
   relativePath: string;
   /** 파일 수정 시간 (Unix timestamp ms) */
   mtime: number;
+  /** Byte size when produced by scanVault/scanArchive; optional for legacy constructed snapshots. */
+  size?: number;
 }
 
 /** 파일 스냅샷 (증분 스캔용) */

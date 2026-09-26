@@ -4,5 +4,27 @@
  */
 export * from './mcpCompanion.js';
 export * from './mcpCrud.js';
-export * from './mcpKg.js';
+export type {
+  KgInventoryInput,
+  KgInventoryItem,
+  KgInventoryResult,
+  KgSearchInput,
+  KgNavigateInput,
+  KgContextInput,
+  KgStatusInput,
+  ClusterExpansionEntry,
+  KgSearchResultItem,
+  SeedResolution,
+  KgSearchResult,
+  KgNavigateResult,
+  KgContextDocumentRef,
+  KgContextResult,
+  KgStatusResult,
+  KgSuggestLinksInput,
+  LinkSuggestion,
+  KgSuggestLinksResult,
+  KgTimelineInput,
+  KgTimelineItem,
+  KgTimelineResult,
+} from './mcpKg.js';
 export * from './mcpMetadata.js';

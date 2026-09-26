@@ -47,6 +47,11 @@
 
 ## Acceptance Criteria
 
+### AC-readable-vault-maintenance — Composable maintenance
+
+- Disk inventory enumerates references beyond graph neighbor limits and remains available with an unbuilt or stale graph. It is read-only and uses scanner I/O.
+- Same-layer moves, full-body updates and child creation compose into a source-preserving maintenance workflow. Integration fixtures verify exact reference target identities, fragments, aliases, source metadata, collisions and retries; skill behavior requires a separate reviewed execution record.
+
 ### AC-server-not-reexported — 실행 진입점 비노출
 
 - 배럴이 `server/` · `serverEntry/` 를 재노출하지 않아 `src → mcp → mcp/server → src` 순환이 성립하지 않는다.

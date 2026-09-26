@@ -6,7 +6,7 @@
 - `createServer` · `startServer` 는 이 표면에 없다. 실행 진입점은 esbuild 가 `mcp/serverEntry/serverEntry.ts` 에서 만드는 `bridge/mcp-server.cjs` 이고, 배럴이 `mcp/server` 를 끌어오면 `server.ts → version.ts` 참조와 맞물려 `src → mcp → mcp/server → src` 순환이 된다.
 - 의존 방향은 한쪽이다. `core/` 는 `mcp/` · `hooks/` 에 의존하지 않고, `types/` 는 zod 외 외부 의존성을 갖지 않는다.
 - 서브레이어 허용값은 `types/frontmatter.ts` 의 `SubLayerSchema` 하나가 소유한다. frontmatter 검증도 MCP 도구 스키마도 이 스키마에서 파생하며, 값 목록을 리터럴로 다시 적지 않는다 — `SubLayer` 타입만 좁히고 어딘가의 리터럴을 놓치면 그 자리는 폐기된 값을 계속 광고한다.
-- `version.ts` 는 빌드 시 `scripts/injectVersion.mjs` 가 생성한다. 직접 수정하지 않는다.
+- `version.ts` 는 빌드 시 생성한다. 직접 수정하지 않는다.
 - `bridge/` 산출물은 esbuild 가 만든다. 소스는 `src/hooks/<event>/<event>.entry.ts` 와 `src/mcp/serverEntry/serverEntry.ts` 이며 산출물을 손대지 않는다.
 - `skills/.shared/host-configuration.md` 는 `core/hostConfigurationSurfaces` renderer가 만든다. canonical configuration skill과 changelog 감시는 같은 registry 결과를 소비하며 생성물을 직접 수정하지 않는다.
 - vault 아키텍처는 v3(L3 sublayer + 평면 L5 임시 수용소 + 레이어 직교 hub 속성)를 기대한다. 기대 버전과 다른 vault 는 `core/architectureMigrator` 가 마이그레이션한다.
@@ -36,7 +36,7 @@
 
 | 산출물                                 | 생성기                                      | 소스                                  |
 | -------------------------------------- | ------------------------------------------- | ------------------------------------- |
-| `src/version.ts`                       | `scripts/injectVersion.mjs`                 | `package.json` 버전                   |
+| `src/version.ts`                       | `version:sync` 빌드 단계                    | `package.json` 버전                   |
 | `bridge/<event>.mjs`                   | `scripts/buildHooks.mjs`                    | `src/hooks/<event>/<event>.entry.ts`  |
 | `bridge/mcp-server.cjs`                | `scripts/buildMcpServer.mjs`                | `src/mcp/serverEntry/serverEntry.ts`  |
 | `skills/.shared/host-configuration.md` | `scripts/syncHostConfigurationReference.ts` | `src/core/hostConfigurationSurfaces/` |
@@ -86,7 +86,7 @@
 
 - **Consumers**: `**/src/**`
 - **Direct import**: `allowed`
-- **Reason**: 생성기(`scripts/injectVersion.mjs`)가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 소비자를 `src/index.ts` 로 돌리면 하위 fractal 이 조상 배럴의 공개 표면 전체에 의존하게 되고, SessionStart 훅 소비자는 배럴 경유가 번들 크기 가드에 걸려 아예 불가능하다.
+- **Reason**: 빌드가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 소비자를 `src/index.ts` 로 돌리면 하위 fractal 이 조상 배럴의 공개 표면 전체에 의존하게 되고, SessionStart 훅 소비자는 배럴 경유가 번들 크기 가드에 걸려 아예 불가능하다.
 
 ## History
 

@@ -7,7 +7,7 @@
  * Update EXPECTED_COUNT and REMOVED_SKILLS as skills are merged or removed.
  */
 import { readFileSync, readdirSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import fg from 'fast-glob';
@@ -28,10 +28,25 @@ const REMOVED_SKILLS = [
   'refine',
   'suggest',
 ];
-// Portfolio after adding craft-library as the public library scaffold skill.
-const EXPECTED_COUNT = 25;
+/** Public skills include topic classification alongside layer maintenance. */
+const EXPECTED_COUNT = 26;
 
 describe('maencof skill portfolio invariants', () => {
+  it.each(['insight', 'remember', 'organize', 'reflect', 'recall'])(
+    '%s resolves its lifecycle reference to the shared policy asset',
+    (skill) => {
+      const entry = join(SKILLS_DIR, skill, 'SKILL.md');
+      const content = readFileSync(entry, 'utf8');
+      const references = [
+        ...content.matchAll(/\]\(([^)]+insight-lifecycle\.md)(?:#[^)]*)?\)/g),
+      ];
+      expect(references).toHaveLength(1);
+      const target = resolve(dirname(entry), references[0][1]);
+      expect(target).toBe(join(SKILLS_DIR, '.shared', 'insight-lifecycle.md'));
+      expect(readFileSync(target, 'utf8').trim().length).toBeGreaterThan(0);
+    },
+  );
+
   it(`skills/ contains exactly ${EXPECTED_COUNT} skill directories`, () => {
     const dirs = readdirSync(SKILLS_DIR, { withFileTypes: true }).filter(
       (entry) => entry.isDirectory() && !entry.name.startsWith('.'),

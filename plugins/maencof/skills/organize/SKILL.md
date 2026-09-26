@@ -1,8 +1,8 @@
 ---
 name: organize
 user-invocable: false
-description: 'Reorganizes the vault by promoting or retiring documents across layers via the memory-organizer agent, executing moves only after explicit confirmation. Use for memory organization, L5 buffer triage, or applying reflect results.'
-argument-hint: '[--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]'
+description: 'Consolidates accumulated insights into current accounts, maintains document content, or reviews layer transitions. Use for insight distillation, memory organization, and L5 buffer triage.'
+argument-hint: '[--insights [--path PREFIX] [--apply|--dry-run]] [--maintenance] [--dry-run] [--layer 3|4|5] [--min-confidence 0.0-1.0]'
 version: '1.0.0'
 complexity: complex
 context_layers: [1, 2, 3, 4, 5]
@@ -14,6 +14,18 @@ plugin: maencof
 
 Runs the memory-organizer agent to recommend and execute document transitions between Layers. The judge module evaluates candidates, then the execute module performs the actual move after user confirmation.
 
+## Insight Mode
+
+For `--insights`, load Assess, Apply and Relations in [insight-lifecycle.md](../.shared/insight-lifecycle.md) and the shared maintenance procedure below. This mode replaces the default transition workflow, including its index prerequisite and error handling: inventory can preview disk documents without an index. The active agent owns assessment and authorized writes, and may use memory-organizer for bounded assessment within its existing access matrix.
+
+`organize --insights [--path VAULT_RELATIVE_PREFIX] [--apply | --dry-run]` defaults to read-only preview. `--apply` consumes the reviewed plan within existing authorization; `--apply --dry-run` is invalid. `--maintenance` is redundant but allowed once; `--layer` and `--min-confidence` cannot be mixed with this mode. `--path` and `--apply` require `--insights`.
+
+Use complete `mcp__plugin_maencof_tools__kg_inventory` pagination and full `mcp__plugin_maencof_tools__read` bodies, including unchanged/held/error candidates in the report. Use `mcp__plugin_maencof_tools__kg_search` only to find related current accounts. Preview exact source and target writes, preserve originals, verify the target before marking sources, and stop on failure or drift. Only validated knowledge may form an L2 synthesis; hold unvalidated L5 groups. Execute through `mcp__plugin_maencof_tools__create` and `mcp__plugin_maencof_tools__update`, then read back. Source deletion, archival and implicit layer promotion are outside this mode.
+
+## Maintenance Mode
+
+With `--maintenance`, load [document-maintenance.md](../.shared/document-maintenance.md) and review full documents for superseded claims, repetition and independent topics. Present a rewrite/split plan with source preservation and size measurements; apply the authorized scope without repeating approval. Use the active agent for child creation and verification. The memory-organizer may review or update within its existing access matrix; this mode grants no new L1/create/bulk permissions. Keep the complete original until every child is created and verified, then retain its path as a linked overview. Reruns reuse verified children. Default invocation retains the layer-transition workflow below. Same-layer directory classification belongs to `/maencof:classify`.
+
 ## When to Use This Skill
 
 - When you want to clean up internalization candidates from Layer 3/4 documents
@@ -24,7 +36,7 @@ Runs the memory-organizer agent to recommend and execute document transitions be
 ## When to Use vs Adjacent Skills
 
 - **`organize`** — judge + execute. Mutates the vault via `mcp__plugin_maencof_tools__move` after explicit user confirmation. Use when you are ready to apply transitions.
-- **`reflect`** — read-only judge. Produces an analysis report with zero filesystem changes. Use to preview candidates before committing. Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose new links → call `mcp__plugin_maencof_tools__kg_suggest_links`.
+- **`reflect`** — read-only vault assessment. Produces an analysis report and may retain review snapshots outside the vault. Use to preview candidates before committing. Rule of thumb: preview → `reflect`; apply layer changes → `organize`; propose new links → call `mcp__plugin_maencof_tools__kg_suggest_links`.
 
 ## Agent Collaboration Sequence
 
@@ -80,15 +92,18 @@ Output the list of executed transitions and an AgentExecutionResult summary.
 
 ## Available MCP Tools
 
-> The organize skill is an orchestrator. MCP tools are invoked by the memory-organizer agent, not directly by this skill. The skill coordinates the workflow and user confirmation flow.
+> For default layer transitions, memory-organizer invokes the mutation tools. Insight and maintenance modes use the active agent for creation and verification as described above; no specialist gains new write permissions.
 
 | Tool                                     | Used by                                 | Purpose                            |
 | ---------------------------------------- | --------------------------------------- | ---------------------------------- |
 | `mcp__plugin_maencof_tools__kg_status`   | skill (Step 1)                          | Check vault status and stale-nodes |
-| `mcp__plugin_maencof_tools__read`        | memory-organizer agent (judge module)   | Read document Frontmatter          |
+| `mcp__plugin_maencof_tools__read`        | active agent or memory-organizer | Read full bodies and metadata; verify changes |
 | `mcp__plugin_maencof_tools__kg_navigate` | memory-organizer agent                  | Traverse link relationships        |
 | `mcp__plugin_maencof_tools__move`        | memory-organizer agent (execute module) | Execute file move                  |
-| `mcp__plugin_maencof_tools__update`      | memory-organizer agent (execute module) | Update Frontmatter                 |
+| `mcp__plugin_maencof_tools__update`      | active agent or memory-organizer within its access matrix | Update content and Frontmatter |
+| `mcp__plugin_maencof_tools__kg_inventory` | active agent (insight mode) | Enumerate all scoped candidates |
+| `mcp__plugin_maencof_tools__kg_search` | active agent (insight mode) | Locate related current accounts |
+| `mcp__plugin_maencof_tools__create` | active agent (insight or maintenance mode) | Create reviewed knowledge documents |
 
 ## Error Handling
 

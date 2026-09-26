@@ -19,7 +19,10 @@ export default defineConfig({
     },
   ],
   test: {
-    include: ['src/**/__tests__/**/*.{test,spec}.ts'],
+    include: [
+      'src/**/__tests__/**/*.{test,spec}.ts',
+      'skills/**/__tests__/**/*.{test,spec}.ts',
+    ],
     exclude: ['**/fixtures/**'],
     globals: true,
     benchmark: {

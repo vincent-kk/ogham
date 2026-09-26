@@ -16,6 +16,8 @@ Fetches content from external data sources (GitHub issues, Slack messages, web p
 
 ## When to Use This Skill
 
+Load [document-maintenance.md](../.shared/document-maintenance.md) before writing or summarizing vault knowledge. Read full existing documents, integrate corrections in place, preserve source links with verified locations, and choose topic directories independently of tags. Handle size warnings with rewriting or semantic splitting; search snippets alone do not establish a claim.
+
 - When you want to record a GitHub issue or PR in the knowledge vault
 - When you want to save external reference materials as Layer 3
 - When you want to quickly record temporary work notes as Layer 4
@@ -54,6 +56,8 @@ source: { original URL }
 Tags are auto-extracted as core keywords from the content.
 
 ### Step 4 — Call `mcp__plugin_maencof_tools__create`
+
+Before creating, search for an existing account of the same subject and read its complete body. Integrate repeated or updated source information through `update` when it belongs there, preserving each claim's source and location; skip creation in that case. For a distinct document, choose a topic directory from its title/gist/body and existing folder purpose, independently of tags. Use that prefix in filename within L2/L3/L4's two-level budget; L5 stays flat. Treat timestamps as chronology only, not as a collision workaround.
 
 ```
 mcp__plugin_maencof_tools__create({

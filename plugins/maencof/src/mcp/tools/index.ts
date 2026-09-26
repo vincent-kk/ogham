@@ -23,6 +23,7 @@ export { handleKgSearch } from './kgSearch/index.js';
 export { handleKgStatus } from './kgStatus/index.js';
 export { handleKgSuggestLinks } from './kgSuggestLinks/index.js';
 export { handleKgTimeline } from './kgTimeline/index.js';
+export { handleKgInventory } from './kgInventory/index.js';
 export {
   captureInsightInputSchema,
   handleCaptureInsight,

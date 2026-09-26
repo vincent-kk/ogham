@@ -10,6 +10,7 @@ import {
   FRONTMATTER_STRIP_REGEX,
 } from '../../../constants/regexes.js';
 import { deduplicateContent } from '../../../core/contentDedup/index.js';
+import { documentBudgetWarnings } from '../../../core/documentBudget/index.js';
 import {
   buildKnowledgeNode,
   parseDocument,
@@ -283,12 +284,13 @@ export async function handleMaencofUpdate(
   // 기존 본문 추출 (Frontmatter 이후 부분)
   const existingBody = fmMatch ? existing.slice(fmMatch[0].length) : existing;
   // content가 생략되면 기존 본문 유지
-  const bodyToWrite = input.content
+  const dedup = input.content
     ? deduplicateContent(input.content, {
         title: undefined,
         generatedKeys: [...AUTO_GENERATED_FM_KEYS],
-      }).content
-    : existingBody;
+      })
+    : { content: existingBody, warnings: [] };
+  const bodyToWrite = dedup.content;
 
   if (fmMatch) {
     // Frontmatter 블록 산출 (선택 필드 머지 또는 updated 자동 갱신)
@@ -326,10 +328,10 @@ export async function handleMaencofUpdate(
     };
 
   await writeFile(absolutePath, newContent, 'utf-8');
+  const warnings = [...dedup.warnings, ...documentBudgetWarnings(newContent)];
 
   // ─── L1 audit log + warnings ──────────────────────────────────
   if (isL1) {
-    const warnings: string[] = [];
     if (input.frontmatter?.tags)
       warnings.push(
         'Tags changed: DOMAIN edges and inverted index will be affected. Run kg_build for consistency.',
@@ -381,5 +383,6 @@ export async function handleMaencofUpdate(
     success: true,
     path: input.path,
     message: 'Document updated',
+    ...(warnings.length > 0 ? { warnings } : {}),
   };
 }

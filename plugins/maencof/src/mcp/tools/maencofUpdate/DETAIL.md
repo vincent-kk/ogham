@@ -34,6 +34,11 @@
 
 ## Acceptance Criteria
 
+### AC-document-budget — Readable document size
+
+- Measure the final complete Markdown using core/documentBudget. Above 100 physical lines or 6,000 body Unicode code points, return document_size_exceeded with measurements and rewrite/split guidance.
+- Preserve existing warnings and full content; never truncate or reject solely for size. Metadata-only updates and legacy reads also report excessive size.
+
 ### AC-l1-triple-gate — L1 3중 게이트
 
 - L1 문서 수정은 `change_reason` · 20자 이상 `justification` · `confirm_l1: true` 셋을 모두 갖추지 못하면 파일을 바꾸지 않는다.

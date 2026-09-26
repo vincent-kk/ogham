@@ -24,6 +24,28 @@ SessionStart의 기존 지침 작성은 현재 vault 초기화·버전 갱신 �
 
 ## Acceptance Criteria
 
+### AC-insight-capture — Capture useful changes
+
+- Automatic capture reads related knowledge before recording and skips unchanged claims. New evidence, exceptions and unresolved relations retain their uncertainty; the dedicated capture tool remains the category and limit gate.
+- Explicit remember updates keep their existing authorization. Automatic capture never bypasses a rejected category through create or update.
+
+### AC-insight-consolidation — Reviewed current knowledge
+
+- Organize's insight mode previews a complete disk inventory and applies only reviewed, authorized topic groups through MCP. Reflect uses the same assessment without knowledge writes.
+- Verified L2 syntheses preserve conditions and claim-level sources. Unvalidated L5-only groups remain held. Originals retain their content and anchors, including when first reused as the synthesis target: add a distinct current account without rewriting original passages. Integration links are written only after the target is read back successfully.
+- Repeated execution reuses existing targets and reassesses changed sources. Failure or concurrent changes stop the affected execution and report recovery state. Storage API tests alone do not prove model execution behavior.
+
+### AC-insight-reuse — Read the current account
+
+- Recall follows relevant integration links to the current synthesis, checks conditions and exceptions, and retains evidence links. Broken, circular or conflicting relationships fall back to readable sources.
+- Lifecycle tags are retrieval hints, not authority, truth guarantees or permanent review exemptions. Actual conversational use requires behavioral evidence beyond static policy checks.
+
+### AC-project-setup — Current-directory onboarding
+
+- Setup captures the user's execution directory once and verifies `kg_status.vaultPath` before knowledge writes. Re-running preserves existing documents and configuration unless an explicit reset applies.
+- A standalone setup CLI previews or applies only a Claude/Codex project MCP connection using the shared ownership and revision-aware manager. It never writes user-scope settings or replaces drift.
+- Required-test verification runs each requested file independently and rejects absent files, missing results, empty assertions, skipped cases and child failures.
+
 ### AC-marker-scope-only — 마커 구간만 소유
 
 - 병합·제거가 `<!-- MAENCOF:START -->` / `<!-- MAENCOF:END -->` 사이만 바꾸고, 마커 밖 사용자 텍스트와 다른 소유자의 구간은 바이트 그대로 남는다.
@@ -76,4 +98,4 @@ SessionStart의 기존 지침 작성은 현재 vault 초기화·버전 갱신 �
 
 ## Last Updated
 
-2026-09-02 — 비검색 정적 HTML library의 구성·local 관리·metadata catalog 계약을 추가했다.
+2026-09-26 — Insight capture, reviewed consolidation and context reuse contracts.

@@ -41,6 +41,7 @@ export async function scanByPatterns(
         absolutePath,
         relativePath: relPath,
         mtime: stats.mtimeMs,
+        size: stats.size,
       };
     }),
   );

@@ -13,6 +13,8 @@
 
 ## API Contracts
 
+Scanner-produced `ScannedFile` entries include byte `size` alongside mtime for inventory fingerprints. The type keeps size optional for existing constructed snapshots; scanVault and scanArchive always populate it from the same stat call. No additional filesystem reader is introduced in MCP handlers.
+
 - barrel `index.ts` — `scanVault` · `scanArchive` · `buildSnapshot` · `computeChangeSet` · `readVaultFile` · `scanIncrementalChanges` + 타입 `ScannedFile` · `FileSnapshot` · `ChangeSet` · `VaultScanOptions`.
 - `scanVault(vaultRoot, options?)` — allowlist 에 매칭된 md 의 `ScannedFile[]`. 경로는 `vaultRoot` 기준 상대이고 `mtime` 은 ms 단위다.
 - `scanArchive(vaultRoot, options?)` — 서고 패턴(`ARCHIVE_SCAN_PATTERNS`)에 매칭된 md 의 `ScannedFile[]`. 경로·정렬·`mtime` 규약은 `scanVault` 와 동일하다.
