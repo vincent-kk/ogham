@@ -1,6 +1,8 @@
 import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
 import { ANALYSIS_AXES } from '../../../constants/analysisAxes.js';
+import { compareByBytes } from '../../../lib/compareByBytes.js';
+import { toProjectRelativePath } from '../../../lib/toProjectRelativePath.js';
 import type { VerificationAdapter } from '../../../types/adapters.js';
 import type {
   AnalysisCertainty,
@@ -10,7 +12,6 @@ import type { VerificationFileFacts } from '../../../types/verification.js';
 import type { FactsFileState, ProjectFacts } from '../../facts/index.js';
 
 import { factsVerificationClaims } from './factsVerificationClaims.js';
-import { compareByBytes } from '../../../lib/compareByBytes.js';
 
 interface VerificationClaim {
   adapterId: string;
@@ -32,12 +33,15 @@ export interface CollectedVerificationClaims {
  *
  * Discovery stays with the adapters — which files are verification is a
  * question about names and paths — while the role and case count of each one
- * come from its facts record. A discovered file the store cannot answer for
+ * come from its facts record. Discovery is narrowed to the facts scan set: a
+ * path the scan excludes can never hold a record, so demanding one would leave
+ * a diagnostic no action clears. A candidate the store cannot answer for
  * lowers the certainty and is named in a diagnostic, so it never leaves the
  * analysis in silence.
  * @param projectRoot Absolute project root the adapters discover under.
  * @param adapters Verification adapters selected for this project.
- * @param facts One read of the store against the current tree.
+ * @param facts One read of the store against the current tree; its scan set
+ * bounds which discovered paths become candidates.
  * @param factsStates Each scanned file's state, from that same read.
  * @returns The active adapters, the discovered paths per adapter, the store's
  * answer for each of them, the diagnostics and the discovery certainty.
@@ -63,6 +67,12 @@ export async function collectVerificationClaims(
       const discovered = new Map<string, string>();
       for (const path of await adapter.discover(projectRoot)) {
         const absolutePath = portableResolve(projectRoot, path);
+        if (
+          !facts.scannedSet.has(
+            toProjectRelativePath(projectRoot, absolutePath),
+          )
+        )
+          continue;
         discovered.set(pathForCompare(absolutePath), absolutePath);
       }
       for (const [key, path] of discovered)

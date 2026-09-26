@@ -101,7 +101,10 @@ async function submitSectionlessRecord(
 ): Promise<void> {
   const status = await handleFacts({ action: 'status', path: root });
   const bytes = readFileSync(join(root, path));
-  const file = join(mkdtempSync(join(tmpdir(), 'filid-sectionless-')), 'r.json');
+  const file = join(
+    mkdtempSync(join(tmpdir(), 'filid-sectionless-')),
+    'r.json',
+  );
   writeFileSync(
     file,
     JSON.stringify([
@@ -297,6 +300,31 @@ describe('snapshot evidence comes from the facts store', () => {
         path: join(root, '__tests__', 'helper.test.ts'),
       }),
     );
+  });
+
+  it('demands no record for a verification file the scan excludes', async () => {
+    const test = "it('holds', () => {});\n";
+    const root = writeProject({
+      ...PROJECT,
+      'skills/a.test.ts': test,
+      '.metadata/b.test.ts': test,
+      'scripts/c.test.ts': test,
+    });
+    const defaults = createDefaultConfig();
+
+    const result = await snapshot(root, {
+      structure: {
+        ...defaults.structure,
+        additionalExcludedDirectories: ['skills'],
+      },
+    });
+
+    const unavailable = result.diagnostics
+      .filter(({ code }) => code === 'verification-facts-unavailable')
+      .map(({ path }) => path);
+    // A scan-excluded path is refused by facts submit, so a demand for its
+    // record would be a blocker no action clears.
+    expect(unavailable).toEqual([join(root, '__tests__', 'helper.test.ts')]);
   });
 });
 
