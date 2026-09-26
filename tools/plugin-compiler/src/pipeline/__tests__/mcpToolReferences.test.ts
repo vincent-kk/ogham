@@ -6,7 +6,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
+import { dirname, join, sep } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { applyFiles } from "../steps/applyFiles.js";
@@ -83,12 +83,13 @@ describe("MCP references in generation plans", () => {
     write("plugin-compiler.json", '{"codexHookRuntime":"bridge/codex"}');
     const plan = planPluginAdapters(directory);
     expect(
-      plan.files.find((file) =>
-        file.absolutePath.endsWith(".codex-plugin/hooks.json"),
+      plan.files.find(
+        (file) =>
+          file.absolutePath === join(directory, ".codex-plugin/hooks.json"),
       )?.content,
     ).toContain("bridge/codex/post-tool-use.mjs");
     expect(
-      plan.files.some((file) => file.absolutePath.includes("/bridge/")),
+      plan.files.some((file) => file.absolutePath.includes(`${sep}bridge${sep}`)),
     ).toBe(false);
     expect(readFileSync(join(directory, "hooks/hooks.json"), "utf8")).toBe(
       hooks,

@@ -1,5 +1,5 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 import {
@@ -24,7 +24,10 @@ function readSeiriSources(): PluginFacts {
     readdirSync(root, { recursive: true })
       .map(String)
       .filter((path) => statSync(join(root, path)).isFile())
-      .map((path) => [path, readFileSync(join(root, path), "utf8")]),
+      .map((path) => [
+        path.split(sep).join("/"),
+        readFileSync(join(root, path), "utf8"),
+      ]),
   );
   return {
     directory: SEIRI_ROOT,
