@@ -47,9 +47,7 @@ afterEach(() =>
 it('consumes a Bash invocation only once, even if pre is replayed', () => {
   const id = { ...fixture(), call: 'bash' };
   observeInvocation(id, 'command', NOW);
-  expect(completeInvocation(id, 'command', NOW, () => 'effect')).toBe(
-    'effect',
-  );
+  expect(completeInvocation(id, 'command', NOW, () => 'effect')).toBe('effect');
   observeInvocation(id, 'command', NOW);
   expect(
     completeInvocation(id, 'command', NOW, () => 'duplicate'),
@@ -59,17 +57,13 @@ it('rejects stale post after a new turn', () => {
   const id = { ...fixture(), call: 'bash' };
   observeInvocation(id, 'command', NOW);
   observeBoundary({ ...id, turn: 'next' }, true, NOW);
-  expect(
-    completeInvocation(id, 'command', NOW, () => 'stale'),
-  ).toBeUndefined();
+  expect(completeInvocation(id, 'command', NOW, () => 'stale')).toBeUndefined();
 });
 it('rejects late pre as well as post after a new turn', () => {
   const id = { ...fixture(), call: 'bash' };
   observeBoundary({ ...id, turn: 'next' }, true, NOW);
   observeInvocation(id, 'command', NOW);
-  expect(
-    completeInvocation(id, 'command', NOW, () => 'stale'),
-  ).toBeUndefined();
+  expect(completeInvocation(id, 'command', NOW, () => 'stale')).toBeUndefined();
 });
 it('does not let a late lifecycle result replace the current task', () => {
   const id = fixture();

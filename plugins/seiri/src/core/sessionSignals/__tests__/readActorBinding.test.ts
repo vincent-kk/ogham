@@ -10,7 +10,10 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
-import type { WorkflowIdentity, WorkflowRequest } from '../../../types/workflow.js';
+import type {
+  WorkflowIdentity,
+  WorkflowRequest,
+} from '../../../types/workflow.js';
 import { completeInvocation } from '../workflow/completeInvocation.js';
 import { observeBoundary } from '../workflow/observeBoundary.js';
 import { observeInvocation } from '../workflow/observeInvocation.js';
@@ -75,7 +78,9 @@ it('returns undefined for corrupt JSON', () => {
 });
 it('returns undefined for a different root', () => {
   const { id } = fixture();
-  const other = mkdtempSync(portableJoin(tmpdir(), 'seiri-read-binding-other-'));
+  const other = mkdtempSync(
+    portableJoin(tmpdir(), 'seiri-read-binding-other-'),
+  );
   roots.push(other);
   mkdirSync(portableJoin(other, '.git'));
   expect(readActorBinding({ ...id, root: other }, NOW)).toBeUndefined();

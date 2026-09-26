@@ -122,10 +122,7 @@ it.each(HOSTS)(
       ).hookSpecificOutput,
     ).toBeUndefined();
     const mismatched = { ...input, tool_use_id: 'resume-mismatch' };
-    processToolStart(
-      { ...mismatched, hook_event_name: 'PreToolUse' },
-      adapter,
-    );
+    processToolStart({ ...mismatched, hook_event_name: 'PreToolUse' }, adapter);
     const mismatchedContent = [
       {
         type: 'text',

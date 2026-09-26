@@ -174,7 +174,9 @@ for (const { name, maxBytes, forbiddenContent = [] } of hookEntries) {
     const content = await readFile(file, 'utf8');
     for (const pattern of [...FORBIDDEN_PATTERNS, ...forbiddenContent])
       if (pattern.test(content))
-        violations.push(`  ${host}/${name}.mjs: forbidden pattern ${pattern} matched`);
+        violations.push(
+          `  ${host}/${name}.mjs: forbidden pattern ${pattern} matched`,
+        );
   }
 }
 

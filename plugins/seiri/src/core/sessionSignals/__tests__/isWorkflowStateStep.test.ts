@@ -29,7 +29,7 @@ it('accepts a binding with no step at all', () => {
   expect(isWorkflowState(baseState({}))).toBe(true);
 });
 it('rejects a binding whose step is not a WorkflowStep', () => {
-  expect(isWorkflowState(baseState({ step: 'not-a-skill' }) as WorkflowState)).toBe(
-    false,
-  );
+  expect(
+    isWorkflowState(baseState({ step: 'not-a-skill' }) as WorkflowState),
+  ).toBe(false);
 });

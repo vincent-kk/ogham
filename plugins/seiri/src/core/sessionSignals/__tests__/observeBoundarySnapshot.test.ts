@@ -4,7 +4,10 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
-import type { WorkflowIdentity, WorkflowRequest } from '../../../types/workflow.js';
+import type {
+  WorkflowIdentity,
+  WorkflowRequest,
+} from '../../../types/workflow.js';
 import { completeInvocation } from '../workflow/completeInvocation.js';
 import { observeBoundary } from '../workflow/observeBoundary.js';
 import { observeInvocation } from '../workflow/observeInvocation.js';
@@ -16,7 +19,12 @@ function boundBinding(): WorkflowIdentity {
   const root = mkdtempSync(portableJoin(tmpdir(), 'seiri-boundary-snap-'));
   roots.push(root);
   mkdirSync(portableJoin(root, '.git'));
-  const id: WorkflowIdentity = { root, actor: 'actor', turn: 'turn', call: 'call' };
+  const id: WorkflowIdentity = {
+    root,
+    actor: 'actor',
+    turn: 'turn',
+    call: 'call',
+  };
   const request: WorkflowRequest = {
     action: 'step',
     project_root: root,
@@ -52,7 +60,9 @@ it('returns the same active binding when this boundary does not suspend it', () 
   expect(snapshot?.state).toBe('active');
 });
 it('returns undefined when there is no binding at all', () => {
-  const root = mkdtempSync(portableJoin(tmpdir(), 'seiri-boundary-snap-empty-'));
+  const root = mkdtempSync(
+    portableJoin(tmpdir(), 'seiri-boundary-snap-empty-'),
+  );
   roots.push(root);
   mkdirSync(portableJoin(root, '.git'));
   const id: WorkflowIdentity = { root, actor: 'actor', turn: 'turn' };

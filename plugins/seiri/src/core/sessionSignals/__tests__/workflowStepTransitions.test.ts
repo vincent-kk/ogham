@@ -1,9 +1,4 @@
-import {
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-} from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 import { portableJoin } from '@ogham/cross-platform';
@@ -95,9 +90,9 @@ it.each(['write-plan', 'execute'] as const)(
     observeBoundary(id, true, NOW);
     lifecycle(id, request(id, { step: 'write-plan' }));
     const before = state(id);
-    expect(
-      lifecycle({ ...id, call: 'second' }, request(id, { step })),
-    ).toBe('updated');
+    expect(lifecycle({ ...id, call: 'second' }, request(id, { step }))).toBe(
+      'updated',
+    );
     const after = state(id);
     expect(after.binding.step).toBe(step);
     expect(after.generation).toBe(before.generation);
@@ -145,7 +140,12 @@ it('start on the same bound task restarts it from scratch rather than updating i
   expect(
     lifecycle(
       { ...id, call: 'restart' },
-      { action: 'start', project_root: id.root, task: 'task-a', intent: 'change' },
+      {
+        action: 'start',
+        project_root: id.root,
+        task: 'task-a',
+        intent: 'change',
+      },
     ),
   ).toBe('created');
   const after = state(id);
@@ -164,7 +164,12 @@ it('resume on the same active task updates without touching generation', () => {
   expect(
     lifecycle(
       { ...id, call: 'resume' },
-      { action: 'resume', project_root: id.root, task: 'task-a', intent: 'change' },
+      {
+        action: 'resume',
+        project_root: id.root,
+        task: 'task-a',
+        intent: 'change',
+      },
     ),
   ).toBe('updated');
   expect(state(id).generation).toBe(before.generation);
@@ -175,11 +180,14 @@ it.each(['write-plan', 'verify'] as const)(
     const id = identity();
     observeBoundary(id, true, NOW);
     lifecycle(id, request(id, { step: 'write-plan' }));
-    lifecycle({ ...id, call: 'pause' }, {
-      action: 'pause',
-      project_root: id.root,
-      task: 'task-a',
-    });
+    lifecycle(
+      { ...id, call: 'pause' },
+      {
+        action: 'pause',
+        project_root: id.root,
+        task: 'task-a',
+      },
+    );
     expect(state(id).binding.state).toBe('suspended');
     expect(
       lifecycle({ ...id, call: `resume-${step}` }, request(id, { step })),
@@ -192,15 +200,23 @@ it('resume on the same paused task returns to active', () => {
   const id = identity();
   observeBoundary(id, true, NOW);
   lifecycle(id, request(id, { step: 'write-plan' }));
-  lifecycle({ ...id, call: 'pause' }, {
-    action: 'pause',
-    project_root: id.root,
-    task: 'task-a',
-  });
+  lifecycle(
+    { ...id, call: 'pause' },
+    {
+      action: 'pause',
+      project_root: id.root,
+      task: 'task-a',
+    },
+  );
   expect(
     lifecycle(
       { ...id, call: 'resume' },
-      { action: 'resume', project_root: id.root, task: 'task-a', intent: 'change' },
+      {
+        action: 'resume',
+        project_root: id.root,
+        task: 'task-a',
+        intent: 'change',
+      },
     ),
   ).toBe('updated');
   expect(state(id).binding.state).toBe('active');
@@ -234,11 +250,14 @@ it('entry step on a DIFFERENT task switches even when the prior binding is pause
   const id = identity();
   observeBoundary(id, true, NOW);
   lifecycle(id, request(id, { step: 'write-plan' }));
-  lifecycle({ ...id, call: 'pause' }, {
-    action: 'pause',
-    project_root: id.root,
-    task: 'task-a',
-  });
+  lifecycle(
+    { ...id, call: 'pause' },
+    {
+      action: 'pause',
+      project_root: id.root,
+      task: 'task-a',
+    },
+  );
   expect(state(id).binding.state).toBe('suspended');
   expect(
     lifecycle(
@@ -291,7 +310,12 @@ it('resume for a different task is a mismatch and leaves state untouched', () =>
   expect(
     lifecycle(
       { ...id, call: 'other' },
-      { action: 'resume', project_root: id.root, task: 'task-b', intent: 'change' },
+      {
+        action: 'resume',
+        project_root: id.root,
+        task: 'task-b',
+        intent: 'change',
+      },
     ),
   ).toBe('mismatch');
   expect(state(id).binding).toEqual(before.binding);

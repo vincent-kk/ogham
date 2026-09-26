@@ -1,4 +1,7 @@
-import type { WorkflowReply, WorkflowRequest } from '../../../types/workflow.js';
+import type {
+  WorkflowReply,
+  WorkflowRequest,
+} from '../../../types/workflow.js';
 
 import type { DialOp, DialResult } from './handlers/applyDial.js';
 import { applyDial } from './handlers/applyDial.js';

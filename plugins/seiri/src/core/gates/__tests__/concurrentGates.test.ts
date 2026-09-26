@@ -25,7 +25,12 @@ const packageRoot = portableJoin(
 );
 
 /** Built PostToolUse hook executed by the host. */
-const bundlePath = portableJoin(packageRoot, 'bridge', 'claude', 'post-tool-use.mjs');
+const bundlePath = portableJoin(
+  packageRoot,
+  'bridge',
+  'claude',
+  'post-tool-use.mjs',
+);
 
 /** Session identifier shared by concurrent hook processes. */
 const SESSION_ID = 'concurrent-gates-probe';

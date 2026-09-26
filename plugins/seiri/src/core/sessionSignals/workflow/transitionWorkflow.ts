@@ -1,15 +1,14 @@
 import { CHAIN_ENTRY_STEPS } from '../../../constants/workflowChain.js';
-import type { WorkflowRequest, WorkflowState } from '../../../types/workflow.js';
+import type {
+  WorkflowRequest,
+  WorkflowState,
+} from '../../../types/workflow.js';
 
 import { freshBinding } from './utils/freshBinding.js';
 
 /** Outcome of one lifecycle request against the current binding. */
 export type WorkflowTransitionResult =
-  | 'created'
-  | 'switched'
-  | 'updated'
-  | 'mismatch'
-  | 'rejected';
+  'created' | 'switched' | 'updated' | 'mismatch' | 'rejected';
 
 /**
  * Whether a request may create a binding or replace a different bound task.
