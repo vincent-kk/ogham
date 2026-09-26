@@ -47,16 +47,12 @@ describe('counter host session identity (Layer B)', () => {
     expect(dynamicContext('launcher')).toContain(expected);
   });
 
-  it('keeps an unidentified producer and both hook topologies unmeasured', async () => {
+  it('keeps an unidentified producer unmeasured and both hook topologies silent', async () => {
     delete process.env.CENNAD_HOST_SESSION_ID;
     expect(await incrementCounter('codex')).toBeNull();
     expect(await readCounter()).toBeNull();
-    expect(dynamicContext('direct')).toContain(
-      'Delegation counts unavailable (unidentified).',
-    );
-    expect(dynamicContext('launcher')).toContain(
-      'Delegation counts unavailable (unidentified).',
-    );
+    expect(dynamicContext('direct')).toBe('');
+    expect(dynamicContext('launcher')).toBe('');
   });
 
   it('preserves the measured-zero experience for a matching identity', async () => {
