@@ -10,11 +10,13 @@ plugin: seiri
 
 # trace-cause — fix where it started
 
+
+
 This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 
-Standalone diagnosis does not activate a workflow. Return to the enclosing task; use [workflow lifecycle](../execute/references/workflow-lifecycle.md) only if an actual change chain needs assistance.
+Standalone diagnosis does not activate a workflow. Return to the enclosing task; follow [workflow lifecycle](../execute/references/workflow-lifecycle.md) only inside an assisted task. If a `[seiri]` progress line or workflow acknowledgement in this session names an active task, call `mcp__seiri__runtime({ action: "step", step: "trace-cause", project_root, task })` with that task and continue without waiting. If you are clearly performing a different task, call it with that task's name instead and follow its acknowledgement. Standalone use needs no call.
 
 First distinguish an unexplained defect from an expected red test, a search with no matches, or a straightforward tool-input correction. Correct the latter locally and continue the original task.
 

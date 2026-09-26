@@ -10,13 +10,15 @@ plugin: seiri
 
 # trace-structure — read the connections before judging
 
+
+
 This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 The first plausible reading of complex code is usually wrong somewhere that matters. Replace inference with traced fact before acting.
 
 ## Workflow
 
-Standalone tracing does not activate a workflow. In an assisted task, retain its existing connection per [workflow lifecycle](../execute/references/workflow-lifecycle.md); loading this supporting skill needs no extra call.
+Standalone tracing does not activate a workflow. In an assisted task, retain its existing connection per [workflow lifecycle](../execute/references/workflow-lifecycle.md). If a `[seiri]` progress line or workflow acknowledgement in this session names an active task, call `mcp__seiri__runtime({ action: "step", step: "trace-structure", project_root, task })` with that task and continue without waiting. If you are clearly performing a different task, call it with that task's name instead and follow its acknowledgement. Standalone use needs no call.
 
 **1. Name the question.** State what the original problem needs from the codebase. Tracing without a question is sightseeing.
 
