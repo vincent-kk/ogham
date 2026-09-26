@@ -17,7 +17,7 @@
 - 수집기 자체의 certainty는 선언된 범위가 아무것도 덮지 않을 때(`facts.covers: []`) `unsupported`이고 `facts-uninitialized` 진단 하나를 남기며, 그 밖에는 `exact`다. adapter의 유무는 참조의 출처를 정하지 않으므로 certainty를 바꾸지 않는다.
 - entry point surface는 그 파일의 레코드 `entrySurface`에서 읽는다. manifest entry point만 예외로 adapter가 manifest를 판독한다 — 소스 해석이 아니라 선언된 표면을 읽는 일이고, manifest는 기본 facts 범위 밖이다. 레코드가 없거나 `exact`가 아니거나 `entrySurface`를 담지 않으면 surface는 `indeterminate`(범위 밖이면 `unsupported`)이고 `entry-point-facts-unavailable` 진단이 다음 행동을 싣는다 — 빈 exact surface로 접히지 않는다.
 - snapshot은 `normalizedFacts`로 파일별 유효 참조를 함께 싣는다: 프로젝트 안으로 해석된 `(sourceText ?? specifier, kind, resolvedPath)`를 정렬한 목록과 적용된 판정. **facts 범위 안 스캔 파일마다 항목이 있고, 간선이 없으면 빈 목록이다** — 범위 안에서 "보고 나니 없었다"와 범위 밖이라 "애초에 보지 않았다"는 다른 사실이고, 항목의 있고 없음이 그 둘을 가른다. 범위 밖(`unsupported`) 파일은 항목이 없다. 리뷰가 자기가 판단한 사실을 동결할 때(스펙 §9) 저장소를 다시 읽지 않게 하려는 것이며 — 두 번 읽으면 다른 답이 나올 수 있다 — snapshot hash 입력은 아니다.
-- verification의 role, case count와 contract group id는 레코드 `verification`에서 읽는다. 어떤 파일이 verification인지는 adapter의 discovery(이름·경로)가 정하고, 그 파일에 쓸 수 있는 레코드가 없으면 파일은 분석에서 빠지되 verification certainty가 `indeterminate`가 되고 `verification-facts-unavailable` 진단이 그 경로를 싣는다.
+- verification의 role, case count와 contract group id는 레코드 `verification`에서 읽는다. 어떤 파일이 verification인지는 adapter의 discovery(이름·경로)가 정하되, 후보는 facts **스캔 집합**(`facts.scannedSet`) 안의 파일로 좁힌다. 스캔이 빼는 경로(config `additionalExcludedDirectories`, 기본 제외 패턴, dot-prefix, gitignore)는 레코드를 받을 수 없으므로 — 제출해도 `facts-record-path-invalid`로 거부된다 — 후보가 아니고 진단도 내지 않는다. 스캔 집합 안 후보에 쓸 수 있는 레코드가 없으면 파일은 분석에서 빠지되 verification certainty가 `indeterminate`가 되고 `verification-facts-unavailable` 진단이 그 경로를 싣는다. 좁히는 기준은 `facts.covers`가 아니라 스캔 집합이다: 스캔됐지만 선언된 범위 밖인 파일은 설정 편집을 다음 행동으로 싣는 진단을 계속 받는다.
 - symlink는 따라가지 않는다. 실제 위치가 project root 밖인 symlink(adapter가 소스로 볼 파일, 또는 디렉터리)는 `symlink-not-followed` 진단(`affects: ['dependencies', 'boundaries']`)과 `unknownFiles` 항목이 된다. 진단의 다음 행동은 먼저 정확한 설정 편집을 말한다: `structure.additionalExcludedDirectories`에 링크 이름을 그대로 넣으면 그 링크는 목록에서 빠진다. 사용자 동의가 필요한 갈래(링크를 실제 파일로 바꾸거나 옮기기)는 그 뒤에 둔다. 내용은 읽지 않는다. root 안을 가리키는 symlink는 대상이 이미 그 실제 경로로 분석되므로 싣지 않는다. 끊어진 symlink와 loop는 분석할 내용이 없으므로 싣지 않는다.
 - snapshot hash 입력의 dependency graph에서는 `unknownFiles`를 뺀다. 그 목록은 hash에 이미 들어가는 `diagnostics`의 경로와 코드로 정해진다. 그래서 목록을 도입해도 같은 프로젝트의 hash가 바뀌지 않는다.
 - snapshot은 tree, owner-level dependency graph, verification, adapter IDs, diagnostics, output language, legacy criteria evidence와 content-derived hash를 함께 가진다.
@@ -26,7 +26,7 @@
 - structure/verification detect와 discovery는 adapter마다 한 번 수행하고 portable absolute path claim으로 정규화해 분석에 전달한다.
 - tree entry evidence는 확정된 structure ownership만 사용하고 adapter별 entry override를 해당 adapter에 전달한다.
 - config `maxDepth`는 validation 한계이며 snapshot tree traversal을 자르지 않는다.
-- config `structure.additionalExcludedDirectories`는 tree scan과 adapter ownership 해석에 **같은 실행에서 같은 값으로** 전달한다. 한쪽만 받으면 node가 아닌 파일이 dependency 증거에 남아 graph certainty를 미확정으로 만든다 — 두 소비처가 갈리지 않게 하는 것이 이 orchestration의 책임이다.
+- config `structure.additionalExcludedDirectories`는 tree scan과 adapter ownership 해석에 **같은 실행에서 같은 값으로** 전달하고, verification discovery는 그 값을 반영한 스캔 집합으로 거른다. 한쪽만 받으면 node가 아닌 파일이 dependency 증거에 남아 graph certainty를 미확정으로 만들고, verification에서는 어떤 행동으로도 풀 수 없는 진단이 남는다 — 소비처가 갈리지 않게 하는 것이 이 orchestration의 책임이다.
 - DETAIL.md가 `## Boundary Exemptions`를 선언하면 그 항목을 `node.documentEvidence.boundaryExemptions`에 보존한다. `targetPath`는 소유 프랙탈 기준으로 정규화한 절대 경로이며, rule engine은 다시 파일을 읽지 않고 이 evidence만 읽는다.
 - dependency graph는 non-organ owner path와 함께 organ path 목록도 받아, owner subtree 안의 owned-organ 참조를 cycle adjacency에서 제외한다.
 - 동일 bytes와 구조는 프로젝트 absolute root 및 mtime과 무관하게 같은 hash이고 file content 또는 구조 입력 변경은 hash를 바꾼다.
@@ -50,6 +50,7 @@
 - 분석은 snapshot 수집 중 확정한 detect/discovery를 다시 읽지 않는다.
 - configured max depth를 넘는 node도 tree와 validation evidence에 남는다.
 - 제외 디렉터리를 선언한 config는 그 디렉터리를 tree node에서도, dependency 증거에서도 빼고, 남은 미해결 참조가 없으면 graph certainty가 `exact`다.
+- 제외 디렉터리·기본 제외 패턴·dot-prefix 경로 아래의 verification 파일은 verification 후보에서도 빠지고 `verification-facts-unavailable` 진단을 받지 않는다.
 
 ### AC-snapshot-hash — Content-derived identity
 
@@ -99,8 +100,8 @@
 - 선언된 facts 범위가 비어 있으면 빈 exact PASS가 아니라 dependency certainty가 `unsupported`이고 `facts-uninitialized` 진단 하나를 남긴다.
 - source 또는 resolved target 어느 한쪽에 non-organ owner가 없는 참조는 `unowned-local-dependency` 진단을 남기되 graph certainty를 내리지 않는다. 소유 fractal이 없으면 노드가 없고, 노드 없는 간선으로 순환을 말할 수 없다 — 경계를 만드는 것은 사용자 동의 사항이므로 그 파일 때문에 분석이 멈추지 않는다. 빠짐없이 보고되는지는 `findUnownedReferences`의 property가 지킨다.
 - 레코드가 없는 entry point의 surface는 빈 exact가 아니라 `indeterminate`이고 `entry-point-facts-unavailable` 진단이 함께 나온다.
-- 레코드가 없는 verification 파일은 조용히 빠지지 않는다: verification certainty가 `indeterminate`이고 `verification-facts-unavailable` 진단이 그 경로를 싣는다.
+- 스캔 집합 안에서 레코드가 없는 verification 파일은 조용히 빠지지 않는다: verification certainty가 `indeterminate`이고 `verification-facts-unavailable` 진단이 그 경로를 싣는다.
 
 ## Last Updated
 
-2026-09-20 — reference, entry-surface and verification evidence is read from the facts store; the adapter no longer fills a file the store does not hold.
+2026-09-27 — verification discovery is narrowed to the facts scan set, so excluded directories no longer produce unresolvable `verification-facts-unavailable` diagnostics.

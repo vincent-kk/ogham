@@ -31,7 +31,8 @@ export interface FactsVerificationClaims {
  * and a discovered verification file is not one of them.
  *
  * @param projectRoot - Absolute project root the discovered paths sit under.
- * @param discoveredPaths - Absolute paths the adapters claim as verification.
+ * @param discoveredPaths - Absolute paths inside the facts scan set that the
+ * adapters claim as verification.
  * @param facts - One read of the store against the current tree.
  * @param factsStates - Each scanned file's state, from that same read.
  * @returns The store's answers and the reports owed for the rest.
@@ -47,8 +48,7 @@ export function factsVerificationClaims(
   for (const absolutePath of discoveredPaths) {
     const path = toProjectRelativePath(projectRoot, absolutePath);
     const state = factsStates.get(path) ?? FACTS_FILE_STATES.MISSING;
-    const verification =
-      facts.records.get(path)?.record.facts.verification;
+    const verification = facts.records.get(path)?.record.facts.verification;
     if (state === FACTS_FILE_STATES.EXACT && verification !== undefined) {
       verificationFacts.set(pathForCompare(absolutePath), verification);
       continue;
