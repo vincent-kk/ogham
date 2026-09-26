@@ -16,7 +16,7 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 ## Workflow
 
-When task-scoped hook assistance is useful, follow [workflow lifecycle](references/workflow-lifecycle.md). Start or resume for this task only; moving between skills within its active chain needs no extra call.
+Follow [workflow lifecycle](references/workflow-lifecycle.md). Call `mcp__plugin_seiri_tools__runtime({ action: "step", step: "execute", project_root, task })` with a kebab-case task name and read its reply before starting other tools in this skill; do not retry or wait for the hook acknowledgement. execute is entered with an approved plan or its stated skip; a single surgical change needs no call.
 
 **0. Resume from the plan and its evidence.** If this task has a ledger, call `mcp__plugin_seiri_tools__gates({ action: "status", task })`. Otherwise use the plan's completion criteria; do not create a ledger merely to run this skill.
 
@@ -33,4 +33,4 @@ When task-scoped hook assistance is useful, follow [workflow lifecycle](referenc
 ## Rules
 
 - Record material deviations in the plan or its ledger with the reason.
-- Before handing off substantial changes, complete the repository's required verification and any needed review. Reuse valid evidence; integration remains the user's decision.
+- Before handing off substantial changes, complete the repository's required verification and any needed review — load `/seiri:request-review` for the work. Reuse valid evidence; integration remains the user's decision. Suggest `/seiri:finish` to the user to close the task.

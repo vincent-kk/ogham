@@ -10,11 +10,13 @@ plugin: seiri
 
 # receive-review — evaluate, then implement
 
+<!-- ogham-mcp-tools:seiri -->
+
 This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 
-If these findings continue an assisted task after a new user turn, resume it per [workflow lifecycle](../execute/references/workflow-lifecycle.md). Reading feedback alone needs no activation.
+If these findings continue an assisted task paused for review, resume it per [workflow lifecycle](../execute/references/workflow-lifecycle.md). Reading feedback alone needs no activation. If a `[seiri]` progress line or workflow acknowledgement in this session names an active task, call `mcp__plugin_seiri_tools__runtime({ action: "step", step: "receive-review", project_root, task })` with that task and continue without waiting. If you are clearly performing a different task, call it with that task's name instead and follow its acknowledgement. Standalone use needs no call.
 
 **1. Read every item before acting on any.** Items relate; partial understanding produces wrong fixes.
 

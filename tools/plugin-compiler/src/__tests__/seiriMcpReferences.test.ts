@@ -62,6 +62,24 @@ describe("seiri canonical MCP surfaces", () => {
       expect(
         files.some((file) => file.content.includes(`mcp__seiri__${name}`)),
       ).toBe(true);
+    for (const name of [
+      "implement",
+      "receive-review",
+      "request-review",
+      "review-plan",
+      "trace-cause",
+      "trace-structure",
+      "write-plan",
+    ]) {
+      const copy = files.find((file) =>
+        file.relativePath.endsWith(`/${name}/SKILL.md`),
+      )!;
+      expect(copy, name).toBeDefined();
+      expect(copy.content, name).toContain("mcp__seiri__runtime");
+      expect(copy.content, name).not.toContain(
+        "mcp__plugin_seiri_tools__runtime",
+      );
+    }
     const finish = files.find((file) =>
       file.relativePath.endsWith("/finish/SKILL.md"),
     )!;
