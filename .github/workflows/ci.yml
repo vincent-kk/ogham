@@ -47,6 +47,10 @@ on:
       - "**/.codex-plugin/**"
       - ".agents/**"
       - "plugins/seiri/**"
+      - "plugins/cennad/**"
+      - "plugins/filid/**"
+      - "plugins/maencof/**"
+      - "plugins/maencof-lens/**"
   pull_request:
     branches: [main]
     types: [opened, synchronize, reopened, labeled, unlabeled]
@@ -68,6 +72,10 @@ on:
       - "**/.codex-plugin/**"
       - ".agents/**"
       - "plugins/seiri/**"
+      - "plugins/cennad/**"
+      - "plugins/filid/**"
+      - "plugins/maencof/**"
+      - "plugins/maencof-lens/**"
 
 # A newer run on the same branch supersedes the older one; main is never cancelled.
 concurrency:
@@ -315,17 +323,18 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
-      - name: Build current seiri runtime and adapters
-        run: node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri
+      - name: Build hook plugin runtimes and adapters
+        run: node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri,@ogham/cennad,@ogham/filid,@ogham/maencof,@ogham/maencof-lens
 
-      # Marketplaces install plugins/seiri from the branch as committed, so a
-      # stale bundle or adapter ships even when fresh-build checks pass.
-      - name: Committed seiri artifacts match the fresh build
+      # Marketplaces install each plugin directory from the branch as committed,
+      # so a stale bundle or adapter ships even when fresh-build checks pass.
+      # Pinned by scripts/__tests__/ciCommittedArtifacts.test.mjs.
+      - name: Committed hook plugin artifacts match the fresh build
         run: |
-          changes="$(git status --porcelain --untracked-files=all -- plugins/seiri)"
+          changes="$(git status --porcelain --untracked-files=all -- plugins/seiri plugins/cennad plugins/filid plugins/maencof plugins/maencof-lens)"
           if [ -n "$changes" ]; then
             echo "$changes"
-            echo "::error::plugins/seiri differs from a fresh build; rebuild seiri and commit the generated files."
+            echo "::error::Plugin artifacts differ from a fresh build; rebuild the listed plugins and commit the generated files."
             exit 1
           fi
 
