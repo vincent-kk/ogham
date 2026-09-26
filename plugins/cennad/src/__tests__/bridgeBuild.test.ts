@@ -39,6 +39,22 @@ describe('bridge generated artifacts', () => {
     }
   });
 
+  it('hook check mode accepts a fresh build and rejects one stale host copy', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'cennad-hooks-fresh-'));
+    try {
+      expect(runCheck('buildHooks.mjs', ['--output-dir', dir])).toBe(0);
+      expect(runCheck('buildHooks.mjs', ['--check', '--output-dir', dir])).toBe(
+        0,
+      );
+      writeFileSync(join(dir, 'codex', 'injectDynamic.mjs'), 'stale');
+      expect(runCheck('buildHooks.mjs', ['--check', '--output-dir', dir])).toBe(
+        1,
+      );
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it('hook check mode rejects stale outputs without rewriting them', () => {
     const dir = mkdtempSync(join(tmpdir(), 'cennad-hooks-check-'));
     const bundles = ['claude', 'codex'].flatMap((host) => {

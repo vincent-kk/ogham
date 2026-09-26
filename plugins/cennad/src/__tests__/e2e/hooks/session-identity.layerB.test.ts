@@ -51,8 +51,13 @@ describe('counter host session identity (Layer B)', () => {
     delete process.env.CENNAD_HOST_SESSION_ID;
     expect(await incrementCounter('codex')).toBeNull();
     expect(await readCounter()).toBeNull();
-    expect(dynamicContext('direct')).toBe('');
-    expect(dynamicContext('launcher')).toBe('');
+    for (const topology of ['direct', 'launcher'] as const) {
+      const run = runHookLayerB('injectDynamic', { topology });
+      expect(run.exitCode).toBe(0);
+      expect(run.stderr).toBe('');
+      expect(run.parsed.hookEventName).toBe('UserPromptSubmit');
+      expect(run.parsed.additionalContext).toBe('');
+    }
   });
 
   it('preserves the measured-zero experience for a matching identity', async () => {
