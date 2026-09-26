@@ -38,7 +38,7 @@ claude --plugin-dir ./plugins/filid
 빌드 산출물은 다음과 같습니다.
 
 - `bridge/mcp-server.cjs` — MCP 서버 (도구 4개)
-- `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 훅 스크립트 3개
+- `bridge/{claude,codex}/{setup,user-prompt-submit,pre-tool-use}.mjs` — 훅 스크립트 3개, 호스트 런타임마다 한 벌씩 빌드 (Claude·Antigravity는 `claude`, Codex는 `codex` 실행)
 - `public/settings.html` — `project_setup`의 `settings` action이 서빙하는 설정 UI
 
 native 의존성과 전역 모듈 탐색이 없습니다. 런타임에 필요한 것은 MCP SDK와 Zod뿐입니다.

@@ -16,7 +16,15 @@ import { afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 // __dirname here is .../plugins/filid/src/__tests__/integration
-const bundlePath = resolve(__dirname, '..', '..', '..', 'bridge', 'setup.mjs');
+const bundlePath = resolve(
+  __dirname,
+  '..',
+  '..',
+  '..',
+  'bridge',
+  'claude',
+  'setup.mjs',
+);
 
 let bundleExists = false;
 let tempDir: string;

@@ -4,11 +4,13 @@ Filid registers three Claude Code lifecycle hooks. They deliver FCA context and 
 
 ## Hook Overview
 
-| Hook Event                     | Source Entry                                           | Built Bundle                    |
-| ------------------------------ | ------------------------------------------------------ | ------------------------------- |
-| `SessionStart`                 | `src/hooks/setup/setup.entry.ts`                       | `bridge/setup.mjs`              |
-| `UserPromptSubmit`             | `src/hooks/userPromptSubmit/userPromptSubmit.entry.ts` | `bridge/user-prompt-submit.mjs` |
-| `PreToolUse` (Read/Write/Edit) | `src/hooks/preToolUse/preToolUse.entry.ts`             | `bridge/pre-tool-use.mjs`       |
+| Hook Event                     | Source Entry                                           | Built Bundle                           |
+| ------------------------------ | ------------------------------------------------------ | -------------------------------------- |
+| `SessionStart`                 | `src/hooks/setup/setup.entry.ts`                       | `bridge/<host>/setup.mjs`              |
+| `UserPromptSubmit`             | `src/hooks/userPromptSubmit/userPromptSubmit.entry.ts` | `bridge/<host>/user-prompt-submit.mjs` |
+| `PreToolUse` (Read/Write/Edit) | `src/hooks/preToolUse/preToolUse.entry.ts`             | `bridge/<host>/pre-tool-use.mjs`       |
+
+Each bundle is built once per host runtime directory. Claude runs `bridge/claude/`, and agy runs the same Claude bundles through `bridge/run-agy.mjs`. Codex runs `bridge/codex/`, which the `codexHookRuntime` setting in `plugin-compiler.json` selects when the compiler emits the Codex hook manifest.
 
 The hook build also emits shared host runners:
 
@@ -49,7 +51,7 @@ The INTENT.md and DETAIL.md write gates are branch-independent. Spike branches, 
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/setup.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/claude/setup.mjs\"",
             "timeout": 30
           }
         ]
@@ -61,7 +63,7 @@ The INTENT.md and DETAIL.md write gates are branch-independent. Spike branches, 
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/claude/user-prompt-submit.mjs\"",
             "timeout": 5
           }
         ]
@@ -73,7 +75,7 @@ The INTENT.md and DETAIL.md write gates are branch-independent. Spike branches, 
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/claude/pre-tool-use.mjs\"",
             "timeout": 10
           }
         ]

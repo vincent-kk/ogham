@@ -38,7 +38,7 @@ claude --plugin-dir ./plugins/filid
 Building produces:
 
 - `bridge/mcp-server.cjs` — MCP server (5 tools)
-- `bridge/{setup,user-prompt-submit,pre-tool-use}.mjs` — 3 hook scripts
+- `bridge/{claude,codex}/{setup,user-prompt-submit,pre-tool-use}.mjs` — 3 hook scripts, built once per host runtime (Claude and Antigravity run `claude`, Codex runs `codex`)
 - `public/settings.html` — the settings UI served by `project_setup` action `settings`
 
 There is no native dependency and no global module lookup: the plugin installs and runs with only the MCP SDK and Zod at runtime.

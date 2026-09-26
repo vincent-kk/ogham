@@ -33,6 +33,7 @@
     "plugin.json",
     ".codex-plugin",
     ".mcp.json",
+    "plugin-compiler.json",
     "mcp_config.json",
     "hooks.json",
     "README.md"
