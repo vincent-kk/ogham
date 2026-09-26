@@ -10,7 +10,9 @@ plugin: r-statistics
 
 # data-preparation — Load · Profile · Clean · Impute
 
-Prepare a dataset for statistical analysis and produce a `dataset_profile` the `statistician` uses to select a method. Execution runs through `mcp__plugin_r-statistics_tools__run_r` (via the `r-expert` agent in a full pipeline, or directly for a partial step).
+
+
+Prepare a dataset for statistical analysis and produce a `dataset_profile` the `statistician` uses to select a method. Execution runs through `mcp__r_statistics__run_r` (via the `r-expert` agent in a full pipeline, or directly for a partial step).
 
 ## Steps
 

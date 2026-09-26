@@ -1,10 +1,12 @@
 # R package check & install (Steps 6–9 detail)
 
+
+
 Load this once R itself is confirmed present (SKILL.md Steps 1–5) and you are proceeding to packages — the `--packages` path, or the tail of a fresh install. Every install here is **consent-gated** and runs through the **terminal, never `run_r`** (`run_r` blocks `install.packages`).
 
 ## Step 6 — Check packages
 
-Via `mcp__plugin_r-statistics_tools__run_r` (`executionMode: "sync"`, read-only — `requireNamespace` is not blocked). Probe the required set and every use-case package, reporting what is missing in each group:
+Via `mcp__r_statistics__run_r` (`executionMode: "sync"`, read-only — `requireNamespace` is not blocked). Probe the required set and every use-case package, reporting what is missing in each group:
 
 ```r
 required <- c("broom","rstatix","car","data.table","jsonlite")

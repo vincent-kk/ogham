@@ -27,6 +27,8 @@ spawns a subagent with `subagent_type: "r-statistics:<id>"` (via `Task` or
 `<id>` is the text after `r-statistics:` in the original `subagent_type` value
 (e.g. `subagent_type: "r-statistics:reviewer"` → read `../.shared/personas/reviewer.md`).
 
+
+
 > **EXECUTION MODEL (Tier-2a Anti-Yield)**: Run the pipeline as a SINGLE CONTINUOUS OPERATION. After each agent (`Task`) returns or an MCP tool completes, IMMEDIATELY chain the next step in the same turn. State transitions are internal — never ask the user which state to resume from. Large agent outputs (SAP, R results, validator findings) are working data; summarize them to the user only at a checkpoint, not after every step.
 >
 > **Valid reasons to yield**:
@@ -70,11 +72,11 @@ Drive the state machine in [state-machine.md](./references/state-machine.md). Th
 1. **Data preparation** — load + profile the data (the `data-preparation` contract, executed by `r-expert` via `run_r`). Produce `dataset_profile`.
 2. **STATISTICIAN_PLAN** — `Task(subagent_type: "r-statistics:statistician")` with the profile + hypothesis → SAP. _(interactive: present the SAP, discuss.)_
 3. **Assumption check** — run the SAP's required assumption tests (the `assumption-check` contract via `r-expert`) → `assumption.{id}` artifacts.
-4. **ASSERT_PLAN** — call `mcp__plugin_r-statistics_tools__assert_analysis_plan` with normalized `method` / `datasetMeta` / `assumptionArtifacts` / `mode`.
+4. **ASSERT_PLAN** — call `mcp__r_statistics__assert_analysis_plan` with normalized `method` / `datasetMeta` / `assumptionArtifacts` / `mode`.
    - `hard_block` → back to STATISTICIAN_PLAN (`methodologyIter++`).
    - `soft_warning` → interactive: proceed with a warning; auto: re-select.
    - `ok` → proceed.
-5. **R_EXECUTION** — `Task(subagent_type: "r-statistics:r-expert")` to fill `methods/{technique}/template.R.tmpl` and run `mcp__plugin_r-statistics_tools__run_r`. On a recoverable error, r-expert retries within `rRepairIter`.
+5. **R_EXECUTION** — `Task(subagent_type: "r-statistics:r-expert")` to fill `methods/{technique}/template.R.tmpl` and run `mcp__r_statistics__run_r`. On a recoverable error, r-expert retries within `rRepairIter`.
 6. **VALIDATION** — `Task(subagent_type: "r-statistics:methodology-validator")` for the soft review.
    - `block` → STATISTICIAN_PLAN (`validatorIter++`).
    - `soft_warning` → interactive: discuss; auto: re-select (`validatorIter++`).
