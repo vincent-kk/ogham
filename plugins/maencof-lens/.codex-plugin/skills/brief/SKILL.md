@@ -1,0 +1,106 @@
+---
+name: brief
+user-invocable: true
+description: "Assemble a token-budgeted context block from multiple vault documents via Spreading Activation. Use when a task needs broad vault reference material — architecture decisions or topic research."
+argument-hint: "<query> [--budget N] [--vault NAME] [--layer N,...] [--full] [--scope MODE]"
+version: 1.2.0
+complexity: simple
+plugin: maencof-lens
+---
+
+# brief — Vault Context Assembly
+
+
+
+Assemble a token-budgeted context block from vault documents matching a query. For single-doc quick reference, use `/maencof-lens:lookup` instead.
+
+## When to Use
+
+- Multi-document vault context needed for a development task
+- Loading reference material for architecture decisions or topic research
+- Assembling background knowledge as a structured context block
+- **Not** for single-doc lookup — use `/maencof-lens:lookup`
+
+## Prerequisites
+
+- `.maencof-lens/config.json` required — if missing: "Run `/maencof-lens:setup`"
+- A committed sharded vault index is required: `.maencof/graph-meta.json`, `.maencof/nodes.json`, and `.maencof/edges.json`. The legacy `index.json` is not required; `archive-members.json` is optional.
+- If any required file is missing (including a legacy-only vault), stop before calling tools and guide the user to run `kg_build` in a maencof session. Lens must not build or migrate the index. File presence does not prove validity; use the MCP tool's load result to detect an unreadable index and give the same rebuild guidance.
+
+## Workflow
+
+### Step 1 — Parse Input
+
+Extract query and options from user input:
+
+- Natural-language query → search keywords
+- Cross-language recall: phrase the query so each key concept appears in BOTH the user's working language and English (the query is split into keywords and unioned internally), since vault docs may be tagged or titled in either language. Do not anchor to one language.
+- `--budget <N>` → token budget (default: 2000)
+- `--vault <name>` → target vault (default: config default)
+- `--layer <N,N,...>` → layer filter as comma-separated list (default: vault config)
+- `--full` → include full document text instead of snippets
+- `--scope <focused|balanced|broad>` → exploration breadth (default: balanced)
+
+### Step 2 — Call `mcp__maencof_lens__context` (single tool call)
+
+```
+mcp__maencof_lens__context(query: user_query, token_budget: budget, vault?: name, layer_filter?: layers, include_full?: bool, scope?: breadth)
+```
+
+`mcp__maencof_lens__context` internally runs SA search + context assembly via `handleKgContext`. Do NOT call `mcp__maencof_lens__search` separately — it is redundant.
+
+No results → suggest different query or broader keywords.
+
+### Step 3 — Present Result
+
+```markdown
+## Context: "{query}" (budget: {N} tokens)
+
+{assembled context block}
+
+---
+
+Sources: {N} documents from vault "{vault_name}"
+Token usage: ~{used}/{budget}
+```
+
+If token budget exceeded, show truncation notice with actual vs. budget count.
+
+## MCP Tools
+
+| Tool                                      | Purpose                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| `mcp__maencof_lens__context` | SA search + token-budgeted context assembly (internally performs search) |
+
+## Options
+
+```
+/maencof-lens:brief <query> [--budget <N>] [--vault <name>] [--layer <N,N,...>] [--full] [--scope <focused|balanced|broad>]
+```
+
+| Option     | Default       | Description                                                                                                                         |
+| ---------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `query`    | required      | Context assembly query (natural language)                                                                                           |
+| `--budget` | 2000          | Token budget for assembled output                                                                                                   |
+| `--vault`  | default vault | Target vault name                                                                                                                   |
+| `--layer`  | vault config  | Layer filter as comma-separated list (e.g., `2,3,4`). Intersected with vault config ceiling — only layers present in both are used. |
+| `--full`   | false         | Include full document text instead of snippets                                                                                      |
+| `--scope`  | balanced      | Exploration breadth: `focused` = close, high-confidence documents; `broad` = distant associative connections (ideation).            |
+
+## Usage Examples
+
+```
+/maencof-lens:brief FCA architecture patterns
+/maencof-lens:brief NER model optimization --budget 4000
+/maencof-lens:brief project goals --vault work
+/maencof-lens:brief design decisions --layer 2 --budget 3000
+/maencof-lens:brief deployment strategy --full
+/maencof-lens:brief plugin naming ideas --scope broad
+```
+
+## Error Handling
+
+- **No lens config** → guide to `/maencof-lens:setup`
+- **No index** → guide to run `kg_build` in maencof session
+- **No results** → suggest different query or broader keywords
+- **Token budget exceeded** → show truncation notice with used/budget count
