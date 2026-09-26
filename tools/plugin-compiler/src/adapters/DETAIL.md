@@ -5,7 +5,7 @@
 - 공개 빌더는 정본에서 읽은 facts를 호스트별 순수 객체로 동기 변환하며 디스크 I/O나 정본 변경을 수행하지 않는다.
 - 동일 facts는 키와 파일 경로 순서가 안정된 결과를 만들어 `stableJson` 직렬화의 바이트 결정성을 보존한다.
 - 조건부 산출물이 필요하지 않으면 `null`을 반환하고, 생성 여부 판정은 매니페스트가 가리키는 표면과 일치해야 한다.
-- MCP reference adaptation is opt-in: one valid `<!-- ogham-mcp-tools:<plugin> -->` marker in a skill file selects a complete Codex skill tree and owned exact hook-token adaptation. Unmarked plugins retain their existing output.
+- MCP reference adaptation is opt-in: one valid `<!-- ogham-mcp-tools:<plugin> -->` marker in a skill file or an `agents/` persona selects a complete Codex skill tree and owned exact hook-token adaptation. Unmarked plugins retain their existing output.
 
 ## API Contracts
 
@@ -19,7 +19,7 @@
 - Async lifecycle marker는 같은 `<plugin>:<agent>`의 `spawn` 다음 `join` 순서로 정확히 한 쌍이어야 하며 plugin 이름과 persona 파일이 facts에 존재해야 한다. 위반은 변환 실패이고 marker가 없는 콘텐츠는 바이트 동일하게 보존한다.
 - A single `ogham-async-agent:handoffs <plugin>` block selects the Codex lifecycle for ordinary, persona-free children. It requires the owning plugin name, forbids an agent suffix, and replaces only the marked Claude paragraph. Duplicate handoff blocks and malformed markers fail closed.
 - agy 훅은 PreToolUse 중 bridge 명령으로 실행되는 hook이 남을 때만 플러그인 named-group과 `*` matcher로 변환하며, marketplace 변환은 각 항목의 local source, 설치 정책, Title-case category를 보존한다.
-- Each marked file has exactly one marker naming its owning plugin. Only its canonical `mcp__plugin_<plugin>_<server>__<tool>` references are rewritten; other files and external tool references remain byte-identical. The marker is removed only from the generated copy. MCP rewriting precedes async lifecycle and persona transformations.
+- Each marked file has exactly one marker naming its owning plugin. Only its canonical `mcp__plugin_<plugin>_<server>__<tool>` references are rewritten, including in the persona copy under `.shared/personas/`; other files and external tool references remain byte-identical. The marker is removed only from the generated copy. MCP rewriting precedes async lifecycle and persona transformations.
 - Manifest server keys remain unchanged; callable tokens replace non-ASCII-alphanumeric/underscore characters with underscores. Owned source server/tool identifiers must use ASCII letters, digits, underscores or hyphens. Referenced tools or servers that collide after normalization fail rather than selecting an arbitrary target.
 - MCP hook rewriting applies only to PreToolUse/PostToolUse exact tokens, including `|` alternatives. An opted-in owned reference inside a compound regex fails with `codex-mcp-hook-matcher`; unrelated expressions retain their existing behavior.
 - `validateMcpToolReferences(facts)` exposes the same pure validation used by builders to lint. Invalid markers, missing owned servers, unsupported names and normalized collisions throw `McpToolReferenceError` with `codex-mcp-tool-reference`; no files are produced for an invalid plugin.

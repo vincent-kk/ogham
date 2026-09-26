@@ -75,7 +75,8 @@ export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
  * `null` when it does not qualify. Every skill file is copied (discovery is
  * REPLACE, so the manifest can only point at a complete dir); registry-spawn
  * files self-load their persona and lifecycle-marked files select Codex child
- * semantics. Each `agents/<id>.md` is dropped at `.shared/personas/<id>.md`.
+ * semantics. Each `agents/<id>.md` is dropped at `.shared/personas/<id>.md`,
+ * with owned MCP references rewritten when the persona carries the MCP marker.
  * Output is sorted by path for deterministic, idempotent re-emission. Claude's
  * own `skills/` is never written here (facts carry the pristine source), so
  * re-runs never double-inject.
@@ -109,7 +110,9 @@ export function buildCodexSkills(facts: PluginFacts): CodexSkillFile[] | null {
   for (const [basename, content] of Object.entries(facts.agentFiles))
     files.push({
       relativePath: `${CODEX_SKILLS_DIR}/${PERSONA_SUBDIR}/${basename}`,
-      content,
+      content: mcpReferences?.personaFiles.includes(basename)
+        ? adaptMcpToolReferences(content, mcpReferences.names)
+        : content,
     });
 
   files.sort((a, b) =>
