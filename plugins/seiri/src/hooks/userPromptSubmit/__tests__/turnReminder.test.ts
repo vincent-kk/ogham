@@ -26,7 +26,7 @@ function seedRepo(intervention: InterventionLevel): string {
   return root;
 }
 
-describe('silent user-turn boundary', () => {
+describe('user-turn boundary', () => {
   it.each(['off', 'advisory', 'standard'] as const)(
     'does not elect skills at %s',
     (intervention) => {

@@ -48,7 +48,7 @@ describe('progressLine renderers', () => {
 
   it('names the requested and bound tasks in the mismatch notice', () => {
     expect(renderMismatchNotice('task-b', 'task-a')).toBe(
-      '[seiri] Workflow task-b: not applied; task-a is active — finish or pause it, or enter task-b via write-plan/execute.',
+      '[seiri] Workflow task-b: not applied; task-a is bound — finish or pause it, or enter task-b via write-plan/execute.',
     );
   });
 

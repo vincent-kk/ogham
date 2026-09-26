@@ -13,6 +13,7 @@ import { afterEach, expect, it } from 'vitest';
 import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../types/config.js';
 import { processSessionStart } from '../setup/setup.js';
+import { processSubagentStart } from '../subagentStart/subagentStart.js';
 import { processUserPromptSubmit } from '../userPromptSubmit/userPromptSubmit.js';
 
 import { activateWorkflow } from './helpers/workflowHarness.js';
@@ -76,6 +77,18 @@ it.each(['startup', 'resume', 'clear', 'fork'] as const)(
     expect(sessionState(cwd).binding.state).toBe('suspended');
   },
 );
+it('suspends a resumed child binding at its later SubagentStart', () => {
+  const cwd = fixture('standard');
+  activateWorkflow(cwd, { agent_id: 'child-a' });
+  processSubagentStart({
+    cwd,
+    session_id: 'session-a',
+    prompt_id: 'turn-b',
+    agent_id: 'child-a',
+    hook_event_name: 'SubagentStart',
+  });
+  expect(sessionState(cwd).binding.state).toBe('suspended');
+});
 it('a compact SessionStart leaves an active binding untouched', () => {
   const cwd = fixture('standard');
   activateWorkflow(cwd);

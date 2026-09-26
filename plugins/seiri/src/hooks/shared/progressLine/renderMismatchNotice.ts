@@ -7,5 +7,5 @@ import { INJECTION_PREFIX } from '../../../constants/plugin.js';
  * @returns The mismatch notice to inject.
  */
 export function renderMismatchNotice(requested: string, bound: string): string {
-  return `${INJECTION_PREFIX} Workflow ${requested}: not applied; ${bound} is active — finish or pause it, or enter ${requested} via write-plan/execute.`;
+  return `${INJECTION_PREFIX} Workflow ${requested}: not applied; ${bound} is bound — finish or pause it, or enter ${requested} via write-plan/execute.`;
 }

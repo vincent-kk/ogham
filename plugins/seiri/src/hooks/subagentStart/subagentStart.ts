@@ -26,7 +26,7 @@ export function processSubagentStart(
 
   const enabled = workflowEnabled(input.cwd);
   const firstTurn = isFirstChildTurn(identity, now);
-  observeBoundary(identity, enabled, now, { firstChild: true });
+  observeBoundary(identity, enabled, now, { firstChild: true, suspend: true });
   if (!enabled || !firstTurn) return EMPTY_RESULT;
 
   const parentIdentity = workflowMainIdentity(input, adapter);

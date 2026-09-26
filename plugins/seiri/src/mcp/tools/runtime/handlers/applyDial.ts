@@ -69,9 +69,8 @@ export function applyDial(
   if (op === 'clear') changed = clearRuntime(root);
 
   const dial = loadIntervention(root);
-  // Same order as SessionStart: the chain first, then its election line.
-  // Off and advisory omit both; describeDial remains because this explicit
-  // tool call must report the state it just applied.
+  // Dial line, then the chain (and strict posture), then the election line;
+  // off and advisory render the dial line alone.
   const election = renderElectionLine(dial.effective);
   return {
     action: 'dial',

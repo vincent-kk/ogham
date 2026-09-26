@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Suspend existing actor participation on native session startup, resume, clear, or fork; preserve it across compaction. In standard/strict, state the stable chain and an election line once per session, alongside an active-rule-status summary the render composes independently of any binding.
+Suspend existing actor participation on native session startup, resume, clear, or fork; preserve it across compaction. In standard/strict, state the stable chain and an election line at each session start, resume, clear, fork, and compaction, alongside an active-rule-status summary the render composes independently of any binding.
 
 ## Conventions
 

@@ -12,7 +12,7 @@ export function handleWorkflow(input: unknown): WorkflowReply {
   const request = parseWorkflowRequest(input);
   if (!request)
     throw new Error(
-      'workflow requires an absolute project_root, kebab-case task, valid action, a WorkflowStep for step, and change/review intent for start or resume',
+      'runtime requires an absolute project_root, kebab-case task, valid action, a WorkflowStep for step, and change/review intent for start or resume',
     );
   const effective = loadIntervention(request.project_root).effective;
   if (effective !== 'standard' && effective !== 'strict')
