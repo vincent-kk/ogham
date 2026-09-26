@@ -1,4 +1,5 @@
-import { existsSync, rmdirSync, unlinkSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { existsSync, readFileSync, rmdirSync, unlinkSync } from 'node:fs';
 
 import { logHookFailure, portableJoin } from '@ogham/cross-platform';
 
@@ -17,6 +18,46 @@ import { readState } from './readState.js';
 /** Incomplete invocations expire independently of actor activity. */
 const CALL_TTL = 24 * 60 * 60 * 1000;
 
+/** Options narrowing one actor transaction beyond identity, dial and time. */
+interface WithWorkflowStateOptions {
+  /** Persist a revocation marker if this transaction fails to commit. */
+  revokeOnFailure?: boolean;
+  /**
+   * Set only by a boundary transaction (`observeBoundary`, `suspendActor`):
+   * proceed despite an existing quarantine marker, apply any pending
+   * suspend-intent marker to an existing binding before `mutate` runs, and
+   * — on a successful commit — delete each marker this call itself saw at
+   * lock-acquire time, but only if its content is still the same token (a
+   * concurrent failing transaction may have rewritten it meanwhile).
+   * `suspend` records this boundary's own suspend intent, persisted to the
+   * sticky marker if this same transaction goes on to fail.
+   */
+  recover?: { suspend: boolean };
+}
+
+/**
+ * Read a marker file's content, or `undefined` when it does not exist.
+ * @param markerPath Marker file to read.
+ * @returns The marker's current content, or `undefined` if it is absent.
+ */
+function readMarkerToken(markerPath: string): string | undefined {
+  return existsSync(markerPath) ? readFileSync(markerPath, 'utf8') : undefined;
+}
+
+/**
+ * Delete a marker only if its current content still matches the token this
+ * transaction captured at lock-acquire time.
+ * @param markerPath Marker file to conditionally delete.
+ * @param token This transaction's own capture, or `undefined` if it saw none.
+ */
+function deleteMarkerIfUnchanged(
+  markerPath: string,
+  token: string | undefined,
+): void {
+  if (token !== undefined && readMarkerToken(markerPath) === token)
+    unlinkSync(markerPath);
+}
+
 /**
  * Run one optional actor transaction. Lock failure skips all effects.
  * @param identity Host-normalized actor identity.
@@ -24,7 +65,8 @@ const CALL_TTL = 24 * 60 * 60 * 1000;
  *   metadata; `false` otherwise.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @param mutate Callback under the actor lock; ledger effects take their lock inside it.
- * @param revokeOnFailure Persist a revocation marker if boundary invalidation fails.
+ * @param options `revokeOnFailure` and `recover`, kept as one options object
+ *   so a growing parameter list stays legible at the call site.
  * @returns Callback result only after state is persisted, or undefined on failure.
  */
 export function withWorkflowState<T>(
@@ -32,8 +74,9 @@ export function withWorkflowState<T>(
   create: false | ((root: string) => string | undefined),
   now: number,
   mutate: (state: WorkflowState) => T,
-  revokeOnFailure = false,
+  options: WithWorkflowStateOptions = {},
 ): T | undefined {
+  const { revokeOnFailure = false, recover } = options;
   const dir = portableJoin(
     findRepoRoot(identity.root),
     CONFIG_DIR,
@@ -42,6 +85,7 @@ export function withWorkflowState<T>(
   const path = portableJoin(dir, `${identity.actor}.json`);
   const lock = `${path}.lock`;
   const revoked = `${path}.revoked`;
+  const revokedSuspend = `${path}.revoked-suspend`;
   let held = false;
   try {
     if (!existsSync(path) && !create) return undefined;
@@ -52,13 +96,19 @@ export function withWorkflowState<T>(
     if (state && !isActorFresh(state, now)) {
       unlinkSync(path);
       if (existsSync(revoked)) unlinkSync(revoked);
+      if (existsSync(revokedSuspend)) unlinkSync(revokedSuspend);
       state = undefined;
     }
-    if (existsSync(revoked)) {
+    const revokedToken = readMarkerToken(revoked);
+    const suspendToken = readMarkerToken(revokedSuspend);
+    if (
+      (revokedToken !== undefined || suspendToken !== undefined) &&
+      !recover
+    ) {
       logHookFailure(
         'seiri',
         'workflow-state',
-        'Actor remains revoked; use a new host session to resume optional assistance.',
+        'Actor is quarantined; only its next boundary transaction may recover it.',
       );
       return undefined;
     }
@@ -70,12 +120,18 @@ export function withWorkflowState<T>(
       invocations: {},
       seen: [],
     };
+    if (recover && suspendToken !== undefined && state.binding)
+      state.binding.state = 'suspended';
     for (const [key, invocation] of Object.entries(state.invocations))
       if (!invocation || now - invocation.startedAt > CALL_TTL)
         delete state.invocations[key];
     const result = mutate(state);
     state.lastObservedAt = now;
     writeAtomically(path, JSON.stringify(state));
+    if (recover) {
+      deleteMarkerIfUnchanged(revoked, revokedToken);
+      deleteMarkerIfUnchanged(revokedSuspend, suspendToken);
+    }
     return result;
   } catch {
     logHookFailure(
@@ -85,7 +141,8 @@ export function withWorkflowState<T>(
     );
     if (revokeOnFailure && existsSync(path)) {
       try {
-        writeAtomically(revoked, 'revoked');
+        writeAtomically(revoked, randomUUID());
+        if (recover?.suspend) writeAtomically(revokedSuspend, randomUUID());
       } catch {
         logHookFailure(
           'seiri',

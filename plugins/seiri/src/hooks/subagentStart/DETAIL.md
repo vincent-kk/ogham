@@ -10,7 +10,7 @@
 
 - The processor accepts the native host payload and returns a nonblocking HookOutput. Empty additional context produces no stdout when the parent has no active binding or the read fails.
 - Shared normalization preserves Claude prompt_id, Codex turn_id, tool_use_id and independent child agent_id. No IDs come from model arguments.
-- `readActorBinding(identity, now)` reads the parent's `host + session_id + 'main'` actor under the same project root, validates structure, TTL, and `.revoked`, and returns a binding only when `state === 'active'`.
+- `readActorBinding(identity, now)` reads the parent's `host + session_id + 'main'` actor under the same project root, validates structure, TTL, and `.revoked`·`.revoked-suspend`, and returns a binding only when `state === 'active'`.
 
 ## Acceptance Criteria
 

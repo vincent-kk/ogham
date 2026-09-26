@@ -18,9 +18,9 @@ import { readState } from './readState.js';
  *   the parent's `host + session_id + 'main'` actor).
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @returns The actor's binding when its state file is structurally valid,
- *   within {@link isActorFresh}'s TTL, not `.revoked`, not lock-held, and
- *   `state === 'active'`; `undefined` on any other outcome, including a
- *   read or parse failure.
+ *   within {@link isActorFresh}'s TTL, not `.revoked` or `.revoked-suspend`,
+ *   not lock-held, and `state === 'active'`; `undefined` on any other
+ *   outcome, including a read or parse failure.
  */
 export function readActorBinding(
   identity: WorkflowIdentity,
@@ -33,7 +33,11 @@ export function readActorBinding(
       SESSIONS_DIR,
       `${identity.actor}.json`,
     );
-    if (existsSync(`${path}.revoked`) || existsSync(`${path}.lock`))
+    if (
+      existsSync(`${path}.revoked`) ||
+      existsSync(`${path}.revoked-suspend`) ||
+      existsSync(`${path}.lock`)
+    )
       return undefined;
     const state = readState(path);
     if (!state || !isActorFresh(state, now)) return undefined;

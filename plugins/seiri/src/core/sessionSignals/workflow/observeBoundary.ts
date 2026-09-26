@@ -24,7 +24,10 @@ export interface ObserveBoundaryOptions {
  *   two-positional-boolean call cannot be reordered by mistake.
  * @returns The post-update binding snapshot from inside the same actor
  *   transaction, or `undefined` when there is no binding or the transaction
- *   did not run.
+ *   did not run. Runs — and, on success, lifts a quarantine left by a prior
+ *   failed transaction — even while the actor is quarantined, since this
+ *   boundary's generation bump and invocations/seen reset discard anything
+ *   recorded before that failure.
  */
 export function observeBoundary(
   identity: WorkflowIdentity,
@@ -45,6 +48,6 @@ export function observeBoundary(
           : undefined,
         suspend,
       ),
-    true,
+    { revokeOnFailure: true, recover: { suspend } },
   );
 }

@@ -29,7 +29,7 @@
 ### Session reporting
 
 - 최초 스킬 선택은 사용자 또는 호스트에 맡깁니다. 설치, Skill 로드, 프롬프트의 완료 표현, 일반 실패만으로 참여를 시작하거나 스킬을 선출하지 않습니다.
-- off/advisory의 SessionStart·UserPromptSubmit·SubagentStart는 상태 배너·선출·원장 상기를 주입하지 않습니다. 그 결과 additionalContext 및 wire stdout은 비어 있습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift(strict는 posture 포함)를 주입합니다. 활성 바인딩이 있으면 UserPromptSubmit은 매 턴, SubagentStart는 부모 main의 활성 바인딩일 때 1회 진행 줄을 주입하고, PostToolUse는 `created`·`switched`에서만 진행 줄 형식 ACK를 냅니다(strict UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) 체인 한 줄). 정적 훅 프로세스 실행 비용과 MCP 스키마 비용은 남으며, 전체 토큰 절감률을 실측 없이 주장하지 않습니다.
+- off/advisory의 SessionStart·UserPromptSubmit·SubagentStart는 상태 배너·선출·원장 상기를 주입하지 않습니다. 그 결과 additionalContext 및 wire stdout은 비어 있습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift(strict는 posture 포함)를 주입하며, compact에서 이 actor 자신의 바인딩이 active면 진행 줄을 마지막에 덧붙입니다. 활성 바인딩이 있으면 UserPromptSubmit은 매 턴, SubagentStart는 부모 main의 활성 바인딩일 때 1회 진행 줄을 주입하고, PostToolUse는 `created`·`switched`에서만 진행 줄 형식 ACK를 냅니다(strict UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) 체인 한 줄). 정적 훅 프로세스 실행 비용과 MCP 스키마 비용은 남으며, 전체 토큰 절감률을 실측 없이 주장하지 않습니다.
 - standard/strict는 명시적으로 참여한 작업의 lifecycle ACK, CHECK 판정 변화와 반복 실패 관측, 그리고 선출·체인·진행 줄을 제공합니다. 어느 것도 모델의 방법 선택을 제한하지 않습니다. 규칙·드리프트 상세는 명시적 settings 조회, 런타임 다이얼은 `runtime` 도구의 `dial`(`dial_op: get`)에서 확인합니다.
 - runtime 요청은 명시적 절대 project_root, kebab-case task, action을 받으며 start/resume에는 change 또는 review intent를 요구하고, `step`의 intent는 선택이며 생략하면 `parseWorkflowRequest`가 유도합니다(review-plan·request-review·receive-review → review, 나머지 → change, 명시 intent 우선). 도구의 accepted는 입력 검증일 뿐입니다. 같은 native invocation ID·actor·turn·generation·입력에 대응하는 성공한 Post만 상태를 적용하고 ACK를 보냅니다.
 - Claude와 Codex는 build 시 고정된 host runtime을 사용하고 plugin-compiler가 Codex 경로를 선택합니다. event payload의 필드 유무로 호스트를 추측하여 다른 namespace의 참여를 만들지 않습니다.
@@ -39,7 +39,7 @@
 - startup/resume/clear/fork는 기존 바인딩을 suspend하며 compact는 유지합니다. 자식은 자신의 최초 native-turn anchor만 받고 부모 binding을 상속하지 않습니다. 자식도 필요한 경우 명시적 `start`나 진입 `step`을 호출합니다.
 - 상태는 host/session/agent 해시별로 격리됩니다. actor는 7일 무관측, invocation은 24시간 후 만료하며 해당 actor 접근 시 정리합니다. 사용자 task 원장은 자동 삭제하지 않습니다. 구 `session-signals.json`/`.lock` 이름은 ignore 목록에만 남고 더 이상 읽거나 쓰지 않습니다.
 - Bash의 Pre 관측과 Post 결과가 현재 참여와 일치할 때만 활성 task의 CHECK를 기록합니다. 다른 task의 같은 명령은 건드리지 않습니다. 동일 판정/증거의 재알림은 억제하고 회귀와 agent 증거 표시는 보존합니다. 중단한 실행은 판정·실패로 세지 않습니다.
-- 락 실패 시 무잠금 mutation을 하지 않습니다. 경계 철회 실패는 revocation marker를 시도하며 marker가 있으면 같은 세션에서 재활성화하지 않습니다. actor와 marker 쓰기가 모두 실패하면 저장 복구 뒤 옛 상태가 나타날 수 있어 무누출 보장 범위 밖입니다. actor 상태와 원장은 별도 파일이므로 crash 시 정확히 한 번 기록·알림을 보장하지 않습니다.
+- 락 실패 시 무잠금 mutation을 하지 않습니다. 경계 철회 실패는 revocation marker를 시도합니다. marker가 있는 동안 관측·완료·전이와 바인딩 읽기는 거부되고, 같은 actor의 다음 경계 트랜잭션(UserPromptSubmit·SessionStart·SubagentStart)이 커밋하면 실패한 경계의 suspend 의도를 적용하고 generation을 올려 진행 중 호출을 폐기한 뒤 자신이 본 marker를 지웁니다. actor와 marker 쓰기가 모두 실패하면 저장 복구 뒤 옛 상태가 나타날 수 있어 무누출 보장 범위 밖입니다. actor 상태와 원장은 별도 파일이므로 crash 시 정확히 한 번 기록·알림을 보장하지 않습니다.
 - 훅은 차단·허용·입력수정 결정을 반환하지 않습니다. 무주입 entry는 stdout을 비우고 오류는 진단 채널에 기록합니다. 규칙 본문, 명령 원문, 전체 출력, EXPECT 원문이나 거부한 설정값을 지시문처럼 반사하지 않습니다. 외부 timeout은 stdin fail-open deadline보다 길어야 합니다.
 - InstructionsLoaded는 dormant이며 주입하지 않습니다. 실제 두 호스트의 ID·응답 형식 기록은 확보했지만, 이전 턴 Pre/Post를 새 턴 뒤로 강제 지연한 native interleave는 직접 관측하지 못했습니다. 합성 역순·지연 테스트를 native 스케줄링 수용으로 바꾸어 보고하지 않습니다.
 
@@ -74,18 +74,18 @@
 
 ## API Contracts
 
-| Export                                     | Contract                                                                                                                                    |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| `loadConfig(projectRoot)`                  | Baseline 계층만: `{ config \| null, path, warning? }`. 절대 throw 하지 않음.                                                                |
-| `loadIntervention(projectRoot)`            | 세 계층: `{ effective, source, baseline, user, runtime, warnings }`. 절대 throw 하지 않음.                                                  |
-| `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 쓴 경로를 반환.                                                                    |
-| `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 경로를 반환.                                                                            |
-| `clearRuntime(projectRoot)`                | 밸브를 제거하고, 존재 여부를 반환.                                                                                                          |
-| `loadManifest(pluginRoot)`                 | 잘못된 manifest 또는 없는 `templateHash` 에서 throw.                                                                                        |
-| `getRuleDocsStatus(projectRoot, plugin)`   | 현재 호스트 채널의 규칙별 스냅샷 (`inSync` 포함).                                                                                           |
-| `planRuleDocs(...)` / `applyRuleDocs(...)` | 동일한 호스트 대상·revision 을 사용; `applied` 로 preview 와 write 를 구분.                                                                 |
-| `settings`                                 | `action` 은 `open` · `status` · `manifest` · `plan` · `sync`; `open` 은 `{ status: saved \| closed \| pending, url, summary? }`.             |
-| `runtime` `action: dial`                   | `{ action, op, changed, dial, posture }`. `dial_op: set` 은 유효한 `intervention` 필요; baseline 은 절대 쓰지 않음.                          |
+| Export                                     | Contract                                                                                                                         |
+| ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `loadConfig(projectRoot)`                  | Baseline 계층만: `{ config \| null, path, warning? }`. 절대 throw 하지 않음.                                                     |
+| `loadIntervention(projectRoot)`            | 세 계층: `{ effective, source, baseline, user, runtime, warnings }`. 절대 throw 하지 않음.                                       |
+| `writeConfig(projectRoot, config)`         | Baseline 을 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 쓴 경로를 반환.                                                         |
+| `writeRuntime(projectRoot, level)`         | 밸브를 원자적으로 쓰고 `.seiri/.gitignore` 도 처리; 경로를 반환.                                                                 |
+| `clearRuntime(projectRoot)`                | 밸브를 제거하고, 존재 여부를 반환.                                                                                               |
+| `loadManifest(pluginRoot)`                 | 잘못된 manifest 또는 없는 `templateHash` 에서 throw.                                                                             |
+| `getRuleDocsStatus(projectRoot, plugin)`   | 현재 호스트 채널의 규칙별 스냅샷 (`inSync` 포함).                                                                                |
+| `planRuleDocs(...)` / `applyRuleDocs(...)` | 동일한 호스트 대상·revision 을 사용; `applied` 로 preview 와 write 를 구분.                                                      |
+| `settings`                                 | `action` 은 `open` · `status` · `manifest` · `plan` · `sync`; `open` 은 `{ status: saved \| closed \| pending, url, summary? }`. |
+| `runtime` `action: dial`                   | `{ action, op, changed, dial, posture }`. `dial_op: set` 은 유효한 `intervention` 필요; baseline 은 절대 쓰지 않음.              |
 
 ### Distribution preparation
 

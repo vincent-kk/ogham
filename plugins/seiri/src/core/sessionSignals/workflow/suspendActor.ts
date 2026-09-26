@@ -14,7 +14,10 @@ import { withWorkflowState } from './withWorkflowState.js';
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @returns The post-update binding snapshot from inside the same actor
  *   transaction, or `undefined` when there is no binding or the transaction
- *   did not run.
+ *   did not run. Runs — and, on success, lifts a quarantine left by a prior
+ *   failed transaction — even while the actor is quarantined, since this
+ *   boundary's generation bump and invocations/seen reset discard anything
+ *   recorded before that failure.
  */
 export function suspendActor(
   identity: WorkflowIdentity,
@@ -25,6 +28,6 @@ export function suspendActor(
     false,
     now,
     (state) => advanceBoundary(state, undefined, true),
-    true,
+    { revokeOnFailure: true, recover: { suspend: true } },
   );
 }
