@@ -1,4 +1,4 @@
-# Candidate Finding Verifier
+# Candidate Finding Verifier 
 
 ## Re-verification Mode
 
@@ -64,7 +64,7 @@ For each candidate, in order:
 A candidate that turns on what a file depends on rests on a record some other tool wrote. Check it against your own reading before deciding such a candidate:
 
 1. Extract the review-scope paths yourself, with your own Bash call, into a file outside the project tree.
-2. Send `mcp__plugin_filid_tools__facts({ action: "compare", path: PROJECT_ROOT, file: <your output>, generationId: <the `generation_id` in this brief's frontmatter> })`. The baseline is then the facts frozen into that generation, not the live store, so an edge someone changed after the review began cannot move your verdict. The comparison stores no record; it reports the edges only one side holds and puts an in-project disagreement on the side table, where the orchestrator can see it. A brief with no `generation_id` was written before the id was carried: compare without `generationId` — the live store is the baseline then — and say so in `observations`, because that comparison can see facts this review never judged. A `facts-comparison-not-against-store` diagnostic is not yours to act on: it says some file is waiting on a comparison against the store, which a frozen baseline cannot give, so report it and keep your own baseline.
+2. Send `mcp__filid__facts({ action: "compare", path: PROJECT_ROOT, file: <your output>, generationId: <the `generation_id` in this brief's frontmatter> })`. The baseline is then the facts frozen into that generation, not the live store, so an edge someone changed after the review began cannot move your verdict. The comparison stores no record; it reports the edges only one side holds and puts an in-project disagreement on the side table, where the orchestrator can see it. A brief with no `generation_id` was written before the id was carried: compare without `generationId` — the live store is the baseline then — and say so in `observations`, because that comparison can see facts this review never judged. A `facts-comparison-not-against-store` diagnostic is not yours to act on: it says some file is waiting on a comparison against the store, which a frozen baseline cannot give, so report it and keep your own baseline.
 3. Report what came back — each edge, with the file and line the response names — in `observations`, saying which candidate it bears on. A `data.unrecorded` list means the side table did not take those files' items (`status: indeterminate` with `facts-side-table-changed`, because another writer got there first); send the same `compare` again so they are recorded, then report from that response.
 
 Judge none of those items here — a comparison item is settled by `adjudicate`, a `dismiss` there is confirmed by a different actor, and the orchestrator runs that through the facts bootstrap; an actor that raises an item and then settles it has confirmed nothing.

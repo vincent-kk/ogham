@@ -10,6 +10,8 @@ plugin: filid
 
 # pull-request — Documented PR Creation
 
+
+
 Run this skill as one continuous operation. Do not ask whether to continue between stages. Yield only at the marked overwrite confirmation, for an unrecoverable source-state error, or after the terminal output.
 
 The PR is where document work happens: Stage 1 drafts missing documents, repairs document-contract findings for the fractals this branch touched, commits those documents, and records everything it could not repair in the PR body's `FCA Handoff` section. Document sync never blocks publication.
@@ -37,7 +39,7 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
 4. Worktree state — ask the tool, do not classify by hand:
 
    ```text
-   mcp__plugin_filid_tools__review_state({
+   mcp__filid__review_state({
      action: "assess",
      projectRoot: PROJECT_ROOT,
      branchName: BRANCH,
@@ -70,7 +72,7 @@ At entry, initialize `HANDOFF_ENTRIES = []`, `REPAIRED = 0`, and leave `document
 2. Map all changed paths to their owning fractals with one `fractal_inspect` `resolve` batch:
 
    ```text
-   mcp__plugin_filid_tools__fractal_inspect({
+   mcp__filid__fractal_inspect({
      action: "resolve",
      path: PROJECT_ROOT,
      requests: [
@@ -137,7 +139,7 @@ Stage 1 may have added document files, so run the [facts bootstrap](../.shared/f
 8. Write the human body without `## FCA Handoff` to `<data.reviewDirectory>/pr-body.md`, using `data.reviewDirectory` from Stage 0's `review_state({ action: "assess" })` call. Then call:
 
    ```text
-   mcp__plugin_filid_tools__review_state({
+   mcp__filid__review_state({
      action: "handoff",
      projectRoot: PROJECT_ROOT,
      baseRef: BASE_REF,

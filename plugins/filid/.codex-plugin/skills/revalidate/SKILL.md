@@ -10,6 +10,8 @@ plugin: filid
 
 # revalidate — Delta Re-measurement and Final Verdict
 
+
+
 Run this skill as one continuous operation. Do not ask whether to continue between steps. Yield only for an unrecoverable state error or after the terminal verdict.
 
 This is the only stage that decides whether the review cycle closed. It re-measures rather than trusting `resolve` — an accepted item is resolved when the evidence moved, not when someone said it was applied.
@@ -27,7 +29,7 @@ Run the [facts bootstrap](../.shared/facts-bootstrap.md) for `PROJECT_ROOT`, the
 ## Step 1 — Locate the state and baseline
 
 ```text
-mcp__plugin_filid_tools__review_state({
+mcp__filid__review_state({
   action: "checkpoint",
   projectRoot: PROJECT_ROOT,
   branchName: BRANCH,
@@ -63,7 +65,7 @@ For each accepted item whose Step 1 join succeeded, re-run the measurement that 
 MCP re-measurement applies only to FCA categories.
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "validate",
   path: <current eligible fractal path — never PROJECT_ROOT>,
   scopes: [...]
@@ -123,7 +125,7 @@ Compose the comment from the `re-validate.md` Step 6 just wrote. A missing, unav
 On `PASS` only:
 
 ```text
-mcp__plugin_filid_tools__review_state({
+mcp__filid__review_state({
   action: "cleanup",
   projectRoot: PROJECT_ROOT,
   branchName: BRANCH,

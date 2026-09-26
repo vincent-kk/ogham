@@ -1,5 +1,7 @@
 # enrich-docs — Reference
 
+
+
 Evidence, planning, editing, and validation details for [SKILL.md](./SKILL.md).
 
 ## §1 Tool calls and evidence
@@ -7,7 +9,7 @@ Evidence, planning, editing, and validation details for [SKILL.md](./SKILL.md).
 Normalize the requested path inside a project containing `.filid/config.json`, then call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "scan",
   path: "<target-path>",
   detail: "full",
@@ -28,7 +30,7 @@ When `path` names an INTENT.md or DETAIL.md file, scan its parent directory and 
 For the candidates, use this ordered batch shape:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "resolve",
   path: "<project-path>",
   requests: [
@@ -148,7 +150,7 @@ For a cap failure, use §5's single compression retry and relocation process wit
 Then call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "validate",
   path: "<target-path>",
   scopes: ["documents", "nodes"]

@@ -10,6 +10,8 @@ plugin: filid
 
 # resolve — Decide, Delegate, Record
 
+
+
 Run this skill as one continuous operation. Yield only at the marked interactive steps. Ending after the commit **is not** completion — the terminal output and the revalidate handoff are part of this skill.
 
 **This skill does not write code.** It owns the procedure: one complete decision sheet for all fix requests, batched decisions, delegation of accepted corrections, a justification record for rejections, a verification gate, and a commit. The correction itself is applied by the main agent or another plugin.
@@ -23,7 +25,7 @@ Resolve files relative to this `SKILL.md`:
 ## Step 1 — Locate the review state
 
 ```text
-mcp__plugin_filid_tools__review_state({
+mcp__filid__review_state({
   action: "checkpoint",
   projectRoot: PROJECT_ROOT,
   branchName: BRANCH,

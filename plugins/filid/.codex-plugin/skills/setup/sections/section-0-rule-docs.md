@@ -1,5 +1,7 @@
 # setup — Project and Rule Documents
 
+
+
 > Reference for Phase 1 of `/filid:setup`. See [../SKILL.md](../SKILL.md) for the continuous workflow.
 
 ## Initialize the project
@@ -7,7 +9,7 @@
 Call:
 
 ```text
-mcp__plugin_filid_tools__project_setup({
+mcp__filid__project_setup({
   action: "init",
   path: "<target-path>",
   language: "<session-language>",
@@ -26,7 +28,7 @@ mcp__plugin_filid_tools__project_setup({
 Inspect the deployment first:
 
 ```text
-mcp__plugin_filid_tools__project_setup({
+mcp__filid__project_setup({
   action: "rules-status",
   path: "<absolute-target-path>"
 })
@@ -35,7 +37,7 @@ mcp__plugin_filid_tools__project_setup({
 On an interactive local host, call:
 
 ```text
-mcp__plugin_filid_tools__project_setup({
+mcp__filid__project_setup({
   action: "settings",
   path: "<absolute-target-path>",
   waitSeconds: 300

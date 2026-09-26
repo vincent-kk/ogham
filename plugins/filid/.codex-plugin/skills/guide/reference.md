@@ -1,11 +1,13 @@
 # guide — Current Structure and Placement Reference
 
+
+
 ## Section 1 — Read the Current Tree
 
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "scan",
   path: "<target-path>",
   detail: "paths"
@@ -21,7 +23,7 @@ If detailed data is persisted as an artifact, read only the path projection need
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "validate",
   path: "<target-path>",
   scopes: [

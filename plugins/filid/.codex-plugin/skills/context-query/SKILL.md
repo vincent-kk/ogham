@@ -10,6 +10,8 @@ plugin: filid
 
 # context-query — Minimal FCA Context
 
+
+
 Answer a focused ownership, boundary, public-contract, or placement-context question from the smallest relevant document chain.
 
 See [reference.md](./reference.md) for evidence selection, the three-round budget, and response shape.
@@ -30,7 +32,7 @@ Use `/filid:guide` for a project-wide human-readable map and `/filid:scan` for a
 Parse a project path and target path from the question, then call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "resolve",
   path: "<project-path>",
   requests: [{ targetPath: "<target-path>" }]
@@ -53,7 +55,7 @@ If the evidence cannot fit the budget, report what is known and list the unread 
 
 | Tool + action                                        | Purpose                                                                                   |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__fractal_inspect` `resolve` | resolve the owner fractal, minimal document chain, nearest DETAIL.md, and output language |
+| `mcp__filid__fractal_inspect` `resolve` | resolve the owner fractal, minimal document chain, nearest DETAIL.md, and output language |
 
 ## Invariants
 

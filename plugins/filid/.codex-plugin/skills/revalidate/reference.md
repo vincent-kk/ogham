@@ -1,5 +1,7 @@
 # revalidate — Reference
 
+
+
 ## §1 Status derivation matrix
 
 One status per accepted item. A successfully joined item is derived from re-measurement only; a failed join is `inconclusive` before re-measurement.
@@ -30,7 +32,7 @@ For Category `bug`, `security`, `performance`, `maintainability`, `test`, or `do
 Resolve every accepted item's full owner-to-root fractal chain in one call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "resolve",
   path: PROJECT_ROOT,
   requests: [

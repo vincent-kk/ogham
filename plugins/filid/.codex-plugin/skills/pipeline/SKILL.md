@@ -10,6 +10,8 @@ plugin: filid
 
 # pipeline — End-to-End Merge-Track Cycle
 
+
+
 > **EXECUTION MODEL**: run every stage as a SINGLE CONTINUOUS OPERATION. Never yield after a stage's `Skill()` call returns, after a git command, or after a `gh` operation — chain the next stage in the same turn.
 >
 > **HIGH-RISK YIELD POINT**: the `resolve` → `revalidate` transition. `resolve` ends with a commit, which _feels_ like completion and **is not**. Invoke `Skill("filid:revalidate")` immediately after `resolve` succeeds.
@@ -47,7 +49,7 @@ Two commands, in this order. Do not skip the first.
 2. Pass that as `hasPullRequest` — filid owns no PR operations, so the tool cannot determine it:
 
 ```text
-mcp__plugin_filid_tools__review_state({
+mcp__filid__review_state({
   action: "assess",
   projectRoot: PROJECT_ROOT,
   branchName: BRANCH,

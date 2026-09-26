@@ -1,11 +1,13 @@
 # setup — Snapshot Scan
 
+
+
 > Reference for Phase 2 of `/filid:setup`.
 
 Create the post-initialization snapshot projection:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "scan",
   path: "<target-path>",
   detail: "paths"

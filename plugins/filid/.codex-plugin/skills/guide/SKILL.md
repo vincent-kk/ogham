@@ -10,6 +10,8 @@ plugin: filid
 
 # guide — Current FCA Structure
 
+
+
 Produce a human-readable guide to the current tree and its placement rules. The guide describes observed evidence and does not modify files.
 
 See [reference.md](./reference.md) for exact calls, placement interpretation, and output format.
@@ -34,7 +36,7 @@ Run the [facts bootstrap](../.shared/facts-bootstrap.md) for the project root, t
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "scan",
   path: "<target-path>",
   detail: "paths"
@@ -48,7 +50,7 @@ Use the returned classifications, document state, and entry-point counts directl
 Call:
 
 ```text
-mcp__plugin_filid_tools__fractal_inspect({
+mcp__filid__fractal_inspect({
   action: "validate",
   path: "<target-path>",
   scopes: [
@@ -87,8 +89,8 @@ Emit the current-structure table, current findings, placement rules, and new mod
 
 | Tool + action                                         | Purpose                                                          |
 | ----------------------------------------------------- | ---------------------------------------------------------------- |
-| `mcp__plugin_filid_tools__fractal_inspect` `scan`     | current tree, classifications, documents, and entry-point counts |
-| `mcp__plugin_filid_tools__fractal_inspect` `validate` | current FCA findings by canonical scope                          |
+| `mcp__filid__fractal_inspect` `scan`     | current tree, classifications, documents, and entry-point counts |
+| `mcp__filid__fractal_inspect` `validate` | current FCA findings by canonical scope                          |
 
 ## Invariants
 

@@ -1,12 +1,14 @@
 # Facts Bootstrap
 
+
+
 Canonical procedure for every filid skill whose judgments read dependency references. Each such skill links here from one short step placed before its first reference-based analysis call; the steps live only in this file.
 
 Run the steps in order, in the same turn as the calling skill, and return to the calling skill's next step when step 8 or the failure section ends the bootstrap. `PROJECT_ROOT` is the absolute project root the calling skill analyses.
 
 ## Tool use
 
-- If the `facts` schema is absent, call `ToolSearch` once with `select:mcp__plugin_filid_tools__facts`.
+- If the `facts` schema is absent, call `ToolSearch` once with `select:mcp__filid__facts`.
 - The extractor runs in step 2 are the only Bash calls this procedure makes, and each runs the extractor alone: it creates its output file with `mktemp`, runs the extractor, and prints only that file's path. Pass the path to `submit`; never print or read the output file. Never run git.
 - Never write project configuration here. Declaring scope edits `.filid/config.json`, which dirties the worktree a review is judging.
 - When a step needs the agent to read a source file itself (steps 3 and 4), read it with the Read tool, not Bash.
@@ -16,7 +18,7 @@ Run the steps in order, in the same turn as the calling skill, and return to the
 ### 1. Read the status
 
 ```text
-mcp__plugin_filid_tools__facts({ action: "status", path: PROJECT_ROOT })
+mcp__filid__facts({ action: "status", path: PROJECT_ROOT })
 ```
 
 `summary` carries `projectState`, `resolutionEpoch`, `scopeSource`, `extractionList` and `attestationRequirement`; keep those. `data` carries the lists: `missing`, `needsResolution`, `uncertain`, `toolError` and `indeterminate` are each `{ paths, truncated }`; `rejected` is `{ items, truncated }` where each item names its own `path`, `code` and `nextAction` (plus `specifier`, `inputPath` or `lines` where filid can name them); `unadjudicated` is `{ items, truncated }`; `awaitingComparison` is `{ items, truncated }` where each item names its `path` and, when a record is stored for it, the `storedTool` that wrote it; `pendingAttestations` is a list of `{ path, actor, contentHash, nextAction }`.
@@ -56,7 +58,7 @@ FACTS_OUT=$(mktemp "${TMPDIR:-/tmp}/filid-facts.XXXXXX") && node "${CLAUDE_PLUGI
 Submit the output file with the epoch from step 1:
 
 ```text
-mcp__plugin_filid_tools__facts({ action: "submit", path: PROJECT_ROOT, file: FACTS_OUT, resolutionEpoch })
+mcp__filid__facts({ action: "submit", path: PROJECT_ROOT, file: FACTS_OUT, resolutionEpoch })
 ```
 
 An accepted submission replaces each submitted file's record. Whole-call refusals go to step 3; per-record and per-reference entries in `rejected` go to step 4.
@@ -87,7 +89,7 @@ A `toolError` caused by a real syntax error is fixed in the source outside a rev
 `data.unadjudicated.items` holds one entry per open item, and every value an `adjudicate` call needs is in it: `path`, `lines`, `kind`, `reference`, `resolvedPath`, `contentHash`, `state`, and `origin`. Read the lines the item names in that file, then decide it from those values alone — do not re-derive them, and do not call `compare` here; `compare` exists for a verifier checking an independent extraction against the store.
 
 ```text
-mcp__plugin_filid_tools__facts({
+mcp__filid__facts({
   action: "adjudicate",
   path: PROJECT_ROOT,
   sourcePath,
@@ -111,9 +113,9 @@ Some files no tool output can settle: the tool cannot read them, a re-extraction
 
 `summary.attestationRequirement` states when such a record is owed, what it must carry, that every line the reference pattern matches is accounted for as a reference or in `nonReferences`, and that a second actor confirms it. It is the contract; this step only says who does what.
 
-- **First submission.** The agent that reads the file writes the record and submits it with its own `actor`: `mcp__plugin_filid_tools__facts({ action: "submit", path: PROJECT_ROOT, file: FACTS_OUT, resolutionEpoch, actor })`. It is stored as pending, so the file stays `uncertain`, and the response's `attested[]` entry says so. A record that leaves a matching line unexplained is refused instead, with the line numbers to read.
+- **First submission.** The agent that reads the file writes the record and submits it with its own `actor`: `mcp__filid__facts({ action: "submit", path: PROJECT_ROOT, file: FACTS_OUT, resolutionEpoch, actor })`. It is stored as pending, so the file stays `uncertain`, and the response's `attested[]` entry says so. A record that leaves a matching line unexplained is refused instead, with the line numbers to read.
 - **Confirmation.** Each entry of `data.pendingAttestations` names the `path`, the `actor` that must NOT confirm it, and the `contentHash` the confirmation has to read. Brief a separate subagent with the file and those values only — never with the pending record's content — and have it read the file itself and submit its own attested record under its own `actor`. Matching records store the record and the file leaves `uncertain`.
-- **Disagreement.** A second answer that differs stores nothing and leaves the pending attestation as it was; the response names the lines that settle it. Read those lines and submit a record that settles them. If the two answers differ a second time, call `mcp__plugin_filid_tools__facts({ action: "discard-pending", path: PROJECT_ROOT, sourcePaths })` for that file and record `facts bootstrap incomplete: step 6 attestation-mismatch` — do not send a third pair of readings, because a call identical to one already made cannot finish (step 8).
+- **Disagreement.** A second answer that differs stores nothing and leaves the pending attestation as it was; the response names the lines that settle it. Read those lines and submit a record that settles them. If the two answers differ a second time, call `mcp__filid__facts({ action: "discard-pending", path: PROJECT_ROOT, sourcePaths })` for that file and record `facts bootstrap incomplete: step 6 attestation-mismatch` — do not send a third pair of readings, because a call identical to one already made cannot finish (step 8).
 - A tool-tier submission that succeeds for the same file discards the pending attestation by itself; nothing extra is owed.
 
 ### 7. Discard a judgement shard nothing can read (`facts-judgements-unreadable`)
@@ -124,7 +126,7 @@ The store keeps judgements in shards. When one does not read, the adopted edges 
 - **Unparseable** — the bytes are there but are not a shard. Nothing can rewrite it in place, because the items that would be written are the ones nobody can read, so it is dropped:
 
 ```text
-mcp__plugin_filid_tools__facts({ action: "discard-damaged", path: PROJECT_ROOT, shards })
+mcp__filid__facts({ action: "discard-damaged", path: PROJECT_ROOT, shards })
 ```
 
 `shards` holds the shard names exactly as the diagnostic reported them, and nothing else — a shard the store can read comes back in `data.refused` with `facts-shard-not-damaged`, and the response says to call `status` again and pass only what its judgements diagnostic reports as unparseable. `data.discarded` names what went, and `summary.affectedFiles` counts only the files the discard marked. A discard that dropped a pending shard rather than a judgement one answers `facts-pending-attestations-discarded`: nothing is held and no edge was lost, because an unconfirmed attestation never entered any file's references — call `status` and carry on.
