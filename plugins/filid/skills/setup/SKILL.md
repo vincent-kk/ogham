@@ -11,6 +11,8 @@ plugin: filid
 
 # setup — Filid 1.0 Initialization
 
+<!-- ogham-mcp-tools:filid -->
+
 Initialize config and managed rule documents, then inspect the resulting FCA snapshot. Setup reports missing document contracts as proposals; it does not write project source documents.
 
 Run the phases continuously. The settings page is the only interactive pause. Do not summarize large tool payloads between phases.

@@ -1,5 +1,7 @@
 # restructure — Reference Documentation
 
+<!-- ogham-mcp-tools:filid -->
+
 Detailed plan, approval, external execution, and postcondition contract for [SKILL.md](./SKILL.md).
 
 ## Section 1 — Placement Requests

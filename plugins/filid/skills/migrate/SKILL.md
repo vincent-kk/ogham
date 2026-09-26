@@ -11,6 +11,8 @@ plugin: filid
 
 # migrate — CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md Migration
 
+<!-- ogham-mcp-tools:filid -->
+
 Migrate an existing FCA-AI project from the legacy `CLAUDE.md`/`SPEC.md` naming convention to the new `INTENT.md`/`DETAIL.md` naming. Uses a cross-platform Node script for batch processing — the LLM only reads the script output and reports to the user.
 
 > **Detail Reference**: For script usage and implementation details, read the `reference.md` file in this skill's directory.

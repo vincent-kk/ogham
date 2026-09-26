@@ -1,5 +1,7 @@
 # checkup — Reference
 
+<!-- ogham-mcp-tools:maencof -->
+
 Detailed diagnostic items, report format, auto-fix rules, and the lightweight `--quick` mode.
 
 ## 8 Diagnostic Items

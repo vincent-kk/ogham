@@ -1,5 +1,7 @@
 # migrate Reference
 
+<!-- ogham-mcp-tools:filid -->
+
 Detailed reference for the `migrate.mjs` script that handles CLAUDE.md/SPEC.md to INTENT.md/DETAIL.md batch migration.
 
 ---

@@ -10,6 +10,8 @@ plugin: filid
 
 # scan — Full FCA Audit
 
+<!-- ogham-mcp-tools:filid -->
+
 Run Filid's only complete FCA audit entry point. The workflow is read-only: it collects snapshot, structure, and verification evidence and returns one prioritized verdict.
 
 See [reference.md](./reference.md) for exact calls, consolidation rules, and the report format.

@@ -12,6 +12,8 @@ plugin: maencof
 
 # /maencof:personal-status
 
+<!-- ogham-mcp-tools:maencof -->
+
 Inspect and control the personal context: `states` (transient conditions such as mood, sleep, health, situation) and `topics` (recent personal topics — plans, concerns, relationships, appointments). The companion captures these silently during conversation via the `mcp__plugin_maencof_tools__capture_personal_context` MCP tool and consumes them at session start as the `<personal-context>` block.
 
 Silence is a conversational-tone contract, not data hiding — the data is user-owned plain JSON, and this skill is the explicit inspection channel.

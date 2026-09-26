@@ -1,5 +1,7 @@
 # setup — Snapshot Scan
 
+<!-- ogham-mcp-tools:filid -->
+
 > Reference for Phase 2 of `/filid:setup`.
 
 Create the post-initialization snapshot projection:

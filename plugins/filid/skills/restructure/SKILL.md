@@ -10,6 +10,8 @@ plugin: filid
 
 # restructure — Plan, Approve, Execute, Verify
 
+<!-- ogham-mcp-tools:filid -->
+
 Move units to their FCA target locations through one persisted `restructure` `plan` action. Filid decides placement and validates the result; the calling environment owns all actual file moves and import edits.
 
 ## When to Use

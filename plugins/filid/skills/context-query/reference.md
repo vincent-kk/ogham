@@ -1,5 +1,7 @@
 # context-query — Minimal Context Reference
 
+<!-- ogham-mcp-tools:filid -->
+
 ## Section 1 — Parse the Question
 
 Extract:

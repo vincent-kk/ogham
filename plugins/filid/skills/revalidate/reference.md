@@ -1,5 +1,7 @@
 # revalidate — Reference
 
+<!-- ogham-mcp-tools:filid -->
+
 ## §1 Status derivation matrix
 
 One status per accepted item. A successfully joined item is derived from re-measurement only; a failed join is `inconclusive` before re-measurement.

@@ -12,6 +12,8 @@ plugin: maencof
 
 # manage — Skill and Agent Management
 
+<!-- ogham-mcp-tools:maencof -->
+
 Manages the lifecycle of skills and agents in the maencof plugin, including list, disable, enable, delete, and scaffold operations.
 
 ## When to Use This Skill

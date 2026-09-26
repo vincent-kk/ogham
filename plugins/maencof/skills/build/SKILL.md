@@ -12,6 +12,8 @@ plugin: maencof
 
 # build — Index Build & Rebuild
 
+<!-- ogham-mcp-tools:maencof -->
+
 Scans markdown documents in the vault and builds the knowledge graph index. Uses incremental build by default, reprocessing only changed files. Supports forced full rebuild (`--full` / `--force`) and cache-discarding rebuild (`--reset-cache`) for recovery from corruption, large-scale file moves, or index structure migration.
 
 ## When to Use This Skill

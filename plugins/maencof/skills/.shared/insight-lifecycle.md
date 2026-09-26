@@ -1,5 +1,7 @@
 # Insight Lifecycle
 
+<!-- ogham-mcp-tools:maencof -->
+
 Read only the sections the active mode needs. This reference owns insight relationships; [document-maintenance.md](./document-maintenance.md) owns general rewriting, source preservation and size handling.
 
 ## Capture

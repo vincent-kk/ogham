@@ -11,6 +11,8 @@ plugin: maencof
 
 # changelog — Self-Change Recorder
 
+<!-- ogham-mcp-tools:maencof -->
+
 Curates changes in watched paths into daily changelog documents (`02_Derived/changelog/YYYY-MM-DD.md`, Layer 2). Detection happens mechanically (MCP boot sweep scan + git); this skill adds the semantic layer: categorization, prose, and the "why".
 
 Recording is deferred and retroactive by design. Nothing blocks a session; unrecorded changes are preserved by git and surfaced as a one-line SessionStart advisory until curated.

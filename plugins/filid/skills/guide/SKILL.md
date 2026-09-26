@@ -10,6 +10,8 @@ plugin: filid
 
 # guide — Current FCA Structure
 
+<!-- ogham-mcp-tools:filid -->
+
 Produce a human-readable guide to the current tree and its placement rules. The guide describes observed evidence and does not modify files.
 
 See [reference.md](./reference.md) for exact calls, placement interpretation, and output format.

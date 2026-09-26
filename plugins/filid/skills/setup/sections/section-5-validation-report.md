@@ -1,5 +1,7 @@
 # setup — Validation and Report
 
+<!-- ogham-mcp-tools:filid -->
+
 > Reference for Phase 3–4 of `/filid:setup`.
 
 Validate the post-initialization snapshot:

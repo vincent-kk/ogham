@@ -1,5 +1,7 @@
 # setup — Project and Rule Documents
 
+<!-- ogham-mcp-tools:filid -->
+
 > Reference for Phase 1 of `/filid:setup`. See [../SKILL.md](../SKILL.md) for the continuous workflow.
 
 ## Initialize the project

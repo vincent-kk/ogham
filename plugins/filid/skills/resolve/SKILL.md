@@ -10,6 +10,8 @@ plugin: filid
 
 # resolve — Decide, Delegate, Record
 
+<!-- ogham-mcp-tools:filid -->
+
 Run this skill as one continuous operation. Yield only at the marked interactive steps. Ending after the commit **is not** completion — the terminal output and the revalidate handoff are part of this skill.
 
 **This skill does not write code.** It owns the procedure: one complete decision sheet for all fix requests, batched decisions, delegation of accepted corrections, a justification record for rejections, a verification gate, and a commit. The correction itself is applied by the main agent or another plugin.

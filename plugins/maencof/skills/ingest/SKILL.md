@@ -12,6 +12,8 @@ plugin: maencof
 
 # ingest — External Knowledge Ingestion
 
+<!-- ogham-mcp-tools:maencof -->
+
 Fetches content from external data sources (GitHub issues, Slack messages, web pages, etc.) and converts it into maencof documents (Layer 3, 4, or 5) for storage.
 
 ## When to Use This Skill

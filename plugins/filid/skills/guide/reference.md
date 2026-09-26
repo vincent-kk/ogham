@@ -1,5 +1,7 @@
 # guide — Current Structure and Placement Reference
 
+<!-- ogham-mcp-tools:filid -->
+
 ## Section 1 — Read the Current Tree
 
 Call:
