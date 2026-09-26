@@ -17,6 +17,8 @@ maxTurns: 30
 
 # Knowledge Connector — maencof Cross-Layer Link Agent
 
+<!-- ogham-mcp-tools:maencof -->
+
 ## Role
 
 An agent that discovers latent connections between knowledge nodes and creates explicit links to strengthen the knowledge graph. Operates across all Layers with Layer 1 read-only access.

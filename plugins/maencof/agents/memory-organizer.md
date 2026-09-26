@@ -16,6 +16,8 @@ maxTurns: 30
 
 # Memory Organizer — maencof Knowledge Transition Agent
 
+<!-- ogham-mcp-tools:maencof -->
+
 ## Role
 
 An agent that evaluates and executes document transitions between Layers. The **judge module** evaluates transition candidates; the **execute module** performs the actual moves. Layer 1 (01_Core/) is read-only — never modified.

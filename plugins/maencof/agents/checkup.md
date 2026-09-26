@@ -17,6 +17,8 @@ maxTurns: 40
 
 # Checkup — maencof Diagnostic Agent
 
+<!-- ogham-mcp-tools:maencof -->
+
 ## Role
 
 Diagnoses the health of the knowledge vault across 8 categories and generates AutoFixActions for items that can be repaired automatically.
