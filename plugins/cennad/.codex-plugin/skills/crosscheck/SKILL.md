@@ -7,6 +7,8 @@ argument-hint: '[--tier apex|high|mid|low] [--no-converge] -- "prompt"'
 
 # crosscheck
 
+
+
 Never send secrets: every enabled vendor receives the prompt. Use one provider's skill when its strengths suffice. Crosscheck never uses the courier or refinement.
 
 `--continue` is unsupported: abort before dispatch and point to `/cennad:<provider> --continue <id>`, echoing the ID. Accept only an optional `--tier`, `--no-converge`, and the required prompt. Forward the SAME prompt verbatim. Pass `tier` only when the user supplied it; never raise it yourself. `--no-converge` ends after first synthesis.
@@ -23,7 +25,7 @@ A `disabled` result means stale policy. Drop that provider without re-running th
 
 ## Dispatch and wait
 
-In ONE message, call `mcp__plugin_cennad_tools__start_conversation` once per participant so calls run in parallel:
+In ONE message, call `mcp__cennad__start_conversation` once per participant so calls run in parallel:
 
 ```
 provider: <codex | antigravity | claude>
@@ -54,4 +56,4 @@ Unless `--no-converge`, read [convergence rounds](references/convergence.md) onl
 
 ## Stop
 
-Abandoning a crosscheck does not stop its CLIs. On user stop, call `mcp__plugin_cennad_tools__stop_conversation`: omit filters to stop all participants, or pass `provider` to drop one. Treat stopped work as a missing viewpoint, not a failure. Report `count: 0` once as normal.
+Abandoning a crosscheck does not stop its CLIs. On user stop, call `mcp__cennad__stop_conversation`: omit filters to stop all participants, or pass `provider` to drop one. Treat stopped work as a missing viewpoint, not a failure. Report `count: 0` once as normal.
