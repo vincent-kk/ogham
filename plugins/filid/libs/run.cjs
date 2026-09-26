@@ -10,7 +10,7 @@
  *
  * Usage (from hooks.json):
  *   node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" \
- *       "${CLAUDE_PLUGIN_ROOT}/bridge/<hook>.mjs" [args...]
+ *       "${CLAUDE_PLUGIN_ROOT}/bridge/<host>/<hook>.mjs" [args...]
  *
  * Hook bundles live under bridge/; scripts/ holds build-time tooling only.
  * The manifests invoke a bare `node`; nothing rewrites that token at install
@@ -64,7 +64,7 @@ function resolveTarget(targetPath) {
     if (!pluginRoot) return null;
 
     const cacheBase = dirname(pluginRoot); // .../<plugin>/
-    const scriptRelative = targetPath.slice(pluginRoot.length); // /bridge/<hook>.mjs
+    const scriptRelative = targetPath.slice(pluginRoot.length); // /bridge/<host>/<hook>.mjs
 
     if (!scriptRelative || !existsSync(cacheBase)) return null;
 

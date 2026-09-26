@@ -1,6 +1,6 @@
 # Hooks — filid pattern
 
-filid 의 hook 패턴을 그대로 따른다. 디렉토리 `hooks/` 는 설정 전용 노드, 실제 구현은 `src/hooks/<name>/build/<name>.entry.ts` → esbuild 번들 → `bridge/<name>.mjs`.
+filid 의 hook 패턴을 그대로 따른다. 디렉토리 `hooks/` 는 설정 전용 노드, 실제 구현은 `src/hooks/<name>/build/<name>.entry.ts` → esbuild 번들 → `bridge/<host>/<name>.mjs`.
 
 `hooks.json` 에서 hook 을 호출할 때는 `libs/run.cjs` cross-platform runner 를 거친다.
 
@@ -15,7 +15,7 @@ filid 의 hook 패턴을 그대로 따른다. 디렉토리 `hooks/` 는 설정 �
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/injectStatic.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/claude/injectStatic.mjs\"",
             "timeout": 5
           }
         ]
@@ -27,7 +27,7 @@ filid 의 hook 패턴을 그대로 따른다. 디렉토리 `hooks/` 는 설정 �
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/injectDynamic.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/claude/injectDynamic.mjs\"",
             "timeout": 3
           }
         ]
@@ -303,6 +303,6 @@ const hookEntries = [
 
 ## 디버깅
 
-- `node bridge/injectStatic.mjs` 직접 실행하면 stdout 으로 페이로드 확인.
+- `node bridge/claude/injectStatic.mjs` 직접 실행하면 stdout 으로 페이로드 확인.
 - 잘못된 config 는 stderr 경고 후 defaults 로 진행 — Claude 세션이 끊기지 않는다.
-- 빌드 후 `wc -c bridge/injectStatic.mjs` 로 사이즈 확인 (10 KB 이내).
+- 빌드 후 `wc -c bridge/*/injectStatic.mjs` 로 사이즈 확인 (10 KB 이내).

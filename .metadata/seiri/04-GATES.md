@@ -160,7 +160,7 @@ MCP에 두는 이유 — 반복 상태 갱신이고 스킬 무관 완결 도구�
 
 # 6. 훅 — 판정은 출력이 한다 (PostToolUse / Claude의 PostToolUseFailure)
 
-기존 번들 `bridge/post-tool-use.mjs`에 새 분기. 새 훅도, 새 이벤트도 아니다.
+기존 번들 `bridge/<host>/post-tool-use.mjs`에 새 분기. 새 훅도, 새 이벤트도 아니다.
 
 **게이팅 순서**: 다이얼(advisory면 기존대로 즉시 반환) → `.seiri/tasks/`가 없거나 비었으면 반환(비용: 디렉토리 존재 확인 하나) → 각 작업의 `gates.md`에서 CHECK 줄을 모아 `tool_input.command`와 대조 → 일치 없으면 기존 실패 연쇄 경로로 → 일치하면 게이트 경로. 일치는 `hashCommand`의 공백 정규화 동치다 — 줄바꿈이 달라도 같은 명령이고, 한 글자라도 다르면 다른 명령이다. `status`가 미충족 게이트의 CHECK 원문을 보여주므로 그대로 복사해 실행하는 것이 자연 경로다.
 

@@ -53,7 +53,7 @@ clean → version:sync → build:rules → build:pages → build:mcp → build:h
 | `build:rules`          | built-in rule hash 동기화               | `templates/rules/manifest.json`               |
 | `build:pages`          | 설정 UI 인라인 단일 파일                | `public/settings.html`                        |
 | `build:mcp`            | MCP 서버 번들 (esbuild, CJS)            | `bridge/mcp-server.cjs`                       |
-| `build:hooks`          | 훅 번들 (esbuild, ESM, 훅별 개별)       | `bridge/*.mjs`                                |
+| `build:hooks`          | 훅 번들 (esbuild, ESM, 훅별 개별)       | `bridge/<host>/*.mjs`                         |
 | `build:compile-plugin` | plugin-compiler 로 host 어댑터 재생성   | `.codex-plugin/`, `plugin.json`, `hooks.json` |
 
 **`build:compile` (tsc) 단계는 1.0에 없다.** 라이브러리 산출물(`dist/`)을 만들지 않으며 `package.json`은 `private: true`다.
@@ -163,7 +163,7 @@ v1 config가 발견되면 **읽을 때 메모리에서 v2로 변환**하고 `con
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/setup.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/claude/setup.mjs\"",
             "timeout": 30
           }
         ]
@@ -175,7 +175,7 @@ v1 config가 발견되면 **읽을 때 메모리에서 v2로 변환**하고 `con
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/user-prompt-submit.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/claude/user-prompt-submit.mjs\"",
             "timeout": 5
           }
         ]
@@ -187,7 +187,7 @@ v1 config가 발견되면 **읽을 때 메모리에서 v2로 변환**하고 `con
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/pre-tool-use.mjs\"",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/libs/run.cjs\" \"${CLAUDE_PLUGIN_ROOT}/bridge/claude/pre-tool-use.mjs\"",
             "timeout": 10
           }
         ]
@@ -481,7 +481,7 @@ summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `
 
 **증상**: INTENT.md 50줄을 넘겨도 차단되지 않음.
 
-1. `bridge/*.mjs` 미존재 → `yarn filid build:hooks`
+1. `bridge/<host>/*.mjs` 미존재 → `yarn filid build:hooks`
 2. `hooks.json`의 `${CLAUDE_PLUGIN_ROOT}` 치환 확인
 3. `libs/run.cjs` 미존재 → `yarn filid build`
 

@@ -11,7 +11,7 @@
  *
  * Usage (from hooks.json):
  *   node "${CLAUDE_PLUGIN_ROOT}/libs/run.cjs" \
- *       "${CLAUDE_PLUGIN_ROOT}/bridge/<hook>.mjs" [args...]
+ *       "${CLAUDE_PLUGIN_ROOT}/bridge/<host>/<hook>.mjs" [args...]
  */
 
 const { spawnSync } = require('child_process');
@@ -58,7 +58,7 @@ function resolveTarget(targetPath) {
     if (!pluginRoot) return null;
 
     const cacheBase = dirname(pluginRoot); // .../<package>/
-    const scriptRelative = targetPath.slice(pluginRoot.length); // /bridge/<hook>.mjs
+    const scriptRelative = targetPath.slice(pluginRoot.length); // /bridge/<host>/<hook>.mjs
 
     if (!scriptRelative || !existsSync(cacheBase)) return null;
 

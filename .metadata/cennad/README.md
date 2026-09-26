@@ -13,7 +13,7 @@ Claude Code 플러그인. Codex CLI / Antigravity CLI(`agy`) / Claude CLI 를 Cl
 - 패키지명: `@ogham/cennad` · 플러그인 이름: `cennad`
 - MCP 서버 이름: `tools` (atlassian 동일 컨벤션)
 - Agent 1개: `courier` — 스킬이 background spawn 하는 위임 실행자 (정교화 ≤3콜 · remedy 판단 보유). 스킬 5개: `setup`, `codex`, `antigravity`, `claude`, `crosscheck` (플러그인 prefix 미사용)
-- Hook 은 빌드 산출물(`bridge/*.mjs`) + `libs/run.cjs` 러너 — filid 동일
+- Hook 은 빌드 산출물(`bridge/<host>/*.mjs`) + `libs/run.cjs` 러너 — filid 동일
 - 라우팅 판단은 Claude. MCP 는 디스패치만.
 
 ## 문서
