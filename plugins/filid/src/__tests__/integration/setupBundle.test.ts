@@ -26,8 +26,6 @@ const bundlePath = resolve(
   'setup.mjs',
 );
 
-// Evaluated at collection time: `it.skipIf` reads it before any hook runs.
-const bundleExists = existsSync(bundlePath);
 let tempDir: string;
 let pluginDir: string;
 let globalMarker: string;
@@ -60,55 +58,47 @@ function runSetup(cwd: string): SpawnSyncReturns<string> {
 }
 
 describe('setup-bundle integration', () => {
-  it.skipIf(!bundleExists)('first invocation creates global marker', () => {
+  it('ships bridge/claude/setup.mjs', () => {
+    expect(existsSync(bundlePath)).toBe(true);
+  });
+
+  it('first invocation creates global marker', () => {
     runSetup(process.cwd());
     expect(existsSync(globalMarker)).toBe(true);
   });
 
-  it.skipIf(!bundleExists)(
-    'first invocation creates session marker under cwdHash dir',
-    () => {
-      runSetup(process.cwd());
-      const entries = readdirSync(pluginDir).filter((d) => d !== '.last-prune');
-      expect(entries.length).toBeGreaterThan(0);
-      const sessionMarker = join(pluginDir, entries[0], '.last-prune');
-      expect(existsSync(sessionMarker)).toBe(true);
-    },
-  );
+  it('first invocation creates session marker under cwdHash dir', () => {
+    runSetup(process.cwd());
+    const entries = readdirSync(pluginDir).filter((d) => d !== '.last-prune');
+    expect(entries.length).toBeGreaterThan(0);
+    const sessionMarker = join(pluginDir, entries[0], '.last-prune');
+    expect(existsSync(sessionMarker)).toBe(true);
+  });
 
-  it.skipIf(!bundleExists)(
-    'second immediate invocation does not change global marker mtime',
-    () => {
-      runSetup(process.cwd());
-      const t1 = statSync(globalMarker).mtimeMs;
-      runSetup(process.cwd());
-      const t2 = statSync(globalMarker).mtimeMs;
-      expect(t2).toBe(t1);
-    },
-  );
+  it('second immediate invocation does not change global marker mtime', () => {
+    runSetup(process.cwd());
+    const t1 = statSync(globalMarker).mtimeMs;
+    runSetup(process.cwd());
+    const t2 = statSync(globalMarker).mtimeMs;
+    expect(t2).toBe(t1);
+  });
 
-  it.skipIf(!bundleExists)(
-    'after backdating global marker 25h, third invocation refreshes mtime',
-    () => {
-      runSetup(process.cwd());
-      const past = Date.now() / 1000 - 25 * 3600;
-      utimesSync(globalMarker, past, past);
-      const t1 = statSync(globalMarker).mtimeMs;
-      runSetup(process.cwd());
-      const t2 = statSync(globalMarker).mtimeMs;
-      expect(t2).toBeGreaterThan(t1);
-    },
-  );
+  it('after backdating global marker 25h, third invocation refreshes mtime', () => {
+    runSetup(process.cwd());
+    const past = Date.now() / 1000 - 25 * 3600;
+    utimesSync(globalMarker, past, past);
+    const t1 = statSync(globalMarker).mtimeMs;
+    runSetup(process.cwd());
+    const t2 = statSync(globalMarker).mtimeMs;
+    expect(t2).toBeGreaterThan(t1);
+  });
 
-  it.skipIf(!bundleExists)(
-    'bundle exits with status 0 and emits parseable JSON',
-    () => {
-      const r = runSetup(process.cwd());
-      expect(r.status).toBe(0);
-      const lines = r.stdout.trim().split('\n').filter(Boolean);
-      const last = lines[lines.length - 1];
-      const parsed = JSON.parse(last);
-      expect(parsed.continue).toBe(true);
-    },
-  );
+  it('bundle exits with status 0 and emits parseable JSON', () => {
+    const r = runSetup(process.cwd());
+    expect(r.status).toBe(0);
+    const lines = r.stdout.trim().split('\n').filter(Boolean);
+    const last = lines[lines.length - 1];
+    const parsed = JSON.parse(last);
+    expect(parsed.continue).toBe(true);
+  });
 });
