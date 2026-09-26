@@ -14,6 +14,7 @@ import { readState } from './readState.js';
  * failed read counts as first, matching a fresh actor.
  * @param identity Host-normalized identity of the child actor.
  * @param now Epoch ms read once at the calling hook's outermost handler.
+ * @returns `true` when this is the child's first boundary, else `false`.
  */
 export function isFirstChildTurn(
   identity: WorkflowIdentity,

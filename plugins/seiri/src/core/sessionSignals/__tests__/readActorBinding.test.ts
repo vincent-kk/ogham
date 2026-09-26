@@ -71,6 +71,11 @@ it('returns undefined once the actor is revoked', () => {
   writeFileSync(`${path}.revoked`, 'revoked');
   expect(readActorBinding(id, NOW)).toBeUndefined();
 });
+it('returns undefined while a sticky suspend marker is present', () => {
+  const { id, path } = fixture();
+  writeFileSync(`${path}.revoked-suspend`, 'revoked-suspend');
+  expect(readActorBinding(id, NOW)).toBeUndefined();
+});
 it('returns undefined for corrupt JSON', () => {
   const { id, path } = fixture();
   writeFileSync(path, '{ not json');

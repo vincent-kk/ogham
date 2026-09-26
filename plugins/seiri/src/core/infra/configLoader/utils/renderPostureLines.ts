@@ -7,6 +7,8 @@ import type { InterventionLevel } from '../../../../types/config.js';
  * tool's `dial` posture echo and by SessionStart's render: empty at `off`
  * and `advisory`, the workflow-chain line alone at `standard`, and the
  * workflow-chain line plus the strict posture line at `strict`.
+ * @param level Effective intervention dial.
+ * @returns The posture lines for `level`, in render order.
  */
 export function renderPostureLines(level: InterventionLevel): string[] {
   if (level === 'off' || level === 'advisory') return [];

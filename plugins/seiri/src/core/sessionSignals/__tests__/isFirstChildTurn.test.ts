@@ -50,6 +50,15 @@ it('is first once the actor TTL has expired, even at a later generation', () => 
   expect(isFirstChildTurn(id, NOW)).toBe(true);
 });
 
+it('is first for a fresh state file whose stored generation is still 0', () => {
+  const { id, path } = fixture();
+  observeBoundary(id, true, NOW, { firstChild: true });
+  const unadvanced = JSON.parse(readFileSync(path, 'utf8'));
+  unadvanced.generation = 0;
+  writeFileSync(path, JSON.stringify(unadvanced));
+  expect(isFirstChildTurn(id, NOW)).toBe(true);
+});
+
 it('is first for corrupt JSON', () => {
   const { id, path } = fixture();
   mkdirSync(portableJoin(id.root, '.seiri/sessions'), { recursive: true });
