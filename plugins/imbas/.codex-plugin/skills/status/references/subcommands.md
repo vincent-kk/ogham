@@ -1,10 +1,12 @@
 # status — Subcommand Behaviors
 
-> **Provider scope**: This skill is fully provider-agnostic and is NOT partitioned. It reads only imbas run state (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__run_list`) and manifest summary counts. Issue-count displays work identically for every provider because they count `issue_ref` presence, which is provider-agnostic by schema (see `src/types/manifest.ts:StoryItemSchema.issue_ref`).
+
+
+> **Provider scope**: This skill is fully provider-agnostic and is NOT partitioned. It reads only imbas run state (`mcp__imbas__run_get`, `mcp__imbas__run_list`) and manifest summary counts. Issue-count displays work identically for every provider because they count `issue_ref` presence, which is provider-agnostic by schema (see `src/types/manifest.ts:StoryItemSchema.issue_ref`).
 
 ## (default) — Current Run Status
 
-1. Call `mcp__plugin_imbas_tools__run_get(project_ref)` with no run_id (returns most recent run).
+1. Call `mcp__imbas__run_get(project_ref)` with no run_id (returns most recent run).
 2. If no runs exist: display "No imbas runs found. Start with /imbas:refine <source>."
 3. Display formatted status:
 
@@ -40,7 +42,7 @@ If manifests are available, include summary:
 
 ## list — All Runs
 
-1. Call `mcp__plugin_imbas_tools__run_list(project_ref)`.
+1. Call `mcp__imbas__run_list(project_ref)`.
 2. Display table:
 
 ```
@@ -58,7 +60,7 @@ Run ID         | Phase     | Status       | Created
 
 ## \<run-id\> — Specific Run Detail
 
-1. Call `mcp__plugin_imbas_tools__run_get(project_ref, run_id)`.
+1. Call `mcp__imbas__run_get(project_ref, run_id)`.
 2. If run not found: display "Run <run-id> not found."
 3. Display full detail:
 
@@ -88,7 +90,7 @@ Phase 3 — split
 
 ## resume \<run-id\> — Resume Interrupted Run
 
-1. Call `mcp__plugin_imbas_tools__run_get(project_ref, run_id)`.
+1. Call `mcp__imbas__run_get(project_ref, run_id)`.
 2. If run not found: display "Run <run-id> not found."
 3. Analyze current state and determine next action:
 

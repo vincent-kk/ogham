@@ -1,5 +1,7 @@
 # status
 
+
+
 현재 또는 과거 imbas 런의 상태를 조회하고, 중단된 런을 재개할 수 있는 읽기 전용 스킬.
 
 ## 개요
@@ -28,8 +30,8 @@ imbas 런의 진행 상황(단계별 상태, 매니페스트 요약, 블로킹 �
 
 | 도구                                | 출처      | 용도                                |
 | ----------------------------------- | --------- | ----------------------------------- |
-| `mcp__plugin_imbas_tools__run_get`  | imbas MCP | 특정 또는 최근 런의 state.json 읽기 |
-| `mcp__plugin_imbas_tools__run_list` | imbas MCP | 프로젝트의 전체 런 목록             |
+| `mcp__imbas__run_get`  | imbas MCP | 특정 또는 최근 런의 state.json 읽기 |
+| `mcp__imbas__run_list` | imbas MCP | 프로젝트의 전체 런 목록             |
 
 Jira 도구나 에이전트 스폰 없음. 로컬 상태만 조회.
 

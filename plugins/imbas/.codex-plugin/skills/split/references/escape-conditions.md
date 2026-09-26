@@ -1,5 +1,7 @@
 # Escape Condition Detection
 
+
+
 During the splitting process, if any of these conditions are detected, IMMEDIATELY escape with a structured report ("escape is a report" principle):
 
 | Code | Situation                                    | Action                                                         |
@@ -12,8 +14,8 @@ During the splitting process, if any of these conditions are detected, IMMEDIATE
 
 On escape:
 
-1. For E2-3 only: generate a single-Story stories-manifest.json wrapping the refined document as one Story (the document is already appropriate size). Call mcp__plugin_imbas_tools__manifest_save to persist it before escaping.
-2. Call mcp__plugin_imbas_tools__run_transition:
+1. For E2-3 only: generate a single-Story stories-manifest.json wrapping the refined document as one Story (the document is already appropriate size). Call mcp__imbas__manifest_save to persist it before escaping.
+2. Call mcp__imbas__run_transition:
    - action: "escape_phase", phase: "split", escape_code: "<code>" → Sets split.status = "escaped", split.escape_code = "<code>"
 3. Emit terminal marker: "Escape code: <code>" (literal `<code>` is one of `E2-1`, `E2-2`, `E2-3`, `EC-1`, `EC-2`).
 4. Display structured escape report to user.

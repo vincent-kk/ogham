@@ -8,6 +8,8 @@ complexity: complex
 plugin: imbas
 ---
 
+
+
 > **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION. After each phase completes, IMMEDIATELY verify the gate result and proceed to the next phase in the SAME TURN. NEVER yield between phases, after an agent subagent return, MCP tool result, or [OP:] operation.
 >
 > **Valid reasons to yield**:
@@ -17,10 +19,10 @@ plugin: imbas
 >
 > **HIGH-RISK YIELD POINTS**:
 >
-> - Phase 0 confirmation banner — do NOT pause after displaying; immediately invoke the first tool (`mcp__plugin_imbas_tools__run_create`)
+> - Phase 0 confirmation banner — do NOT pause after displaying; immediately invoke the first tool (`mcp__imbas__run_create`)
 > - GATE 1–4 decision points — after judging PASS, immediately chain the next phase's tool call
 > - **Phase 3 decompose → creation boundary is the highest-stall risk point.** When GATE 3 auto-approves the stories manifest, you MUST chain the creation steps (split creation-workflow Steps 9–11) in the same turn. Emitting a "Stories decomposed" summary without continuing is a FAILURE mode.
-> - Provider creation loops — after EACH item creation, save the manifest via `mcp__plugin_imbas_tools__manifest_save` and chain the next item
+> - Provider creation loops — after EACH item creation, save the manifest via `mcp__imbas__manifest_save` and chain the next item
 
 # pipeline — End-to-End Pipeline Orchestration
 

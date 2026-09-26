@@ -8,6 +8,8 @@ complexity: complex
 plugin: imbas
 ---
 
+
+
 > **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls or the `estimator` subagent return.
 >
 > **Valid reasons to yield**:
@@ -17,7 +19,7 @@ plugin: imbas
 >
 > **HIGH-RISK YIELD POINTS**:
 >
-> - After `estimator` subagent returns the estimation payload — chain `mcp__plugin_imbas_tools__manifest_save(type: "estimation")`, the report render, and `mcp__plugin_imbas_tools__run_transition(complete_phase)` in the same turn
+> - After `estimator` subagent returns the estimation payload — chain `mcp__imbas__manifest_save(type: "estimation")`, the report render, and `mcp__imbas__run_transition(complete_phase)` in the same turn
 
 # estimate — Phase 2 Man-Day Estimation & Schedule
 

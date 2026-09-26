@@ -1,5 +1,7 @@
 # Tools Used — Jira Provider
 
+
+
 ## Jira Operations
 
 | Operation                                                     | Usage                                          |
@@ -12,4 +14,4 @@ The LLM resolves which tool to use at runtime. Read the linked operation file fo
 
 | Tool                                  | Usage                                            |
 | ------------------------------------- | ------------------------------------------------ |
-| `mcp__plugin_imbas_tools__config_get` | Read `config.jira.base_url` for URL construction |
+| `mcp__imbas__config_get` | Read `config.jira.base_url` for URL construction |

@@ -8,6 +8,8 @@ complexity: complex
 plugin: imbas
 ---
 
+
+
 > **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, subagent returns, the 3→1→2 verification loop, or provider creation operations.
 >
 > **Valid reasons to yield**:
@@ -21,7 +23,7 @@ plugin: imbas
 > - Reverse-inference `analyst` subagent return — chain gate evaluation in the same turn
 > - Horizontal split recursion (Step 5(a)) — recursive re-verification MUST NOT yield between iterations
 > - **After the user approves at Step 8 — creation (Steps 9–11) starts in the SAME turn**
-> - Provider creation loops — after EACH item, save the manifest via `mcp__plugin_imbas_tools__manifest_save` and chain the next item; never pause to report partial progress
+> - Provider creation loops — after EACH item, save the manifest via `mcp__imbas__manifest_save` and chain the next item; never pause to report partial progress
 > - Escape condition detection — emit blocker report AND end execution in the same turn
 
 # split — Phase 3 Issue Splitting & Creation
@@ -73,7 +75,7 @@ Shared:
 ## Creation (Provider-agnostic skeleton)
 
 1. Load inputs (stories manifest via Read, run state via imbas_tools).
-2. Read `config.provider` via `mcp__plugin_imbas_tools__config_get`.
+2. Read `config.provider` via `mcp__imbas__config_get`.
 3. Load ONLY the provider-specific workflow file matching `config.provider`:
 
    | provider | workflow file                   |
@@ -83,7 +85,7 @@ Shared:
    | `local`  | `references/local/workflow.md`  |
 
 4. Execute those steps exactly.
-5. Persist outputs via imbas_tools (`mcp__plugin_imbas_tools__manifest_save`, `mcp__plugin_imbas_tools__run_transition`, etc.).
+5. Persist outputs via imbas_tools (`mcp__imbas__manifest_save`, `mcp__imbas__run_transition`, etc.).
 
 ## Constraints
 

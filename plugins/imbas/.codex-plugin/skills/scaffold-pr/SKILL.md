@@ -8,6 +8,8 @@ complexity: moderate
 plugin: imbas
 ---
 
+
+
 > **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, `/imbas:read-issue` returns, `[OP:]` operations, or `gh`/`git` command results.
 >
 > **Valid reasons to yield**:
@@ -51,7 +53,7 @@ Create a Draft PR from an issue with its sub-tasks rendered as a checklist in th
 
 ## Workflow (Provider-agnostic skeleton)
 
-0. Read `config.provider` via `mcp__plugin_imbas_tools__config_get`. If provider is `local`, emit terminal marker `scaffold-pr BLOCKED: local provider not supported — PR creation requires a remote git host.` and end. Do NOT continue.
+0. Read `config.provider` via `mcp__imbas__config_get`. If provider is `local`, emit terminal marker `scaffold-pr BLOCKED: local provider not supported — PR creation requires a remote git host.` and end. Do NOT continue.
 1. Read issue via `/imbas:read-issue <issue> --depth shallow`.
 2. Load ONLY the provider-specific workflow file matching `config.provider`:
 

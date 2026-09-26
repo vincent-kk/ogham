@@ -1,5 +1,7 @@
 # Auto-Approval Gates
 
+
+
 Pipeline replaces manual user-review steps with automated quality gates. Each gate evaluates specific fields and either auto-approves or stops the pipeline.
 
 ---
@@ -30,7 +32,7 @@ Evaluated after the `estimator` output is saved. Estimation is informational —
 
 ```
 AUTO-PROCEED when:
-  mcp__plugin_imbas_tools__manifest_validate(project_ref, run_id, type: "estimation")
+  mcp__imbas__manifest_validate(project_ref, run_id, type: "estimation")
     returns 0 errors
   → Warnings (milestone beyond horizon, unknown risk unit) are accumulated
     for the final report, not blocking.
@@ -59,7 +61,7 @@ ALL conditions must be true for auto-approval:
     - E2-3 is handled separately (see Special Case below)
 
 [ ] Manifest validation passes
-    - mcp__plugin_imbas_tools__manifest_validate(project_ref, run_id, type: "stories") returns 0 errors
+    - mcp__imbas__manifest_validate(project_ref, run_id, type: "stories") returns 0 errors
 
 [ ] Every Story passes ALL verification checks:
     [ ] verification.anchor_link == true
@@ -99,7 +101,7 @@ Verification field failures:
   → List affected Story IDs with the failing field and value
 
 Manifest validation errors:
-  → List all errors from mcp__plugin_imbas_tools__manifest_validate
+  → List all errors from mcp__imbas__manifest_validate
 ```
 
 ### Why This Gate is Safe

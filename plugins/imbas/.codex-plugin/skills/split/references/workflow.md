@@ -19,18 +19,20 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 # Workflow — Part A: Decomposition (Steps 1–7)
 
+
+
 Creation continues in [creation-workflow.md](./creation-workflow.md) (Steps 8–11) in the same continuous operation.
 
 ```
 Step 1 — Load Run & Verify Preconditions
-  1. If --run provided: call mcp__plugin_imbas_tools__run_get(project_ref, run_id).
-     If not provided: call mcp__plugin_imbas_tools__run_get(project_ref) → returns most recent run.
+  1. If --run provided: call mcp__imbas__run_get(project_ref, run_id).
+     If not provided: call mcp__imbas__run_get(project_ref) → returns most recent run.
   2. Verify refine.status == "completed" and refine.result in ["PASS", "PASS_WITH_WARNINGS"].
      - If PASS_WITH_WARNINGS: display warning list from validation-report.md.
      - If not met: error with guidance.
   3. Verify estimate.status in ["completed", "skipped"] — otherwise run the
      estimate-skip flow in preconditions.md (user decision point).
-  4. Call mcp__plugin_imbas_tools__run_transition:
+  4. Call mcp__imbas__run_transition:
      - action: "start_phase", phase: "split"
      → Sets split.status = "in_progress", current_phase = "split"
   5. Input document: refined.md (canonical). supplements/* remain available as
@@ -152,9 +154,9 @@ Step 6 — stories-manifest.json Generation
      - Source issue: If state.source_issue_ref is present,
        add { issue_ref: <source_issue_ref>, target_status: <config workflow Done state>, reason: "source_split", status: "pending" }.
      - Umbrella patterns: do NOT add transitions (umbrella Stories stay open by design).
-  3. Call mcp__plugin_imbas_tools__manifest_save:
+  3. Call mcp__imbas__manifest_save:
      - project_ref, run_id, type: "stories", manifest: <full manifest>
-  4. Call mcp__plugin_imbas_tools__manifest_validate:
+  4. Call mcp__imbas__manifest_validate:
      - project_ref, run_id, type: "stories"
      - If validation errors: fix and re-save.
 

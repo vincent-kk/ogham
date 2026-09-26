@@ -1,5 +1,7 @@
 # Init Workflow
 
+
+
 ```
 Step 0 — Environment Health Check (non-blocking)
   Check remote tool availability and determine available providers.
@@ -37,7 +39,7 @@ Step 2 — .imbas/ directory creation
 Step 3 — Settings Page (browser; the ONLY interactive configuration step)
   Call the MCP tool with the ABSOLUTE workspace path:
 
-    mcp__plugin_imbas_tools__open_settings({
+    mcp__imbas__open_settings({
       project_root: "<absolute-cwd>",
       wait_seconds: 300,
       bootstrap: {
@@ -67,7 +69,7 @@ Step 3 — Settings Page (browser; the ONLY interactive configuration step)
 
 Step 4 — GitHub label provisioning (only when summary.provider == "github"
           AND summary.provisionLabels == true)
-  1. Load config.labels via mcp__plugin_imbas_tools__config_get.
+  1. Load config.labels via `mcp__imbas__config_get`.
   2. gh label list --repo <repo> --json name → existing set.
   3. For each config label value NOT in existing:
      gh label create "<value>" --repo <repo> --color c5def5
@@ -75,7 +77,7 @@ Step 4 — GitHub label provisioning (only when summary.provider == "github"
   (Unchecked box → skip silently; `setup labels provision` remains available.)
 
 Step 5 — Cache population (provider-specific, from the saved config)
-  Read the saved config via mcp__plugin_imbas_tools__config_get first.
+  Read the saved config via mcp__imbas__config_get first.
 
   Cache files are plain JSON managed with the Write tool — write each file,
   then update `.imbas/<KEY>/cache/cached_at.json` to
@@ -128,4 +130,4 @@ Step 7 — Result display
 
 ## Headless / CI fallback
 
-`open_settings` needs a local browser. Automation that cannot open one configures directly instead: `mcp__plugin_imbas_tools__config_set` with dot-path updates and `scope: "project"` (e.g. `updates: { "provider": "local", "defaults.project_ref": "KEY" }`), then continue from Step 5. The API requires `scope`; pass `"user"` only when the user explicitly requests a global setting.
+`open_settings` needs a local browser. Automation that cannot open one configures directly instead: `mcp__imbas__config_set` with dot-path updates and `scope: "project"` (e.g. `updates: { "provider": "local", "defaults.project_ref": "KEY" }`), then continue from Step 5. The API requires `scope`; pass `"user"` only when the user explicitly requests a global setting.

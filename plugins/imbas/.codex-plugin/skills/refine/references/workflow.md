@@ -19,28 +19,30 @@ spawns a subagent with `subagent_type: "imbas:<id>"` (via `Task` or
 
 # refine — Workflow
 
+
+
 ```
 Step 1 — Run Initialization
-  1. Load config.json via mcp__plugin_imbas_tools__config_get.
+  1. Load config.json via `mcp__imbas__config_get`.
   2. Determine project key: --project argument > config.defaults.project_ref.
      If neither available → error: "No project key. Run /imbas:setup or pass --project."
-  3. Call mcp__plugin_imbas_tools__run_create with:
+  3. Call mcp__imbas__run_create with:
      - project_ref: <determined key>
      - source_file: <source path>
      - supplements: <supplement paths array> (if provided)
      → Returns: run_id, run_dir, initial state
-  4. Side effects of mcp__plugin_imbas_tools__run_create:
+  4. Side effects of mcp__imbas__run_create:
      - Creates .imbas/<KEY>/runs/<YYYYMMDD-NNN>/ directory
      - Copies source document → source.md (immutable copy principle)
      - Copies supplements → supplements/ directory
      - Initializes state.json (current_phase: "refine", all phases: "pending")
-  5. Call mcp__plugin_imbas_tools__run_transition with:
+  5. Call mcp__imbas__run_transition with:
      - project_ref, run_id, action: "start_phase", phase: "refine"
      → Sets refine.status = "in_progress", refine.started_at = now()
 
 Step 2 — Document Source Resolution
   - Local file (*.md, *.txt):
-    - Already copied to source.md by mcp__plugin_imbas_tools__run_create. Read directly.
+    - Already copied to source.md by `mcp__imbas__run_create`. Read directly.
   - Confluence URL:
     - [OP: get_confluence] page_id=<extracted from URL>
     - Convert response to markdown and save as source.md in run directory.
@@ -106,7 +108,7 @@ Step 4 — Result Evaluation Gate
     → Message: "Refine result: PASS. refined.md written. Next: /imbas:estimate (optional) or /imbas:split."
 
 Step 5 — State Update
-  Call mcp__plugin_imbas_tools__run_transition with:
+  Call mcp__imbas__run_transition with:
   - project_ref, run_id
   - action: "complete_phase"
   - phase: "refine"

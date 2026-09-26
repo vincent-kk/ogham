@@ -1,5 +1,7 @@
 # Manifest Execution Workflow — Jira Provider
 
+
+
 This file is loaded by the manifest skill when `config.provider === 'jira'`. Provider-agnostic preamble (manifest loading, dry-run preview, user confirmation, result report) lives in `../workflow.md`. This file owns the Jira-specific execution steps (Step 2.5 drift check, Step 4 batch execution).
 
 ## Step 2.5 — Drift Check (Jira-specific branch)
@@ -12,12 +14,12 @@ For manifests with existing `issue_ref` values (resume/re-run scenarios):
 4. Classify as MATCH / DRIFT_DELETED / DRIFT_STATE per the shared skeleton, then:
    - DRIFT_DELETED → offer to reset to pending.
    - DRIFT_STATE → offer to skip or proceed.
-5. If any drift detected, display summary table and save reconciled manifest via `mcp__plugin_imbas_tools__manifest_save` before Step 3.
+5. If any drift detected, display summary table and save reconciled manifest via `mcp__imbas__manifest_save` before Step 3.
 6. Skip entirely for fresh runs (no `issue_ref` anywhere).
 
 ## Step 4 — Batch Execution (Jira)
 
-CRITICAL: after EACH item creation, immediately save the manifest with the updated `status` / `issue_ref` via `mcp__plugin_imbas_tools__manifest_save`. This is the crash-recovery invariant — re-runs skip already-created items.
+CRITICAL: after EACH item creation, immediately save the manifest with the updated `status` / `issue_ref` via `mcp__imbas__manifest_save`. This is the crash-recovery invariant — re-runs skip already-created items.
 
 ### Stories type
 
@@ -73,8 +75,8 @@ After all items in Step 4 are created successfully, apply lifecycle labels. See 
 
 ### Stories type
 
-1. Load run state via `mcp__plugin_imbas_tools__run_get`.
-2. Load label config via `mcp__plugin_imbas_tools__config_get` with field `"labels"`.
+1. Load run state via `mcp__imbas__run_get`.
+2. Load label config via `mcp__imbas__config_get` with field `"labels"`.
 3. For each created `issue_ref` in manifest (stories + epic):
    - If `split.pending_review === true`: `[OP: edit_issue] issue_ref=<ref>`, add `<config.labels.review_pending>` to labels.
    - If `split.pending_review === false`: `[OP: edit_issue] issue_ref=<ref>`, add `<config.labels.review_complete>` to labels.
