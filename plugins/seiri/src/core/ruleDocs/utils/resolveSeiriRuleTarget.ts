@@ -1,14 +1,13 @@
 import {
   type DirectoryRuleTarget,
   type SectionArtifactTarget,
-  resolveProjectRuleTarget,
   resolveUserRuleTarget,
 } from '@ogham/agent-artifacts';
 
 import type { SeiriConfigScope } from '../../../types/config.js';
-import { findRepoRoot } from '../../utils/findRepoRoot.js';
 
 import { resolveSeiriArtifactHost } from './resolveSeiriArtifactHost.js';
+import { resolveSeiriProjectRuleTarget } from './resolveSeiriProjectRuleTarget.js';
 
 /**
  * Where seiri's rule documents live for the chosen layer.
@@ -24,13 +23,8 @@ export function resolveSeiriRuleTarget(
   projectRoot: string,
   scope: SeiriConfigScope = 'project',
 ): DirectoryRuleTarget | SectionArtifactTarget | null {
-  const host = resolveSeiriArtifactHost();
-  if (host === null) return null;
+  if (scope !== 'user') return resolveSeiriProjectRuleTarget(projectRoot);
 
-  return scope === 'user'
-    ? resolveUserRuleTarget({ host })
-    : resolveProjectRuleTarget({
-        host,
-        projectRoot: findRepoRoot(projectRoot),
-      });
+  const host = resolveSeiriArtifactHost();
+  return host === null ? null : resolveUserRuleTarget({ host });
 }

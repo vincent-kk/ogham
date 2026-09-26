@@ -179,13 +179,13 @@ describe('hook entry silence', () => {
       name: 'Claude',
       directory: ['claude'],
       native: { prompt_id: 'turn-a' },
-      tool: 'mcp__plugin_seiri_tools__workflow',
+      tool: 'mcp__plugin_seiri_tools__runtime',
     },
     {
       name: 'Codex',
       directory: ['codex'],
       native: { turn_id: 'turn-a' },
-      tool: 'mcp__seiri__workflow',
+      tool: 'mcp__seiri__runtime',
     },
   ] as const)(
     'preserves an explicit workflow acknowledgment through the $name manifest runner',

@@ -12,9 +12,11 @@ import { workflowHash } from './workflowHash.js';
 
 /**
  * Resolve native provenance using the adapter fixed at build time.
+ * Child turns hash the native agent ID independently of the parent's turn;
+ * resumed-child boundaries invalidate stale calls through generation changes.
  * @param input Hook payload; `cwd` and `session_id` must both be present or the call yields `undefined`.
  * @param adapter Host adapter fixed at build time; supplies the namespace and native turn reader.
- * @returns The hashed actor identity, with `turn` and `call` present only when the host reported them, or `undefined` when `cwd`/`session_id` are missing or the repository root cannot be resolved.
+ * @returns The hashed actor identity, with an agent-stable child `turn` or the main actor's reported native turn, and `call` only when reported; `undefined` when `cwd`/`session_id` are missing or the repository root cannot be resolved.
  */
 export function workflowIdentity(
   input: HookBaseInput,
@@ -27,7 +29,9 @@ export function workflowIdentity(
   } catch {
     return undefined;
   }
-  const turn = adapter.turn(input);
+  const turn = input.agent_id
+    ? JSON.stringify(['agent', input.agent_id])
+    : adapter.turn(input);
   return {
     root,
     actor: workflowHash(

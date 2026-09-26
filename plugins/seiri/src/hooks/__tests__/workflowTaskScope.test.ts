@@ -1,8 +1,8 @@
 import {
   mkdirSync,
   mkdtempSync,
-  readdirSync,
   readFileSync,
+  readdirSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -12,9 +12,9 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
-import { INJECTION_PREFIX } from '../../constants/plugin.js';
 import { processToolOutcome } from '../postToolUse/postToolUse.js';
 import { processToolStart } from '../preToolUse/preToolUse.js';
+import { renderMismatchNotice } from '../shared/progressLine/renderMismatchNotice.js';
 
 import { activateWorkflow, observeBash } from './helpers/workflowHarness.js';
 
@@ -38,7 +38,7 @@ function fixture() {
   expect(
     activateWorkflow(cwd, { task: 'task-a' }).hookSpecificOutput
       ?.additionalContext,
-  ).toContain('acknowledged');
+  ).toContain('started');
   return {
     cwd,
     session_id: 'session-a',
@@ -99,7 +99,7 @@ it('does not apply a late Bash result after replacing its task', () => {
   const call = {
     ...input,
     tool_use_id: 'switch',
-    tool_name: 'mcp__plugin_seiri_tools__workflow',
+    tool_name: 'mcp__plugin_seiri_tools__runtime',
     tool_input: req,
   };
   processToolStart({ ...call, hook_event_name: 'PreToolUse' });
@@ -133,7 +133,7 @@ it('rejects resume for a different task with a mismatch result and leaves state 
   const call = {
     ...input,
     tool_use_id: 'resume-mismatch',
-    tool_name: 'mcp__plugin_seiri_tools__workflow',
+    tool_name: 'mcp__plugin_seiri_tools__runtime',
     tool_input: req,
   };
   processToolStart({ ...call, hook_event_name: 'PreToolUse' });
@@ -152,7 +152,7 @@ it('rejects resume for a different task with a mismatch result and leaves state 
     ],
   });
   expect(result.hookSpecificOutput?.additionalContext).toBe(
-    `${INJECTION_PREFIX} Workflow task-b: resume not applied; another task is bound — use start for new work.`,
+    renderMismatchNotice('task-b', 'task-a'),
   );
   const after = sessionState(input.cwd);
   expect(after.binding).toEqual(before.binding);
@@ -167,9 +167,47 @@ it('does not record evidence if the task ledger lock is held', () => {
 });
 it('records into the physical workspace when the native cwd is a nested symlink', () => {
   const input = fixture();
-  const sub = portableJoin(input.cwd, 'sub'); mkdirSync(sub);
-  const outside = mkdtempSync(portableJoin(tmpdir(), 'seiri-scope-alias-')); roots.push(outside);
-  const alias = portableJoin(outside, 'alias'); symlinkSync(sub, alias, 'junction');
+  const sub = portableJoin(input.cwd, 'sub');
+  mkdirSync(sub);
+  const outside = mkdtempSync(portableJoin(tmpdir(), 'seiri-scope-alias-'));
+  roots.push(outside);
+  const alias = portableJoin(outside, 'alias');
+  symlinkSync(sub, alias, 'junction');
   observeBash({ ...input, cwd: alias });
   expect(ledger(input.cwd, 'task-a')).toContain('[x] G1');
+});
+it('leaves a dial call unpaired: no invocation, no acknowledgment, no actor-state change', () => {
+  const input = fixture();
+  const before = sessionState(input.cwd);
+  const call = {
+    ...input,
+    tool_use_id: 'dial-call',
+    tool_name: 'mcp__plugin_seiri_tools__runtime',
+    tool_input: {
+      action: 'dial',
+      project_root: input.cwd,
+      task: 'task-b',
+      intent: 'change',
+      dial_op: 'get',
+    },
+  };
+  processToolStart({ ...call, hook_event_name: 'PreToolUse' });
+  expect(sessionState(input.cwd)).toEqual(before);
+  expect(
+    processToolOutcome({
+      ...call,
+      tool_response: [
+        {
+          type: 'text',
+          text: JSON.stringify({
+            status: 'accepted',
+            action: 'dial',
+            task: 'task-b',
+            intent: 'change',
+          }),
+        },
+      ],
+    }).hookSpecificOutput,
+  ).toBeUndefined();
+  expect(sessionState(input.cwd)).toEqual(before);
 });

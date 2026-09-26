@@ -10,11 +10,13 @@ plugin: seiri
 
 # implement — no change without a failure seen first
 
+
+
 This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 
-For a sustained change chain that benefits from hooks, use [workflow lifecycle](../execute/references/workflow-lifecycle.md). A routine edit needs no activation; an already active task needs no extra call.
+Within an assisted task, follow [workflow lifecycle](../execute/references/workflow-lifecycle.md). A routine edit needs no activation. If a `[seiri]` progress line or workflow acknowledgement in this session names an active task, call `mcp__seiri__runtime({ action: "step", step: "implement", project_root, task })` with that task and continue without waiting. If you are clearly performing a different task, call it with that task's name instead and follow its acknowledgement. Standalone use needs no call.
 
 Choose verification for the change. Behavior changes follow the fail-first steps below. Refactors preserve existing assertions and add characterization before moving uncovered behavior. Documentation and formatting changes use the relevant artifact checks; do not invent an executable failure for prose.
 
@@ -32,4 +34,4 @@ Choose verification for the change. Behavior changes follow the fail-first steps
 
 - This repository's explicit instructions outrank this sequence.
 - Preserve useful exploration. Before claiming a behavior change works, demonstrate that its check fails on the pre-change behavior and passes with the change.
-- Verify the actual claim before handing off; reuse valid evidence from this implementation.
+- Verify the actual claim before handing off — load `/seiri:verify`; reuse valid evidence from this implementation.

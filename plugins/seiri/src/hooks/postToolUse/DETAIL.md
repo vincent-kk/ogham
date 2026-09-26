@@ -2,22 +2,22 @@
 
 ## Requirements
 
-- Only an exact paired invocation in the active actor/turn/generation can activate a workflow or record the active task's Bash evidence. Skill loading has no effect.
-- Hooks never block a tool or inject global election instructions. Missing host provenance or storage failure yields no assistance.
-- off/advisory suppress new observations and injection; trusted boundaries still invalidate existing participation.
+- Only an exact paired invocation in the active actor/turn/generation can transition the runtime state machine or record the active task's Bash evidence. Skill loading has no effect.
+- `created` and `switched` transitions inject one progress-line-formatted acknowledgment naming the task, intent, and current step; `mismatch` injects one notice naming the bound task and the ways out: finish it, or enter the requested task through an entry step. `rejected` injects nothing. `updated` injects nothing only for a same-task `step`; an explicit `resume`, `pause`, or `finish` acknowledges on `updated` in the prior control-verb ACK text; a request naming a different bound task yields the mismatch notice instead.
+- off/advisory suppress new observations and injection; trusted boundaries still suspend existing participation.
 
 ## API Contracts
 
 - The processor accepts the native host payload and returns a nonblocking HookOutput. Empty additional context produces no stdout.
-- Shared normalization preserves Claude prompt_id, Codex turn_id, tool_use_id and independent child agent_id. No IDs come from model arguments.
+- Shared normalization hashes Claude `prompt_id` or Codex `turn_id` as the main actor's turn and `JSON.stringify(['agent', agent_id])` as a child's turn; `tool_use_id` identifies the call. No IDs come from model arguments.
 
 ## Acceptance Criteria
 
 ### AC-conditional-participation — Explicit scope
 
-- Inactive sessions receive no workflow banner or gate writes.
+- Inactive sessions receive no progress-line acknowledgment or gate writes.
 - Bound workflows cannot cross turns, actors, tasks or invocation generations through late results.
-- A resume, pause or finish naming a task other than the bound one leaves state untouched and injects one mismatch line instead of the acknowledgment.
+- A non-entry `step`, `resume`, `pause`, or `finish` naming a task other than the bound one leaves state untouched and injects one mismatch line instead of an acknowledgment; an entry `step` naming a different task switches instead.
 
 ### AC-native-invocation-provenance — Recorded host envelopes
 

@@ -1,10 +1,8 @@
-import { inspectRuleDocumentStatus } from '@ogham/agent-artifacts';
-
 import type { SeiriConfigScope } from '../../../types/config.js';
 import type { RuleDocStatus } from '../../../types/manifest.js';
-import { loadManagedRuleDocuments } from '../loaders/loadManagedRuleDocuments.js';
-import { loadManifest } from '../loaders/loadManifest.js';
 import { resolveSeiriRuleTarget } from '../utils/resolveSeiriRuleTarget.js';
+
+import { buildRuleDocsStatus } from './buildRuleDocsStatus.js';
 
 /**
  * Snapshot every manifest rule against one layer's rule channel.
@@ -25,60 +23,7 @@ export function getRuleDocsStatus(
   pluginRoot: string,
   scope: SeiriConfigScope = 'project',
 ): RuleDocStatus[] {
-  const manifest = loadManifest(pluginRoot);
-  const documents = loadManagedRuleDocuments(pluginRoot, manifest);
-  const target = resolveSeiriRuleTarget(projectRoot, scope);
-
-  if (target === null)
-    return manifest.rules.map((entry) => ({
-      id: entry.id,
-      filename: entry.filename,
-      title: entry.title,
-      description: entry.description,
-      recommended: entry.recommended === true,
-      target: '',
-      displayTarget: 'unsupported host rule channel',
-      source: null,
-      deployed: false,
-      active: false,
-      activeTarget: '',
-      activeDisplayTarget: 'unsupported host rule channel',
-      activeDeployedHash: null,
-      activeInSync: false,
-      activeSource: null,
-      templateHash: entry.templateHash,
-      deployedHash: null,
-      inSync: false,
-    }));
-
-  const inspections = new Map(
-    inspectRuleDocumentStatus({ owner: 'seiri', target }, documents).map(
-      (inspection) => [inspection.id, inspection],
-    ),
+  return buildRuleDocsStatus(pluginRoot, () =>
+    resolveSeiriRuleTarget(projectRoot, scope),
   );
-
-  return manifest.rules.flatMap((entry) => {
-    const inspection = inspections.get(entry.id);
-    if (inspection === undefined) return [];
-    return {
-      id: entry.id,
-      filename: entry.filename,
-      title: entry.title,
-      description: entry.description,
-      recommended: entry.recommended === true,
-      target: inspection.target,
-      displayTarget: inspection.displayTarget,
-      source: inspection.source,
-      deployed: inspection.deployed,
-      active: inspection.active,
-      activeTarget: inspection.activeTarget,
-      activeDisplayTarget: inspection.activeDisplayTarget,
-      activeDeployedHash: inspection.activeDeployedHash,
-      activeInSync: inspection.activeInSync,
-      activeSource: inspection.activeSource,
-      templateHash: inspection.expectedHash ?? entry.templateHash,
-      deployedHash: inspection.deployedHash,
-      inSync: inspection.inSync,
-    };
-  });
 }

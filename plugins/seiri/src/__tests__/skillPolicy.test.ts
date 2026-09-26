@@ -11,7 +11,9 @@ import {
   DOCUMENT_WRITING_SKILLS,
   HIDDEN_USER_ONLY_SKILLS,
   VISIBLE_USER_STARTED_SKILLS,
+  WORKFLOW_INVOCABLE_SKILLS,
 } from '../constants/skillPolicy.js';
+import { WORKFLOW_SKILLS } from '../constants/workflowChain.js';
 
 /**
  * The invocation contract every skill must honour. A skill that can be
@@ -56,6 +58,15 @@ describe('skill invocation policy', () => {
       ...HIDDEN_USER_ONLY_SKILLS,
     ].sort();
     expect(partitioned).toEqual([...SHIPPED_SKILLS]);
+  });
+
+  // WORKFLOW_SKILLS is a literal copy of the auto-invocable set — kept out
+  // of skillPolicy.ts so hook bundles stay light. `satisfies` rejects a
+  // stranger; this test is the completeness direction it cannot express.
+  it('workflow chain membership mirrors the auto-invocable set', () => {
+    expect([...WORKFLOW_SKILLS].sort()).toEqual(
+      [...WORKFLOW_INVOCABLE_SKILLS].sort(),
+    );
   });
 
   it('keeps the auto-invocable disciplines autonomous by default', () => {

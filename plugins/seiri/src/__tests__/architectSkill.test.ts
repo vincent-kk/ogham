@@ -1,12 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
 import { SHIPPED_SKILLS } from '../constants/budgets.js';
-import { WORKFLOW_CHAIN_LINE } from '../constants/postureLines.js';
 import {
   DOCUMENT_WRITING_SKILLS,
   VISIBLE_USER_STARTED_SKILLS,
   WORKFLOW_INVOCABLE_SKILLS,
 } from '../constants/skillPolicy.js';
+import { WORKFLOW_CHAIN_LINE } from '../constants/workflowChain.js';
 
 describe('architect skill policy', () => {
   // filid:contract AC-architecture-records

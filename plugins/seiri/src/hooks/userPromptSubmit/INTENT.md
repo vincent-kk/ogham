@@ -1,27 +1,28 @@
-# userPromptSubmit — Silent turn authority
+# userPromptSubmit — Turn authority and progress line
 
 ## Purpose
 
-Establish the current native turn and suspend previous participation. Skill selection belongs to the user or host, including whether a later request continues the same task.
+Establish the current native turn. Under standard/strict, keep an active binding active across turns and report its progress, never reporting a paused binding's task; under off/advisory, suspend previous participation instead. Skill selection belongs to the user or host, including whether a later request continues the same task.
 
 ## Conventions
 
-- Under standard/strict, anchor the trusted turn even without a binding.
-- Under off/advisory, revoke only existing metadata and create no new anchor.
+- Under standard/strict, anchor the trusted turn without suspending an existing binding, and read the post-anchor snapshot for the progress line.
+- Under off/advisory, revoke existing metadata and create no new anchor.
 - Do not inspect prompt prose to infer task intent.
+- Progress-line and chain-line rendering live in `hooks/shared/progressLine/`'s concrete files, shared with SubagentStart and PostToolUse; none of them import an election or posture constant, so no `Election` text can reach these bundles.
 
 ## Boundaries
 
 ### Always do
 
-- Clear prior in-flight authority through the actor store.
-- Return a nonblocking result with no injected context.
+- Anchor the current turn through the actor store, suspending only under off/advisory.
+- Render the progress line from the same-transaction snapshot the anchor call returns.
 
 ### Ask first
 
-- Change native-boundary authority or the silent-output contract.
+- Change native-boundary authority or the injection contract.
 
 ### Never do
 
-- Inject reminders, enumerate task ledgers, or start/resume a task automatically.
+- Infer task intent from prompt prose, enumerate task ledgers, or start/resume a task automatically.
 - Copy rule bodies or import internal barrels.

@@ -25,7 +25,12 @@ const packageRoot = portableJoin(
 );
 
 /** Built PostToolUse hook executed by the host. */
-const bundlePath = portableJoin(packageRoot, 'bridge', 'claude', 'post-tool-use.mjs');
+const bundlePath = portableJoin(
+  packageRoot,
+  'bridge',
+  'claude',
+  'post-tool-use.mjs',
+);
 
 /** Session identifier shared by concurrent hook processes. */
 const SESSION_ID = 'concurrent-gates-probe';
@@ -153,7 +158,7 @@ async function activate(root: string, session: string): Promise<void> {
   const call = {
     ...native,
     tool_use_id: 'start',
-    tool_name: 'mcp__plugin_seiri_tools__workflow',
+    tool_name: 'mcp__plugin_seiri_tools__runtime',
     tool_input: request,
   };
   await invoke('pre-tool-use.mjs', { ...call, hook_event_name: 'PreToolUse' });

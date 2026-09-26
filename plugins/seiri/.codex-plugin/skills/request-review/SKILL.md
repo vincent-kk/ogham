@@ -10,11 +10,13 @@ plugin: seiri
 
 # request-review — curated context, unprejudiced reviewer
 
+
+
 This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
 ## Workflow
 
-For an assisted chain, follow [workflow lifecycle](../execute/references/workflow-lifecycle.md): retain an active task during immediate review, pause while waiting, and finish when its work is complete. A review request alone needs no activation.
+For an assisted chain, follow [workflow lifecycle](../execute/references/workflow-lifecycle.md): retain an active task during immediate review, pause while waiting, and finish when its work is complete. A review request alone needs no activation. If a `[seiri]` progress line or workflow acknowledgement in this session names an active task, call `mcp__seiri__runtime({ action: "step", step: "request-review", project_root, task })` with that task and continue without waiting. If you are clearly performing a different task, call it with that task's name instead and follow its acknowledgement. Standalone use needs no call.
 
 **1. Fix the range.** The exact commits or files under review, stated so the reviewer can reproduce the diff. The reviewer sees the work product — never this conversation.
 

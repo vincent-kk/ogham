@@ -43,10 +43,16 @@
 - **Direct import**: allowed
 - **Reason**: 훅은 esbuild 번들로 배송되고 크기 가드를 받는다. `index.ts` 를 거치면 배럴이 재노출하는 그래프 전체가 번들에 끌려 들어와 가드를 넘긴다. typecheck 는 이 비대를 잡지 못하고 `build:hooks` 의 가드만 잡으므로, 배럴 경유는 선택지가 아니라 빌드 실패다.
 
+### utils — Hook bundles cannot pass through the barrel
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: `loaders` 와 같은 이유다. SessionStart 는 다이얼 설명과 고정 election·posture 문구만 필요로 하는데, 배럴을 거치면 config 쓰기·런타임 밸브 쓰기 경로까지 번들에 들어와 크기 가드를 넘긴다.
+
 ## History
 
 - 2026-09-05 — 잘못된 intervention 원값을 경고에서 제거했다. 경고는 fallback의 이유만 설명하고 프로젝트가 쓴 임의 문자열을 훅 컨텍스트로 운반하지 않아야 하기 때문이다.
 
 ## Last Updated
 
-2026-09-26 — 프로젝트 기준선 경로를 `../../../constants/files.ts` 상수 이름으로 적었다.
+2026-09-26 — 훅의 `utils` 직접 import 면책을 선언했다.

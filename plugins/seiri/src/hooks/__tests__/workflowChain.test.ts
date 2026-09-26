@@ -15,6 +15,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../types/config.js';
 import { processToolOutcome } from '../postToolUse/postToolUse.js';
+import { renderChainLine } from '../shared/progressLine/renderChainLine.js';
 import { processUserPromptSubmit } from '../userPromptSubmit/userPromptSubmit.js';
 
 /** Projects created by the observation-only skill cases. */
@@ -128,14 +129,21 @@ describe('skill loading does not create workflow participation', () => {
     },
   );
 
-  it.each(['standard', 'strict'] as const)(
-    'activates observation at either enabled dial position: %s',
-    (dial) => {
-      const cwd = seedRepo(dial);
-      expect(turn(cwd)).toEqual({ continue: true });
-      expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(true);
-    },
-  );
+  it('activates observation at standard with no chain-line fallback', () => {
+    const cwd = seedRepo('standard');
+    expect(turn(cwd)).toEqual({ continue: true });
+    expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(true);
+  });
+
+  it('activates observation at strict, falling back to the chain line', () => {
+    const cwd = seedRepo('strict');
+    const result = turn(cwd);
+    expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.additionalContext).toBe(
+      renderChainLine(),
+    );
+    expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(true);
+  });
 
   it('does not revive legacy Skill state after an off round trip', () => {
     const cwd = seedRepo();

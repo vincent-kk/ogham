@@ -31,18 +31,18 @@ describe('dial render', () => {
     expect(renderPostureLines('advisory')).toEqual([]);
   });
 
-  it('describes optional participation without electing skills', () => {
+  it('states the fixed chain, host-neutral', () => {
     const standard = renderPostureLines('standard');
     expect(standard).toHaveLength(1);
-    expect(standard[0]).toContain('explicit task participation');
+    expect(standard[0]).toContain('seiri:write-plan');
     expect(standard[0]).not.toContain('/seiri:');
   });
 
-  it('adds the completion contract at strict, keeping the chain', () => {
+  it('adds the strict posture line, keeping the chain', () => {
     const strict = renderPostureLines('strict');
     expect(strict).toHaveLength(2);
     expect(strict[0]).toBe(renderPostureLines('standard')[0]);
-    expect(strict[1]).toContain('reuse');
+    expect(strict[1]).toContain('Posture (strict)');
     expect(strict[1]).toContain('verification');
   });
 

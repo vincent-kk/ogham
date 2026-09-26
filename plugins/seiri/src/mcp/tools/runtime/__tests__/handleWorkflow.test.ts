@@ -11,7 +11,7 @@ import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
 import type { WorkflowRequest } from '../../../../types/workflow.js';
-import { handleWorkflow } from '../workflow.js';
+import { handleWorkflow } from '../handlers/handleWorkflow.js';
 
 const roots: string[] = [];
 function fixture(level = 'standard'): WorkflowRequest {
@@ -50,17 +50,21 @@ it('accepts a request without creating an actor state or ledger', () => {
     false,
   );
 });
-it.each(['off', 'advisory'] as const)('reports disabled at %s with its reason', (level) => {
-  expect(handleWorkflow(fixture(level))).toEqual({
-    status: 'disabled',
-    reason: level,
-  });
-});
+it.each(['off', 'advisory'] as const)(
+  'reports disabled at %s with its reason',
+  (level) => {
+    expect(handleWorkflow(fixture(level))).toEqual({
+      status: 'disabled',
+      reason: level,
+    });
+  },
+);
 it('rejects relative paths, traversal task names, unknown actions and missing start intent', () => {
   const valid = fixture();
   for (const invalid of [
     { project_root: '.' },
     { task: '../escape' },
+    { task: undefined },
     { action: 'activate' },
     { intent: undefined },
   ])
@@ -76,4 +80,27 @@ it('accepts pause and finish without an intent', () => {
   expect(
     handleWorkflow({ ...input, action: 'finish', intent: undefined }).status,
   ).toBe('accepted');
+});
+it('accepts a step request and echoes the derived intent', () => {
+  const input = fixture();
+  expect(
+    handleWorkflow({
+      ...input,
+      action: 'step',
+      step: 'review-plan',
+      intent: undefined,
+    }),
+  ).toEqual({
+    status: 'accepted',
+    action: 'step',
+    task: 'test-task',
+    step: 'review-plan',
+    intent: 'review',
+  });
+});
+it('rejects a step request naming a value outside WorkflowStep', () => {
+  const input = fixture();
+  expect(() =>
+    handleWorkflow({ ...input, action: 'step', step: 'not-a-skill' }),
+  ).toThrow();
 });

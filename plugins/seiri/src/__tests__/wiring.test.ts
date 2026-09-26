@@ -7,7 +7,7 @@ import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
 import {
-  CODEX_WORKFLOW_TOOL,
+  CODEX_RUNTIME_TOOL,
   DORMANT_HOOKS,
   HookName,
   HostTool,
@@ -200,7 +200,7 @@ describe('wiring', () => {
     const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
     expect(server).toContain('ToolName.SETTINGS');
     expect(server).toContain(
-      ".enum(['open', 'status', 'manifest', 'plan', 'sync', 'config'])",
+      ".enum(['open', 'status', 'manifest', 'plan', 'sync'])",
     );
     expect(server).toContain('action: z');
     expect(server).not.toContain('type: z');
@@ -208,6 +208,17 @@ describe('wiring', () => {
     expect(server).toContain('revision: z');
     expect(server).not.toContain('waitSeconds');
     expect(server).not.toContain('path: z');
+  });
+
+  it('keeps the dial valve on runtime, not settings', () => {
+    const server = read('src', 'mcp', 'server', 'lifecycle', 'createServer.ts');
+    expect(server).not.toContain("'config'");
+    expect(server).not.toContain('config_op');
+    expect(server).toContain('ToolName.RUNTIME');
+    expect(server).toContain(
+      ".enum(['step', 'start', 'resume', 'pause', 'finish', 'dial'])",
+    );
+    expect(server).toContain('dial_op: z');
   });
 
   it('registers exactly one server tool for each declared tool name', () => {
@@ -230,6 +241,11 @@ describe('wiring', () => {
       expect(listed.tools.map(({ name }) => name).sort()).toEqual(
         Object.values(ToolName).sort(),
       );
+      // A discriminated-union schema would surface as a top-level `anyOf`
+      // instead of `type: 'object'`, and the client's own ToolSchema
+      // validation would have already rejected the whole listTools() call.
+      for (const tool of listed.tools)
+        expect(tool.inputSchema.type).toBe('object');
     } finally {
       await client.close();
     }
@@ -258,12 +274,12 @@ describe('wiring', () => {
     expect(codexHooks.hooks).not.toHaveProperty('PostToolUseFailure');
     expect(
       claudeHooks.hooks.PostToolUse?.some(
-        (group) => group.matcher === HostTool.WORKFLOW,
+        (group) => group.matcher === HostTool.RUNTIME,
       ),
     ).toBe(true);
     expect(
       codexHooks.hooks.PostToolUse?.some(
-        (group) => group.matcher === CODEX_WORKFLOW_TOOL,
+        (group) => group.matcher === CODEX_RUNTIME_TOOL,
       ),
     ).toBe(true);
     expect(codexHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command).toBe(

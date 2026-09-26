@@ -96,7 +96,7 @@ describe('concurrent paired hook processes', () => {
       const start = {
         ...native,
         tool_use_id: `start-${round}`,
-        tool_name: 'mcp__plugin_seiri_tools__workflow',
+        tool_name: 'mcp__plugin_seiri_tools__runtime',
         tool_input: request,
       };
       await hook('pre-tool-use.mjs', {

@@ -4,8 +4,13 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { ELECTION_STRICT_LINE } from '../../constants/electionLines.js';
+import { STRICT_POSTURE_LINE } from '../../constants/postureLines.js';
+import { WORKFLOW_CHAIN_LINE } from '../../constants/workflowChain.js';
 import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.js';
 import { processSessionStart } from '../setup/setup.js';
+import { renderProgressLine } from '../shared/progressLine/renderProgressLine.js';
+import { renderSubagentLine } from '../shared/progressLine/renderSubagentLine.js';
 import { CLAUDE_WORKFLOW_ADAPTER } from '../shared/workflowAdapters/claude.js';
 import { CODEX_WORKFLOW_ADAPTER } from '../shared/workflowAdapters/codex.js';
 import { processSubagentStart } from '../subagentStart/subagentStart.js';
@@ -49,23 +54,33 @@ function seedRepo(): string {
 
 describe('non-Bash hook host payload parity', () => {
   it.each(['startup', 'resume', 'clear', 'fork'])(
-    'silently suspends participation on %s in either host',
+    'suspends participation on %s in either host and injects only the session contract',
     (source) => {
       for (const { adapter, native, failure } of HOSTS) {
         const cwd = seedRepo();
         expect(activateWorkflow(cwd, native).hookSpecificOutput).toBeDefined();
-        expect(
-          processSessionStart(
-            {
-              cwd,
-              session_id: 'session-a',
-              ...native,
-              hook_event_name: 'SessionStart',
-              source,
-            },
-            adapter,
-          ),
-        ).toEqual({ continue: true });
+        const result = processSessionStart(
+          {
+            cwd,
+            session_id: 'session-a',
+            ...native,
+            hook_event_name: 'SessionStart',
+            source,
+          },
+          adapter,
+        );
+        expect(result).toEqual({
+          continue: true,
+          hookSpecificOutput: {
+            hookEventName: 'SessionStart',
+            additionalContext: expect.stringContaining(
+              `[seiri] ${ELECTION_STRICT_LINE}\n[seiri] ${WORKFLOW_CHAIN_LINE}\n[seiri] ${STRICT_POSTURE_LINE}`,
+            ),
+          },
+        });
+        expect(result.hookSpecificOutput?.additionalContext).not.toContain(
+          'payment-refactor',
+        );
         for (let i = 0; i < 3; i++)
           expect(
             observeBash({
@@ -81,7 +96,7 @@ describe('non-Bash hook host payload parity', () => {
     },
   );
 
-  it('silently replaces native user-turn provenance on either host', () => {
+  it('replaces native user-turn provenance on either host, naming only the active task', () => {
     for (const { adapter, native, next, failure } of HOSTS) {
       const cwd = seedRepo();
       expect(activateWorkflow(cwd, native).hookSpecificOutput).toBeDefined();
@@ -96,7 +111,13 @@ describe('non-Bash hook host payload parity', () => {
           },
           adapter,
         ),
-      ).toEqual({ continue: true });
+      ).toEqual({
+        continue: true,
+        hookSpecificOutput: {
+          hookEventName: 'UserPromptSubmit',
+          additionalContext: renderProgressLine('payment-refactor', 'change'),
+        },
+      });
       for (let i = 0; i < 3; i++)
         expect(
           observeBash({
@@ -126,7 +147,13 @@ describe('non-Bash hook host payload parity', () => {
           },
           adapter,
         ),
-      ).toEqual({ continue: true });
+      ).toEqual({
+        continue: true,
+        hookSpecificOutput: {
+          hookEventName: 'SubagentStart',
+          additionalContext: renderSubagentLine('payment-refactor', 'change'),
+        },
+      });
       for (let i = 0; i < 3; i++)
         expect(
           observeBash({

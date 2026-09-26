@@ -3,7 +3,7 @@
 ## Requirements
 
 - `templates/rules/*.md` 를 호출자가 고른 레이어의 호스트 채널과 조정한다. `project`(기본값)는 저장소 채널, `user` 는 호스트 상태 루트다.
-- 호스트마다 채널이 다르다: Claude 는 `rules/` 디렉터리 파일, Codex 는 유효한 `AGENTS*.md` 의 소유 섹션이다.
+- 호스트마다 채널이 다르다: Claude 는 `RULES_DIR` 디렉터리 파일, Codex 는 유효한 `AGENTS*.md` 의 소유 섹션이다.
 - **배포 상태의 진실은 파일시스템이다.** config 에 미러링하지 않는다 — 사본은 드리프트만 만든다.
 - 사용자 파일을 건드리는 동작은 dry-run 짝을 갖는다. 계획과 실행은 같은 계획을 쓴다.
 - 해시는 raw 바이트 기준이다. 그래서 `.gitattributes` 가 규칙 템플릿을 LF 로 고정하고 루트 `.prettierignore` 가 포매터를 막는다.
@@ -13,6 +13,7 @@
 - `loadManifest` 는 throw 한다 — 깨진 매니페스트는 사용자 상태가 아니라 빌드 결함이다. 세션 경로 소비자가 이를 흡수한다.
 - 세션 훅에서 `applyRuleDocs` 를 부르지 않는다. 배포는 setup 표면 전담이다.
 - 배럴은 훅 밖 소비자 전용이다. 훅은 concrete 파일을 직접 import 한다.
+- 훅은 `project` 레이어만 읽으므로 `getRuleDocsStatus`(양쪽 레이어)를 거치지 않고 `buildRuleDocsStatus` + `resolveSeiriProjectRuleTarget`(project 전용 대상 해석)을 직접 쓴다 — `user` 레이어의 해석 코드가 훅 번들에 들어오지 않는다.
 
 ## API Contracts
 
@@ -61,6 +62,12 @@
 - **Direct import**: allowed
 - **Reason**: `loaders` 와 같은 이유다. SessionStart·SubagentStart 가 배포 상태 스냅샷 하나만 필요로 하는데, 배럴을 거치면 apply 경로까지 번들에 들어온다.
 
+### utils — Hook bundles cannot pass through the barrel
+
+- **Consumers**: `**/src/hooks/**`, `**/__tests__/**`
+- **Direct import**: allowed
+- **Reason**: `loaders` 와 같은 이유다. SessionStart 는 프로젝트 규칙 대상 경로 하나만 해석하면 되는데, 배럴을 거치면 sync·plan·apply 그래프까지 번들에 들어와 크기 가드를 넘긴다. 이 해석 함수는 훅만 쓰므로 배럴에 재노출하지 않는다.
+
 ## Last Updated
 
-2026-07-30 — 규칙 배포 계약과 훅 직접 import 면책을 문서화했다.
+2026-09-26 — 훅의 `utils` 직접 import 면책을 선언했다.

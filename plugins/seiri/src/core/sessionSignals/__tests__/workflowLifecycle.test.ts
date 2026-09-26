@@ -61,7 +61,7 @@ it('requires a trusted boundary before start and does not create a ledger', () =
   const id = identity();
   expect(lifecycle(id, request(id.root))).toBeUndefined();
   observeBoundary(id, true, NOW);
-  expect(lifecycle(id, request(id.root))).toBe('applied');
+  expect(lifecycle(id, request(id.root))).toBe('created');
   expect(state(id).binding.task).toBe('task-a');
   expect(readdirSync(portableJoin(id.root, '.seiri')).sort()).toEqual([
     '.gitignore',
@@ -73,9 +73,9 @@ it('suspends at the next turn and requires explicit resume', () => {
   observeBoundary(id, true, NOW);
   lifecycle(id, request(id.root));
   const next = { ...id, turn: 'next', call: 'resume' };
-  observeBoundary(next, true, NOW);
+  observeBoundary(next, true, NOW, { suspend: true });
   expect(state(id).binding.state).toBe('suspended');
-  expect(lifecycle(next, request(id.root, 'resume'))).toBe('applied');
+  expect(lifecycle(next, request(id.root, 'resume'))).toBe('updated');
   expect(state(id).binding.state).toBe('active');
 });
 it('pauses and finishes participation without changing task outcome', () => {
@@ -83,11 +83,11 @@ it('pauses and finishes participation without changing task outcome', () => {
   observeBoundary(id, true, NOW);
   lifecycle(id, request(id.root));
   expect(lifecycle({ ...id, call: 'pause' }, request(id.root, 'pause'))).toBe(
-    'applied',
+    'updated',
   );
   expect(state(id).binding.state).toBe('suspended');
   expect(lifecycle({ ...id, call: 'finish' }, request(id.root, 'finish'))).toBe(
-    'applied',
+    'updated',
   );
   expect(state(id).binding).toBeUndefined();
 });
@@ -101,7 +101,7 @@ it('rejects resume for a different task, but permits explicit replacement', () =
   expect(state(id).binding.task).toBe('task-a');
   expect(
     lifecycle({ ...id, call: 'replace' }, request(id.root, 'start', 'task-b')),
-  ).toBe('applied');
+  ).toBe('switched');
   expect(state(id).binding.task).toBe('task-b');
 });
 it('does not inherit participation into a child actor', () => {
@@ -109,12 +109,12 @@ it('does not inherit participation into a child actor', () => {
   observeBoundary(id, true, NOW);
   lifecycle(id, request(id.root));
   const child = { ...id, actor: 'child', turn: 'child-turn' };
-  observeBoundary(child, true, NOW, true);
+  observeBoundary(child, true, NOW, { firstChild: true });
   expect(
     completeInvocation(child, 'bash', NOW, () => 'effect'),
   ).toBeUndefined();
   expect(lifecycle(child, request(id.root, 'start', 'child-task'))).toBe(
-    'applied',
+    'created',
   );
   expect(state(id).binding.task).toBe('task-a');
 });

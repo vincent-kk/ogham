@@ -1,3 +1,5 @@
+import { projectRoot } from '@ogham/cross-platform';
+
 import { INTERVENTION_LEVELS } from '../../../../constants/intervention.js';
 import {
   clearRuntime,
@@ -10,14 +12,18 @@ import {
 } from '../../../../core/infra/configLoader/index.js';
 import type { InterventionState } from '../../../../types/config.js';
 
-/** What a `config` call does: read the dial, turn the valve, or drop it. */
-export type ConfigOp = 'get' | 'set' | 'clear';
+/** What a `dial` call does: read the dial, turn the valve, or drop it. */
+export type DialOp = 'get' | 'set' | 'clear';
 
-export interface ConfigActionResult {
-  action: 'config';
-  op: ConfigOp;
+/** Outcome of one dial call. */
+export interface DialResult {
+  /** Result discriminant. */
+  action: 'dial';
+  /** Operation performed. */
+  op: DialOp;
   /** Whether this call altered stored state. */
   changed: boolean;
+  /** Dial state after the call. */
   dial: InterventionState;
   /**
    * The posture now in effect, as one sentence.
@@ -35,34 +41,39 @@ export interface ConfigActionResult {
  * Only the valve. The committed baseline stays a setup-surface act, so
  * that lowering intervention mid-session can never quietly rewrite what
  * the repository declares to everyone else.
+ * @param rawProjectRoot Workspace root as supplied on the tool call, resolved the same way every project-scoped tool resolves it.
+ * @param op Which operation to perform on the valve.
+ * @param intervention Dial position for `op: "set"`.
+ * @returns The dial state after the operation and the posture sentence now in effect.
+ * @throws When `op` is `"set"` and `intervention` is not a valid intervention level.
  */
-export function applyConfigAction(
-  projectRoot: string,
-  op: ConfigOp,
+export function applyDial(
+  rawProjectRoot: string | undefined,
+  op: DialOp,
   intervention: unknown,
-): ConfigActionResult {
+): DialResult {
+  const root = projectRoot(rawProjectRoot);
   let changed = false;
 
   if (op === 'set') {
     if (!isInterventionLevel(intervention))
       throw new Error(
-        `config_op "set" needs "intervention" to be one of ${INTERVENTION_LEVELS.join(
+        `dial_op "set" needs "intervention" to be one of ${INTERVENTION_LEVELS.join(
           ' | ',
         )}; received ${JSON.stringify(intervention)}`,
       );
-    writeRuntime(projectRoot, intervention);
+    writeRuntime(root, intervention);
     changed = true;
   }
 
-  if (op === 'clear') changed = clearRuntime(projectRoot);
+  if (op === 'clear') changed = clearRuntime(root);
 
-  const dial = loadIntervention(projectRoot);
-  // Same order as SessionStart: the chain first, then its election line.
-  // Off and advisory omit both; describeDial remains because this explicit
-  // tool call must report the state it just applied.
+  const dial = loadIntervention(root);
+  // Dial line, then the chain (and strict posture), then the election line;
+  // off and advisory render the dial line alone.
   const election = renderElectionLine(dial.effective);
   return {
-    action: 'config',
+    action: 'dial',
     op,
     changed,
     dial,

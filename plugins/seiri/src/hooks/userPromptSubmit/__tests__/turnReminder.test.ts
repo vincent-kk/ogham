@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';
+import { renderChainLine } from '../../shared/progressLine/renderChainLine.js';
 import { processUserPromptSubmit } from '../userPromptSubmit.js';
 
 /** Isolated projects owned by this suite. */
@@ -25,8 +26,8 @@ function seedRepo(intervention: InterventionLevel): string {
   return root;
 }
 
-describe('silent user-turn boundary', () => {
-  it.each(['off', 'advisory', 'standard', 'strict'] as const)(
+describe('user-turn boundary', () => {
+  it.each(['off', 'advisory', 'standard'] as const)(
     'does not elect skills at %s',
     (intervention) => {
       expect(
@@ -40,6 +41,17 @@ describe('silent user-turn boundary', () => {
     },
   );
 
+  it('falls back to the chain line at strict with no active binding', () => {
+    expect(
+      processUserPromptSubmit({
+        cwd: seedRepo('strict'),
+        session_id: 'session-a',
+        prompt_id: 'turn-a',
+        hook_event_name: 'UserPromptSubmit',
+      }).hookSpecificOutput?.additionalContext,
+    ).toBe(renderChainLine());
+  });
+
   it.each(['I am done', 'Review this plan', 'The test failed'])(
     'does not choose a workflow from the prompt: %s',
     (prompt) => {
@@ -50,8 +62,8 @@ describe('silent user-turn boundary', () => {
           prompt_id: 'turn-a',
           hook_event_name: 'UserPromptSubmit',
           prompt,
-        }),
-      ).toEqual({ continue: true });
+        }).hookSpecificOutput?.additionalContext,
+      ).toBe(renderChainLine());
     },
   );
 

@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- standard/strict에서 기존 actor anchor와 같은 native turn의 Bash 또는 workflow 호출만 관측한다.
-- Bash는 active binding이 있을 때만 기록한다. workflow는 validated explicit request만 기록한다.
+- standard/strict에서 기존 actor anchor와 같은 turn(main은 native turn, 자식은 agent-stable turn)의 Bash 또는 runtime 참여 호출(`step`·`start`·`resume`·`pause`·`finish`)만 관측한다. `dial`은 화이트리스트 밖이라 관측하지 않는다.
+- Bash는 active binding이 있을 때만 기록한다. runtime 참여 호출은 validated explicit request만 기록한다.
 - 관측은 호스트 호출 ID와 입력 해시를 저장하며 결정·주입을 하지 않는다.
 
 ## API Contracts

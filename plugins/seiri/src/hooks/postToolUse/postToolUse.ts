@@ -1,4 +1,4 @@
-import { EMPTY_RESULT, INJECTION_PREFIX } from '../../constants/plugin.js';
+import { EMPTY_RESULT } from '../../constants/plugin.js';
 import { completeInvocation } from '../../core/sessionSignals/workflow/completeInvocation.js';
 import { transitionWorkflow } from '../../core/sessionSignals/workflow/transitionWorkflow.js';
 import type {
@@ -15,6 +15,7 @@ import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 import { workflowRequest } from '../shared/workflowHost/workflowRequest.js';
 
 import { bashOutcome } from './utils/bashOutcome.js';
+import { workflowAck } from './utils/workflowAck.js';
 
 /**
  * Apply only a paired result belonging to the current actor, task and turn.
@@ -57,16 +58,20 @@ export function processToolOutcome(
           !workflowAccepted(input.tool_response, request, adapter)
         )
           return EMPTY_RESULT;
+        const previousTask = state.binding?.task;
         const outcome = transitionWorkflow(state, request);
-        if (outcome === 'rejected') return EMPTY_RESULT;
+        const additionalContext = workflowAck(
+          outcome,
+          request,
+          state,
+          previousTask,
+        );
+        if (!additionalContext) return EMPTY_RESULT;
         return {
           continue: true,
           hookSpecificOutput: {
             hookEventName: input.hook_event_name,
-            additionalContext:
-              outcome === 'mismatch'
-                ? `${INJECTION_PREFIX} Workflow ${request.task}: ${request.action} not applied; another task is bound — use start for new work.`
-                : `${INJECTION_PREFIX} Workflow ${request.task}: ${request.action} acknowledged (${request.intent ?? 'participation only'}).`,
+            additionalContext,
           },
         };
       }

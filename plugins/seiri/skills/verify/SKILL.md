@@ -14,9 +14,11 @@ plugin: seiri
 
 This skill may be invoked automatically. Prefer autonomous judgment: when a choice is needed, take the conservative default and say so in one line. A genuine blocker — a decision only the user can resolve — earns one crisp AskUserQuestion; a routine checkpoint does not.
 
-## The gate
+## Workflow
 
-Standalone verification does not activate a workflow. When continuing an assisted task, use [workflow lifecycle](../execute/references/workflow-lifecycle.md); reuse its active binding and finish or pause when the task ends or is left open.
+Standalone verification does not activate a workflow. When continuing an assisted task, use [workflow lifecycle](../execute/references/workflow-lifecycle.md); reuse its active binding and close it through `/seiri:finish` when the task ends, or pause when it is left open. If a `[seiri]` progress line or workflow acknowledgement in this session names an active task, call `mcp__plugin_seiri_tools__runtime({ action: "step", step: "verify", project_root, task })` with that task and continue without waiting. If you are clearly performing a different task, call it with that task's name instead and follow its acknowledgement. Standalone use needs no call.
+
+## The gate
 
 **1. Name the command that would prove the claim — for a task on a ledger, that is its gate's CHECK.** No command names itself — "it should work" identifies nothing.
 
@@ -37,4 +39,4 @@ Standalone verification does not activate a workflow. When continuing an assiste
 
 ## Rules
 
-- Request review when substantial changes need it; a verified explanation does not automatically enter a development review chain. Integration remains the user's decision.
+- Request review when substantial changes need it — load `/seiri:request-review`; a verified explanation does not automatically enter a development review chain. Suggest `/seiri:finish` to the user when the task is done. Integration remains the user's decision.

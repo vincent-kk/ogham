@@ -39,13 +39,53 @@ describe('workflow skill routing contract', () => {
       expect(readFileSync(path, 'utf8').split(marker)).toHaveLength(2);
   });
 
-  it('keeps callable workflow transitions in one shared reference', () => {
-    const callers = documents(skills).filter((path) =>
-      readFileSync(path, 'utf8').includes('mcp__plugin_seiri_tools__workflow'),
-    );
-    expect(callers).toEqual([
-      portableJoin(skills, 'execute/references/workflow-lifecycle.md'),
-    ]);
+  /** The nine skills whose `step` call binds or advances the workflow chain. */
+  const workflowSkills = [
+    'write-plan',
+    'review-plan',
+    'execute',
+    'implement',
+    'verify',
+    'request-review',
+    'receive-review',
+    'trace-cause',
+    'trace-structure',
+  ];
+
+  it('gives each workflow skill exactly one step sentence naming its own step', () => {
+    for (const name of workflowSkills) {
+      const matches = [
+        ...skill(name).matchAll(
+          /mcp__plugin_seiri_tools__runtime\(\{ action: "step", step: "([a-z-]+)"/g,
+        ),
+      ];
+      expect(matches, name).toHaveLength(1);
+      expect(matches[0][1], name).toBe(name);
+    }
+  });
+
+  it('keeps the tool name out of skills whose job is not runtime control', () => {
+    const others = readdirSync(skills, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => entry.name)
+      .filter((name) => !workflowSkills.includes(name));
+    for (const name of others) {
+      const namesRuntime = skill(name).includes(
+        'mcp__plugin_seiri_tools__runtime',
+      );
+      expect(namesRuntime, name).toBe(false);
+    }
+  });
+
+  it('lets entry skills read the reply and non-entry skills wait for an acknowledgement', () => {
+    for (const name of ['write-plan', 'execute'])
+      expect(skill(name), name).toContain('read its reply before');
+    for (const name of workflowSkills.filter(
+      (candidate) => candidate !== 'write-plan' && candidate !== 'execute',
+    )) {
+      expect(skill(name), name).toContain('continue without waiting');
+      expect(skill(name), name).toContain('follow its acknowledgement');
+    }
   });
 
   it('resolves lifecycle links inside the host-adapted skill tree', () => {
@@ -105,9 +145,36 @@ describe('workflow skill routing contract', () => {
       expect(skill(name), name).toMatch(
         /standalone[^\n]+(?:activate|activation)/i,
       );
+    }
+    for (const name of ['explain', 'trace-change']) {
       expect(skill(name), name).not.toContain(
-        'mcp__plugin_seiri_tools__workflow',
+        'mcp__plugin_seiri_tools__runtime',
       );
+    }
+  });
+
+  it('hands off to the named next skill once its own work is done', () => {
+    expect(skill('write-plan')).toMatch(/`\/seiri:review-plan`/);
+    expect(skill('execute')).toMatch(/`\/seiri:request-review`/);
+    expect(skill('execute')).toMatch(/`\/seiri:finish`/);
+    expect(skill('implement')).toMatch(/`\/seiri:verify`/);
+    expect(skill('verify')).toMatch(/`\/seiri:request-review`/);
+    expect(skill('verify')).toMatch(/`\/seiri:finish`/);
+  });
+
+  it('marks the newly routed skills for MCP tool compilation', () => {
+    for (const name of [
+      'implement',
+      'receive-review',
+      'request-review',
+      'review-plan',
+      'trace-cause',
+      'trace-structure',
+      'write-plan',
+    ]) {
+      const body = skill(name);
+      expect(body.split(marker), name).toHaveLength(2);
+      expect(body.indexOf(marker) < body.indexOf('## '), name).toBe(true);
     }
   });
 

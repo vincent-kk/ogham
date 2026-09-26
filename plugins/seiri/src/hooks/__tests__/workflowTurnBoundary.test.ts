@@ -1,4 +1,11 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 
 import { portableJoin } from '@ogham/cross-platform';
@@ -34,8 +41,8 @@ function fixture(host: string) {
     tool_use_id: 'resume',
     tool_name:
       host === 'claude'
-        ? 'mcp__plugin_seiri_tools__workflow'
-        : 'mcp__seiri__workflow',
+        ? 'mcp__plugin_seiri_tools__runtime'
+        : 'mcp__seiri__runtime',
     tool_input: {
       action: 'resume',
       project_root: cwd,
@@ -57,6 +64,12 @@ function result(host: string) {
     },
   ];
   return host === 'claude' ? content : { content };
+}
+/** Read the sole actor state file created for one isolated repository root. */
+function sessionState(cwd: string) {
+  const dir = portableJoin(cwd, '.seiri/sessions');
+  const name = readdirSync(dir).find((entry) => entry.endsWith('.json'))!;
+  return JSON.parse(readFileSync(portableJoin(dir, name), 'utf8'));
 }
 afterEach(() =>
   roots
@@ -109,10 +122,7 @@ it.each(HOSTS)(
       ).hookSpecificOutput,
     ).toBeUndefined();
     const mismatched = { ...input, tool_use_id: 'resume-mismatch' };
-    processToolStart(
-      { ...mismatched, hook_event_name: 'PreToolUse' },
-      adapter,
-    );
+    processToolStart({ ...mismatched, hook_event_name: 'PreToolUse' }, adapter);
     const mismatchedContent = [
       {
         type: 'text',
@@ -186,6 +196,7 @@ it.each(HOSTS)(
       },
       adapter,
     );
+    expect(sessionState(input.cwd).binding.state).toBe('suspended');
     expect(
       processToolOutcome(
         {

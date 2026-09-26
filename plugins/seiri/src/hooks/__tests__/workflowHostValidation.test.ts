@@ -28,7 +28,7 @@ it.each(['/', '/.'])(
     const { root } = fixture();
     expect(
       workflowRequest(
-        'mcp__seiri__workflow',
+        'mcp__seiri__runtime',
         {
           action: 'start',
           task: 'task',
@@ -53,7 +53,7 @@ it('recognizes a workspace symlink without accepting an unrelated repository', (
   };
   expect(
     workflowRequest(
-      'mcp__seiri__workflow',
+      'mcp__seiri__runtime',
       request,
       root,
       CODEX_WORKFLOW_ADAPTER,
@@ -61,7 +61,7 @@ it('recognizes a workspace symlink without accepting an unrelated repository', (
   ).toBeDefined();
   expect(
     workflowRequest(
-      'mcp__seiri__workflow',
+      'mcp__seiri__runtime',
       { ...request, project_root: parent },
       root,
       CODEX_WORKFLOW_ADAPTER,
@@ -76,12 +76,29 @@ it('resolves a symlink into a repository subdirectory before locating its root',
   symlinkSync(sub, alias, 'junction');
   expect(
     workflowRequest(
-      'mcp__seiri__workflow',
+      'mcp__seiri__runtime',
       { action: 'start', task: 'task', intent: 'change', project_root: alias },
       root,
       CODEX_WORKFLOW_ADAPTER,
     ),
   ).toBeDefined();
+});
+it('excludes dial from the paired lifecycle whitelist', () => {
+  const { root } = fixture();
+  expect(
+    workflowRequest(
+      'mcp__seiri__runtime',
+      {
+        action: 'dial',
+        task: 'task',
+        intent: 'change',
+        project_root: root,
+        dial_op: 'get',
+      },
+      root,
+      CODEX_WORKFLOW_ADAPTER,
+    ),
+  ).toBeUndefined();
 });
 it('treats Claude interrupted successful-tool envelopes as interruptions', () => {
   expect(

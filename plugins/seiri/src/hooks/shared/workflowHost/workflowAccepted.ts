@@ -9,7 +9,7 @@ import { WORKFLOW_ADAPTER } from '../workflowAdapter.js';
  * @param response Raw MCP tool call response; anything other than a non-error object with a content array yields `false`.
  * @param request Request the response is checked against; every field must match a parsed reply block.
  * @param adapter Host adapter fixed at build time; supplies the content envelope shape.
- * @returns Whether any content block reports the same accepted action, task and intent as `request`.
+ * @returns Whether any content block reports the same accepted action, task, step and intent as `request`.
  */
 export function workflowAccepted(
   response: unknown,
@@ -30,6 +30,7 @@ export function workflowAccepted(
         result.status === 'accepted' &&
         result.action === request.action &&
         result.task === request.task &&
+        result.step === request.step &&
         result.intent === request.intent
       );
     } catch {

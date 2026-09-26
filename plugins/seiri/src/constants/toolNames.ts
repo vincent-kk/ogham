@@ -7,7 +7,7 @@
 export const ToolName = {
   GATES: 'gates',
   SETTINGS: 'settings',
-  WORKFLOW: 'workflow',
+  RUNTIME: 'runtime',
 } as const;
 
 export type ToolNameValue = (typeof ToolName)[keyof typeof ToolName];

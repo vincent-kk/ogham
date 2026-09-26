@@ -44,7 +44,14 @@ const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 // canaries: their presence means a constants file stopped shaking.
 const hookEntries = [
   { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: LIGHT_HOOK_BYTES },
-  { name: 'setup', entry: 'setup', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'setup',
+    entry: 'setup',
+    // One session-start read of rule status, dial and configLoader chains,
+    // plus the fixed election/chain/posture render and, after compaction, the
+    // active progress line. Runs at every SessionStart source.
+    maxBytes: 22 * KILO_BYTE,
+  },
   {
     name: 'user-prompt-submit',
     entry: 'userPromptSubmit',
@@ -54,14 +61,16 @@ const hookEntries = [
   {
     name: 'post-tool-use',
     entry: 'postToolUse',
-    // Paired provenance, atomic actor state and gate judging share this entry.
-    maxBytes: 20 * KILO_BYTE,
+    // Paired provenance, atomic actor state, gate judging and progress-line
+    // rendering share this entry.
+    maxBytes: 22 * KILO_BYTE,
     forbiddenContent: [/Election/, /A plan was produced/],
   },
   {
     name: 'subagent-start',
     entry: 'subagentStart',
     maxBytes: LIGHT_HOOK_BYTES,
+    forbiddenContent: [/Election/],
   },
   {
     name: 'instructions-loaded',
@@ -166,7 +175,9 @@ for (const { name, maxBytes, forbiddenContent = [] } of hookEntries) {
     const content = await readFile(file, 'utf8');
     for (const pattern of [...FORBIDDEN_PATTERNS, ...forbiddenContent])
       if (pattern.test(content))
-        violations.push(`  ${host}/${name}.mjs: forbidden pattern ${pattern} matched`);
+        violations.push(
+          `  ${host}/${name}.mjs: forbidden pattern ${pattern} matched`,
+        );
   }
 }
 

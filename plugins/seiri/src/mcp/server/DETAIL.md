@@ -6,7 +6,7 @@
 - 모든 핸들러는 `wrapHandler` 로 감싸 throw 를 오류 결과로 바꾼다.
 - 결과 직렬화는 compact JSON 이다. 컨텍스트로 나가는 바이트를 늘리지 않는다.
 - stdio 가 유일한 transport 다.
-- `settings` 의 `action: 'config'` 는 `off`·`advisory`·`standard`·`strict` 네 다이얼 값을 받으며, `off` 는 skills-only 런타임 밸브다.
+- `runtime` 의 `action: 'dial'` 은 `off`·`advisory`·`standard`·`strict` 네 다이얼 값을 받으며, `off` 는 skills-only 런타임 밸브다.
 
 ## API Contracts
 
@@ -17,7 +17,7 @@
 
 ### AC-tool-count — 도구 개수 고정
 
-- 등록 도구가 정확히 3개이고 각각 `wrapHandler` 를 거친다. workflow의 project_root는 필수 절대경로이고 task는 kebab-case다. start/resume은 intent가 필요하다. off/advisory에서 disabled, 나머지에서 accepted를 반환한다. accepted는 hook ACK와 구별된다.
+- 등록 도구가 정확히 3개이고 각각 `wrapHandler` 를 거친다. runtime의 project_root는 필수 절대경로이고 task는 kebab-case다. start/resume은 intent가 필요하고 `step`의 intent는 생략 시 유도된다. 참여 액션은 off/advisory에서 disabled, 나머지에서 accepted를 반환하며, `dial`은 유효 다이얼과 무관하게 동작한다. accepted는 hook ACK와 구별된다.
 
 ### AC-compact-serialization — 응답 크기
 

@@ -4,6 +4,7 @@ import {
   TRACKED_INVOCATIONS_CAP,
 } from '../../../constants/failureChain.js';
 import { TASK_NAME_PATTERN } from '../../../constants/gates.js';
+import { WORKFLOW_SKILLS } from '../../../constants/workflowChain.js';
 import type { WorkflowState } from '../../../types/workflow.js';
 
 import { parseWorkflowRequest } from './parseWorkflowRequest.js';
@@ -63,6 +64,11 @@ export function isWorkflowState(value: unknown): value is WorkflowState {
     !TASK_NAME_PATTERN.test(binding.task) ||
     !['change', 'review'].includes(binding.intent as string) ||
     !['active', 'suspended'].includes(binding.state as string)
+  )
+    return false;
+  if (
+    binding.step !== undefined &&
+    !(WORKFLOW_SKILLS as readonly unknown[]).includes(binding.step)
   )
     return false;
   if (
