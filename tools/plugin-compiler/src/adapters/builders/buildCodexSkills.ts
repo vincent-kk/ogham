@@ -42,13 +42,16 @@ const VARIANT_ENABLED_PLUGINS = new Set([
 /**
  * Whether this plugin emits a Codex skill variant: either a valid explicit
  * lifecycle/MCP marker exists, or the plugin is allowlisted and has a persona spawn
- * that needs registry adaptation. The manifest builder shares this predicate so
- * its `skills` path and the emitted tree never disagree.
+ * that needs registry adaptation. A plugin without a skills directory never
+ * emits one: its personas are reachable only through skills, and its manifest
+ * has no `skills` path to point at the tree. The manifest builder shares this
+ * predicate so its `skills` path and the emitted tree never disagree.
  * @param facts Canonical inputs used by both skills and manifest builders.
  * @returns Whether a complete Codex skill tree must be emitted.
  * @throws Error for invalid explicit markers or referenced personas/tools.
  */
 export function emitsCodexSkillVariant(facts: PluginFacts): boolean {
+  if (!facts.hasSkills) return false;
   const hasMcpAdaptation = validateMcpToolReferences(facts) !== null;
   let hasLifecycleAdaptation = false;
   for (const [relativePath, content] of Object.entries(facts.skillFiles)) {

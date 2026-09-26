@@ -56,7 +56,7 @@
 
 ### AC-adapters-skill-variant — 스킬 변이 완전성
 
-- A variant is emitted only when the allowlist/persona/registry-spawn conditions hold or a valid async lifecycle or MCP reference marker exists.
+- A variant is emitted only for a plugin with a skills directory, and only when the allowlist/persona/registry-spawn conditions hold or a valid async lifecycle or MCP reference marker exists.
 - 변이는 전체 스킬 집합과 persona를 포함한다. registry 스폰 콘텐츠만 self-load 주입을 받고 lifecycle marker 콘텐츠만 Codex spawn/join 치환을 받으며 결과는 `relativePath` 순이다.
 - lifecycle 생성본은 persona 선행 로드, child target 보관, final 전 `wait_agent` mailbox 대기와 sender 대조, parent 자동 재개 금지를 명시한다. 원본 Claude 문단과 source marker는 생성본에 남지 않는다.
 - marker phase·plugin·persona 검증 실패는 fail closed 하며, marker가 없는 비대상 스킬은 바이트 동일하다.

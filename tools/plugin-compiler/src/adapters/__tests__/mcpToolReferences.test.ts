@@ -100,6 +100,19 @@ describe("explicit MCP tool references", () => {
     );
   });
 
+  it("emits no skill variant for a plugin without skills even when a persona is marked", () => {
+    const facts = mcpToolFacts({
+      hasSkills: false,
+      skillFiles: {},
+      agentFiles: {
+        "courier.md":
+          "<!-- ogham-mcp-tools:seiri -->\nmcp__plugin_seiri_tools__workflow",
+      },
+    });
+    expect(buildCodexSkills(facts)).toBeNull();
+    expect(buildCodexPluginManifest(facts).skills).toBeUndefined();
+  });
+
   it("preserves similarly prefixed external tool names", () => {
     const source =
       "<!-- ogham-mcp-tools:seiri -->\nmcp__plugin_seiri-extra_tools__workflow mcp__other__gates";
