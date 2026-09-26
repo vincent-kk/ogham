@@ -6,7 +6,12 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
-import { DORMANT_HOOKS, HookName, HostTool } from '../constants/hooks.js';
+import {
+  CODEX_WORKFLOW_TOOL,
+  DORMANT_HOOKS,
+  HookName,
+  HostTool,
+} from '../constants/hooks.js';
 import { Route, STATE_PLACEHOLDER } from '../constants/http.js';
 import { INTERVENTION_LEVELS } from '../constants/intervention.js';
 import { RULE_ID_PREFIX } from '../constants/plugin.js';
@@ -258,7 +263,7 @@ describe('wiring', () => {
     ).toBe(true);
     expect(
       codexHooks.hooks.PostToolUse?.some(
-        (group) => group.matcher === 'mcp__seiri__workflow',
+        (group) => group.matcher === CODEX_WORKFLOW_TOOL,
       ),
     ).toBe(true);
     expect(codexHooks.hooks.PostToolUse?.[0]?.hooks[0]?.command).toBe(

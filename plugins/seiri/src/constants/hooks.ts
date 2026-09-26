@@ -1,3 +1,6 @@
+import { PLUGIN_NAME } from './plugin.js';
+import { ToolName } from './toolNames.js';
+
 /** Native shell tool name shared by the two supported hook ABIs. */
 export const BASH_TOOL = 'Bash';
 
@@ -42,6 +45,16 @@ export const HookName = {
 } as const;
 
 /**
+ * The server key seiri's `.mcp.json` declares — its only MCP server.
+ *
+ * Claude addresses a plugin tool as `mcp__plugin_<plugin>_<server>__<tool>`;
+ * for a single-server plugin the plugin compiler's Codex adapter maps that
+ * to `mcp__<plugin>__<tool>`. Both workflow addresses below compose from
+ * {@link PLUGIN_NAME}, this key and {@link ToolName.WORKFLOW}.
+ */
+const MCP_SERVER_KEY = 'tools';
+
+/**
  * Host tool names the PreToolUse/PostToolUse matchers select on.
  *
  * `hooks.json` cannot import this file, so each name is stated twice: once
@@ -51,18 +64,16 @@ export const HookName = {
  */
 export const HostTool = {
   BASH: BASH_TOOL,
-  WORKFLOW: 'mcp__plugin_seiri_tools__workflow',
+  WORKFLOW: `mcp__plugin_${PLUGIN_NAME}_${MCP_SERVER_KEY}__${ToolName.WORKFLOW}`,
 } as const;
 
 /**
- * Codex's server-prefixed form of {@link HostTool.WORKFLOW}.
- *
- * The plugin compiler's Codex adapter rewrites the Claude MCP address into
- * this shape at build time; this constant pins the value both hosts' hook
- * ABIs match against, sourced here alongside `HostTool` rather than
- * restated in the Codex workflow adapter.
+ * Codex's server-prefixed form of {@link HostTool.WORKFLOW}, composed from
+ * the same parts. `src/__tests__/wiring.test.ts` checks it against the
+ * matcher the compiler emits in `.codex-plugin/hooks.json`.
  */
-export const CODEX_WORKFLOW_TOOL = 'mcp__seiri__workflow' as const;
+export const CODEX_WORKFLOW_TOOL =
+  `mcp__${PLUGIN_NAME}__${ToolName.WORKFLOW}` as const;
 
 /**
  * Hooks that are built but deliberately absent from `hooks/hooks.json`.

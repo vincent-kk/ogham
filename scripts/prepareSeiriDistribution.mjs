@@ -15,17 +15,39 @@ import {
   readdirSync,
   rmSync,
 } from "node:fs";
-import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path";
+import {
+  dirname,
+  isAbsolute,
+  join,
+  posix,
+  relative,
+  resolve,
+  sep,
+} from "node:path";
 import { fileURLToPath } from "node:url";
+import { tsImport } from "tsx/esm/api";
 
 /** Repository location, independent of the caller's working directory. */
 const repository = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+/** Adapter paths from the compiler's canonical constants, so a rename there reaches this script. */
+const {
+  AGY_HOOKS_PATH,
+  AGY_MCP_CONFIG_PATH,
+  CODEX_MANIFEST_PATH,
+  CODEX_SKILLS_DIR,
+  ROOT_MANIFEST_PATH,
+} = await tsImport(
+  "../tools/plugin-compiler/src/constants/adapterPaths.ts",
+  import.meta.url,
+);
+/** Codex's convention directory; every Codex-only adapter lives under it. */
+const CODEX_DIR = posix.dirname(CODEX_MANIFEST_PATH);
 /** Compiler-owned outputs excluded even if stale copies exist in the checkout. */
 const generated = [
-  "plugin.json",
-  ".codex-plugin",
-  "mcp_config.json",
-  "hooks.json",
+  ROOT_MANIFEST_PATH,
+  CODEX_DIR,
+  AGY_MCP_CONFIG_PATH,
+  AGY_HOOKS_PATH,
 ];
 
 /** Return sorted file paths; symlinks cannot smuggle workspace dependencies into a distribution. */
@@ -87,11 +109,8 @@ function requireReference(output, reference) {
 
 /** Validate manifest parity, runtime references, and copied skill links after compilation. */
 export function validateSeiriDistribution(output) {
-  const rootBytes = readFileSync(join(output, "plugin.json"), "utf8");
-  if (
-    rootBytes !==
-    readFileSync(join(output, ".codex-plugin/plugin.json"), "utf8")
-  )
+  const rootBytes = readFileSync(join(output, ROOT_MANIFEST_PATH), "utf8");
+  if (rootBytes !== readFileSync(join(output, CODEX_MANIFEST_PATH), "utf8"))
     throw new Error("Root and Codex manifests differ");
   const manifest = JSON.parse(rootBytes);
   for (const field of ["skills", "hooks"]) {
@@ -128,7 +147,7 @@ export function validateSeiriDistribution(output) {
         requireReference(output, join(dirname(file), match[1]));
     }
     if (
-      file.startsWith(".codex-plugin/skills/") &&
+      file.startsWith(`${CODEX_SKILLS_DIR}/`) &&
       /mcp__plugin_seiri_tools__/.test(text)
     )
       throw new Error(`Unadapted Codex tool reference: ${file}`);
@@ -150,7 +169,11 @@ export function prepareSeiriDistribution({
   if (output.startsWith(`${source}${sep}`))
     throw new Error("--output must be outside the source plugin");
   const pkg = JSON.parse(readFileSync(join(source, "package.json"), "utf8"));
-  for (const required of ["plugin.json", ".codex-plugin/", "mcp_config.json"]) {
+  for (const required of [
+    ROOT_MANIFEST_PATH,
+    `${CODEX_DIR}/`,
+    AGY_MCP_CONFIG_PATH,
+  ]) {
     if (!pkg.files.includes(required))
       throw new Error(`Missing package.files entry: ${required}`);
   }
