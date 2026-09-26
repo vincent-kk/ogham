@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Expose settings, task evidence, and validated workflow participation requests. Keep the tool surface small and leave code inspection to the host.
+Expose settings, task evidence, and validated runtime participation requests. Keep the tool surface small and leave code inspection to the host.
 
 ## Conventions
 

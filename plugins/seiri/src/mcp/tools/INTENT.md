@@ -2,15 +2,15 @@
 
 ## Purpose
 
-Provide distinct contracts for configuration, task ledgers, and workflow requests. These tools do not inspect or edit application code.
+Provide distinct contracts for configuration, task ledgers, and runtime participation requests. These tools do not inspect or edit application code.
 
 ## Conventions
 
 - Browser and headless settings use the same core preview/apply functions.
 - Extend settings actions for settings concerns; task evidence and participation remain separate contracts.
-- Runtime config actions write the untracked valve; previewed settings determine baseline writes.
+- The runtime tool's `dial` action writes the untracked valve; previewed settings determine baseline writes.
 - Canonical MCP addresses use the full plugin namespace and compiler opt-in.
-- Workflow project_root is required and absolute; native actor identity is never a model argument.
+- Runtime project_root is required and absolute; native actor identity is never a model argument.
 
 ## Boundaries
 

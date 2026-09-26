@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Observe trusted host boundaries and paired invocations for explicitly participating tasks. Hooks do not elect skills, report global status, block actions, or inject rule bodies.
+Observe trusted host boundaries and paired invocations for explicitly participating tasks. standard/strict SessionStart states the stable chain, an election line, and a rule/dial/drift summary as advisory text, never a forced skill call; other hooks report only task-scoped progress and, under strict, the chain line on turns with no active binding (none or paused). Hooks never block actions or inject rule bodies.
 
 ## Structure
 
@@ -20,7 +20,7 @@ Executable entries are bundled and registered by convention. Dormant entries are
 ### Always do
 
 - Fail open and report failures through logHookFailure.
-- Leave stdout empty without meaningful additionalContext.
+- Leave stdout empty when off/advisory or no dial-scoped injection applies.
 - Allow trusted boundaries to revoke existing state even when assistance is disabled.
 
 ### Ask first
@@ -31,4 +31,4 @@ Executable entries are bundled and registered by convention. Dormant entries are
 
 - Write deployed host rules, duplicate their text, or call MCP tools.
 - Block, allow, or rewrite tool calls through hook decisions.
-- Create observations under off/advisory or activate from Skill loading.
+- Create observations under off/advisory, activate participation from Skill loading, or force a skill call from injected text.

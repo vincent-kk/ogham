@@ -4,14 +4,13 @@
 
 - `initialScope`는 공통 `resolveInitialConfigScope`로 결정한다. project 존재 → user 존재 → 최초 project 순이며, `ruleDocs.scope`도 같은 초기값을 쓴다.
 
-- 단일 도구가 `open`·`status`·`manifest`·`plan`·`sync`·`config` 여섯 `action` 을 제공한다.
+- 단일 도구가 `open`·`status`·`manifest`·`plan`·`sync` 다섯 `action` 을 제공한다. 런타임 밸브 조회·설정·해제는 `runtime` 도구의 `dial` 액션이 맡는다.
 - `open` 은 로컬 설정 폼을 띄우고 bounded long-poll 로 저장·닫힘을 기다리며 서버는 `127.0.0.1` 에만 바인딩한다.
 - 로컬 서버 가드는 `@ogham/http-kit` 을 재사용하고 토큰·Origin 검증을 재구현하지 않는다.
 - 프로젝트 루트는 `@ogham/cross-platform` 의 `projectRoot(project_root?)` 로 해석하며 `process.cwd()` 폴백을 두지 않는다.
 - 브라우저와 헤드리스 경로는 같은 `planRuleDocs`·`applyRuleDocs` 판정을 사용한다.
 - `sync` 는 계획을 먼저 보여준 뒤에만 적용하고 드리프트한 파일은 `resync` 에 id 가 명시된 때만 덮어쓴다.
 - `selections` 에서 빠진 id 는 배포 해제로 읽는다.
-- `config` 는 플러그인 루트 확인 전에 분기하며 런타임 밸브만 조회·설정·해제한다.
 - `open` 대기는 `[1, MAX_WAIT_SECONDS]` 로 clamp 하고 `extra.signal` 을 전파한다.
 - 종료 상태는 토큰 없는 origin 만 반환하며 `OGHAM_NO_BROWSER` 에서는 탭을 열지 않는다.
 
@@ -22,7 +21,6 @@
 - `status` — `{ action: 'status', entries }`; 현재 레이어 채널의 배포 상태와 드리프트.
 - `manifest` — `{ action: 'manifest', manifest }`; 관리 대상 규칙 목록.
 - `plan`·`sync` — `{ action, result, selected }`; 같은 계획을 각각 미적용·적용 상태로 반환한다.
-- `config` — `{ action: 'config', op, changed, dial, posture }`; `set` 은 유효한 `intervention` 을 요구한다.
 
 ## Acceptance Criteria
 

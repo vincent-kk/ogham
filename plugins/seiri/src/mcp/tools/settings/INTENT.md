@@ -2,16 +2,15 @@
 
 ## Purpose
 
-규칙 선택과 개입 다이얼을 다루는 단일 MCP 표면. `action` 으로 브라우저 설정 페이지, 헤드리스 조회·계획·동기화, 런타임 다이얼을 분기하며 모든 경로가 같은 core 판정을 사용한다.
+규칙 선택을 다루는 단일 MCP 표면. `action` 으로 브라우저 설정 페이지와 헤드리스 조회·계획·동기화를 분기하며 모든 경로가 같은 core 판정을 사용한다. 런타임 다이얼은 `runtime` 도구의 `dial` 액션이 다룬다.
 
 ## Conventions
 
-- `action` 은 `open`·`status`·`manifest`·`plan`·`sync`·`config` 여섯 값이다.
+- `action` 은 `open`·`status`·`manifest`·`plan`·`sync` 다섯 값이다.
 - `open` 은 `127.0.0.1` 전용 서버와 bounded long-poll 을 사용하며 `extra.signal` 을 전파한다.
 - 모듈 레벨 서버 싱글톤은 `pending` 재호출을 이어 받고 다른 프로젝트 요청에서 교체된다.
 - 헤드리스 `plan` 과 `sync`, 브라우저 `/plan` 과 `/save` 는 같은 core 계획·적용 함수를 경유한다.
 - 프로젝트 루트는 `project_root` 로 받고 `@ogham/cross-platform` 의 `projectRoot(path?)` 로 해석한다.
-- `config` 는 런타임 밸브만 다루며 기준선은 브라우저 저장 경로가 diff 를 보인 뒤 기록한다.
 - 모든 응답은 입력과 같은 `action` 판별 키를 갖는다.
 
 ## Boundaries
@@ -32,4 +31,4 @@
 - 세션 훅에서 호출.
 - `127.0.0.1` 외 바인딩 또는 CORS 와일드카드.
 - 매니페스트에 없는 파일 기록, 사용자 확인 없는 로컬 편집 덮어쓰기.
-- `config` 로 기준선 기록.
+- 런타임 밸브 조회·설정·해제 (`runtime` 도구의 책임).

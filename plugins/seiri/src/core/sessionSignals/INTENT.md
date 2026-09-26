@@ -9,6 +9,8 @@ Own ephemeral actor-scoped workflow participation and observations. The host and
 - A host session and its main or child actor have separate hashed state addresses.
 - A trusted native turn boundary must precede tool observations. Tools cannot create that boundary.
 - Explicit lifecycle requests take effect only through paired successful host results.
+- Only an entry step (`write-plan`, `execute`) or `start` can create a binding or switch it to another task; `resume` and every other step only update an existing same-task binding.
+- A read of another actor's binding (for a one-time handoff) never locks or writes that actor's state.
 - Store hashes and bounded counters, never commands, prompts, outputs, or transcripts.
 
 ## Boundaries
