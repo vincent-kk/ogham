@@ -9,13 +9,10 @@
 - `injectStatic.ts` — `buildStaticPayload(config, self)` (payload 텍스트 빌더)
 - `build/injectStatic.entry.ts` — 번들 진입점 (loadConfig → payload → stdout)
 - `utils/strengthLabel.ts` — `intervention_strength → 한 단어 라벨` (UI 슬라이더 어휘)
-- `utils/routingStance.ts` — 강도가 실제로 바꾸는 Routing guidance 라인 배열
-- `utils/domainLines.ts` — 활성 provider 키워드 → 소유자 표 (+ 제외 사유 접미)
-- `utils/joinKeywords.ts` — keywords 트림 + 비었을 때 caller fallback
 
 ## Conventions
 
-- `loadConfig` 는 `../shared/loadConfig.js` (LCA shared organ) 에서 import
+- `loadConfig` 는 `../shared/loadConfig.ts` (LCA shared organ) 에서 import
 - payload 라인 순서는 `.metadata/cennad/hooks.md` 와 일치 유지
 - `Active providers` = crosscheck 명단(enabled 전부), `Auto-routing` = electable. crosscheck 스킬이 전자를 읽으므로 의미를 바꾸지 않는다
 - 표에는 제외된 provider 도 남기고 사유를 붙인다 (self host / by setup)

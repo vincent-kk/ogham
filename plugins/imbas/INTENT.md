@@ -4,15 +4,7 @@
 
 ## Structure
 
-| Path                         | Role                                           |
-| ---------------------------- | ---------------------------------------------- |
-| `src/`                       | TypeScript 소스 (fractal 루트; 자체 INTENT.md) |
-| `agents/`                    | 역할별 에이전트 (analyst, planner, estimator)  |
-| `skills/`                    | 사용자 스킬 디렉토리                           |
-| `scripts/`                   | esbuild 빌드 스크립트                          |
-| `bridge/` · `public/`        | 빌드 산출물: MCP 번들 · settings UI (커밋)     |
-| `.claude-plugin/plugin.json` | Claude Code 플러그인 매니페스트                |
-| `.mcp.json`                  | MCP 서버 등록                                  |
+- `bridge/` · `public/` 는 빌드 산출물(MCP 번들 · settings UI)이며 커밋한다.
 
 ## Conventions
 
@@ -37,7 +29,7 @@
 ### Never do
 
 - `bridge/` 손편집 / `src/version.ts` 손편집
-- 다른 provider 의 `references/` 디렉토리 참조 (cross-provider leakage)
+- 다른 provider 의 references 디렉토리 참조 (cross-provider leakage)
 - `.imbas/runs/<id>/` 외 임의 위치에 state 저장
 
 ## Dependencies

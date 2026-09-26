@@ -8,9 +8,7 @@ SessionStart 이벤트 디스패처. `helpers/bootstrap`(볼트 init·CLAUDE.md 
 
 - `sessionStart.entry.ts` — 브리지 진입점 (stdin → selfProbe → orchestrator → stdout)
 - `sessionStart.ts` — `orchestrateSessionStart` (조립 + 병합)
-- `helpers/bootstrap/` — 세션 시작 실제 작업
-- `helpers/probeAdvisory/` — selfProbe 오류 필터 + 경고 조립
-- `helpers/remindExpiredBuffer/` — L5 buffer TTL 만료 알림 (삭제하지 않음)
+- L5 buffer TTL 만료 helper 는 알리기만 하고 삭제하지 않는다
 
 ## Conventions
 
