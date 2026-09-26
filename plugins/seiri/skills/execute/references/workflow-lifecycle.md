@@ -38,7 +38,7 @@ Pause before deliberately leaving work open, waiting for review, or switching to
 
 ## Acknowledgement and fallback
 
-An `accepted` tool reply validates the request; it does not confirm activation or any state change. Only the paired PostToolUse hook ACK confirms a `created` or `switched` transition; a `mismatch` notice means the call was not applied because a different task is bound. Match that acknowledgement to this task and action before relying on automatic CHECK recording.
+An `accepted` tool reply validates the request; it does not confirm activation or any state change. Only the paired PostToolUse hook ACK confirms a transition: `created` or `switched` in progress-line shape, or an explicit `resume`, `pause`, or `finish` in its own acknowledgement text; a same-task `step`'s `updated` is silent, and a `mismatch` notice means the call was not applied because a different task is bound. Match that acknowledgement to this task and action before relying on automatic CHECK recording.
 
 If the tool is unavailable, `disabled`, fails, or produces no hook ACK, continue the authorized work using explicit verification and task records. Do not retry in a loop, toggle settings, or make successful activation a prerequisite for work. Report unavailable automatic assistance only when it affects the evidence being claimed. Missing acknowledgements never become successful gate evidence.
 

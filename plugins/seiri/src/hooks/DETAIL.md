@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 훅은 비차단이며 규칙 본문은 주입하지 않습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift를 주입합니다(선출·posture·규칙 요약은 `hooks/setup/render/`, 체인 한 줄은 `hooks/shared/progressLine.ts`). 진입 `step`이나 `start`로 바인딩이 생기면 PostToolUse는 `created`·`switched`에서, UserPromptSubmit은 활성 바인딩이 있는 매 턴에, SubagentStart는 부모 main의 활성 바인딩이 있을 때 1회 진행 줄을 주입하고, strict UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다. off/advisory와 주입 대상이 없는 이벤트는 wire stdout까지 비웁니다.
+- 훅은 비차단이며 규칙 본문은 주입하지 않습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift를 주입합니다(선출·posture·규칙 요약은 `hooks/setup/render/`; SessionStart의 체인 한 줄은 `WORKFLOW_CHAIN_LINE`(`constants/workflowChain.ts`)를 `renderPostureLines`로 얻고, 진행 줄·진행-줄 형식 ACK·subagent 줄은 `hooks/shared/progressLine/`의 concrete 파일에서 가져옵니다). 진입 `step`이나 `start`로 바인딩이 생기면 PostToolUse는 `created`·`switched`에서, UserPromptSubmit은 활성 바인딩이 있는 매 턴에, SubagentStart는 부모 main의 활성 바인딩이 있을 때 1회 진행 줄을 주입하고, strict UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다. off/advisory와 주입 대상이 없는 이벤트는 wire stdout까지 비웁니다.
 - 예외는 fail-open으로 처리하고 logHookFailure로 진단합니다. stdin deadline은 외부 timeout보다 짧습니다.
 - off/advisory는 신규 관측·주입을 금지하지만 기존 참여의 신뢰되는 턴·세션 경계 철회는 허용합니다.
 - 훅은 concrete 내부 파일만 import하고 검증 런타임·MCP SDK·glob 엔진을 포함하지 않습니다. 공유 패키지는 공개 진입점으로 사용합니다.
@@ -15,7 +15,7 @@
 - UserPromptSubmit은 최신 native-turn anchor를 기록합니다. off/advisory는 이전 binding을 suspend하고(`suspend: !enabled`) 항상 침묵하며, standard/strict는 suspend하지 않고 활성 바인딩이 있으면 진행 줄을(standard의 paused 바인딩은 무주입), strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다.
 - SubagentStart는 부모 binding을 상속하지 않고 자식의 첫 anchor만 생성합니다. 부모가 main actor이고 활성 바인딩이 있으면(`readActorBinding`, 무락·무쓰기) 진행 줄을 1회 주입합니다.
 - PreToolUse는 기존 anchor와 일치하는 runtime 참여 액션(`step`·`start`·`resume`·`pause`·`finish`; `dial`은 제외)이나 Bash invocation만 기록하며 권한 결정·입력수정을 하지 않습니다.
-- PostToolUse와 Claude Failure는 정확한 paired invocation의 현재 generation/actor/task에만 효과를 적용합니다. runtime의 `created`·`switched`는 진행 줄 형식 ACK, `updated`·`rejected`는 무주입, `mismatch`는 안내 문구를 내고, Bash는 활성 task의 증거/실패 변화만 제공합니다.
+- PostToolUse와 Claude Failure는 정확한 paired invocation의 현재 generation/actor/task에만 효과를 적용합니다. runtime의 `created`·`switched`는 진행 줄 형식 ACK, `mismatch`는 안내 문구를 내고, `rejected`는 무주입입니다. `updated`는 같은 task `step`이면 무주입이고, `resume`·`pause`·`finish`는 기존 control-verb ACK 문구로 응답합니다. Bash는 활성 task의 증거/실패 변화만 제공합니다.
 - 훅 밖 소비자는 공개 배럴을 사용할 수 있으나 executable entry는 concrete 구현을 사용합니다.
 
 ## Acceptance Criteria

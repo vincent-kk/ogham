@@ -7,8 +7,8 @@ Apply acknowledged lifecycle requests, inject their progress-line acknowledgment
 ## Conventions
 
 - Require an exact successful Pre/Post pairing before applying lifecycle effects.
-- Inject an acknowledgment only for `created`/`switched`; a mismatch notice for `mismatch`; nothing for `updated`/`rejected`.
-- Share the acknowledgment's line format with `hooks/shared/progressLine.ts`.
+- Inject the progress-line acknowledgment for `created`/`switched`; a mismatch notice for `mismatch`; nothing for `rejected`. For `updated`, inject nothing only for a same-task `step`; `resume`/`pause`/`finish` acknowledge in their prior control-verb text.
+- Share the acknowledgment's line format with `hooks/shared/progressLine/`.
 - Judge CHECK evidence through normalized output and literal EXPECT; absent data never means success.
 - Retain regression and agent provenance while suppressing unchanged verdict/evidence notifications.
 - Keep failure counters within the active binding and ignore interrupted execution.

@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { ELECTION_STANDARD_LINE } from '../../../../constants/electionLines.js';
+import { ELECTION_STRICT_LINE } from '../../../../constants/electionLines.js';
 import { writeConfig } from '../../../../core/infra/configLoader/loaders/writeConfig.js';
 import { handleRuntime } from '../runtime.js';
 
@@ -115,7 +115,7 @@ describe('runtime dial action', () => {
       dial_op: 'set',
       intervention: 'strict',
     });
-    expect(strict.posture).toContain(ELECTION_STANDARD_LINE);
+    expect(strict.posture).toContain(ELECTION_STRICT_LINE);
 
     const advisory = call(repoRoot, {
       dial_op: 'set',

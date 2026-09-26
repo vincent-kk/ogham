@@ -9,7 +9,7 @@ Establish the current native turn. Under standard/strict, keep an active binding
 - Under standard/strict, anchor the trusted turn without suspending an existing binding, and read the post-anchor snapshot for the progress line.
 - Under off/advisory, revoke existing metadata and create no new anchor.
 - Do not inspect prompt prose to infer task intent.
-- Progress-line and chain-line rendering live in `hooks/shared/progressLine.ts`, shared with SubagentStart and PostToolUse.
+- Progress-line and chain-line rendering live in `hooks/shared/progressLine/`'s concrete files, shared with SubagentStart and PostToolUse; none of them import an election or posture constant, so no `Election` text can reach these bundles.
 
 ## Boundaries
 

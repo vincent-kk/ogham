@@ -34,14 +34,14 @@ it('does not elect skills at a new user turn', () => {
     }),
   ).toEqual({ continue: true });
 });
-it('does not elect skills at session start', () => {
-  expect(
-    processSessionStart({
-      ...fixture(),
-      hook_event_name: 'SessionStart',
-      source: 'startup',
-    }),
-  ).toEqual({ continue: true });
+it('states the election and chain at session start', () => {
+  const context = processSessionStart({
+    ...fixture(),
+    hook_event_name: 'SessionStart',
+    source: 'startup',
+  }).hookSpecificOutput?.additionalContext;
+  expect(context).toContain('Election:');
+  expect(context).toContain('Workflow: seiri:write-plan');
 });
 it('does not record a ledger outside an explicitly bound workflow', () => {
   const input = fixture();
