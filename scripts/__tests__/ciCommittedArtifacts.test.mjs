@@ -47,6 +47,14 @@ describe("CI committed artifact gate", () => {
       );
   });
 
+  it("checks Codex MCP tool markers in the job that runs on every trigger", () => {
+    assert.ok(
+      job.includes(
+        "run: node --test scripts/__tests__/mcpToolMarkers.test.mjs",
+      ),
+    );
+  });
+
   it("triggers on every hook plugin directory for push and pull_request", () => {
     for (const trigger of ["push", "pull_request"]) {
       const paths = triggerPaths(trigger);

@@ -323,6 +323,11 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      # Runs on every trigger, so a skill-only change cannot ship an unmarked
+      # owned MCP tool name to Codex.
+      - name: Owned MCP tool references are marked for Codex
+        run: node --test scripts/__tests__/mcpToolMarkers.test.mjs
+
       - name: Build hook plugin runtimes and adapters
         run: node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri,@ogham/cennad,@ogham/filid,@ogham/maencof,@ogham/maencof-lens
 
