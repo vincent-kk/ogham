@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Bundle src/hooks/<name>/build/<name>.entry.ts -> bridge/<name>.mjs
+ * Bundle src/hooks/<name>/build/<name>.entry.ts -> bridge/claude/<name>.mjs
+ * and bridge/codex/<name>.mjs
  *
  * Hooks must remain thin scripts (Node builtins only). Pulling external
  * runtimes into a hook bundle breaks the per-event cold-start budget. A
@@ -35,28 +36,37 @@ const hookEntries = [
   { name: 'injectDynamic', maxBytes: LIGHT_HOOK_BYTES },
 ];
 
+// Each hook is bundled once per host runtime directory. Claude loads
+// bridge/claude; the compiler's `codexHookRuntime` setting points Codex at
+// bridge/codex.
+const HOOK_HOSTS = ['claude', 'codex'];
+
 const buildResults = await Promise.all(
-  hookEntries.map(async ({ name }) => ({
-    name,
-    result: await esbuild.build({
-      entryPoints: [resolve(root, `src/hooks/${name}/build/${name}.entry.ts`)],
-      bundle: true,
-      platform: 'node',
-      target: 'node20',
-      format: 'esm',
-      outfile: resolve(outputDir, `${name}.mjs`),
-      minify: true,
-      sourcemap: false,
-      treeShaking: true,
-      write: !check,
-    }),
-  })),
+  hookEntries.flatMap(({ name }) =>
+    HOOK_HOSTS.map(async (host) => ({
+      bundle: `${host}/${name}.mjs`,
+      result: await esbuild.build({
+        entryPoints: [
+          resolve(root, `src/hooks/${name}/build/${name}.entry.ts`),
+        ],
+        bundle: true,
+        platform: 'node',
+        target: 'node20',
+        format: 'esm',
+        outfile: resolve(outputDir, host, `${name}.mjs`),
+        minify: true,
+        sourcemap: false,
+        treeShaking: true,
+        write: !check,
+      }),
+    })),
+  ),
 );
 
 console.log(
   check
-    ? `  Hook scripts (${hookEntries.length}) checked -> ${outputDir}`
-    : `  Hook scripts (${hookEntries.length}) -> ${outputDir}`,
+    ? `  Hook scripts (${hookEntries.length}) checked -> ${outputDir}/{claude,codex}`
+    : `  Hook scripts (${hookEntries.length}) -> ${outputDir}/{claude,codex}`,
 );
 
 const FORBIDDEN_PATTERNS = [
@@ -99,31 +109,36 @@ const FORBIDDEN_PATTERNS = [
 const violations = [];
 
 for (const { name, maxBytes } of hookEntries) {
-  const file = resolve(outputDir, `${name}.mjs`);
-  const buildResult = buildResults.find((entry) => entry.name === name).result;
-  let content;
-  if (check) {
-    content = Buffer.from(buildResult.outputFiles[0].contents);
-    let existing = null;
-    try {
-      existing = await readFile(file);
-    } catch (error) {
-      if (error.code !== 'ENOENT') throw error;
-    }
-    if (existing === null || !content.equals(existing))
-      violations.push(`  ${name}.mjs: generated output is out of sync`);
-  } else content = await readFile(file);
+  for (const host of HOOK_HOSTS) {
+    const bundle = `${host}/${name}.mjs`;
+    const file = resolve(outputDir, host, `${name}.mjs`);
+    const buildResult = buildResults.find(
+      (entry) => entry.bundle === bundle,
+    ).result;
+    let content;
+    if (check) {
+      content = Buffer.from(buildResult.outputFiles[0].contents);
+      let existing = null;
+      try {
+        existing = await readFile(file);
+      } catch (error) {
+        if (error.code !== 'ENOENT') throw error;
+      }
+      if (existing === null || !content.equals(existing))
+        violations.push(`  ${bundle}: generated output is out of sync`);
+    } else content = await readFile(file);
 
-  const size = content.byteLength;
-  if (size > maxBytes) {
-    violations.push(
-      `  ${name}.mjs: ${size} bytes > ${maxBytes} (${(size / 1024).toFixed(1)} KB > ${(maxBytes / 1024).toFixed(0)} KB)`,
-    );
-  }
-  const source = content.toString('utf8');
-  for (const pattern of FORBIDDEN_PATTERNS) {
-    if (pattern.test(source)) {
-      violations.push(`  ${name}.mjs: forbidden pattern ${pattern} matched`);
+    const size = content.byteLength;
+    if (size > maxBytes) {
+      violations.push(
+        `  ${bundle}: ${size} bytes > ${maxBytes} (${(size / 1024).toFixed(1)} KB > ${(maxBytes / 1024).toFixed(0)} KB)`,
+      );
+    }
+    const source = content.toString('utf8');
+    for (const pattern of FORBIDDEN_PATTERNS) {
+      if (pattern.test(source)) {
+        violations.push(`  ${bundle}: forbidden pattern ${pattern} matched`);
+      }
     }
   }
 }

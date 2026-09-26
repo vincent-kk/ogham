@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Claude Code 플러그인의 Layer 1 자동 실행 계층. 2개 lifecycle 이벤트를 `bridge/*.mjs` 스크립트에 매핑하는 정적 설정 노드.
+Claude Code 플러그인의 Layer 1 자동 실행 계층. 2개 lifecycle 이벤트를 `bridge/claude/*.mjs` 스크립트에 매핑하는 정적 설정 노드.
 
 ## Structure
 
@@ -39,6 +39,6 @@ Claude Code 플러그인의 Layer 1 자동 실행 계층. 2개 lifecycle 이벤�
 
 ## Dependencies
 
-- `bridge/*.mjs` (esbuild 번들 산출물)
+- `bridge/<host>/*.mjs` (esbuild 번들 산출물)
 - `libs/run.cjs` (크로스 플랫폼 hook runner)
 - `src/hooks/<name>/build/<name>.entry.ts` (빌드 입력)

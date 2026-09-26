@@ -31,7 +31,7 @@ yarn build
 claude --plugin-dir ./plugins/cennad
 ```
 
-빌드하면 `bridge/mcp-server.cjs`, `bridge/injectStatic.mjs`, `bridge/injectDynamic.mjs` 가 생성됩니다.
+빌드하면 `bridge/mcp-server.cjs`와 훅 번들 `injectStatic.mjs`·`injectDynamic.mjs`가 `bridge/claude/`(Claude)와 `bridge/codex/`(Codex)에 생성됩니다.
 
 ### 사전 조건
 

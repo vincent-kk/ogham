@@ -8,8 +8,10 @@ const bridgeDir = resolve(packageRoot, 'bridge');
 
 const REQUIRED_ARTIFACTS = [
   'mcp-server.cjs',
-  'injectStatic.mjs',
-  'injectDynamic.mjs',
+  ...['claude', 'codex'].flatMap((host) => [
+    `${host}/injectStatic.mjs`,
+    `${host}/injectDynamic.mjs`,
+  ]),
 ];
 
 function isTruthy(v: string | undefined): boolean {

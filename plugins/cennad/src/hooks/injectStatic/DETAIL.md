@@ -5,7 +5,7 @@
 - 세션 시작 시 cennad home 의 `config.json` 을 읽어 provider 비율, crosscheck 명단(`Active providers`), 자동 라우팅 명단(`Auto-routing`), 강도별 stance, 도메인 소유자 표를 `additionalContext` 로 **1회** 출력한다.
 - active config 를 JSON/object 로 읽을 수 없으면 기본 home 의 config 를 읽기 전용 fallback 으로 시도하고, 그마저 실패하면 defaults 로 진행한다.
 - **세션을 절대 차단하지 않는다.** 어떤 실패에도 계속 진행한다.
-- 진입점은 `injectStatic.entry.ts` 이며 esbuild 가 `bridge/*.mjs` 로 번들한다.
+- 진입점은 `injectStatic.entry.ts` 이며 esbuild 가 `bridge/<host>/*.mjs` 로 번들한다.
 
 ## API Contracts
 

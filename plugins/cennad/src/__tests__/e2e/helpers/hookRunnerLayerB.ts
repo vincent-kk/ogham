@@ -57,7 +57,7 @@ export function runHookLayerB(
 
   // Compare the shipped launcher topology with a direct bundle process. Session
   // identity must remain the same across both instead of depending on ppid.
-  const script = resolve(bridgeDir, `${name}.mjs`);
+  const script = resolve(bridgeDir, 'claude', `${name}.mjs`);
   const runner = resolve(bridgeDir, '..', 'libs', 'run.cjs');
   const args = opts.topology === 'direct' ? [script] : [runner, script];
   const result = spawnSync(process.execPath, args, {
