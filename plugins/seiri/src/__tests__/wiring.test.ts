@@ -216,7 +216,7 @@ describe('wiring', () => {
     expect(server).not.toContain('config_op');
     expect(server).toContain('ToolName.RUNTIME');
     expect(server).toContain(
-      ".enum(['start', 'resume', 'pause', 'finish', 'dial'])",
+      ".enum(['step', 'start', 'resume', 'pause', 'finish', 'dial'])",
     );
     expect(server).toContain('dial_op: z');
   });

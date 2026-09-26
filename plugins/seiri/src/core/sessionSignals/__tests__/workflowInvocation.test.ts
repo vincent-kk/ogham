@@ -86,7 +86,7 @@ it('does not let a late lifecycle result replace the current task', () => {
     completeInvocation({ ...id, call: 'second' }, 'second', NOW, (s) =>
       transitionWorkflow(s, second),
     ),
-  ).toBe('applied');
+  ).toBe('switched');
   expect(
     completeInvocation({ ...id, call: 'first' }, 'first', NOW, (s) =>
       transitionWorkflow(s, first),
@@ -114,7 +114,7 @@ it('matches exact actor, turn, invocation and input without consuming a mismatch
 });
 it('does not reactivate a resumed child with no trusted new boundary', () => {
   const id = fixture();
-  observeBoundary(id, true, NOW, true);
+  observeBoundary(id, true, NOW, { firstChild: true });
   observeInvocation({ ...id, call: 'bash' }, 'command', NOW);
   expect(
     completeInvocation({ ...id, call: 'bash' }, 'command', NOW, () => true),

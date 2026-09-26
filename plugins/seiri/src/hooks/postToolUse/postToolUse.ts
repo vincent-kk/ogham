@@ -58,7 +58,13 @@ export function processToolOutcome(
         )
           return EMPTY_RESULT;
         const outcome = transitionWorkflow(state, request);
-        if (outcome === 'rejected') return EMPTY_RESULT;
+        // A same-task `step` update is silent; `resume`, `pause` and
+        // `finish` acknowledge on any non-rejected outcome, same as `start`.
+        if (
+          outcome === 'rejected' ||
+          (outcome === 'updated' && request.action === 'step')
+        )
+          return EMPTY_RESULT;
         return {
           continue: true,
           hookSpecificOutput: {

@@ -15,7 +15,9 @@ export interface RuntimeInput {
   project_root: string;
   /** Required for participation actions; unused by `dial`. */
   task?: string;
-  /** Required for `start` and `resume`; unused by `dial`. */
+  /** Required for action `step`; unused by other actions. */
+  step?: WorkflowRequest['step'];
+  /** Required for `start` and `resume`; optional (derived) for `step`; unused by `dial`. */
   intent?: WorkflowRequest['intent'];
   /** For `dial`, default `get`; unused by participation actions. */
   dial_op?: DialOp | null;

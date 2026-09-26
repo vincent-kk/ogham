@@ -17,6 +17,6 @@ export function processSessionStart(
   if (!['startup', 'resume', 'clear', 'fork'].includes(input.source ?? ''))
     return EMPTY_RESULT;
   const identity = workflowIdentity(input, adapter);
-  if (identity) observeBoundary(identity, false, now);
+  if (identity) observeBoundary(identity, false, now, { suspend: true });
   return EMPTY_RESULT;
 }

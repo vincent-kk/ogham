@@ -1,10 +1,15 @@
+import type { WorkflowSkill } from '../constants/workflowChain.js';
+
 import type { HookBaseInput } from './hooks.js';
 
 /** Requested lifecycle transition, sequenced by the caller. */
-export type WorkflowAction = 'start' | 'resume' | 'pause' | 'finish';
+export type WorkflowAction = 'step' | 'start' | 'resume' | 'pause' | 'finish';
 
 /** Declared purpose of a start or resume request. */
 export type WorkflowIntent = 'change' | 'review';
+
+/** Chain skill a `step` request names; the union of the nine chain skills. */
+export type WorkflowStep = WorkflowSkill;
 
 /** Host-neutral identity, hashed at the hook boundary. */
 export interface WorkflowIdentity {
@@ -26,7 +31,9 @@ export interface WorkflowRequest {
   project_root: string;
   /** Path-safe task name; no ledger is required. */
   task: string;
-  /** Required for start and resume. */
+  /** Chain skill named by a `step` request; required for `action: "step"`. */
+  step?: WorkflowStep;
+  /** Required for start and resume; derived for `step` when absent. */
   intent?: WorkflowIntent;
 }
 
@@ -37,6 +44,8 @@ export type WorkflowReply =
       status: 'accepted';
       action: WorkflowAction;
       task: string;
+      /** Echoed for `action: "step"`. */
+      step?: WorkflowStep;
       intent?: WorkflowIntent;
     };
 
@@ -45,6 +54,8 @@ export interface WorkflowBinding {
   task: string;
   intent: WorkflowIntent;
   state: 'active' | 'suspended';
+  /** Chain skill last recorded for this binding, when a `step` set it. */
+  step?: WorkflowStep;
   counts: Record<string, number>;
   announced: string[];
   verdicts: Record<string, string>;

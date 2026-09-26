@@ -17,6 +17,8 @@ export function processSubagentStart(
 ): HookOutput {
   const identity = workflowIdentity(input, adapter);
   if (identity && input.agent_id)
-    observeBoundary(identity, workflowEnabled(input.cwd), now, true);
+    observeBoundary(identity, workflowEnabled(input.cwd), now, {
+      firstChild: true,
+    });
   return EMPTY_RESULT;
 }

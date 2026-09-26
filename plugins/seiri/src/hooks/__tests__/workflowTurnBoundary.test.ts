@@ -1,4 +1,11 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  readdirSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 
 import { portableJoin } from '@ogham/cross-platform';
@@ -57,6 +64,12 @@ function result(host: string) {
     },
   ];
   return host === 'claude' ? content : { content };
+}
+/** Read the sole actor state file created for one isolated repository root. */
+function sessionState(cwd: string) {
+  const dir = portableJoin(cwd, '.seiri/sessions');
+  const name = readdirSync(dir).find((entry) => entry.endsWith('.json'))!;
+  return JSON.parse(readFileSync(portableJoin(dir, name), 'utf8'));
 }
 afterEach(() =>
   roots
@@ -186,6 +199,7 @@ it.each(HOSTS)(
       },
       adapter,
     );
+    expect(sessionState(input.cwd).binding.state).toBe('suspended');
     expect(
       processToolOutcome(
         {

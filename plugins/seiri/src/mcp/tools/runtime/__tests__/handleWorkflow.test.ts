@@ -78,3 +78,26 @@ it('accepts pause and finish without an intent', () => {
     handleWorkflow({ ...input, action: 'finish', intent: undefined }).status,
   ).toBe('accepted');
 });
+it('accepts a step request and echoes the derived intent', () => {
+  const input = fixture();
+  expect(
+    handleWorkflow({
+      ...input,
+      action: 'step',
+      step: 'review-plan',
+      intent: undefined,
+    }),
+  ).toEqual({
+    status: 'accepted',
+    action: 'step',
+    task: 'test-task',
+    step: 'review-plan',
+    intent: 'review',
+  });
+});
+it('rejects a step request naming a value outside WorkflowStep', () => {
+  const input = fixture();
+  expect(() =>
+    handleWorkflow({ ...input, action: 'step', step: 'not-a-skill' }),
+  ).toThrow();
+});

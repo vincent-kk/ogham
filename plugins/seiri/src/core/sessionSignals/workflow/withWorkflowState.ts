@@ -11,11 +11,10 @@ import { acquireLockDir } from '../../utils/acquireLockDir.js';
 import { findRepoRoot } from '../../utils/findRepoRoot.js';
 import { writeAtomically } from '../../utils/writeAtomically.js';
 
+import { isActorFresh } from './isActorFresh.js';
 import { prepareDirectory } from './prepareDirectory.js';
 import { readState } from './readState.js';
 
-/** Seven days without observations retires this actor, never user ledgers. */
-const ACTOR_TTL = 7 * 24 * 60 * 60 * 1000;
 /** Incomplete invocations expire independently of actor activity. */
 const CALL_TTL = 24 * 60 * 60 * 1000;
 
@@ -50,7 +49,7 @@ export function withWorkflowState<T>(
     held = acquireLockDir(lock);
     if (!held) throw new Error('Actor lock unavailable');
     let state = readState(path);
-    if (state && now - state.lastObservedAt > ACTOR_TTL) {
+    if (state && !isActorFresh(state, now)) {
       unlinkSync(path);
       if (existsSync(revoked)) unlinkSync(revoked);
       state = undefined;

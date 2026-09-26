@@ -3,6 +3,7 @@ import { z } from 'zod';
 
 import { PLUGIN_NAME } from '../../../constants/plugin.js';
 import { ToolName } from '../../../constants/toolNames.js';
+import { WORKFLOW_SKILLS } from '../../../constants/workflowChain.js';
 import { VERSION } from '../../../version.js';
 import { handleGates } from '../../tools/gates/index.js';
 import { handleRuntime } from '../../tools/runtime/index.js';
@@ -100,10 +101,10 @@ export function createServer(): McpServer {
     ToolName.RUNTIME,
     {
       description:
-        'Session runtime: optional workflow participation after a skill has been selected, plus the intervention dial. Sequence participation lifecycle calls (start, resume, pause, finish); accepted validates the request, and only the matching PostToolUse acknowledgment confirms participation. No ledger is required. Missing acknowledgment or disabled assistance never blocks work. finish ends participation, not proof of success. dial reads or moves the intervention valve immediately, with no acknowledgment pair.',
+        'Session runtime: optional workflow participation after a skill has been selected, plus the intervention dial. step is the first verb of every chain skill; write-plan and execute are entry steps that create or switch a binding, the other seven only update an existing one for the same task. Sequence participation lifecycle calls (step, start, resume, pause, finish); accepted validates the request, and only the matching PostToolUse acknowledgment confirms participation. No ledger is required. Missing acknowledgment or disabled assistance never blocks work. finish ends participation, not proof of success. dial reads or moves the intervention valve immediately, with no acknowledgment pair.',
       inputSchema: {
         action: z
-          .enum(['start', 'resume', 'pause', 'finish', 'dial'])
+          .enum(['step', 'start', 'resume', 'pause', 'finish', 'dial'])
           .describe(
             'Participation transition to sequence, or dial to read or move the intervention valve.',
           ),
@@ -116,12 +117,20 @@ export function createServer(): McpServer {
           .string()
           .optional()
           .describe(
-            'Kebab-case task name, with or without a gate ledger. Required for start, resume, pause and finish.',
+            'Kebab-case task name, with or without a gate ledger. Required for step, start, resume, pause and finish.',
+          ),
+        step: z
+          .enum(WORKFLOW_SKILLS)
+          .optional()
+          .describe(
+            'Calling chain skill; required for action "step". write-plan and execute are entry steps.',
           ),
         intent: z
           .enum(['change', 'review'])
           .optional()
-          .describe('Required for start and resume.'),
+          .describe(
+            'Required for start and resume. Optional for step, where it is derived from the step when absent.',
+          ),
         dial_op: z
           .enum(['get', 'set', 'clear'])
           .nullish()
