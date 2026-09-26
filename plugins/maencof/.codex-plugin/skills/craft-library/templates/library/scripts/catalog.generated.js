@@ -1,0 +1,1 @@
+var MAENCOF_LIBRARY_CATALOG = [];
