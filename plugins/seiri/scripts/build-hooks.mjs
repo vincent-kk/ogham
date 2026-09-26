@@ -48,8 +48,9 @@ const hookEntries = [
     name: 'setup',
     entry: 'setup',
     // One session-start read of rule status, dial and configLoader chains,
-    // plus the fixed election/chain/posture render. Runs once per session.
-    maxBytes: 20 * KILO_BYTE,
+    // plus the fixed election/chain/posture render and, after compaction, the
+    // active progress line. Runs at every SessionStart source.
+    maxBytes: 22 * KILO_BYTE,
   },
   {
     name: 'user-prompt-submit',

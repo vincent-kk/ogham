@@ -2,6 +2,8 @@ import { INJECTION_PREFIX } from '../../../constants/plugin.js';
 import { describeDial } from '../../../core/infra/configLoader/utils/describeDial.js';
 import type { InterventionState } from '../../../types/config.js';
 import type { RuleDocStatus } from '../../../types/manifest.js';
+import type { WorkflowBinding } from '../../../types/workflow.js';
+import { renderProgressLine } from '../../shared/progressLine/renderProgressLine.js';
 
 import { activeRulesLine } from './activeRulesLine.js';
 import { driftLine } from './driftLine.js';
@@ -18,15 +20,20 @@ export interface SessionStartRenderInput {
   chain: string;
   /** Fixed strict posture line; omitted at standard. */
   posture?: string;
+  /** This actor's own active binding, read lock-free at `compact`; absent at every other source. */
+  binding?: WorkflowBinding;
 }
 
 /**
  * Compose SessionStart's standard/strict injection, in a fixed order: an
  * active-rule summary and drift warning when rule status is available,
- * the effective dial, the election line, the chain line, and — at strict
- * only — the posture line. A missing or unreadable `ruleStatuses` omits
- * only the rule-summary lines; election, chain and posture still render.
- * @param input Dial, optional rule statuses, and the fixed election/chain/posture text.
+ * the effective dial, the election line, the chain line, at strict only
+ * the posture line, and last — only when `binding` is given — the
+ * progress line naming its task, intent and chain position. A missing or
+ * unreadable `ruleStatuses` omits only the rule-summary lines; election,
+ * chain and posture still render.
+ * @param input Dial, optional rule statuses, the fixed election/chain/posture
+ *   text, and this actor's own binding when one is active at `compact`.
  * @returns Ordered `additionalContext` lines, each already prefixed.
  */
 export function renderSessionStart({
@@ -35,6 +42,7 @@ export function renderSessionStart({
   election,
   chain,
   posture,
+  binding,
 }: SessionStartRenderInput): string[] {
   const active = ruleStatuses?.filter((status) => status.active) ?? [];
   const lines: string[] = [];
@@ -50,6 +58,8 @@ export function renderSessionStart({
   lines.push(`${INJECTION_PREFIX} ${election}`);
   lines.push(`${INJECTION_PREFIX} ${chain}`);
   if (posture) lines.push(`${INJECTION_PREFIX} ${posture}`);
+  if (binding)
+    lines.push(renderProgressLine(binding.task, binding.intent, binding.step));
 
   return lines;
 }

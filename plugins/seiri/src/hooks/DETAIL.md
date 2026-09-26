@@ -11,7 +11,7 @@
 
 ## API Contracts
 
-- SessionStart는 startup/resume/clear/fork에서 기존 바인딩을 suspend하고(`suspendActor(identity, now)`) compact를 유지하며, standard/strict에서 선출·체인·규칙 요약·다이얼·drift를 주입합니다. 규칙 상태를 읽지 못해도 선출·체인 줄은 나옵니다.
+- SessionStart는 startup/resume/clear/fork에서 기존 바인딩을 suspend하고(`suspendActor(identity, now)`) compact를 유지하며, standard/strict에서 선출·체인·규칙 요약·다이얼·drift를 주입합니다. 규칙 상태를 읽지 못해도 선출·체인 줄은 나옵니다. compact에서 이 actor 자신의 바인딩이 active로 읽히면(`readActorBinding`, 무락·무쓰기) 진행 줄을 마지막에 덧붙입니다.
 - UserPromptSubmit은 최신 native-turn anchor를 기록합니다. off/advisory는 이전 binding을 suspend하고(`suspend: !enabled`) 항상 침묵하며, standard/strict는 suspend하지 않고 활성 바인딩이 있으면 진행 줄을(standard의 paused 바인딩은 무주입), strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다.
 - SubagentStart는 부모 binding을 상속하지 않고 자식의 첫 anchor만 생성합니다. 부모가 main actor이고 활성 바인딩이 있으면(`readActorBinding`, 무락·무쓰기) 진행 줄을 1회 주입합니다.
 - PreToolUse는 기존 anchor와 일치하는 runtime 참여 액션(`step`·`start`·`resume`·`pause`·`finish`; `dial`은 제외)이나 Bash invocation만 기록하며 권한 결정·입력수정을 하지 않습니다.

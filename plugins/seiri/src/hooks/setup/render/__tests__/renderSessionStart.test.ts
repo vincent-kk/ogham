@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest';
 
 import type { InterventionState } from '../../../../types/config.js';
 import type { RuleDocStatus } from '../../../../types/manifest.js';
+import type { WorkflowBinding } from '../../../../types/workflow.js';
+import { renderProgressLine } from '../../../shared/progressLine/renderProgressLine.js';
 import { renderSessionStart } from '../renderSessionStart.js';
 
 const DIAL_STANDARD: InterventionState = {
@@ -104,5 +106,40 @@ describe('renderSessionStart', () => {
       posture: POSTURE,
     });
     expect(strict.at(-1)).toBe(`[seiri] ${POSTURE}`);
+  });
+
+  it('appends the progress line last when a binding is present, at strict', () => {
+    const binding: WorkflowBinding = {
+      task: 'task-a',
+      intent: 'change',
+      state: 'active',
+      step: 'write-plan',
+      counts: {},
+      announced: [],
+      verdicts: {},
+    };
+    const lines = renderSessionStart({
+      dial: DIAL_STRICT,
+      election: ELECTION,
+      chain: CHAIN,
+      posture: POSTURE,
+      binding,
+    });
+    expect(lines.at(-1)).toBe(
+      renderProgressLine(binding.task, binding.intent, binding.step),
+    );
+  });
+
+  it('leaves the output unchanged when no binding is passed', () => {
+    const withoutBinding = renderSessionStart({
+      dial: DIAL_STANDARD,
+      election: ELECTION,
+      chain: CHAIN,
+    });
+    expect(withoutBinding).toEqual([
+      `[seiri] Intervention: standard`,
+      `[seiri] ${ELECTION}`,
+      `[seiri] ${CHAIN}`,
+    ]);
   });
 });

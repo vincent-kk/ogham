@@ -4,10 +4,14 @@ import { renderElectionLine } from '../../core/infra/configLoader/utils/renderEl
 import { renderPostureLines } from '../../core/infra/configLoader/utils/renderPostureLines.js';
 import { buildRuleDocsStatus } from '../../core/ruleDocs/status/buildRuleDocsStatus.js';
 import { resolveSeiriProjectRuleTarget } from '../../core/ruleDocs/utils/resolveSeiriProjectRuleTarget.js';
+import { readActorBinding } from '../../core/sessionSignals/workflow/readActorBinding.js';
 import { suspendActor } from '../../core/sessionSignals/workflow/suspendActor.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 import type { RuleDocStatus } from '../../types/manifest.js';
-import type { WorkflowHostAdapter } from '../../types/workflow.js';
+import type {
+  WorkflowBinding,
+  WorkflowHostAdapter,
+} from '../../types/workflow.js';
 import { loadHookIntervention } from '../shared/loadHookIntervention.js';
 import { WORKFLOW_ADAPTER } from '../shared/workflowAdapter.js';
 import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
@@ -19,9 +23,11 @@ const NATIVE_BOUNDARY_SOURCES = ['startup', 'resume', 'clear', 'fork'];
 
 /**
  * Suspend existing participation at native session resets; compaction is
- * continuous. In standard/strict, report which rules are active, where
- * the dial sits, and the fixed election and chain (and, at strict,
- * posture) lines — regardless of whether rule status can be read.
+ * continuous, so this actor's own active binding, when one exists, is read
+ * back in and appended to the render instead. In standard/strict, report
+ * which rules are active, where the dial sits, and the fixed election and
+ * chain (and, at strict, posture) lines — regardless of whether rule
+ * status can be read.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  */
 export function processSessionStart(
@@ -29,10 +35,12 @@ export function processSessionStart(
   adapter: WorkflowHostAdapter = WORKFLOW_ADAPTER,
   now: number = Date.now(),
 ): HookOutput {
+  const identity = workflowIdentity(input, adapter);
+  let binding: WorkflowBinding | undefined;
   if (NATIVE_BOUNDARY_SOURCES.includes(input.source ?? '')) {
-    const identity = workflowIdentity(input, adapter);
     if (identity) suspendActor(identity, now);
-  }
+  } else if (input.source === 'compact' && identity)
+    binding = readActorBinding(identity, now);
 
   if (!input.cwd) return EMPTY_RESULT;
   const dial = loadHookIntervention(input.cwd);
@@ -54,6 +62,7 @@ export function processSessionStart(
     election,
     chain,
     posture,
+    binding,
   });
 
   if (lines.length === 0) return EMPTY_RESULT;
