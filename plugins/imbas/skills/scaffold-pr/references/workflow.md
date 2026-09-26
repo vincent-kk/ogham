@@ -1,5 +1,7 @@
 # scaffold-pr Workflow — Provider-agnostic skeleton
 
+<!-- ogham-mcp-tools:imbas -->
+
 This file defines the overall flow. Sub-task fetching (Step 3) is delegated to the provider-specific workflow file (`jira/workflow.md` or `github/workflow.md`), selected by `config.provider`. Steps 0, 1, 2, 4 are shared.
 
 ## Step 0 — Provider gate

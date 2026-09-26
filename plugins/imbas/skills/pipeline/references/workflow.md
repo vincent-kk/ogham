@@ -1,5 +1,7 @@
 # Workflow
 
+<!-- ogham-mcp-tools:imbas -->
+
 ## Phase 0 — SMART DEFAULTS & CONFIRMATION
 
 ```

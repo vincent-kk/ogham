@@ -8,6 +8,8 @@ complexity: complex
 plugin: imbas
 ---
 
+<!-- ogham-mcp-tools:imbas -->
+
 > **EXECUTION MODEL**: Execute all phases as a SINGLE CONTINUOUS OPERATION. After each phase completes, IMMEDIATELY verify the gate result and proceed to the next phase in the SAME TURN. NEVER yield between phases, after an agent subagent return, MCP tool result, or [OP:] operation.
 >
 > **Valid reasons to yield**:

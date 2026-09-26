@@ -1,5 +1,7 @@
 # Manifest Execution Workflow — GitHub Provider
 
+<!-- ogham-mcp-tools:imbas -->
+
 This file is loaded by the manifest skill when `config.provider === 'github'`. Provider-agnostic preamble (manifest loading, dry-run preview, user confirmation, result report) lives in `../workflow.md`. This file owns the GitHub-specific execution steps: label bootstrap, drift check, and batch execution.
 
 ## Step 0 — Label Bootstrap

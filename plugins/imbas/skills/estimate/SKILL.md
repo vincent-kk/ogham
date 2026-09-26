@@ -8,6 +8,8 @@ complexity: complex
 plugin: imbas
 ---
 
+<!-- ogham-mcp-tools:imbas -->
+
 > **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls or the `estimator` subagent return.
 >
 > **Valid reasons to yield**:

@@ -1,5 +1,7 @@
 # Tools Used — Combined
 
+<!-- ogham-mcp-tools:imbas -->
+
 ## imbas MCP Tools
 
 | Tool                                               | Phases    | Usage                                                                  |

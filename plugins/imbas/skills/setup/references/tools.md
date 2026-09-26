@@ -1,5 +1,7 @@
 # Tools Used
 
+<!-- ogham-mcp-tools:imbas -->
+
 ## imbas MCP Tools
 
 | Tool                                     | Usage                                                                                 |

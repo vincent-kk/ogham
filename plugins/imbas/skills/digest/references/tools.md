@@ -1,5 +1,7 @@
 # digest — Tools Used & Agent Spawn
 
+<!-- ogham-mcp-tools:imbas -->
+
 Provider-specific publish tools live in `jira/tools.md`, `github/tools.md`, and `local/tools.md`. This file lists shared tools and delegated skills.
 
 ## Shared tools (all providers)

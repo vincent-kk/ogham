@@ -1,5 +1,7 @@
 # comment
 
+<!-- ogham-mcp-tools:atlassian -->
+
 | Operation      | Method | Endpoint                    | Notes                                                                                       |
 | -------------- | ------ | --------------------------- | ------------------------------------------------------------------------------------------- |
 | List comments  | GET    | `/issue/{key}/comment`      | Cloud. On Server/DC use `comment_thread` (below)                                            |

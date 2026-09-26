@@ -1,5 +1,7 @@
 # refine — Error Handling
 
+<!-- ogham-mcp-tools:imbas -->
+
 ## Error Handling
 
 | Error                                                     | Action                                                                                                         |

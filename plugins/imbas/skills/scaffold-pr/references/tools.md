@@ -1,5 +1,7 @@
 # Tools Used — Provider-agnostic
 
+<!-- ogham-mcp-tools:imbas -->
+
 Provider-specific tools are in `jira/tools.md` and `github/tools.md`.
 
 ## imbas MCP Tools (all providers)

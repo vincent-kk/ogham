@@ -1,5 +1,7 @@
 # Tools Used — Jira Provider
 
+<!-- ogham-mcp-tools:imbas -->
+
 Loaded when `config.provider === 'jira'`. Provider-agnostic imbas MCP tools (`mcp__plugin_imbas_tools__run_get`, `mcp__plugin_imbas_tools__manifest_save`, `mcp__plugin_imbas_tools__manifest_validate`) are documented in `../tools.md` and are used by all providers.
 
 ## Jira Operations

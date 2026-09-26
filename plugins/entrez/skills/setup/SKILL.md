@@ -11,6 +11,8 @@ plugin: entrez
 
 # setup — configuration & connectivity
 
+<!-- ogham-mcp-tools:entrez -->
+
 Configure the NCBI identifiers (`tool`, `email`) and optional `api_key`, and verify EInfo reachability. The api_key is handled entirely by a local web UI — **never ask for it in chat**.
 
 ## Flow

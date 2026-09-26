@@ -8,6 +8,8 @@ complexity: moderate
 plugin: imbas
 ---
 
+<!-- ogham-mcp-tools:imbas -->
+
 > **EXECUTION MODEL**: Execute all workflow steps as a SINGLE CONTINUOUS OPERATION. After each step completes, IMMEDIATELY proceed to the next in the SAME TURN. NEVER yield after MCP tool calls, media fetch delegation, or provider publish operations.
 >
 > **Valid reasons to yield**:

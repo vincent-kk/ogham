@@ -9,6 +9,8 @@ complexity: simple
 plugin: r-statistics
 ---
 
+<!-- ogham-mcp-tools:r-statistics -->
+
 <!-- [INTERACTIVE] — installation changes the system; never run an installer without explicit consent. -->
 
 # setup — Detect & Install R

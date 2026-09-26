@@ -1,5 +1,7 @@
 # Escape Condition Detection
 
+<!-- ogham-mcp-tools:imbas -->
+
 During the splitting process, if any of these conditions are detected, IMMEDIATELY escape with a structured report ("escape is a report" principle):
 
 | Code | Situation                                    | Action                                                         |

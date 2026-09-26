@@ -1,5 +1,7 @@
 # status
 
+<!-- ogham-mcp-tools:imbas -->
+
 현재 또는 과거 imbas 런의 상태를 조회하고, 중단된 런을 재개할 수 있는 읽기 전용 스킬.
 
 ## 개요

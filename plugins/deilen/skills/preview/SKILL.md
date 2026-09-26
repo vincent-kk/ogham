@@ -6,6 +6,8 @@ description: 'Render a markdown document or plan as a readable local page and co
 
 # preview
 
+<!-- ogham-mcp-tools:deilen -->
+
 Preview the document Claude just produced as a readable local page. The user reads it and closes, or leaves line-anchored comments (and images) — then collect the feedback and act: revise the document or continue the conversation.
 
 ## Steps

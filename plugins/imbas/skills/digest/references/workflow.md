@@ -1,5 +1,7 @@
 # digest Workflow — Provider-agnostic skeleton
 
+<!-- ogham-mcp-tools:imbas -->
+
 This file owns Steps 0–5. Step 6 (preview / publish) is delegated to the provider-specific workflow file selected by `config.provider`:
 
 - `jira` → `jira/workflow.md` Step 6

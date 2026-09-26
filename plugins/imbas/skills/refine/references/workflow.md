@@ -1,8 +1,10 @@
 # refine — Workflow
 
+<!-- ogham-mcp-tools:imbas -->
+
 ```
 Step 1 — Run Initialization
-  1. Load config.json via mcp__plugin_imbas_tools__config_get.
+  1. Load config.json via `mcp__plugin_imbas_tools__config_get`.
   2. Determine project key: --project argument > config.defaults.project_ref.
      If neither available → error: "No project key. Run /imbas:setup or pass --project."
   3. Call mcp__plugin_imbas_tools__run_create with:
@@ -21,7 +23,7 @@ Step 1 — Run Initialization
 
 Step 2 — Document Source Resolution
   - Local file (*.md, *.txt):
-    - Already copied to source.md by mcp__plugin_imbas_tools__run_create. Read directly.
+    - Already copied to source.md by `mcp__plugin_imbas_tools__run_create`. Read directly.
   - Confluence URL:
     - [OP: get_confluence] page_id=<extracted from URL>
     - Convert response to markdown and save as source.md in run directory.

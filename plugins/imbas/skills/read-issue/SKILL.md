@@ -10,6 +10,8 @@ plugin: imbas
 
 # read-issue — Issue Context Reconstruction (Internal)
 
+<!-- ogham-mcp-tools:imbas -->
+
 Internal skill that reads an issue with its full context (Jira comment thread, GitHub issue thread, or local digest entries), reconstructs the conversation context (who said what, decisions made, latest state), and returns a structured JSON summary. Called by refine, split, digest skills and by `analyst`, `planner`, `estimator` agents.
 
 ## Arguments

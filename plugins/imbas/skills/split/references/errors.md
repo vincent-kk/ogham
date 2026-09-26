@@ -1,5 +1,7 @@
 # Error Handling — Provider-agnostic
 
+<!-- ogham-mcp-tools:imbas -->
+
 Provider-specific errors are in `jira/errors.md`, `github/errors.md`, and `local/errors.md`.
 
 ## Decomposition (Steps 1–7)

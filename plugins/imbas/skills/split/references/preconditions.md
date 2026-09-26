@@ -1,5 +1,7 @@
 # Preconditions
 
+<!-- ogham-mcp-tools:imbas -->
+
 From state.json:
 
 - `refine.status == "completed"`

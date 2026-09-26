@@ -10,6 +10,8 @@ plugin: atlassian
 
 # download
 
+<!-- ogham-mcp-tools:atlassian -->
+
 One `mcp__plugin_atlassian_tools__fetch` call per file: `method: "GET"`, `accept_format: "raw"`, `save_to_path: ".temp/<namespace>/<filename>"`. Parameters: [`mcp-tools.md`](../.shared/mcp-tools.md).
 
 ## Namespace

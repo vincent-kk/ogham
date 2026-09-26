@@ -10,6 +10,8 @@ plugin: entrez
 
 # download — PMC Open Access full text
 
+<!-- ogham-mcp-tools:entrez -->
+
 Fetch full text for PMIDs/PMCIDs (or records from a prior `search`). Principle: **OA → save; non-OA → report links**. Licenses are checked (a PMCID does not imply redistribution rights).
 
 ## Procedure

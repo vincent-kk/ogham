@@ -1,5 +1,7 @@
 # Workflow — Part B: Creation (Steps 8–11)
 
+<!-- ogham-mcp-tools:imbas -->
+
 Runs immediately after Step 7 (decomposition review) in the same continuous operation. Provider-specific execution (Step 9 drift check and Step 10 batch execution) lives in `jira/workflow.md`, `github/workflow.md`, or `local/workflow.md`, selected by `config.provider`. In those files, "Step 2.5" is this Step 9 and "Step 4 / Phases 4a–4d" is this Step 10.
 
 ## Step 8 — Approval Gate (user decision point)

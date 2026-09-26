@@ -1,5 +1,7 @@
 # Revise loop (the Revise directive only)
 
+<!-- ogham-mcp-tools:deilen -->
+
 Load this only when the collected feedback's directive is **Revise**. The Discuss and Dismiss terminations never need it — they end in chat without re-rendering.
 
 Apply the comments, then re-render, and keep iterating:

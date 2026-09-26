@@ -1,5 +1,7 @@
 # Error Handling — GitHub Provider (manifest skill)
 
+<!-- ogham-mcp-tools:imbas -->
+
 Provider-agnostic errors are in `../errors.md`. This file lists GitHub-specific error cases triggered inside the manifest `workflow.md` (this directory).
 
 ## Error taxonomy

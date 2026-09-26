@@ -1,5 +1,7 @@
 # scaffold-pr Workflow — Jira Provider
 
+<!-- ogham-mcp-tools:imbas -->
+
 Loaded when `config.provider === 'jira'`. Handles Step 3 (sub-task fetching) from the shared skeleton (`../workflow.md`).
 
 ## Step 3 — Fetch sub-tasks

@@ -11,6 +11,8 @@ plugin: atlassian
 
 # setup
 
+<!-- ogham-mcp-tools:atlassian -->
+
 Credentials are collected in a browser page served on `127.0.0.1`, never in chat — do not ask the user for URLs, tokens, or passwords.
 
 ## Flow
