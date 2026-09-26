@@ -1,4 +1,5 @@
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync } from 'node:fs';
+import { rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { fileURLToPath } from 'node:url';
 
@@ -252,7 +253,13 @@ describe('wiring', () => {
         expect(tool.inputSchema.type).toBe('object');
     } finally {
       await client.close();
-      rmSync(workspace, { recursive: true, force: true });
+      // SDK close() signals termination before the child releases its Windows cwd.
+      await rm(workspace, {
+        recursive: true,
+        force: true,
+        maxRetries: 3,
+        retryDelay: 100,
+      });
     }
   });
 
