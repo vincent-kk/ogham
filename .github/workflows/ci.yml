@@ -298,10 +298,10 @@ jobs:
           # A markdown-only workspace (prawf) matches no lintable file.
           yarn eslint --no-error-on-unmatched-pattern "${targets[@]}"
 
-  # Seiri's committed runtime and adapters must equal a fresh build, and its
-  # distribution must also be preparable from source alone in isolated
-  # staging; other plugins and root adapters keep the committed-byte drift
-  # gate. This
+  # The committed runtime and adapters of seiri, cennad, filid, maencof and
+  # maencof-lens must equal a fresh build, and seiri's distribution must also
+  # be preparable from source alone in isolated staging; other plugins and
+  # root adapters keep the committed-byte drift gate. This
   # job deliberately does not depend on the plan: the generator reads every
   # plugin, and the root adapters it writes (`.agents/**`) are ignored by the
   # planner, so gating it on the plan would let a root adapter drift through.
