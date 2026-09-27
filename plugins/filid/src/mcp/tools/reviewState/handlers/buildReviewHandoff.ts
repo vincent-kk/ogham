@@ -113,6 +113,7 @@ export async function buildReviewHandoff(
           violation,
           computed.ruleScopeById.get(violation.ruleId),
           settings.generatedPaths,
+          settings.exclude,
         ),
       }),
     );

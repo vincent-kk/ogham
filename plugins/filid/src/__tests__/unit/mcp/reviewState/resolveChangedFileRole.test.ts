@@ -22,6 +22,20 @@ function changedFile(
 }
 
 describe('resolveChangedFileRole — first matching role wins', () => {
+  it('excludes a generated deleted binary path before any other role', () => {
+    const classifyVerification = vi.fn(() => 'test-record' as const);
+    expect(resolveChangedFileRole(
+      changedFile('generated/README.md', 'D', true),
+      '/project/generated/README.md',
+      {
+        exclude: ['generated'],
+        generatedPaths: ['generated'],
+        lockfiles: ['README.md'],
+        classifyVerification,
+      },
+    )).toBe('excluded');
+    expect(classifyVerification).not.toHaveBeenCalled();
+  });
   it.each([
     {
       name: 'generated before deleted, binary, lockfile, document, and verification',

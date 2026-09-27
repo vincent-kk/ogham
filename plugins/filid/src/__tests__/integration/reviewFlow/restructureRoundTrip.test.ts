@@ -28,7 +28,7 @@ import { writeSharedUnitRestructureProject } from './helpers/writeSharedUnitRest
 
 /** Config whose one unknown top-level key makes the snapshot emit `config-warning`. */
 const CONFIG_WITH_UNKNOWN_KEY = {
-  version: '2.0',
+  version: '3.0',
   adapters: { mode: 'auto', enabled: [] },
   rules: {},
   unknownKey: true,

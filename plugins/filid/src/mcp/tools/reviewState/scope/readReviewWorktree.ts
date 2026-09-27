@@ -3,6 +3,7 @@ import {
   REVIEW_STATE_DIRECTORY_NAMES,
   REVIEW_STATE_GIT_ARGUMENTS,
 } from '../../../../constants/reviewState.js';
+import { isExcludedPath } from '../../../../lib/matchesPathPattern.js';
 import { classifyWorktreePaths } from '../assess/classifyWorktreePaths.js';
 import { parseGitStatusPaths } from '../assess/parseGitStatusPaths.js';
 import { computeReviewDirtyPathsHash } from '../hash/computeReviewDirtyPathsHash.js';
@@ -19,6 +20,7 @@ import type { CollectedChangedScopeEvidence } from './changedScopeEvidenceTypes.
 export async function readReviewWorktree(
   projectRoot: string,
   generatedPaths: readonly string[],
+  exclude: readonly string[] = [],
 ): Promise<
   Pick<
     CollectedChangedScopeEvidence,
@@ -31,7 +33,10 @@ export async function readReviewWorktree(
   const reviewPrefix = `${REVIEW_STATE_DIRECTORY_NAMES.FILID}/${REVIEW_STATE_DIRECTORY_NAMES.REVIEW}`;
   const dirtyPaths = parseGitStatusPaths(statusOutput)
     .filter(
-      (path) => path !== reviewPrefix && !path.startsWith(`${reviewPrefix}/`),
+      (path) =>
+        path !== reviewPrefix &&
+        !path.startsWith(`${reviewPrefix}/`) &&
+        !isExcludedPath({ exclude }, path),
     )
     .sort();
   return {

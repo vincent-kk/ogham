@@ -121,9 +121,10 @@ vi.mock('../../../mcp/tools/utils/createToolSnapshot.js', () => ({
 
 const mockedCreateToolSnapshot = vi.mocked(createToolSnapshot);
 
-function mockSnapshotContext(diagnostics: ToolDiagnostic[]): void {
+function mockSnapshotContext(diagnostics: ToolDiagnostic[], exclude: string[] = []): void {
   const context: ToolSnapshotContext = {
     snapshot: SNAPSHOT,
+    exclude,
     rules: [],
     maxDepth: 10,
     diagnostics,
@@ -134,6 +135,21 @@ function mockSnapshotContext(diagnostics: ToolDiagnostic[]): void {
 describe('fractal_inspect resolve shared-snapshot batch', () => {
   beforeEach(() => {
     mockedCreateToolSnapshot.mockReset();
+  });
+
+  it('reports an excluded target with its matching pattern', async () => {
+    mockSnapshotContext([], ['**/source.unit']);
+    const result = await handleContextResolve({
+      path: PROJECT_ROOT,
+      requests: [{ targetPath: SOURCE_PATH }],
+    });
+    expect(result.data?.results[0]).toMatchObject({
+      resolved: false,
+      diagnostics: [{
+        code: 'context-target-excluded',
+        message: expect.stringContaining('**/source.unit'),
+      }],
+    });
   });
 
   it('resolves 100 ordered requests from one snapshot', async () => {

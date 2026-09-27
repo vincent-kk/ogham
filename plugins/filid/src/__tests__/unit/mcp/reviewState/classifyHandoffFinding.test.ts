@@ -66,6 +66,18 @@ describe('classifyHandoffFinding', () => {
     ).toEqual({ class: 'config-decision', notePrefix: '' });
   });
 
+  it('classifies a stale path under exclude as a configuration decision', () => {
+    expect(classifyHandoffFinding(
+      violation({
+        ruleId: 'stale-path',
+        message: 'Path token `examples/mock/data.json` in section "Structure" resolves to nothing.',
+      }),
+      RULE_SCOPES.DOCUMENTS,
+      [],
+      ['examples/**'],
+    )).toEqual({ class: 'config-decision', notePrefix: '' });
+  });
+
   it('does not treat a short generated token as a substring match', () => {
     expect(
       classifyHandoffFinding(

@@ -166,7 +166,7 @@ export async function prepareIncrementalReviewState(
     previous.verdict === 'INCONCLUSIVE' &&
     previous.scope.worktree !== WORKTREE_DISPOSITIONS.CLEAN;
   const currentWorktree = sealedOnDirtyWorktree
-    ? (await readReviewWorktree(input.projectRoot, settings.generatedPaths))
+    ? (await readReviewWorktree(input.projectRoot, settings.generatedPaths, settings.exclude))
         .worktree
     : null;
   const sealedReason = previous

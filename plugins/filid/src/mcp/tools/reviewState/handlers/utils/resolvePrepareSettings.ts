@@ -77,6 +77,7 @@ export function resolvePrepareSettings(input: PrepareSettingsInput) {
     groupChurnLimit: review?.groupChurnLimit ?? REVIEW_GROUP_CHURN_LIMIT,
     planChurnLimit: review?.planChurnLimit ?? REVIEW_PLAN_CHURN_LIMIT,
     lockfiles: review?.lockfiles ?? REVIEW_LOCKFILE_BASENAMES,
+    exclude: config?.exclude ?? [],
     generatedPaths: config?.structure?.generatedPaths ?? [],
     pluginRoot: resolvePluginRoot(),
     host: detectHost(),

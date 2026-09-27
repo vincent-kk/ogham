@@ -9,7 +9,7 @@
 | Agent next action | Obtain the missing decision evidence and validate the exact assigned decision set within the existing review workflow. |
 | Branch | `feature/review-flow` |
 | Base | `main` |
-| Snapshot | `2b2f4bb467aa1d9be7aa25b6c5a5ad4832c7e7c96ed72351a5578baa0dc41ce7` |
+| Snapshot | `1fa4aa59d68b9dcb451e2fd44df1cdc73eaba0c4b6fa94154e3317486ba9428e` |
 | Coverage | 1 reviewed · 1 skipped · 2 total |
 | Findings | 0 confirmed · 0 refuted · 1 indeterminate |
 | Generated | <SEALED_AT> |

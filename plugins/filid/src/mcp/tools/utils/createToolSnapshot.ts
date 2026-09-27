@@ -25,6 +25,7 @@ import { configWarningAffects } from './configWarningAffects.js';
 
 export interface ToolSnapshotContext {
   snapshot: ProjectSnapshot;
+  exclude: readonly string[];
   rules: Rule[];
   maxDepth: number;
   diagnostics: ToolDiagnostic[];
@@ -89,6 +90,6 @@ export function createToolSnapshot(
       ...loaded.diagnostics,
       ...snapshot.diagnostics,
     ];
-    return { snapshot, rules, maxDepth, diagnostics };
+    return { snapshot, exclude: config.exclude ?? [], rules, maxDepth, diagnostics };
   });
 }

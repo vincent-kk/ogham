@@ -14,6 +14,7 @@ import {
 } from '../../../../core/index.js';
 import { resolveFactsScope } from '../../../../core/facts/index.js';
 import { compareByBytes } from '../../../../lib/compareByBytes.js';
+import { isExcludedPath } from '../../../../lib/matchesPathPattern.js';
 import { readUnknownFileText } from '../../../../core/restructure/index.js';
 import { aggregateCertainty } from '../../../../core/verification/index.js';
 import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
@@ -78,6 +79,7 @@ export async function computeChangedScopeEvidence(
   const worktree = await readReviewWorktree(
     input.projectRoot,
     input.generatedPaths,
+    input.exclude,
   );
   const context = await createToolSnapshot(input.projectRoot);
   const verificationRoles = new Map(
@@ -88,7 +90,9 @@ export async function computeChangedScopeEvidence(
   );
   const scopePaths = selectReviewScopePaths(
     context.snapshot,
-    roster.map((entry) => entry.path),
+    roster
+      .filter((entry) => !isExcludedPath({ exclude: input.exclude }, entry.path))
+      .map((entry) => entry.path),
   );
   const frozenFacts = selectFrozenFacts(context.snapshot, scopePaths);
   const factsHashByPath = new Map(
@@ -108,6 +112,7 @@ export async function computeChangedScopeEvidence(
       },
       {
         generatedPaths: input.generatedPaths,
+        exclude: input.exclude,
         lockfiles: input.lockfiles,
         tree: context.snapshot.tree,
         projectRoot: input.projectRoot,

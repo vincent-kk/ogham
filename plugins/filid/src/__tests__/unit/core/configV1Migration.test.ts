@@ -27,12 +27,12 @@ function writeV1Config(config: Record<string, unknown>): string {
   return path;
 }
 
-describe('project_setup init records a lossless v1 config as v2', () => {
-  it('writes the converted config when every key has a v2 home', () => {
+describe('project_setup init records a lossless v1 config as v3', () => {
+  it('writes the converted config when every key has a v3 home', () => {
     const path = writeV1Config({ rules: {} });
     const result = initProject(projectRoot);
     expect(result.configMigrated).toBe(true);
-    expect(JSON.parse(readFileSync(path, 'utf8')).version).toBe('2.0');
+    expect(JSON.parse(readFileSync(path, 'utf8')).version).toBe('3.0');
   });
 
   it('keeps the file when an unrecognized top-level key would be discarded', () => {

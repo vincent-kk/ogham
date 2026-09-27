@@ -130,6 +130,7 @@ export const REVIEW_VALIDATE_KINDS = {
 
 /** Deterministic reasons that make a changed path non-reviewable. */
 export const REVIEW_SKIP_REASONS = {
+  EXCLUDED: 'excluded by config',
   GENERATED: 'generated artifact',
   DELETED: 'deleted path',
   BINARY: 'binary content',
@@ -261,12 +262,6 @@ export const REVIEW_HANDOFF_DOCUMENT_SYNC_STATES = [
   'declined',
   'failed',
 ] as const;
-
-/** Segment wildcard in `structure.generatedPaths`; matches exactly one segment. */
-export const GENERATED_PATH_WILDCARD = '*';
-
-/** Separator for the repository-relative paths git reports. */
-export const REVIEW_PATH_SEGMENT_SEPARATOR = '/';
 
 /** Git status codes whose record is followed by the rename or copy source. */
 export const RENAME_STATUS_CODES = ['R', 'C'] as const;

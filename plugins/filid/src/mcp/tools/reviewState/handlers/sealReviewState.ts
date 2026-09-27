@@ -146,6 +146,7 @@ export async function sealReviewState(
   const worktree = await readReviewWorktree(
     input.projectRoot,
     settings.generatedPaths,
+    settings.exclude,
   );
   if (state.phase === REVIEW_STATE_PHASES.SEALED) {
     const worktreeMoved =

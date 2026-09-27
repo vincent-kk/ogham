@@ -104,6 +104,7 @@ const ReviewScopeFileSchema = z
       'source',
       'verification',
       'document',
+      'excluded',
       'generated',
       'binary',
       'lockfile',

@@ -43,6 +43,21 @@ function entry(
 }
 
 describe('classifyChangedFile', () => {
+  it('retains an excluded path without owner or review instructions', () => {
+    const classifyVerification = vi.fn(() => 'test-record' as const);
+    const result = classifyChangedFile(entry('src/generated/value.test.ts'), {
+      exclude: ['src/generated'],
+      generatedPaths: ['src/generated'],
+      tree: buildFractalTree(TREE_ENTRIES),
+      projectRoot: PROJECT_ROOT,
+      classifyVerification,
+    });
+    expect(result).toMatchObject({
+      role: 'excluded', owner: null, skipReason: 'excluded by config',
+      rules: [], repositoryRules: [],
+    });
+    expect(classifyVerification).not.toHaveBeenCalled();
+  });
   it.each([
     ['src/generated/value.test.ts', 'generated', 'test-record'],
     ['src/README.md', 'document', 'test-record'],

@@ -6,6 +6,8 @@ import {
 } from '../../../../../constants/mcpContracts.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
 import { resolveContext } from '../../../../../core/index.js';
+import { matchingExcludedPattern } from '../../../../../lib/matchesPathPattern.js';
+import { toProjectRelativePath } from '../../../../../lib/toProjectRelativePath.js';
 import type { ProjectSnapshot } from '../../../../../types/fractal.js';
 import type { ContextResolveResult } from '../../../../../types/report.js';
 import type { ToolDiagnostic } from '../../../../../types/toolEnvelope.js';
@@ -28,8 +30,29 @@ export function resolveContextRequest(
   snapshotDiagnostics: ToolDiagnostic[],
   request: ContextResolveRequest,
   index: number,
+  exclude: readonly string[] = [],
 ): ContextResolveResult {
   const targetPath = portableResolve(snapshot.projectRoot, request.targetPath);
+  const matchingPattern = matchingExcludedPattern(
+    { exclude },
+    toProjectRelativePath(snapshot.projectRoot, targetPath),
+  );
+  if (matchingPattern !== undefined) {
+    const diagnostic: ToolDiagnostic = {
+      code: CONTEXT_RESOLVE_DIAGNOSTIC_CODES.TARGET_EXCLUDED,
+      message: `Context target ${targetPath} is excluded by config pattern "${matchingPattern}".`,
+      path: targetPath,
+      affects: [],
+      nextAction: CONTEXT_RESOLVE_DIAGNOSTIC_NEXT_ACTIONS.TARGET_EXCLUDED,
+    };
+    return {
+      index,
+      resolved: false,
+      targetPath,
+      status: TOOL_STATUSES.INDETERMINATE,
+      diagnostics: [diagnostic],
+    };
+  }
   let resolution;
   try {
     resolution = resolveContext(snapshot, targetPath);

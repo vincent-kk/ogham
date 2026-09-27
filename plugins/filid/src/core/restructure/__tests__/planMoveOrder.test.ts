@@ -591,7 +591,7 @@ describe('restructure orders overlapping moves for automatic execution', () => {
     const decision = conflictDecision(result, P.SCHED);
 
     expect(decision.message).toContain(`(${P.DELAY})`);
-    expect(decision.nextAction).toContain('excluded directories');
+    expect(decision.nextAction).toContain('config exclude');
   });
 
   it('names the same move to run first from every member of a cycle no source encloses', () => {

@@ -84,7 +84,7 @@ describe('review cost policy', () => {
     'accepts a review group budget of %s without fixing automatic sizing',
     (maxGroups) => {
       const parsed = FilidConfigSchema.parse({
-        version: '2.0',
+        version: '3.0',
         adapters: { mode: 'auto', enabled: ['ecmascript'] },
         rules: {},
         review: { maxGroups },
@@ -98,7 +98,7 @@ describe('review cost policy', () => {
     (maxGroups) => {
       expect(
         FilidConfigSchema.safeParse({
-          version: '2.0',
+          version: '3.0',
           adapters: { mode: 'auto', enabled: ['ecmascript'] },
           rules: {},
           review: { maxGroups },

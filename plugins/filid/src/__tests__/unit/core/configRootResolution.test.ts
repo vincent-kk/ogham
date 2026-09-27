@@ -5,7 +5,6 @@ import { join } from 'node:path';
 import { spawnCliSync } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { BUILTIN_RULE_IDS } from '../../../constants/builtinRuleIds.js';
 import {
   createDefaultConfig,
   initProject,
@@ -78,7 +77,7 @@ describe('config git-root resolution', () => {
     expect(existsSync(result.filePath.config)).toBe(true);
   });
 
-  it('loads config v2 from the git root when called from a subdirectory', () => {
+  it('loads config v3 from the git root when called from a subdirectory', () => {
     const repoRoot = join(tmpDir, 'repo');
     const subdirectory = join(repoRoot, 'packages', 'sub');
     mkdirSync(subdirectory, { recursive: true });
@@ -87,7 +86,7 @@ describe('config git-root resolution', () => {
 
     const result = loadConfig(subdirectory);
 
-    expect(result.config?.version).toBe('2.0');
+    expect(result.config?.version).toBe('3.0');
   });
 
   it('loads rule overrides from the same resolved root', () => {
@@ -97,9 +96,7 @@ describe('config git-root resolution', () => {
     mockRepoRoot(repoRoot);
     initProject(subdirectory);
 
-    expect(Object.keys(loadRuleOverrides(subdirectory))).toHaveLength(
-      Object.values(BUILTIN_RULE_IDS).length,
-    );
+    expect(loadRuleOverrides(subdirectory)).toEqual({});
   });
 
   it('falls back to the provided path outside a git repository', () => {

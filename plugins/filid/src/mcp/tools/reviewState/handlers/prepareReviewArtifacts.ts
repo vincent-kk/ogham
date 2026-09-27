@@ -5,6 +5,7 @@ import { removeFileIfExistsSync } from '@ogham/cross-platform';
 import type { REVIEW_STATE_ACTIONS } from '../../../../constants/reviewState.js';
 import {
   REVIEW_EFFORT_ROUNDS,
+  REVIEW_SKIP_REASONS,
   REVIEW_STATE_DISPOSITIONS,
   REVIEW_STATE_PHASES,
   REVIEW_STATE_SCHEMA_VERSION,
@@ -284,6 +285,7 @@ export async function prepareReviewArtifacts(
     evidencePath: paths.evidencePath,
     factsPath: paths.factsPath,
     generatedPaths: settings.generatedPaths,
+    exclude: settings.exclude,
     lockfiles: settings.lockfiles,
     createdAt,
   });
@@ -302,7 +304,8 @@ export async function prepareReviewArtifacts(
     overrides,
   });
   files = files.map((file) =>
-    staging?.unresolvedPaths?.includes(file.path)
+    staging?.unresolvedPaths?.includes(file.path) &&
+    file.skipReason !== REVIEW_SKIP_REASONS.EXCLUDED
       ? { ...file, skipReason: null }
       : file,
   );

@@ -37,8 +37,9 @@ export function readReviewEnvironmentHash(
   });
   return computeReviewArtifactHash(
     JSON.stringify([
-      1,
+      2,
       settings.generatedPaths,
+      settings.exclude,
       settings.lockfiles,
       rules,
       documents,

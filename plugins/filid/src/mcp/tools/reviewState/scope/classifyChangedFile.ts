@@ -27,16 +27,21 @@ export function classifyChangedFile(
   },
 ): ReviewScopeFile {
   const absolutePath = portableResolve(options.projectRoot, entry.path);
-  const ownerTarget =
-    entry.change === 'D' ? portableDirname(absolutePath) : absolutePath;
-  const owner = resolveOwningFractal(options.tree, ownerTarget);
   const role = resolveChangedFileRole(entry, absolutePath, {
+    exclude: options.exclude,
     generatedPaths: options.generatedPaths,
     lockfiles: options.lockfiles ?? REVIEW_LOCKFILE_BASENAMES,
     classifyVerification: options.classifyVerification,
   });
+  const ownerTarget =
+    entry.change === 'D' ? portableDirname(absolutePath) : absolutePath;
+  const owner = role === 'excluded'
+    ? null
+    : resolveOwningFractal(options.tree, ownerTarget);
   const skipReason =
-    role === 'generated'
+    role === 'excluded'
+      ? REVIEW_SKIP_REASONS.EXCLUDED
+      : role === 'generated'
       ? REVIEW_SKIP_REASONS.GENERATED
       : entry.change === 'D'
         ? REVIEW_SKIP_REASONS.DELETED
