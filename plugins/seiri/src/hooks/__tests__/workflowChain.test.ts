@@ -15,6 +15,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../types/config.js';
 import { processToolOutcome } from '../postToolUse/postToolUse.js';
+import { processToolStart } from '../preToolUse/preToolUse.js';
 import { renderChainLine } from '../shared/progressLine/renderChainLine.js';
 import { processUserPromptSubmit } from '../userPromptSubmit/userPromptSubmit.js';
 
@@ -80,6 +81,20 @@ describe('skill loading does not create workflow participation', () => {
         existsSync(portableJoin(cwd, '.seiri', 'session-signals.json')),
       ).toBe(false);
       expect(turn(cwd)).toEqual({ continue: true });
+      processToolStart({
+        cwd,
+        session_id: 'session-a',
+        prompt_id: 'turn-a',
+        tool_use_id: 'entry',
+        hook_event_name: 'PreToolUse',
+        tool_name: 'mcp__plugin_seiri_tools__runtime',
+        tool_input: {
+          action: 'step',
+          step: 'write-plan',
+          project_root: cwd,
+          task: 'task-a',
+        },
+      });
       const sessions = portableJoin(cwd, '.seiri', 'sessions');
       for (const name of readdirSync(sessions))
         if (name.endsWith('.json'))
@@ -129,20 +144,20 @@ describe('skill loading does not create workflow participation', () => {
     },
   );
 
-  it('activates observation at standard with no chain-line fallback', () => {
+  it('creates no state on a plain turn at standard', () => {
     const cwd = seedRepo('standard');
     expect(turn(cwd)).toEqual({ continue: true });
-    expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(true);
+    expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(false);
   });
 
-  it('activates observation at strict, falling back to the chain line', () => {
+  it('creates no state on a plain turn at strict', () => {
     const cwd = seedRepo('strict');
     const result = turn(cwd);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toBe(
       renderChainLine(),
     );
-    expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(true);
+    expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(false);
   });
 
   it('does not revive legacy Skill state after an off round trip', () => {

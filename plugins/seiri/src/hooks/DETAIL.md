@@ -11,10 +11,10 @@
 
 ## API Contracts
 
-- SessionStart는 startup/resume/clear/fork에서 기존 바인딩을 suspend하고(`suspendActor(identity, now)`) compact를 유지하며, standard/strict에서 선출·체인·규칙 요약·다이얼·drift를 주입합니다. 규칙 상태를 읽지 못해도 선출·체인 줄은 나옵니다. compact에서 이 actor 자신의 바인딩이 active로 읽히면(`readActorBinding`, 무락·무쓰기) 진행 줄을 마지막에 덧붙입니다.
-- UserPromptSubmit은 최신 native-turn anchor를 기록합니다. off/advisory는 이전 binding을 suspend하고(`suspend: !enabled`) 항상 침묵하며, standard/strict는 suspend하지 않고 활성 바인딩이 있으면 진행 줄을(standard의 paused 바인딩은 무주입), strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다.
-- SubagentStart는 부모 binding을 상속하지 않고 자식의 첫 agent-stable turn anchor만 생성합니다. 부모가 main actor이고 활성 바인딩이 있으면(`readActorBinding`, 무락·무쓰기) 진행 줄을 1회 주입합니다. generation이 `0`보다 큰 재개 자식은 진행 줄 없이 binding을 suspend하고 anchor를 제거하며, generation 증가와 진행 중 호출 폐기로 늦은 결과를 무효화합니다.
-- PreToolUse는 기존 anchor와 일치하는 runtime 참여 액션(`step`·`start`·`resume`·`pause`·`finish`; `dial`은 제외)이나 Bash invocation만 기록하며 권한 결정·입력수정을 하지 않습니다.
+- SessionStart는 startup/resume/clear/fork에서 기존 바인딩을 suspend하고(`observeBoundary(identity, false, now, { suspend: true })`) compact를 유지하며, standard/strict에서 선출·체인·규칙 요약·다이얼·drift를 주입합니다. 규칙 상태를 읽지 못해도 선출·체인 줄은 나옵니다. compact에서 이 actor 자신의 바인딩이 active로 읽히면(`readActorBinding`, 무락·무쓰기) 진행 줄을 마지막에 덧붙입니다.
+- UserPromptSubmit은 기존 native-turn anchor를 갱신하며 파일이 없으면 아무것도 만들지 않습니다. off/advisory는 이전 binding을 suspend하고(`suspend: !enabled`) 항상 침묵하며, standard/strict는 suspend하지 않고 활성 바인딩이 있으면 진행 줄을(standard의 paused 바인딩은 무주입), strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다.
+- SubagentStart는 부모 binding을 상속하지 않고 자식 actor를 만들지 않습니다. 부모가 main actor이고 활성 바인딩이 있으면(`readActorBinding`, 무락·무쓰기) 진행 줄을 주입합니다. 참여한 적 없는 자식은 매번 첫 턴으로 간주되어 handoff 줄을 다시 받으며 진입 요청으로 참여할 수 있습니다. generation이 `0`보다 큰 재개 자식은 진행 줄 없이 binding을 suspend하고 anchor를 제거하며, generation 증가와 진행 중 호출 폐기로 늦은 결과를 무효화합니다.
+- PreToolUse의 진입 요청은 부재·만료·손상 actor를 payload의 native turn으로 seed합니다. 그 외에는 기존 anchor와 일치하는 runtime 참여 액션(`step`·`start`·`resume`·`pause`·`finish`; `dial`은 제외)이나 Bash invocation만 기록하며 권한 결정·입력수정을 하지 않습니다.
 - PostToolUse와 Claude Failure는 정확한 paired invocation의 현재 generation/actor/task에만 효과를 적용합니다. runtime의 `created`·`switched`는 진행 줄 형식 ACK, `mismatch`는 안내 문구를 내고, `rejected`는 무주입입니다. `updated`는 같은 task `step`이면 무주입이고, `resume`·`pause`·`finish`는 기존 control-verb ACK 문구로 응답합니다. Bash는 활성 task의 증거/실패 변화만 제공합니다.
 - 훅 밖 소비자는 공개 배럴을 사용할 수 있으나 executable entry는 concrete 구현을 사용합니다.
 
@@ -60,4 +60,4 @@
 
 ## Last Updated
 
-2026-09-26 — 명시적 조건부 참여와 비차단 호스트 계약을 반영했습니다.
+2026-09-27

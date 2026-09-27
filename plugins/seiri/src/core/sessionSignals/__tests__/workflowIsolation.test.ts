@@ -18,10 +18,11 @@ import { observeBoundary } from '../workflow/observeBoundary.js';
 import { observeInvocation } from '../workflow/observeInvocation.js';
 import { prepareDirectory } from '../workflow/prepareDirectory.js';
 import { readActorBinding } from '../workflow/readActorBinding.js';
-import { suspendActor } from '../workflow/suspendActor.js';
 import { transitionWorkflow } from '../workflow/transitionWorkflow.js';
 import { advanceBoundary } from '../workflow/utils/advanceBoundary.js';
 import { withWorkflowState } from '../workflow/withWorkflowState.js';
+
+import { seedActor } from './helpers/seedActor.js';
 
 const NOW = 1_700_000_000_000;
 const roots: string[] = [];
@@ -57,6 +58,7 @@ afterEach(() =>
 
 it('does not mutate or run effects without the actor lock', () => {
   const { id, path } = fixture();
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW);
   mkdirSync(`${path}.lock`);
   const before = readFileSync(path, 'utf8');
@@ -67,6 +69,7 @@ it('does not mutate or run effects without the actor lock', () => {
 });
 it('quarantines subsequent automatic effects when a boundary cannot acquire its lock', () => {
   const { id, path } = fixture();
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW);
   mkdirSync(`${path}.lock`);
   observeBoundary({ ...id, turn: 'next' }, true, NOW);
@@ -118,7 +121,7 @@ it('does not delete a marker a concurrent failing boundary wrote during this tra
     prepareDirectory,
     NOW,
     (state) => {
-      suspendActor(id, NOW);
+      observeBoundary(id, false, NOW, { suspend: true });
       return advanceBoundary(state, outer.turn, false);
     },
     { revokeOnFailure: true, recover: { suspend: false } },
@@ -147,7 +150,7 @@ it('when a marker predates this transaction, removes only the token it saw — a
     prepareDirectory,
     NOW,
     (state) => {
-      suspendActor(id, NOW);
+      observeBoundary(id, false, NOW, { suspend: true });
       return advanceBoundary(state, outer.turn, false);
     },
     { revokeOnFailure: true, recover: { suspend: false } },
@@ -162,7 +165,7 @@ it('when a marker predates this transaction, removes only the token it saw — a
 it('applies a failed SessionStart suspend-intent at the next standard UPS boundary, suspending the binding', () => {
   const { id, path } = boundFixture();
   mkdirSync(`${path}.lock`);
-  suspendActor(id, NOW);
+  observeBoundary(id, false, NOW, { suspend: true });
   rmSync(`${path}.lock`, { recursive: true });
   expect(existsSync(`${path}.revoked`)).toBe(true);
   expect(existsSync(`${path}.revoked-suspend`)).toBe(true);
@@ -200,14 +203,14 @@ it('does not apply suspend at recovery when the failed transaction carried no su
   );
   expect(existsSync(`${path}.revoked`)).toBe(false);
 });
-it('recovers a quarantined actor through suspendActor, suspending the binding as SessionStart always does', () => {
+it('recovers a quarantined actor through a suspending boundary, suspending the binding as SessionStart always does', () => {
   const { id, path } = boundFixture();
   mkdirSync(`${path}.lock`);
   observeBoundary({ ...id, turn: 'next' }, true, NOW);
   rmSync(`${path}.lock`, { recursive: true });
   expect(existsSync(`${path}.revoked`)).toBe(true);
 
-  const snapshot = suspendActor(id, NOW);
+  const snapshot = observeBoundary(id, false, NOW, { suspend: true });
 
   expect(existsSync(`${path}.revoked`)).toBe(false);
   expect(snapshot).toEqual(
@@ -252,20 +255,32 @@ it('does not overwrite a user-owned ignore file or create unignored metadata', (
   mkdirSync(portableJoin(id.root, '.seiri'));
   const ignore = portableJoin(id.root, '.seiri/.gitignore');
   writeFileSync(ignore, 'runtime.json\n');
-  observeBoundary(id, true, NOW);
+  observeInvocation({ ...id, call: 'entry' }, 'hash', NOW, {
+    action: 'start',
+    project_root: id.root,
+    task: 'task-a',
+    intent: 'change',
+  });
   expect(existsSync(path)).toBe(false);
   expect(readFileSync(ignore, 'utf8')).toBe('runtime.json\n');
 });
-it('rejects corrupted state until a trusted fresh boundary', () => {
+it('rejects corrupted state until an entry invocation reseeds it', () => {
   const { id, path } = fixture();
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW);
   writeFileSync(path, '{broken');
   expect(withWorkflowState(id, false, NOW, () => 'effect')).toBeUndefined();
-  observeBoundary({ ...id, turn: 'next' }, true, NOW);
+  observeInvocation({ ...id, turn: 'next', call: 'entry' }, 'hash', NOW, {
+    action: 'start',
+    project_root: id.root,
+    task: 'task-a',
+    intent: 'change',
+  });
   expect(withWorkflowState(id, false, NOW, (s) => s.turn)).toBe('next');
 });
 it('expires old actor state before removing its revocation marker', () => {
   const { id, path } = fixture();
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW);
   const state = JSON.parse(readFileSync(path, 'utf8'));
   state.lastObservedAt -= 8 * 24 * 60 * 60 * 1000;
@@ -277,6 +292,7 @@ it('expires old actor state before removing its revocation marker', () => {
 });
 it('prunes stale invocations while retaining the active actor', () => {
   const { id } = fixture();
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW);
   withWorkflowState(id, false, NOW, (s) => {
     s.invocations.old = {

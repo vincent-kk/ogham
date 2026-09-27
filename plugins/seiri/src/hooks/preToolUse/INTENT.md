@@ -12,7 +12,7 @@ Observe selected native invocations for conditional workflow assistance. Loaded 
 
 ### Always do
 
-- Require an existing trusted turn anchor before recording an invocation.
+- Seed an absent, expired, or corrupt actor from the payload's native turn on an entry request; require the existing trusted anchor for every other invocation.
 - Keep stdout empty and all failures nonblocking.
 
 ### Ask first

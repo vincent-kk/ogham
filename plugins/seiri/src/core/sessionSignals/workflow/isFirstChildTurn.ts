@@ -12,6 +12,7 @@ import { readState } from './readState.js';
  * file yet, one past its TTL, or a stored generation of `0`. Read before
  * `observeBoundary` mutates the same file, without a lock — a locked or
  * failed read counts as first, matching a fresh actor.
+ * A child that has never participated has no file and is first every time.
  * @param identity Host-normalized identity of the child actor.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @returns `true` when this is the child's first boundary, else `false`.

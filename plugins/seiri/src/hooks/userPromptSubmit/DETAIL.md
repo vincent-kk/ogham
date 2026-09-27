@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Every trusted user turn replaces its native-turn anchor. Initial skill selection belongs to the host or user.
+- Every trusted user turn advances the anchor of an existing actor and creates nothing. Initial skill selection belongs to the host or user.
 - off/advisory suspend prior participation (`observeBoundary(..., { suspend: true })`) and stay silent. standard/strict do not suspend (`suspend: false`): an active binding keeps its progress line every turn; a paused binding gets nothing at standard and the one-line chain at strict, and strict adds that same chain line when there is no binding at all.
 - Missing host provenance or storage failure yields no assistance.
 
@@ -27,4 +27,4 @@
 
 ## Last Updated
 
-2026-09-26
+2026-09-27

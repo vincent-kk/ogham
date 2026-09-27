@@ -11,7 +11,7 @@ import { workflowEnabled } from '../shared/workflowHost/workflowEnabled.js';
 import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 
 /**
- * Record the turn anchor; suspend prior participation only when the dial is off/advisory.
+ * Advance an existing actor's turn anchor; suspend participation only when the dial is off/advisory.
  * An active binding gets a progress line at standard and strict alike;
  * with no active binding, strict alone falls back to the chain line.
  * @param input Native UserPromptSubmit payload for the new user turn.

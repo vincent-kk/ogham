@@ -7,7 +7,7 @@ Own ephemeral actor-scoped workflow participation and observations. The host and
 ## Conventions
 
 - A host session and its main or child actor have separate hashed state addresses.
-- A trusted turn boundary — the main actor's native turn or a child's agent-stable first SubagentStart — must precede tool observations. Tools cannot create that boundary.
+- Only an entry request's PreToolUse creates actor metadata, anchored on its payload's native turn. Boundary hooks update or suspend existing actors without creating them. Tool events never replace a valid existing anchor.
 - Explicit lifecycle requests take effect only through paired successful host results.
 - Only an entry step (`write-plan`, `execute`) or `start` can create a binding or switch it to another task; `resume` and every other step only update an existing same-task binding.
 - A read of another actor's binding (for a one-time handoff) never locks or writes that actor's state.

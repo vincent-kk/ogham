@@ -5,9 +5,8 @@ import type {
 
 /**
  * Advance one actor transaction's turn bookkeeping, optionally suspending
- * its binding. Shared by `observeBoundary` (which may create metadata)
- * and `suspendActor` (which never does), so the create-capable and
- * create-free callers apply the same turn-advancing effect.
+ * its binding. Shared by `observeBoundary` (boundaries) and the
+ * entry-request seed in `observeInvocation`.
  * @param state Actor state, mutated in place.
  * @param turn Turn hash (native for the main actor, agent-stable for a child) to record as the current anchor, or
  *   `undefined` to leave the actor with no anchored turn.

@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Session boundaries suspend existing participation (`suspendActor(identity, now)`); compact preserves it and, when this actor's own binding reads back `active` via `readActorBinding(identity, now)`, appends its progress line last.
+- Session boundaries suspend existing participation (`observeBoundary(identity, false, now, { suspend: true })`); compact preserves it and, when this actor's own binding reads back `active` via `readActorBinding(identity, now)`, appends its progress line last.
 - Hooks never block a tool. Missing host provenance or storage failure yields no assistance beyond the render's own fallback.
 - off/advisory suppress new observations and injection; trusted boundaries still suspend existing participation.
 - standard/strict compose `renderSessionStart({ dial, ruleStatuses?, election, chain, binding? })`, in this order: an active-rule-status summary, the effective dial, a drift warning, a fixed election line that names, by work moment and never by word signal, `seiri:write-plan`, `seiri:execute`, `seiri:trace-cause`, and `seiri:verify` in host-neutral form, a one-line chain summary, and — at compact only, when `binding` is given — the progress line last. In strict, the election slot carries the owner contract instead — the four standard owners plus review-plan, implement, request-review, and receive-review — and a posture line follows the chain, ahead of any progress line. A missing or unreadable `ruleStatuses` still yields the election and chain lines.
@@ -20,7 +20,7 @@
 - A `startup`, `resume`, `clear` or `fork` SessionStart suspends an existing binding, clears the turn anchor and pending invocations, and advances the actor generation.
 - Any other source, including `compact`, leaves workflow state untouched.
 - SessionStart never creates participation on its own.
-- When this suspend fails (lock or storage), the intent is not lost: `suspendActor` leaves a sticky marker, and the main actor's next UserPromptSubmit or SessionStart applies the suspend before its own effect and clears the marker on commit.
+- When this suspend fails (lock or storage), the intent is not lost: `observeBoundary(identity, false, now, { suspend: true })` leaves a sticky marker, and the main actor's next UserPromptSubmit or SessionStart applies the suspend before its own effect and clears the marker on commit.
 
 ### AC-session-start-render — Election, chain, and rule status
 
@@ -30,4 +30,4 @@
 
 ## Last Updated
 
-2026-09-26
+2026-09-27

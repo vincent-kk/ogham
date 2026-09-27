@@ -14,6 +14,8 @@ import type { WorkflowIdentity } from '../../../types/workflow.js';
 import { isFirstChildTurn } from '../workflow/isFirstChildTurn.js';
 import { observeBoundary } from '../workflow/observeBoundary.js';
 
+import { seedActor } from './helpers/seedActor.js';
+
 const NOW = 1_700_000_000_000;
 const roots: string[] = [];
 function fixture(): { id: WorkflowIdentity; path: string } {
@@ -34,14 +36,16 @@ it('is first when no state file exists yet', () => {
   expect(isFirstChildTurn(id, NOW)).toBe(true);
 });
 
-it('is not first once a boundary already advanced the generation', () => {
+it('is not first once a participating actor boundary advanced the generation', () => {
   const { id } = fixture();
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW, { firstChild: true });
   expect(isFirstChildTurn(id, NOW)).toBe(false);
 });
 
 it('is first once the actor TTL has expired, even at a later generation', () => {
   const { id, path } = fixture();
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW, { firstChild: true });
   const stale = JSON.parse(readFileSync(path, 'utf8'));
   expect(stale.generation).toBeGreaterThan(0);
@@ -52,6 +56,7 @@ it('is first once the actor TTL has expired, even at a later generation', () => 
 
 it('is first for a fresh state file whose stored generation is still 0', () => {
   const { id, path } = fixture();
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW, { firstChild: true });
   const unadvanced = JSON.parse(readFileSync(path, 'utf8'));
   unadvanced.generation = 0;

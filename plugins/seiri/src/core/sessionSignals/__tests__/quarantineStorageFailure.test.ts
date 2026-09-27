@@ -19,6 +19,8 @@ vi.mock('../../utils/writeAtomically.js', async (importOriginal) => {
 
 const { observeBoundary } = await import('../workflow/observeBoundary.js');
 
+const { seedActor } = await import('./helpers/seedActor.js');
+
 const NOW = 1_700_000_000_000;
 const roots: string[] = [];
 afterEach(() =>
@@ -34,6 +36,7 @@ it('never deletes the quarantine marker ahead of a successful commit — it surv
   const id: WorkflowIdentity = { root, actor: 'actor', turn: 'turn' };
   const path = portableJoin(root, '.seiri/sessions/actor.json');
 
+  seedActor(id, NOW);
   observeBoundary(id, true, NOW);
   mkdirSync(`${path}.lock`);
   observeBoundary({ ...id, turn: 'next' }, true, NOW);

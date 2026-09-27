@@ -11,9 +11,9 @@ import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 import { workflowMainIdentity } from '../shared/workflowHost/workflowMainIdentity.js';
 
 /**
- * Anchor a child's first agent-stable turn without inheriting the parent's workflow.
- * On that first turn only, hand the child one line naming the parent
- * main actor's active task, when it has one; a resumed child gets nothing.
+ * Create no child actor; suspend and unanchor an existing resumed child.
+ * A never-participating child receives the parent main actor's active
+ * task line on each start and may enter a workflow through its own request.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  */
 export function processSubagentStart(

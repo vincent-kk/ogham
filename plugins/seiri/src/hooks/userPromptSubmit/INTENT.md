@@ -2,11 +2,11 @@
 
 ## Purpose
 
-Establish the current native turn. Under standard/strict, keep an active binding active across turns and report its progress, never reporting a paused binding's task; under off/advisory, suspend previous participation instead. Skill selection belongs to the user or host, including whether a later request continues the same task.
+Advance the native-turn anchor of an existing actor; create nothing. Under standard/strict, keep an active binding active across turns and report its progress, never reporting a paused binding's task; under off/advisory, suspend previous participation instead. Skill selection belongs to the user or host, including whether a later request continues the same task.
 
 ## Conventions
 
-- Under standard/strict, anchor the trusted turn without suspending an existing binding, and read the post-anchor snapshot for the progress line.
+- Under standard/strict, advance an existing actor's trusted turn anchor without creating an actor or suspending its binding, and read the post-anchor snapshot for the progress line.
 - Under off/advisory, revoke existing metadata and create no new anchor.
 - Do not inspect prompt prose to infer task intent.
 - Progress-line and chain-line rendering live in `hooks/shared/progressLine/`'s concrete files, shared with SubagentStart and PostToolUse; none of them import an election or posture constant, so no `Election` text can reach these bundles.
@@ -15,7 +15,7 @@ Establish the current native turn. Under standard/strict, keep an active binding
 
 ### Always do
 
-- Anchor the current turn through the actor store, suspending only under off/advisory.
+- Advance an existing actor's current turn through the actor store, suspending only under off/advisory.
 - Render the progress line from the same-transaction snapshot the anchor call returns.
 
 ### Ask first

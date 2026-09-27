@@ -23,7 +23,7 @@ interface WithWorkflowStateOptions {
   /** Persist a revocation marker if this transaction fails to commit. */
   revokeOnFailure?: boolean;
   /**
-   * Set only by a boundary transaction (`observeBoundary`, `suspendActor`):
+   * Set only by a boundary transaction (`observeBoundary`):
    * proceed despite an existing quarantine marker, apply any pending
    * suspend-intent marker to an existing binding before `mutate` runs, and
    * — on a successful commit — delete each marker this call itself saw at
@@ -61,8 +61,9 @@ function deleteMarkerIfUnchanged(
 /**
  * Run one optional actor transaction. Lock failure skips all effects.
  * @param identity Host-normalized actor identity.
- * @param create Directory preparer when a trusted boundary may create
- *   metadata; `false` otherwise.
+ * @param create Directory preparer when an entry request may create
+ *   metadata; `false` otherwise. Removes orphan quarantine markers under
+ *   the actor lock when the actor state file is absent.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @param mutate Callback under the actor lock; ledger effects take their lock inside it.
  * @param options `revokeOnFailure` and `recover`, kept as one options object
@@ -92,6 +93,10 @@ export function withWorkflowState<T>(
     if (create && !create(identity.root)) return undefined;
     held = acquireLockDir(lock);
     if (!held) throw new Error('Actor lock unavailable');
+    if (create && !existsSync(path)) {
+      for (const marker of [revoked, revokedSuspend])
+        if (existsSync(marker)) unlinkSync(marker);
+    }
     let state = readState(path);
     if (state && !isActorFresh(state, now)) {
       unlinkSync(path);

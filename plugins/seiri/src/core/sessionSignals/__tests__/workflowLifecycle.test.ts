@@ -19,6 +19,8 @@ import { observeBoundary } from '../workflow/observeBoundary.js';
 import { observeInvocation } from '../workflow/observeInvocation.js';
 import { transitionWorkflow } from '../workflow/transitionWorkflow.js';
 
+import { seedActor } from './helpers/seedActor.js';
+
 const NOW = 1_700_000_000_000;
 const roots: string[] = [];
 function identity(): WorkflowIdentity {
@@ -57,10 +59,8 @@ afterEach(() =>
     .forEach((root) => rmSync(root, { recursive: true, force: true })),
 );
 
-it('requires a trusted boundary before start and does not create a ledger', () => {
+it('creates an actor from a start pair without a boundary or ledger', () => {
   const id = identity();
-  expect(lifecycle(id, request(id.root))).toBeUndefined();
-  observeBoundary(id, true, NOW);
   expect(lifecycle(id, request(id.root))).toBe('created');
   expect(state(id).binding.task).toBe('task-a');
   expect(readdirSync(portableJoin(id.root, '.seiri')).sort()).toEqual([
@@ -120,7 +120,7 @@ it('does not inherit participation into a child actor', () => {
 });
 it('drops anchors at disabled boundaries, including a boundary without a binding', () => {
   const id = identity();
-  observeBoundary(id, true, NOW);
+  seedActor(id, NOW);
   observeBoundary({ ...id, turn: 'disabled' }, false, NOW);
   expect(lifecycle(id, request(id.root))).toBeUndefined();
   expect(state(id).turn).toBeUndefined();

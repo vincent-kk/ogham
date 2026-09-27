@@ -3,7 +3,6 @@ import type {
   WorkflowIdentity,
 } from '../../../types/workflow.js';
 
-import { prepareDirectory } from './prepareDirectory.js';
 import { advanceBoundary } from './utils/advanceBoundary.js';
 import { withWorkflowState } from './withWorkflowState.js';
 
@@ -16,9 +15,9 @@ export interface ObserveBoundaryOptions {
 }
 
 /**
- * Silently replace a trusted turn anchor; inactive dials only revoke existing metadata.
+ * Refresh an existing actor's trusted turn anchor; never create an actor.
  * @param identity Host-normalized actor identity.
- * @param enabled Whether the intervention dial permits creating or refreshing metadata; forced to `false` for a first child generation.
+ * @param enabled Whether to record the turn anchor; forced to `false` for an existing child generation.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @param options `firstChild` and `suspend`, kept as one options object so a
  *   two-positional-boolean call cannot be reordered by mistake.
@@ -38,7 +37,7 @@ export function observeBoundary(
   const { firstChild = false, suspend = false } = options;
   return withWorkflowState(
     identity,
-    enabled && !!identity.turn && prepareDirectory,
+    false,
     now,
     (state) =>
       advanceBoundary(

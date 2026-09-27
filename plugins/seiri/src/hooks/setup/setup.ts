@@ -4,8 +4,8 @@ import { renderElectionLine } from '../../core/infra/configLoader/utils/renderEl
 import { renderPostureLines } from '../../core/infra/configLoader/utils/renderPostureLines.js';
 import { buildRuleDocsStatus } from '../../core/ruleDocs/status/buildRuleDocsStatus.js';
 import { resolveSeiriProjectRuleTarget } from '../../core/ruleDocs/utils/resolveSeiriProjectRuleTarget.js';
+import { observeBoundary } from '../../core/sessionSignals/workflow/observeBoundary.js';
 import { readActorBinding } from '../../core/sessionSignals/workflow/readActorBinding.js';
-import { suspendActor } from '../../core/sessionSignals/workflow/suspendActor.js';
 import type { HookOutput, SessionStartInput } from '../../types/hooks.js';
 import type { RuleDocStatus } from '../../types/manifest.js';
 import type {
@@ -38,7 +38,7 @@ export function processSessionStart(
   const identity = workflowIdentity(input, adapter);
   let binding: WorkflowBinding | undefined;
   if (NATIVE_BOUNDARY_SOURCES.includes(input.source ?? '')) {
-    if (identity) suspendActor(identity, now);
+    if (identity) observeBoundary(identity, false, now, { suspend: true });
   } else if (input.source === 'compact' && identity)
     binding = readActorBinding(identity, now);
 

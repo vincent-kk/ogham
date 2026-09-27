@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Create only the child actor's first agent-stable turn anchor, without inheriting the parent's task or binding. Parent prompt/turn changes do not invalidate the child's paired tool calls or lifecycle results.
+- Create no child actor and never inherit the parent's task or binding. A never-participating child is first on every start, receives the handoff again, and may enter a workflow through its own entry request. Parent prompt/turn changes do not invalidate the child's paired tool calls or lifecycle results.
 - Under standard/strict, when the parent is the main actor and holds an active binding, inject one progress line naming that task and its current step — read through `readActorBinding`, lock-free and without writing. No election text.
 - off/advisory suppress new observations and injection; trusted boundaries still suspend existing participation.
 
@@ -16,16 +16,16 @@
 
 ### AC-child-boundary — Independent child actor
 
-- A child's first SubagentStart anchors only that child's actor; the parent's binding and task are never visible to the child beyond the one progress line.
-- A SubagentStart for a child whose generation is already above zero leaves it unanchored, increments generation, discards pending calls and suspends any existing binding, even though its normalized child turn stays constant.
+- A child's first SubagentStart creates no actor; the parent's binding and task are never visible to the child beyond the one progress line.
+- A SubagentStart for an already-participating child whose generation is above zero leaves it unanchored, increments generation, discards pending calls and suspends any existing binding, even though its normalized child turn stays constant.
 - A payload without `agent_id` or host provenance changes no state and returns an empty nonblocking result.
 
 ### AC-subagent-progress-line — One-time parent handoff
 
-- The progress line is injected once, only when the parent actor is main and its binding is active; a paused, absent, or non-main parent binding injects nothing.
+- The progress line is injected while the child has never participated, only when the parent actor is main and its binding is active; a paused, absent, or non-main parent binding injects nothing.
 - The bundle contains no `/Election/` literal.
-- The progress line is injected only on the child's first SubagentStart; a resumed child (generation above zero) receives nothing.
+- A never-participating child receives the handoff on repeated SubagentStart events; a resumed child that already participated (generation above zero) receives nothing.
 
 ## Last Updated
 
-2026-09-26
+2026-09-27

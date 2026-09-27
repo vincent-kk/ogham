@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 
 import { portableJoin } from '@ogham/cross-platform';
@@ -65,10 +71,10 @@ it.each(['write-plan', 'execute'] as const)(
 it('a non-entry step with no binding is rejected and creates nothing', () => {
   const id = identity();
   observeBoundary(id, true, NOW);
-  const before = state(id);
-  expect(lifecycle(id, request(id, { step: 'verify' }))).toBe('rejected');
-  expect(state(id).binding).toBeUndefined();
-  expect(state(id).generation).toBe(before.generation);
+  expect(lifecycle(id, request(id, { step: 'verify' }))).toBeUndefined();
+  expect(existsSync(portableJoin(id.root, '.seiri/sessions/actor.json'))).toBe(
+    false,
+  );
 });
 it('resume with no binding is rejected and creates nothing', () => {
   const id = identity();
@@ -80,8 +86,10 @@ it('resume with no binding is rejected and creates nothing', () => {
       task: 'task-a',
       intent: 'change',
     }),
-  ).toBe('rejected');
-  expect(state(id).binding).toBeUndefined();
+  ).toBeUndefined();
+  expect(existsSync(portableJoin(id.root, '.seiri/sessions/actor.json'))).toBe(
+    false,
+  );
 });
 it.each(['write-plan', 'execute'] as const)(
   'entry step %s on the same active task only updates step',

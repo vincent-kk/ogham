@@ -1,27 +1,14 @@
-import { CHAIN_ENTRY_STEPS } from '../../../constants/workflowChain.js';
 import type {
   WorkflowRequest,
   WorkflowState,
 } from '../../../types/workflow.js';
 
 import { freshBinding } from './utils/freshBinding.js';
+import { isEntryRequest } from './utils/isEntryRequest.js';
 
 /** Outcome of one lifecycle request against the current binding. */
 export type WorkflowTransitionResult =
   'created' | 'switched' | 'updated' | 'mismatch' | 'rejected';
-
-/**
- * Whether a request may create a binding or replace a different bound task.
- * @param request Lifecycle request to classify.
- * @returns `true` for `start`, and for a `step` request naming one of {@link CHAIN_ENTRY_STEPS}.
- */
-function isEntry(request: WorkflowRequest): boolean {
-  return (
-    request.action === 'start' ||
-    (request.action === 'step' &&
-      (CHAIN_ENTRY_STEPS as readonly string[]).includes(request.step ?? ''))
-  );
-}
 
 /**
  * Apply one acknowledged lifecycle request; finish certifies no task outcome.
@@ -47,7 +34,7 @@ export function transitionWorkflow(
   request: WorkflowRequest,
 ): WorkflowTransitionResult {
   const previous = state.binding;
-  const entry = isEntry(request);
+  const entry = isEntryRequest(request);
   const sameTask = previous?.task === request.task;
   if (previous && !sameTask && !entry) return 'mismatch';
   if (!previous && !entry) return 'rejected';

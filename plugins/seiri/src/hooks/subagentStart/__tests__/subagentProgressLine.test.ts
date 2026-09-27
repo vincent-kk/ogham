@@ -47,11 +47,21 @@ describe('subagent progress line', () => {
     );
   });
 
-  it('gives a resumed child nothing on its second SubagentStart', () => {
+  it('gives a participating resumed child nothing on its second SubagentStart', () => {
     const cwd = seedRepo();
     activateWorkflow(cwd, { task: 'payment-refactor' });
     spawn(cwd, 'child-a');
+    activateWorkflow(cwd, { task: 'child-task', agent_id: 'child-a' });
     expect(spawn(cwd, 'child-a')).toEqual({ continue: true });
+  });
+
+  it('repeats the handoff for a never-participating child', () => {
+    const cwd = seedRepo();
+    activateWorkflow(cwd, { task: 'payment-refactor' });
+    spawn(cwd, 'child-a');
+    expect(spawn(cwd, 'child-a').hookSpecificOutput?.additionalContext).toBe(
+      renderSubagentLine('payment-refactor', 'change'),
+    );
   });
 
   it('gives the child nothing when the main actor has no active binding', () => {
