@@ -74,7 +74,7 @@ describe('project_setup settings child', () => {
       body: JSON.stringify({
         scope: 'project',
         config: {
-          version: '2.0',
+          version: '3.0',
           language: 'Korean',
           adapters: { mode: 'auto', enabled: [] },
           rules: {},
@@ -112,7 +112,7 @@ describe('project_setup settings child', () => {
       body: JSON.stringify({
         scope: 'project',
         config: {
-          version: '2.0',
+          version: '3.0',
           language: 'Korean',
           adapters: { mode: 'auto', enabled: [] },
           rules: {},

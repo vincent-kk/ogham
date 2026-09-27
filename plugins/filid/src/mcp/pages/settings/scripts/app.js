@@ -331,7 +331,7 @@
       opt.textContent = level;
       severity.appendChild(opt);
     });
-    if (override.severity) severity.value = override.severity;
+    severity.value = override.severity || state.ruleDefaults[id].severity;
 
     row.appendChild(name);
     row.appendChild(enabledCell);
@@ -367,16 +367,40 @@
   }
 
   /**
-   * Draw the structural rules the chosen layer configures. The list is
-   * rebuilt rather than patched: two layers may name different rule sets.
+   * Draw every shipped rule with this layer's override, if any.
    */
   function renderRules() {
     var list = $('rules-list');
     list.textContent = '';
     var rules = activeConfig().rules || {};
-    Object.keys(rules).forEach(function (id) {
-      list.appendChild(ruleItem(id, rules[id] || {}));
+    Object.keys(state.ruleDefaults).forEach(function (id) {
+      var override = rules[id] || {};
+      if (typeof override === 'string')
+        override = override === 'off' ? { enabled: false } : { severity: override };
+      list.appendChild(ruleItem(id, override));
     });
+  }
+
+  /** Keep simple peer declarations short while preserving scoped objects. */
+  function allowedPeerLine(entry) {
+    if (!entry || typeof entry !== 'object' || entry.adapterId)
+      return JSON.stringify(entry);
+    if (typeof entry.basename !== 'string') return JSON.stringify(entry);
+    if (
+      Object.keys(entry).some(function (key) {
+        return key !== 'basename' && key !== 'paths';
+      }) ||
+      (entry.paths &&
+        (!Array.isArray(entry.paths) ||
+          entry.paths.some(function (path) {
+            return typeof path !== 'string';
+          })))
+    )
+      return JSON.stringify(entry);
+    if (!entry.paths || entry.paths.length === 0) return entry.basename;
+    if (entry.paths.length === 1)
+      return entry.paths[0] + '/' + entry.basename;
+    return JSON.stringify(entry);
   }
 
   // --- prefill: general & structure exceptions ----------------------------
@@ -389,21 +413,11 @@
     // other layer left in the field.
     $('max-depth').value =
       typeof structure.maxDepth === 'number' ? String(structure.maxDepth) : '';
+    $('exclude-paths').value = (config.exclude || []).join('\n');
+    $('generated-paths').value = (structure.generatedPaths || []).join('\n');
 
     var allowed = structure.additionalAllowedPeers || [];
-    $('additional-allowed').value = allowed
-      .map(function (entry) {
-        if (
-          entry &&
-          typeof entry === 'object' &&
-          typeof entry.basename === 'string' &&
-          !entry.paths &&
-          !entry.adapterId
-        )
-          return entry.basename;
-        return JSON.stringify(entry);
-      })
-      .join('\n');
+    $('additional-allowed').value = allowed.map(allowedPeerLine).join('\n');
     var entryPointOverrides = structure.entryPointOverrides || {};
     $('additional-entry-points').value = (
       entryPointOverrides[adapterId()] || []
@@ -518,7 +532,8 @@
       var line = raw[i];
       if (line.charAt(0) === '{') {
         try {
-          entries.push(JSON.parse(line));
+          var parsed = JSON.parse(line);
+          entries.push(allowedPeerLine(parsed));
         } catch (err) {
           showFieldError(
             'additional-allowed',
@@ -527,7 +542,7 @@
           return null;
         }
       } else {
-        entries.push({ basename: line });
+        entries.push(line);
       }
     }
     return entries;
@@ -535,7 +550,7 @@
 
   function collectConfig() {
     var config = JSON.parse(JSON.stringify(activeConfig()));
-    config.version = '2.0';
+    config.version = '3.0';
     config.rules = {};
 
     var enabledBoxes = form.querySelectorAll('[data-rule-enabled]');
@@ -544,7 +559,8 @@
       var severity = form.querySelector(
         '[data-rule-severity="' + id + '"]',
       ).value;
-      var override = { enabled: enabledBoxes[i].checked, severity: severity };
+      var enabled = enabledBoxes[i].checked;
+      var defaultSeverity = state.ruleDefaults[id].severity;
       var exemptArea = form.querySelector('[data-rule-exempt="' + id + '"]');
       var exempt = exemptArea.value
         .split('\n')
@@ -554,13 +570,27 @@
         .filter(function (line) {
           return line.length > 0;
         });
-      if (exempt.length) override.exempt = exempt;
-      config.rules[id] = override;
+      if (enabled && severity === defaultSeverity && !exempt.length) continue;
+      if (!enabled && severity === defaultSeverity && !exempt.length) {
+        config.rules[id] = 'off';
+      } else if (enabled && severity !== defaultSeverity && !exempt.length) {
+        config.rules[id] = severity;
+      } else {
+        var override = {};
+        if (!enabled) override.enabled = false;
+        if (severity !== defaultSeverity) override.severity = severity;
+        if (exempt.length) override.exempt = exempt;
+        config.rules[id] = override;
+      }
     }
 
     var language = $('language').value.trim();
     if (language) config.language = language;
     else delete config.language;
+
+    var excluded = lines('exclude-paths');
+    if (excluded.length) config.exclude = excluded;
+    else delete config.exclude;
 
     var structure = config.structure
       ? JSON.parse(JSON.stringify(config.structure))
@@ -574,6 +604,10 @@
       }
       structure.maxDepth = maxDepth;
     } else delete structure.maxDepth;
+
+    var generated = lines('generated-paths');
+    if (generated.length) structure.generatedPaths = generated;
+    else delete structure.generatedPaths;
 
     var allowed = collectAllowed();
     if (allowed === null) return null;

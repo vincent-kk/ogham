@@ -5,6 +5,8 @@ import { join } from 'node:path';
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
+import { BUILTIN_RULE_IDS } from '../../../../../constants/builtinRuleIds.js';
+import { BUILTIN_RULE_SEVERITIES } from '../../../../../constants/builtinRuleSeverities.js';
 import { syncRuleDocs } from '../../../../../core/infra/configLoader/loaders/syncRuleDocs.js';
 import { buildSettingsState } from '../utils/buildSettingsState.js';
 
@@ -60,6 +62,16 @@ afterEach(() => {
 });
 
 describe('settings state rule documents', () => {
+  it('provides a default severity for every shipped rule', () => {
+    const state = buildSettingsState(projectRoot);
+    expect(Object.keys(state.ruleDefaults).sort()).toEqual(
+      Object.values(BUILTIN_RULE_IDS).sort(),
+    );
+    expect(state.ruleDefaults['max-depth']?.severity).toBe(
+      BUILTIN_RULE_SEVERITIES['max-depth'],
+    );
+  });
+
   it('carries a snapshot for each layer, not just the one in use', () => {
     const state = buildSettingsState(projectRoot);
 
