@@ -66,7 +66,7 @@ Related: `/filid:enrich-docs` (invoked in Stage 1), `/filid:cross-review` (chain
 
 With `--skip-enrich`, step 4 is skipped; scope resolution, ownerless reporting and the handoff (steps 1–3) still run.
 
-At entry, initialize `HANDOFF_ENTRIES = []`, `REPAIRED = 0`, and leave `documentSync` unset. Subsequent findings append to `HANDOFF_ENTRIES`; `reference.md` §7 defines the entry contract.
+At entry, initialize `HANDOFF_ENTRIES = []`, `REPAIRED = 0`, `EXCLUDED = 0`, and leave `documentSync` unset. Subsequent findings append to `HANDOFF_ENTRIES`; `reference.md` §7 defines the entry contract.
 
 1. Derive the changed paths: `git diff --name-only <BASE_REF>...HEAD`.
 2. Map all changed paths to their owning fractals with one `fractal_inspect` `resolve` batch:
@@ -84,9 +84,9 @@ At entry, initialize `HANDOFF_ENTRIES = []`, `REPAIRED = 0`, and leave `document
 
    Read ordered `data.results`, or the artifact results when inline `data` is absent. If the batch call fails, its artifact cannot be read, or `data.results` is missing after that fallback, append `{ class: "document-sync", ruleId: "document-sync", path: ".", note: <diagnostic verbatim> }` to `HANDOFF_ENTRIES`, set `Document sync: failed`, leave the owner set empty, skip step 4, and proceed to step 7.
 
-   A `resolved: true` item contributes its `result.summary.ownerFractalPath`; keep its diagnostics visible. Apply `reference.md` §6 to `resolved: false` items: it defines the `context-target-unresolved`, `git cat-file -e HEAD:<path>`, and `structure.additionalExcludedDirectories` evidence for ownerless classification. For a path absent from `HEAD` — a deleted or renamed source — resolve its nearest ancestor directory that `git cat-file -e HEAD:<dir>` confirms and take that owner; when no ancestor resolves, or any other diagnostic appears, append `{ class: "unresolved-path", ruleId: <diagnostic code>, path: <changed path>, note: <diagnostic verbatim> }` to `HANDOFF_ENTRIES` and continue. Collect distinct resolved owners as the document audit scope; do not enrich the whole tree.
+   A `resolved: true` item contributes its `result.summary.ownerFractalPath`; keep its diagnostics visible. Apply `reference.md` §6 to `resolved: false` items. First, a `context-target-excluded` diagnostic means the path is excluded by config: increment `EXCLUDED`, skip document sync for that path, and add no handoff entry. Then classify `context-target-unresolved` with `git cat-file -e HEAD:<path>` as ownerless non-FCA. For a path absent from `HEAD` — a deleted or renamed source — resolve its nearest ancestor directory that `git cat-file -e HEAD:<dir>` confirms and take that owner; when no ancestor resolves, or any other diagnostic appears, append `{ class: "unresolved-path", ruleId: <diagnostic code>, path: <changed path>, note: <diagnostic verbatim> }` to `HANDOFF_ENTRIES` and continue. Collect distinct resolved owners as the document audit scope; do not enrich the whole tree.
 
-3. Report ownerless non-FCA paths and carry their count summary into the `(non-FCA)` row and the bullet list of the `Changes` block as specified in §6. Keep all changed paths in Stage 3's PR analysis. With no owners, make no enrich-docs call and report `no-change`, unless the sync is already `failed` or the flag requires `skipped`.
+3. Report excluded and ownerless non-FCA paths. Carry their counts into the `(excluded)` and `(non-FCA)` rows and the bullet list of the `Changes` block as specified in §6. Keep all changed paths in Stage 3's PR analysis. With no owners, make no enrich-docs call and report `no-change`, unless the sync is already `failed` or the flag requires `skipped`.
 4. When owners exist and `--skip-enrich` is absent, invoke `Skill("filid:enrich-docs", "<owner fractal paths> --include-detail --repair")` so the audit covers both INTENT.md and DETAIL.md. Append `--auto-approve` **exactly when this skill received it** — never by inferring that a pipeline is running. An orchestrator that wants unattended document sync passes the flag; without it, enrich-docs keeps its own approval step and a standalone run stays interactive.
 5. Read the enrich-docs report when step 4 ran. Nothing here exits:
 
@@ -127,7 +127,7 @@ Stage 1 may have added document files, so run the [facts bootstrap](../.shared/f
 1. Collect branch-only commit subjects with `git log --format=%s <BASE_REF>..HEAD`. Collect changed paths with `git diff --name-only <BASE_REF>...HEAD`, Kind evidence with `git diff --name-status -M <BASE_REF>...HEAD`, file statistics with `git diff --stat <BASE_REF>...HEAD`, and summary statistics with `git diff --shortstat <BASE_REF>...HEAD`. The triple-dot diff starts at the merge-base and excludes base-only changes.
 2. Build the body from `reference.md` §3: five open sections on top, four collapsed regions below, in that order; optional sections are omitted when their inputs are absent.
 3. Build the `Changes` rows only from Stage 1's resolved `ownerFractalPath` set and the name-status output from step 1:
-   - Start with one row for each owner fractal. Add a `removed` row directly from `D <F>/INTENT.md` and a `moved` row directly from `R… <old>/INTENT.md <F>/INTENT.md` even when the deleted source has no current owner. Add one final `(non-FCA)` row when ownerless paths exist; its `What changed` cell gives their count and whether configuration declares the exclusion.
+   - Start with one row for each owner fractal. Add a `removed` row directly from `D <F>/INTENT.md` and a `moved` row directly from `R… <old>/INTENT.md <F>/INTENT.md` even when the deleted source has no current owner. Add an `(excluded)` row when `EXCLUDED` is positive; its `What changed` cell gives the count and names the config declaration. Add one final `(non-FCA)` row when ownerless paths exist; its `What changed` cell gives their count.
    - Derive `Kind` by first match: `removed` for `D <F>/INTENT.md`; `new` for `A <F>/INTENT.md`; `moved` for `R… <old>/INTENT.md <F>/INTENT.md`, with `<old> → <F>` in `What changed`; `boundary` for `M <F>/INTENT.md` or a changed non-document file directly below `<F>` rather than a subdirectory; `test` when every changed path under `<F>` has a `__tests__`, `tests`, `test`, `spec`, `specs`, `e2e`, or `fixtures` segment or a filename containing `.test.` or `.spec.`; otherwise `behavior`. The verification-path predicate is an approximation.
    - Sort `removed`, `new`, `moved`, and `boundary` first in that order, each by changed-file count descending, then sort `test` and `behavior` by changed-file count descending. Do not display those counts in the rows.
    - Derive `Contract` bullets only from `new`, `removed`, `moved`, and `boundary` rows, one consumer-visible change per fractal. `behavior` and `test` never enter `Contract`.
@@ -184,7 +184,7 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 - `--push` is on by default: an unpushed branch is pushed before the PR opens, and the push is always named in the terminal output — never silent. With `--no-push` the run ends in a saved body and a message naming the cause.
 - Only `INTENT.md` / `DETAIL.md` are staged by this skill. Any other staged path is a defect.
 - Generated paths are classified so the cycle can continue, never staged and never committed. Committing build output stays the developer's call.
-- Config-declared and existing ownerless non-FCA paths are reported and excluded only from document sync. An unresolved path missing from `HEAD` or carrying another diagnostic is recorded as `unresolved-path` in the handoff and never blocks PR creation.
+- Paths declared in `exclude` are counted and excluded from document sync without a handoff entry. Existing ownerless non-FCA paths are reported and excluded only from document sync. An unresolved path missing from `HEAD` or carrying another diagnostic is recorded as `unresolved-path` in the handoff and never blocks PR creation.
 - Document sync never blocks PR creation. What Stage 1 could not repair, and a sync that failed, was declined, or was skipped with `--skip-enrich`, is recorded in the PR body's `FCA Handoff` section and in the `Handoff:` terminal line; `review` reads the body's handoff block and top sections as change context.
 - Stage 1 repairs document-contract findings only. Source, import, dependency and file-placement findings are recorded, never fixed here.
 - Input-error aborts are exactly Stage 0's detached/empty branch, no commits ahead of base, `source-dirty` worktree, and `documents-only` with `--skip-enrich`; and Stage 2's unresolved base. Base resolution never guesses silently.
@@ -198,6 +198,7 @@ Refresh remote state after Stage 1's document commit: run `git rev-parse --verif
 Pull request: <created|updated|body-saved> <url-or-path>
 Document sync: <committed|no-change|skipped|declined|failed>
 Handoff: <N> recorded (<c> code-change, <d> config-decision, <i> indeterminate, <r> needs-rework, <u> unresolved-path, <s> document-sync), <R> repaired
+Excluded: <EXCLUDED>
 Branch push: <pushed|up-to-date|declined>
 ```
 

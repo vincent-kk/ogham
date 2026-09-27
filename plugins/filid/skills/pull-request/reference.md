@@ -109,7 +109,8 @@ Five open sections appear at the top, followed by four collapsed regions. The co
 | `<fractal>` | <kind> | <one-sentence change> |
 
 - Stage 1 document sync commit `<hash>` — <document change summary>.
-- <n> non-FCA paths were excluded from document sync — <config declaration status>.
+- <n> paths excluded by config.
+- <n> non-FCA paths were excluded from document sync.
 
 </details>
 
@@ -149,7 +150,7 @@ Rules:
 - Keep the five open sections to at most 40 lines in total. If necessary, reduce each `Review notes` bullet to one sentence and each checked `Verification` item to its command and observed result.
 - Build `Contract` only from `Changes` rows whose `Kind` is `new`, `removed`, `moved`, or `boundary`. Give each affected fractal one `` `<fractal>` — <consumer-visible change> `` bullet. Do not promote `behavior` or `test` rows. Keep `**Rollback**` and any `> [!WARNING]` breaking notice in `Contract`.
 - When structural fractals exceed 10, replace their individual `Contract` bullets with one Kind-count line such as `new 3, moved 1, boundary 12`; preserve `> [!WARNING]` and `**Rollback**`.
-- The only evidence for `Changes` rows is the Stage 1 `fractal_inspect` `resolve` batch's `ownerFractalPath` set and `git diff --name-status -M <BASE_REF>...HEAD`. Create one row per owner fractal, add rows established by the `removed` and `moved` rules below, and put one final `(non-FCA)` row when ownerless paths exist. That row states the path count and whether configuration declares the exclusion. Put the Stage 1 document commit and non-FCA exclusion summaries in bullets below the table.
+- The only evidence for `Changes` rows is the Stage 1 `fractal_inspect` `resolve` batch's owner and diagnostic results and `git diff --name-status -M <BASE_REF>...HEAD`. Create one row per owner fractal, add rows established by the `removed` and `moved` rules below, add an `(excluded)` row with the path count and `exclude` declaration when excluded paths exist, and put one final `(non-FCA)` row when ownerless paths exist. Put the Stage 1 document commit and both path-count summaries in bullets below the table.
 - Derive `Kind` by first match:
   1. `removed` for `D <F>/INTENT.md`.
   2. `new` for `A <F>/INTENT.md`.
@@ -186,7 +187,7 @@ The tool reads `structure.generatedPaths` from the project config and sorts ever
 
 What the tool guarantees:
 
-- Patterns match segment by segment; `*` matches exactly one segment. There is no `**` and no partial-segment wildcard, so a pattern names one path shape.
+- Patterns use project-relative globs: `**` crosses directories, `*` stays within one segment, and `?` matches one character. A match on a parent directory covers its descendants.
 - `generatedPaths` covers artifacts the build writes **and the repository tracks**. Ignored output never reaches `git status`, so it needs no entry.
 - An empty list makes every non-document path source — the conservative default, not a misconfiguration to work around.
 - The classification decides whether the cycle continues. It never decides what gets committed: only documents are ever staged by this skill.
@@ -197,12 +198,13 @@ Stage 1 narrows only the FCA document audit, never the PR change list. Send ever
 
 | Evidence                                                                                                       | Document scope             | Action                                                                                                                                    |
 | -------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| `fractal_inspect` `resolve` returns `resolved: true`                                                           | FCA-owned                  | Keep `result.summary.ownerFractalPath`; a target under a config-excluded directory name is still FCA-owned through its enclosing fractal. |
-| `resolved: false`, every diagnostic is `context-target-unresolved`, and `git cat-file -e HEAD:<path>` succeeds | existing ownerless non-FCA | Report the path and ownerless evidence; use a matching `structure.additionalExcludedDirectories` segment as the config-declared reason.   |
+| `resolved: false` with `context-target-excluded`                                                                 | excluded                  | Count it; skip document sync and handoff. The diagnostic names the matching `exclude` pattern.                                          |
+| `fractal_inspect` `resolve` returns `resolved: true`                                                           | FCA-owned                  | Keep `result.summary.ownerFractalPath`.                                                                                                    |
+| `resolved: false`, every diagnostic is `context-target-unresolved`, and `git cat-file -e HEAD:<path>` succeeds | existing ownerless non-FCA | Report the path and ownerless evidence.                                                                                                    |
 | The target is absent from `HEAD`, including a deleted or renamed source                                        | unresolved                 | Resolve the nearest ancestor directory present in `HEAD`; when none resolves, record `unresolved-path` (§7) and continue.                 |
 | Any other failed diagnostic                                                                                    | unresolved                 | Record the diagnostic verbatim as `unresolved-path` (§7) and continue.                                                                    |
 
-`additionalExcludedDirectories` entries are directory names, not paths or globs. Compare complete project-relative directory segments; never match the basename or a partial segment. The config match is a reason, not an ownership override, and is consulted only after `resolved: false`. Config-declared and structural ownerless paths are listed in terminal progress and summarized by count in the bullet list under the `Changes` table. They remain in the `Changes` table as the `(non-FCA)` row because non-FCA is a document-ownership verdict, not a request to hide the change.
+The resolver applies `exclude` itself. Report excluded paths in terminal progress and the `(excluded)` Changes row, with their count in the bullet list. Report structural ownerless paths separately in the `(non-FCA)` row and its count bullet. Neither class enters the document audit scope.
 
 When every changed path is non-FCA, Stage 1 completes the single `fractal_inspect` `resolve` batch, makes no enrich-docs call, and reports `Document sync: no-change` (`skipped` with `--skip-enrich`). A failed item is never converted to non-FCA merely because ignoring it would let publication continue.
 
@@ -217,8 +219,8 @@ Certainty takes precedence: every finding with `certainty: indeterminate` or `un
 | Class             | Evidence                                                                                                                                                                                                                  | Treatment                                              |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
 | `needs-rework`    | A document reverted by enrich-docs                                                                                                                                                                                        | Record it                                              |
-| `needs-rework`    | `stale-path` that does not name a `structure.generatedPaths` token                                                                                                                                                        | Record it                                              |
-| `config-decision` | `stale-path` naming a `structure.generatedPaths` token; `organ-no-intentmd`; a Boundary Exemption with an empty Reason (`missing-field`)                                                                                  | Record for a human or configuration decision           |
+| `needs-rework`    | `stale-path` outside `structure.generatedPaths` and `exclude`                                                                                                                                                              | Record it                                              |
+| `config-decision` | `stale-path` naming a `structure.generatedPaths` or `exclude` token; `organ-no-intentmd`; a Boundary Exemption with an empty Reason (`missing-field`)                                                                     | Record for a human or configuration decision           |
 | `code-change`     | `circular-dependency`, `external-import-boundary`, `pure-function-isolation`, `max-depth`, `zero-peer-file`, `module-entry-point`, `entry-point-surface`; `test-record-case-cap` and `spec-*` with `exact` certainty      | Record for review                                      |
 | `indeterminate`   | Any finding with `indeterminate` or `unsupported` certainty; scan-level diagnostics; `Verification evidence is indeterminate.`                                                                                            | Record the evidence gap                                |
 | `unresolved-path` | A Stage 1 step 2 resolution failure that cannot become non-FCA                                                                                                                                                            | Record the path and diagnostic                         |

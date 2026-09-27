@@ -77,25 +77,27 @@ describe('shipped fractal_inspect resolve caller contract', () => {
     );
   });
 
-  it('keeps non-FCA PR scope exclusions explicit and deletion-safe', () => {
+  it('keeps excluded and non-FCA PR scope explicit and deletion-safe', () => {
     const skill = documents['skills/pull-request/SKILL.md'];
     const reference = documents['skills/pull-request/reference.md'];
 
-    expect(skill).toContain('structure.additionalExcludedDirectories');
+    expect(skill).toContain('context-target-excluded');
+    expect(skill).toContain('Excluded: <EXCLUDED>');
     expect(skill).toContain('context-target-unresolved');
     expect(skill).toContain('git cat-file -e HEAD:<path>');
     expect(skill).toContain('resolved: false');
     expect(reference).toContain('Non-FCA document scope');
+    expect(reference).toContain('`(excluded)` Changes row');
     expect(reference).toContain('deleted or renamed source');
   });
 
-  it('does not pre-filter config exclusions that retain an enclosing owner', () => {
+  it('lets resolve classify excluded paths without a skill-side filter', () => {
     const skill = documents['skills/pull-request/SKILL.md'];
     const reference = documents['skills/pull-request/reference.md'];
 
     expect(skill).not.toContain('do not send it to `fractal_inspect`');
     expect(skill).toContain('all changed paths');
-    expect(reference).toContain('still FCA-owned');
-    expect(reference).toContain('reason, not an ownership override');
+    expect(reference).toContain('The resolver applies `exclude` itself');
+    expect(reference).toContain('context-target-excluded');
   });
 });
