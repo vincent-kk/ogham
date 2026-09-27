@@ -46,7 +46,7 @@ mcp__plugin_filid_tools__project_setup({
 
 The page owns config and managed-document persistence. Dispatch on the stable status:
 
-Its Paths section edits top-level `ignore` with project-relative globs; matching files and directories are omitted from Filid operations.
+Its Paths section edits top-level `ignore` (omitted from every Filid operation), `structure.excludeFromScan` (structure scan only; still reviewed), and `review.generatedPaths` (tracked build output skipped in review), each as project-relative globs.
 
 - `saved`: retain the returned save summary and continue.
 - `closed`: keep the existing state and continue.

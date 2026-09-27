@@ -397,7 +397,9 @@
           })))
     )
       return JSON.stringify(entry);
-    if (!entry.paths || entry.paths.length === 0) return entry.basename;
+    if (!entry.paths) return entry.basename;
+    if (entry.paths.length === 0 || entry.paths[0] === '')
+      return JSON.stringify(entry);
     if (entry.paths.length === 1)
       return entry.paths[0] + '/' + entry.basename;
     return JSON.stringify(entry);

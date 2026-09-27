@@ -155,7 +155,10 @@ describe('the facts bootstrap document matches the tool it drives', () => {
         ].map(([, path]) => path),
       ),
     ].filter(
-      (path) => !path.startsWith('facts.') && !path.includes('resolved.'),
+      (path) =>
+        !path.startsWith('facts.') &&
+        !path.startsWith('structure.') &&
+        !path.includes('resolved.'),
     );
     expect(referenced).toContain('extractionList.path');
     expect(referenced).toContain('data.unadjudicated.items');

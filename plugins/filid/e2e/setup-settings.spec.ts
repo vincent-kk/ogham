@@ -262,6 +262,7 @@ test('complex peer objects survive settings save unchanged', async ({ page }) =>
   const peers = [
     { basename: 'setup.entry.ts', paths: ['**/a', '**/b'] },
     { basename: 'x.ts', adapterId: 'ecmascript' },
+    { basename: 'y.ts', paths: [] },
   ];
   mkdirSync(join(projectDir, '.filid'), { recursive: true });
   writeFileSync(

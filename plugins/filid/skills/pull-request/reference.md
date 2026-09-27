@@ -110,7 +110,7 @@ Five open sections appear at the top, followed by four collapsed regions. The co
 
 - Stage 1 document sync commit `<hash>` — <document change summary>.
 - <n> paths ignored by config.
-- <n> non-FCA paths were excluded from document sync.
+- <n> non-FCA paths were excluded from document sync — <n> declared by `structure.excludeFromScan`.
 
 </details>
 
@@ -150,7 +150,7 @@ Rules:
 - Keep the five open sections to at most 40 lines in total. If necessary, reduce each `Review notes` bullet to one sentence and each checked `Verification` item to its command and observed result.
 - Build `Contract` only from `Changes` rows whose `Kind` is `new`, `removed`, `moved`, or `boundary`. Give each affected fractal one `` `<fractal>` — <consumer-visible change> `` bullet. Do not promote `behavior` or `test` rows. Keep `**Rollback**` and any `> [!WARNING]` breaking notice in `Contract`.
 - When structural fractals exceed 10, replace their individual `Contract` bullets with one Kind-count line such as `new 3, moved 1, boundary 12`; preserve `> [!WARNING]` and `**Rollback**`.
-- The only evidence for `Changes` rows is the Stage 1 `fractal_inspect` `resolve` batch's owner and diagnostic results and `git diff --name-status -M <BASE_REF>...HEAD`. Create one row per owner fractal, add rows established by the `removed` and `moved` rules below, add an `(ignored)` row with the path count and `ignore` declaration when ignored paths exist, and put one final `(non-FCA)` row when ownerless paths exist. Put the Stage 1 document commit and both path-count summaries in bullets below the table.
+- The only evidence for `Changes` rows is the Stage 1 `fractal_inspect` `resolve` batch's owner and diagnostic results and `git diff --name-status -M <BASE_REF>...HEAD`. Create one row per owner fractal, add rows established by the `removed` and `moved` rules below, add an `(ignored)` row with the path count and `ignore` declaration when ignored paths exist, and put one final `(non-FCA)` row (stating the path count and how many `structure.excludeFromScan` declares) when ownerless paths exist. Put the Stage 1 document commit and both path-count summaries in bullets below the table.
 - Derive `Kind` by first match:
   1. `removed` for `D <F>/INTENT.md`.
   2. `new` for `A <F>/INTENT.md`.
@@ -200,12 +200,12 @@ Stage 1 narrows only the FCA document audit, never the PR change list. Send ever
 | Evidence                                                                                                       | Document scope             | Action                                                                                                                                    |
 | -------------------------------------------------------------------------------------------------------------- | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `resolved: false` with `context-target-ignored`                                                                 | ignored                   | Count it; skip document sync and handoff. The diagnostic names the matching `ignore` pattern.                                           |
-| `fractal_inspect` `resolve` returns `resolved: true`                                                           | FCA-owned                  | Keep `result.summary.ownerFractalPath`.                                                                                                    |
-| `resolved: false`, every diagnostic is `context-target-unresolved`, and `git cat-file -e HEAD:<path>` succeeds | existing ownerless non-FCA | Report the path and ownerless evidence.                                                                                                    |
+| `fractal_inspect` `resolve` returns `resolved: true`                                                           | FCA-owned                  | Keep `result.summary.ownerFractalPath`. A target under a `structure.excludeFromScan` pattern is still FCA-owned through its enclosing fractal. |
+| `resolved: false`, every diagnostic is `context-target-unresolved`, and `git cat-file -e HEAD:<path>` succeeds | existing ownerless non-FCA | Report the path and ownerless evidence; when the path or an ancestor matches a `structure.excludeFromScan` pattern (same path-or-ancestor grammar as `ignore`), name that pattern as the config-declared reason. The path is still reviewed. |
 | The target is absent from `HEAD`, including a deleted or renamed source                                        | unresolved                 | Resolve the nearest ancestor directory present in `HEAD`; when none resolves, record `unresolved-path` (§7) and continue.                 |
 | Any other failed diagnostic                                                                                    | unresolved                 | Record the diagnostic verbatim as `unresolved-path` (§7) and continue.                                                                    |
 
-The resolver applies `ignore` itself. Report ignored paths in terminal progress and the `(ignored)` Changes row, with their count in the bullet list. Report structural ownerless paths separately in the `(non-FCA)` row and its count bullet. Neither class enters the document audit scope.
+The resolver applies `ignore` itself. Report ignored paths in terminal progress and the `(ignored)` Changes row, with their count in the bullet list. Report structural ownerless paths separately in the `(non-FCA)` row and its count bullet. Neither class enters the document audit scope. `structure.excludeFromScan` is consulted only after `resolved: false`, as a reason, never as an ownership override.
 
 When every changed path is non-FCA, Stage 1 completes the single `fractal_inspect` `resolve` batch, makes no enrich-docs call, and reports `Document sync: no-change` (`skipped` with `--skip-enrich`). A failed item is never converted to non-FCA merely because ignoring it would let publication continue.
 

@@ -142,6 +142,22 @@ describe('project snapshot', () => {
     expect(excluded.tree.nodes.get(fixture.producer)?.peerFiles).not.toContain('value.ts');
   });
 
+  it('prunes structure.excludeFromScan paths from the tree like ignore does', async () => {
+    const root = project();
+    const fixture = writeSnapshotProject(root);
+    await seedFacts(root);
+    const config = createDefaultConfig();
+    const registry = createAdapterRegistry();
+    const included = await createProjectSnapshot(root, registry, config);
+    const excluded = await createProjectSnapshot(root, registry, {
+      ...config,
+      structure: { ...config.structure, excludeFromScan: ['producer/value.ts'] },
+    });
+
+    expect(included.snapshotHash).not.toBe(excluded.snapshotHash);
+    expect(excluded.tree.nodes.get(fixture.producer)?.peerFiles).not.toContain('value.ts');
+  });
+
   it('bundles one tree, owner graph, and verification analysis', async () => {
     const root = project();
     const fixture = writeSnapshotProject(root);

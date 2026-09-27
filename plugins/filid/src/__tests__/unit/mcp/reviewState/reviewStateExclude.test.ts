@@ -72,6 +72,32 @@ describe('review_state ignore', () => {
     });
   });
 
+  it('leaves structure.excludeFromScan paths reviewable and dirty-sensitive', async () => {
+    const configPath = join(fixture.projectRoot, '.filid/config.json');
+    const config = JSON.parse(readFileSync(configPath, 'utf8')) as Record<string, unknown>;
+    config.structure = { ...((config.structure as object | undefined) ?? {}), excludeFromScan: ['src/value1.ts'] };
+    writeFileSync(configPath, JSON.stringify(config));
+    await seedFacts(fixture.projectRoot);
+
+    const prepared = await handleReviewState({
+      action: 'prepare',
+      projectRoot: fixture.projectRoot,
+      effort: 'low',
+    });
+    expect(prepared.summary.ignoredFiles).toBe(0);
+    const state = readPreparedReviewState(prepared);
+    const file = state.scope.files.find((entry) => entry.path === 'src/value1.ts');
+    expect(file?.role).not.toBe('ignored');
+    expect(file?.skipReason).toBeNull();
+
+    writeFileSync(join(fixture.projectRoot, 'src/value1.ts'), 'dirty mock\n');
+    const assessed = await handleReviewState({
+      action: 'assess',
+      projectRoot: fixture.projectRoot,
+    });
+    expect(assessed.summary.worktreeDisposition).toBe('source-dirty');
+  });
+
   it('keeps excluded committed files visible without reviewing or freezing them', async () => {
     const configPath = join(fixture.projectRoot, '.filid/config.json');
     const config = JSON.parse(readFileSync(configPath, 'utf8')) as Record<string, unknown>;
