@@ -280,6 +280,19 @@ describe('fractal-tree', () => {
       }
     });
 
+    it('drops an excluded file from its owner peerFiles', async () => {
+      setup({ '.': ['INTENT.md', 'index.ts', 'keep.ts', 'skip.mock.ts'] });
+      try {
+        const tree = await scanProject(tmpDir, {
+          exclude: ['skip.mock.ts', ...DEFAULT_SCAN_OPTIONS.exclude],
+        });
+        expect(tree.nodes.get(tmpDir)?.peerFiles).toContain('keep.ts');
+        expect(tree.nodes.get(tmpDir)?.peerFiles).not.toContain('skip.mock.ts');
+      } finally {
+        teardown();
+      }
+    });
+
     it('should detect INTENT.md and classify as fractal', async () => {
       setup({
         '.': ['INTENT.md'],

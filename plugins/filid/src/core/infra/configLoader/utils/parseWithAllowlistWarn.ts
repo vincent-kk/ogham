@@ -25,6 +25,7 @@ export function parseWithAllowlistWarn(
     typeof structuredClone === 'function'
       ? structuredClone(parsed)
       : (JSON.parse(JSON.stringify(parsed)) as unknown);
+  const droppedPaths: Array<readonly (string | number)[]> = [];
 
   for (const issue of error.issues) {
     const pathStr = formatIssuePath(issue.path);
@@ -63,8 +64,20 @@ export function parseWithAllowlistWarn(
       `invalid value at ${pathStr}: ${issue.message} (dropped, non-fatal; see migration guide)`,
       issue.path,
     );
-    deleteAt(root, issue.path);
+    droppedPaths.push(issue.path);
   }
+
+  droppedPaths.sort((left, right) => {
+    for (let index = 0; index < Math.min(left.length, right.length); index += 1) {
+      const a = left[index];
+      const b = right[index];
+      if (a === b) continue;
+      if (typeof a === 'number' && typeof b === 'number') return b - a;
+      return String(b).localeCompare(String(a));
+    }
+    return right.length - left.length;
+  });
+  for (const path of droppedPaths) deleteAt(root, path);
 
   return { sanitized: root };
 }

@@ -125,6 +125,23 @@ afterEach(() => {
 });
 
 describe('project snapshot', () => {
+  it('changes the snapshot hash when a source file is excluded', async () => {
+    const root = project();
+    const fixture = writeSnapshotProject(root);
+    await seedFacts(root);
+    const config = createDefaultConfig();
+    const registry = createAdapterRegistry();
+    const included = await createProjectSnapshot(root, registry, config);
+    const excluded = await createProjectSnapshot(root, registry, {
+      ...config,
+      exclude: ['producer/value.ts'],
+    });
+
+    expect(included.snapshotHash).not.toBe(excluded.snapshotHash);
+    expect(included.tree.nodes.get(fixture.producer)?.peerFiles).toContain('value.ts');
+    expect(excluded.tree.nodes.get(fixture.producer)?.peerFiles).not.toContain('value.ts');
+  });
+
   it('bundles one tree, owner graph, and verification analysis', async () => {
     const root = project();
     const fixture = writeSnapshotProject(root);

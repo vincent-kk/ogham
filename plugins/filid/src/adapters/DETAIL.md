@@ -34,6 +34,7 @@
 ### AC-adapter-excluded-paths — Excluded evidence
 
 - A path matched by `exclude`, including via an ancestor, enters neither ownership nor unsupported diagnostics.
+- Snapshot orchestration passes both built-in scan exclusions and config `exclude` to adapter source discovery, so both use the same candidate file set.
 - Empty exclusions preserve ordinary discovery.
 - `requestedPaths`로 명시한 path에도 같은 제외가 적용된다.
 

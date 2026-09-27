@@ -116,7 +116,7 @@ git status --short
   "structure": {
     "maxDepth": 10,
     "additionalOrganNames": ["fixtures"],
-    "additionalAllowedPeers": ["packages/*/vite.config.ts"],
+    "additionalAllowedPeers": ["**/packages/*/vite.config.ts"],
     "generatedPaths": ["plugins/*/bridge"],
     "entryPointOverrides": {
       "ecmascript": ["route.ts", "page.tsx"]
@@ -135,7 +135,7 @@ git status --short
 | `rules.<id>`                       | Overrides only: `off`, severity shorthand, or an object with `enabled`, `severity`, `exempt`. |
 | `structure.maxDepth`               | 트리 깊이 한계 (기본 10)                                          |
 | `structure.additionalOrganNames`   | organ으로 취급할 추가 디렉터리 이름                               |
-| `structure.additionalAllowedPeers` | Allowed peer object or `<path>/<basename>` shorthand; basename may be a glob. |
+| `structure.additionalAllowedPeers` | Allowed peer object or `<path>/<basename>` shorthand; basename may be a glob. The directory part matches the absolute node path like `exempt`, so prefix it with `**/`. |
 | `structure.generatedPaths`         | Tracked build output, skipped in review; uses the same path-and-ancestor glob grammar. |
 | `structure.entryPointOverrides`    | **key가 adapter ID다.** core가 파일명 의미를 해석하지 않고 전달   |
 

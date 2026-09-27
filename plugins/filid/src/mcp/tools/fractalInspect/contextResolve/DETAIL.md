@@ -30,6 +30,7 @@
 - sibling/subtree와 무관한 문서나 문서 본문을 포함하지 않는다.
 - owner가 없는 target 또는 project 밖 target은 해당 item의 실패로 반환하며, 그 `context-target-unresolved` diagnostic은 `nextAction`으로 project 안의 경로를 다시 넣고 재호출하라고 안내한다.
 - An excluded target is unresolved with `context-target-excluded` and does not acquire an owner from the snapshot.
+- Exclusion is deterministic, but the existing item statuses have no deterministic non-resolution value: `ok` means a resolved chain and `violations` means a violated rule. The unresolved item and batch therefore remain `indeterminate` while the diagnostic names the config decision.
 
 ### AC-context-batch — Shared snapshot과 독립 결과
 

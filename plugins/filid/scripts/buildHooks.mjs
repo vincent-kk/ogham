@@ -65,7 +65,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   (delivery-state visit pipeline: commitVisit transaction
 //                   + 3-state TTL soft delivery + scoped fmap
 //                   + pre-tool-validator + structure-guard + FCA opt-in gate).
-//                   36KB keeps a bounded cold-start budget while leaving room
+//                   40 KiB keeps a bounded cold-start budget while leaving room
 //                   for guard state and conservative Move projection.
 //   SESSION_START — selfProbeHook (Node builtin spawnSync) + logHookFailure.
 //                   Output fingerprints reject cross-spawn/which even when the

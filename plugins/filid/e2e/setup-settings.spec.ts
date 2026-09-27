@@ -256,6 +256,33 @@ test('normalized peer entries prefill as shorthand and save in raw form', async 
   ]);
 });
 
+test('complex peer objects survive settings save unchanged', async ({ page }) => {
+  const peers = [
+    { basename: 'setup.entry.ts', paths: ['**/a', '**/b'] },
+    { basename: 'x.ts', adapterId: 'ecmascript' },
+  ];
+  mkdirSync(join(projectDir, '.filid'), { recursive: true });
+  writeFileSync(
+    join(projectDir, '.filid', 'config.json'),
+    JSON.stringify({
+      version: '3.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+      structure: { additionalAllowedPeers: peers },
+    }),
+  );
+  const url = await openSession(projectDir);
+  const waiting = longPoll(projectDir);
+  await page.goto(url);
+  await page.getByText('Structure exceptions').click();
+  await expect(page.locator('#additional-allowed')).toHaveValue(
+    peers.map((peer) => JSON.stringify(peer)).join('\n'),
+  );
+  await page.getByRole('button', { name: 'Save & Close' }).click();
+  expect((await waiting).status).toBe('saved');
+  expect(readConfig(projectDir).structure?.additionalAllowedPeers).toEqual(peers);
+});
+
 test('plain Save settles the long-poll (window stays open)', async ({
   page,
 }) => {

@@ -191,11 +191,12 @@
               id="additional-allowed"
               rows="3"
               spellcheck="false"
-              placeholder='manifest.file&#10;{"basename": "NOTICE", "paths": ["packages/**"]}'
+              placeholder='manifest.file&#10;{"basename": "NOTICE", "paths": ["**/packages/**"]}'
             ></textarea>
             <small class="help">
               A bare file name applies globally; a JSON object restricts it to
-              path globs.
+              path globs. The directory part matches the absolute node path
+              like exempt; prefix it with **/.
             </small>
             <small
               class="error"

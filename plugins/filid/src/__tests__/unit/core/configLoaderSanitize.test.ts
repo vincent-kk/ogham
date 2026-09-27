@@ -34,6 +34,21 @@ describe('config-loader v3 sanitize and migration', () => {
     vi.restoreAllMocks();
   });
 
+  it('drops several invalid peer entries without shifting later indexes', () => {
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      structure: {
+        additionalAllowedPeers: [123, '/abs.ts', 'dir/', 'ok.ts'],
+      },
+    });
+
+    const { config, warnings } = loadConfig(tmpDir);
+    expect(config?.structure?.additionalAllowedPeers).toEqual([
+      { basename: 'ok.ts' },
+    ]);
+    expect(warnings).toHaveLength(3);
+  });
+
   it('drops and warns for unknown keys nested in a v2 rule override', () => {
     writeRaw(tmpDir, {
       ...V2_BASE,

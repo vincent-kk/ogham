@@ -49,6 +49,19 @@ export function readHookConfig(cwd: string): HookConfig | null {
       (pattern): pattern is string => typeof pattern === 'string',
     );
   if (
+    raw.version === '2.0' &&
+    typeof raw.structure === 'object' &&
+    raw.structure !== null &&
+    !Array.isArray(raw.structure)
+  ) {
+    const legacy = (raw.structure as Record<string, unknown>).additionalExcludedDirectories;
+    if (Array.isArray(legacy) && legacy.every((name) => typeof name === 'string'))
+      config.exclude = [
+        ...(config.exclude ?? []),
+        ...legacy.map((name: string) => `**/${name}`),
+      ];
+  }
+  if (
     typeof raw.rules === 'object' &&
     raw.rules !== null &&
     !Array.isArray(raw.rules)

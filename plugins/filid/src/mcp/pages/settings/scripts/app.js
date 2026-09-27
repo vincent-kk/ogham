@@ -533,7 +533,8 @@
       if (line.charAt(0) === '{') {
         try {
           var parsed = JSON.parse(line);
-          entries.push(allowedPeerLine(parsed));
+          var shorthand = allowedPeerLine(parsed);
+          entries.push(shorthand.charAt(0) === '{' ? parsed : shorthand);
         } catch (err) {
           showFieldError(
             'additional-allowed',

@@ -26,6 +26,7 @@
 ### AC-settings-v3-roundtrip — Config preservation
 
 - Editing visible fields writes v3 paths, override-only rules, and shorthand allowed peers while preserving unedited fields.
+- Allowed peers with several paths or an adapter ID remain objects across page save and reload; only peers representable by shorthand become strings.
 - A pattern under `exclude` or `structure.generatedPaths` survives page save and reload.
 - Adapter selection and unedited structure keys survive a save unchanged.
 

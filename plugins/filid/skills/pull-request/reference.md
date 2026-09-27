@@ -175,10 +175,11 @@ Rules:
 
 `review_state({action: "assess"})` performs the classification. This section explains what it returns; it is not a procedure to run by hand. Reproducing it in prose was how two runs on the same tree could disagree.
 
-The tool reads `structure.generatedPaths` from the project config and sorts every path `git status` reports into three classes — **first match wins**:
+The tool reads top-level `exclude` and `structure.generatedPaths` from the project config, drops excluded paths, then sorts the remaining paths into three classes — **first match wins**:
 
 | Test, in order                                           | Class     | Meaning                    |
 | -------------------------------------------------------- | --------- | -------------------------- |
+| Path matches `exclude`                                   | dropped   | never classified           |
 | Basename is `INTENT.md` or `DETAIL.md`                   | document  | Stage 1 commits it         |
 | Path matches a `generatedPaths` entry, or sits under one | generated | build output, never staged |
 | Anything else                                            | source    | a real change              |
@@ -189,7 +190,7 @@ What the tool guarantees:
 
 - Patterns use project-relative globs: `**` crosses directories, `*` stays within one segment, and `?` matches one character. A match on a parent directory covers its descendants.
 - `generatedPaths` covers artifacts the build writes **and the repository tracks**. Ignored output never reaches `git status`, so it needs no entry.
-- An empty list makes every non-document path source — the conservative default, not a misconfiguration to work around.
+- An empty `generatedPaths` list makes every remaining non-document path source — the conservative default, not a misconfiguration to work around.
 - The classification decides whether the cycle continues. It never decides what gets committed: only documents are ever staged by this skill.
 
 ## §6 Non-FCA document scope

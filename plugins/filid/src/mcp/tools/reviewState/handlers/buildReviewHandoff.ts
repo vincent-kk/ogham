@@ -73,6 +73,7 @@ export async function buildReviewHandoff(
     const computed = await computeChangedScopeEvidence({
       projectRoot: input.projectRoot,
       source,
+      exclude: settings.exclude,
       generatedPaths: settings.generatedPaths,
       lockfiles: settings.lockfiles,
     });

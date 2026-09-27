@@ -68,6 +68,7 @@ interface FilidConfigV3 {
 - auto/explicit adapter 선택과 structure option을 round-trip한다.
 - explicit empty와 unknown adapter ID는 성공 설정으로 처리되지 않는다.
 - Raw files retain valid rule (`off` or severity) and allowed-peer string shorthand; normalized consumers see objects. Absent rule IDs retain built-in defaults.
+- A shorthand peer directory matches the absolute node path like `exempt`; prefix it with `**/` to match beneath any project root.
 
 ### AC-config-generated-paths — 생성물 경로 선언
 

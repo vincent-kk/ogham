@@ -46,6 +46,20 @@ describe('readHookConfig', () => {
     expect(readHookConfig(cwd)?.exclude).toEqual(['private/**', 'draft.md']);
   });
 
+  it('honors legacy excluded directory names in a v2 project file', () => {
+    writeFileSync(
+      join(cwd, '.filid', 'config.json'),
+      JSON.stringify({
+        version: '2.0',
+        exclude: ['draft.md'],
+        structure: { additionalExcludedDirectories: ['fixtures', 'samples'] },
+      }),
+    );
+    expect(readHookConfig(cwd)?.exclude).toEqual([
+      'draft.md', '**/fixtures', '**/samples',
+    ]);
+  });
+
   it('returns null when the config file is missing', () => {
     expect(readHookConfig(cwd)).toBeNull();
   });
