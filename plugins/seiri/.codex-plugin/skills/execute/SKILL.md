@@ -18,11 +18,11 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 Follow [workflow lifecycle](references/workflow-lifecycle.md). Call `mcp__seiri__runtime({ action: "step", step: "execute", project_root, task })` with a kebab-case task name and read its reply before starting other tools in this skill; do not retry or wait for the hook acknowledgement. execute is entered with an approved plan or its stated skip; a single surgical change needs no call.
 
-**0. Resume from the plan and its evidence.** If this task has a ledger, call `mcp__seiri__gates({ action: "status", task })`. Otherwise use the plan's completion criteria; do not create a ledger merely to run this skill.
+**0. Resume from the plan and its ledger.** Call `mcp__seiri__gates({ action: "status", task })`. If it reports no ledger — a plan written outside write-plan — derive one from the plan's completion criteria per [gate ledger format](references/gates-format.md) before task one.
 
 **1. Read the plan critically before task one.** Contradictions, gaps that block starting, steps that fight the repository's conventions — report them in one batch, not one interrupt per discovery. Nothing blocking: begin.
 
-**2. Close outcomes with evidence.** When a ledger exists, run its CHECKs and inspect the task's status; an unmet gate is not completed work. Reuse evidence only while its artifact, environment, and scope remain valid. A delegate's report needs inspection; rerun checks when their evidence is missing or invalidated. Record a deliberately omitted gate with its reason.
+**2. Close outcomes with evidence.** Run the ledger's CHECKs and inspect the task's status; an unmet gate is not completed work. Reuse evidence only while its artifact, environment, and scope remain valid. A delegate's report needs inspection; rerun checks when their evidence is missing or invalidated. Record a deliberately omitted gate with its reason.
 
 **3. Preserve the outcome and boundaries.** Adjust reversible implementation details as the repository provides better evidence. Record material deviations and reopen decisions whose assumptions fail. Use diagnosis for an unexplained failure; an expected red test or a corrected tool argument does not require a separate workflow.
 

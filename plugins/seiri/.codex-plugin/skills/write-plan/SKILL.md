@@ -38,7 +38,7 @@ Regardless of method:
 - Map each requirement to implementation and observable verification; add no unrelated work.
 - Resolve implementation direction during planning.
 - Unresolved decisions name an owner and stop affected work; never disguise them as steps.
-- Optionally track verification in `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md`. Execution does not require a ledger. CHECK tests the actual result condition and emits a fixed literal EXPECT marker only on success. Use Markdown code spans for CHECK/EXPECT; keep the ledger format separate from the plan.
+- Every plan gets a ledger at `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md`, wherever the plan lives; execution closes on it. CHECK tests the actual result condition and emits a fixed literal EXPECT marker only on success. Use Markdown code spans for CHECK/EXPECT; keep the ledger format separate from the plan.
 - A structural decision chooses module boundaries, dependency direction, public ownership or contracts, or durable code placement. When one occurs while planning, write `adr.md` beside the plan. Otherwise do not create it.
 - Make the ADR readable without the plan: state the context, decision, reasons, rejected alternatives, and consequences. Keep implementation steps in the plan.
 

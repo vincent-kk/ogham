@@ -119,7 +119,7 @@ describe('workflow skill routing contract', () => {
     expect(lifecycle).toMatch(/Do not retry[^\n]+loop/);
   });
 
-  it('makes lifecycle task-scoped with explicit roots and no compulsory ledger', () => {
+  it('makes lifecycle task-scoped with explicit roots and no activation ledger', () => {
     const lifecycle = readFileSync(
       portableJoin(skills, 'execute/references/workflow-lifecycle.md'),
       'utf8',
@@ -128,7 +128,10 @@ describe('workflow skill routing contract', () => {
       expect(lifecycle).toContain(`\`${action}\``);
     expect(lifecycle).toMatch(/project_root[^\n]+absolute/);
     expect(lifecycle).toMatch(/task[^\n]+kebab-case/);
-    expect(lifecycle).toMatch(/ledger[^\n]+optional/i);
+    expect(lifecycle).toMatch(
+      /Activation needs no ledger[^\n]+never creates one/,
+    );
+    expect(lifecycle).not.toMatch(/ledger is optional/i);
     expect(lifecycle).toMatch(/child[^\n]+own[^\n]+start/i);
     expect(lifecycle).toMatch(/new user turn[^\n]+suspend/i);
     expect(lifecycle).toMatch(/same active task[^\n]+no[^\n]+call/i);
@@ -178,12 +181,14 @@ describe('workflow skill routing contract', () => {
     }
   });
 
-  it('does not require ledger creation merely to execute or review', () => {
-    expect(skill('execute')).toMatch(/do not create a ledger merely/i);
-    expect(skill('write-plan')).toContain(
-      'Execution does not require a ledger.',
+  it('gives every executed plan a ledger but none to review-only work', () => {
+    expect(skill('write-plan')).toMatch(
+      /Every plan gets a ledger[^\n]+wherever the plan lives/,
     );
-    expect(skill('review-plan')).toMatch(/if (?:the|this) task has a ledger/i);
+    expect(skill('write-plan')).not.toMatch(/does not require a ledger/i);
+    expect(skill('execute')).toMatch(/no ledger[^\n]+before task one/i);
+    expect(skill('execute')).not.toMatch(/do not create a ledger merely/i);
+    expect(skill('review-plan')).toMatch(/plan without one is rework/i);
     expect(skill('request-review')).toMatch(
       /Do not create a ledger for a review-only request/i,
     );

@@ -16,7 +16,7 @@ Hooks default to **Skills only** (off). Off and advisory add no automatic contex
 
 A runtime request needs an explicit repository root and task name. An accepted MCP reply validates input; a paired hook acknowledgement confirms participation. At standard/strict, an active binding persists across new user turns; only a session boundary, `pause`, `finish`, or a different task's entry step end it. Resume only an existing binding for the same task, pause when leaving it open, and finish when its connection should end. A lifecycle finish is not proof that the work passed.
 
-Ledgers are optional. For an active task with a ledger, paired Bash calls matching CHECK record evidence against EXPECT. Other tasks stay untouched; unchanged evidence does not repeatedly inject a verdict. Reuse valid verification evidence and choose checks appropriate to behavior changes, refactors, or documents.
+Every executed plan carries a ledger; activation and plan-less work need none. For an active task with a ledger, paired Bash calls matching CHECK record evidence against EXPECT. Other tasks stay untouched; unchanged evidence does not repeatedly inject a verdict. Reuse valid verification evidence and choose checks appropriate to behavior changes, refactors, or documents.
 
 Actor state expires after seven inactive days and invocation records after 24 hours. Missing host provenance or storage failures suppress assistance. A simultaneous failure to persist both revocation and its fallback marker cannot guarantee revocation survives storage recovery. Recorded native host identities and envelopes are covered; deliberately delayed native events crossing a new user turn remain an explicit acceptance limit.
 

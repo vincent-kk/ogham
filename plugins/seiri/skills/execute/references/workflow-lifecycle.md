@@ -4,7 +4,7 @@
 
 Chain: `write-plan → review-plan → execute → implement → verify → request-review`; a failure inside an active task goes to `trace-cause`; a review reply goes to `receive-review`.
 
-The user or host selects skills first. Reading a skill, observing an error, or hearing a completion claim never activates a workflow. Use this protocol only when task-scoped hook assistance is useful for an actual change or review chain. A ledger is optional; do not create one to activate assistance. Standalone explanations, traces, and verification need no activation.
+The user or host selects skills first. Reading a skill, observing an error, or hearing a completion claim never activates a workflow. Use this protocol only when task-scoped hook assistance is useful for an actual change or review chain. Activation needs no ledger and never creates one; a plan's ledger comes from write-plan or execute. Standalone explanations, traces, and verification need no activation.
 
 ## Calls
 

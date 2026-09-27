@@ -167,7 +167,9 @@ describe('skill invocation policy', () => {
     expect(writePlan).toContain(
       'A skill is not selected merely because it is installed.',
     );
-    expect(writePlan).toContain('Execution does not require a ledger.');
+    expect(writePlan).toContain(
+      'wherever the plan lives; execution closes on it.',
+    );
     expect(writePlan).toContain(
       'A structural decision chooses module boundaries, dependency direction, public ownership or contracts, or durable code placement.',
     );
