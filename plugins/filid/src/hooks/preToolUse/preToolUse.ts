@@ -1,4 +1,4 @@
-import { readFileSync, realpathSync } from 'node:fs';
+import { readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 
 import {
@@ -83,9 +83,9 @@ export async function handlePreToolUse(
     try {
       const configRoot = findConfigRoot(safeCwd) ?? safeCwd;
       const relativePath = relative(
-        realpathSync(configRoot),
-        resolve(safeCwd, targetPath),
-      );
+        resolveHookTargetPath(safeCwd, configRoot),
+        targetPath,
+      ).replace(/\\/g, '/');
       if (
         relativePath !== '..' &&
         !relativePath.startsWith('../') &&
