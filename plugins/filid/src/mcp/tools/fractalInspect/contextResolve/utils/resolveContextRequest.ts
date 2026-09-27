@@ -6,6 +6,8 @@ import {
 } from '../../../../../constants/mcpContracts.js';
 import { TOOL_STATUSES } from '../../../../../constants/toolEnvelope.js';
 import { resolveContext } from '../../../../../core/index.js';
+import { matchingIgnoredPattern } from '../../../../../lib/matchesPathPattern.js';
+import { toProjectRelativePath } from '../../../../../lib/toProjectRelativePath.js';
 import type { ProjectSnapshot } from '../../../../../types/fractal.js';
 import type { ContextResolveResult } from '../../../../../types/report.js';
 import type { ToolDiagnostic } from '../../../../../types/toolEnvelope.js';
@@ -28,8 +30,32 @@ export function resolveContextRequest(
   snapshotDiagnostics: ToolDiagnostic[],
   request: ContextResolveRequest,
   index: number,
+  ignore: readonly string[] = [],
 ): ContextResolveResult {
   const targetPath = portableResolve(snapshot.projectRoot, request.targetPath);
+  const relativePath = toProjectRelativePath(snapshot.projectRoot, targetPath);
+  const matchingPattern =
+    relativePath === '..' ||
+    relativePath.startsWith('../') ||
+    relativePath.startsWith('/')
+      ? undefined
+      : matchingIgnoredPattern({ ignore }, relativePath);
+  if (matchingPattern !== undefined) {
+    const diagnostic: ToolDiagnostic = {
+      code: CONTEXT_RESOLVE_DIAGNOSTIC_CODES.TARGET_IGNORED,
+      message: `Context target ${targetPath} is ignored by config pattern "${matchingPattern}".`,
+      path: targetPath,
+      affects: [],
+      nextAction: CONTEXT_RESOLVE_DIAGNOSTIC_NEXT_ACTIONS.TARGET_IGNORED,
+    };
+    return {
+      index,
+      resolved: false,
+      targetPath,
+      status: TOOL_STATUSES.INDETERMINATE,
+      diagnostics: [diagnostic],
+    };
+  }
   let resolution;
   try {
     resolution = resolveContext(snapshot, targetPath);

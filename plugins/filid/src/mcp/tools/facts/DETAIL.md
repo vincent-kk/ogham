@@ -95,7 +95,7 @@
 ### AC-facts-tool-scope — snapshot과 같은 파일 집합
 
 - 깊이 10을 넘는 파일도 범위에 들어간다.
-- `structure.additionalExcludedDirectories`가 지정한 디렉터리의 파일은 범위에서 빠진다.
+- Files under config `ignore` are outside the scanned set and cannot become facts candidates.
 
 ### AC-facts-tool-liveness — 서버는 멈추지 않는다
 

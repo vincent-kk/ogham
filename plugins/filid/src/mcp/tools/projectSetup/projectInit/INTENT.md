@@ -2,7 +2,7 @@
 
 ## Purpose
 
-project path, output language와 optional adapter IDs를 검증해 부재한 config v2만 생성한다.
+Validate project path, output language, and optional adapter IDs; create only absent config v3 or persist a losslessly migrated v1/v2 file.
 
 ## Conventions
 

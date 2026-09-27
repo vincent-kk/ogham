@@ -29,7 +29,7 @@ export interface ClassifyInput {
    * (`additional-organ-names`), matched alongside `KNOWN_ORGAN_DIR_NAMES`.
    * Callers without config access (the hook layer) simply omit it.
    */
-  additionalOrganNames?: readonly string[];
+  organNames?: readonly string[];
 }
 
 /**
@@ -51,7 +51,7 @@ export function isInfraOrgDirectoryByPattern(dirName: string): boolean {
  * 1. INTENT.md exists → fractal (explicit declaration)
  * 2. DETAIL.md exists → fractal (documented module boundary)
  * 3. Name matches __*__ or .* pattern → organ (infrastructure convention)
- * 4. Directory name in KNOWN_ORGAN_DIR_NAMES or additionalOrganNames → organ
+ * 4. Directory name in KNOWN_ORGAN_DIR_NAMES or organNames → organ
  *    (name-based, overrides structure)
  * 5. Adapter-reported MODULE INDEX → fractal
  * 6. No fractal children + leaf directory → organ
@@ -74,7 +74,7 @@ export function classifyNode(input: ClassifyInput): CategoryType {
 
   const isOrganName =
     KNOWN_ORGAN_DIR_NAMES.includes(input.dirName) ||
-    (input.additionalOrganNames ?? []).includes(input.dirName);
+    (input.organNames ?? []).includes(input.dirName);
 
   const hasModuleIndex =
     (input.entryPoints ?? []).some(

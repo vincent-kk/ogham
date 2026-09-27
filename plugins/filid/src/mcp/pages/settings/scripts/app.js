@@ -331,7 +331,7 @@
       opt.textContent = level;
       severity.appendChild(opt);
     });
-    if (override.severity) severity.value = override.severity;
+    severity.value = override.severity || state.ruleDefaults[id].severity;
 
     row.appendChild(name);
     row.appendChild(enabledCell);
@@ -367,16 +367,42 @@
   }
 
   /**
-   * Draw the structural rules the chosen layer configures. The list is
-   * rebuilt rather than patched: two layers may name different rule sets.
+   * Draw every shipped rule with this layer's override, if any.
    */
   function renderRules() {
     var list = $('rules-list');
     list.textContent = '';
     var rules = activeConfig().rules || {};
-    Object.keys(rules).forEach(function (id) {
-      list.appendChild(ruleItem(id, rules[id] || {}));
+    Object.keys(state.ruleDefaults).forEach(function (id) {
+      var override = rules[id] || {};
+      if (typeof override === 'string')
+        override = override === 'off' ? { enabled: false } : { severity: override };
+      list.appendChild(ruleItem(id, override));
     });
+  }
+
+  /** Keep simple peer declarations short while preserving scoped objects. */
+  function allowedPeerLine(entry) {
+    if (!entry || typeof entry !== 'object' || entry.adapterId)
+      return JSON.stringify(entry);
+    if (typeof entry.basename !== 'string') return JSON.stringify(entry);
+    if (
+      Object.keys(entry).some(function (key) {
+        return key !== 'basename' && key !== 'paths';
+      }) ||
+      (entry.paths &&
+        (!Array.isArray(entry.paths) ||
+          entry.paths.some(function (path) {
+            return typeof path !== 'string';
+          })))
+    )
+      return JSON.stringify(entry);
+    if (!entry.paths) return entry.basename;
+    if (entry.paths.length === 0 || entry.paths[0] === '')
+      return JSON.stringify(entry);
+    if (entry.paths.length === 1)
+      return entry.paths[0] + '/' + entry.basename;
+    return JSON.stringify(entry);
   }
 
   // --- prefill: general & structure exceptions ----------------------------
@@ -385,31 +411,23 @@
     var config = activeConfig();
     $('language').value = config.language || '';
     var structure = config.structure || {};
+    var review = config.review || {};
     // Assigned either way: a layer that sets no depth must clear the value the
     // other layer left in the field.
     $('max-depth').value =
       typeof structure.maxDepth === 'number' ? String(structure.maxDepth) : '';
+    $('ignore-paths').value = (config.ignore || []).join('\n');
+    $('exclude-from-scan').value = (structure.excludeFromScan || []).join('\n');
+    $('generated-paths').value = (review.generatedPaths || []).join('\n');
 
-    var allowed = structure.additionalAllowedPeers || [];
-    $('additional-allowed').value = allowed
-      .map(function (entry) {
-        if (
-          entry &&
-          typeof entry === 'object' &&
-          typeof entry.basename === 'string' &&
-          !entry.paths &&
-          !entry.adapterId
-        )
-          return entry.basename;
-        return JSON.stringify(entry);
-      })
-      .join('\n');
+    var allowed = structure.allowedPeers || [];
+    $('additional-allowed').value = allowed.map(allowedPeerLine).join('\n');
     var entryPointOverrides = structure.entryPointOverrides || {};
     $('additional-entry-points').value = (
       entryPointOverrides[adapterId()] || []
     ).join('\n');
     $('additional-organ-names').value = (
-      structure.additionalOrganNames || []
+      structure.organNames || []
     ).join('\n');
   }
 
@@ -518,7 +536,9 @@
       var line = raw[i];
       if (line.charAt(0) === '{') {
         try {
-          entries.push(JSON.parse(line));
+          var parsed = JSON.parse(line);
+          var shorthand = allowedPeerLine(parsed);
+          entries.push(shorthand.charAt(0) === '{' ? parsed : shorthand);
         } catch (err) {
           showFieldError(
             'additional-allowed',
@@ -527,15 +547,63 @@
           return null;
         }
       } else {
-        entries.push({ basename: line });
+        entries.push(line);
       }
     }
     return entries;
   }
 
+  /**
+   * What a rule row takes effect as when this layer writes nothing for it.
+   * Under Project the user layer still merges underneath field by field, so
+   * an omitted row keeps the user's value, not the shipped default.
+   *
+   * @param {string} id Shipped rule id, a key of `state.ruleDefaults`.
+   * @returns {{enabled: boolean, severity: string, exempt: string[]}} The
+   *   value in force for that rule when the saved layer omits it.
+   */
+  function ruleBaseline(id) {
+    var base = {
+      enabled: true,
+      severity: state.ruleDefaults[id].severity,
+      exempt: [],
+    };
+    if (scope !== 'project') return base;
+    var inherited = (configByScope.user.rules || {})[id] || {};
+    if (inherited.enabled === false) base.enabled = false;
+    if (inherited.severity) base.severity = inherited.severity;
+    if (inherited.exempt) base.exempt = inherited.exempt;
+    return base;
+  }
+
+  /**
+   * The `rules[id]` value one row saves: every field that differs from the
+   * row's baseline, in the shortest form the config file accepts.
+   *
+   * @param {string} id Shipped rule id, a key of `state.ruleDefaults`.
+   * @param {boolean} enabled Whether the row's checkbox is checked.
+   * @param {string} severity The row's selected severity.
+   * @param {string[]} exempt The row's trimmed, non-empty exempt patterns.
+   * @returns {object|string|undefined} `'off'`, a bare severity, or an
+   *   override object; undefined when the row matches its baseline and the
+   *   layer should say nothing.
+   */
+  function ruleEntry(id, enabled, severity, exempt) {
+    var base = ruleBaseline(id);
+    var override = {};
+    if (enabled !== base.enabled) override.enabled = enabled;
+    if (severity !== base.severity) override.severity = severity;
+    if (exempt.join('\n') !== base.exempt.join('\n')) override.exempt = exempt;
+    var keys = Object.keys(override);
+    if (!keys.length) return undefined;
+    if (keys.length > 1) return override;
+    if (override.enabled === false) return 'off';
+    return override.severity || override;
+  }
+
   function collectConfig() {
     var config = JSON.parse(JSON.stringify(activeConfig()));
-    config.version = '2.0';
+    config.version = '3.0';
     config.rules = {};
 
     var enabledBoxes = form.querySelectorAll('[data-rule-enabled]');
@@ -544,7 +612,7 @@
       var severity = form.querySelector(
         '[data-rule-severity="' + id + '"]',
       ).value;
-      var override = { enabled: enabledBoxes[i].checked, severity: severity };
+      var enabled = enabledBoxes[i].checked;
       var exemptArea = form.querySelector('[data-rule-exempt="' + id + '"]');
       var exempt = exemptArea.value
         .split('\n')
@@ -554,17 +622,22 @@
         .filter(function (line) {
           return line.length > 0;
         });
-      if (exempt.length) override.exempt = exempt;
-      config.rules[id] = override;
+      var entry = ruleEntry(id, enabled, severity, exempt);
+      if (entry !== undefined) config.rules[id] = entry;
     }
 
     var language = $('language').value.trim();
     if (language) config.language = language;
     else delete config.language;
 
+    var ignored = lines('ignore-paths');
+    if (ignored.length) config.ignore = ignored;
+    else delete config.ignore;
+
     var structure = config.structure
       ? JSON.parse(JSON.stringify(config.structure))
       : {};
+    var review = config.review ? JSON.parse(JSON.stringify(config.review)) : {};
     var maxDepthRaw = $('max-depth').value.trim();
     if (maxDepthRaw !== '') {
       var maxDepth = Number(maxDepthRaw);
@@ -575,10 +648,20 @@
       structure.maxDepth = maxDepth;
     } else delete structure.maxDepth;
 
+    var excludeFromScan = lines('exclude-from-scan');
+    if (excludeFromScan.length) structure.excludeFromScan = excludeFromScan;
+    else delete structure.excludeFromScan;
+
+    var generated = lines('generated-paths');
+    if (generated.length) review.generatedPaths = generated;
+    else delete review.generatedPaths;
+    if (Object.keys(review).length) config.review = review;
+    else delete config.review;
+
     var allowed = collectAllowed();
     if (allowed === null) return null;
-    if (allowed.length) structure.additionalAllowedPeers = allowed;
-    else delete structure.additionalAllowedPeers;
+    if (allowed.length) structure.allowedPeers = allowed;
+    else delete structure.allowedPeers;
 
     var entryPoints = lines('additional-entry-points');
     var entryPointOverrides = structure.entryPointOverrides || {};
@@ -589,8 +672,8 @@
     else delete structure.entryPointOverrides;
 
     var organNames = lines('additional-organ-names');
-    if (organNames.length) structure.additionalOrganNames = organNames;
-    else delete structure.additionalOrganNames;
+    if (organNames.length) structure.organNames = organNames;
+    else delete structure.organNames;
 
     if (Object.keys(structure).length) config.structure = structure;
     else delete config.structure;

@@ -40,17 +40,29 @@ const AdapterSelectionSchema = z
       });
   });
 
-/** Optional project structure overrides stored in Filid configuration. */
-const StructureConfigSchema = z
-  .object({
+/** Project structure fields shared by raw files and normalized values. */
+const structureFields = {
     maxDepth: z.number().nonnegative().finite().optional(),
-    additionalOrganNames: z.array(z.string().min(1)).optional(),
-    additionalAllowedPeers: z.array(AllowedPeerOverrideSchema).optional(),
-    additionalExcludedDirectories: z.array(z.string().min(1)).optional(),
+    organNames: z.array(z.string().min(1)).optional(),
     entryPointOverrides: z
       .record(z.string(), z.array(z.string().min(1)))
       .optional(),
-    generatedPaths: z.array(z.string().min(1)).optional(),
+    excludeFromScan: z.array(z.string().min(1)).optional(),
+};
+
+const StructureConfigSchema = z
+  .object({
+    ...structureFields,
+    allowedPeers: z.array(AllowedPeerOverrideSchema).optional(),
+  })
+  .strict();
+
+const StructureConfigFileSchema = z
+  .object({
+    ...structureFields,
+    allowedPeers: z
+      .array(z.union([AllowedPeerOverrideSchema, z.string().min(1)]))
+      .optional(),
   })
   .strict();
 
@@ -66,6 +78,7 @@ const ReviewConfigSchema = z
     planChurnLimit: z.number().int().positive().optional(),
     concurrency: z.number().int().positive().optional(),
     lockfiles: z.array(z.string().min(1)).optional(),
+    generatedPaths: z.array(z.string().min(1)).optional(),
   })
   .strict()
   .transform((value) => ({
@@ -94,18 +107,36 @@ const FactsConfigSchema = z
   })
   .strict();
 
-/** Strict schema for the merged Filid v2 configuration. */
-export const FilidConfigSchema = z
-  .object({
-    version: z.literal('2.0'),
+const configFields = {
+    version: z.literal('3.0'),
     language: z.string().optional(),
+    ignore: z.array(z.string().min(1)).optional(),
     adapters: AdapterSelectionSchema,
-    rules: z.record(z.string(), RuleOverrideSchema),
-    structure: StructureConfigSchema.optional(),
     review: ReviewConfigSchema.optional(),
     facts: FactsConfigSchema.optional(),
+};
+
+/** Strict, shorthand-preserving schema for a complete v3 file on disk. */
+export const FilidConfigFileSchema = z
+  .object({
+    ...configFields,
+    rules: z.record(
+      z.string(),
+      z.union([RuleOverrideSchema, z.enum(['off', 'error', 'warning', 'info'])]),
+    ),
+    structure: StructureConfigFileSchema.optional(),
   })
   .strict();
 
-/** Validated Filid v2 configuration value. */
+/** Strict normalized schema for the merged v3 configuration. */
+export const FilidConfigSchema = z
+  .object({
+    ...configFields,
+    rules: z.record(z.string(), RuleOverrideSchema),
+    structure: StructureConfigSchema.optional(),
+  })
+  .strict();
+
+/** Validated normalized Filid v3 configuration value. */
 export type FilidConfig = z.infer<typeof FilidConfigSchema>;
+export type FilidConfigFile = z.input<typeof FilidConfigFileSchema>;

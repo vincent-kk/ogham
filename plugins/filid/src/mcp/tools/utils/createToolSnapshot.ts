@@ -25,6 +25,7 @@ import { configWarningAffects } from './configWarningAffects.js';
 
 export interface ToolSnapshotContext {
   snapshot: ProjectSnapshot;
+  ignore: readonly string[];
   rules: Rule[];
   maxDepth: number;
   diagnostics: ToolDiagnostic[];
@@ -66,10 +67,10 @@ export function createToolSnapshot(
     const rules = getActiveRules(
       loadBuiltinRules(
         config.rules,
-        config.structure?.additionalAllowedPeers,
+        config.structure?.allowedPeers,
         undefined,
         undefined,
-        config.structure?.additionalOrganNames,
+        config.structure?.organNames,
       ),
     );
     const snapshot = await createProjectSnapshot(
@@ -89,6 +90,6 @@ export function createToolSnapshot(
       ...loaded.diagnostics,
       ...snapshot.diagnostics,
     ];
-    return { snapshot, rules, maxDepth, diagnostics };
+    return { snapshot, ignore: config.ignore ?? [], rules, maxDepth, diagnostics };
   });
 }

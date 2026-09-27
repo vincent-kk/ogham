@@ -93,6 +93,22 @@ describe('rule-engine exempt (Commit B)', () => {
   });
 
   describe('zero-peer-file object-entry branch (AC3)', () => {
+    it('accepts literal and glob basenames while rejecting other peers', () => {
+      const node = makeNode({
+        path: 'packages/foo',
+        peerFiles: ['README.extra', 'vite.config.ts', 'stray.ts'],
+      });
+      const rules = loadBuiltinRules(undefined, [
+        { basename: 'README.extra' },
+        { basename: '*.config.ts' },
+      ]);
+      const violations = evaluateRules(treeOf([node]), rules).violations.filter(
+        (violation) => violation.ruleId === BUILTIN_RULE_IDS.ZERO_PEER_FILE,
+      );
+      expect(violations).toHaveLength(1);
+      expect(violations[0]?.message).toContain('stray.ts');
+    });
+
     it('allows CLAUDE.md under packages/** but not elsewhere', () => {
       const allowedNode = makeNode({
         path: 'packages/foo',

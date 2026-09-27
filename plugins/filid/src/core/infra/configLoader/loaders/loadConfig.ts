@@ -4,12 +4,12 @@ import {
   readConfigLayers,
 } from '@ogham/cross-platform';
 
-import { getDefaultAdapterIds } from '../../../../adapters/index.js';
 import { createLogger } from '../../../../lib/logger.js';
 import { configLayers } from '../utils/configLayers.js';
 import { sanitizeExemptPatterns } from '../utils/exemptSanitize.js';
 import { formatIssuePath } from '../utils/formatIssuePath.js';
 import { parseWithAllowlistWarn } from '../utils/parseWithAllowlistWarn.js';
+import { sanitizePathPatterns } from '../utils/pathPatternSanitize.js';
 
 import { FilidConfigSchema } from './configSchemas.js';
 import type {
@@ -17,7 +17,7 @@ import type {
   ConfigWarning,
   LoadConfigResult,
 } from './configTypes.js';
-import { migrateConfigV1 } from './migrateConfigV1.js';
+import { normalizeConfigLayer } from './normalizeConfigLayer.js';
 
 const log = createLogger('config-loader');
 
@@ -55,8 +55,8 @@ export function loadConfig(
   const documents = readConfigLayers(layers);
   for (const warning of documents.warnings) addWarning(warning, null);
 
-  const user = migrateIfV1(documents.user, diagnostics);
-  const project = migrateIfV1(documents.project, diagnostics);
+  const user = normalizeConfigLayer(documents.user, diagnostics);
+  const project = normalizeConfigLayer(documents.project, diagnostics);
   if (user === null && project === null)
     return { config: null, warnings, diagnostics };
 
@@ -64,7 +64,7 @@ export function loadConfig(
   const strict = FilidConfigSchema.safeParse(candidate);
   if (strict.success)
     return {
-      config: sanitizeExemptPatterns(strict.data, addWarning),
+      config: sanitizePathPatterns(sanitizeExemptPatterns(strict.data, addWarning), addWarning),
       warnings,
       diagnostics,
     };
@@ -77,7 +77,7 @@ export function loadConfig(
   const retry = FilidConfigSchema.safeParse(sanitized);
   if (retry.success)
     return {
-      config: sanitizeExemptPatterns(retry.data, addWarning),
+      config: sanitizePathPatterns(sanitizeExemptPatterns(retry.data, addWarning), addWarning),
       warnings,
       diagnostics,
     };
@@ -88,16 +88,4 @@ export function loadConfig(
       null,
     );
   return { config: null, warnings, diagnostics };
-}
-
-/** Lift one layer from v1 to v2 shape; anything else passes through. */
-function migrateIfV1(
-  document: Record<string, unknown> | null,
-  diagnostics: ConfigDiagnostic[],
-): Record<string, unknown> | null {
-  if (document === null || document.version !== '1.0') return document;
-  const [legacyAdapterId] = getDefaultAdapterIds();
-  const migrated = migrateConfigV1(document, legacyAdapterId);
-  diagnostics.push(...migrated.diagnostics);
-  return migrated.config as Record<string, unknown>;
 }

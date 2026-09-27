@@ -5,6 +5,7 @@ import {
   createAdapterRegistry,
   resolveAdapters,
 } from '../../../adapters/index.js';
+import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scanDefaults.js';
 import type {
   AdapterClaim,
   EntryPointInspection,
@@ -149,7 +150,22 @@ describe('adapter registry', () => {
     const result = await resolveAdapters(
       '/project',
       [structureAdapter('known', 1, [owned, excluded])],
-      { excludedDirectoryNames: ['skills'] },
+      { exclude: ['**/skills'] },
+    );
+
+    expect([...result.ownership.keys()]).toEqual([owned]);
+    expect(result.unsupportedPaths).toEqual([]);
+    expect(result.diagnostics).toEqual([]);
+  });
+
+  it('drops built-in scan exclusions during adapter source discovery', async () => {
+    const owned = '/project/src/keep.source';
+    const builtInExcluded = '/project/docs/hidden.source';
+
+    const result = await resolveAdapters(
+      '/project',
+      [structureAdapter('known', 1, [owned, builtInExcluded])],
+      { exclude: DEFAULT_SCAN_OPTIONS.exclude },
     );
 
     expect([...result.ownership.keys()]).toEqual([owned]);
@@ -163,7 +179,7 @@ describe('adapter registry', () => {
     const result = await resolveAdapters(
       '/project',
       [structureAdapter('known', 1, [excluded])],
-      { requestedPaths: [excluded], excludedDirectoryNames: ['skills'] },
+      { requestedPaths: [excluded], exclude: ['**/skills'] },
     );
 
     expect(result.ownership.size).toBe(0);
@@ -177,7 +193,7 @@ describe('adapter registry', () => {
     const result = await resolveAdapters(
       '/skills/project',
       [structureAdapter('known', 1, [owned])],
-      { excludedDirectoryNames: ['skills'] },
+      { exclude: ['**/skills'] },
     );
 
     expect([...result.ownership.keys()]).toEqual([owned]);

@@ -188,7 +188,7 @@ describe('organ-classifier', () => {
     });
 
     it.each([['skills'], ['agents'], ['docs'], ['plans'], ['references']])(
-      'additionalOrganNames makes %s an organ despite child directories',
+      'organNames makes %s an organ despite child directories',
       (dirName) => {
         // Repo-specific content compartments nest (skills/<name>/SKILL.md),
         // so the name match must beat the non-leaf structure fallback that
@@ -200,13 +200,13 @@ describe('organ-classifier', () => {
             hasDetailMd: false,
             hasFractalChildren: false,
             isLeafDirectory: false,
-            additionalOrganNames: [dirName],
+            organNames: [dirName],
           }),
         ).toBe('organ');
       },
     );
 
-    it('additionalOrganNames does not override a self-documenting directory', () => {
+    it('organNames does not override a self-documenting directory', () => {
       // Priority 1 (INTENT.md → fractal) outranks every name-based match,
       // config-supplied ones included.
       expect(
@@ -216,12 +216,12 @@ describe('organ-classifier', () => {
           hasDetailMd: false,
           hasFractalChildren: false,
           isLeafDirectory: false,
-          additionalOrganNames: ['plans'],
+          organNames: ['plans'],
         }),
       ).toBe('fractal');
     });
 
-    it('an unlisted name is unaffected by additionalOrganNames', () => {
+    it('an unlisted name is unaffected by organNames', () => {
       // The module index is what makes `payments` a fractal; listing an
       // unrelated name must not take that away. Without the index there would
       // be nothing to preserve — an undeclared directory is already an organ.
@@ -240,7 +240,7 @@ describe('organ-classifier', () => {
               surface: 'enumerated',
             },
           ],
-          additionalOrganNames: ['plans'],
+          organNames: ['plans'],
         }),
       ).toBe('fractal');
     });

@@ -3,7 +3,7 @@ import { type ConfigScope, writeConfigLayer } from '@ogham/cross-platform';
 import { createLogger } from '../../../../lib/logger.js';
 import { configLayers } from '../utils/configLayers.js';
 
-import type { FilidConfig } from './configSchemas.js';
+import type { FilidConfigFile } from './configSchemas.js';
 
 const log = createLogger('config-loader');
 
@@ -17,7 +17,7 @@ const log = createLogger('config-loader');
 export function writeConfig(
   projectRoot: string,
   scope: ConfigScope,
-  config: FilidConfig,
+  config: FilidConfigFile,
 ): string {
   const written = writeConfigLayer(
     configLayers(projectRoot),

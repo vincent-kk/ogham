@@ -4,6 +4,7 @@ import {
 } from '../../../../constants/reviewState.js';
 import { RULE_SCOPES } from '../../../../constants/ruleScopes.js';
 import type { RuleScope } from '../../../../types/rules.js';
+import { isIgnoredPath } from '../../../../lib/matchesPathPattern.js';
 import { matchesGeneratedPath } from '../assess/matchesGeneratedPath.js';
 import type { ReviewScopeViolation } from '../state/reviewStateTypes.js';
 
@@ -21,6 +22,7 @@ export function classifyHandoffFinding(
   violation: ReviewScopeViolation,
   ruleScope: RuleScope | undefined,
   generatedPaths: readonly string[],
+  ignore: readonly string[] = [],
 ): { class: ReviewHandoffClass; notePrefix: string } {
   if (
     violation.certainty === 'indeterminate' ||
@@ -39,9 +41,9 @@ export function classifyHandoffFinding(
     return {
       class:
         stalePathToken !== undefined &&
-        generatedPaths.some((path) =>
+        (isIgnoredPath({ ignore }, stalePathToken ?? '') || generatedPaths.some((path) =>
           matchesGeneratedPath(path, stalePathToken),
-        )
+        ))
           ? 'config-decision'
           : 'needs-rework',
       notePrefix: '',

@@ -1,6 +1,7 @@
-import type {
-  REVIEW_STATE_ACTIONS,
-  REVIEW_STATE_DISPOSITIONS,
+import {
+  REVIEW_SKIP_REASONS,
+  type REVIEW_STATE_ACTIONS,
+  type REVIEW_STATE_DISPOSITIONS,
 } from '../../../../../constants/reviewState.js';
 import type {
   ToolDiagnostic,
@@ -64,6 +65,9 @@ export function createPreparedReviewPayload(
       sourceHash: input.state.sourceHash,
       snapshotHash: input.state.scope.snapshotHash,
       filesTotal: input.state.scope.files.length,
+      ignoredFiles: input.state.scope.files.filter(
+        (file) => file.skipReason === REVIEW_SKIP_REASONS.IGNORED,
+      ).length,
       unitsTotal: input.state.groups.reduce(
         (total, group) => total + group.units.length,
         0,

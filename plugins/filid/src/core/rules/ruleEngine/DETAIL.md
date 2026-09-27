@@ -3,14 +3,15 @@
 ## Requirements
 
 - canonical 15개 built-in rule만 등록한다.
-- rule 기본 severity는 roster가 직접 적지 않고 `constants/builtinRuleSeverities` 정본에서 읽는다. `createDefaultConfig`도 같은 상수를 읽으므로 두 경로가 서로 다른 기본값을 답하지 않는다. 프로젝트 config가 적은 severity는 그 프로젝트의 선택이며 `applyOverrides`를 통해 언제나 우선한다.
+- Rule default severity comes from the built-in roster. Config v3 writes only overrides; an absent rule ID retains its built-in enabled state and severity. Explicit project severity wins through `applyOverrides`.
+- Allowed-peer basenames may contain minimal glob wildcards. Exact names use direct membership; dynamic names match only the basename, with path and adapter scopes unchanged.
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로 평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag, verification을 지원한다.
 - rule exception과 indeterminate/unsupported evidence를 PASS로 숨기지 않는다.
 - violation `message`에 적는 경로는 project root 기준 POSIX 상대 경로다(root 자신은 `.`). `path` 필드는 절대 경로 그대로다. message는 review 후보로 hash되므로 저장소 위치에 따라 달라지면 안 된다. root는 `RuleContext.tree.root`나 snapshot의 `projectRoot`에서 읽는다(둘은 같은 값이다).
 - exception과 allowed-peer scope는 portable separator/case path identity로 평가한다.
 - `legacy-criteria-ledger`는 project granularity로 snapshot evidence를 평가하고 root DETAIL migration target을 suggestion으로 반환한다.
-- `organ-no-intentmd`는 **조용히 승격된 organ**을 보고한다. 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`는 실제 snapshot에서 성립할 수 없다. 대신 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `additionalOrganNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우 — DETAIL.md도 module 진입점도 없는 상태 — 를 `warning`으로 낸다. 둘 중 하나라도 있으면 승격이 의도된 것이므로 침묵한다.
+- `organ-no-intentmd`는 **조용히 승격된 organ**을 보고한다. 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`는 실제 snapshot에서 성립할 수 없다. 대신 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `organNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우 — DETAIL.md도 module 진입점도 없는 상태 — 를 `warning`으로 낸다. 둘 중 하나라도 있으면 승격이 의도된 것이므로 침묵한다.
 - `external-import-boundary` 위반은 import가 풀리는 파일을 `importedPath`에 싣는다. restructure postcondition이 위반의 신원(rule, 소비자, 대상)을 계획 시점 기준선과 비교할 때 쓴다.
 - `external-import-boundary`는 대상이 organ 파일이면 진입점 경유가 아니라 **소비자 위치**로 판정한다. organ은 진입점을 갖지 않으므로 경유할 대상이 없다.
 
@@ -26,7 +27,7 @@
 
 ## API Contracts
 
-- `loadBuiltinRules(overrides?, additionalAllowed?, additionalOrganNames?): Rule[]` — config-bound canonical rule roster. 위치 인자이며, 3번째·4번째 자리는 어댑터가 사실을 소유하게 되어 무시된다.
+- `loadBuiltinRules(overrides?, additionalAllowed?, organNames?): Rule[]` — config-bound canonical rule roster. 위치 인자이며, 3번째·4번째 자리는 어댑터가 사실을 소유하게 되어 무시된다.
 - `evaluateRule(rule, context): RuleViolation[]` — 단일 rule 결과 또는 indeterminate finding.
 - `evaluateRules(snapshot, rules?, options?): RuleEvaluationResult` — scope/granularity에 맞춘 전체 결과.
 
@@ -49,7 +50,7 @@
 - organ 이름 디렉터리가 INTENT.md만 갖고 fractal이면 `organ-no-intentmd` `warning`이 나오고, 승격 취소와 진입점 추가 두 해소책을 제시한다.
 - 같은 디렉터리에 DETAIL.md 또는 module 진입점이 있으면 침묵한다.
 - organ 이름이 아닌 디렉터리는 INTENT.md가 있어도 침묵한다.
-- config `additionalOrganNames`로 선언된 이름도 built-in 이름과 같게 취급한다.
+- config `organNames`로 선언된 이름도 built-in 이름과 같게 취급한다.
 
 ### AC-rules-organ-boundary — 소비자 위치 기준 organ 접근
 

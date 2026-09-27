@@ -1,7 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { getDefaultAdapterIds } from '../../../../adapters/index.js';
 import {
   CONFIG_DIR,
   CONFIG_FILE,
@@ -10,8 +9,9 @@ import { createLogger } from '../../../../lib/logger.js';
 import { resolveGitRoot } from '../utils/resolveGitRoot.js';
 
 import type { InitProjectOptions, InitResult } from './configTypes.js';
+import { FilidConfigFileSchema } from './configSchemas.js';
 import { createDefaultConfig } from './createDefaultConfig.js';
-import { migrateConfigV1 } from './migrateConfigV1.js';
+import { normalizeConfigLayer } from './normalizeConfigLayer.js';
 import { writeConfig } from './writeConfig.js';
 
 const log = createLogger('config-loader');
@@ -55,7 +55,7 @@ export function initProject(
 }
 
 /**
- * Convert an existing v1 config to v2 in place when nothing is lost.
+ * Convert an existing v1/v2 config to v3 in place when nothing is lost.
  *
  * The conversion is deterministic, so it needs no decision; a conversion that
  * would drop a key the user wrote is left alone, and the reader keeps
@@ -63,7 +63,7 @@ export function initProject(
  *
  * @param projectRoot Resolved Git root that owns the config layer.
  * @param configPath Absolute path of the existing config file.
- * @returns Whether the file was rewritten as v2.
+ * @returns Whether the file was rewritten as v3.
  */
 function migrateProjectConfig(
   projectRoot: string,
@@ -78,14 +78,16 @@ function migrateProjectConfig(
   if (
     !document ||
     typeof document !== 'object' ||
-    (document as Record<string, unknown>).version !== '1.0'
+    !['1.0', '2.0'].includes(String((document as Record<string, unknown>).version))
   )
     return false;
-  const [legacyAdapterId] = getDefaultAdapterIds();
-  const migrated = migrateConfigV1(document, legacyAdapterId!);
-  if (migrated.diagnostics.some(({ code }) => code === 'config-key-discarded'))
+  const diagnostics: import('./configTypes.js').ConfigDiagnostic[] = [];
+  const migrated = normalizeConfigLayer(document as Record<string, unknown>, diagnostics);
+  if (diagnostics.some(({ code }) => code === 'config-key-discarded'))
     return false;
-  writeConfig(projectRoot, 'project', migrated.config);
-  log.debug('migrated config v1 to v2', configPath);
+  const strict = FilidConfigFileSchema.safeParse(migrated);
+  if (!strict.success) return false;
+  writeConfig(projectRoot, 'project', strict.data);
+  log.debug('migrated config to v3', configPath);
   return true;
 }

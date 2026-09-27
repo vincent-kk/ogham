@@ -62,8 +62,8 @@ describe('a config-warning affects the axes its dropped entry could have changed
       [],
     ],
     [
-      'an invalid additionalAllowedPeers entry',
-      { structure: { additionalAllowedPeers: 'README.md' } },
+      'an invalid allowedPeers entry',
+      { structure: { allowedPeers: 'README.md' } },
       [],
     ],
     [

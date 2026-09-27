@@ -11,7 +11,7 @@ import type { StructureAdapter } from './adapters.js';
 export interface ScanOptions {
   /** 스캔 포함 glob 패턴. 기본값: ['**'] */
   include?: string[];
-  /** 스캔 제외 glob 패턴. 기본값: ['node_modules/**', '.git/**', 'dist/**'] */
+  /** Built-in and project-relative exclusion globs. */
   exclude?: string[];
   /** 최대 스캔 깊이. 기본값: 10 */
   maxDepth?: number;
@@ -21,13 +21,7 @@ export interface ScanOptions {
    * `KNOWN_ORGAN_DIR_NAMES` 에 더해 organ 으로 분류할 디렉토리 이름.
    * `.filid/config.json` 의 `additional-organ-names` 가 공급한다. 기본값: []
    */
-  additionalOrganNames?: readonly string[];
-  /**
-   * 내장 exclude pattern에 더해 스캔에서 제외할 디렉토리 이름.
-   * `.filid/config.json` 의 `additionalExcludedDirectories` 가 공급하며,
-   * 같은 값이 adapter source discovery 에도 전달된다. 기본값: []
-   */
-  additionalExcludedDirectories?: readonly string[];
+  organNames?: readonly string[];
   /** Structure evidence providers. Defaults to the registered initial adapters. */
   structureAdapters?: readonly StructureAdapter[];
   /** Adapter-specific entry names passed through without core interpretation. */

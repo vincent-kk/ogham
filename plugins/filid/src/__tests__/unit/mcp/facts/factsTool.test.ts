@@ -176,14 +176,14 @@ describe('facts status', () => {
     );
   });
 
-  it('honours structure.additionalExcludedDirectories from project config', async () => {
+  it('honours ignore from project config', async () => {
     project.write(
       '.filid/config.json',
       JSON.stringify({
-        version: '2.0',
+        version: '3.0',
         adapters: { mode: 'auto', enabled: [] },
         rules: {},
-        structure: { additionalExcludedDirectories: ['generated'] },
+        ignore: ['**/generated'],
         facts: { covers: ['**'] },
       }),
     );

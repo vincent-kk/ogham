@@ -8,8 +8,8 @@ import type {
   StructureAdapter,
 } from '../../types/adapters.js';
 import { compareByBytes } from '../../lib/compareByBytes.js';
-
-const PATH_SEPARATOR = /[\\/]/;
+import { isIgnoredPath } from '../../lib/matchesPathPattern.js';
+import { toProjectRelativePath } from '../../lib/toProjectRelativePath.js';
 
 interface ClaimedAdapter {
   adapter: StructureAdapter;
@@ -23,42 +23,25 @@ interface ClaimedAdapter {
 export interface ResolveAdaptersOptions {
   /** Paths to judge instead of the adapters' own discovery results. */
   requestedPaths?: readonly string[];
-  /**
-   * Directory names dropped before ownership is decided. A name matches only
-   * below `projectRoot`, so a root that happens to sit inside a directory of
-   * that name keeps its files.
-   */
-  excludedDirectoryNames?: readonly string[];
+  /** Project-relative patterns dropped before ownership is decided. */
+  exclude?: readonly string[];
 }
 
 /**
- * Build a predicate that reports whether a path sits under an excluded
- * directory. Only the directory segments below the project root are inspected —
- * the filename is not a directory, and the root's own segments are not the
- * project's structure.
+ * Build the same project-relative exclusion predicate used by the tree scan.
  * @param projectRoot Absolute root every candidate path is measured against.
- * @param excludedDirectoryNames Directory names to drop; empty disables the filter.
- * @param judgesLastSegment Whether the last segment counts as a directory
- *   name too: true for an unfollowed link, whose own name stands where a
- *   directory would.
+ * @param exclude Config patterns to drop; empty disables the filter.
  * @returns Predicate over absolute candidate paths.
  */
 function createExclusionFilter(
   projectRoot: string,
-  excludedDirectoryNames: readonly string[],
-  judgesLastSegment = false,
+  exclude: readonly string[],
 ): (absolutePath: string) => boolean {
-  if (excludedDirectoryNames.length === 0) return () => false;
-  const excluded = new Set(excludedDirectoryNames);
-  const rootSegmentCount = projectRoot
-    .split(PATH_SEPARATOR)
-    .filter(Boolean).length;
-  return (absolutePath) =>
-    absolutePath
-      .split(PATH_SEPARATOR)
-      .filter(Boolean)
-      .slice(rootSegmentCount, judgesLastSegment ? undefined : -1)
-      .some((segment) => excluded.has(segment));
+  if (exclude.length === 0) return () => false;
+  return (absolutePath) => isIgnoredPath(
+    { ignore: exclude },
+    toProjectRelativePath(projectRoot, absolutePath),
+  );
 }
 
 export async function resolveAdapters(
@@ -66,13 +49,8 @@ export async function resolveAdapters(
   adapters: readonly StructureAdapter[],
   options: ResolveAdaptersOptions = {},
 ): Promise<AdapterResolution> {
-  const { requestedPaths, excludedDirectoryNames = [] } = options;
-  const isExcluded = createExclusionFilter(projectRoot, excludedDirectoryNames);
-  const isExcludedLink = createExclusionFilter(
-    projectRoot,
-    excludedDirectoryNames,
-    true,
-  );
+  const { requestedPaths, exclude = [] } = options;
+  const isExcluded = createExclusionFilter(projectRoot, exclude);
   const detected = await Promise.all(
     adapters.map(async (adapter) => ({
       adapter,
@@ -162,7 +140,7 @@ export async function resolveAdapters(
   const unfollowedLinks = claimed
     .flatMap(({ links }) => links)
     .map((path) => portableResolve(projectRoot, path))
-    .filter((path) => !isExcludedLink(path));
+    .filter((path) => !isExcluded(path));
 
   return {
     adapters: active.map(({ adapter }) => adapter),

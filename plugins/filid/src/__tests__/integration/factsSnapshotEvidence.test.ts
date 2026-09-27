@@ -310,13 +310,8 @@ describe('snapshot evidence comes from the facts store', () => {
       '.metadata/b.test.ts': test,
       'scripts/c.test.ts': test,
     });
-    const defaults = createDefaultConfig();
-
     const result = await snapshot(root, {
-      structure: {
-        ...defaults.structure,
-        additionalExcludedDirectories: ['skills'],
-      },
+      ignore: ['**/skills'],
     });
 
     const unavailable = result.diagnostics

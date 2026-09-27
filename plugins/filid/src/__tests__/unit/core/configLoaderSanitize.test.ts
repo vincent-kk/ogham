@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { loadConfig } from '../../../core/infra/configLoader/index.js';
 
 const V2_BASE = {
-  version: '2.0',
+  version: '3.0',
   adapters: { mode: 'auto', enabled: [] },
   rules: {},
 } as const;
@@ -18,7 +18,7 @@ function writeRaw(root: string, raw: unknown): void {
   writeFileSync(join(dir, 'config.json'), JSON.stringify(raw), 'utf8');
 }
 
-describe('config-loader v2 sanitize and migration', () => {
+describe('config-loader v3 sanitize and migration', () => {
   let tmpDir: string;
 
   beforeEach(() => {
@@ -32,6 +32,21 @@ describe('config-loader v2 sanitize and migration', () => {
   afterEach(() => {
     if (existsSync(tmpDir)) rmSync(tmpDir, { recursive: true, force: true });
     vi.restoreAllMocks();
+  });
+
+  it('drops several invalid peer entries without shifting later indexes', () => {
+    writeRaw(tmpDir, {
+      ...V2_BASE,
+      structure: {
+        allowedPeers: [123, '/abs.ts', 'dir/', 'ok.ts'],
+      },
+    });
+
+    const { config, warnings } = loadConfig(tmpDir);
+    expect(config?.structure?.allowedPeers).toEqual([
+      { basename: 'ok.ts' },
+    ]);
+    expect(warnings).toHaveLength(3);
   });
 
   it('drops and warns for unknown keys nested in a v2 rule override', () => {
@@ -153,7 +168,7 @@ describe('config-loader v2 sanitize and migration', () => {
     });
   });
 
-  it('loads a valid v2 config without warnings or diagnostics', () => {
+  it('loads a valid v3 config without warnings or diagnostics', () => {
     writeRaw(tmpDir, {
       ...V2_BASE,
       language: 'Korean',
@@ -162,7 +177,7 @@ describe('config-loader v2 sanitize and migration', () => {
       },
       structure: {
         maxDepth: 8,
-        additionalAllowedPeers: [
+        allowedPeers: [
           { basename: 'manifest.file', paths: ['packages/**'] },
         ],
       },
@@ -170,7 +185,7 @@ describe('config-loader v2 sanitize and migration', () => {
 
     const { config, warnings, diagnostics } = loadConfig(tmpDir);
 
-    expect(config?.version).toBe('2.0');
+    expect(config?.version).toBe('3.0');
     expect(config?.structure?.maxDepth).toBe(8);
     expect(warnings).toEqual([]);
     expect(diagnostics).toEqual([]);
@@ -222,13 +237,13 @@ describe('config-loader v2 sanitize and migration', () => {
     const { config, warnings, diagnostics } = loadConfig(tmpDir);
 
     expect(config).toMatchObject({
-      version: '2.0',
+      version: '3.0',
       language: 'Korean',
       adapters: { mode: 'auto' },
       structure: {
         maxDepth: 6,
-        additionalOrganNames: ['plans'],
-        additionalAllowedPeers: [{ basename: 'manifest.file' }],
+        organNames: ['plans'],
+        allowedPeers: [{ basename: 'manifest.file' }],
       },
     });
     expect(Object.values(config?.structure?.entryPointOverrides ?? {})).toEqual(

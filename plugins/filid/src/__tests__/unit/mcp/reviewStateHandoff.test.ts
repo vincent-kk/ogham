@@ -153,6 +153,42 @@ afterEach(() => {
 });
 
 describe('review_state handoff', () => {
+  it('omits an excluded-only change from owner scope and candidates', async () => {
+    writeProjectFile(
+      '.filid/config.json',
+      JSON.stringify({
+        version: '3.0',
+        adapters: { mode: 'auto', enabled: [] },
+        rules: {},
+        ignore: ['src/value.ts'],
+      }),
+    );
+    await seedFacts(projectRoot);
+
+    const result = await handleReviewState({
+      action: REVIEW_STATE_ACTIONS.HANDOFF,
+      projectRoot,
+      branchName: BRANCH,
+      baseRef: 'main',
+      documentSync: 'no-change',
+      repaired: 0,
+    });
+    expect(mockedComputeChangedScopeEvidence).toHaveBeenCalledWith(
+      expect.objectContaining({ ignore: ['src/value.ts'] }),
+    );
+    const computed = await mockedComputeChangedScopeEvidence.mock.results.at(-1)?.value as
+      | Awaited<ReturnType<typeof computeChangedScopeEvidence>>
+      | undefined;
+    expect(computed?.candidates.map((candidate) => candidate.path)).not.toContain(
+      'src/value.ts',
+    );
+    expect(result.data.scope).toEqual([]);
+    const parsed = parseHandoffBlock(readFileSync(result.data.handoffPath, 'utf8'));
+    expect(parsed.handoff?.recorded.map((entry) => entry.path)).not.toContain(
+      'src/value.ts',
+    );
+  });
+
   it('writes a parser-valid handoff for the committed owner scope', async () => {
     const result = await handleReviewState({
       action: REVIEW_STATE_ACTIONS.HANDOFF,

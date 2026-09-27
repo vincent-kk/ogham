@@ -217,7 +217,7 @@ describe('committed file incremental review', () => {
       if (priorStatus === 'excluded') {
         const configPath = join(fixture.projectRoot, '.filid/config.json');
         const config = JSON.parse(readFileSync(configPath, 'utf8'));
-        config.structure = { generatedPaths: ['src/value1.ts'] };
+        config.review = { ...(config.review ?? {}), generatedPaths: ['src/value1.ts'] };
         writeFileSync(configPath, JSON.stringify(config));
       }
       const next = await prepareWithFacts({

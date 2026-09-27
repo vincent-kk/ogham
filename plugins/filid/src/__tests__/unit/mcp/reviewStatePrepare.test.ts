@@ -173,6 +173,7 @@ describe('review_state prepare v7', () => {
     expect(result.summary).toMatchObject({
       disposition: REVIEW_STATE_DISPOSITIONS.FRESH,
       filesTotal: 5,
+      ignoredFiles: 0,
       unitsTotal: 3,
       groupsTotal: 1,
       effort: 'low',
@@ -198,6 +199,7 @@ describe('review_state prepare v7', () => {
         'effortMode',
         'effortReason',
         'evidenceComplete',
+        'ignoredFiles',
         'filesTotal',
         'groupsTotal',
         'reviewableGroups',

@@ -73,6 +73,7 @@ export async function buildReviewHandoff(
     const computed = await computeChangedScopeEvidence({
       projectRoot: input.projectRoot,
       source,
+      ignore: settings.ignore,
       generatedPaths: settings.generatedPaths,
       lockfiles: settings.lockfiles,
     });
@@ -113,6 +114,7 @@ export async function buildReviewHandoff(
           violation,
           computed.ruleScopeById.get(violation.ruleId),
           settings.generatedPaths,
+          settings.ignore,
         ),
       }),
     );

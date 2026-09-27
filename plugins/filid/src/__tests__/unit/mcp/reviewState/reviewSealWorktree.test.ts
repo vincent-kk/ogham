@@ -58,7 +58,7 @@ describe('seal current worktree', () => {
     async (withDocuments) => {
       const configPath = join(fixture.projectRoot, '.filid/config.json');
       const config = JSON.parse(readFileSync(configPath, 'utf8'));
-      config.structure = { generatedPaths: ['generated'] };
+      config.review = { generatedPaths: ['generated'] };
       writeFileSync(configPath, JSON.stringify(config));
       const prepared = await handleReviewState({
         action: 'prepare',

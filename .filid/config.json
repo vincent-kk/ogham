@@ -1,5 +1,5 @@
 {
-  "version": "2.0",
+  "version": "3.0",
   "language": "ko",
   "adapters": {
     "mode": "auto",
@@ -8,17 +8,8 @@
     ]
   },
   "rules": {
-    "organ-no-intentmd": {
-      "enabled": true,
-      "severity": "warning"
-    },
-    "detail-document-contract": {
-      "enabled": true,
-      "severity": "warning"
-    },
+    "detail-document-contract": "warning",
     "module-entry-point": {
-      "enabled": true,
-      "severity": "warning",
       "exempt": [
         "**/shared/agent-artifacts",
         "**/plugins/filid",
@@ -28,111 +19,47 @@
         "**/plugins/cennad/hooks",
         "**/plugins/seiri/templates"
       ]
-    },
-    "max-depth": {
-      "enabled": true,
-      "severity": "error"
-    },
-    "circular-dependency": {
-      "enabled": true,
-      "severity": "error"
-    },
-    "pure-function-isolation": {
-      "enabled": true,
-      "severity": "error"
-    },
-    "zero-peer-file": {
-      "enabled": true,
-      "severity": "warning"
     }
   },
   "structure": {
-    "additionalOrganNames": [
+    "organNames": [
       "agents",
       "references"
     ],
-    "additionalAllowedPeers": [
-      {
-        "basename": "version.ts"
-      },
-      {
-        "basename": "hooks.json"
-      },
-      {
-        "basename": "plugin.json"
-      },
-      {
-        "basename": "mcp_config.json"
-      },
-      {
-        "basename": "plugin-compiler.json"
-      },
-      {
-        "basename": "SKILL.md"
-      },
-      {
-        "basename": "DESIGN.md"
-      },
-      {
-        "basename": "DETAIL.md"
-      },
-      {
-        "basename": "INTENT.md"
-      },
-      {
-        "basename": "README.md"
-      },
-      {
-        "basename": "README-ko_kr.md"
-      },
-      {
-        "basename": "CLAUDE.md"
-      },
-      {
-        "basename": "package.json"
-      },
-      {
-        "basename": "tsconfig.json"
-      },
-      {
-        "basename": "tsconfig.build.json"
-      },
-      {
-        "basename": "tsconfig.test.json"
-      },
-      {
-        "basename": "tsconfig.eslint.json"
-      },
-      {
-        "basename": "tsconfig.tsbuildinfo"
-      },
-      {
-        "basename": "tsconfig.build.tsbuildinfo"
-      },
-      {
-        "basename": "vitest.config.ts"
-      },
-      {
-        "basename": "vitest.setup.ts"
-      },
-      {
-        "basename": "vitest.e2e.config.ts"
-      },
-      {
-        "basename": "vitest.e2e.setup.ts"
-      },
-      {
-        "basename": "vitest.e2e.globalSetup.ts"
-      },
-      {
-        "basename": "vitest.globalSetup.ts"
-      },
-      {
-        "basename": "playwright.config.ts"
-      },
-      {
-        "basename": "index.html"
-      },
+    "excludeFromScan": [
+      "**/skills",
+      "**/.metadata",
+      "**/.claude",
+      "**/scripts"
+    ],
+    "allowedPeers": [
+      "version.ts",
+      "hooks.json",
+      "plugin.json",
+      "mcp_config.json",
+      "plugin-compiler.json",
+      "SKILL.md",
+      "DESIGN.md",
+      "DETAIL.md",
+      "INTENT.md",
+      "README.md",
+      "README-ko_kr.md",
+      "CLAUDE.md",
+      "package.json",
+      "tsconfig.json",
+      "tsconfig.build.json",
+      "tsconfig.test.json",
+      "tsconfig.eslint.json",
+      "tsconfig.tsbuildinfo",
+      "tsconfig.build.tsbuildinfo",
+      "vitest.config.ts",
+      "vitest.setup.ts",
+      "vitest.e2e.config.ts",
+      "vitest.e2e.setup.ts",
+      "vitest.e2e.globalSetup.ts",
+      "vitest.globalSetup.ts",
+      "playwright.config.ts",
+      "index.html",
       {
         "basename": "setup.entry.ts",
         "paths": [
@@ -157,12 +84,7 @@
           "**/plugins/imbas/src/hooks/agentEnforcer"
         ]
       },
-      {
-        "basename": "contextInjector.entry.ts",
-        "paths": [
-          "**/plugins/imbas/src/hooks/contextInjector"
-        ]
-      },
+      "**/plugins/imbas/src/hooks/contextInjector/contextInjector.entry.ts",
       {
         "basename": "sessionStart.entry.ts",
         "paths": [
@@ -185,217 +107,43 @@
           "**/plugins/maencof/src/hooks/postToolUse"
         ]
       },
-      {
-        "basename": "subagentStart.entry.ts",
-        "paths": [
-          "**/plugins/seiri/src/hooks/subagentStart"
-        ]
-      },
-      {
-        "basename": "instructionsLoaded.entry.ts",
-        "paths": [
-          "**/plugins/seiri/src/hooks/instructionsLoaded"
-        ]
-      },
-      {
-        "basename": "instructionsPath.ts",
-        "paths": [
-          "**/plugins/maencof/src/hooks/shared"
-        ]
-      },
-      {
-        "basename": "isMaencofVault.ts",
-        "paths": [
-          "**/plugins/maencof/src/hooks/shared"
-        ]
-      },
-      {
-        "basename": "maencofMcpTools.ts",
-        "paths": [
-          "**/plugins/maencof/src/hooks/shared"
-        ]
-      },
-      {
-        "basename": "maencofPath.ts",
-        "paths": [
-          "**/plugins/maencof/src/hooks/shared"
-        ]
-      },
-      {
-        "basename": "metaPath.ts",
-        "paths": [
-          "**/plugins/maencof/src/hooks/shared"
-        ]
-      },
-      {
-        "basename": "readStdin.ts",
-        "paths": [
-          "**/plugins/maencof/src/hooks/shared"
-        ]
-      },
-      {
-        "basename": "writeResult.ts",
-        "paths": [
-          "**/plugins/maencof/src/hooks/shared"
-        ]
-      },
-      {
-        "basename": "build.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "buildCompanionIdentityTag.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "buildL1CoreBlock.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "buildSessionIdentityBlock.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "compressMarkdown.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "extractGist.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "readCachedNodesArray.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "readCompanionIdentity.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "readIndexMetadata.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "readL1Summary.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "renderIdentitySection.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/turnContext"
-        ]
-      },
-      {
-        "basename": "applyPersonalContextMutation.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "defaultPersonalContext.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "evictTopicsOverCap.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "isStateActive.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "normalizePersonalContext.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "personalContextPath.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "prunePersonalContext.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "readPersonalContext.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "renderPersonalContextBlock.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "writePersonalContext.ts",
-        "paths": [
-          "**/plugins/maencof/src/core/personalContext"
-        ]
-      },
-      {
-        "basename": "sessionStart.spec.ts",
-        "paths": [
-          "**/plugins/maencof-lens/src/hooks/sessionStart"
-        ]
-      },
-      {
-        "basename": "metaSkillBody.md",
-        "paths": [
-          "**/plugins/maencof/src/hooks/sessionStart/helpers/bootstrap"
-        ]
-      },
-      {
-        "basename": "findMarker.spec.ts",
-        "paths": [
-          "**/plugins/maencof-lens/src/vault/staleDetector"
-        ]
-      },
-      {
-        "basename": "staleDetector.spec.ts",
-        "paths": [
-          "**/plugins/maencof-lens/src/vault/staleDetector"
-        ]
-      }
-    ],
-    "additionalExcludedDirectories": [
-      "skills",
-      ".metadata",
-      ".claude",
-      "scripts"
-    ],
+      "**/plugins/seiri/src/hooks/subagentStart/subagentStart.entry.ts",
+      "**/plugins/seiri/src/hooks/instructionsLoaded/instructionsLoaded.entry.ts",
+      "**/plugins/maencof/src/hooks/shared/instructionsPath.ts",
+      "**/plugins/maencof/src/hooks/shared/isMaencofVault.ts",
+      "**/plugins/maencof/src/hooks/shared/maencofMcpTools.ts",
+      "**/plugins/maencof/src/hooks/shared/maencofPath.ts",
+      "**/plugins/maencof/src/hooks/shared/metaPath.ts",
+      "**/plugins/maencof/src/hooks/shared/readStdin.ts",
+      "**/plugins/maencof/src/hooks/shared/writeResult.ts",
+      "**/plugins/maencof/src/core/turnContext/build.ts",
+      "**/plugins/maencof/src/core/turnContext/buildCompanionIdentityTag.ts",
+      "**/plugins/maencof/src/core/turnContext/buildL1CoreBlock.ts",
+      "**/plugins/maencof/src/core/turnContext/buildSessionIdentityBlock.ts",
+      "**/plugins/maencof/src/core/turnContext/compressMarkdown.ts",
+      "**/plugins/maencof/src/core/turnContext/extractGist.ts",
+      "**/plugins/maencof/src/core/turnContext/readCachedNodesArray.ts",
+      "**/plugins/maencof/src/core/turnContext/readCompanionIdentity.ts",
+      "**/plugins/maencof/src/core/turnContext/readIndexMetadata.ts",
+      "**/plugins/maencof/src/core/turnContext/readL1Summary.ts",
+      "**/plugins/maencof/src/core/turnContext/renderIdentitySection.ts",
+      "**/plugins/maencof/src/core/personalContext/applyPersonalContextMutation.ts",
+      "**/plugins/maencof/src/core/personalContext/defaultPersonalContext.ts",
+      "**/plugins/maencof/src/core/personalContext/evictTopicsOverCap.ts",
+      "**/plugins/maencof/src/core/personalContext/isStateActive.ts",
+      "**/plugins/maencof/src/core/personalContext/normalizePersonalContext.ts",
+      "**/plugins/maencof/src/core/personalContext/personalContextPath.ts",
+      "**/plugins/maencof/src/core/personalContext/prunePersonalContext.ts",
+      "**/plugins/maencof/src/core/personalContext/readPersonalContext.ts",
+      "**/plugins/maencof/src/core/personalContext/renderPersonalContextBlock.ts",
+      "**/plugins/maencof/src/core/personalContext/writePersonalContext.ts",
+      "**/plugins/maencof-lens/src/hooks/sessionStart/sessionStart.spec.ts",
+      "**/plugins/maencof/src/hooks/sessionStart/helpers/bootstrap/metaSkillBody.md",
+      "**/plugins/maencof-lens/src/vault/staleDetector/findMarker.spec.ts",
+      "**/plugins/maencof-lens/src/vault/staleDetector/staleDetector.spec.ts"
+    ]
+  },
+  "review": {
     "generatedPaths": [
       "plugins/*/bridge",
       "plugins/*/public",

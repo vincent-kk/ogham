@@ -10,7 +10,7 @@ config, cache와 content-addressed ephemeral tool artifact의 host I/O를 소유
 | --------------- | ----------------------------------------------- |
 | `artifactStore` | 16 KiB envelope overflow와 always artifact 저장 |
 | `cacheManager`  | 세션/프롬프트 cache 관리                        |
-| `configLoader`  | config v2와 managed rule document I/O           |
+| `configLoader`  | config v3 and managed rule document I/O          |
 
 ## Conventions
 

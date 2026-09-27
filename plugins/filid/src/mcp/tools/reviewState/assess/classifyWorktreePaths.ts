@@ -12,7 +12,7 @@ import { matchesGeneratedPath } from './matchesGeneratedPath.js';
  * The order is the contract: a module document is a document even when it sits
  * under a declared generated path, because Stage 1 is its committer either way.
  * @param dirtyPaths Repository-relative paths reported by `git status`.
- * @param generatedPaths Declared `structure.generatedPaths` patterns; an empty
+ * @param generatedPaths Declared `review.generatedPaths` patterns; an empty
  * list makes every non-document path source, which is the conservative default.
  * @returns The three groups and the disposition they add up to.
  */

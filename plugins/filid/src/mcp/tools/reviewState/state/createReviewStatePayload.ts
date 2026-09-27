@@ -1,4 +1,5 @@
 import { existsSync } from 'node:fs';
+import { REVIEW_SKIP_REASONS } from '../../../../constants/reviewState.js';
 
 import { listReviewArtifacts } from './listReviewArtifacts.js';
 import { reviewReportExists } from './reviewReportExists.js';
@@ -48,6 +49,9 @@ export function createReviewStatePayload({
             sourceHash: state.sourceHash,
             snapshotHash: state.scope.snapshotHash,
             filesTotal: state.scope.files.length,
+            ignoredFiles: state.scope.files.filter(
+              (file) => file.skipReason === REVIEW_SKIP_REASONS.IGNORED,
+            ).length,
             unitsTotal: state.groups.reduce(
               (total, group) => total + group.units.length,
               0,

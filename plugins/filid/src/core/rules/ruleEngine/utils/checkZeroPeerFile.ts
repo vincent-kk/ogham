@@ -2,6 +2,8 @@ import { portableBasename } from '@ogham/cross-platform';
 
 import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 import { DETAIL_MD, INTENT_MD } from '../../../../constants/documentFiles.js';
+import { globToRegExp } from '../../../../lib/globToRegexp.js';
+import { isDynamicGlob } from '../../../../lib/isDynamicGlob.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
 import type { AllowedPeerOverride } from '../../../infra/configLoader/index.js';
 
@@ -9,7 +11,7 @@ import { isExempt } from './isExempt.js';
 
 /**
  * Factory returning the zero-peer-file check bound to the project's
- * `structure.additionalAllowedPeers` config. Using a factory keeps the closure
+ * `structure.allowedPeers` config. Using a factory keeps the closure
  * over `additionalAllowed` explicit while letting the returned function satisfy
  * the `Rule.check` signature.
  */
@@ -24,6 +26,7 @@ export function checkZeroPeerFile(
     if (peerFiles.length === 0) return [];
 
     const allowed = new Set([INTENT_MD, DETAIL_MD]);
+    const allowedPatterns: RegExp[] = [];
     for (const entryPoint of node.entryPoints)
       allowed.add(portableBasename(entryPoint.path));
 
@@ -38,7 +41,7 @@ export function checkZeroPeerFile(
     if (fwFiles)
       for (const file of fwFiles) allowed.add(portableBasename(file));
 
-    // Category: structure.additionalAllowedPeers from .filid/config.json —
+    // Category: structure.allowedPeers from .filid/config.json —
     // allowed only when entry.paths glob matches node.path (paths omitted =
     // every boundary) and entry.adapterId matches a reported entry point.
     if (additionalAllowed)
@@ -51,11 +54,16 @@ export function checkZeroPeerFile(
           )
         )
           continue;
-        allowed.add(entry.basename);
+        if (isDynamicGlob(entry.basename)) {
+          try { allowedPatterns.push(globToRegExp(entry.basename)); } catch { /* Invalid config patterns do not allow peers. */ }
+        } else allowed.add(entry.basename);
       }
 
     const disallowed = peerFiles.filter(
-      (file) => !allowed.has(portableBasename(file)),
+      (file) => {
+        const basename = portableBasename(file);
+        return !allowed.has(basename) && !allowedPatterns.some((pattern) => pattern.test(basename));
+      },
     );
     if (disallowed.length === 0) return [];
 

@@ -175,7 +175,7 @@ describe('review risk evidence', () => {
     'accepts additional high-risk paths $highRiskPaths',
     ({ highRiskPaths }) => {
       const parsed = FilidConfigSchema.parse({
-        version: '2.0',
+        version: '3.0',
         adapters: { mode: 'auto', enabled: [] },
         rules: {},
         review: { highRiskPaths },

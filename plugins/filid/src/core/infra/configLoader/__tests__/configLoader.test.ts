@@ -93,7 +93,7 @@ describe('initProject — language seeding', () => {
   });
 });
 
-describe('structure.generatedPaths — build artifact declaration', () => {
+describe('review.generatedPaths — build artifact declaration', () => {
   const tempDirs: string[] = [];
   const declared = ['plugins/*/bridge', 'dist'];
 
@@ -108,12 +108,12 @@ describe('structure.generatedPaths — build artifact declaration', () => {
     execSync('git init', { cwd: repoRoot, stdio: 'ignore' });
 
     const config = createDefaultConfig();
-    config.structure = { generatedPaths: declared };
+    config.review = { generatedPaths: declared };
     writeConfig(repoRoot, 'project', config);
 
     const loaded = loadConfig(repoRoot);
 
-    expect(loaded.config?.structure?.generatedPaths).toEqual(declared);
+    expect(loaded.config?.review?.generatedPaths).toEqual(declared);
     expect(loaded.warnings).toEqual([]);
   });
 });

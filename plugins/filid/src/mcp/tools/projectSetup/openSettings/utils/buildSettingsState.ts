@@ -1,6 +1,8 @@
 import { resolveInitialConfigScope } from '@ogham/cross-platform';
 
 import { getDefaultAdapterIds } from '../../../../../adapters/index.js';
+import { BUILTIN_RULE_IDS } from '../../../../../constants/builtinRuleIds.js';
+import { BUILTIN_RULE_SEVERITIES } from '../../../../../constants/builtinRuleSeverities.js';
 import {
   createDefaultConfig,
   getRuleDocsChannel,
@@ -12,7 +14,7 @@ import type { SettingsPageState } from '../types/settingsTypes.js';
 
 /**
  * Assemble the state injected into the settings page: the current config
- * (or the 8-rule default when the project has none yet) plus the rule doc
+ * (or the shipped default when the project has none yet) plus the rule doc
  * deployment snapshot for both config layers.
  *
  * Both layers are inspected because the scope toggle decides where rules
@@ -41,6 +43,12 @@ export function buildSettingsState(projectRoot: string): SettingsPageState {
       user: byScope.user.config ?? createDefaultConfig(),
       project: config,
     },
+    ruleDefaults: Object.fromEntries(
+      Object.values(BUILTIN_RULE_IDS).map((id) => [
+        id,
+        { severity: BUILTIN_RULE_SEVERITIES[id] },
+      ]),
+    ),
     configDiagnostics: byScope.project.diagnostics,
     scope,
     structureAdapterId,

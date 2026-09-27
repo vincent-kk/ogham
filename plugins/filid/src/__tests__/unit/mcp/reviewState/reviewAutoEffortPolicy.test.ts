@@ -66,7 +66,7 @@ describe('automatic review effort policy', () => {
     (threshold) => {
       expect(
         FilidConfigSchema.safeParse({
-          version: '2.0',
+          version: '3.0',
           adapters: { mode: 'auto', enabled: [] },
           rules: {},
           review: { effort: 'auto', autoLowEffortGroupThreshold: threshold },
@@ -79,7 +79,7 @@ describe('automatic review effort policy', () => {
     const review = { effort: 'auto', autoLowEffortGroupThreshold: 24 };
     expect(
       FilidConfigSchema.parse({
-        version: '2.0',
+        version: '3.0',
         adapters: { mode: 'auto', enabled: [] },
         rules: {},
         review,

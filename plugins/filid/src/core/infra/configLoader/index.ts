@@ -1,11 +1,13 @@
 export {
   AllowedPeerOverrideSchema,
   FilidConfigSchema,
+  FilidConfigFileSchema,
   RuleOverrideSchema,
 } from './loaders/configSchemas.js';
 export type {
   AllowedPeerOverride,
   FilidConfig,
+  FilidConfigFile,
 } from './loaders/configSchemas.js';
 export type {
   ConfigDiagnostic,
@@ -26,6 +28,7 @@ export {
 } from './loaders/loadConfigByScope.js';
 export { loadConfigScope } from './loaders/loadConfigScope.js';
 export { migrateConfigV1 } from './loaders/migrateConfigV1.js';
+export { migrateConfigV2 } from './loaders/migrateConfigV2.js';
 export { loadRuleOverrides } from './loaders/loadRuleOverrides.js';
 export { resolveLanguage } from './loaders/resolveLanguage.js';
 export { resolveMaxDepth } from './loaders/resolveMaxDepth.js';

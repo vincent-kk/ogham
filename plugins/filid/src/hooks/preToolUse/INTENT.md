@@ -7,7 +7,7 @@ PreToolUse 이벤트에서 하나의 물리 도구 호출을 논리 operation으
 ## Conventions
 
 - hook entry는 shared normalizer의 판별 결과를 batch orchestrator에 넘기고, 완전한 `apply_patch`의 모든 operation을 입력 순서대로 처리한다.
-- operation 내부 순서: `validateCwd` → `isFcaProject` → `processVisit` → Write/Edit/Delete이면 문서 gate → Write/Edit이면 구조 가드.
+- operation 내부 순서: `validateCwd` → `isFcaProject` → config `ignore` 대상이면 통과 → `processVisit` → Write/Edit/Delete이면 문서 gate → Write/Edit이면 구조 가드.
 - 방문 전달은 permission을 결정하지 않으며 캐시·전달 실패 시에도 해당 operation의 문서 gate와 구조 가드는 계속 실행한다. 전달은 owner INTENT.md 경로와 읽기 지시이며 본문을 싣지 않는다.
 - destination의 기존 content는 DETAIL.md 검증에만 best-effort로 읽는다. Move source는 exact projection에 사용하고, 일반 파일의 inexact 결과는 import superset을 만들기 위해 재확인한다.
 - validator·구조 가드 등 모든 operation 결과는 deny-wins로 병합하며 reason과 non-empty context는 입력 순서를 보존한다.

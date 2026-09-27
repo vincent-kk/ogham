@@ -64,6 +64,21 @@ function sealedPaths(sealed: Awaited<ReturnType<typeof handleReviewState>>): {
   return sealed.data;
 }
 
+/** Refresh a readable legacy state after the environment-hash version bump. */
+async function prepareCurrentGeneration(): Promise<void> {
+  await handleReviewState({
+    action: 'prepare',
+    projectRoot: restored.projectRoot,
+    branchName: PINNED_REVIEW_BRANCH,
+    baseRef: 'main',
+  });
+  const state = readReviewState(
+    resolveReviewStatePaths(restored.projectRoot, PINNED_REVIEW_BRANCH).statePath,
+  );
+  if (!state || 'kind' in state) throw new Error('fresh state is unreadable');
+  preserved = state;
+}
+
 describe('state prepared by S0 code replays on the current code', () => {
   it('rebuilds the exact commits the preserved state was prepared against', () => {
     expect(
@@ -76,7 +91,13 @@ describe('state prepared by S0 code replays on the current code', () => {
     expect(preserved.groups).toHaveLength(2);
   });
 
-  it('checkpoints the preserved generation without stale or invalid state', async () => {
+  it('invalidates the old environment hash and checkpoints a fresh generation', async () => {
+    await expect(handleReviewState({
+      action: 'checkpoint',
+      projectRoot: restored.projectRoot,
+      branchName: PINNED_REVIEW_BRANCH,
+    })).rejects.toMatchObject({ code: 'review-inputs-stale' });
+    await prepareCurrentGeneration();
     const checkpoint = await handleReviewState({
       action: 'checkpoint',
       projectRoot: restored.projectRoot,
@@ -90,6 +111,7 @@ describe('state prepared by S0 code replays on the current code', () => {
   });
 
   it('validates a reviewer round from a brief that carries no generationId', async () => {
+    await prepareCurrentGeneration();
     const [group] = preserved.groups;
     writeReviewStateFixtureJson(
       restored.projectRoot,
@@ -110,6 +132,7 @@ describe('state prepared by S0 code replays on the current code', () => {
   });
 
   it('completes every handoff and seals the preserved generation', async () => {
+    await prepareCurrentGeneration();
     await completeIncrementalReview(restored.projectRoot);
     const sealed = await handleReviewState({
       action: 'seal',
@@ -126,6 +149,7 @@ describe('state prepared by S0 code replays on the current code', () => {
   });
 
   it('seals a stored diagnostic without affects as a blocker, the way it was written', async () => {
+    await prepareCurrentGeneration();
     editPersistedReviewState(
       restored.projectRoot,
       PINNED_REVIEW_BRANCH,
@@ -153,6 +177,7 @@ describe('state prepared by S0 code replays on the current code', () => {
   });
 
   it('seals a stored diagnostic with affects [] as verdict-neutral evidence, not a blocker', async () => {
+    await prepareCurrentGeneration();
     editPersistedReviewState(
       restored.projectRoot,
       PINNED_REVIEW_BRANCH,
@@ -181,6 +206,7 @@ describe('state prepared by S0 code replays on the current code', () => {
   });
 
   it('validates and seals a stored graph-uncertainty candidate the earlier code wrote, without stale inputs', async () => {
+    await prepareCurrentGeneration();
     const { statePath } = resolveReviewStatePaths(
       restored.projectRoot,
       PINNED_REVIEW_BRANCH,

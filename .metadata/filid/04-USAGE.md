@@ -101,56 +101,59 @@ git status --short
 
 ## 설정 파일
 
-### `.filid/config.json` — 프로젝트 설정 (schema 2.0)
+### `.filid/config.json` — 프로젝트 설정 (schema 3.0)
 
 ```json
 {
-  "version": "2.0",
+  "version": "3.0",
   "language": "ko",
   "adapters": {
     "mode": "auto",
     "enabled": ["ecmascript"]
   },
-  "rules": {
-    "intent-document-contract": { "enabled": true, "severity": "error" },
-    "zero-peer-file": { "enabled": true, "severity": "warning" }
-  },
+  "ignore": ["examples/**", "**/*.mock.json"],
+  "rules": { "zero-peer-file": "warning" },
   "structure": {
     "maxDepth": 10,
-    "additionalOrganNames": ["fixtures"],
-    "additionalAllowedPeers": [
-      { "basename": "vite.config.ts", "paths": ["packages/*"] }
-    ],
+    "organNames": ["fixtures"],
+    "allowedPeers": ["**/packages/*/vite.config.ts"],
+    "excludeFromScan": ["scripts/**"],
     "entryPointOverrides": {
       "ecmascript": ["route.ts", "page.tsx"]
     }
+  },
+  "review": {
+    "generatedPaths": ["plugins/*/bridge"]
   }
 }
 ```
 
 | 필드                               | 설명                                                              |
 | ---------------------------------- | ----------------------------------------------------------------- |
-| `version`                          | `"2.0"` 고정                                                      |
+| `version`                          | `"3.0"` 고정                                                      |
+| `ignore`                           | Project-relative globs; a match on a path or ancestor ignores it across Filid. |
 | `language`                         | **문서 출력 언어.** 프로그래밍 언어 선택값이 아니다.              |
 | `adapters.mode`                    | `auto` = 등록 어댑터의 claim 사용 / `explicit` = `enabled`만 사용 |
 | `adapters.enabled`                 | 어댑터 ID 목록. `explicit`인데 비어 있으면 validation error       |
-| `rules.<id>`                       | `enabled` · `severity`(`error\|warning\|info`) · `exempt` glob    |
+| `rules.<id>`                       | Overrides only: `off`, severity shorthand, or an object with `enabled`, `severity`, `exempt`. |
 | `structure.maxDepth`               | 트리 깊이 한계 (기본 10)                                          |
-| `structure.additionalOrganNames`   | organ으로 취급할 추가 디렉터리 이름                               |
-| `structure.additionalAllowedPeers` | fractal root 허용 peer. `paths` glob으로 범위 제한 가능           |
+| `structure.organNames`   | organ으로 취급할 추가 디렉터리 이름                               |
+| `structure.allowedPeers` | Allowed peer object or `<path>/<basename>` shorthand; basename may be a glob. The directory part matches the absolute node path like `exempt`, so prefix it with `**/`. |
+| `structure.excludeFromScan`        | Project-relative globs; removes matching paths from the structure scan and adapter source discovery only — still reviewed. |
+| `review.generatedPaths`         | Tracked build output, skipped in review; uses the same path-and-ancestor glob grammar. |
 | `structure.entryPointOverrides`    | **key가 adapter ID다.** core가 파일명 의미를 해석하지 않고 전달   |
 
 `entryPointOverrides`로 주입한 경로는 `kind: "executable"`로 보고되어 **노드 분류를 바꾸지 않는다.** `zero-peer-file`의 허용 peer와 `entry-point-surface`의 입력으로만 쓰인다. 디렉터리를 fractal로 만들려면 `INTENT.md`/`DETAIL.md`를 두거나 어댑터가 module index로 인식하는 진입점(예: `index.ts`)을 둔다.
 
 스키마는 `strict`다. 알 수 없는 key는 조용히 무시되지 않고 거부된다.
 
-#### v1 config 이관
+#### v1/v2 config migration
 
-v1 config가 발견되면 **읽을 때 메모리에서 v2로 변환**하고 `config-migration-required` 진단을 낸다. **자동으로 파일을 쓰지 않는다.**
+v1/v2 config is converted to v3 in memory on read, with a `config-migration-required` diagnostic. Reads never write the file.
 
-- 기존 organ / depth / allowed / entry-point 값은 대응하는 v2 필드로 옮겨진다.
+- Existing organ, depth, allowed-peer, and entry-point values map to v3; v2 `additionalExcludedDirectories` names become `structure.excludeFromScan` entries via `**/<name>`.
 - 제거된 naming rule, route pattern, CC/LCOM4/promotion 설정은 버려지며 각 key가 migration diagnostic에 기록된다.
-- 사용자가 `setup`에서 저장을 승인할 때만 v2가 디스크에 기록된다.
+- A settings save or `project_setup init` persists v3 when migration is lossless.
 
 ### `hooks/hooks.json` — Hook 이벤트 등록
 
@@ -499,7 +502,7 @@ summary는 `specDocument`와 `testRecord`별로 `fileCount`, `knownCaseCount`, `
 
 ### config가 저장되지 않음
 
-v1 config는 읽을 때 메모리에서만 v2로 변환된다. 디스크 기록은 `setup`에서 사용자가 저장을 승인할 때만 일어난다. `config-migration-required` 진단이 보이면 의도된 동작이다.
+v1/v2 config migrates to v3 in memory on read. Save through settings or run lossless `project_setup init` to persist it. A `config-migration-required` diagnostic is expected until then.
 
 ### scan 결과가 잘려 보임
 

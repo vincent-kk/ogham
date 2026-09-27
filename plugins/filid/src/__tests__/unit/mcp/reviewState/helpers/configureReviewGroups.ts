@@ -25,7 +25,7 @@ export async function configureReviewGroups(
     projectRoot,
     '.filid/config.json',
     JSON.stringify({
-      version: '2.0',
+      version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
       review: { groupFileLimit: 1, ...review },

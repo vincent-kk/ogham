@@ -16,7 +16,7 @@
 ## API Contracts
 
 - `createAdapterRegistry(initial?)` — 중복 ID를 거부하고 structure/verification registry를 만든다.
-- `resolveAdapters(projectRoot, adapters, options?)` — active claims, path ownership, unsupported paths, unfollowed links와 diagnostics를 반환한다. `options.requestedPaths`는 discovery 결과 대신 판정할 path 집합이고, `options.excludedDirectoryNames`는 두 경로 모두에서 걸러낼 디렉터리 이름이다.
+- `resolveAdapters(projectRoot, adapters, options?)` — returns claims, ownership, unsupported paths, unfollowed links, and diagnostics. `options.requestedPaths` selects explicit candidates; `options.exclude` filters both explicit and discovered paths with the shared path matcher.
 - `AdapterRegistry.registerStructure` / `registerVerification` — ID별 adapter 등록.
 - `AdapterRegistry.selectStructure` / `selectVerification` — detect 없이 explicit ID validation과 등록 candidate 선택만 수행한다.
 - `AdapterRegistry.resolveStructure` / `resolveVerification` — detect confidence가 양수인 adapter를 confidence 내림차순으로 반환.
@@ -31,10 +31,11 @@
 - 동률 owner는 `ambiguous-adapter-claim`, 무소유 path는 `unsupported`다.
 - snapshot orchestration은 candidate selection 뒤 adapter detect를 반복하지 않는다.
 
-### AC-adapter-excluded-directories — 제외 디렉터리
+### AC-adapter-ignored-paths — Ignored evidence
 
-- 제외 이름을 세그먼트로 담은 path는 ownership에 들어가지 않고 `unsupported` 진단도 만들지 않는다.
-- 제외는 이름 단위이며 경로상 위치와 무관하다. 제외 목록이 비면 판정 결과가 지정 이전과 동일하다.
+- A path matched by `ignore`, including via an ancestor, enters neither ownership nor unsupported diagnostics.
+- Snapshot orchestration passes built-in scan exclusions, config `ignore`, and config `structure.excludeFromScan` to adapter source discovery, so all three use the same candidate file set.
+- Empty exclusions preserve ordinary discovery.
 - `requestedPaths`로 명시한 path에도 같은 제외가 적용된다.
 
 ### AC-adapter-extension — core 비변경

@@ -1,5 +1,5 @@
 import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { relative, resolve } from 'node:path';
 
 import {
   type CodexMoveProvenance,
@@ -12,10 +12,13 @@ import {
   DENY_RETRY_GUIDANCE,
   HOOK_TOOL_NAME,
 } from '../../constants/hookDefaults.js';
+import { isIgnoredPath } from '../../lib/matchesPathPattern.js';
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
 import { isDetailMd } from '../shared/utils/isDetailMd.js';
 import { isFcaProject } from '../shared/utils/isFcaProject.js';
 import { isIntentMd } from '../shared/utils/isIntentMd.js';
+import { findConfigRoot } from '../utils/findConfigRoot.js';
+import { readHookConfig } from '../utils/readHookConfig.js';
 import { validateCwd } from '../utils/validateCwd.js';
 
 import { processVisit } from './helpers/intentInjector/intentInjector.js';
@@ -69,6 +72,30 @@ export async function handlePreToolUse(
   const safeCwd = validateCwd(input.cwd);
   if (safeCwd === null) return { continue: true };
   if (!isFcaProject(safeCwd)) return { continue: true };
+
+  const target = input.tool_input.file_path ?? input.tool_input.path;
+  if (target) {
+    const targetPath = resolveHookTargetPath(
+      safeCwd,
+      target,
+      input.tool_name === HOOK_TOOL_NAME.DELETE,
+    );
+    try {
+      const configRoot = findConfigRoot(safeCwd) ?? safeCwd;
+      const relativePath = relative(
+        resolveHookTargetPath(safeCwd, configRoot),
+        targetPath,
+      ).replace(/\\/g, '/');
+      if (
+        relativePath !== '..' &&
+        !relativePath.startsWith('../') &&
+        isIgnoredPath(readHookConfig(safeCwd), relativePath)
+      )
+        return { continue: true };
+    } catch {
+      /* Fail open: an unreadable config root leaves the target not-ignored. */
+    }
+  }
 
   const mutation =
     input.tool_name === HOOK_TOOL_NAME.WRITE ||

@@ -38,6 +38,26 @@ describe('readHookConfig', () => {
     });
   });
 
+  it('reads exclusion patterns from the project layer', () => {
+    writeFileSync(
+      join(cwd, '.filid', 'config.json'),
+      JSON.stringify({ ignore: ['private/**', 'draft.md'] }),
+    );
+    expect(readHookConfig(cwd)?.ignore).toEqual(['private/**', 'draft.md']);
+  });
+
+  it('does not treat scan-only structure.excludeFromScan as ignored', () => {
+    writeFileSync(
+      join(cwd, '.filid', 'config.json'),
+      JSON.stringify({
+        version: '3.0',
+        ignore: ['draft.md'],
+        structure: { excludeFromScan: ['**/fixtures', '**/samples'] },
+      }),
+    );
+    expect(readHookConfig(cwd)?.ignore).toEqual(['draft.md']);
+  });
+
   it('returns null when the config file is missing', () => {
     expect(readHookConfig(cwd)).toBeNull();
   });

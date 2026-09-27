@@ -60,7 +60,7 @@ interface ToolResultEnvelope<Summary, Data> {
 }
 ```
 
-- 모든 진단은 `affects`를 싣는다. structure·verification·restructure 판정은 그 축에 영향을 선언한 진단만 indeterminate 사유로 읽는다. `affects: []`는 판정을 바꾸지 않는다. `config-warning`은 버린 config 경로가 loosen-only 목록(`rules.*.exempt|enabled|severity`, `structure.additionalAllowedPeers`, `structure.generatedPaths`)에 있을 때만 `[]`이고, 그 밖의 잘못된 값·모르는 key·config 전체 fallback은 세 축 전부다. `$schema`, `$comment`, `_`로 시작하는 key는 경고 없이 무시한다. 저장된 review state의 진단은 `affects`가 없을 수 있고, 그때는 모든 축으로 읽는다.
+- 모든 진단은 `affects`를 싣는다. structure·verification·restructure 판정은 그 축에 영향을 선언한 진단만 indeterminate 사유로 읽는다. `affects: []`는 판정을 바꾸지 않는다. `config-warning`은 버린 config 경로가 loosen-only 목록(`rules.*.exempt|enabled|severity`, `structure.allowedPeers`, `review.generatedPaths`)에 있을 때만 `[]`이고, 그 밖의 잘못된 값·모르는 key·config 전체 fallback은 세 축 전부다. `$schema`, `$comment`, `_`로 시작하는 key는 경고 없이 무시한다. 저장된 review state의 진단은 `affects`가 없을 수 있고, 그때는 모든 축으로 읽는다.
 - 기본 inline 예산은 UTF-8 **16 KiB**(`TOOL_INLINE_BUDGET_BYTES`).
 - 초과 시 `data`를 빼고 전체 payload를 plugin cache의 `artifacts/<tool-name>/<sha256>.json`에 atomic write한다.
 - artifact와 inline text는 같은 compact serializer를 쓴다. `Map`/`Set` 정규화, byte 계산, SHA-256 입력이 모두 그 직렬화 결과 기준이다.
@@ -824,19 +824,24 @@ interface HookOutput {
 ## 설정 계약 (`.filid/config.json`)
 
 ```typescript
-interface FilidConfigV2 {
-  version: "2.0";
+interface FilidConfigV3 {
+  version: "3.0";
   language?: string;
+  ignore?: string[];
   adapters: {
     mode: "auto" | "explicit";
     enabled: string[];
   };
-  rules: Record<string, RuleOverride>;
+  rules: Record<string, RuleOverride | "off" | "error" | "warning" | "info">;
   structure?: {
     maxDepth?: number;
-    additionalOrganNames?: string[];
-    additionalAllowedPeers?: AllowedPeerOverride[];
+    organNames?: string[];
+    allowedPeers?: (AllowedPeerOverride | string)[];
+    excludeFromScan?: string[];
     entryPointOverrides?: Record<string, string[]>;
+  };
+  review?: {
+    generatedPaths?: string[];
   };
   facts?: {
     covers?: string[];
@@ -861,7 +866,8 @@ interface AllowedPeerOverride {
 - `language`는 **문서 출력 언어**이며 프로그래밍 언어 선택값이 아니다.
 - `explicit` 모드에서 `enabled`가 빈 배열이면 validation error다.
 - `entryPointOverrides`의 key는 **adapter ID**다. core가 파일명 의미를 해석하지 않고 해당 어댑터에 전달한다. 주입된 경로는 `kind: "executable"`로 보고되므로 **노드 분류를 바꾸지 않는다.** `zero-peer-file`과 `entry-point-surface`의 입력일 뿐이다.
-- v1 config는 읽을 때 메모리에서 v2로 변환하고 `config-migration-required` 진단을 낸다. **자동으로 파일을 쓰지 않는다.**
+- v1/v2 config migrates to v3 in memory on read; saving or lossless `project_setup init` persists it. Normalized consumers see object forms for rule and peer shorthand.
+- `ignore` and `review.generatedPaths` use project-relative minimal globs matching the path or any ancestor. `ignore` applies across scanning, review, context resolution, skills, and hooks. `structure.excludeFromScan` uses the same grammar but removes paths only from the structure scan and adapter source discovery; those paths are still reviewed.
 - 스키마는 `strict`다. 알 수 없는 key는 무시되지 않고 거부된다.
 - `facts.covers`가 없으면 adapter의 소스 확장자로 만든 **기본 범위**가 적용된다(`scopeSource: "default"`). **서버는 프로젝트 설정 파일을 쓰지 않는다** — 리뷰 중에 쓰면 worktree가 `source-dirty`가 되어 seal을 막기 때문이다. `facts-uninitialized`는 유효 범위가 빈 경우(`covers: []`)에만 남는다. 제출은 범위를 넓히지 못한다.
 - `facts.provider`는 해석의 권위를 가진 도구 이름이다. 저장 레코드가 그 도구에서 왔을 때에만 해석 불일치가 `informational[]`로 내려간다.

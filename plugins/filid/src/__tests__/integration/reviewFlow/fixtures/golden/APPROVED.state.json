@@ -5,7 +5,7 @@
     "userInstructions": "",
     "changeContext": null,
     "pluginRoot": "<ROOT1>",
-    "environmentHash": "297abba1c4b3275fc3214922c5512f178db813b728b83c80f9106d59d5077890",
+    "environmentHash": "93f2f2250486d9f11e8eff90d4e69e9ad2dfda365a1d44a237abb7f0204867ac",
     "decisions": [
       {
         "group": "01",
@@ -130,7 +130,7 @@
   ],
   "scope": {
     "diagnostics": [],
-    "snapshotHash": "2b2f4bb467aa1d9be7aa25b6c5a5ad4832c7e7c96ed72351a5578baa0dc41ce7",
+    "snapshotHash": "1fa4aa59d68b9dcb451e2fd44df1cdc73eaba0c4b6fa94154e3317486ba9428e",
     "factsDigest": "ad16626420e681989c23b48e7103fe52bb9d4fc70f07f8fe428867b2a2e87979",
     "evidenceComplete": true,
     "worktree": "clean",

@@ -4,14 +4,16 @@ import {
   type AllowedPeerOverride,
   AllowedPeerOverrideSchema,
   type FilidConfig,
+  FilidConfigFileSchema,
   FilidConfigSchema,
   RuleOverrideSchema,
 } from '../../../core/infra/configLoader/index.js';
 import type { RuleOverride, RuleSeverity } from '../../../types/rules.js';
 
-describe('config-schema-types v2', () => {
-  it('exposes the v2 adapter and structure contract', () => {
-    expectTypeOf<FilidConfig['version']>().toEqualTypeOf<'2.0'>();
+describe('config-schema-types v3', () => {
+  it('exposes the v3 adapter and structure contract', () => {
+    expectTypeOf<FilidConfig['version']>().toEqualTypeOf<'3.0'>();
+    expectTypeOf<FilidConfig['ignore']>().toEqualTypeOf<string[] | undefined>();
     expectTypeOf<FilidConfig['language']>().toEqualTypeOf<string | undefined>();
     expectTypeOf<FilidConfig['adapters']>().toEqualTypeOf<{
       mode: 'auto' | 'explicit';
@@ -20,26 +22,24 @@ describe('config-schema-types v2', () => {
     expectTypeOf<FilidConfig['structure']>().toEqualTypeOf<
       | {
           maxDepth?: number;
-          additionalOrganNames?: string[];
-          additionalAllowedPeers?: AllowedPeerOverride[];
-          additionalExcludedDirectories?: string[];
+          organNames?: string[];
+          allowedPeers?: AllowedPeerOverride[];
           entryPointOverrides?: Record<string, string[]>;
-          generatedPaths?: string[];
+          excludeFromScan?: string[];
         }
       | undefined
     >();
     expectTypeOf<FilidConfig>().toMatchTypeOf<{
-      version: '2.0';
+      version: '3.0';
       adapters: { mode: 'auto' | 'explicit'; enabled: string[] };
       rules: Record<string, RuleOverride>;
       language?: string;
       structure?: {
         maxDepth?: number;
-        additionalOrganNames?: string[];
-        additionalAllowedPeers?: AllowedPeerOverride[];
-        additionalExcludedDirectories?: string[];
+        organNames?: string[];
+        allowedPeers?: AllowedPeerOverride[];
         entryPointOverrides?: Record<string, string[]>;
-        generatedPaths?: string[];
+        excludeFromScan?: string[];
       };
     }>();
   });
@@ -68,41 +68,44 @@ describe('config-schema-types v2', () => {
 
   it('parses structure customizations only under structure', () => {
     const parsed = FilidConfigSchema.parse({
-      version: '2.0',
+      version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
       structure: {
-        additionalOrganNames: ['docs', 'plans'],
+        organNames: ['docs', 'plans'],
         entryPointOverrides: { custom: ['module.entry'] },
       },
     });
-    expect(parsed.structure?.additionalOrganNames).toEqual(['docs', 'plans']);
+    expect(parsed.structure?.organNames).toEqual(['docs', 'plans']);
     expect(parsed.structure?.entryPointOverrides).toEqual({
       custom: ['module.entry'],
     });
     expect(() => FilidConfigSchema.parse({ ...parsed, extra: true })).toThrow();
   });
 
-  it('round-trips structure.additionalExcludedDirectories verbatim', () => {
+  it('round-trips ignore and raw shorthand', () => {
     const parsed = FilidConfigSchema.parse({
-      version: '2.0',
+      version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
-      structure: { additionalExcludedDirectories: ['skills', '.metadata'] },
+      ignore: ['**/skills', '**/.metadata'],
     });
 
-    expect(parsed.structure?.additionalExcludedDirectories).toEqual([
-      'skills',
-      '.metadata',
-    ]);
+    expect(parsed.ignore).toEqual(['**/skills', '**/.metadata']);
     expect(() =>
-      FilidConfigSchema.parse({
-        version: '2.0',
+      FilidConfigFileSchema.parse({
+        version: '3.0',
         adapters: { mode: 'auto', enabled: [] },
         rules: {},
-        structure: { additionalExcludedDirectories: [''] },
+        ignore: [''],
       }),
     ).toThrow();
+    expect(FilidConfigFileSchema.parse({
+      version: '3.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: { 'max-depth': 'off' },
+      structure: { allowedPeers: ['plugins/x/*.ts'] },
+    }).rules['max-depth']).toBe('off');
   });
 
   it('schemas are exported from the public loader facade', () => {
@@ -110,7 +113,7 @@ describe('config-schema-types v2', () => {
     expectTypeOf(RuleOverrideSchema.parse).toBeFunction();
     expectTypeOf(AllowedPeerOverrideSchema.parse).toBeFunction();
     const sample = FilidConfigSchema.parse({
-      version: '2.0',
+      version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
     });

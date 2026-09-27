@@ -27,16 +27,17 @@ const STATE: SettingsPageState = {
   configExists: true,
   configByScope: {
     user: {
-      version: '2.0',
+      version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
     },
     project: {
-      version: '2.0',
+      version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
     },
   },
+  ruleDefaults: {},
   configDiagnostics: [],
   scope: {
     paths: {
@@ -68,7 +69,7 @@ const STATE: SettingsPageState = {
 const VALID_BODY: SaveBody = {
   scope: 'project',
   config: {
-    version: '2.0',
+    version: '3.0',
     adapters: { mode: 'auto', enabled: [] },
     rules: {},
   },
@@ -195,7 +196,7 @@ describe('filid settings web server', () => {
       configByScope: {
         ...STATE.configByScope,
         project: {
-          version: '2.0',
+          version: '3.0',
           adapters: { mode: 'auto', enabled: [] },
           rules: {},
           language: '</script><script>alert(1)</script>',

@@ -6,6 +6,7 @@ import { createIgnoreFilter } from '../../../../lib/createIgnoreFilter.js';
 import type { ScanOptions } from '../../../../types/scan.js';
 
 import { discoverDirectories } from './discoverDirectories.js';
+import { shouldExclude } from './shouldExclude.js';
 
 /**
  * Every file the project scan collects, as one flat list.
@@ -35,7 +36,11 @@ export async function listScannedFilePaths(
         (entry) =>
           entry.isFile() &&
           !entry.name.startsWith('.') &&
-          !isIgnored(join(directory, entry.name)),
+          !isIgnored(join(directory, entry.name)) &&
+          !shouldExclude(
+            relative(absoluteRoot, join(directory, entry.name)).split(sep).join('/'),
+            opts,
+          ),
       )
       .map((entry) =>
         relative(absoluteRoot, join(directory, entry.name))

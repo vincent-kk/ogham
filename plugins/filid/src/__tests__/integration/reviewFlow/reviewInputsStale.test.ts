@@ -152,7 +152,7 @@ describe('review-inputs-stale gate after prepare', () => {
           path,
           JSON.stringify({
             ...config,
-            structure: { generatedPaths: ['dist'] },
+            review: { generatedPaths: ['dist'] },
           }),
         );
       },

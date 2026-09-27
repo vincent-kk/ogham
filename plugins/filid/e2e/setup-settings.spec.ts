@@ -12,7 +12,7 @@ import { join } from 'node:path';
 import { type Page, expect, test } from '@playwright/test';
 
 import { BUILTIN_RULE_IDS } from '../src/constants/builtinRuleIds.js';
-import type { FilidConfig } from '../src/core/infra/configLoader/loaders/configSchemas.js';
+import type { FilidConfigFile } from '../src/core/infra/configLoader/loaders/configSchemas.js';
 import { handleOpenSettings } from '../src/mcp/tools/projectSetup/openSettings/index.js';
 
 // The tool must not spawn real browser tabs, and rule-doc management needs the
@@ -76,10 +76,10 @@ async function selectProjectLayer(page: Page): Promise<void> {
     .click();
 }
 
-function readConfig(dir: string): FilidConfig {
+function readConfig(dir: string): FilidConfigFile {
   return JSON.parse(
     readFileSync(join(dir, '.filid', 'config.json'), 'utf8'),
-  ) as FilidConfig;
+  ) as FilidConfigFile;
 }
 
 async function closeActiveServer(): Promise<void> {
@@ -182,6 +182,9 @@ test('full save round-trip persists every edited config field to disk', async ({
 
   await page.locator('#language').fill('Korean');
   await page.locator('#max-depth').fill('7');
+  await page.locator('#ignore-paths').fill('examples/**\n**/*.mock.json');
+  await page.locator('#exclude-from-scan').fill('**/skills');
+  await page.locator('#generated-paths').fill('dist/**');
 
   await page.getByText('Structure exceptions').click();
   await page
@@ -198,19 +201,89 @@ test('full save round-trip persists every edited config field to disk', async ({
   expect(out.summary?.configWritten).toBe(true);
 
   const config = readConfig(projectDir);
-  expect(config.rules['module-entry-point'].enabled).toBe(false);
-  expect(config.rules['max-depth'].severity).toBe('warning');
-  expect(config.rules['zero-peer-file'].exempt).toEqual(['src/legacy/**']);
+  expect(config.version).toBe('3.0');
+  expect(config.rules['module-entry-point']).toBe('off');
+  expect(config.rules['max-depth']).toBe('warning');
+  expect(config.rules['zero-peer-file']).toEqual({ exempt: ['src/legacy/**'] });
+  expect(Object.keys(config.rules)).toEqual([
+    'module-entry-point',
+    'max-depth',
+    'zero-peer-file',
+  ]);
   expect(config.language).toBe('Korean');
+  expect(config.ignore).toEqual(['examples/**', '**/*.mock.json']);
   expect(config.structure?.maxDepth).toBe(7);
-  expect(config.structure?.additionalAllowedPeers).toEqual([
-    { basename: 'manifest.file' },
-    { basename: 'NOTICE', paths: ['packages/**'] },
+  expect(config.structure?.excludeFromScan).toEqual(['**/skills']);
+  expect(config.review?.generatedPaths).toEqual(['dist/**']);
+  expect(config.structure?.allowedPeers).toEqual([
+    'manifest.file',
+    'packages/**/NOTICE',
   ]);
   expect(Object.values(config.structure?.entryPointOverrides ?? {})).toEqual([
     ['module.entry'],
   ]);
-  expect(config.structure?.additionalOrganNames).toEqual(['plans']);
+  expect(config.structure?.organNames).toEqual(['plans']);
+});
+
+test('normalized peer entries prefill as shorthand and save in raw form', async ({
+  page,
+}) => {
+  mkdirSync(join(projectDir, '.filid'), { recursive: true });
+  writeFileSync(
+    join(projectDir, '.filid', 'config.json'),
+    JSON.stringify({
+      version: '3.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+      structure: {
+        allowedPeers: [
+          { basename: 'notes.md' },
+          { basename: 'NOTICE', paths: ['packages/**'] },
+        ],
+      },
+    }),
+  );
+  const url = await openSession(projectDir);
+  const waiting = longPoll(projectDir);
+  await page.goto(url);
+  await page.getByText('Structure exceptions').click();
+  await expect(page.locator('#additional-allowed')).toHaveValue(
+    'notes.md\npackages/**/NOTICE',
+  );
+  await page.getByRole('button', { name: 'Save & Close' }).click();
+  expect((await waiting).status).toBe('saved');
+  expect(readConfig(projectDir).structure?.allowedPeers).toEqual([
+    'notes.md',
+    'packages/**/NOTICE',
+  ]);
+});
+
+test('complex peer objects survive settings save unchanged', async ({ page }) => {
+  const peers = [
+    { basename: 'setup.entry.ts', paths: ['**/a', '**/b'] },
+    { basename: 'x.ts', adapterId: 'ecmascript' },
+    { basename: 'y.ts', paths: [] },
+  ];
+  mkdirSync(join(projectDir, '.filid'), { recursive: true });
+  writeFileSync(
+    join(projectDir, '.filid', 'config.json'),
+    JSON.stringify({
+      version: '3.0',
+      adapters: { mode: 'auto', enabled: [] },
+      rules: {},
+      structure: { allowedPeers: peers },
+    }),
+  );
+  const url = await openSession(projectDir);
+  const waiting = longPoll(projectDir);
+  await page.goto(url);
+  await page.getByText('Structure exceptions').click();
+  await expect(page.locator('#additional-allowed')).toHaveValue(
+    peers.map((peer) => JSON.stringify(peer)).join('\n'),
+  );
+  await page.getByRole('button', { name: 'Save & Close' }).click();
+  expect((await waiting).status).toBe('saved');
+  expect(readConfig(projectDir).structure?.allowedPeers).toEqual(peers);
 });
 
 test('plain Save settles the long-poll (window stays open)', async ({
@@ -345,8 +418,8 @@ test('client validation blocks the save and recovers after the fix', async ({
 
   const out = await waiting;
   expect(out.status).toBe('saved');
-  expect(readConfig(projectDir).structure?.additionalAllowedPeers).toEqual([
-    { basename: 'notes.md' },
+  expect(readConfig(projectDir).structure?.allowedPeers).toEqual([
+    'notes.md',
   ]);
 });
 

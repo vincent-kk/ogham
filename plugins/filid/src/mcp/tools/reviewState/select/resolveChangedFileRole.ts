@@ -1,4 +1,5 @@
 import type { VerificationRole } from '../../../../types/adapters.js';
+import { isIgnoredPath } from '../../../../lib/matchesPathPattern.js';
 import { matchesGeneratedPath } from '../assess/matchesGeneratedPath.js';
 import type {
   ReviewChangedFile,
@@ -9,6 +10,8 @@ import { isLockfilePath } from './isLockfilePath.js';
 
 /** Dependencies needed to classify a changed path without ambient state. */
 interface ResolveChangedFileRoleOptions {
+  /** Configured cross-cutting exclusions, before generated-path precedence. */
+  ignore?: readonly string[];
   /** Configured generated-path patterns, in declaration order. */
   generatedPaths: readonly string[];
   /** Effective lockfile basenames, replacing defaults when configured. */
@@ -21,7 +24,7 @@ interface ResolveChangedFileRoleOptions {
  * Resolve the first applicable review role for one committed changed path.
  * @param entry Git-derived change, churn, and binary facts.
  * @param absolutePath Absolute path passed to the verification adapter.
- * @param options Generated, lockfile, and verification classifiers.
+ * @param options Ignore patterns, generated, lockfile, and verification classifiers.
  * @returns The role selected by the v7 precedence contract.
  */
 export function resolveChangedFileRole(
@@ -29,6 +32,8 @@ export function resolveChangedFileRole(
   absolutePath: string,
   options: ResolveChangedFileRoleOptions,
 ): ReviewScopeRole {
+  if (isIgnoredPath({ ignore: options.ignore }, entry.path))
+    return 'ignored';
   if (
     options.generatedPaths.some((pattern) =>
       matchesGeneratedPath(pattern, entry.path),

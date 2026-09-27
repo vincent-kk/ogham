@@ -168,6 +168,7 @@ const SNAPSHOT: ProjectSnapshot = {
 
 const TOOL_CONTEXT: ToolSnapshotContext = {
   snapshot: SNAPSHOT,
+  ignore: [],
   rules: [],
   maxDepth: 10,
   diagnostics: [],

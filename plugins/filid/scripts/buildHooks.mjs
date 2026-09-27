@@ -65,7 +65,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 //                   (delivery-state visit pipeline: commitVisit transaction
 //                   + 3-state TTL soft delivery + scoped fmap
 //                   + pre-tool-validator + structure-guard + FCA opt-in gate).
-//                   36KB keeps a bounded cold-start budget while leaving room
+//                   40 KiB keeps a bounded cold-start budget while leaving room
 //                   for guard state and conservative Move projection.
 //   SESSION_START — selfProbeHook (Node builtin spawnSync) + logHookFailure.
 //                   Output fingerprints reject cross-spawn/which even when the
@@ -75,7 +75,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 // pre-tool-use path via cacheManager. Still Node builtins only — FORBIDDEN_PATTERNS
 // below is the real isolation guard, not these caps.
 const SESSION_START_HOOK_BYTES = 48 * KILO_BYTE;
-const HEAVY_HOOK_BYTES = 36 * KILO_BYTE;
+const HEAVY_HOOK_BYTES = 40 * KILO_BYTE;
 const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 
 // Each hook is bundled once per host runtime directory. Claude (and Antigravity

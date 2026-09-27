@@ -4,7 +4,7 @@ import { z } from 'zod';
 import {
   type ConfigDiagnostic,
   type FilidConfig,
-  FilidConfigSchema,
+  FilidConfigFileSchema,
   type RuleDocStatusEntry,
   type RuleDocSyncResult,
 } from '../../../../../core/infra/configLoader/index.js';
@@ -37,6 +37,8 @@ export interface SettingsPageState {
     user: FilidConfig;
     project: FilidConfig;
   };
+  /** The shipped severities used to render rules absent from either layer. */
+  ruleDefaults: Record<string, { severity: 'error' | 'warning' | 'info' }>;
   configDiagnostics: ConfigDiagnostic[];
   /** Per-layer raw documents and which dot paths the project layer overrode. */
   scope: ConfigScopeState;
@@ -70,7 +72,7 @@ export interface SettingsPageState {
 export const SaveBodySchema = z
   .object({
     scope: z.enum(['user', 'project']),
-    config: FilidConfigSchema,
+    config: FilidConfigFileSchema,
     ruleDocs: z.object({
       selections: z.record(z.string(), z.boolean()),
       resync: z.array(z.string()),

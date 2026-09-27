@@ -156,11 +156,14 @@ export const SNAPSHOT_TOOL_DIAGNOSTIC_NEXT_ACTIONS = {
 
 /** Stable diagnostic codes emitted by context resolution. */
 export const CONTEXT_RESOLVE_DIAGNOSTIC_CODES = {
+  TARGET_IGNORED: 'context-target-ignored',
   TARGET_UNRESOLVED: 'context-target-unresolved',
 } as const;
 
 /** Next actions of the context-resolution diagnostics, keyed like their codes. */
 export const CONTEXT_RESOLVE_DIAGNOSTIC_NEXT_ACTIONS = {
+  TARGET_IGNORED:
+    'Remove or narrow the matching ignore pattern in .filid/config.json to bring this path into Filid analysis, then resolve it again.',
   TARGET_UNRESOLVED:
     "Pass a path inside the project's fractal tree, relative to path or absolute, then call again.",
 } as const;

@@ -83,7 +83,7 @@ async function readSnapshotFacts(
  * Assemble one read-only evidence snapshot of a project.
  * @param projectRoot Directory the snapshot describes.
  * @param registry Adapter registry supplying ecosystem facts.
- * @param config Loaded config v2 — selects adapters and output language.
+ * @param config Loaded config v3 — selects adapters, output language, and exclusions.
  * @param options Axis selection; omitting it collects every axis.
  * @returns The snapshot, whose `collectedAxes` reports what was gathered.
  */
@@ -98,12 +98,11 @@ export async function createProjectSnapshot(
   const enabledIds =
     config.adapters.mode === 'explicit' ? config.adapters.enabled : undefined;
   const selectedAdapters = await resolveSnapshotAdapters(registry, enabledIds);
-  const additionalExcludedDirectories =
-    config.structure?.additionalExcludedDirectories;
+  const fileSetOptions = scanFileSetOptions(config);
   const adapterResolution = await resolveAdapters(
     root,
     selectedAdapters.structure,
-    { excludedDirectoryNames: additionalExcludedDirectories },
+    { exclude: fileSetOptions.exclude },
   );
   const structureAdapters = adapterResolution.adapters;
   const structureOwnership = new Map(
@@ -113,8 +112,8 @@ export async function createProjectSnapshot(
     ]),
   );
   const tree = await scanProject(root, {
-    ...scanFileSetOptions(config),
-    additionalOrganNames: config.structure?.additionalOrganNames,
+    ...fileSetOptions,
+    organNames: config.structure?.organNames,
     structureAdapters,
     entryPointOverrides: config.structure?.entryPointOverrides,
     structureOwnership,
