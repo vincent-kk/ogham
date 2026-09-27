@@ -8,13 +8,13 @@
  *
  * Why each is loosen-only: every builtin rule is enabled by default and no
  * builtin severity is `info`, so dropping `enabled` or `severity` checks the
- * same or more; dropping `exempt`, `additionalAllowedPeers` or
+ * same or more; dropping `exempt`, `allowedPeers` or
  * `generatedPaths` exempts, allows or excuses less.
  */
 export const LOOSEN_ONLY_CONFIG_PATHS: readonly (readonly string[])[] = [
   ['rules', '*', 'exempt'],
   ['rules', '*', 'enabled'],
   ['rules', '*', 'severity'],
-  ['structure', 'additionalAllowedPeers'],
-  ['structure', 'generatedPaths'],
+  ['structure', 'allowedPeers'],
+  ['review', 'generatedPaths'],
 ];

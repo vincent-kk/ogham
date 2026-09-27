@@ -12,8 +12,9 @@ import type { ScanOptions } from '../../../../types/scan.js';
  *   `structure.maxDepth` is a rule threshold, not a traversal limit, so the
  *   built-in default of 10 would silently drop files the snapshot holds —
  *   this repository has directories twelve levels deep.
- * - Built-in and config `exclude` patterns are combined; callers receive the
- *   same file set from scanning and adapter discovery.
+ * - Built-in patterns, the cross-cutting `ignore` list and the scan-only
+ *   `structure.excludeFromScan` list are combined; callers receive the same
+ *   file set from scanning and adapter discovery.
  *
  * Every other scan option steers entry-point discovery or node classification,
  * neither of which changes the set of peer files.
@@ -24,6 +25,10 @@ import type { ScanOptions } from '../../../../types/scan.js';
 export function scanFileSetOptions(config?: FilidConfig): ScanOptions {
   return {
     maxDepth: Number.MAX_SAFE_INTEGER,
-    exclude: [...DEFAULT_SCAN_OPTIONS.exclude, ...(config?.exclude ?? [])],
+    exclude: [
+      ...DEFAULT_SCAN_OPTIONS.exclude,
+      ...(config?.ignore ?? []),
+      ...(config?.structure?.excludeFromScan ?? []),
+    ],
   };
 }

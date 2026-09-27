@@ -13,7 +13,7 @@ import type { RuleOverride, RuleSeverity } from '../../../types/rules.js';
 describe('config-schema-types v3', () => {
   it('exposes the v3 adapter and structure contract', () => {
     expectTypeOf<FilidConfig['version']>().toEqualTypeOf<'3.0'>();
-    expectTypeOf<FilidConfig['exclude']>().toEqualTypeOf<string[] | undefined>();
+    expectTypeOf<FilidConfig['ignore']>().toEqualTypeOf<string[] | undefined>();
     expectTypeOf<FilidConfig['language']>().toEqualTypeOf<string | undefined>();
     expectTypeOf<FilidConfig['adapters']>().toEqualTypeOf<{
       mode: 'auto' | 'explicit';
@@ -22,10 +22,10 @@ describe('config-schema-types v3', () => {
     expectTypeOf<FilidConfig['structure']>().toEqualTypeOf<
       | {
           maxDepth?: number;
-          additionalOrganNames?: string[];
-          additionalAllowedPeers?: AllowedPeerOverride[];
+          organNames?: string[];
+          allowedPeers?: AllowedPeerOverride[];
           entryPointOverrides?: Record<string, string[]>;
-          generatedPaths?: string[];
+          excludeFromScan?: string[];
         }
       | undefined
     >();
@@ -36,8 +36,8 @@ describe('config-schema-types v3', () => {
       language?: string;
       structure?: {
         maxDepth?: number;
-        additionalOrganNames?: string[];
-        additionalAllowedPeers?: AllowedPeerOverride[];
+        organNames?: string[];
+        allowedPeers?: AllowedPeerOverride[];
         entryPointOverrides?: Record<string, string[]>;
         generatedPaths?: string[];
       };
@@ -72,39 +72,39 @@ describe('config-schema-types v3', () => {
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
       structure: {
-        additionalOrganNames: ['docs', 'plans'],
+        organNames: ['docs', 'plans'],
         entryPointOverrides: { custom: ['module.entry'] },
       },
     });
-    expect(parsed.structure?.additionalOrganNames).toEqual(['docs', 'plans']);
+    expect(parsed.structure?.organNames).toEqual(['docs', 'plans']);
     expect(parsed.structure?.entryPointOverrides).toEqual({
       custom: ['module.entry'],
     });
     expect(() => FilidConfigSchema.parse({ ...parsed, extra: true })).toThrow();
   });
 
-  it('round-trips exclude and raw shorthand', () => {
+  it('round-trips ignore and raw shorthand', () => {
     const parsed = FilidConfigSchema.parse({
       version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
-      exclude: ['**/skills', '**/.metadata'],
+      ignore: ['**/skills', '**/.metadata'],
     });
 
-    expect(parsed.exclude).toEqual(['**/skills', '**/.metadata']);
+    expect(parsed.ignore).toEqual(['**/skills', '**/.metadata']);
     expect(() =>
       FilidConfigFileSchema.parse({
         version: '3.0',
         adapters: { mode: 'auto', enabled: [] },
         rules: {},
-        exclude: [''],
+        ignore: [''],
       }),
     ).toThrow();
     expect(FilidConfigFileSchema.parse({
       version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: { 'max-depth': 'off' },
-      structure: { additionalAllowedPeers: ['plugins/x/*.ts'] },
+      structure: { allowedPeers: ['plugins/x/*.ts'] },
     }).rules['max-depth']).toBe('off');
   });
 

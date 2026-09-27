@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
-  isExcludedPath,
+  isIgnoredPath,
   matchesPathPattern,
 } from '../matchesPathPattern.js';
 
@@ -22,6 +22,6 @@ describe('matchesPathPattern', () => {
   it('normalizes separators and handles invalid patterns without throwing', () => {
     expect(matchesPathPattern('plugins\\*\\bridge', 'plugins/filid/bridge/x.js')).toBe(true);
     expect(matchesPathPattern('foo[', 'foo[')).toBe(false);
-    expect(isExcludedPath({ exclude: ['foo[', 'src/*.ts'] }, 'src/main.ts')).toBe(true);
+    expect(isIgnoredPath({ ignore: ['foo[', 'src/*.ts'] }, 'src/main.ts')).toBe(true);
   });
 });

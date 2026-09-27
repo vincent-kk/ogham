@@ -137,19 +137,24 @@
           <span class="scope-badge"></span>
         </section>
 
-        <section class="section" aria-labelledby="paths-title" data-config-path="exclude">
+        <section class="section" aria-labelledby="paths-title" data-config-path="ignore">
           <h2 class="section-title" id="paths-title">Paths</h2>
           <p class="section-help">Patterns are relative to the project root. Use <code>**</code> for directories, <code>*</code> for one segment, and <code>?</code> for one character. A match on a parent directory also covers its contents.</p>
           <div class="field-grid">
-            <label class="field" for="exclude-paths">
-              <span>Excluded paths</span>
-              <textarea id="exclude-paths" rows="3" spellcheck="false" placeholder="examples/**&#10;**/*.mock.json"></textarea>
-              <small class="help">One pattern per line. Excluded paths are omitted from Filid operations.</small>
+            <label class="field" for="ignore-paths">
+              <span>Ignore (all operations)</span>
+              <textarea id="ignore-paths" rows="3" spellcheck="false" placeholder="examples/**&#10;**/*.mock.json"></textarea>
+              <small class="help">One pattern per line. Ignored paths are left out of every Filid operation: structure scan, facts, cross-review, PR document sync and hook context.</small>
+            </label>
+            <label class="field" for="exclude-from-scan">
+              <span>Exclude from structure scan (still reviewed)</span>
+              <textarea id="exclude-from-scan" rows="3" spellcheck="false" placeholder="**/skills&#10;**/docs"></textarea>
+              <small class="help">One pattern per line. Left out of the FCA structure scan only; cross-review and hook context still see these paths.</small>
             </label>
             <label class="field" for="generated-paths">
-              <span>Generated paths</span>
+              <span>Generated paths (review)</span>
               <textarea id="generated-paths" rows="3" spellcheck="false" placeholder="dist/**"></textarea>
-              <small class="help">Tracked build output skipped in review and never staged.</small>
+              <small class="help">Tracked build output: skipped in cross-review, allowed to stay dirty, never staged.</small>
             </label>
           </div>
           <span class="scope-badge"></span>

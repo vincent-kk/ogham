@@ -21,7 +21,7 @@ export interface ScanOptions {
    * `KNOWN_ORGAN_DIR_NAMES` 에 더해 organ 으로 분류할 디렉토리 이름.
    * `.filid/config.json` 의 `additional-organ-names` 가 공급한다. 기본값: []
    */
-  additionalOrganNames?: readonly string[];
+  organNames?: readonly string[];
   /** Structure evidence providers. Defaults to the registered initial adapters. */
   structureAdapters?: readonly StructureAdapter[];
   /** Adapter-specific entry names passed through without core interpretation. */

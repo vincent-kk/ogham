@@ -160,7 +160,7 @@ describe('review_state handoff', () => {
         version: '3.0',
         adapters: { mode: 'auto', enabled: [] },
         rules: {},
-        exclude: ['src/value.ts'],
+        ignore: ['src/value.ts'],
       }),
     );
     await seedFacts(projectRoot);
@@ -174,7 +174,7 @@ describe('review_state handoff', () => {
       repaired: 0,
     });
     expect(mockedComputeChangedScopeEvidence).toHaveBeenCalledWith(
-      expect.objectContaining({ exclude: ['src/value.ts'] }),
+      expect.objectContaining({ ignore: ['src/value.ts'] }),
     );
     const computed = await mockedComputeChangedScopeEvidence.mock.results.at(-1)?.value as
       | Awaited<ReturnType<typeof computeChangedScopeEvidence>>

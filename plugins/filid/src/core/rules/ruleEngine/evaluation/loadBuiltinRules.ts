@@ -31,7 +31,7 @@ export function loadBuiltinRules(
   additionalAllowed?: AllowedPeerOverride[],
   _additionalEntryPoints?: string[],
   _additionalRoutePatterns?: string[],
-  additionalOrganNames?: string[],
+  organNames?: string[],
 ): Rule[] {
   const rules: Rule[] = [
     {
@@ -67,7 +67,7 @@ export function loadBuiltinRules(
       enabled: true,
       scope: 'nodes',
       granularity: 'node',
-      check: checkOrganNoIntentMd(additionalOrganNames),
+      check: checkOrganNoIntentMd(organNames),
     },
     {
       id: BUILTIN_RULE_IDS.ENTRY_POINT_SURFACE,

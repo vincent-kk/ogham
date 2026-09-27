@@ -31,10 +31,10 @@
 - 동률 owner는 `ambiguous-adapter-claim`, 무소유 path는 `unsupported`다.
 - snapshot orchestration은 candidate selection 뒤 adapter detect를 반복하지 않는다.
 
-### AC-adapter-excluded-paths — Excluded evidence
+### AC-adapter-ignored-paths — Ignored evidence
 
-- A path matched by `exclude`, including via an ancestor, enters neither ownership nor unsupported diagnostics.
-- Snapshot orchestration passes both built-in scan exclusions and config `exclude` to adapter source discovery, so both use the same candidate file set.
+- A path matched by `ignore`, including via an ancestor, enters neither ownership nor unsupported diagnostics.
+- Snapshot orchestration passes built-in scan exclusions, config `ignore`, and config `structure.excludeFromScan` to adapter source discovery, so all three use the same candidate file set.
 - Empty exclusions preserve ordinary discovery.
 - `requestedPaths`로 명시한 path에도 같은 제외가 적용된다.
 

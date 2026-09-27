@@ -47,7 +47,7 @@ export async function assertReviewInputsFresh(
   )
     throw new ToolDiagnosticError(
       REVIEW_STATE_DIAGNOSTIC_CODES.INPUTS_STALE,
-      'Local review inputs changed after preparation: repository instructions, review rules, actor methods, or the exclude/generatedPaths/lockfiles config differ from the prepared review.',
+      'Local review inputs changed after preparation: repository instructions, review rules, actor methods, or the ignore/generatedPaths/lockfiles config differ from the prepared review.',
       nextAction,
     );
   const selected = groupId

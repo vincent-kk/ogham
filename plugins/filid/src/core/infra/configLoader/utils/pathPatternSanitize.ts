@@ -13,14 +13,21 @@ export function sanitizePathPatterns(
       addWarning(`invalid glob syntax "${pattern}" (dropped)`, [...key, index]);
       return false;
     });
-  const exclude = config.exclude && sanitize(config.exclude, ['exclude']);
-  const generatedPaths = config.structure?.generatedPaths &&
-    sanitize(config.structure.generatedPaths, ['structure', 'generatedPaths']);
+  const ignore = config.ignore && sanitize(config.ignore, ['ignore']);
+  const excludeFromScan =
+    config.structure?.excludeFromScan &&
+    sanitize(config.structure.excludeFromScan, ['structure', 'excludeFromScan']);
+  const generatedPaths =
+    config.review?.generatedPaths &&
+    sanitize(config.review.generatedPaths, ['review', 'generatedPaths']);
   return {
     ...config,
-    ...(exclude ? { exclude } : {}),
-    ...(generatedPaths && config.structure
-      ? { structure: { ...config.structure, generatedPaths } }
+    ...(ignore ? { ignore } : {}),
+    ...(excludeFromScan && config.structure
+      ? { structure: { ...config.structure, excludeFromScan } }
+      : {}),
+    ...(generatedPaths && config.review
+      ? { review: { ...config.review, generatedPaths } }
       : {}),
   };
 }

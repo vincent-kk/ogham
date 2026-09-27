@@ -182,7 +182,8 @@ test('full save round-trip persists every edited config field to disk', async ({
 
   await page.locator('#language').fill('Korean');
   await page.locator('#max-depth').fill('7');
-  await page.locator('#exclude-paths').fill('examples/**\n**/*.mock.json');
+  await page.locator('#ignore-paths').fill('examples/**\n**/*.mock.json');
+  await page.locator('#exclude-from-scan').fill('**/skills');
   await page.locator('#generated-paths').fill('dist/**');
 
   await page.getByText('Structure exceptions').click();
@@ -210,17 +211,18 @@ test('full save round-trip persists every edited config field to disk', async ({
     'zero-peer-file',
   ]);
   expect(config.language).toBe('Korean');
-  expect(config.exclude).toEqual(['examples/**', '**/*.mock.json']);
+  expect(config.ignore).toEqual(['examples/**', '**/*.mock.json']);
   expect(config.structure?.maxDepth).toBe(7);
-  expect(config.structure?.generatedPaths).toEqual(['dist/**']);
-  expect(config.structure?.additionalAllowedPeers).toEqual([
+  expect(config.structure?.excludeFromScan).toEqual(['**/skills']);
+  expect(config.review?.generatedPaths).toEqual(['dist/**']);
+  expect(config.structure?.allowedPeers).toEqual([
     'manifest.file',
     'packages/**/NOTICE',
   ]);
   expect(Object.values(config.structure?.entryPointOverrides ?? {})).toEqual([
     ['module.entry'],
   ]);
-  expect(config.structure?.additionalOrganNames).toEqual(['plans']);
+  expect(config.structure?.organNames).toEqual(['plans']);
 });
 
 test('normalized peer entries prefill as shorthand and save in raw form', async ({
@@ -234,7 +236,7 @@ test('normalized peer entries prefill as shorthand and save in raw form', async 
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
       structure: {
-        additionalAllowedPeers: [
+        allowedPeers: [
           { basename: 'notes.md' },
           { basename: 'NOTICE', paths: ['packages/**'] },
         ],
@@ -250,7 +252,7 @@ test('normalized peer entries prefill as shorthand and save in raw form', async 
   );
   await page.getByRole('button', { name: 'Save & Close' }).click();
   expect((await waiting).status).toBe('saved');
-  expect(readConfig(projectDir).structure?.additionalAllowedPeers).toEqual([
+  expect(readConfig(projectDir).structure?.allowedPeers).toEqual([
     'notes.md',
     'packages/**/NOTICE',
   ]);
@@ -268,7 +270,7 @@ test('complex peer objects survive settings save unchanged', async ({ page }) =>
       version: '3.0',
       adapters: { mode: 'auto', enabled: [] },
       rules: {},
-      structure: { additionalAllowedPeers: peers },
+      structure: { allowedPeers: peers },
     }),
   );
   const url = await openSession(projectDir);
@@ -280,7 +282,7 @@ test('complex peer objects survive settings save unchanged', async ({ page }) =>
   );
   await page.getByRole('button', { name: 'Save & Close' }).click();
   expect((await waiting).status).toBe('saved');
-  expect(readConfig(projectDir).structure?.additionalAllowedPeers).toEqual(peers);
+  expect(readConfig(projectDir).structure?.allowedPeers).toEqual(peers);
 });
 
 test('plain Save settles the long-poll (window stays open)', async ({
@@ -415,7 +417,7 @@ test('client validation blocks the save and recovers after the fix', async ({
 
   const out = await waiting;
   expect(out.status).toBe('saved');
-  expect(readConfig(projectDir).structure?.additionalAllowedPeers).toEqual([
+  expect(readConfig(projectDir).structure?.allowedPeers).toEqual([
     'notes.md',
   ]);
 });

@@ -102,7 +102,7 @@ export async function collectNodeMetadata(
           hasFractalChildren: children.length > 0,
           isLeafDirectory: children.length === 0,
           entryPoints,
-          additionalOrganNames: opts.additionalOrganNames,
+          organNames: opts.organNames,
         }),
         hasIntentMd,
         hasDetailMd,

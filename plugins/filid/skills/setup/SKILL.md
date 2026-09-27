@@ -31,7 +31,7 @@ Load only the reference needed for the active phase:
 ## When to Use
 
 - initializing Filid in a new or existing repository
-- selecting adapters, output language, and project-relative `exclude` paths in config v3
+- selecting adapters, output language, and project-relative `ignore` paths in config v3
 - reconciling managed FCA rule documents
 - discovering missing INTENT.md or DETAIL.md contracts
 - rechecking initialization after a structural change

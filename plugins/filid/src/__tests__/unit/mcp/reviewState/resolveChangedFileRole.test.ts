@@ -28,12 +28,12 @@ describe('resolveChangedFileRole — first matching role wins', () => {
       changedFile('generated/README.md', 'D', true),
       '/project/generated/README.md',
       {
-        exclude: ['generated'],
+        ignore: ['generated'],
         generatedPaths: ['generated'],
         lockfiles: ['README.md'],
         classifyVerification,
       },
-    )).toBe('excluded');
+    )).toBe('ignored');
     expect(classifyVerification).not.toHaveBeenCalled();
   });
   it.each([

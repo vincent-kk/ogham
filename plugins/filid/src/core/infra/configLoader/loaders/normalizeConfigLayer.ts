@@ -37,11 +37,11 @@ export function normalizeConfigLayer(
   const structure = layer.structure;
   if (structure && typeof structure === 'object' && !Array.isArray(structure)) {
     const fields = structure as Record<string, unknown>;
-    const peers = fields.additionalAllowedPeers;
+    const peers = fields.allowedPeers;
     if (Array.isArray(peers))
       layer = { ...layer, structure: {
         ...fields,
-        additionalAllowedPeers: peers.map((peer: unknown) => {
+        allowedPeers: peers.map((peer: unknown) => {
           if (typeof peer !== 'string' || !peer) return peer;
           const slash = peer.lastIndexOf('/');
           if (slash < 0) return { basename: peer };

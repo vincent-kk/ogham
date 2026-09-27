@@ -4,7 +4,7 @@ import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
 
 /**
  * Factory returning the organ-promotion check bound to the project's
- * `structure.additionalOrganNames`.
+ * `structure.organNames`.
  *
  * `type === 'organ' && hasIntentMd` cannot occur in a real snapshot:
  * classification step 1 turns any directory holding INTENT.md into a fractal,
@@ -14,14 +14,14 @@ import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
  * entry point means the promotion was deliberate, so the check stays silent.
  */
 export function checkOrganNoIntentMd(
-  additionalOrganNames?: string[],
+  organNames?: string[],
 ): (context: RuleContext) => RuleViolation[] {
   return (context: RuleContext): RuleViolation[] => {
     const { node } = context;
     if (node.type !== 'fractal' || !node.hasIntentMd) return [];
     if (
       !KNOWN_ORGAN_DIR_NAMES.includes(node.name) &&
-      !(additionalOrganNames ?? []).includes(node.name)
+      !(organNames ?? []).includes(node.name)
     )
       return [];
     if (node.hasDetailMd) return [];

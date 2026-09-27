@@ -65,8 +65,8 @@ export function createPreparedReviewPayload(
       sourceHash: input.state.sourceHash,
       snapshotHash: input.state.scope.snapshotHash,
       filesTotal: input.state.scope.files.length,
-      excludedFiles: input.state.scope.files.filter(
-        (file) => file.skipReason === REVIEW_SKIP_REASONS.EXCLUDED,
+      ignoredFiles: input.state.scope.files.filter(
+        (file) => file.skipReason === REVIEW_SKIP_REASONS.IGNORED,
       ).length,
       unitsTotal: input.state.groups.reduce(
         (total, group) => total + group.units.length,

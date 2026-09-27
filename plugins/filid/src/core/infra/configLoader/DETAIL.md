@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Project config schema version is `3.0`; it governs document language, adapters, override-only rules, structure, and the cross-cutting `exclude` list.
+- Project config schema version is `3.0`; it governs document language, adapters, override-only rules, structure, and the cross-cutting `ignore` list.
 - `language`는 문서 출력 언어일 뿐 프로그래밍 언어 선택값이 아니다.
 - adapter mode `auto`는 등록 adapter claim을 사용하고 `explicit`은 `enabled` ID만 사용한다. explicit의 빈 목록과 미등록 ID는 validation finding이다.
 - v1 and v2 layers migrate to v3 in memory before merging; reads never write. `initProject` persists a lossless migration only when no key was discarded. Unknown keys and discarded v1 policy keys retain diagnostics. JSON serialization does not preserve comments or original layout. `config-migration-required` has `affects: []`; discarded policy keys affect every analysis axis.
@@ -12,8 +12,9 @@
 - config discovery는 git/project root를 기준으로 하며 plugin 설치 경로를 project fallback으로 사용하지 않는다.
 - optional `review` 설정은 cross-review의 effort, group file·churn 상한, 전체 review group 예산, plan threshold, 병렬 상한과 lockfile basename을 선언한다. 숫자는 양의 정수만 허용하고 lockfile 중복은 loader가 제거한다.
 - review 기본값은 review constants가 소유한다. `groupChurnLimit`는 group 상한과 file chunk 상한을 함께 정해 어떤 review unit도 group 상한을 넘지 않게 한다.
-- `structure.generatedPaths` describes tracked build output. It and top-level `exclude` use project-relative POSIX minimal globs (`**`, `*`, `?`) matching a path or any ancestor. Invalid patterns are warned and dropped. The loader preserves valid declarations without interpreting target paths.
-- `exclude` prunes scans, adapter source discovery, review candidates, context resolution, and hooks. The tree and adapter source discovery receive the same patterns so excluded files cannot remain as dependency evidence. v2 directory names migrate to `**/<name>` entries.
+- `review.generatedPaths` describes tracked build output. It and top-level `ignore` use project-relative POSIX minimal globs (`**`, `*`, `?`) matching a path or any ancestor. Invalid patterns are warned and dropped. The loader preserves valid declarations without interpreting target paths.
+- `ignore` prunes scans, adapter source discovery, review candidates, context resolution, and hooks. The tree and adapter source discovery receive the same patterns so ignored files cannot remain as dependency evidence.
+- `structure.excludeFromScan` is the scan-only sibling of `ignore` — same grammar, matching a path or any ancestor — that removes paths from the structure tree and adapter source discovery only, never from review or hooks. Migration turns each v2 `additionalExcludedDirectories` name into a `**/<name>` entry here.
 - managed rule 문서는 host가 실제로 읽는 target을 `@ogham/agent-artifacts`로 동기화하고 Filid owner 주소 밖의 내용을 보존한다.
 - rule 문서 배포 레이어는 config 레이어와 같은 축이다. `project`는 `<gitRoot>` 채널에, `user`는 호스트 상태 루트(`~/.claude/rules/`)에 쓴다. 레이어를 지정하지 않은 호출은 `project`로 해석한다.
 - 레이어를 명시한 sync는 선택한 레이어에 먼저 쓴 다음 반대편 레이어의 `filid_` 소유 문서를 회수한다. 순서가 뒤집히면 중간 실패가 규칙이 어느 레이어에도 없는 상태를 남긴다. 레이어를 명시하지 않은 호출은 배치를 결정한 적이 없으므로 반대편을 건드리지 않는다.
@@ -26,7 +27,7 @@
 interface FilidConfigV3 {
   version: '3.0';
   language?: string;
-  exclude?: string[];
+  ignore?: string[];
   adapters: { mode: 'auto' | 'explicit'; enabled: string[] };
   rules: Record<string, RuleOverride>;
   review?: {
@@ -39,13 +40,14 @@ interface FilidConfigV3 {
     planChurnLimit?: number;
     concurrency?: number;
     lockfiles?: string[];
+    generatedPaths?: string[];
   };
   structure?: {
     maxDepth?: number;
-    additionalOrganNames?: string[];
-    additionalAllowedPeers?: AllowedPeerOverride[];
+    organNames?: string[];
+    allowedPeers?: AllowedPeerOverride[];
     entryPointOverrides?: Record<string, string[]>;
-    generatedPaths?: string[];
+    excludeFromScan?: string[];
   };
 }
 ```
@@ -72,7 +74,7 @@ interface FilidConfigV3 {
 
 ### AC-config-generated-paths — 생성물 경로 선언
 
-- `structure.generatedPaths`를 담은 config가 strict 검증을 통과하고 값이 round-trip한다.
+- `review.generatedPaths`를 담은 config가 strict 검증을 통과하고 값이 round-trip한다.
 - loader는 경로를 정규화·해석하지 않고 선언된 문자열 그대로 보존한다.
 
 ### AC-config-review — review 실행 설정
@@ -85,14 +87,15 @@ interface FilidConfigV3 {
 - `maxGroups`는 선택 양의 정수로 round-trip하며, 생략된 `groupFileLimit`은 loader에서 고정 값으로 채우지 않는다.
 - `highRiskPaths`는 선택 비어 있지 않은 glob 문자열 배열이며 기본 위험 신호에 추가된다. 생략하거나 빈 배열이면 추가 경로가 없다. prepare가 경로 의미를 해석하며 loader는 값을 보존한다.
 
-### AC-config-exclude — Cross-cutting path exclusion
+### AC-config-ignore — Cross-cutting path exclusion
 
-- `exclude` round-trips through strict file validation and applies the same ancestor-match glob predicate at every consumer.
-- Invalid patterns emit a warning and do not match; dropping `exclude` affects all analysis axes.
+- `ignore` round-trips through strict file validation and applies the same ancestor-match glob predicate at every consumer.
+- Invalid patterns emit a warning and do not match; dropping `ignore` affects all analysis axes.
+- `structure.excludeFromScan` round-trips the same way and applies only to structure scanning and adapter source discovery.
 
 ### AC-config-migration — 비파괴 migration
 
-- v1/v2 corresponding fields survive in normalized v3 memory values, including v2 excluded directory names migrated to `**/<name>`; discarded keys have diagnostics.
+- v1/v2 corresponding fields survive in normalized v3 memory values, including v2 `additionalExcludedDirectories` names migrated to `structure.excludeFromScan` as `**/<name>`; discarded keys have diagnostics.
 - load만으로 config 파일의 byte content가 바뀌지 않는다.
 
 ### AC-config-roots — root 격리

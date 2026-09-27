@@ -41,23 +41,21 @@ describe('readHookConfig', () => {
   it('reads exclusion patterns from the project layer', () => {
     writeFileSync(
       join(cwd, '.filid', 'config.json'),
-      JSON.stringify({ exclude: ['private/**', 'draft.md'] }),
+      JSON.stringify({ ignore: ['private/**', 'draft.md'] }),
     );
-    expect(readHookConfig(cwd)?.exclude).toEqual(['private/**', 'draft.md']);
+    expect(readHookConfig(cwd)?.ignore).toEqual(['private/**', 'draft.md']);
   });
 
-  it('honors legacy excluded directory names in a v2 project file', () => {
+  it('does not treat scan-only structure.excludeFromScan as ignored', () => {
     writeFileSync(
       join(cwd, '.filid', 'config.json'),
       JSON.stringify({
-        version: '2.0',
-        exclude: ['draft.md'],
-        structure: { additionalExcludedDirectories: ['fixtures', 'samples'] },
+        version: '3.0',
+        ignore: ['draft.md'],
+        structure: { excludeFromScan: ['**/fixtures', '**/samples'] },
       }),
     );
-    expect(readHookConfig(cwd)?.exclude).toEqual([
-      'draft.md', '**/fixtures', '**/samples',
-    ]);
+    expect(readHookConfig(cwd)?.ignore).toEqual(['draft.md']);
   });
 
   it('returns null when the config file is missing', () => {

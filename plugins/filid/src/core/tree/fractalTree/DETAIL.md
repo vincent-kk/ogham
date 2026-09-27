@@ -3,7 +3,7 @@
 ## Requirements
 
 - `readdirSync(..., { withFileTypes: true })` recursion으로 root와 descendants를 탐색한다.
-- Apply built-in `ScanOptions.exclude` and config-supplied project-relative patterns through one path-and-ancestor matcher. A matching directory is pruned; matching files are absent from both peer files and the flat scanned path list.
+- Apply built-in `ScanOptions.exclude`, config `ignore`, and config `structure.excludeFromScan` project-relative patterns through one path-and-ancestor matcher. A matching directory is pruned; matching files are absent from both peer files and the flat scanned path list.
 - git이 무시하고 추적하지도 않는 path는 directory에서도 peer file에서도 evidence가 되지 않는다. 판정은 `lib/createIgnoreFilter`가 scan 시작에 한 번 만든 filter가 맡고, git이 없거나 root가 work tree 밖이면 filter는 항상 false를 돌려준다.
 - 각 directory의 document, peer file과 adapter entry/framework evidence를 수집한다.
 - snapshot이 ownership map을 제공하면 ambiguous/unsupported entry point descriptor를 tree 분류에 사용하지 않는다.
@@ -18,7 +18,7 @@
 - `collectNodeMetadata(paths, root, options, adapters, isIgnored?): Promise<NodeEntry[]>` — adapter-aware metadata.
 - `correctNodeTypes(entries, children, names): NodeEntry[]` — deepest-first classification correction.
 - `scanProject(rootPath, options?): Promise<FractalTree>` — complete read-only tree.
-- `scanFileSetOptions(config?): ScanOptions` — supplies full traversal and config `exclude` patterns as the single file-set policy for tree scanning and adapter discovery. `structure.maxDepth` is a rule threshold, not a traversal cap.
+- `scanFileSetOptions(config?): ScanOptions` — supplies full traversal, config `ignore`, and config `structure.excludeFromScan` patterns as the single file-set policy for tree scanning and adapter discovery. `structure.maxDepth` is a rule threshold, not a traversal cap.
 - `listScannedFilePaths(rootPath, options?): Promise<string[]>` — the same file set `scanProject` collects as `peerFiles`, flattened to project-relative POSIX paths sorted by raw bytes. It runs the same discovery and the same ignore filter, so the two sets cannot drift; it returns raw entry names without `pathForCompare`, because a rename that changes only case must read as a different path list.
 
 ## Acceptance Criteria

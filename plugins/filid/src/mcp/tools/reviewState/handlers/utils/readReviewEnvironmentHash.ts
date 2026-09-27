@@ -39,7 +39,7 @@ export function readReviewEnvironmentHash(
     JSON.stringify([
       2,
       settings.generatedPaths,
-      settings.exclude,
+      settings.ignore,
       settings.lockfiles,
       rules,
       documents,

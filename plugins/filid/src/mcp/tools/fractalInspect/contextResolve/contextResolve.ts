@@ -47,7 +47,7 @@ export async function handleContextResolve(
       context.diagnostics,
       request,
       index,
-      context.exclude,
+      context.ignore,
     ),
   );
   const isIndeterminate = results.some(

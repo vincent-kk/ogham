@@ -3,7 +3,7 @@
 ## Requirements
 
 - 하나 이상의 request를 project path에서 만든 하나의 shared snapshot에 대해 해석한다.
-- A target matched by config `exclude` fails with `context-target-excluded`, naming the matching pattern; other requests in the batch still resolve.
+- A target matched by config `ignore` fails with `context-target-ignored`, naming the matching pattern; other requests in the batch still resolve.
 - 각 request의 target을 소유하는 가장 가까운 fractal부터 root까지 document reference를 반환한다.
 - 가장 가까운 DETAIL 경로와 output language를 보존한다.
 - 문서 content와 전체 tree를 반환하거나 다시 읽지 않는다.
@@ -29,7 +29,7 @@
 
 - sibling/subtree와 무관한 문서나 문서 본문을 포함하지 않는다.
 - owner가 없는 target 또는 project 밖 target은 해당 item의 실패로 반환하며, 그 `context-target-unresolved` diagnostic은 `nextAction`으로 project 안의 경로를 다시 넣고 재호출하라고 안내한다.
-- An excluded target is unresolved with `context-target-excluded` and does not acquire an owner from the snapshot.
+- An ignored target is unresolved with `context-target-ignored` and does not acquire an owner from the snapshot.
 - Exclusion is deterministic, but the existing item statuses have no deterministic non-resolution value: `ok` means a resolved chain and `violations` means a violated rule. The unresolved item and batch therefore remain `indeterminate` while the diagnostic names the config decision.
 
 ### AC-context-batch — Shared snapshot과 독립 결과

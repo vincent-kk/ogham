@@ -43,24 +43,24 @@ const AdapterSelectionSchema = z
 /** Project structure fields shared by raw files and normalized values. */
 const structureFields = {
     maxDepth: z.number().nonnegative().finite().optional(),
-    additionalOrganNames: z.array(z.string().min(1)).optional(),
+    organNames: z.array(z.string().min(1)).optional(),
     entryPointOverrides: z
       .record(z.string(), z.array(z.string().min(1)))
       .optional(),
-    generatedPaths: z.array(z.string().min(1)).optional(),
+    excludeFromScan: z.array(z.string().min(1)).optional(),
 };
 
 const StructureConfigSchema = z
   .object({
     ...structureFields,
-    additionalAllowedPeers: z.array(AllowedPeerOverrideSchema).optional(),
+    allowedPeers: z.array(AllowedPeerOverrideSchema).optional(),
   })
   .strict();
 
 const StructureConfigFileSchema = z
   .object({
     ...structureFields,
-    additionalAllowedPeers: z
+    allowedPeers: z
       .array(z.union([AllowedPeerOverrideSchema, z.string().min(1)]))
       .optional(),
   })
@@ -78,6 +78,7 @@ const ReviewConfigSchema = z
     planChurnLimit: z.number().int().positive().optional(),
     concurrency: z.number().int().positive().optional(),
     lockfiles: z.array(z.string().min(1)).optional(),
+    generatedPaths: z.array(z.string().min(1)).optional(),
   })
   .strict()
   .transform((value) => ({
@@ -109,7 +110,7 @@ const FactsConfigSchema = z
 const configFields = {
     version: z.literal('3.0'),
     language: z.string().optional(),
-    exclude: z.array(z.string().min(1)).optional(),
+    ignore: z.array(z.string().min(1)).optional(),
     adapters: AdapterSelectionSchema,
     review: ReviewConfigSchema.optional(),
     facts: FactsConfigSchema.optional(),

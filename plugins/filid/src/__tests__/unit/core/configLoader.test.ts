@@ -94,8 +94,8 @@ describe('config-loader v3', () => {
     const config = createDefaultConfig('Korean', ['ecmascript']);
     config.structure = {
       maxDepth: 4,
-      additionalOrganNames: ['plans'],
-      additionalAllowedPeers: [{ basename: 'NOTICE' }],
+      organNames: ['plans'],
+      allowedPeers: [{ basename: 'NOTICE' }],
       entryPointOverrides: { ecmascript: ['custom.entry'] },
     };
 
@@ -269,8 +269,8 @@ describe('config-loader v3', () => {
         language: 'Korean',
         structure: {
           maxDepth: 7,
-          additionalOrganNames: ['plans'],
-          additionalAllowedPeers: [
+          organNames: ['plans'],
+          allowedPeers: [
             { basename: 'NOTICE' },
             { basename: 'CLAUDE.md', paths: ['packages/**'] },
           ],
@@ -320,7 +320,7 @@ describe('config-loader v3', () => {
     );
   });
 
-  it('migrates v2 excluded directory names into v3 patterns', () => {
+  it('migrates v2 excluded directory names into scan-only v3 patterns', () => {
     const v2 = {
       version: '2.0',
       adapters: { mode: 'auto', enabled: ['ecmascript'] },
@@ -328,11 +328,38 @@ describe('config-loader v3', () => {
       structure: { additionalExcludedDirectories: ['skills', '.metadata'], maxDepth: 7 },
     };
     const converted = migrateConfigV2(v2);
-    expect(converted.config.exclude).toEqual(['**/skills', '**/.metadata']);
-    expect(converted.config.structure).toEqual({ maxDepth: 7 });
+    expect(converted.config.ignore).toBeUndefined();
+    expect(converted.config.structure).toEqual({
+      maxDepth: 7,
+      excludeFromScan: ['**/skills', '**/.metadata'],
+    });
     expect(converted.diagnostics[0]?.code).toBe('config-migration-required');
     writeRawConfig(tmpDir, v2);
-    expect(loadConfig(tmpDir).config?.exclude).toEqual(['**/skills', '**/.metadata']);
+    const loaded = loadConfig(tmpDir).config;
+    expect(loaded?.ignore).toBeUndefined();
+    expect(loaded?.structure?.excludeFromScan).toEqual(['**/skills', '**/.metadata']);
+  });
+
+  it('renames v2 structure keys and moves generatedPaths under review', () => {
+    const converted = migrateConfigV2({
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: ['ecmascript'] },
+      rules: {},
+      structure: {
+        additionalOrganNames: ['agents'],
+        additionalAllowedPeers: [{ basename: 'version.ts' }],
+        generatedPaths: ['plugins/*/bridge'],
+      },
+      review: { effort: 'low' },
+    });
+    expect(converted.config.structure).toEqual({
+      organNames: ['agents'],
+      allowedPeers: [{ basename: 'version.ts' }],
+    });
+    expect(converted.config.review).toEqual({
+      effort: 'low',
+      generatedPaths: ['plugins/*/bridge'],
+    });
   });
 
   it('expands v3 rule and allowed-peer shorthand for consumers', () => {
@@ -340,12 +367,12 @@ describe('config-loader v3', () => {
       version: '3.0',
       adapters: { mode: 'auto', enabled: ['ecmascript'] },
       rules: { 'max-depth': 'off', 'zero-peer-file': 'error' },
-      structure: { additionalAllowedPeers: ['version.ts', 'plugins/x/*.ts'] },
+      structure: { allowedPeers: ['version.ts', 'plugins/x/*.ts'] },
     });
     const config = loadConfig(tmpDir).config;
     expect(config?.rules['max-depth']).toEqual({ enabled: false });
     expect(config?.rules['zero-peer-file']).toEqual({ severity: 'error' });
-    expect(config?.structure?.additionalAllowedPeers).toEqual([
+    expect(config?.structure?.allowedPeers).toEqual([
       { basename: 'version.ts' },
       { basename: '*.ts', paths: ['plugins/x'] },
     ]);
@@ -356,14 +383,15 @@ describe('config-loader v3', () => {
       version: '3.0',
       adapters: { mode: 'auto', enabled: ['ecmascript'] },
       rules: { 'max-depth': 'unexpected' },
-      exclude: ['foo[', 'examples/**'],
-      structure: { generatedPaths: ['bad{', 'plugins/*/bridge'], additionalAllowedPeers: ['bad/'] },
+      ignore: ['foo[', 'examples/**'],
+      review: { generatedPaths: ['bad{', 'plugins/*/bridge'] },
+      structure: { allowedPeers: ['bad/'] },
     });
     const result = loadConfig(tmpDir);
     expect(result.config?.rules['max-depth']).toBeUndefined();
-    expect(result.config?.exclude).toEqual(['examples/**']);
-    expect(result.config?.structure?.generatedPaths).toEqual(['plugins/*/bridge']);
-    expect(result.config?.structure?.additionalAllowedPeers).toEqual([]);
+    expect(result.config?.ignore).toEqual(['examples/**']);
+    expect(result.config?.review?.generatedPaths).toEqual(['plugins/*/bridge']);
+    expect(result.config?.structure?.allowedPeers).toEqual([]);
     expect(result.warnings).toHaveLength(4);
   });
 });

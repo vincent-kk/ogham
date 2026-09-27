@@ -285,7 +285,7 @@ export async function prepareReviewArtifacts(
     evidencePath: paths.evidencePath,
     factsPath: paths.factsPath,
     generatedPaths: settings.generatedPaths,
-    exclude: settings.exclude,
+    ignore: settings.ignore,
     lockfiles: settings.lockfiles,
     createdAt,
   });
@@ -305,7 +305,7 @@ export async function prepareReviewArtifacts(
   });
   files = files.map((file) =>
     staging?.unresolvedPaths?.includes(file.path) &&
-    file.skipReason !== REVIEW_SKIP_REASONS.EXCLUDED
+    file.skipReason !== REVIEW_SKIP_REASONS.IGNORED
       ? { ...file, skipReason: null }
       : file,
   );

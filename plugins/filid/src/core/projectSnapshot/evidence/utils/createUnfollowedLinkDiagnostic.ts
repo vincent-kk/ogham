@@ -24,7 +24,7 @@ export function createUnfollowedLinkDiagnostic(
   return {
     code: DEPENDENCY_DIAGNOSTIC_CODES.SYMLINK_NOT_FOLLOWED,
     message: `${relativePath} is a symbolic link to a location outside the project root; filid does not follow it, so any import it holds is missing from the dependency graph.`,
-    nextAction: `Add "${relativePath}" to exclude in .filid/config.json if the link holds no project source; the link then leaves the analysis. Otherwise, with the user's consent, replace ${relativePath} with the real file or directory, or move it out of the project. Then run again; until then, report dependency and boundary results that could involve it as indeterminate.`,
+    nextAction: `Add "${relativePath}" to ignore in .filid/config.json if the link holds no project source; the link then leaves the analysis. Otherwise, with the user's consent, replace ${relativePath} with the real file or directory, or move it out of the project. Then run again; until then, report dependency and boundary results that could involve it as indeterminate.`,
     path: linkPath,
     affects: ['dependencies', 'boundaries'],
     causeId: createHash('sha256')

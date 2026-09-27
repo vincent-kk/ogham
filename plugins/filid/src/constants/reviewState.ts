@@ -130,7 +130,7 @@ export const REVIEW_VALIDATE_KINDS = {
 
 /** Deterministic reasons that make a changed path non-reviewable. */
 export const REVIEW_SKIP_REASONS = {
-  EXCLUDED: 'excluded by config',
+  IGNORED: 'ignored by config',
   GENERATED: 'generated artifact',
   DELETED: 'deleted path',
   BINARY: 'binary content',

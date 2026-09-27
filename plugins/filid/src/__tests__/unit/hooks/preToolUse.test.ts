@@ -69,7 +69,7 @@ describe('handlePreToolUse', () => {
     mkdirSync(join(tmpDir, '.filid'), { recursive: true });
     writeFileSync(
       join(tmpDir, '.filid', 'config.json'),
-      JSON.stringify({ version: '3.0', exclude: ['private/**'] }),
+      JSON.stringify({ version: '3.0', ignore: ['private/**'] }),
     );
     const target = join(tmpDir, 'private', 'INTENT.md');
     mkdirSync(join(tmpDir, 'private'), { recursive: true });

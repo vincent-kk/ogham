@@ -11,7 +11,7 @@ import { isExempt } from './isExempt.js';
 
 /**
  * Factory returning the zero-peer-file check bound to the project's
- * `structure.additionalAllowedPeers` config. Using a factory keeps the closure
+ * `structure.allowedPeers` config. Using a factory keeps the closure
  * over `additionalAllowed` explicit while letting the returned function satisfy
  * the `Rule.check` signature.
  */
@@ -41,7 +41,7 @@ export function checkZeroPeerFile(
     if (fwFiles)
       for (const file of fwFiles) allowed.add(portableBasename(file));
 
-    // Category: structure.additionalAllowedPeers from .filid/config.json —
+    // Category: structure.allowedPeers from .filid/config.json —
     // allowed only when entry.paths glob matches node.path (paths omitted =
     // every boundary) and entry.adapterId matches a reported entry point.
     if (additionalAllowed)

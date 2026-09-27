@@ -38,12 +38,12 @@ describe('config-loader v3 sanitize and migration', () => {
     writeRaw(tmpDir, {
       ...V2_BASE,
       structure: {
-        additionalAllowedPeers: [123, '/abs.ts', 'dir/', 'ok.ts'],
+        allowedPeers: [123, '/abs.ts', 'dir/', 'ok.ts'],
       },
     });
 
     const { config, warnings } = loadConfig(tmpDir);
-    expect(config?.structure?.additionalAllowedPeers).toEqual([
+    expect(config?.structure?.allowedPeers).toEqual([
       { basename: 'ok.ts' },
     ]);
     expect(warnings).toHaveLength(3);
@@ -177,7 +177,7 @@ describe('config-loader v3 sanitize and migration', () => {
       },
       structure: {
         maxDepth: 8,
-        additionalAllowedPeers: [
+        allowedPeers: [
           { basename: 'manifest.file', paths: ['packages/**'] },
         ],
       },
@@ -242,8 +242,8 @@ describe('config-loader v3 sanitize and migration', () => {
       adapters: { mode: 'auto' },
       structure: {
         maxDepth: 6,
-        additionalOrganNames: ['plans'],
-        additionalAllowedPeers: [{ basename: 'manifest.file' }],
+        organNames: ['plans'],
+        allowedPeers: [{ basename: 'manifest.file' }],
       },
     });
     expect(Object.values(config?.structure?.entryPointOverrides ?? {})).toEqual(

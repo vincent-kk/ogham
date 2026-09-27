@@ -113,7 +113,7 @@ export async function createProjectSnapshot(
   );
   const tree = await scanProject(root, {
     ...fileSetOptions,
-    additionalOrganNames: config.structure?.additionalOrganNames,
+    organNames: config.structure?.organNames,
     structureAdapters,
     entryPointOverrides: config.structure?.entryPointOverrides,
     structureOwnership,

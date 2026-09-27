@@ -127,7 +127,7 @@ export type ReviewScopeChange = 'A' | 'M' | 'D';
 
 /** Review rule-selection role assigned to one changed path. */
 export type ReviewScopeRole =
-  'source' | 'verification' | 'document' | 'excluded' | 'generated' | 'binary' | 'lockfile';
+  'source' | 'verification' | 'document' | 'ignored' | 'generated' | 'binary' | 'lockfile';
 
 /** Finding category written to evidence and downstream review artifacts. */
 export type ReviewScopeCategory = 'contract' | 'structure' | 'verification';
@@ -230,7 +230,7 @@ export interface ScopeCandidateBuildResult {
 
 /** Inputs used to enrich one git roster entry without ambient state. */
 export interface ClassifyChangedFileOptions {
-  exclude?: readonly string[];
+  ignore?: readonly string[];
   generatedPaths: readonly string[];
   tree: FractalTree;
   projectRoot: string;
@@ -538,8 +538,8 @@ export interface ReviewStateSummary
   snapshotHash?: string;
   /** Number of committed changed paths in the prepared roster. */
   filesTotal?: number;
-  /** Committed changed paths explicitly excluded by configuration. */
-  excludedFiles?: number;
+  /** Committed changed paths explicitly ignored by configuration. */
+  ignoredFiles?: number;
   /** Number of independently reviewable units after chunking. */
   unitsTotal?: number;
   /** Number of deterministic reviewer groups. */
@@ -606,7 +606,7 @@ export interface ReviewPrepareSummary
   snapshotHash: string;
   /** Number of committed changed paths in the complete roster. */
   filesTotal: number;
-  excludedFiles: number;
+  ignoredFiles: number;
   /** Number of independently reviewable units after chunking. */
   unitsTotal: number;
   /** Number of deterministic reviewer groups. */

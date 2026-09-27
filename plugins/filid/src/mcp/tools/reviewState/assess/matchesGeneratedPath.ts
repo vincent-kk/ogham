@@ -5,7 +5,7 @@ import { matchesPathPattern } from '../../../../lib/matchesPathPattern.js';
  *
  * The shared project-relative minimal glob grammar matches the path or any
  * ancestor, so tracked build output covers descendants.
- * @param pattern One `structure.generatedPaths` entry.
+ * @param pattern One `review.generatedPaths` entry.
  * @param candidatePath Repository-relative path reported by git.
  * @returns True when every pattern segment matches, in order.
  */

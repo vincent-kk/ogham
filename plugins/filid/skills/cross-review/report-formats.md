@@ -66,9 +66,9 @@ generated_at: <timestamp>
 
 ## Coverage
 
-<review target, reviewed, pending, excluded, and total counts; exclusion reasons with up to three representative paths>
+<review target, reviewed, pending, ignored, and total counts; exclusion reasons with up to three representative paths>
 
-An excluded roster path uses result `skipped` and reason `excluded by config`.
+An ignored roster path uses result `skipped` and reason `ignored by config`.
 
 | Path   | Change   | Group   | Result                          | Reason   |
 | ------ | -------- | ------- | ------------------------------- | -------- |

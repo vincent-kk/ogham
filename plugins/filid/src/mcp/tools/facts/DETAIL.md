@@ -95,7 +95,7 @@
 ### AC-facts-tool-scope — snapshot과 같은 파일 집합
 
 - 깊이 10을 넘는 파일도 범위에 들어간다.
-- Files under config `exclude` are outside the scanned set and cannot become facts candidates.
+- Files under config `ignore` are outside the scanned set and cannot become facts candidates.
 
 ### AC-facts-tool-liveness — 서버는 멈추지 않는다
 

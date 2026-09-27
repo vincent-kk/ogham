@@ -164,7 +164,7 @@ describe('fractal-tree', () => {
       }
     });
 
-    it('should classify additionalOrganNames dirs as organ end-to-end', async () => {
+    it('should classify organNames dirs as organ end-to-end', async () => {
       // A module index makes `skills` a fractal on structure alone; the
       // config-supplied name overrides that, and the override must survive the
       // bottom-up correctNodeTypes pass too. Without the index there would be
@@ -190,7 +190,7 @@ describe('fractal-tree', () => {
         expect(bare.nodes.get(join(tmpDir, 'leaf-refs'))!.type).toBe('organ');
 
         const tree = await scanProject(tmpDir, {
-          additionalOrganNames: ['skills', 'references'],
+          organNames: ['skills', 'references'],
         });
         expect(tree.nodes.get(join(tmpDir, 'skills'))!.type).toBe('organ');
         expect(

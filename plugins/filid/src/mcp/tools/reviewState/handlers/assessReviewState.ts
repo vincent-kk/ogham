@@ -9,7 +9,7 @@ import {
 } from '../../../../constants/reviewState.js';
 import { TOOL_STATUSES } from '../../../../constants/toolEnvelope.js';
 import { loadConfig } from '../../../../core/index.js';
-import { isExcludedPath } from '../../../../lib/matchesPathPattern.js';
+import { isIgnoredPath } from '../../../../lib/matchesPathPattern.js';
 import { classifyWorktreePaths } from '../assess/classifyWorktreePaths.js';
 import { parseGitStatusPaths } from '../assess/parseGitStatusPaths.js';
 import { readRevalidationHead } from '../assess/readRevalidationHead.js';
@@ -45,14 +45,14 @@ export async function assessReviewState(
   const paths = resolveReviewStatePaths(input.projectRoot, input.branchName);
   assertReviewStatePaths(paths);
   const config = loadConfig(input.projectRoot).config;
-  const generatedPaths = config?.structure?.generatedPaths ?? [];
-  const exclude = config?.exclude ?? [];
+  const generatedPaths = config?.review?.generatedPaths ?? [];
+  const ignore = config?.ignore ?? [];
   const status = await executeReviewGit(input.projectRoot, [
     ...REVIEW_STATE_GIT_ARGUMENTS.STATUS_PORCELAIN,
   ]);
   const worktree = classifyWorktreePaths(
     parseGitStatusPaths(status).filter((path) =>
-      !isExcludedPath({ exclude }, path),
+      !isIgnoredPath({ ignore }, path),
     ),
     generatedPaths,
   );

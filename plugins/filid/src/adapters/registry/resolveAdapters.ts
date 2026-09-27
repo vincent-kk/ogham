@@ -8,7 +8,7 @@ import type {
   StructureAdapter,
 } from '../../types/adapters.js';
 import { compareByBytes } from '../../lib/compareByBytes.js';
-import { isExcludedPath } from '../../lib/matchesPathPattern.js';
+import { isIgnoredPath } from '../../lib/matchesPathPattern.js';
 import { toProjectRelativePath } from '../../lib/toProjectRelativePath.js';
 
 interface ClaimedAdapter {
@@ -38,8 +38,8 @@ function createExclusionFilter(
   exclude: readonly string[],
 ): (absolutePath: string) => boolean {
   if (exclude.length === 0) return () => false;
-  return (absolutePath) => isExcludedPath(
-    { exclude },
+  return (absolutePath) => isIgnoredPath(
+    { ignore: exclude },
     toProjectRelativePath(projectRoot, absolutePath),
   );
 }

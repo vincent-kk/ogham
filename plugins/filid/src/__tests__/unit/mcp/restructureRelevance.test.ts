@@ -301,7 +301,7 @@ describe('a consumer behind a symbolic link out of the project is not silently d
 
 describe('an unfollowed link leaves the list once its own name is excluded', () => {
   it.for([['file'], ['directory']] as const)(
-    'drops a %s link matched by exclude, as its diagnostic says',
+    'drops a %s link matched by ignore, as its diagnostic says',
     async ([kind], { skip }) => {
       const name = kind === 'file' ? 'linked.ts' : 'vendor';
       const linkPath = kind === 'file' ? `domain/b/${name}` : name;
@@ -323,7 +323,7 @@ describe('an unfollowed link leaves the list once its own name is excluded', () 
       );
       expect(diagnostic?.nextAction).toMatch(
         new RegExp(
-          `^Add "${linkPath.replace('.', '\\.')}" to exclude`,
+          `^Add "${linkPath.replace('.', '\\.')}" to ignore`,
         ),
       );
       writeReviewStateFixtureFile(
@@ -333,7 +333,7 @@ describe('an unfollowed link leaves the list once its own name is excluded', () 
           version: '3.0',
           adapters: { mode: 'auto', enabled: [] },
           rules: {},
-          exclude: [linkPath],
+          ignore: [linkPath],
         }),
       );
       const after = await planValueMove();

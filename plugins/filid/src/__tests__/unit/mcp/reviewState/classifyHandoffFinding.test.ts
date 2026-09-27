@@ -66,7 +66,7 @@ describe('classifyHandoffFinding', () => {
     ).toEqual({ class: 'config-decision', notePrefix: '' });
   });
 
-  it('classifies a stale path under exclude as a configuration decision', () => {
+  it('classifies a stale path under ignore as a configuration decision', () => {
     expect(classifyHandoffFinding(
       violation({
         ruleId: 'stale-path',

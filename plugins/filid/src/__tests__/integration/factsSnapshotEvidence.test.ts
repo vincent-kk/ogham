@@ -311,7 +311,7 @@ describe('snapshot evidence comes from the facts store', () => {
       'scripts/c.test.ts': test,
     });
     const result = await snapshot(root, {
-      exclude: ['**/skills'],
+      ignore: ['**/skills'],
     });
 
     const unavailable = result.diagnostics

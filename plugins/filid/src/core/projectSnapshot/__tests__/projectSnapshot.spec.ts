@@ -134,7 +134,7 @@ describe('project snapshot', () => {
     const included = await createProjectSnapshot(root, registry, config);
     const excluded = await createProjectSnapshot(root, registry, {
       ...config,
-      exclude: ['producer/value.ts'],
+      ignore: ['producer/value.ts'],
     });
 
     expect(included.snapshotHash).not.toBe(excluded.snapshotHash);

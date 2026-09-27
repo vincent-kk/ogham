@@ -18,7 +18,7 @@ export const DEFAULT_SCAN_OPTIONS: Required<ScanOptions> = {
   ],
   maxDepth: 10,
   followSymlinks: false,
-  additionalOrganNames: [],
+  organNames: [],
   structureAdapters: [],
   entryPointOverrides: {},
   structureOwnership: new Map(),

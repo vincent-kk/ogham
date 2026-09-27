@@ -22,7 +22,7 @@ export interface CollectChangedScopeEvidenceInput {
   /** Canonical frozen-facts artifact path contained by the review directory. */
   factsPath: string;
   /** Effective cross-cutting exclusion patterns. */
-  exclude?: readonly string[];
+  ignore?: readonly string[];
   /** Effective generated-path patterns from validated configuration. */
   generatedPaths: readonly string[];
   /** Effective lockfile basenames from validated configuration or defaults. */

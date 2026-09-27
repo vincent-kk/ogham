@@ -409,21 +409,23 @@
     var config = activeConfig();
     $('language').value = config.language || '';
     var structure = config.structure || {};
+    var review = config.review || {};
     // Assigned either way: a layer that sets no depth must clear the value the
     // other layer left in the field.
     $('max-depth').value =
       typeof structure.maxDepth === 'number' ? String(structure.maxDepth) : '';
-    $('exclude-paths').value = (config.exclude || []).join('\n');
-    $('generated-paths').value = (structure.generatedPaths || []).join('\n');
+    $('ignore-paths').value = (config.ignore || []).join('\n');
+    $('exclude-from-scan').value = (structure.excludeFromScan || []).join('\n');
+    $('generated-paths').value = (review.generatedPaths || []).join('\n');
 
-    var allowed = structure.additionalAllowedPeers || [];
+    var allowed = structure.allowedPeers || [];
     $('additional-allowed').value = allowed.map(allowedPeerLine).join('\n');
     var entryPointOverrides = structure.entryPointOverrides || {};
     $('additional-entry-points').value = (
       entryPointOverrides[adapterId()] || []
     ).join('\n');
     $('additional-organ-names').value = (
-      structure.additionalOrganNames || []
+      structure.organNames || []
     ).join('\n');
   }
 
@@ -589,13 +591,14 @@
     if (language) config.language = language;
     else delete config.language;
 
-    var excluded = lines('exclude-paths');
-    if (excluded.length) config.exclude = excluded;
-    else delete config.exclude;
+    var ignored = lines('ignore-paths');
+    if (ignored.length) config.ignore = ignored;
+    else delete config.ignore;
 
     var structure = config.structure
       ? JSON.parse(JSON.stringify(config.structure))
       : {};
+    var review = config.review ? JSON.parse(JSON.stringify(config.review)) : {};
     var maxDepthRaw = $('max-depth').value.trim();
     if (maxDepthRaw !== '') {
       var maxDepth = Number(maxDepthRaw);
@@ -606,14 +609,20 @@
       structure.maxDepth = maxDepth;
     } else delete structure.maxDepth;
 
+    var excludeFromScan = lines('exclude-from-scan');
+    if (excludeFromScan.length) structure.excludeFromScan = excludeFromScan;
+    else delete structure.excludeFromScan;
+
     var generated = lines('generated-paths');
-    if (generated.length) structure.generatedPaths = generated;
-    else delete structure.generatedPaths;
+    if (generated.length) review.generatedPaths = generated;
+    else delete review.generatedPaths;
+    if (Object.keys(review).length) config.review = review;
+    else delete config.review;
 
     var allowed = collectAllowed();
     if (allowed === null) return null;
-    if (allowed.length) structure.additionalAllowedPeers = allowed;
-    else delete structure.additionalAllowedPeers;
+    if (allowed.length) structure.allowedPeers = allowed;
+    else delete structure.allowedPeers;
 
     var entryPoints = lines('additional-entry-points');
     var entryPointOverrides = structure.entryPointOverrides || {};
@@ -624,8 +633,8 @@
     else delete structure.entryPointOverrides;
 
     var organNames = lines('additional-organ-names');
-    if (organNames.length) structure.additionalOrganNames = organNames;
-    else delete structure.additionalOrganNames;
+    if (organNames.length) structure.organNames = organNames;
+    else delete structure.organNames;
 
     if (Object.keys(structure).length) config.structure = structure;
     else delete config.structure;

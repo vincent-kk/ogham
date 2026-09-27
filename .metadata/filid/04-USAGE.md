@@ -111,16 +111,19 @@ git status --short
     "mode": "auto",
     "enabled": ["ecmascript"]
   },
-  "exclude": ["examples/**", "**/*.mock.json"],
+  "ignore": ["examples/**", "**/*.mock.json"],
   "rules": { "zero-peer-file": "warning" },
   "structure": {
     "maxDepth": 10,
-    "additionalOrganNames": ["fixtures"],
-    "additionalAllowedPeers": ["**/packages/*/vite.config.ts"],
-    "generatedPaths": ["plugins/*/bridge"],
+    "organNames": ["fixtures"],
+    "allowedPeers": ["**/packages/*/vite.config.ts"],
+    "excludeFromScan": ["scripts/**"],
     "entryPointOverrides": {
       "ecmascript": ["route.ts", "page.tsx"]
     }
+  },
+  "review": {
+    "generatedPaths": ["plugins/*/bridge"]
   }
 }
 ```
@@ -128,15 +131,16 @@ git status --short
 | 필드                               | 설명                                                              |
 | ---------------------------------- | ----------------------------------------------------------------- |
 | `version`                          | `"3.0"` 고정                                                      |
-| `exclude`                          | Project-relative globs; a match on a path or ancestor excludes it across Filid. |
+| `ignore`                           | Project-relative globs; a match on a path or ancestor ignores it across Filid. |
 | `language`                         | **문서 출력 언어.** 프로그래밍 언어 선택값이 아니다.              |
 | `adapters.mode`                    | `auto` = 등록 어댑터의 claim 사용 / `explicit` = `enabled`만 사용 |
 | `adapters.enabled`                 | 어댑터 ID 목록. `explicit`인데 비어 있으면 validation error       |
 | `rules.<id>`                       | Overrides only: `off`, severity shorthand, or an object with `enabled`, `severity`, `exempt`. |
 | `structure.maxDepth`               | 트리 깊이 한계 (기본 10)                                          |
-| `structure.additionalOrganNames`   | organ으로 취급할 추가 디렉터리 이름                               |
-| `structure.additionalAllowedPeers` | Allowed peer object or `<path>/<basename>` shorthand; basename may be a glob. The directory part matches the absolute node path like `exempt`, so prefix it with `**/`. |
-| `structure.generatedPaths`         | Tracked build output, skipped in review; uses the same path-and-ancestor glob grammar. |
+| `structure.organNames`   | organ으로 취급할 추가 디렉터리 이름                               |
+| `structure.allowedPeers` | Allowed peer object or `<path>/<basename>` shorthand; basename may be a glob. The directory part matches the absolute node path like `exempt`, so prefix it with `**/`. |
+| `structure.excludeFromScan`        | Project-relative globs; removes matching paths from the structure scan and adapter source discovery only — still reviewed. |
+| `review.generatedPaths`         | Tracked build output, skipped in review; uses the same path-and-ancestor glob grammar. |
 | `structure.entryPointOverrides`    | **key가 adapter ID다.** core가 파일명 의미를 해석하지 않고 전달   |
 
 `entryPointOverrides`로 주입한 경로는 `kind: "executable"`로 보고되어 **노드 분류를 바꾸지 않는다.** `zero-peer-file`의 허용 peer와 `entry-point-surface`의 입력으로만 쓰인다. 디렉터리를 fractal로 만들려면 `INTENT.md`/`DETAIL.md`를 두거나 어댑터가 module index로 인식하는 진입점(예: `index.ts`)을 둔다.
@@ -147,7 +151,7 @@ git status --short
 
 v1/v2 config is converted to v3 in memory on read, with a `config-migration-required` diagnostic. Reads never write the file.
 
-- Existing organ, depth, allowed-peer, and entry-point values map to v3; v2 excluded directory names become `**/<name>` patterns.
+- Existing organ, depth, allowed-peer, and entry-point values map to v3; v2 `additionalExcludedDirectories` names become `structure.excludeFromScan` entries via `**/<name>`.
 - 제거된 naming rule, route pattern, CC/LCOM4/promotion 설정은 버려지며 각 key가 migration diagnostic에 기록된다.
 - A settings save or `project_setup init` persists v3 when migration is lossless.
 

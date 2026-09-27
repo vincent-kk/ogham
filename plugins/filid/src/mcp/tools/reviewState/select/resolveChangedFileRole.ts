@@ -1,5 +1,5 @@
 import type { VerificationRole } from '../../../../types/adapters.js';
-import { isExcludedPath } from '../../../../lib/matchesPathPattern.js';
+import { isIgnoredPath } from '../../../../lib/matchesPathPattern.js';
 import { matchesGeneratedPath } from '../assess/matchesGeneratedPath.js';
 import type {
   ReviewChangedFile,
@@ -11,7 +11,7 @@ import { isLockfilePath } from './isLockfilePath.js';
 /** Dependencies needed to classify a changed path without ambient state. */
 interface ResolveChangedFileRoleOptions {
   /** Configured cross-cutting exclusions, before generated-path precedence. */
-  exclude?: readonly string[];
+  ignore?: readonly string[];
   /** Configured generated-path patterns, in declaration order. */
   generatedPaths: readonly string[];
   /** Effective lockfile basenames, replacing defaults when configured. */
@@ -32,8 +32,8 @@ export function resolveChangedFileRole(
   absolutePath: string,
   options: ResolveChangedFileRoleOptions,
 ): ReviewScopeRole {
-  if (isExcludedPath({ exclude: options.exclude }, entry.path))
-    return 'excluded';
+  if (isIgnoredPath({ ignore: options.ignore }, entry.path))
+    return 'ignored';
   if (
     options.generatedPaths.some((pattern) =>
       matchesGeneratedPath(pattern, entry.path),

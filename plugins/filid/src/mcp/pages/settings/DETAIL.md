@@ -5,15 +5,15 @@
 - 서버가 공통 `resolveInitialConfigScope`로 계산한 `initialScope`를 초기 선택으로 사용한다. project 설정이 있으면 project, user 설정만 있으면 user, 둘 다 없으면 project다. 페이지는 이 조건을 재판단하지 않는다.
 
 - Render the current Filid config v3 and managed rule-document state without external assets.
-- Preserve hidden config fields while editing `language`, override-only rules, `exclude`, `structure.generatedPaths`, and structure options.
-- Store maximum depth at `structure.maxDepth`, peer overrides at `structure.additionalAllowedPeers`, organ names at `structure.additionalOrganNames`, and entry overrides under the selected adapter ID in `structure.entryPointOverrides`.
+- Preserve hidden config fields while editing `language`, override-only rules, `ignore`, `structure.excludeFromScan`, `review.generatedPaths`, and structure options.
+- Store maximum depth at `structure.maxDepth`, peer overrides at `structure.allowedPeers`, organ names at `structure.organNames`, and entry overrides under the selected adapter ID in `structure.entryPointOverrides`.
 - Keep adapter selection intact unless the page exposes an explicit adapter control.
 - Validate user-entered peer override JSON before sending `POST /save`.
 
 ## API Contracts
 
 - Injected state uses normalized config objects and includes built-in rule defaults; submitted `SaveBody.config` is a raw v3 file document that may contain shorthand.
-- Existing field IDs remain stable. `#exclude-paths` and `#generated-paths` hold one project-relative pattern per line.
+- Existing field IDs remain stable: `#ignore-paths` ("Ignore (all operations)"), `#exclude-from-scan` ("Exclude from structure scan (still reviewed)"), and `#generated-paths` ("Generated paths (review)") each hold one project-relative pattern per line.
 - Every state-changing request includes the server-issued token query parameter.
 
 ## Acceptance Criteria
@@ -27,7 +27,7 @@
 
 - Editing visible fields writes v3 paths, override-only rules, and shorthand allowed peers while preserving unedited fields.
 - Allowed peers with several paths or an adapter ID remain objects across page save and reload; only peers representable by shorthand become strings.
-- A pattern under `exclude` or `structure.generatedPaths` survives page save and reload.
+- A pattern under `ignore`, `structure.excludeFromScan`, or `review.generatedPaths` survives page save and reload.
 - Adapter selection and unedited structure keys survive a save unchanged.
 
 ### AC-settings-validation — Invalid peer input

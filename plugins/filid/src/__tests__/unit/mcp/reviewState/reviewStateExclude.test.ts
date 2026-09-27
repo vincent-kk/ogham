@@ -28,11 +28,11 @@ afterEach(() => {
   else process.env.CLAUDE_PLUGIN_ROOT = fixture.originalPluginRoot;
 });
 
-describe('review_state exclude', () => {
+describe('review_state ignore', () => {
   it('does not clear an excluded skip reason in unresolved staging', async () => {
     const configPath = join(fixture.projectRoot, '.filid/config.json');
     const config = JSON.parse(readFileSync(configPath, 'utf8')) as Record<string, unknown>;
-    config.exclude = ['src/value1.ts'];
+    config.ignore = ['src/value1.ts'];
     writeFileSync(configPath, JSON.stringify(config));
     await seedFacts(fixture.projectRoot);
 
@@ -52,13 +52,13 @@ describe('review_state exclude', () => {
     );
     const state = readPreparedReviewState(prepared);
     expect(state.scope.files.find((file) => file.path === 'src/value1.ts'))
-      .toMatchObject({ role: 'excluded', skipReason: 'excluded by config' });
+      .toMatchObject({ role: 'ignored', skipReason: 'ignored by config' });
   });
 
   it('assess treats an excluded dirty source file as a clean worktree', async () => {
     const configPath = join(fixture.projectRoot, '.filid/config.json');
     const config = JSON.parse(readFileSync(configPath, 'utf8')) as Record<string, unknown>;
-    config.exclude = ['src/value1.ts'];
+    config.ignore = ['src/value1.ts'];
     writeFileSync(configPath, JSON.stringify(config));
     writeFileSync(join(fixture.projectRoot, 'src/value1.ts'), 'dirty mock\n');
 
@@ -75,7 +75,7 @@ describe('review_state exclude', () => {
   it('keeps excluded committed files visible without reviewing or freezing them', async () => {
     const configPath = join(fixture.projectRoot, '.filid/config.json');
     const config = JSON.parse(readFileSync(configPath, 'utf8')) as Record<string, unknown>;
-    config.exclude = ['src/value1.ts'];
+    config.ignore = ['src/value1.ts'];
     writeFileSync(configPath, JSON.stringify(config));
     await seedFacts(fixture.projectRoot);
 
@@ -84,10 +84,10 @@ describe('review_state exclude', () => {
       projectRoot: fixture.projectRoot,
       effort: 'low',
     });
-    expect(prepared.summary.excludedFiles).toBe(1);
+    expect(prepared.summary.ignoredFiles).toBe(1);
     const state = readPreparedReviewState(prepared);
     expect(state.scope.files.find((file) => file.path === 'src/value1.ts')).toMatchObject({
-      role: 'excluded', owner: null, skipReason: 'excluded by config',
+      role: 'ignored', owner: null, skipReason: 'ignored by config',
     });
     expect(state.groups.flatMap((group) => group.units.map((unit) => unit.path)))
       .not.toContain('src/value1.ts');
@@ -101,7 +101,7 @@ describe('review_state exclude', () => {
   it('keeps an excluded roster entry through incremental preparation', async () => {
     const configPath = join(fixture.projectRoot, '.filid/config.json');
     const config = JSON.parse(readFileSync(configPath, 'utf8')) as Record<string, unknown>;
-    config.exclude = ['src/value1.ts'];
+    config.ignore = ['src/value1.ts'];
     writeFileSync(configPath, JSON.stringify(config));
     await seedFacts(fixture.projectRoot);
     await handleReviewState({
@@ -120,6 +120,6 @@ describe('review_state exclude', () => {
     });
     const state = readPreparedReviewState(next);
     expect(state.scope.files.find((file) => file.path === 'src/value1.ts'))
-      .toMatchObject({ role: 'excluded', skipReason: 'excluded by config' });
+      .toMatchObject({ role: 'ignored', skipReason: 'ignored by config' });
   });
 });

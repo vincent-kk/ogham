@@ -34,6 +34,6 @@ export async function scanProject(
     isIgnored,
   );
   return buildFractalTree(
-    correctNodeTypes(nodeEntries, childrenMap, opts.additionalOrganNames),
+    correctNodeTypes(nodeEntries, childrenMap, opts.organNames),
   );
 }

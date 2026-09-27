@@ -44,18 +44,18 @@ export function matchesPathPattern(pattern: string, relativePath: string): boole
 }
 
 /** Return the first exclusion declaration that covers a path. */
-export function matchingExcludedPattern(
-  config: { exclude?: readonly string[] } | null | undefined,
+export function matchingIgnoredPattern(
+  config: { ignore?: readonly string[] } | null | undefined,
   relativePath: string,
 ): string | undefined {
-  return config?.exclude?.find((pattern) =>
+  return config?.ignore?.find((pattern) =>
     matchesPathPattern(pattern, relativePath),
   );
 }
 
-export function isExcludedPath(
-  config: { exclude?: readonly string[] } | null | undefined,
+export function isIgnoredPath(
+  config: { ignore?: readonly string[] } | null | undefined,
   relativePath: string,
 ): boolean {
-  return matchingExcludedPattern(config, relativePath) !== undefined;
+  return matchingIgnoredPattern(config, relativePath) !== undefined;
 }

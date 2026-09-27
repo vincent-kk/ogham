@@ -178,10 +178,10 @@
     },
     {
       "file": "skills/enrich-docs/reference.md",
-      "hash": "5993184ba6cd1803",
+      "hash": "9d48277c135b4043",
       "kind": "human-call",
       "class": "U",
-      "text": "Two findings are deferred instead of repaired: a `stale-path` whose token matches a `structure.generatedPaths` entry (the path exists at runtime; whether the rule should exempt it is a config decision), and a `missing-field` on a Boundary Exemption whose `Reason` is empty (the reason is a human claim, never generated).",
+      "text": "Two findings are deferred instead of repaired: a `stale-path` whose token matches a `review.generatedPaths` entry (the path exists at runtime; whether the rule should exempt it is a config decision), and a `missing-field` on a Boundary Exemption whose `Reason` is empty (the reason is a human claim, never generated).",
       "note": "생성 경로 면제 여부·경계 면제 사유는 설정·제품 결정"
     },
     {

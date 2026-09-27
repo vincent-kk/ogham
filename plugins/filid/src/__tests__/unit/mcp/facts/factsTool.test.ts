@@ -176,14 +176,14 @@ describe('facts status', () => {
     );
   });
 
-  it('honours exclude from project config', async () => {
+  it('honours ignore from project config', async () => {
     project.write(
       '.filid/config.json',
       JSON.stringify({
         version: '3.0',
         adapters: { mode: 'auto', enabled: [] },
         rules: {},
-        exclude: ['**/generated'],
+        ignore: ['**/generated'],
         facts: { covers: ['**'] },
       }),
     );

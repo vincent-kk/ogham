@@ -58,7 +58,7 @@ CC, LCOM4, 테스트 안정 기간, peer file 개수 상한 상수는 1.0에 존
 'test', 'tests', 'spec', 'specs', 'fixtures', 'e2e',
 ```
 
-`references`, `docs`, `plans` 같은 docs-as-code compartment 이름은 **의도적으로 빠져 있다.** 이 목록에 이름을 넣으면 같은 이름의 실제 코드 모듈이 조용히 organ으로 재분류되어 적용되어야 할 규칙이 사라진다. 프로젝트는 `.filid/config.json`의 `structure.additionalOrganNames`로 직접 선언한다. 선언되지 않은 compartment도 문서와 module index가 없으면 분류 기본값이 이미 organ이므로, 등록은 "index가 있어도 organ으로 취급한다"를 강제할 때만 필요하다.
+`references`, `docs`, `plans` 같은 docs-as-code compartment 이름은 **의도적으로 빠져 있다.** 이 목록에 이름을 넣으면 같은 이름의 실제 코드 모듈이 조용히 organ으로 재분류되어 적용되어야 할 규칙이 사라진다. 프로젝트는 `.filid/config.json`의 `structure.organNames`로 직접 선언한다. 선언되지 않은 compartment도 문서와 module index가 없으면 분류 기본값이 이미 organ이므로, 등록은 "index가 있어도 organ으로 취급한다"를 강제할 때만 필요하다.
 
 ### BOUNDARY_KEYWORDS
 
@@ -133,7 +133,7 @@ const ANALYSIS_CERTAINTIES = {
 1. INTENT.md 존재                             → fractal (명시적 선언)
 2. DETAIL.md 존재                             → fractal (문서화된 모듈 경계)
 3. __name__ 또는 .name infrastructure 패턴    → organ
-4. known organ name 또는 additionalOrganNames → organ (이름이 구조를 이긴다)
+4. known organ name 또는 organNames → organ (이름이 구조를 이긴다)
 5. 어댑터가 kind: "module" 진입점 보고        → fractal
 6. fractal child 없는 leaf directory          → organ
 7. 어댑터가 무부작용·stateless 확정           → pure-function
@@ -190,7 +190,7 @@ DETAIL.md는 append-only 이력이 아니다. 갱신할 때마다 현재 상태�
 
 organ 노드에는 INTENT.md를 두지 않는다. 독립 문서가 필요하면 `fractal`로 재분류한다.
 
-**규칙은 "조용히 승격된 organ"을 본다.** 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`인 노드는 실제 snapshot에 존재할 수 없다. 그 조합을 술어로 쓰면 규칙은 영원히 발화하지 않는다. 그래서 판정 대상은 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `additionalOrganNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우다 — DETAIL.md도 module 진입점도 없는 상태.
+**규칙은 "조용히 승격된 organ"을 본다.** 분류 1단계가 `INTENT.md → fractal`이므로 `type === 'organ' && hasIntentMd`인 노드는 실제 snapshot에 존재할 수 없다. 그 조합을 술어로 쓰면 규칙은 영원히 발화하지 않는다. 그래서 판정 대상은 organ 이름(`KNOWN_ORGAN_DIR_NAMES` 또는 config `organNames`) 디렉터리가 **INTENT.md만으로** fractal이 된 경우다 — DETAIL.md도 module 진입점도 없는 상태.
 
 | 조건                                   | 판정               |
 | -------------------------------------- | ------------------ |

@@ -49,8 +49,8 @@ export function createReviewStatePayload({
             sourceHash: state.sourceHash,
             snapshotHash: state.scope.snapshotHash,
             filesTotal: state.scope.files.length,
-            excludedFiles: state.scope.files.filter(
-              (file) => file.skipReason === REVIEW_SKIP_REASONS.EXCLUDED,
+            ignoredFiles: state.scope.files.filter(
+              (file) => file.skipReason === REVIEW_SKIP_REASONS.IGNORED,
             ).length,
             unitsTotal: state.groups.reduce(
               (total, group) => total + group.units.length,

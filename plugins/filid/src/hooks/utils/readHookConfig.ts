@@ -7,7 +7,7 @@ import { findConfigRoot } from './findConfigRoot.js';
 
 export interface HookConfig {
   language?: string;
-  exclude?: string[];
+  ignore?: string[];
   rules?: Record<string, { enabled?: boolean } | undefined>;
   injection?: { ctxTtlTurns?: number };
 }
@@ -44,23 +44,10 @@ export function readHookConfig(cwd: string): HookConfig | null {
   const raw = mergeConfigLayers(user, project);
   const config: HookConfig = {};
   if (typeof raw.language === 'string') config.language = raw.language;
-  if (Array.isArray(raw.exclude))
-    config.exclude = raw.exclude.filter(
+  if (Array.isArray(raw.ignore))
+    config.ignore = raw.ignore.filter(
       (pattern): pattern is string => typeof pattern === 'string',
     );
-  if (
-    raw.version === '2.0' &&
-    typeof raw.structure === 'object' &&
-    raw.structure !== null &&
-    !Array.isArray(raw.structure)
-  ) {
-    const legacy = (raw.structure as Record<string, unknown>).additionalExcludedDirectories;
-    if (Array.isArray(legacy) && legacy.every((name) => typeof name === 'string'))
-      config.exclude = [
-        ...(config.exclude ?? []),
-        ...legacy.map((name: string) => `**/${name}`),
-      ];
-  }
   if (
     typeof raw.rules === 'object' &&
     raw.rules !== null &&

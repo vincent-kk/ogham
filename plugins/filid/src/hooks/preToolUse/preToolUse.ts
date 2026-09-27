@@ -12,7 +12,7 @@ import {
   DENY_RETRY_GUIDANCE,
   HOOK_TOOL_NAME,
 } from '../../constants/hookDefaults.js';
-import { isExcludedPath } from '../../lib/matchesPathPattern.js';
+import { isIgnoredPath } from '../../lib/matchesPathPattern.js';
 import type { HookOutput, PreToolUseInput } from '../../types/hooks.js';
 import { isDetailMd } from '../shared/utils/isDetailMd.js';
 import { isFcaProject } from '../shared/utils/isFcaProject.js';
@@ -84,7 +84,7 @@ export async function handlePreToolUse(
     if (
       relativePath !== '..' &&
       !relativePath.startsWith('../') &&
-      isExcludedPath(readHookConfig(safeCwd), relativePath)
+      isIgnoredPath(readHookConfig(safeCwd), relativePath)
     )
       return { continue: true };
   }

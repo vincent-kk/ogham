@@ -11,7 +11,7 @@
 - Filid는 FCA 노드, 어댑터가 보고한 진입점, 외부 import 경계와 실제 의존 DAG를 검사한다.
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
 - Cross-review prepares committed evidence, validates ordinary actor opinions and deterministically seals trusted results without changing code. Defect disposition and reviewComplete are independent; blocker reports retain evidence recovery and human decisions alongside confirmed corrections.
-- Cross-review keeps config-excluded files in the roster as skipped entries with a reason and count, without assigning review work or freezing facts for them.
+- Cross-review keeps config-ignored files in the roster as skipped entries with a reason and count, without assigning review work or freezing facts for them.
 - cross-review는 일반 첫 reviewer와 verifier에 효율 모델을 사용한다. 기본 동시성 8·1024줄·자동 최대 32파일로 그룹을 구성하며 기본 전체 그룹 상한 64를 배정 전에 검사한다. 기본 auto는 reviewable group이 설정 threshold(기본 16) 이상이면 low, 미만이면 medium을 선택한다. low는 전체 그룹을 한 번씩 검토하며 위험 그룹은 첫 회부터 상위 모델을 사용한다. medium/high는 위험·불확실성과 신규 finding에 따라 남은 예산에서 후속 검토한다. 전체 roster와 완전한 opinion 예시를 brief마다 반복하지 않고 미리 쓴 reviewer skeleton을 재사용한다. 적용 규칙·전체 diff·독립 verifier·불확실성 판정은 유지한다.
 - `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `fractal_inspect` `resolve` 결과의 `data.results[].summary.chainPaths` 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
 - `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 PR 본문의 `FCA Handoff`에 `unresolved-path`로 기록하고 계속한다.
@@ -40,8 +40,8 @@
 - 단계 간 중간 산출물은 `.filid/review/<branch>/`에 파일로 남기고 다음 단계와 서브에이전트에는 **경로만** 전달한다. 대형 변경에서 컨텍스트가 터지지 않게 하는 장치이며 이 파일들은 커밋하지 않는다.
 - 모든 큰 MCP 결과는 16 KiB inline 예산의 공통 envelope를 거쳐 검증 가능한 임시 artifact로 전달한다. 스킬은 inline data가 없으면 artifact의 JSON data를 읽고, 누락·읽기 실패를 빈 성공 결과로 해석하지 않는다.
 - managed rule 문서의 host target 선택과 동기화는 `@ogham/agent-artifacts`에 위임하며 Filid owner 주소 밖의 사용자 내용을 보존한다.
-- Config schema 3.0 defines adapter selection, override-only rules with string shorthand, allowed-peer shorthand, and project-relative `exclude` and `structure.generatedPaths` globs. A pattern covers its matching path and descendants. v1/v2 migrate in memory; reads never persist a migration.
-- PR document audit resolves all changed paths in one `fractal_inspect resolve` batch. `context-target-excluded` paths form an excluded class outside document sync and handoff, while remaining visible in the Changes table. An existing `context-target-unresolved` path is ownerless non-FCA; other failures remain unresolved handoffs.
+- Config schema 3.0 defines adapter selection, override-only rules with string shorthand, allowed-peer shorthand, and project-relative `ignore`, `structure.excludeFromScan`, and `review.generatedPaths` globs. A pattern covers its matching path and descendants. v1/v2 migrate in memory; reads never persist a migration.
+- PR document audit resolves all changed paths in one `fractal_inspect resolve` batch. `context-target-ignored` paths form an ignored class outside document sync and handoff, while remaining visible in the Changes table. An existing `context-target-unresolved` path is ownerless non-FCA; other failures remain unresolved handoffs.
 
 ## Acceptance Criteria
 
@@ -73,7 +73,7 @@
 
 ### AC-root-pr-document-scope — PR 문서 동기화 범위
 
-- Paths under `exclude` are counted and reported as `(excluded)` without document sync or handoff. Existing ownerless paths are reported as non-FCA.
+- Paths under `ignore` are counted and reported as `(ignored)` without document sync or handoff. An ownerless path whose ancestor matches `structure.excludeFromScan` is reported as config-declared non-FCA and is still reviewed. Existing ownerless paths are reported as non-FCA.
 - `HEAD`에 없는 unresolved 경로와 `context-target-unresolved` 이외의 실패는 non-FCA로 바뀌지 않고 `FCA Handoff`에 `unresolved-path`로 기록된다. PR 생성은 계속된다.
 - non-FCA 경로도 PR의 `Changes` 표에서는 유지되며 owner가 하나도 없으면 document sync는 `no-change`다.
 - PR 문서 동기화와 resolve의 문서 수정 위임은 INTENT와 DETAIL을 모두 평가한다.
@@ -89,7 +89,7 @@
 
 ### AC-root-pr-handoff — 문서 동기화 자기복구와 handoff
 
-- Stage 1은 `documents` 스코프 finding 중 `derivable-content`, `derivable-structure`, `stale-path`(`structure.generatedPaths` 비매치), `line-limit`, `missing-boundaries`, `missing-field`, `missing-section`, `duplicate-id`, `missing-document`만 `enrich-docs --repair`로 고친다. 수락 그룹의 `missing-field`는 근거가 없으면 `needs-rework`, `duplicate-id`는 정본 그룹 선택에 판단이 필요하면 `needs-rework`로 보류하며, Boundary Exemption의 Reason 누락은 `config-decision`으로 보류한다.
+- Stage 1은 `documents` 스코프 finding 중 `derivable-content`, `derivable-structure`, `stale-path`(`review.generatedPaths` 비매치), `line-limit`, `missing-boundaries`, `missing-field`, `missing-section`, `duplicate-id`, `missing-document`만 `enrich-docs --repair`로 고친다. 수락 그룹의 `missing-field`는 근거가 없으면 `needs-rework`, `duplicate-id`는 정본 그룹 선택에 판단이 필요하면 `needs-rework`로 보류하며, Boundary Exemption의 Reason 누락은 `config-decision`으로 보류한다.
 - `boundaries`, `dag`, `nodes`, `entry-points`, `verification` 스코프 finding과 certainty가 `indeterminate`/`unsupported`로 명시된 모든 finding은 고치지 않고 기록한다.
 - 스캔 `status`는 편집 가부의 근거가 아니다. enrich-docs는 `scan detail: "full"`의 노드별 `documentEvidence.findings`를 편집 입력으로 쓰고, `documentEvidence`가 없거나 scan을 읽을 수 없는 문서만 보류한다. non-finding 진단은 보고하되 편집을 막지 않는다.
 - RICH 문서는 `--repair`에서 finding이 이름 붙인 범위만 고치고 그 밖의 RICH 내용은 건드리지 않는다.

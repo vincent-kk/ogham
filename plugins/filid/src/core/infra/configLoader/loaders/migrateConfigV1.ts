@@ -76,14 +76,14 @@ export function migrateConfigV1(
     Array.isArray(source['additional-organ-names']) &&
     source['additional-organ-names'].every((name) => typeof name === 'string')
   )
-    structure.additionalOrganNames = source[
+    structure.organNames = source[
       'additional-organ-names'
     ] as string[];
   if (Array.isArray(source['additional-allowed'])) {
     const migrated = source['additional-allowed']
       .map(migrateAllowedPeer)
       .filter((entry): entry is AllowedPeerOverride => entry !== null);
-    if (migrated.length > 0) structure.additionalAllowedPeers = migrated;
+    if (migrated.length > 0) structure.allowedPeers = migrated;
   }
   if (
     Array.isArray(source['additional-entry-points']) &&
