@@ -18,6 +18,7 @@ import {
   loadConfig,
   loadRuleOverrides,
   migrateConfigV1,
+  migrateConfigV2,
   resolveLanguage,
   resolveMaxDepth,
   writeConfig,
@@ -32,7 +33,7 @@ function writeRawConfig(root: string, raw: unknown): string {
   return path;
 }
 
-describe('config-loader v2', () => {
+describe('config-loader v3', () => {
   let tmpDir: string;
 
   beforeEach(() => {
@@ -47,15 +48,13 @@ describe('config-loader v2', () => {
     rmSync(tmpDir, { recursive: true, force: true });
   });
 
-  it('creates a v2 default with auto adapter selection', () => {
+  it('creates a v3 default with auto adapter selection', () => {
     const config = createDefaultConfig();
 
-    expect(config.version).toBe('2.0');
+    expect(config.version).toBe('3.0');
     expect(config.adapters.mode).toBe('auto');
     expect(config.adapters.enabled).toContain('ecmascript');
-    expect(Object.keys(config.rules)).toHaveLength(
-      Object.values(BUILTIN_RULE_IDS).length,
-    );
+    expect(config.rules).toEqual({});
   });
 
   it('refuses to create explicit adapter selection with no enabled ID', () => {
@@ -64,11 +63,11 @@ describe('config-loader v2', () => {
     );
   });
 
-  it('seeds every rule with the builtin roster severity', () => {
+  it('leaves builtin rule defaults to the rule roster', () => {
     const config = createDefaultConfig();
 
-    for (const rule of loadBuiltinRules())
-      expect(config.rules[rule.id]?.severity).toBe(rule.severity);
+    expect(Object.values(BUILTIN_RULE_IDS)).toHaveLength(loadBuiltinRules().length);
+    expect(config.rules).toEqual({});
   });
 
   it('returns null when config does not exist', () => {
@@ -91,7 +90,7 @@ describe('config-loader v2', () => {
     );
   });
 
-  it('round-trips a strict v2 config', () => {
+  it('round-trips a strict v3 config', () => {
     const config = createDefaultConfig('Korean', ['ecmascript']);
     config.structure = {
       maxDepth: 4,
@@ -121,7 +120,7 @@ describe('config-loader v2', () => {
 
   it('does not reinterpret an unsupported config version as v1', () => {
     writeRawConfig(tmpDir, {
-      version: '3.0',
+      version: '4.0',
       adapters: { mode: 'auto', enabled: ['future'] },
       rules: {},
     });
@@ -198,7 +197,7 @@ describe('config-loader v2', () => {
     'drops an invalid %s structure.maxDepth with a warning',
     (_name, value) => {
       writeRawConfig(tmpDir, {
-        version: '2.0',
+        version: '3.0',
         adapters: { mode: 'auto', enabled: ['ecmascript'] },
         rules: {},
         structure: { maxDepth: value },
@@ -223,7 +222,7 @@ describe('config-loader v2', () => {
     expect(result.filePath.config).toBe(join(tmpDir, '.filid', 'config.json'));
     expect(loadConfig(tmpDir).config).toEqual(
       expect.objectContaining({
-        version: '2.0',
+        version: '3.0',
         language: 'Korean',
         adapters: { mode: 'explicit', enabled: ['ecmascript', 'custom'] },
       }),
@@ -266,7 +265,7 @@ describe('config-loader v2', () => {
 
     expect(result.config).toEqual(
       expect.objectContaining({
-        version: '2.0',
+        version: '3.0',
         language: 'Korean',
         structure: {
           maxDepth: 7,
@@ -319,5 +318,52 @@ describe('config-loader v2', () => {
     expect(result.warnings.some(({ message: warning }) => warning.includes('enabled'))).toBe(
       true,
     );
+  });
+
+  it('migrates v2 excluded directory names into v3 patterns', () => {
+    const v2 = {
+      version: '2.0',
+      adapters: { mode: 'auto', enabled: ['ecmascript'] },
+      rules: {},
+      structure: { additionalExcludedDirectories: ['skills', '.metadata'], maxDepth: 7 },
+    };
+    const converted = migrateConfigV2(v2);
+    expect(converted.config.exclude).toEqual(['**/skills', '**/.metadata']);
+    expect(converted.config.structure).toEqual({ maxDepth: 7 });
+    expect(converted.diagnostics[0]?.code).toBe('config-migration-required');
+    writeRawConfig(tmpDir, v2);
+    expect(loadConfig(tmpDir).config?.exclude).toEqual(['**/skills', '**/.metadata']);
+  });
+
+  it('expands v3 rule and allowed-peer shorthand for consumers', () => {
+    writeRawConfig(tmpDir, {
+      version: '3.0',
+      adapters: { mode: 'auto', enabled: ['ecmascript'] },
+      rules: { 'max-depth': 'off', 'zero-peer-file': 'error' },
+      structure: { additionalAllowedPeers: ['version.ts', 'plugins/x/*.ts'] },
+    });
+    const config = loadConfig(tmpDir).config;
+    expect(config?.rules['max-depth']).toEqual({ enabled: false });
+    expect(config?.rules['zero-peer-file']).toEqual({ severity: 'error' });
+    expect(config?.structure?.additionalAllowedPeers).toEqual([
+      { basename: 'version.ts' },
+      { basename: '*.ts', paths: ['plugins/x'] },
+    ]);
+  });
+
+  it('warns and drops malformed shorthand and path globs', () => {
+    writeRawConfig(tmpDir, {
+      version: '3.0',
+      adapters: { mode: 'auto', enabled: ['ecmascript'] },
+      rules: { 'max-depth': 'unexpected' },
+      exclude: ['foo[', 'examples/**'],
+      structure: { generatedPaths: ['bad{', 'plugins/*/bridge'], additionalAllowedPeers: ['bad/'] },
+    });
+    const result = loadConfig(tmpDir);
+    expect(result.config?.rules['max-depth']).toBeUndefined();
+    expect(result.config?.exclude).toEqual(['examples/**']);
+    expect(result.config?.structure?.generatedPaths).toEqual(['plugins/*/bridge']);
+    expect(result.config?.structure?.additionalAllowedPeers).toEqual([]);
+    expect(result.warnings).toHaveLength(4);
   });
 });

@@ -46,7 +46,7 @@ export interface ConfigDiagnostic {
 }
 
 export interface ConfigMigrationResult {
-  config: FilidConfig;
+  config: Omit<FilidConfig, 'version'> & { version: '2.0' };
   diagnostics: ConfigDiagnostic[];
 }
 

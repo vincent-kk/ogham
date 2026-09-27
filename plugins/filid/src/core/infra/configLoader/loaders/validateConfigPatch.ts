@@ -1,13 +1,12 @@
-import { sanitizeExemptPatterns } from '../utils/exemptSanitize.js';
 import { formatIssuePath } from '../utils/formatIssuePath.js';
 import { parseWithAllowlistWarn } from '../utils/parseWithAllowlistWarn.js';
 
-import { FilidConfigSchema } from './configSchemas.js';
+import { FilidConfigFileSchema } from './configSchemas.js';
 import type { ConfigPatchIssue, ConfigPatchValidation } from './configTypes.js';
 
 /**
  * Validate a prospective `.filid/config.json` patch JSON string against the
- * shared `FilidConfigSchema`. No local schema is defined here — the schema is
+ * shared `FilidConfigFileSchema`. No local schema is defined here — the schema is
  * the single source of truth.
  *
  * **No consumer today.** This backed the `config_patch_validate` MCP tool, which
@@ -33,7 +32,7 @@ export function validateConfigPatch(patchJson: string): ConfigPatchValidation {
     };
   }
 
-  const strict = FilidConfigSchema.safeParse(parsed);
+  const strict = FilidConfigFileSchema.safeParse(parsed);
   if (strict.success) return { valid: true, errors: [] };
 
   const errors: ConfigPatchIssue[] = strict.error.issues.map((issue) => ({
@@ -45,13 +44,12 @@ export function validateConfigPatch(patchJson: string): ConfigPatchValidation {
   // callbacks' free-form warnings are redundant here, so swallow them.
   const noop = (): void => {};
   const { sanitized } = parseWithAllowlistWarn(parsed, strict.error, noop);
-  const retry = FilidConfigSchema.safeParse(sanitized);
+  const retry = FilidConfigFileSchema.safeParse(sanitized);
   if (retry.success) {
-    const suggestionObject = sanitizeExemptPatterns(retry.data, noop);
     return {
       valid: false,
       errors,
-      suggestion: JSON.stringify(suggestionObject, null, 2),
+      suggestion: JSON.stringify(retry.data, null, 2),
     };
   }
 
