@@ -6,8 +6,8 @@
 
 - Start or reuse a token-protected loopback settings server for one project.
 - Concurrent calls share the in-flight startup. A different project waits for startup and replacement; an older server's close callback cannot clear its successor.
-- Load config v2, or the in-memory v1 migration result with diagnostics, into the page state.
-- Validate and persist only config v2 save bodies through configLoader.
+- Load normalized config v3, including in-memory v1/v2 migration diagnostics, into page state.
+- Validate raw v3 file documents and persist their shorthand through configLoader.
 - Preserve managed rule-document selection and resynchronization behavior.
 - Bound each wait and return a resumable URL when the form is still pending.
 
@@ -16,8 +16,8 @@
 - Input: `{ path?: string, waitSeconds?: number }`.
 - Entry point exposes the handler, `OpenSettingsOutput`, and its `SaveSummary` component type so the dispatcher can describe the returned save result. Server startup inputs and page payload types remain internal.
 - Output uses the common envelope; summary preserves saved/closed/pending, URL, message and optional save summary.
-- `SettingsPageState` includes project root, config existence, config v2, config diagnostics, and rule-document status.
-- `SaveBody.config` is strict config v2; unknown or legacy keys are rejected.
+- `SettingsPageState` includes project root, config existence, normalized config v3, built-in rule defaults, diagnostics, and rule-document status.
+- `SaveBody.config` is strict raw config v3; unknown or legacy keys are rejected.
 
 ## Acceptance Criteria
 

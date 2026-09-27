@@ -14,6 +14,7 @@
 - Move source를 읽을 수 없으면 source path와 부재 사유를 포함해 destination 종류와 무관하게 deny한다.
 - branch 이름, spike 상태, criteria ledger 또는 agent 역할에 따라 검증을 면제하지 않는다.
 - 비-FCA 프로젝트와 유효하지 않은 cwd는 상태를 변경하지 않고 통과시킨다.
+- On an FCA project, a target matching the effective two-layer `exclude` config passes through before context injection, document validation, or structure guarding. Project `exclude` replaces the user list when present.
 
 ## API Contracts
 

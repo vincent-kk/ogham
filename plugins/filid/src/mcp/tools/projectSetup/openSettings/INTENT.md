@@ -1,6 +1,6 @@
 ## Purpose
 
-`project_setup`의 `settings` action child. `127.0.0.1` 전용 설정 서버에서 config v2와 rule docs 폼을 열고 bounded long-poll 결과를 반환한다.
+The `project_setup settings` child. It serves the v3 config and rule-document form on `127.0.0.1` and returns a bounded long-poll result.
 
 ## Structure
 

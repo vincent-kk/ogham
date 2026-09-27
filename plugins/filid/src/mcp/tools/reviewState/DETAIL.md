@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- Config `exclude` marks changed files as `excluded` before generated-path classification. These files remain visible as skipped roster entries and in `summary.excludedFiles`, but have no owner, diff, group, candidate, or frozen facts. Dirty excluded paths do not make a worktree dirty. Environment hash version 2 includes `exclude`; persisted state schema 2 stays readable because the role addition is additive.
+
 - Prepared diagnostic causes retain their impact axes and consumer/target evidence through state, actor briefs and sealed reports. Gaps reference an existing cause or supply actionable resolution advice. Unknown cause references fail validation. Human advice requires distinct concrete options and a reason evidence gathering cannot decide.
 - Defect disposition and review completeness are independent. Trusted, source-matched confirmed defects require corrections even with analysis gaps. Incomplete evidence never approves; INCONCLUSIVE alone never implies a human decision. Blockers retain all occurrences and sources by explicit cause identity, never by rule alone.
 

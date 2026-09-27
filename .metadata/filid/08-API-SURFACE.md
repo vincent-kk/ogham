@@ -824,18 +824,20 @@ interface HookOutput {
 ## 설정 계약 (`.filid/config.json`)
 
 ```typescript
-interface FilidConfigV2 {
-  version: "2.0";
+interface FilidConfigV3 {
+  version: "3.0";
   language?: string;
+  exclude?: string[];
   adapters: {
     mode: "auto" | "explicit";
     enabled: string[];
   };
-  rules: Record<string, RuleOverride>;
+  rules: Record<string, RuleOverride | "off" | "error" | "warning" | "info">;
   structure?: {
     maxDepth?: number;
     additionalOrganNames?: string[];
-    additionalAllowedPeers?: AllowedPeerOverride[];
+    additionalAllowedPeers?: (AllowedPeerOverride | string)[];
+    generatedPaths?: string[];
     entryPointOverrides?: Record<string, string[]>;
   };
   facts?: {
@@ -861,7 +863,8 @@ interface AllowedPeerOverride {
 - `language`는 **문서 출력 언어**이며 프로그래밍 언어 선택값이 아니다.
 - `explicit` 모드에서 `enabled`가 빈 배열이면 validation error다.
 - `entryPointOverrides`의 key는 **adapter ID**다. core가 파일명 의미를 해석하지 않고 해당 어댑터에 전달한다. 주입된 경로는 `kind: "executable"`로 보고되므로 **노드 분류를 바꾸지 않는다.** `zero-peer-file`과 `entry-point-surface`의 입력일 뿐이다.
-- v1 config는 읽을 때 메모리에서 v2로 변환하고 `config-migration-required` 진단을 낸다. **자동으로 파일을 쓰지 않는다.**
+- v1/v2 config migrates to v3 in memory on read; saving or lossless `project_setup init` persists it. Normalized consumers see object forms for rule and peer shorthand.
+- `exclude` and `structure.generatedPaths` use project-relative minimal globs matching the path or any ancestor. `exclude` applies across scanning, review, context resolution, skills, and hooks.
 - 스키마는 `strict`다. 알 수 없는 key는 무시되지 않고 거부된다.
 - `facts.covers`가 없으면 adapter의 소스 확장자로 만든 **기본 범위**가 적용된다(`scopeSource: "default"`). **서버는 프로젝트 설정 파일을 쓰지 않는다** — 리뷰 중에 쓰면 worktree가 `source-dirty`가 되어 seal을 막기 때문이다. `facts-uninitialized`는 유효 범위가 빈 경우(`covers: []`)에만 남는다. 제출은 범위를 넓히지 못한다.
 - `facts.provider`는 해석의 권위를 가진 도구 이름이다. 저장 레코드가 그 도구에서 왔을 때에만 해석 불일치가 `informational[]`로 내려간다.
