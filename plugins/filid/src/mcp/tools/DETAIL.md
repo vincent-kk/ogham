@@ -8,7 +8,7 @@
 - `utils/` organ은 도구 간 공유 helper를 담으며 그 자체로 공개 표면이 아니다. snapshot 생성과, 좁은 질의에서 프로젝트 전체 diagnostics를 질의 범위로 줄이는 scoping이 여기 있다.
 - snapshot 생성과 facts context 조립은 각각 요청 스코프 메모를 연다. 스코프는 도구 호출이 아니라 그 한 번의 조립에 묶인다 — 한 도구가 스냅샷 두 개 사이에 프로젝트에 쓰면 뒤 스냅샷은 쓴 뒤의 트리를 봐야 하기 때문이다.
 - 모든 도구 진단은 `affects`를 싣는다(생성 측 필수). 소비자는 그 축에 영향을 선언한 진단만 결론을 흐리는 것으로 읽는다: structure 판정(`resolveFractalScanCertainty`)과 `fractal_inspect validate`의 status(`resolveProjectValidationStatus`)는 finding이 아니고 축을 하나라도 선언한 진단, verification 판정은 `verification`을 선언한 진단이다. `affects: []`는 어떤 판정도 indeterminate로 만들지 않는다.
-- `config-warning` axes come from `constants/configWarningAxes.ts`. Invalid or unknown `ignore` entries affect all axes because dropping a requested exclusion changes the analyzed set. Only the declared loosen-only paths yield `[]`: `rules.*.exempt`, `rules.*.enabled`, `rules.*.severity`, `structure.allowedPeers`, and `review.generatedPaths`. Unknown keys, whole-config fallback, and other invalid paths affect all axes.
+- `config-warning` axes come from `constants/configWarningAxes.ts`. Invalid or unknown `ignore` entries affect all axes because dropping a requested exclusion changes the analyzed set. Only the declared loosen-only paths yield `[]`: `rules.*.exempt`, `rules.*.enabled`, `rules.*.severity`, `structure.allowedPeers`, and `review.generatedPaths`. Unknown keys, whole-config fallback, and other invalid paths affect all axes. A path joins the loosen-only list by its key path, never by the length of its value array. A diagnostic without `affects` can only be a stored legacy one and is read as affecting every axis.
 
 ## API Contracts
 

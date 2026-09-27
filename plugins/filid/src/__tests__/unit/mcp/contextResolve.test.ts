@@ -323,4 +323,23 @@ describe('fractal_inspect resolve shared-snapshot batch', () => {
       { index: 2, resolved: true, targetPath: SIBLING_SOURCE_PATH },
     ]);
   });
+
+  it('reports an outside target as unresolved, not ignored, even when a pattern would match its relative path', async () => {
+    mockSnapshotContext([], ['**/source.unit']);
+
+    const result = await handleContextResolve({
+      path: PROJECT_ROOT,
+      requests: [{ targetPath: '/outside/source.unit' }],
+    });
+
+    expect(result.data?.results[0]).toMatchObject({
+      resolved: false,
+      diagnostics: [
+        {
+          code: 'context-target-unresolved',
+          path: '/outside/source.unit',
+        },
+      ],
+    });
+  });
 });

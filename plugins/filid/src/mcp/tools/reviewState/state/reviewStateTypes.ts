@@ -606,6 +606,7 @@ export interface ReviewPrepareSummary
   snapshotHash: string;
   /** Number of committed changed paths in the complete roster. */
   filesTotal: number;
+  /** Committed changed paths in filesTotal that configuration ignores; skipped without review. */
   ignoredFiles: number;
   /** Number of independently reviewable units after chunking. */
   unitsTotal: number;

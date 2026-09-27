@@ -553,6 +553,54 @@
     return entries;
   }
 
+  /**
+   * What a rule row takes effect as when this layer writes nothing for it.
+   * Under Project the user layer still merges underneath field by field, so
+   * an omitted row keeps the user's value, not the shipped default.
+   *
+   * @param {string} id Shipped rule id, a key of `state.ruleDefaults`.
+   * @returns {{enabled: boolean, severity: string, exempt: string[]}} The
+   *   value in force for that rule when the saved layer omits it.
+   */
+  function ruleBaseline(id) {
+    var base = {
+      enabled: true,
+      severity: state.ruleDefaults[id].severity,
+      exempt: [],
+    };
+    if (scope !== 'project') return base;
+    var inherited = (configByScope.user.rules || {})[id] || {};
+    if (inherited.enabled === false) base.enabled = false;
+    if (inherited.severity) base.severity = inherited.severity;
+    if (inherited.exempt) base.exempt = inherited.exempt;
+    return base;
+  }
+
+  /**
+   * The `rules[id]` value one row saves: every field that differs from the
+   * row's baseline, in the shortest form the config file accepts.
+   *
+   * @param {string} id Shipped rule id, a key of `state.ruleDefaults`.
+   * @param {boolean} enabled Whether the row's checkbox is checked.
+   * @param {string} severity The row's selected severity.
+   * @param {string[]} exempt The row's trimmed, non-empty exempt patterns.
+   * @returns {object|string|undefined} `'off'`, a bare severity, or an
+   *   override object; undefined when the row matches its baseline and the
+   *   layer should say nothing.
+   */
+  function ruleEntry(id, enabled, severity, exempt) {
+    var base = ruleBaseline(id);
+    var override = {};
+    if (enabled !== base.enabled) override.enabled = enabled;
+    if (severity !== base.severity) override.severity = severity;
+    if (exempt.join('\n') !== base.exempt.join('\n')) override.exempt = exempt;
+    var keys = Object.keys(override);
+    if (!keys.length) return undefined;
+    if (keys.length > 1) return override;
+    if (override.enabled === false) return 'off';
+    return override.severity || override;
+  }
+
   function collectConfig() {
     var config = JSON.parse(JSON.stringify(activeConfig()));
     config.version = '3.0';
@@ -565,7 +613,6 @@
         '[data-rule-severity="' + id + '"]',
       ).value;
       var enabled = enabledBoxes[i].checked;
-      var defaultSeverity = state.ruleDefaults[id].severity;
       var exemptArea = form.querySelector('[data-rule-exempt="' + id + '"]');
       var exempt = exemptArea.value
         .split('\n')
@@ -575,18 +622,8 @@
         .filter(function (line) {
           return line.length > 0;
         });
-      if (enabled && severity === defaultSeverity && !exempt.length) continue;
-      if (!enabled && severity === defaultSeverity && !exempt.length) {
-        config.rules[id] = 'off';
-      } else if (enabled && severity !== defaultSeverity && !exempt.length) {
-        config.rules[id] = severity;
-      } else {
-        var override = {};
-        if (!enabled) override.enabled = false;
-        if (severity !== defaultSeverity) override.severity = severity;
-        if (exempt.length) override.exempt = exempt;
-        config.rules[id] = override;
-      }
+      var entry = ruleEntry(id, enabled, severity, exempt);
+      if (entry !== undefined) config.rules[id] = entry;
     }
 
     var language = $('language').value.trim();

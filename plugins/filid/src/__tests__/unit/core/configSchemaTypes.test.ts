@@ -39,7 +39,7 @@ describe('config-schema-types v3', () => {
         organNames?: string[];
         allowedPeers?: AllowedPeerOverride[];
         entryPointOverrides?: Record<string, string[]>;
-        generatedPaths?: string[];
+        excludeFromScan?: string[];
       };
     }>();
   });

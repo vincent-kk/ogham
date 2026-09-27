@@ -1,4 +1,10 @@
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  existsSync,
+  mkdirSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -88,6 +94,35 @@ describe('handlePreToolUse', () => {
         }),
       ),
     ).toEqual({ continue: true });
+  });
+
+  it('Delete of a symlinked INTENT.md pointing into an ignored directory stays denied', async () => {
+    mkdirSync(join(tmpDir, '.filid'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, '.filid', 'config.json'),
+      JSON.stringify({ version: '3.0', ignore: ['private/**'] }),
+    );
+    mkdirSync(join(tmpDir, 'private'), { recursive: true });
+    const realTarget = join(tmpDir, 'private', 'real-intent.md');
+    writeFileSync(
+      realTarget,
+      '# Intent\n## Purpose\nx\n## Boundaries\nAll\n',
+    );
+    mkdirSync(join(tmpDir, 'src'), { recursive: true });
+    const symlinkPath = join(tmpDir, 'src', 'INTENT.md');
+    symlinkSync(realTarget, symlinkPath);
+
+    const result = await handlePreToolUse(
+      makeInput({
+        tool_name: 'Delete',
+        tool_input: { path: symlinkPath },
+      }),
+    );
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'Delete rejected',
+    );
   });
 
   it('Read event → visit pipeline runs (additionalContext present), no block', async () => {

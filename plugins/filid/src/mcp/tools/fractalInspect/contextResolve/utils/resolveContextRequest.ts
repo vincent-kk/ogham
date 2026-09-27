@@ -33,10 +33,13 @@ export function resolveContextRequest(
   ignore: readonly string[] = [],
 ): ContextResolveResult {
   const targetPath = portableResolve(snapshot.projectRoot, request.targetPath);
-  const matchingPattern = matchingIgnoredPattern(
-    { ignore },
-    toProjectRelativePath(snapshot.projectRoot, targetPath),
-  );
+  const relativePath = toProjectRelativePath(snapshot.projectRoot, targetPath);
+  const matchingPattern =
+    relativePath === '..' ||
+    relativePath.startsWith('../') ||
+    relativePath.startsWith('/')
+      ? undefined
+      : matchingIgnoredPattern({ ignore }, relativePath);
   if (matchingPattern !== undefined) {
     const diagnostic: ToolDiagnostic = {
       code: CONTEXT_RESOLVE_DIAGNOSTIC_CODES.TARGET_IGNORED,

@@ -75,18 +75,26 @@ export async function handlePreToolUse(
 
   const target = input.tool_input.file_path ?? input.tool_input.path;
   if (target) {
-    const configRoot = findConfigRoot(safeCwd) ?? safeCwd;
-    const targetPath = resolveHookTargetPath(safeCwd, target);
-    const relativePath = relative(
-      realpathSync(configRoot),
-      resolve(safeCwd, targetPath),
+    const targetPath = resolveHookTargetPath(
+      safeCwd,
+      target,
+      input.tool_name === HOOK_TOOL_NAME.DELETE,
     );
-    if (
-      relativePath !== '..' &&
-      !relativePath.startsWith('../') &&
-      isIgnoredPath(readHookConfig(safeCwd), relativePath)
-    )
-      return { continue: true };
+    try {
+      const configRoot = findConfigRoot(safeCwd) ?? safeCwd;
+      const relativePath = relative(
+        realpathSync(configRoot),
+        resolve(safeCwd, targetPath),
+      );
+      if (
+        relativePath !== '..' &&
+        !relativePath.startsWith('../') &&
+        isIgnoredPath(readHookConfig(safeCwd), relativePath)
+      )
+        return { continue: true };
+    } catch {
+      /* Fail open: an unreadable config root leaves the target not-ignored. */
+    }
   }
 
   const mutation =

@@ -24,7 +24,7 @@ interface ResolveChangedFileRoleOptions {
  * Resolve the first applicable review role for one committed changed path.
  * @param entry Git-derived change, churn, and binary facts.
  * @param absolutePath Absolute path passed to the verification adapter.
- * @param options Generated, lockfile, and verification classifiers.
+ * @param options Ignore patterns, generated, lockfile, and verification classifiers.
  * @returns The role selected by the v7 precedence contract.
  */
 export function resolveChangedFileRole(
