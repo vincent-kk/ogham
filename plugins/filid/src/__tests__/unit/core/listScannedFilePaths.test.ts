@@ -118,13 +118,14 @@ describe('listScannedFilePaths', () => {
     expect(await listScannedFilePaths(root)).not.toContain(deep);
   });
 
-  it('honours config-supplied excluded directory names', async () => {
+  it('honours config-supplied file and directory patterns', async () => {
     const root = createProject({
       'src/index.ts': 'export {};',
+      'src/fixture.mock.json': '{}',
       'generated/out.ts': 'export {};',
     });
     const options: ScanOptions = {
-      additionalExcludedDirectories: ['generated'],
+      exclude: ['generated', '**/*.mock.json'],
     };
 
     const actual = await listScannedFilePaths(root, options);

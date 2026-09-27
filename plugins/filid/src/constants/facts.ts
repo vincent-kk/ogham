@@ -601,7 +601,7 @@ export const FACTS_REJECTION_NEXT_ACTIONS = {
   [FACTS_REJECTION_CODES.OUT_OF_SCOPE]:
     'Submission cannot widen the scope. Either drop this record, or add the path to facts.covers in the project .filid/config.json and submit again.',
   [FACTS_REJECTION_CODES.PATH_INVALID]:
-    'This path is not in the scanned path list — most often because git ignores it, it or a parent is dot-prefixed, or it sits in an excluded directory — or it does not stay inside the project as a project-relative POSIX path. Either drop this record, or bring the file into the scan by adjusting .gitignore, structure.additionalExcludedDirectories or the facts scope, then submit again.',
+    'This path is not in the scanned path list — most often because git ignores it, it or a parent is dot-prefixed, or it matches config exclude — or it does not stay inside the project as a project-relative POSIX path. Either drop this record, or bring the file into the scan by adjusting .gitignore, exclude or the facts scope, then submit again.',
   [FACTS_REJECTION_CODES.REFERENCE_ABSENT]:
     'The string this reference reports is not in the file. Re-extract the file with a tool that reads its current bytes, or submit an attested record that accounts for the line.',
   [FACTS_REJECTION_CODES.RESOLVED_PATH_INVALID]:

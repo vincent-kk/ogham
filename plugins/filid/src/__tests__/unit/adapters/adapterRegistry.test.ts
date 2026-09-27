@@ -149,7 +149,7 @@ describe('adapter registry', () => {
     const result = await resolveAdapters(
       '/project',
       [structureAdapter('known', 1, [owned, excluded])],
-      { excludedDirectoryNames: ['skills'] },
+      { exclude: ['**/skills'] },
     );
 
     expect([...result.ownership.keys()]).toEqual([owned]);
@@ -163,7 +163,7 @@ describe('adapter registry', () => {
     const result = await resolveAdapters(
       '/project',
       [structureAdapter('known', 1, [excluded])],
-      { requestedPaths: [excluded], excludedDirectoryNames: ['skills'] },
+      { requestedPaths: [excluded], exclude: ['**/skills'] },
     );
 
     expect(result.ownership.size).toBe(0);
@@ -177,7 +177,7 @@ describe('adapter registry', () => {
     const result = await resolveAdapters(
       '/skills/project',
       [structureAdapter('known', 1, [owned])],
-      { excludedDirectoryNames: ['skills'] },
+      { exclude: ['**/skills'] },
     );
 
     expect([...result.ownership.keys()]).toEqual([owned]);

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_SCAN_OPTIONS } from '../../../constants/scanDefaults.js';
 
 import {
   scanProject,
@@ -110,8 +111,8 @@ describe('fractal-tree', () => {
       expect(shouldExclude('plugins/demo/generated', options)).toBe(false);
     });
 
-    it('should exclude config-supplied directory names at any depth', () => {
-      const options = { additionalExcludedDirectories: ['skills'] };
+    it('should exclude config-supplied patterns at any depth', () => {
+      const options = { exclude: ['**/skills'] };
 
       expect(shouldExclude('skills', options)).toBe(true);
       expect(shouldExclude('plugins/demo/skills', options)).toBe(true);
@@ -120,8 +121,8 @@ describe('fractal-tree', () => {
       expect(shouldExclude('plugins/demo/skills', {})).toBe(false);
     });
 
-    it('should keep the built-in patterns when config names are supplied', () => {
-      const options = { additionalExcludedDirectories: ['skills'] };
+    it('should keep the built-in patterns when config patterns are supplied', () => {
+      const options = { exclude: ['**/skills', ...DEFAULT_SCAN_OPTIONS.exclude] };
 
       expect(shouldExclude('node_modules', options)).toBe(true);
       expect(shouldExclude('.metadata', options)).toBe(true);
@@ -251,7 +252,7 @@ describe('fractal-tree', () => {
       }
     });
 
-    it('should drop additionalExcludedDirectories names from the tree', async () => {
+    it('should drop excluded paths from the tree', async () => {
       setup({
         '.': ['INTENT.md'],
         src: ['index.ts'],
@@ -265,7 +266,7 @@ describe('fractal-tree', () => {
         );
 
         const tree = await scanProject(tmpDir, {
-          additionalExcludedDirectories: ['skills'],
+          exclude: ['**/skills', ...DEFAULT_SCAN_OPTIONS.exclude],
         });
         expect(tree.nodes.has(join(tmpDir, 'plugins', 'demo', 'skills'))).toBe(
           false,

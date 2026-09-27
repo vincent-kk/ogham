@@ -10,6 +10,7 @@ import type { ScanOptions } from '../../../../types/scan.js';
 import { classifyNode } from '../../organClassifier/index.js';
 import type { NodeEntry } from '../treeBuilder/buildFractalTree.js';
 import { compareByBytes } from '../../../../lib/compareByBytes.js';
+import { shouldExclude } from './shouldExclude.js';
 
 export async function collectNodeMetadata(
   allDirs: string[],
@@ -40,7 +41,8 @@ export async function collectNodeMetadata(
           (entry) =>
             entry.isFile() &&
             !entry.name.startsWith('.') &&
-            !isIgnored(join(path, entry.name)),
+            !isIgnored(join(path, entry.name)) &&
+            !shouldExclude(relative(rootPath, join(path, entry.name)).replace(/\\/g, '/'), opts),
         )
         .map((entry) => entry.name)
         .sort();

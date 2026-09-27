@@ -33,7 +33,7 @@ const CONFLICT_SENTENCES: Record<
   }),
   emptied: ({ sourcePath }, related) => ({
     message: `Every file filid sees under ${sourcePath} leaves through other moves in this plan (${related.join(', ')}), so the directory move itself would move an empty directory.`,
-    nextAction: `Drop this request and create a new plan; the inner moves relocate the files filid sees. After executing it, look inside ${sourcePath}: filid does not see dot-prefixed files or directories, symbolic links, git-ignored files, or excluded directories (docs, scripts, build, dist, coverage, next, bridge, node_modules and structure.additionalExcludedDirectories). Ask the user where any leftovers belong, and delete ${sourcePath} only once it is empty.`,
+    nextAction: `Drop this request and create a new plan; the inner moves relocate the files filid sees. After executing it, look inside ${sourcePath}: filid does not see dot-prefixed files or directories, symbolic links, git-ignored files, or paths under config exclude and built-in scan exclusions. Ask the user where any leftovers belong, and delete ${sourcePath} only once it is empty.`,
   }),
 };
 
