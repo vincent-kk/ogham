@@ -65,6 +65,31 @@ afterEach(() => {
 // ---------------------------------------------------------------------------
 
 describe('handlePreToolUse', () => {
+  it('passes excluded reads and writes through before visit and validation', async () => {
+    mkdirSync(join(tmpDir, '.filid'), { recursive: true });
+    writeFileSync(
+      join(tmpDir, '.filid', 'config.json'),
+      JSON.stringify({ version: '3.0', exclude: ['private/**'] }),
+    );
+    const target = join(tmpDir, 'private', 'INTENT.md');
+    mkdirSync(join(tmpDir, 'private'), { recursive: true });
+    writeFileSync(target, '# Intent');
+
+    expect(
+      await handlePreToolUse(
+        makeInput({ tool_name: 'Read', tool_input: { file_path: target } }),
+      ),
+    ).toEqual({ continue: true });
+    expect(
+      await handlePreToolUse(
+        makeInput({
+          tool_name: 'Write',
+          tool_input: { file_path: target, content: '# Invalid contract' },
+        }),
+      ),
+    ).toEqual({ continue: true });
+  });
+
   it('Read event → visit pipeline runs (additionalContext present), no block', async () => {
     // Place a file inside the temp FCA project
     const filePath = join(tmpDir, 'src', 'index.ts');

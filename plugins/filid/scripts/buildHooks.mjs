@@ -75,7 +75,7 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 // pre-tool-use path via cacheManager. Still Node builtins only — FORBIDDEN_PATTERNS
 // below is the real isolation guard, not these caps.
 const SESSION_START_HOOK_BYTES = 48 * KILO_BYTE;
-const HEAVY_HOOK_BYTES = 36 * KILO_BYTE;
+const HEAVY_HOOK_BYTES = 40 * KILO_BYTE;
 const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 
 // Each hook is bundled once per host runtime directory. Claude (and Antigravity

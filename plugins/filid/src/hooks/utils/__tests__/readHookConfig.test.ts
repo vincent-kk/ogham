@@ -38,6 +38,14 @@ describe('readHookConfig', () => {
     });
   });
 
+  it('reads exclusion patterns from the project layer', () => {
+    writeFileSync(
+      join(cwd, '.filid', 'config.json'),
+      JSON.stringify({ exclude: ['private/**', 'draft.md'] }),
+    );
+    expect(readHookConfig(cwd)?.exclude).toEqual(['private/**', 'draft.md']);
+  });
+
   it('returns null when the config file is missing', () => {
     expect(readHookConfig(cwd)).toBeNull();
   });
