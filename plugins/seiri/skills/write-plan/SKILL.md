@@ -34,11 +34,11 @@ Higher-precedence instructions bind. A skill is not selected merely because it i
 Regardless of method:
 
 - Write enough that a capable implementer can proceed without this conversation.
-- Ground claims about the current repository with tools, retaining compact evidence a reviewer can reproduce.
-- Connect every requirement to implementation work and observable verification; do not add work with no requirement.
-- Resolve the implementation direction needed for an executable plan within planning.
-- Leave no unresolved placeholder disguised as a step; a real unresolved decision names its owner and stops the affected work.
-- When durable verification tracking is useful, write `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md`. Execution does not require a ledger. Design each CHECK/EXPECT pair together: CHECK tests the actual result condition and emits a fixed literal EXPECT marker only on success; keep every CHECK/EXPECT value in a Markdown code span and the ledger's fixed format separate from the plan's human format.
+- Ground repository claims with tools and reproducible evidence.
+- Map each requirement to implementation and observable verification; add no unrelated work.
+- Resolve implementation direction during planning.
+- Unresolved decisions name an owner and stop affected work; never disguise them as steps.
+- Optionally track verification in `.seiri/tasks/<name>/gates.md` per `skills/execute/references/gates-format.md`. Execution does not require a ledger. CHECK tests the actual result condition and emits a fixed literal EXPECT marker only on success. Use Markdown code spans for CHECK/EXPECT; keep the ledger format separate from the plan.
 - A structural decision chooses module boundaries, dependency direction, public ownership or contracts, or durable code placement. When one occurs while planning, write `adr.md` beside the plan. Otherwise do not create it.
 - Make the ADR readable without the plan: state the context, decision, reasons, rejected alternatives, and consequences. Keep implementation steps in the plan.
 
@@ -55,6 +55,6 @@ Use this only when no other planning method applies:
 
 ## Rules
 
-- Let the selected method or repository choose the plan location; otherwise name the task in kebab-case (`^[a-z0-9]+(?:-[a-z0-9]+)*$`) and save to `.seiri/tasks/<name>/plan.md`, with the ledger's `Plan:` line pointing to it.
+- Let the selected method or repository choose the plan location; otherwise name the task in kebab-case (`^[a-z0-9]+(?:-[a-z0-9]+)*$`) and save to `.seiri/tasks/<name>/plan.md`, with the ledger's `Plan:` line pointing to it. Task directories idle for more than 72 hours are deleted at MCP server startup, so save a plan or ADR meant to outlive that elsewhere and point `Plan:` there.
 - Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
 - Review before execution when unresolved risk warrants it — hand off to `/seiri:review-plan`. Reuse a valid review of the same plan; changed claims need only a scoped recheck.

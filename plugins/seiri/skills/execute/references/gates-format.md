@@ -64,7 +64,7 @@ ABANDON: G2 <reason — only when abandoning a gate>
   gates.lock
 ```
 
-Names match `^[a-z0-9]+(?:-[a-z0-9]+)*$`. The directory is owned by the task name, never a session; no file contains `session_id`. Its existence makes it observable without registration. `gates.lock` is temporary, the directory is not committed, and cleanup belongs to the user. A repository may place the plan elsewhere, but `Plan:` points there; the ledger and lock stay here.
+Names match `^[a-z0-9]+(?:-[a-z0-9]+)*$`. The directory is owned by the task name, never a session; no file contains `session_id`. Its existence makes it observable without registration. `gates.lock` is temporary and the directory is not committed. At MCP server startup seiri deletes a task directory once it and everything in it have gone unmodified for more than 72 hours; keep a record that must outlive an idle task outside `.seiri/tasks`. A repository may place the plan elsewhere, but `Plan:` points there; the ledger and lock stay here.
 
 ## Tool
 

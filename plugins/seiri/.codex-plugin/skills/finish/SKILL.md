@@ -29,7 +29,7 @@ You were invoked by the user, so ask what the decision needs. The integration ch
 - Keep: report where everything stands and stop.
 - Discard: destructive and irreversible. Name a backup ref first, require the user to type the word "discard", and only then delete.
 
-**4. Close assistance and clean up only what this work created.** If this task used hooks, follow [workflow lifecycle](../execute/references/workflow-lifecycle.md): keep or pending review means pause; completed or cancelled work means finish. Do not start assistance just to close a branch. A workspace the harness or the user owns stays untouched.
+**4. Close assistance and clean up only what this work created.** If this task used hooks, follow [workflow lifecycle](../execute/references/workflow-lifecycle.md) and call `finish` for it whatever the user chose — integrate, push for review, keep, or discard: invoking this skill is the deliberate close. Later work on the same task re-enters through its entry step or `start`. Do not start assistance just to close a branch. A workspace the harness or the user owns stays untouched.
 
 ## Rules
 

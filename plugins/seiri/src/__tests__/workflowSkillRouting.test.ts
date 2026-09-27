@@ -195,6 +195,17 @@ describe('workflow skill routing contract', () => {
       'utf8',
     );
     expect(lifecycle).toMatch(/finish[^\n]+does not[^\n]+(?:prove|certify)/i);
-    expect(skill('finish')).toMatch(/keep[^\n]+pause/i);
+  });
+
+  it('closes participation whenever the finish skill runs, whatever the choice', () => {
+    const lifecycle = readFileSync(
+      portableJoin(skills, 'execute/references/workflow-lifecycle.md'),
+      'utf8',
+    );
+    expect(skill('finish')).toMatch(
+      /call `finish`[^\n]+whatever the user chose[^\n]+push for review[^\n]+keep/i,
+    );
+    expect(skill('finish')).not.toMatch(/keep[^\n]+means pause/i);
+    expect(lifecycle).toMatch(/`\/seiri:finish` always finishes/);
   });
 });
