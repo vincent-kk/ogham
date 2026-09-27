@@ -31,7 +31,7 @@ Load only the reference needed for the active phase:
 ## When to Use
 
 - initializing Filid in a new or existing repository
-- selecting adapters and output language in config v2
+- selecting adapters, output language, and project-relative `ignore` paths in config v3
 - reconciling managed FCA rule documents
 - discovering missing INTENT.md or DETAIL.md contracts
 - rechecking initialization after a structural change
@@ -100,7 +100,7 @@ Emit the compact setup report from the validation reference and finish. Do not a
 
 | Tool + action                                         | Purpose                                                       |
 | ----------------------------------------------------- | ------------------------------------------------------------- |
-| `mcp__filid__project_setup` `init`       | create missing config v2 without overwriting existing config  |
+| `mcp__filid__project_setup` `init`       | create missing config v3 or migrate a lossless older config   |
 | `mcp__filid__project_setup` `rules-*`    | inspect or synchronize managed rule documents                 |
 | `mcp__filid__project_setup` `settings`   | edit config and managed rules through a bounded local session |
 | `mcp__filid__fractal_inspect` `scan`     | inspect the post-initialization snapshot                      |

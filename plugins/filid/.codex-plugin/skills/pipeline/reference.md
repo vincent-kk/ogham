@@ -40,7 +40,7 @@ Push state is a separate fact, not a stage: `summary.unpushedCommits` counts com
 
 With `--no-push`, only a saved body exists, so `review` has no PR to start from and the cycle ends there — a publication-option ending, not a document-sync one.
 
-Generated paths are the ones declared in `structure.generatedPaths`; the classification table is `pull-request/reference.md` §5. A build artifact left in the tree is not a reason to stop a cycle that has not started.
+Generated paths are the ones declared in `review.generatedPaths`; the classification table is `pull-request/reference.md` §5. A build artifact left in the tree is not a reason to stop a cycle that has not started.
 
 **`review`**
 

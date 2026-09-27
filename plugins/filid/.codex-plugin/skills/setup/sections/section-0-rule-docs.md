@@ -20,7 +20,7 @@ mcp__filid__project_setup({
 - `path` is required.
 - Omit `language` when the session does not specify an output language.
 - Omit `adapterIds` for automatic adapter selection. If supplied, it must be non-empty and its order is preserved.
-- Existing `.filid/config.json` content is never overwritten.
+- Existing v3 `.filid/config.json` content is never overwritten. A lossless v1/v2 document is migrated and saved as v3.
 - This call creates config only; managed rule documents remain a separate operation.
 
 ## Reconcile managed rule documents
@@ -45,6 +45,8 @@ mcp__filid__project_setup({
 ```
 
 The page owns config and managed-document persistence. Dispatch on the stable status:
+
+Its Paths section edits top-level `ignore` (omitted from every Filid operation), `structure.excludeFromScan` (structure scan only; still reviewed), and `review.generatedPaths` (tracked build output skipped in review), each as project-relative globs.
 
 - `saved`: retain the returned save summary and continue.
 - `closed`: keep the existing state and continue.
