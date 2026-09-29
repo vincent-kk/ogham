@@ -134,7 +134,7 @@ describe('edit notice host parity', () => {
     expect(results[0]).toEqual(results[1]);
     expect(results[0]).toHaveLength(2);
     expect(results[0]?.[0]).toContain('First edit this turn');
-    expect(results[0]?.[1]).toContain('3 files edited this turn');
+    expect(results[0]?.[1]).toContain('2 files edited this turn');
   });
 });
 

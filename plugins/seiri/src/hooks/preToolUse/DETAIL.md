@@ -6,7 +6,7 @@
 - Bash는 active binding이 있을 때만 기록한다. runtime 참여 호출은 validated explicit request만 기록한다.
 - 호출 관측은 호스트 호출 ID와 입력 해시를 저장하며 결정·주입을 하지 않는다.
 - `Edit`·`Write`·`NotebookEdit`(엔트리가 펼친 Codex `apply_patch` 포함)는 `editNotice`를 거친다. `agent_id`가 있으면 무주입·무상태다. `tool_input.file_path` 또는 `notebook_path`를 `canonicalizeTargetPathSync`로 정규화하고, 같은 방식으로 정규화한 cwd에서 찾은 저장소 루트에 대한 `portableRelative` 경로(구분자 `/`)를 구한다. 저장소 밖(`..` 또는 절대 경로)과 `EDIT_NOTICE_EXCLUDED_PREFIXES`(`.seiri/`) 경로는 무주입이다. 경로 정규화 예외는 그 경로만 무주입으로 끝내고 같은 호출의 다른 안내를 지우지 않는다.
-- `observeEdit`는 저장소 상대 경로의 `workflowHash`를 actor의 턴별 `edits`에 기록하고, 활성 바인딩이 없을 때 첫 파일에서 `first`, 서로 다른 파일 수가 `EDIT_NOTICE_FILE_THRESHOLD`(3)에 이를 때 `spread`를 한 번씩 낸다. paused 바인딩은 안내 대상이다.
+- `observeEdit`는 저장소 상대 경로의 `workflowHash`를 actor의 턴별 `edits`에 기록하고, 활성 바인딩이 없을 때 첫 파일에서 `first`, 서로 다른 파일 수가 `EDIT_NOTICE_FILE_THRESHOLD`(2)에 이를 때 `spread`를 한 번씩 낸다. paused 바인딩은 안내 대상이다.
 
 ## API Contracts
 
@@ -25,12 +25,12 @@
 ### AC-pre-edit-notice — 편집 순간 안내
 
 - standard, 바인딩 없음: 턴 첫 편집은 `First edit this turn`을 내고, 같은 파일 재편집은 무주입이다.
-- 같은 턴 서로 다른 파일 3개째는 `3 files edited this turn`을 내고 4개째는 무주입이다. `EDIT_TRACKED_FILES_CAP`를 넘는 파일은 기록되지 않는다.
+- 같은 턴 서로 다른 파일 2개째는 `2 files edited this turn`을 내고 3개째부터는 무주입이다. `EDIT_TRACKED_FILES_CAP`를 넘는 파일은 기록되지 않는다.
 - 활성 바인딩이 있으면 무주입이며 `edits`를 기록하지 않는다.
 - `.seiri/` 아래 경로와 저장소 밖 경로는 무주입이다. symlink cwd, Codex식 cwd 상대 경로, 아직 없는 새 파일은 안내한다.
 - off/advisory는 무주입이며 `.seiri/sessions`를 만들지 않는다. `agent_id`가 있는 편집은 무주입이며 자식 actor 파일을 만들지 않는다.
 - 새 턴(UserPromptSubmit)은 `edits`를 지워 같은 파일 편집이 다시 `First edit`가 된다.
-- Codex `apply_patch` 한 호출이 3파일을 고치면 first와 spread가 한 출력으로 나가고, Claude `Edit` 3회와 같은 두 안내가 관측된다.
+- Codex `apply_patch` 한 호출이 2파일 이상을 고치면 first와 spread가 한 출력으로 나가고, Claude `Edit` 2회 이상과 같은 두 안내가 관측된다.
 
 ## Last Updated
 

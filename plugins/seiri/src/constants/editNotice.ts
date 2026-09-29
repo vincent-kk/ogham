@@ -13,9 +13,11 @@ export const CODEX_PATCH_TOOL = 'apply_patch';
 
 /**
  * Distinct files edited in one unbound turn at which the second notice says
- * the work is no longer a single surgical change.
+ * the work is no longer a single surgical change. The spread notice is due at
+ * the second distinct file, matching the election rule "a change touching 2+
+ * files".
  */
-export const EDIT_NOTICE_FILE_THRESHOLD = 3;
+export const EDIT_NOTICE_FILE_THRESHOLD = 2;
 
 /**
  * Repository-relative path prefixes (plain prefixes, not globs) whose edits

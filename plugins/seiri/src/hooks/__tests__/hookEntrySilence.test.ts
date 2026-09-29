@@ -207,7 +207,7 @@ describe('hook entry silence', () => {
             '*** Begin Patch\n*** Add File: src/a.ts\n+a\n*** Add File: src/b.ts\n+b\n*** Add File: src/c.ts\n+c\n*** End Patch',
         },
       },
-      notices: ['First edit this turn', '3 files edited this turn'],
+      notices: ['First edit this turn', '2 files edited this turn'],
     },
   ] as const)(
     'injects the edit notice through the $name manifest runner at standard',

@@ -148,16 +148,15 @@ describe.each(HOSTS)('edit notice: $adapter.name', (host) => {
     expect(edit(cwd, host, portableJoin(cwd, 'src', 'a.ts'))).toBe('');
   });
 
-  it('announces the third distinct file once and records no file past the cap', () => {
+  it('announces the second distinct file once and records no file past the cap', () => {
     const cwd = seedRepo('standard');
     const file = (n: number) => portableJoin(cwd, 'src', `f${n}.ts`);
     expect(edit(cwd, host, file(1))).toContain(FIRST);
-    expect(edit(cwd, host, file(2))).toBe('');
-    expect(edit(cwd, host, file(3))).toContain(
-      '3 files edited this turn with no active task',
+    expect(edit(cwd, host, file(2))).toContain(
+      '2 files edited this turn with no active task',
     );
-    expect(edit(cwd, host, file(4))).toBe('');
-    for (let n = 5; n <= EDIT_TRACKED_FILES_CAP + 2; n++)
+    expect(edit(cwd, host, file(3))).toBe('');
+    for (let n = 4; n <= EDIT_TRACKED_FILES_CAP + 2; n++)
       expect(edit(cwd, host, file(n))).toBe('');
     expect(actorState(cwd, host)?.edits?.files).toHaveLength(
       EDIT_TRACKED_FILES_CAP,

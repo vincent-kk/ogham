@@ -15,5 +15,5 @@ export function renderEditNotice(
 ): string {
   return kind === 'first'
     ? `${INJECTION_PREFIX} First edit this turn with no active task. A change touching 2+ files or their tests → seiri:write-plan (or seiri:execute for an approved plan) before continuing; a single surgical change → proceed.`
-    : `${INJECTION_PREFIX} ${fileCount} files edited this turn with no active task — no longer a surgical change; enter seiri:write-plan or seiri:execute before the next edit.`;
+    : `${INJECTION_PREFIX} ${fileCount} files edited this turn with no active task — this is no longer a surgical change. Stop and load seiri:write-plan (or seiri:execute for an approved plan) before the next edit.`;
 }
