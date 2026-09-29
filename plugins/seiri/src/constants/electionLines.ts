@@ -1,16 +1,22 @@
 import { INTERVENTION } from './intervention.js';
 
 /**
- * Standard's election line, keyed on work moments rather than word signals.
- * It fixes the moment (before any plan text) and states that a
- * user-prescribed procedure fills the steps' actors, never the steps.
+ * Standard's election line, keyed on the first edit and a file count rather
+ * than word signals: a change touching 2+ files or their tests elects a
+ * workflow, a single-file surgical change does not, and a review, diff
+ * explanation, or read-only analysis never starts one. A user-prescribed
+ * procedure fills the steps' actors, never the steps.
  */
 export const ELECTION_STANDARD_LINE =
-  'Election: decide it before writing any plan text — a multi-step change → seiri:write-plan; an approved plan → seiri:execute; a failure inside an active task → seiri:trace-cause; your own completion claim inside an active task → seiri:verify. A user-prescribed procedure (who reviews, who implements) names actors inside these steps; it never replaces a step or moves the plan. A single surgical change, an explanation, or a short investigation needs no workflow.';
+  'Election: decide it before the first edit — a change touching 2+ files or their tests → seiri:write-plan; an approved plan → seiri:execute; a failure inside an active task → seiri:trace-cause; your own completion claim inside an active task → seiri:verify. A single-file surgical change needs no workflow. A review, a diff explanation, or a read-only analysis starts no workflow and writes no plan. A user-prescribed procedure (who reviews, who implements) names actors inside these steps; it never replaces a step or moves the plan.';
 
-/** Strict's owner contract, adding review-plan, implement, request-review, and receive-review to the standard four. */
+/**
+ * Strict's owner contract at the same first-edit moment and file-count
+ * threshold, adding review-plan, implement, request-review, and
+ * receive-review to the standard four.
+ */
 export const ELECTION_STRICT_LINE =
-  'Election[strict]: decide it before writing any plan text — a multi-step change → seiri:write-plan, checked by seiri:review-plan before seiri:execute carries it out; each planned change unit → seiri:implement; a failure inside an active task → seiri:trace-cause; your own completion claim → seiri:verify; substantial finished work → seiri:request-review; review feedback → seiri:receive-review. A user-prescribed procedure (who reviews, who implements) names actors inside these steps; it never replaces a step or moves the plan. A single surgical change, an explanation, or a short investigation needs no workflow.';
+  'Election[strict]: decide it before the first edit — a change touching 2+ files or their tests → seiri:write-plan, checked by seiri:review-plan before seiri:execute carries it out; each planned change unit → seiri:implement; a failure inside an active task → seiri:trace-cause; your own completion claim → seiri:verify; substantial finished work → seiri:request-review; review feedback → seiri:receive-review. A single-file surgical change needs no workflow. A review, a diff explanation, or a read-only analysis starts no workflow and writes no plan. A user-prescribed procedure (who reviews, who implements) names actors inside these steps; it never replaces a step or moves the plan.';
 
 /**
  * Returned by the runtime MCP tool's dial posture echo at standard and

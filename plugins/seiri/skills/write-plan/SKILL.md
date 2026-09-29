@@ -1,7 +1,7 @@
 ---
 name: write-plan
 user-invocable: true
-description: 'Plan substantial changes that need a durable implementation path. Follow the selected planning method; skip short investigations, explanations, and routine edits.'
+description: 'Plan a change that touches more than one file or its tests, before the first edit. Follow the selected planning method. Never for a review, a diff explanation, or a read-only analysis; a single-file surgical change needs no plan.'
 argument-hint: '[the spec or goal to plan]'
 version: '0.1.0'
 complexity: moderate

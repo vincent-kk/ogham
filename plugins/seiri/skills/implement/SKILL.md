@@ -1,7 +1,7 @@
 ---
 name: implement
 user-invocable: true
-description: 'Implement a behavior change with a check that fails without it. Use characterization for refactors and artifact checks for documentation or formatting changes.'
+description: 'Implement a behavior change with a check that fails without it; opens the task when none is active. Use characterization for refactors and artifact checks for documentation or formatting changes.'
 argument-hint: '[the change to make]'
 version: '0.1.0'
 complexity: moderate
