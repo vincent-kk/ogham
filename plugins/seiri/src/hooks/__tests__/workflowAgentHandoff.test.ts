@@ -248,13 +248,13 @@ it('(c) a fresh session whose first call is a non-entry step gets no acknowledgm
   const rejected = runtimeCall(
     CLAUDE_WORKFLOW_ADAPTER,
     c,
-    'c-implement',
-    { action: 'step', project_root: cwd, task: 't-handoff', step: 'implement' },
+    'c-verify',
+    { action: 'step', project_root: cwd, task: 't-handoff', step: 'verify' },
     {
       status: 'accepted',
       action: 'step',
       task: 't-handoff',
-      step: 'implement',
+      step: 'verify',
       intent: 'change',
     },
   );
@@ -286,13 +286,13 @@ it('(d) that same fresh session then calling start creates a binding, and its ne
   runtimeCall(
     CLAUDE_WORKFLOW_ADAPTER,
     c,
-    'c-implement',
-    { action: 'step', project_root: cwd, task: 't-handoff', step: 'implement' },
+    'c-verify',
+    { action: 'step', project_root: cwd, task: 't-handoff', step: 'verify' },
     {
       status: 'accepted',
       action: 'step',
       task: 't-handoff',
-      step: 'implement',
+      step: 'verify',
       intent: 'change',
     },
   );

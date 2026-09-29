@@ -16,7 +16,7 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 ## Workflow
 
-Within an assisted task, follow [workflow lifecycle](../execute/references/workflow-lifecycle.md). A routine edit needs no activation. If a `[seiri]` progress line or workflow acknowledgement in this session names an active task, call `mcp__plugin_seiri_tools__runtime({ action: "step", step: "implement", project_root, task })` with that task and continue without waiting. If you are clearly performing a different task, call it with that task's name instead and follow its acknowledgement. Standalone use needs no call.
+Follow [workflow lifecycle](../execute/references/workflow-lifecycle.md). Call `mcp__plugin_seiri_tools__runtime({ action: "step", step: "implement", project_root, task })` — with the task a `[seiri]` progress line or acknowledgement names, or with a new kebab-case task name when no task is active (this opens the task; no ledger is created) — and read its reply before other tools run, without retrying or waiting on the hook acknowledgement. A routine single-file edit needs no call.
 
 Choose verification for the change. Behavior changes follow the fail-first steps below. Refactors preserve existing assertions and add characterization before moving uncovered behavior. Documentation and formatting changes use the relevant artifact checks; do not invent an executable failure for prose.
 

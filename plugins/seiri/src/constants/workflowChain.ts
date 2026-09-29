@@ -26,11 +26,23 @@ export const WORKFLOW_SKILLS = [
 ] as const satisfies readonly WorkflowSkill[];
 
 /**
- * The only steps a `step` request may use to create or switch a binding.
- * Every other chain skill's `step` can only update an existing binding for
- * the same task.
+ * The only steps a `step` request may use to create a binding, and whose
+ * PreToolUse seeds an absent actor. Every other chain skill's `step` can
+ * only update an existing binding for the same task.
  */
-export const CHAIN_ENTRY_STEPS = ['write-plan', 'execute'] as const;
+export const CHAIN_ENTRY_STEPS = [
+  'write-plan',
+  'execute',
+  'implement',
+] as const;
+
+/**
+ * The entry steps that may also replace a different task's active binding.
+ * `implement` is absent: it opens a task only when none is active, so a
+ * change unit named inside an executing plan never resets that plan's
+ * counts and verdicts.
+ */
+export const CHAIN_SWITCH_STEPS = ['write-plan', 'execute'] as const;
 
 /**
  * Display order of the main chain, left to right, as rendered by a

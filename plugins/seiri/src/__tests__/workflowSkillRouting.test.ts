@@ -78,10 +78,11 @@ describe('workflow skill routing contract', () => {
   });
 
   it('lets entry skills read the reply and non-entry skills wait for an acknowledgement', () => {
-    for (const name of ['write-plan', 'execute'])
+    const entrySkills = ['write-plan', 'execute', 'implement'];
+    for (const name of entrySkills)
       expect(skill(name), name).toContain('read its reply before');
     for (const name of workflowSkills.filter(
-      (candidate) => candidate !== 'write-plan' && candidate !== 'execute',
+      (candidate) => !entrySkills.includes(candidate),
     )) {
       expect(skill(name), name).toContain('continue without waiting');
       expect(skill(name), name).toContain('follow its acknowledgement');
