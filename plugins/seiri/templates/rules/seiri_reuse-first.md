@@ -16,7 +16,7 @@ Evaluate solutions in this strict order:
 
 Nothing speculative. Validation at trust boundaries (public APIs, user input, external data) is never speculative — exported symbols cannot enumerate their callers.
 
-## 3. Focused changes
+## 3. Surgical changes
 
 Every changed line traces to the request. Remove what YOUR change orphaned; leave pre-existing dead code in place, mentioned, not buried in an unrelated diff.
 

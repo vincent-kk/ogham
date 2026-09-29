@@ -20,4 +20,4 @@ A file the framework calls by convention — routes, pages, handlers, plugin man
 
 ---
 
-**This rule is working if:** the public surface can be enumerated by reading entry points, who may import a file can be predicted from its path and a search confirms it, and removing an internal symbol breaks no consumer. **This rule is wrong for you if:** the code is a script or notebook with no module boundary — there is no contract to keep small.
+**This rule is working if:** the public surface can be enumerated by reading entry points, who may import a file can be predicted from its path and a search confirms it, and removing an internal symbol breaks no consumer. **This rule is wrong for you if:** the code is a single-file script or notebook with no module boundary — there is no contract to keep small.

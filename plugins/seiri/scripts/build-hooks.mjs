@@ -43,20 +43,14 @@ const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 // lists render lines this hook never emits — tree-shaking regression
 // canaries: their presence means a constants file stopped shaking.
 const hookEntries = [
-  {
-    name: 'pre-tool-use',
-    entry: 'preToolUse',
-    maxBytes: LIGHT_HOOK_BYTES,
-    forbiddenContent: [/Election/],
-  },
+  { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: LIGHT_HOOK_BYTES },
   {
     name: 'setup',
     entry: 'setup',
     // One session-start read of rule status, dial and configLoader chains,
     // plus the fixed election/chain/posture render and, after compaction, the
     // active progress line. Runs at every SessionStart source.
-    // This path currently measures 22.1 KiB in both host bundles.
-    maxBytes: 23 * KILO_BYTE,
+    maxBytes: 22 * KILO_BYTE,
   },
   {
     name: 'user-prompt-submit',

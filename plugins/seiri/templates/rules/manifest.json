@@ -27,7 +27,7 @@
       "description": "Keep a module's exports small, named, and enumerable — entry points declare, internals implement, and a unit's path states its reach.",
       "grounding": "This rule rests on a property every codebase with a module system has: a distinction exists between what is public and what is internal.",
       "recommended": false,
-      "templateHash": "3dfe216eed892766df2715ecd32f2aa8f2af559c41ca0e399e9814e5b5965af2"
+      "templateHash": "30d6ba8bd3330350fdfe46279ae29fac0ff6990e8c4a113236eb40fc0e34abd5"
     },
     {
       "id": "seiri_test-validity",
@@ -45,7 +45,7 @@
       "description": "Search first, compose second, write last — the smallest change that answers the request.",
       "grounding": "This rule rests on a property every codebase has: a change is a diff, and it answers a request.",
       "recommended": true,
-      "templateHash": "24964819e677f407a1e2d52744cf7df1de73481e1ff6fc91b6892a519900fadf"
+      "templateHash": "22304006d5a21df262b3223fc266de96c50c6f88b797e263b71172022d8db20e"
     },
     {
       "id": "seiri_naming",

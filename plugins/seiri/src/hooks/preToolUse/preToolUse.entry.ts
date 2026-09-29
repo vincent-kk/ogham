@@ -11,8 +11,7 @@ import { processToolStart } from './preToolUse.js';
 
 let result: HookOutput = EMPTY_RESULT;
 try {
-  const input = JSON.parse(await readStdin()) as PreToolUseInput;
-  result = processToolStart(input);
+  result = processToolStart(JSON.parse(await readStdin()) as PreToolUseInput);
 } catch (error) {
   logHookFailure(PLUGIN_NAME, 'pre-tool-use', error);
 }

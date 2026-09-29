@@ -9,12 +9,12 @@ import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 import { workflowRequest } from '../shared/workflowHost/workflowRequest.js';
 
 /**
- * Observe a paired invocation without selecting skills or affecting
- * permissions. Entry requests seed an absent actor from the native turn.
+ * Observe a paired invocation without selecting skills or affecting permissions.
+ * Entry requests seed an absent actor from the payload's native turn.
  * @param input Native PreToolUse payload for the tool about to run.
  * @param adapter Host adapter fixed at build time; defaults to `WORKFLOW_ADAPTER`.
  * @param now Epoch ms read once at the calling hook's outermost handler.
- * @returns The non-blocking `EMPTY_RESULT` after any valid observation.
+ * @returns Always the non-blocking, non-injecting `EMPTY_RESULT`.
  */
 export function processToolStart(
   input: PreToolUseInput,
