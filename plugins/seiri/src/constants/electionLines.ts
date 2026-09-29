@@ -2,18 +2,20 @@ import { INTERVENTION } from './intervention.js';
 
 /**
  * Standard's election line, keyed to behavior changes in source or tests.
- * Documentation and read-only answers need no workflow; a contained fix can
- * enter implement directly. User-prescribed procedures name actors in steps.
+ * Documentation and read-only answers elect nothing; a single contained fix
+ * enters implement directly. User-assigned roles decide who performs a step,
+ * never which steps run.
  */
 export const ELECTION_STANDARD_LINE =
-  'Election: decide it before the first edit — a behavior change to source or tests (logic, a fix, a refactor) → seiri:write-plan, or seiri:implement for one contained fix; an approved plan → seiri:execute; inside an active task, a failure → seiri:trace-cause and your completion claim → seiri:verify. Documentation, comments, formatting, or a read-only answer (review, explanation, analysis) starts no workflow. A user-prescribed procedure (who reviews, who implements) names actors inside these steps, never replacing a step or moving the plan.';
+  'Election: decide before the first edit. A behavior change to source or tests (logic, a fix, a refactor) → seiri:write-plan; one contained fix → seiri:implement; an approved plan → seiri:execute. In an active task, a failure → seiri:trace-cause and a completion claim → seiri:verify. Documentation, comments, formatting, and read-only answers (review, explanation, analysis) elect nothing. User-assigned roles (who reviews, who implements) decide who performs a step, not which steps run: none is dropped or reordered, and planning stays in seiri:write-plan.';
 
 /**
  * Strict's election line for behavior changes in source or tests, adding
- * review-plan, implement, request-review, and receive-review to standard.
+ * review-plan, implement, request-review, and receive-review to standard and
+ * dropping the direct implement entry.
  */
 export const ELECTION_STRICT_LINE =
-  'Election[strict]: decide it before the first edit: a behavior change to source or tests → seiri:write-plan, reviewed by seiri:review-plan, then seiri:execute with each unit through seiri:implement; a failure inside an active task → seiri:trace-cause; your completion claim → seiri:verify; finished work → seiri:request-review; review feedback → seiri:receive-review. Documentation, comments, formatting, or a read-only answer starts no workflow. A user-prescribed procedure (who reviews, who implements) names actors inside these steps, never replacing a step or moving the plan.';
+  'Election[strict]: decide before the first edit. A behavior change to source or tests → seiri:write-plan, reviewed by seiri:review-plan, then seiri:execute, each unit via seiri:implement. In an active task, a failure → seiri:trace-cause and a completion claim → seiri:verify; finished work → seiri:request-review; review feedback → seiri:receive-review. Documentation, comments, formatting, and read-only answers elect nothing. User-assigned roles (who reviews, who implements) decide who performs a step, not which steps run: none is dropped or reordered, and planning stays in seiri:write-plan.';
 
 /**
  * Returned by the runtime MCP tool's dial posture echo at standard and
