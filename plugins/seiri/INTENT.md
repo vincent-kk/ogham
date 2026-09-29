@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Deploy selected code-authoring rules to the host's project rule channel and provide optional, task-scoped workflow assistance. The host loads deployed rules; hooks never duplicate their bodies or elect the first skill.
+Deploy selected code-authoring rules to the host's project rule channel and provide optional, task-scoped workflow assistance. The host loads deployed rules; hooks never duplicate their bodies, load a skill, or block a tool; they restate the election once per session, once more at the first unbound edit of a turn, and once when that turn's edits reach three files.
 
 ## Structure
 

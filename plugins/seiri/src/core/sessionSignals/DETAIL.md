@@ -3,11 +3,13 @@
 ## Requirements
 
 - 워크플로우 상태는 host/session/agent 해시별 파일이다. 위치는 소비 프로젝트의 런타임 디렉터리(`../../constants/files.ts`의 `CONFIG_DIR`·`SESSIONS_DIR`)이며 실행 중에 만들어지는 비추적 상태라 이 저장소에는 없다.
-- `WorkflowBinding`은 `step?: WorkflowStep`을 갖는다. `WorkflowStep`은 아홉 체인 스킬 이름의 합집합이고, 그 중 `CHAIN_ENTRY_STEPS`(`write-plan`, `execute`)만 새 바인딩을 만들 수 있다. `isWorkflowState`는 저장된 `step`이 `WorkflowStep` 멤버인지 검증하고, 실패하면 actor 상태 전체를 무효로 친다.
-- `step`·`start`·`resume`의 전이는 이전 상태 × 요청의 조합으로 `created`·`switched`·`updated`·`mismatch`·`rejected` 중 하나를 반환한다. 바인딩이 없을 때 진입 `step`이나 `start`는 `created`, 비진입 `step`은 `rejected`(상태 불변, 무주입), `resume`도 `rejected`(새 바인딩을 만들지 않음)다. 같은 task에 대한 `start`는 `updated`가 아니라 `created`다 — 처음부터 다시 시작하는 것으로 취급해 바인딩을 새로 만들고 counts·verdicts·generation을 초기화한다. 같은 task의 active/paused에 대한 `step`·`resume`은 `updated`(paused는 active로 복귀, `step`만 갱신, generation·invocations 불변)다. 다른 task에 대한 진입 `step`·`start`는 `switched`(counts·verdicts 초기화)이고, 비진입 `step`·`resume`·`pause`·`finish`는 `mismatch`(상태 불변)다.
+- `WorkflowBinding`은 `step?: WorkflowStep`을 갖는다. `WorkflowStep`은 아홉 체인 스킬 이름의 합집합이고, 그 중 `CHAIN_ENTRY_STEPS`(`write-plan`, `execute`, `implement`)만 새 바인딩을 만들 수 있고, 다른 task의 active 바인딩 교체는 `CHAIN_SWITCH_STEPS`(`write-plan`, `execute`)만 한다. `isWorkflowState`는 저장된 `step`이 `WorkflowStep` 멤버인지 검증하고, 실패하면 actor 상태 전체를 무효로 친다.
+- `step`·`start`·`resume`의 전이는 이전 상태 × 요청의 조합으로 `created`·`switched`·`updated`·`mismatch`·`rejected` 중 하나를 반환한다. 바인딩이 없을 때 진입 `step`이나 `start`는 `created`, 비진입 `step`은 `rejected`(상태 불변, 무주입), `resume`도 `rejected`(새 바인딩을 만들지 않음)다. 같은 task에 대한 `start`는 `updated`가 아니라 `created`다 — 처음부터 다시 시작하는 것으로 취급해 바인딩을 새로 만들고 counts·verdicts·generation을 초기화한다. 같은 task의 active/paused에 대한 `step`·`resume`은 `updated`(paused는 active로 복귀, `step`만 갱신, generation·invocations 불변)다. 다른 task에 대한 진입 `step`·`start`는 `switched`(counts·verdicts 초기화)이되, 다른 task가 active일 때 `CHAIN_SWITCH_STEPS` 밖의 진입 `step`(`implement`)은 `mismatch`(상태 불변)다. 다른 task가 paused면 `implement`도 `switched`다. 비진입 `step`·`resume`·`pause`·`finish`는 `mismatch`(상태 불변)다.
 - `observeBoundary(identity, enabled, now, { firstChild?, suspend? })`로 턴 경계를 관측한다. generation·invocations·seen 갱신은 항상 하고, `suspend`가 참일 때만 바인딩을 `suspended`로 만든다. 반환값은 같은 actor transaction 안에서 갱신 뒤 상태의 바인딩 스냅샷이며, 호출자는 이 스냅샷만으로 렌더한다(갱신 전 상태를 읽어 낡은 표시를 내지 않는다).
-- 생성 가능한 호출은 진입 요청의 `observeInvocation`뿐이며 `prepareDirectory`를 주입한다. `observeBoundary`는 actor를 만들지 않는다. 상태 파일이 없는 actor의 quarantine marker는 seed 트랜잭션이 지운다.
+- 생성 가능한 호출은 진입 요청의 `observeInvocation`과 `observeEdit`뿐이며 둘 다 `prepareDirectory`를 주입한다. `observeBoundary`는 actor를 만들지 않는다. 상태 파일이 없는 actor의 quarantine marker는 seed 트랜잭션이 지운다.
 - SessionStart는 startup/resume/clear/fork에서 `observeBoundary(identity, false, now, { suspend: true })`(compact는 제외, 진행 중 호출 보존), UserPromptSubmit은 `suspend: !enabled`(off/advisory만 suspend)로 호출한다. main actor의 turn은 호스트의 native turn을 해시하며, 자식 actor의 turn은 `JSON.stringify(['agent', agent_id])`를 해시해 부모의 prompt/turn 변경과 독립적으로 유지한다. SubagentStart는 actor를 만들지 않으며 바인딩을 상속하지 않는다. 재개된 자식의 SubagentStart는 저장된 generation이 `0`보다 크면 anchor를 제거하고 generation을 올려 진행 중 호출을 폐기하며, `suspend: true`로 기존 바인딩을 suspend한다. 자식의 늦은 호출은 부모 turn 변경이 아니라 이 generation 경계로 무효화한다.
+- `WorkflowState.edits?: { files: string[]; notices: EditNoticeKind[] }`는 현재 턴에 편집된 저장소 상대 경로의 `workflowHash`와 이미 낸 편집 안내 종류(`first`·`spread`)만 담는다. `advanceBoundary`가 턴 경계마다 지운다. `isWorkflowState`는 필드 부재를 허용하고, 있으면 `files`가 `EDIT_TRACKED_FILES_CAP`(64) 이하의 문자열 배열이고 `notices`가 `EDIT_NOTICE_KINDS`의 부분집합일 때만 유효로 본다.
+- `observeEdit(identity, fileHash, now, threshold)`는 `identity.turn`이 없으면 아무것도 하지 않는다. actor를 진입 요청과 같은 방식으로 seed하고(generation 0이면 payload turn으로 경계 전진), 다른 turn이거나 active 바인딩이 있으면 기록하지 않는다. 파일 해시를 cap 안에서 한 번씩 기록하고, 첫 파일에서 `first`, 서로 다른 파일 수가 `threshold`에 이를 때 `spread`를 한 번씩 반환한다. paused 바인딩은 안내 대상이다. 호출자(PreToolUse)는 자식 actor에 대해 이 함수를 부르지 않는다.
 - `isFirstChildTurn(identity, now)`는 `observeBoundary`가 같은 파일을 갱신하기 전에 자식 자신의 상태 파일을 무락으로 읽어, 파일이 없거나 TTL을 넘겼거나 저장된 generation이 `0`이면 첫 턴으로 본다(쓰기는 하지 않음). 읽기 실패도 첫 턴으로 본다.
 - `readActorBinding(identity, now)`는 무락·무쓰기로 다른 actor(부모 `host + session_id + 'main'`)의 상태 파일을 읽어, 구조 검증·TTL·`.revoked`·`.revoked-suspend`를 통과하고 `state === 'active'`인 스냅샷만 반환한다. 잠금 중이거나 읽기 실패면 아무것도 반환하지 않는다.
 - 상태 변경과 부수효과는 actor lock 내부에서 수행한다. lock 실패 시 무변경이며 actor→gate 순으로 잠근다. 두 파일 간 crash atomicity는 보장하지 않는다.
@@ -16,7 +18,7 @@
 - 별도로 MCP 서버 시작 시 `sweepStaleActors`가 72시간(`IDLE_STATE_TTL`) 넘게 수정되지 않은 actor 묶음(상태, lock, marker, 임시 파일)을 actor lock 아래에서 다시 확인하고 삭제한다. git 추적·ignore 여부는 보지 않는다. `.json`이 없는 이름은 lock 없이 자기 mtime으로 판정해 삭제하며, 디렉터리의 하위 항목은 보지 않는다.
 - 사용자 소유 ignore 파일은 수정하지 않는다. sessions 경로 제외가 명시적으로 확인되지 않으면 자동 상태 생성을 생략한다.
 - 전이는 정확한 호출 ID·입력·actor·turn·generation에 대응하는 성공한 Post에서만 적용된다. `created`·`switched`는 generation을 올리고 진행 중 호출을 폐기하며, `step`·`resume`의 `updated`는 generation·invocations를 바꾸지 않는다. `pause`·`finish`의 `updated`는 `created`·`switched`와 같이 generation을 올리고 진행 중 호출을 폐기해 늦게 도착하는 결과를 무효화한다. 문서의 `paused`는 저장 상태 `suspended`(`types/workflow.ts`)를 가리킨다.
-- **활성 바인딩의 잔여 범위(명시적 수용).** standard/strict에서 활성 바인딩은 같은 host·native session·actor의 후속 사용자 턴 전체에 유지된다. 다른 task로의 진입 `step` 교체나 `pause`/`finish` 전까지는, 무관한 질문이나 진입 스킬을 거치지 않는 작업에도 이전 task의 진행 줄이 표시되고 그 사이의 일치하는 Bash 증거·실패 힌트가 이 바인딩에 쌓인다. 이 범위는 같은 session 안에서만 허용되며 다른 session·agent·host로는 상속되지 않는다(actor 해시가 분리하고, SessionStart가 세션 경계에서 suspend한다).
+- **활성 바인딩의 잔여 범위(명시적 수용).** standard/strict에서 활성 바인딩은 같은 host·native session·actor의 후속 사용자 턴 전체에 유지된다. 다른 task로의 `start`·`write-plan`·`execute` 교체나 `pause`/`finish` 전까지는, 무관한 질문이나 진입 스킬을 거치지 않는 작업에도 이전 task의 진행 줄이 표시되고 그 사이의 일치하는 Bash 증거·실패 힌트가 이 바인딩에 쌓인다. 이 범위는 같은 session 안에서만 허용되며 다른 session·agent·host로는 상속되지 않는다(actor 해시가 분리하고, SessionStart가 세션 경계에서 suspend한다).
 
 ## API Contracts
 
@@ -28,10 +30,10 @@
 
 ### AC-workflow-lifecycle — 참여 격리
 
-- 바인딩 없는 일반 작업·Skill 읽기는 바인딩·원장·진행 줄을 만들지 않는다. dial 범위 안내(SessionStart 선출·체인, strict의 활성 바인딩이 없는 턴의 체인 한 줄)는 훅 렌더 소관이다.
-- main actor의 이전 native turn·자식의 이전 generation·다른 actor·교체 전 task의 호출 결과와 중복·역순·늦은 결과는 효과를 만들지 않는다. 부모의 native turn만 바뀐 자식 호출은 같은 generation 안에서 계속 유효하다. 비진입 `step`·`resume`·`pause`·`finish`가 다른 task를 가리키면 상태 변경 없이 짧은 불일치 결과만 돌려준다.
+- 바인딩 없는 일반 작업·Skill 읽기는 바인딩·원장·진행 줄을 만들지 않는다. dial 범위 안내(SessionStart 선출·체인, strict의 활성 바인딩이 없는 턴의 체인 한 줄, 활성 바인딩이 없는 턴의 편집 안내)는 훅 렌더 소관이다.
+- main actor의 이전 native turn·자식의 이전 generation·다른 actor·교체 전 task의 호출 결과와 중복·역순·늦은 결과는 효과를 만들지 않는다. 부모의 native turn만 바뀐 자식 호출은 같은 generation 안에서 계속 유효하다. 비진입 `step`·`resume`·`pause`·`finish`가 다른 task를 가리키면 상태 변경 없이 짧은 불일치 결과만 돌려준다. 다른 task가 active일 때의 `implement` `step`도 같다.
 - lock 획득 실패는 참여를 만들지 않는다. 경계 훅은 손상 파일을 그대로 두며, 진입 Pre가 손상·만료·generation 0 상태를 native turn으로 다시 seed한다. 유효하고 만료되지 않은 generation > 0 상태의 anchor는 도구 이벤트가 교체하지 않는다.
-- 경계 훅만 지나간 actor는 파일이 없다. 비진입 Pre·Bash Pre도 파일을 만들지 않는다. 참여한 적 없는 자식은 재개 뒤에도 첫 턴으로 간주되어 handoff 줄을 다시 받고 진입 요청으로 참여할 수 있다.
+- 경계 훅만 지나간 actor는 파일이 없다. 비진입 Pre·Bash Pre도 파일을 만들지 않는다. 활성 바인딩이 없는 main actor의 편집 Pre는 파일을 만든다. 참여한 적 없는 자식은 재개 뒤에도 첫 턴으로 간주되어 handoff 줄을 다시 받고 진입 요청으로 참여할 수 있다.
 - 배포 훅의 프로세스 간 검증은 두 Pre 관측 뒤 Post를 정방향·역방향으로 처리하여 호출과 카운터 보존을 확인합니다. actor lock을 명시적으로 유지한 별도 경우에는 동시 Post가 상태를 바꾸지 않고 종료하며, 잠금 해제 후 같은 Post를 다시 전달하면 정상 처리됨을 확인합니다. CI는 임의 동시 실행이 항상 잠금 제한 시간 안에 성공한다고 가정하지 않습니다.
 - `resume`은 기존 바인딩(같은 task의 active 또는 paused)만 갱신하며 새 바인딩을 만들지 않는다.
 
@@ -57,4 +59,4 @@
 
 ## Last Updated
 
-2026-09-27
+2026-09-29

@@ -33,13 +33,14 @@
 - standard/strict는 명시적으로 참여한 작업의 lifecycle ACK, CHECK 판정 변화와 반복 실패 관측, 그리고 선출·체인·진행 줄을 제공합니다. 어느 것도 모델의 방법 선택을 제한하지 않습니다. 규칙·드리프트 상세는 명시적 settings 조회, 런타임 다이얼은 `runtime` 도구의 `dial`(`dial_op: get`)에서 확인합니다.
 - runtime 요청은 명시적 절대 project_root, kebab-case task, action을 받으며 start/resume에는 change 또는 review intent를 요구하고, `step`의 intent는 선택이며 생략하면 `parseWorkflowRequest`가 유도합니다(review-plan·request-review·receive-review → review, 나머지 → change, 명시 intent 우선). 도구의 accepted는 입력 검증일 뿐입니다. 같은 native invocation ID·actor·turn·generation·입력에 대응하는 성공한 Post만 상태를 적용하고 ACK를 보냅니다.
 - Claude와 Codex는 build 시 고정된 host runtime을 사용하고 plugin-compiler가 Codex 경로를 선택합니다. event payload의 필드 유무로 호스트를 추측하여 다른 namespace의 참여를 만들지 않습니다.
-- 진입 `step`(write-plan, execute)과 `start`만 새 바인딩을 만들거나 다른 task로 교체하며 카운터를 초기화합니다. `resume`과 나머지 `step`은 같은 task의 기존 바인딩(active 또는 paused)만 갱신하고, 바인딩이 없으면 아무것도 만들지 않습니다. pause는 중단, finish는 연결 종료이며 작업 성공 인증이 아닙니다. 이미 활성인 같은 작업에서 스킬만 바뀌면 무ACK로 조용히 갱신됩니다.
-- UserPromptSubmit은 standard/strict에서 기존 native-turn anchor를 갱신하되 만들지 않고 이전 binding을 suspend하지 않고 활성 바인딩이면 진행 줄을 유지합니다(paused는 standard에서 무주입, strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄). off/advisory에서는 이전 binding을 suspend합니다. 어느 다이얼에서도 진행 중 호출은 폐기합니다. suspend된 바인딩(off/advisory 턴·세션 경계 뒤)이나 pause한 작업을 이어 갈 때만 모델이 task 이름으로 resume합니다. 진입 요청의 Pre만 부재·만료·손상 actor를 seed하며, 유효한 기존 anchor는 교체하지 않습니다.
+- 진입 `step`(write-plan, execute, implement)과 `start`만 새 바인딩을 만들며 카운터를 초기화합니다. 다른 task의 바인딩을 교체하는 것은 `start`와 write-plan·execute `step`뿐입니다. `implement`는 바인딩이 없거나 다른 task가 paused일 때만 task를 열고, 다른 task가 active이면 mismatch로 남습니다. `resume`과 나머지 `step`은 같은 task의 기존 바인딩(active 또는 paused)만 갱신하고, 바인딩이 없으면 아무것도 만들지 않습니다. pause는 중단, finish는 연결 종료이며 작업 성공 인증이 아닙니다. 이미 활성인 같은 작업에서 스킬만 바뀌면 무ACK로 조용히 갱신됩니다.
+- UserPromptSubmit은 standard/strict에서 기존 native-turn anchor를 갱신하되 만들지 않고 이전 binding을 suspend하지 않고 활성 바인딩이면 진행 줄을 유지합니다(paused는 standard에서 무주입, strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄). off/advisory에서는 이전 binding을 suspend합니다. 어느 다이얼에서도 진행 중 호출은 폐기합니다. suspend된 바인딩(off/advisory 턴·세션 경계 뒤)이나 pause한 작업을 이어 갈 때만 모델이 task 이름으로 resume합니다. 진입 요청의 Pre와 활성 바인딩이 없는 main actor의 편집 Pre만 부재·만료·손상 actor를 seed하며, 유효한 기존 anchor는 교체하지 않습니다.
 - off/advisory는 신규 참여 관측과 주입을 하지 않습니다. 예외로 신뢰되는 턴·세션 경계에서는 기존 metadata/anchor를 무효화하여 이전 참여가 살아남지 않게 합니다. 기존 상태가 없으면 새 파일을 만들지 않습니다. 명시 gates API의 동작은 유지합니다.
-- startup/resume/clear/fork는 기존 바인딩을 suspend하며 compact는 유지합니다. 자식 actor는 자신의 진입 요청에서만 생기고 부모 binding을 상속하지 않습니다. 자식도 필요한 경우 명시적 `start`나 진입 `step`을 호출합니다.
+- startup/resume/clear/fork는 기존 바인딩을 suspend하며 compact는 유지합니다. 자식 actor는 자신의 진입 요청에서만 생기고 부모 binding을 상속하지 않습니다. 자식의 편집은 관측하거나 안내하지 않습니다. 자식도 필요한 경우 명시적 `start`나 진입 `step`을 호출합니다.
 - 상태는 host/session/agent 해시별로 격리됩니다. actor는 7일 무관측, invocation은 24시간 후 만료하며 해당 actor 접근 시 정리합니다. 별도로 MCP 서버 시작 시 72시간 넘게 수정되지 않은 `sessions`·`tasks` 항목을 정리하며 git 추적·ignore 여부는 보지 않습니다. 구 `session-signals.json`/`.lock` 이름은 ignore 목록에만 남고 더 이상 읽거나 쓰지 않습니다.
 - Bash의 Pre 관측과 Post 결과가 현재 참여와 일치할 때만 활성 task의 CHECK를 기록합니다. 다른 task의 같은 명령은 건드리지 않습니다. 동일 판정/증거의 재알림은 억제하고 회귀와 agent 증거 표시는 보존합니다. 중단한 실행은 판정·실패로 세지 않습니다.
 - 락 실패 시 무잠금 mutation을 하지 않습니다. 경계 철회 실패는 revocation marker를 시도합니다. marker가 있는 동안 관측·완료·전이와 바인딩 읽기는 거부되고, 같은 actor의 다음 경계 트랜잭션(UserPromptSubmit·SessionStart·SubagentStart)이 커밋하면 실패한 경계의 suspend 의도를 적용하고 generation을 올려 진행 중 호출을 폐기한 뒤 자신이 본 marker를 지웁니다. actor와 marker 쓰기가 모두 실패하면 저장 복구 뒤 옛 상태가 나타날 수 있어 무누출 보장 범위 밖입니다. actor 상태와 원장은 별도 파일이므로 crash 시 정확히 한 번 기록·알림을 보장하지 않습니다.
+- 편집 안내: PreToolUse 매처는 `Bash|Edit|Write|NotebookEdit|apply_patch|mcp__plugin_seiri_tools__runtime`이며 Codex 생성물은 runtime 토큰만 `mcp__seiri__runtime`으로 바뀝니다. standard/strict에서 활성 바인딩이 없는 main actor가 한 턴에 저장소 안의 파일을 처음 편집하면 한 줄(`First edit this turn …`)을, 같은 턴에 서로 다른 파일 3개째를 편집하면 한 줄(`<n> files edited this turn …`)을 `additionalContext`로 주입하고, 그 턴의 나머지 편집에는 침묵합니다. 저장소 밖 경로와 `.seiri/` 아래 경로는 세지 않습니다. 활성 바인딩, 자식 actor(`agent_id`), off/advisory에서는 주입도 상태도 만들지 않으며, paused 바인딩은 안내 대상입니다. Codex `apply_patch`는 엔트리가 `@ogham/cross-platform`의 `normalizeCodexToolUses`로 `Write`·`Edit` 논리 연산으로 펼치고(삭제는 제외, Move는 목적지만) 한 호출의 안내를 병합해 한 번에 냅니다. 편집 추적은 actor 레코드의 `edits`에 저장소 상대 경로의 해시와 이미 낸 안내 종류만 담고 턴 경계마다 지웁니다. 안내는 스킬 이름과 파일 수만 담고, 스킬을 로드하거나 도구를 차단하지 않습니다.
 - 훅은 차단·허용·입력수정 결정을 반환하지 않습니다. 무주입 entry는 stdout을 비우고 오류는 진단 채널에 기록합니다. 규칙 본문, 명령 원문, 전체 출력, EXPECT 원문이나 거부한 설정값을 지시문처럼 반사하지 않습니다. 외부 timeout은 stdin fail-open deadline보다 길어야 합니다.
 - InstructionsLoaded는 dormant이며 주입하지 않습니다. 실제 두 호스트의 ID·응답 형식 기록은 확보했지만, 이전 턴 Pre/Post를 새 턴 뒤로 강제 지연한 native interleave는 직접 관측하지 못했습니다. 합성 역순·지연 테스트를 native 스케줄링 수용으로 바꾸어 보고하지 않습니다.
 
@@ -167,6 +168,12 @@
 - implement 는 새 심볼을 추가하는 변경에서 그 심볼의 부재를 유효한 변경 전 실패로 허용하되, 일반적인 missing import는 허용하지 않는다.
 - trace-cause 는 테스트·CLI·UI·runtime 중 보고된 증상을 재현하는 명령을 기준선으로 삼고 같은 명령으로 수정 전후를 비교한다.
 
+### AC-edit-moment-notice — 첫 편집에서 선출을 재천명한다
+
+- standard/strict에서 활성 바인딩이 없는 main actor의 턴 첫 편집과 서로 다른 파일 3개째 편집에만 한 줄씩 안내하고, 같은 턴의 다른 편집·활성 바인딩·자식 actor·off/advisory·저장소 밖과 `.seiri/` 경로는 무주입이다.
+- Claude `Edit`·`Write`·`NotebookEdit`와 Codex `apply_patch`가 같은 파일 수에 같은 안내를 낸다. Codex 한 patch가 3파일을 고치면 두 안내가 한 출력으로 나간다.
+- actor 레코드는 경로 원문이 아니라 저장소 상대 경로의 해시만 담는다.
+
 ### AC-hook-input-confinement — 저장소 입력은 컨텍스트 명령이 아니다
 
 - 미충족 게이트의 훅 판정 줄에는 `EXPECT` 원문이 없고, 잘못된 intervention 경고에는 거부된 원값이 없다.
@@ -205,6 +212,7 @@
 
 ## History
 
+- 2026-09-29 — 선출 재천명 순간을 계획 텍스트 이전에서 활성 바인딩이 없는 턴의 첫 편집과 3파일째 편집으로 옮기고, `implement`를 바인딩을 만드는 진입 단계에 넣되 다른 active task는 교체하지 못하게 했습니다. 세션 시작 한 줄만으로는 개발 세션에서도 체인이 발화하지 않았고, 편집 유무가 개발과 리뷰·분석을 두 호스트에서 같게 가르는 가장 값싼 관측이기 때문입니다. 저장소 소유자가 훅 관측 표면 확장을 승인했습니다.
 - 2026-09-27 — 실행할 계획의 게이트 원장을 선택에서 필수로 되돌렸습니다. 원장 작성을 모델 재량에 맡기면 계획마다 원장 유무가 달라져 실행 완료를 CHECK 증거로 닫는 흐름이 보장되지 않기 때문입니다. 계획 없는 작업과 참여 활성화에는 여전히 원장을 요구하지 않습니다.
 - 2026-09-27 — 선출 문구에 시점(계획 텍스트를 쓰기 전)과 사용자 지정 절차의 지위(단계의 행위자를 정할 뿐 단계·계획 위치를 바꾸지 않음)를 명시했습니다. 사용자가 검토·구현 주체를 지정한 다단계 요청에서 모델이 워크플로우를 대체된 것으로 읽고 계획을 seiri 밖에 쓴 사례를 막기 위한 결정입니다.
 - 2026-09-26 — 전역 선출과 스킬 로드 기반 체인을 명시적 작업 참여로 바꿨습니다. 설명·리뷰·일반 질문에서 불필요한 절차를 주입하지 않고 모델의 범위·방법 판단을 보존하기 위한 결정입니다.
@@ -235,4 +243,4 @@
 
 ## Last Updated
 
-2026-09-27 — MCP 시작 시 git 추적·ignore 여부와 무관한 72시간 유휴 상태 정리를 반영했습니다.
+2026-09-29 — 편집 순간 안내와 `implement` 진입 단계를 반영했습니다.
