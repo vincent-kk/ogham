@@ -1,7 +1,7 @@
 ---
 name: write-plan
 user-invocable: true
-description: 'Plan a change that touches more than one file or its tests, before the first edit. Follow the selected planning method. Never for a review, a diff explanation, or a read-only analysis; a single-file surgical change needs no plan.'
+description: 'Plan a behavior change to source or tests — new logic, a fix across units, a refactor — before the first edit. Follow the selected planning method. Never for documentation, comments, formatting, a review, or an explanation; one contained fix goes to implement instead.'
 argument-hint: '[the spec or goal to plan]'
 version: '0.1.0'
 complexity: moderate
@@ -12,11 +12,11 @@ plugin: seiri
 
 
 
-Plan substantial changes; choose reversible details autonomously. Ask only about consequential unresolved choices. Explanations and short investigations need no plan.
+Plan behavior changes; choose reversible details autonomously. Ask only about consequential unresolved choices.
 
 ## Workflow
 
-Follow [workflow lifecycle](../execute/references/workflow-lifecycle.md). Call `mcp__seiri__runtime({ action: "step", step: "write-plan", project_root, task })` with a kebab-case task name; read its reply before other tools run, without retrying or waiting on the hook acknowledgement. A single surgical change needs no plan or call.
+Follow [workflow lifecycle](../execute/references/workflow-lifecycle.md). Call `mcp__seiri__runtime({ action: "step", step: "write-plan", project_root, task })` with a kebab-case task name; read its reply before other tools run, without retrying or waiting on the hook acknowledgement. One contained fix enters implement instead.
 
 ## Choose the planning method
 
