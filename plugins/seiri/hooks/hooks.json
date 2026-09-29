@@ -26,7 +26,7 @@
     ],
     "PreToolUse": [
       {
-        "matcher": "Bash|mcp__plugin_seiri_tools__runtime",
+        "matcher": "Bash|Edit|Write|NotebookEdit|apply_patch|mcp__plugin_seiri_tools__runtime",
         "hooks": [
           {
             "type": "command",

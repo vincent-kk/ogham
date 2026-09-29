@@ -43,14 +43,21 @@ const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 // lists render lines this hook never emits — tree-shaking regression
 // canaries: their presence means a constants file stopped shaking.
 const hookEntries = [
-  { name: 'pre-tool-use', entry: 'preToolUse', maxBytes: LIGHT_HOOK_BYTES },
+  {
+    name: 'pre-tool-use',
+    entry: 'preToolUse',
+    // carries @ogham/cross-platform's apply_patch parser for Codex edit notices
+    maxBytes: 22 * KILO_BYTE,
+    forbiddenContent: [/Election/],
+  },
   {
     name: 'setup',
     entry: 'setup',
     // One session-start read of rule status, dial and configLoader chains,
     // plus the fixed election/chain/posture render and, after compaction, the
-    // active progress line. Runs at every SessionStart source.
-    maxBytes: 22 * KILO_BYTE,
+    // active progress line. Runs at every SessionStart source. Actor-state
+    // validation of the per-turn edit record took it past 22 KiB.
+    maxBytes: 23 * KILO_BYTE,
   },
   {
     name: 'user-prompt-submit',
@@ -62,8 +69,9 @@ const hookEntries = [
     name: 'post-tool-use',
     entry: 'postToolUse',
     // Paired provenance, atomic actor state, gate judging and progress-line
-    // rendering share this entry.
-    maxBytes: 22 * KILO_BYTE,
+    // rendering share this entry. Actor-state validation of the per-turn
+    // edit record took it past 22 KiB.
+    maxBytes: 23 * KILO_BYTE,
     forbiddenContent: [/Election/, /A plan was produced/],
   },
   {

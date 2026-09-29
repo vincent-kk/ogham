@@ -8,6 +8,7 @@ const pluginRoot = fileURLToPath(new URL('../../../', import.meta.url));
 
 /** Election text belongs to `hooks/setup/render/`; a match here means a constants file stopped shaking. */
 const ELECTION_FREE_BUNDLES = [
+  'pre-tool-use',
   'user-prompt-submit',
   'post-tool-use',
   'subagent-start',

@@ -1,3 +1,4 @@
+import type { EditNoticeKind } from '../constants/editNotice.js';
 import type { WorkflowSkill } from '../constants/workflowChain.js';
 
 import type { HookBaseInput } from './hooks.js';
@@ -71,6 +72,14 @@ export interface WorkflowInvocation {
   request?: WorkflowRequest;
 }
 
+/** One turn's file edits with no active binding; cleared at every turn boundary. */
+export interface WorkflowEdits {
+  /** `workflowHash` of each distinct repository-relative path edited this turn. */
+  files: string[];
+  /** Edit notices already injected this turn, each at most once. */
+  notices: EditNoticeKind[];
+}
+
 /** Atomic actor state. Native IDs and tool output are never persisted. */
 export interface WorkflowState {
   version: 1;
@@ -81,6 +90,8 @@ export interface WorkflowState {
   invocations: Record<string, WorkflowInvocation>;
   /** Invocations already seen in this turn, including completed generations. */
   seen: string[];
+  /** This turn's edit observations; absent until an unbound edit is recorded. */
+  edits?: WorkflowEdits;
 }
 
 /** Statically selected by the hook build; tests can inject either concrete adapter. */

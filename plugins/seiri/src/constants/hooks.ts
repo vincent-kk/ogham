@@ -60,7 +60,8 @@ const MCP_SERVER_KEY = 'tools';
  * `hooks.json` cannot import this file, so each name is stated twice: once
  * as a matcher there, once as the payload check here. This constant pins
  * the names `src/__tests__/wiring.test.ts` checks against `hooks.json` to
- * keep the two in step.
+ * keep the two in step. The file-edit tools the PreToolUse matcher also
+ * selects are owned by `constants/editNotice.ts`, not listed here.
  */
 export const HostTool = {
   BASH: BASH_TOOL,

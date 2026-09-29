@@ -8,6 +8,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import { portableDirname, portableJoin } from '@ogham/cross-platform';
 import { describe, expect, it } from 'vitest';
 
+import { CODEX_PATCH_TOOL, EDIT_TOOLS } from '../constants/editNotice.js';
 import {
   CODEX_RUNTIME_TOOL,
   DORMANT_HOOKS,
@@ -300,6 +301,22 @@ describe('wiring', () => {
         '/bridge/codex/',
       ),
     );
+  });
+
+  it('selects every edit tool and the Codex patch tool in both PreToolUse matchers', () => {
+    for (const manifest of [
+      read('hooks', 'hooks.json'),
+      read('.codex-plugin', 'hooks.json'),
+    ]) {
+      const hooks = JSON.parse(manifest) as {
+        hooks: { PreToolUse?: Array<{ matcher?: string }> };
+      };
+      const tools = (hooks.hooks.PreToolUse ?? []).flatMap(
+        (group) => group.matcher?.split('|') ?? [],
+      );
+      for (const tool of [...EDIT_TOOLS, CODEX_PATCH_TOOL])
+        expect(tools).toContain(tool);
+    }
   });
 
   it('ships no agents — the manifest must not claim otherwise', () => {
