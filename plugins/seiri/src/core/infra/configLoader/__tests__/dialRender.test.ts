@@ -42,7 +42,7 @@ describe('dial render', () => {
     const strict = renderPostureLines('strict');
     expect(strict).toHaveLength(2);
     expect(strict[0]).toBe(renderPostureLines('standard')[0]);
-    expect(strict[1]).toContain('Posture (strict)');
+    expect(strict[1]).toContain('Posture[strict]');
     expect(strict[1]).toContain('verification');
   });
 

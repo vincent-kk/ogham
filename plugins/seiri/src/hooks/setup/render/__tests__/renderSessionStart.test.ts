@@ -46,7 +46,7 @@ function rule(overrides: Partial<RuleDocStatus> = {}): RuleDocStatus {
 
 const ELECTION = 'Election: fixture line.';
 const CHAIN = 'Workflow: fixture chain.';
-const POSTURE = 'Posture (strict): fixture posture.';
+const POSTURE = 'Posture[strict]: fixture posture.';
 
 describe('renderSessionStart', () => {
   it('orders rule summary, dial, drift, election, chain at standard with rule status', () => {

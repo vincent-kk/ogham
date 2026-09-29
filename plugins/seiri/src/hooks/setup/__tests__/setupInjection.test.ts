@@ -60,7 +60,7 @@ it('carries the strict-only posture line at strict, absent at standard', () => {
     hook_event_name: 'SessionStart',
     source: 'startup',
   }).hookSpecificOutput?.additionalContext;
-  expect(strictContext).toContain('Posture (strict)');
+  expect(strictContext).toContain('Posture[strict]');
 
   const standardContext = processSessionStart({
     cwd: seedRepo('standard'),
