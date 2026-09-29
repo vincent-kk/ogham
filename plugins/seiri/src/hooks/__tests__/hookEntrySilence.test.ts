@@ -224,11 +224,12 @@ describe('hook entry silence', () => {
       const boundary = run('user-prompt-submit.mjs', {
         hook_event_name: 'UserPromptSubmit',
       });
-      expect({
-        status: boundary.status,
-        stdout: boundary.stdout,
-        stderr: boundary.stderr,
-      }).toEqual({ status: 0, stdout: '', stderr: '' });
+      expect(boundary.status).toBe(0);
+      expect(boundary.stderr).toBe('');
+      expect(
+        (JSON.parse(boundary.stdout) as HookOutput).hookSpecificOutput
+          ?.additionalContext,
+      ).toContain('No task bound. Before editing:');
       const request = {
         action: 'start',
         project_root: repoRoot,

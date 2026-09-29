@@ -141,7 +141,7 @@ export function createServer(): McpServer {
           .enum(['off', 'advisory', 'standard', 'strict'])
           .nullish()
           .describe(
-            'Dial position for dial_op "set". off and advisory add no automatic context and suspend existing participation at turn boundaries. standard and strict open each session with the election and chain lines and report task progress once an entry step or start binds a task; strict also repeats the chain line on turns with no active task. No position blocks work or forces a skill call.',
+            'Dial position for dial_op "set". off and advisory add no automatic context and suspend existing participation at turn boundaries. standard and strict open each session with the election and chain lines, state the entry line on turns with no active task, and report task progress once an entry step or start binds a task. No position blocks work or forces a skill call.',
           ),
       },
     },

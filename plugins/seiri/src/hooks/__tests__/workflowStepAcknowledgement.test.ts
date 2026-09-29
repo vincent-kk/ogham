@@ -213,7 +213,7 @@ it('finish clears a redundant in-flight entry step, leaving no ACK and no bindin
   });
   expect(stepResult.hookSpecificOutput).toBeUndefined();
 });
-it('a non-entry step with no prior binding is rejected: no ACK, no binding, and the next turn stays silent', () => {
+it('a non-entry step with no prior binding is rejected: no ACK or binding, and the next turn gets the entry line', () => {
   const base = fixture();
   processUserPromptSubmit({ ...base, hook_event_name: 'UserPromptSubmit' });
   const rejected = call(
@@ -239,8 +239,8 @@ it('a non-entry step with no prior binding is rejected: no ACK, no binding, and 
       ...base,
       prompt_id: 'turn-b',
       hook_event_name: 'UserPromptSubmit',
-    }),
-  ).toEqual({ continue: true });
+    }).hookSpecificOutput?.additionalContext,
+  ).toContain('No task bound. Before editing:');
 });
 
 /**

@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 import { portableJoin } from '@ogham/cross-platform';
@@ -6,7 +6,6 @@ import { afterEach, describe, expect, it } from 'vitest';
 
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
 import type { InterventionLevel } from '../../../types/config.js';
-import { renderChainLine } from '../../shared/progressLine/renderChainLine.js';
 import { processUserPromptSubmit } from '../userPromptSubmit.js';
 
 /** Isolated projects owned by this suite. */
@@ -27,8 +26,8 @@ function seedRepo(intervention: InterventionLevel): string {
 }
 
 describe('user-turn boundary', () => {
-  it.each(['off', 'advisory', 'standard'] as const)(
-    'does not elect skills at %s',
+  it.each(['off', 'advisory'] as const)(
+    'stays silent at %s',
     (intervention) => {
       expect(
         processUserPromptSubmit({
@@ -41,15 +40,33 @@ describe('user-turn boundary', () => {
     },
   );
 
-  it('falls back to the chain line at strict with no active binding', () => {
+  it('states the standard entry line without creating an actor file', () => {
+    const cwd = seedRepo('standard');
     expect(
       processUserPromptSubmit({
-        cwd: seedRepo('strict'),
+        cwd,
         session_id: 'session-a',
         prompt_id: 'turn-a',
         hook_event_name: 'UserPromptSubmit',
       }).hookSpecificOutput?.additionalContext,
-    ).toBe(renderChainLine());
+    ).toContain(
+      '[seiri] No task bound. Before editing: a behavior change to source or tests',
+    );
+    expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(false);
+  });
+
+  it('states the strict entry line with no binding', () => {
+    const context = processUserPromptSubmit({
+      cwd: seedRepo('strict'),
+      session_id: 'session-a',
+      prompt_id: 'turn-a',
+      hook_event_name: 'UserPromptSubmit',
+    }).hookSpecificOutput?.additionalContext;
+    expect(context).toContain(
+      'No task bound. Before editing: a behavior change to source or tests',
+    );
+    expect(context).toContain('checked by seiri:review-plan');
+    expect(context).not.toContain('Workflow:');
   });
 
   it.each(['I am done', 'Review this plan', 'The test failed'])(
@@ -63,7 +80,7 @@ describe('user-turn boundary', () => {
           hook_event_name: 'UserPromptSubmit',
           prompt,
         }).hookSpecificOutput?.additionalContext,
-      ).toBe(renderChainLine());
+      ).toContain('No task bound. Before editing:');
     },
   );
 

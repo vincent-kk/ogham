@@ -28,7 +28,7 @@
 
 ### AC-workflow-lifecycle — 참여 격리
 
-- 바인딩 없는 일반 작업·Skill 읽기는 바인딩·원장·진행 줄을 만들지 않는다. dial 범위 안내(SessionStart 선출·체인, strict의 활성 바인딩이 없는 턴의 체인 한 줄)는 훅 렌더 소관이다.
+- 바인딩 없는 일반 작업·Skill 읽기는 바인딩·원장·진행 줄을 만들지 않는다. dial 범위 안내(SessionStart 선출·체인, standard/strict의 활성 바인딩이 없는 턴의 진입 줄)는 훅 렌더 소관이다.
 - main actor의 이전 native turn·자식의 이전 generation·다른 actor·교체 전 task의 호출 결과와 중복·역순·늦은 결과는 효과를 만들지 않는다. 부모의 native turn만 바뀐 자식 호출은 같은 generation 안에서 계속 유효하다. 비진입 `step`·`resume`·`pause`·`finish`가 다른 task를 가리키면 상태 변경 없이 짧은 불일치 결과만 돌려준다. 다른 task가 active일 때의 `implement` `step`도 같다.
 - lock 획득 실패는 참여를 만들지 않는다. 경계 훅은 손상 파일을 그대로 두며, 진입 Pre가 손상·만료·generation 0 상태를 native turn으로 다시 seed한다. 유효하고 만료되지 않은 generation > 0 상태의 anchor는 도구 이벤트가 교체하지 않는다.
 - 경계 훅만 지나간 actor는 파일이 없다. 비진입 Pre·Bash Pre도 파일을 만들지 않는다. 참여한 적 없는 자식은 재개 뒤에도 첫 턴으로 간주되어 handoff 줄을 다시 받고 진입 요청으로 참여할 수 있다.

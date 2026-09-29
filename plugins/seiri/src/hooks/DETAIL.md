@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 훅은 비차단이며 규칙 본문은 주입하지 않습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift를 주입합니다(선출·posture·규칙 요약은 `hooks/setup/render/`; SessionStart의 체인 한 줄은 `WORKFLOW_CHAIN_LINE`(`constants/workflowChain.ts`)를 `renderPostureLines`로 얻고, 진행 줄·진행-줄 형식 ACK·subagent 줄은 `hooks/shared/progressLine/`의 concrete 파일에서 가져옵니다). 진입 `step`이나 `start`로 바인딩이 생기면 PostToolUse는 `created`·`switched`에서, UserPromptSubmit은 활성 바인딩이 있는 매 턴에, SubagentStart는 부모 main의 활성 바인딩이 있을 때 1회 진행 줄을 주입하고, strict UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다. off/advisory와 주입 대상이 없는 이벤트는 wire stdout까지 비웁니다.
+- 훅은 비차단이며 규칙 본문은 주입하지 않습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift를 주입합니다(선출·posture·규칙 요약은 `hooks/setup/render/`; SessionStart의 체인 한 줄은 `WORKFLOW_CHAIN_LINE`(`constants/workflowChain.ts`)를 `renderPostureLines`로 얻고, 진행 줄·진행-줄 형식 ACK·subagent 줄은 `hooks/shared/progressLine/`의 concrete 파일에서 가져옵니다). 진입 `step`이나 `start`로 바인딩이 생기면 PostToolUse는 `created`·`switched`에서, UserPromptSubmit은 활성 바인딩이 있는 매 턴에, SubagentStart는 부모 main의 활성 바인딩이 있을 때 1회 진행 줄을 주입합니다. UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) standard/strict에 맞는 진입 줄을 주입합니다. off/advisory와 주입 대상이 없는 이벤트는 wire stdout까지 비웁니다.
 - 예외는 fail-open으로 처리하고 logHookFailure로 진단합니다. stdin deadline은 외부 timeout보다 짧습니다.
 - off/advisory는 신규 관측·주입을 금지하지만 기존 참여의 신뢰되는 턴·세션 경계 철회는 허용합니다.
 - 훅은 concrete 내부 파일만 import하고 검증 런타임·MCP SDK·glob 엔진을 포함하지 않습니다. 공유 패키지는 공개 진입점으로 사용합니다.
@@ -12,7 +12,7 @@
 ## API Contracts
 
 - SessionStart는 startup/resume/clear/fork에서 기존 바인딩을 suspend하고(`observeBoundary(identity, false, now, { suspend: true })`) compact를 유지하며, standard/strict에서 선출·체인·규칙 요약·다이얼·drift를 주입합니다. 규칙 상태를 읽지 못해도 선출·체인 줄은 나옵니다. compact에서 이 actor 자신의 바인딩이 active로 읽히면(`readActorBinding`, 무락·무쓰기) 진행 줄을 마지막에 덧붙입니다.
-- UserPromptSubmit은 기존 native-turn anchor를 갱신하며 파일이 없으면 아무것도 만들지 않습니다. off/advisory는 이전 binding을 suspend하고(`suspend: !enabled`) 항상 침묵하며, standard/strict는 suspend하지 않고 활성 바인딩이 있으면 진행 줄을(standard의 paused 바인딩은 무주입), strict는 활성 바인딩이 없으면(paused 포함) 체인 한 줄을 주입합니다.
+- UserPromptSubmit은 기존 native-turn anchor를 갱신하며 파일이 없으면 아무것도 만들지 않습니다. off/advisory는 이전 binding을 suspend하고(`suspend: !enabled`) 항상 침묵하며, standard/strict는 suspend하지 않고 활성 바인딩이 있으면 진행 줄만, 없으면(paused 포함) 해당 다이얼의 진입 줄만 주입합니다.
 - SubagentStart는 부모 binding을 상속하지 않고 자식 actor를 만들지 않습니다. 부모가 main actor이고 활성 바인딩이 있으면(`readActorBinding`, 무락·무쓰기) 진행 줄을 주입합니다. 참여한 적 없는 자식은 매번 첫 턴으로 간주되어 handoff 줄을 다시 받으며 진입 요청으로 참여할 수 있습니다. generation이 `0`보다 큰 재개 자식은 진행 줄 없이 binding을 suspend하고 anchor를 제거하며, generation 증가와 진행 중 호출 폐기로 늦은 결과를 무효화합니다.
 - PreToolUse의 진입 요청은 부재·만료·손상 actor를 payload의 native turn으로 seed합니다. 그 외에는 기존 anchor와 일치하는 runtime 참여 액션(`step`·`start`·`resume`·`pause`·`finish`; `dial`은 제외)이나 Bash invocation만 기록하며 권한 결정·입력수정을 하지 않습니다. 결과는 항상 `EMPTY_RESULT`입니다.
 - PostToolUse와 Claude Failure는 정확한 paired invocation의 현재 generation/actor/task에만 효과를 적용합니다. runtime의 `created`·`switched`는 진행 줄 형식 ACK, `mismatch`는 안내 문구를 내고, `rejected`는 무주입입니다. `updated`는 같은 task `step`이면 무주입이고, `resume`·`pause`·`finish`는 기존 control-verb ACK 문구로 응답합니다. Bash는 활성 task의 증거/실패 변화만 제공합니다.
