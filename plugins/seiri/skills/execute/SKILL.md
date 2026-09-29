@@ -16,7 +16,7 @@ This skill may be invoked automatically. Prefer autonomous judgment: when a choi
 
 ## Workflow
 
-Follow [workflow lifecycle](references/workflow-lifecycle.md). Call `mcp__plugin_seiri_tools__runtime({ action: "step", step: "execute", project_root, task })` with a kebab-case task name and read its reply before starting other tools in this skill; do not retry or wait for the hook acknowledgement. execute is entered with an approved plan or its stated skip; a single surgical change needs no call.
+Follow [workflow lifecycle](references/workflow-lifecycle.md). Call `mcp__plugin_seiri_tools__runtime({ action: "step", step: "execute", project_root, task })` with a kebab-case task name and read its reply before starting other tools in this skill; do not retry or wait for the hook acknowledgement. execute is entered with an approved plan or its stated skip; one contained fix enters implement instead.
 
 **0. Resume from the plan and its ledger.** Call `mcp__plugin_seiri_tools__gates({ action: "status", task })`. If it reports no ledger — a plan written outside write-plan — derive one from the plan's completion criteria per [gate ledger format](references/gates-format.md) before task one.
 

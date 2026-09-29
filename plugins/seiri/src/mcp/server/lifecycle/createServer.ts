@@ -101,7 +101,7 @@ export function createServer(): McpServer {
     ToolName.RUNTIME,
     {
       description:
-        'Session runtime: optional workflow participation after a skill has been selected, plus the intervention dial. step is the first verb of every chain skill; write-plan and execute are entry steps that create or switch a binding, the other seven only update an existing one for the same task. Sequence participation lifecycle calls (step, start, resume, pause, finish); accepted validates the request, and only the matching PostToolUse acknowledgment confirms participation. No ledger is required. Missing acknowledgment or disabled assistance never blocks work. finish ends participation, not proof of success. dial reads or moves the intervention valve immediately, with no acknowledgment pair.',
+        'Session runtime: optional workflow participation after a skill has been selected, plus the intervention dial. step is the first verb of every chain skill; write-plan, execute and implement are entry steps that create a binding; write-plan and execute may also switch a different bound task, implement opens a task only when none is active and never switches an active one; the other six only update an existing binding for the same task. Sequence participation lifecycle calls (step, start, resume, pause, finish); accepted validates the request, and only the matching PostToolUse acknowledgment confirms participation. No ledger is required. Missing acknowledgment or disabled assistance never blocks work. finish ends participation, not proof of success. dial reads or moves the intervention valve immediately, with no acknowledgment pair.',
       inputSchema: {
         action: z
           .enum(['step', 'start', 'resume', 'pause', 'finish', 'dial'])
@@ -123,7 +123,7 @@ export function createServer(): McpServer {
           .enum(WORKFLOW_SKILLS)
           .optional()
           .describe(
-            'Calling chain skill; required for action "step". write-plan and execute are entry steps.',
+            'Calling chain skill; required for action "step". write-plan, execute and implement are entry steps.',
           ),
         intent: z
           .enum(['change', 'review'])
@@ -141,7 +141,7 @@ export function createServer(): McpServer {
           .enum(['off', 'advisory', 'standard', 'strict'])
           .nullish()
           .describe(
-            'Dial position for dial_op "set". off and advisory add no automatic context and suspend existing participation at turn boundaries. standard and strict open each session with the election and chain lines and report task progress once an entry step or start binds a task; strict also repeats the chain line on turns with no active task. No position blocks work or forces a skill call.',
+            'Dial position for dial_op "set". off and advisory add no automatic context and suspend existing participation at turn boundaries. standard and strict open each session with the election and chain lines, state the entry line on turns with no active task, and report task progress once an entry step or start binds a task. No position blocks work or forces a skill call.',
           ),
       },
     },

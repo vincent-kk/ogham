@@ -18,4 +18,4 @@ Clarify only enough to proceed without consequential guessing.
 - Record the outcome in the lightest useful form. Include intent, observable success, boundaries, and open decisions only when they add information.
 - Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
 
-If the result is ready for implementation, hand it to `/seiri:write-plan` for multi-step work or `/seiri:implement` for a surgical change.
+If the result is ready for implementation, hand a behavior change to `/seiri:write-plan`, or one contained fix to `/seiri:implement`.

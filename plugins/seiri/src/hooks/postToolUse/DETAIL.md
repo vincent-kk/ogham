@@ -3,7 +3,7 @@
 ## Requirements
 
 - Only an exact paired invocation in the active actor/turn/generation can transition the runtime state machine or record the active task's Bash evidence. Skill loading has no effect.
-- `created` and `switched` transitions inject one progress-line-formatted acknowledgment naming the task, intent, and current step; `mismatch` injects one notice naming the bound task and the ways out: finish it, or enter the requested task through an entry step. `rejected` injects nothing. `updated` injects nothing only for a same-task `step`; an explicit `resume`, `pause`, or `finish` acknowledges on `updated` in the prior control-verb ACK text; a request naming a different bound task yields the mismatch notice instead.
+- `created` and `switched` transitions inject one progress-line-formatted acknowledgment naming the task, intent, and current step; `mismatch` injects one notice naming the bound task and the ways out: finish it, or enter the requested task through `write-plan` or `execute`. `rejected` injects nothing. `updated` injects nothing only for a same-task `step`; an explicit `resume`, `pause`, or `finish` acknowledges on `updated` in the prior control-verb ACK text; a request naming a different bound task yields the mismatch notice instead.
 - off/advisory suppress new observations and injection; trusted boundaries still suspend existing participation.
 
 ## API Contracts
@@ -17,7 +17,7 @@
 
 - Inactive sessions receive no progress-line acknowledgment or gate writes.
 - Bound workflows cannot cross turns, actors, tasks or invocation generations through late results.
-- A non-entry `step`, `resume`, `pause`, or `finish` naming a task other than the bound one leaves state untouched and injects one mismatch line instead of an acknowledgment; an entry `step` naming a different task switches instead.
+- A non-entry `step`, `resume`, `pause`, or `finish` naming a task other than the bound one leaves state untouched and injects one mismatch line instead of an acknowledgment; so does an `implement` step while a different task is active. A `write-plan` or `execute` step naming a different task switches instead, and `implement` creates a binding when none exists.
 
 ### AC-native-invocation-provenance — Recorded host envelopes
 
@@ -26,4 +26,4 @@
 
 ## Last Updated
 
-2026-09-26
+2026-09-29

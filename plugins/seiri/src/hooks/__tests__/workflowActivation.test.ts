@@ -26,13 +26,21 @@ afterEach(() =>
     .forEach((root) => rmSync(root, { recursive: true, force: true })),
 );
 
-it('does not elect skills at a new user turn', () => {
+it('states the entry line without electing skills at a new user turn', () => {
   expect(
     processUserPromptSubmit({
       ...fixture(),
       hook_event_name: 'UserPromptSubmit',
     }),
-  ).toEqual({ continue: true });
+  ).toEqual({
+    continue: true,
+    hookSpecificOutput: {
+      hookEventName: 'UserPromptSubmit',
+      additionalContext: expect.stringContaining(
+        'No task bound. Before editing:',
+      ),
+    },
+  });
 });
 it('states the election and chain at session start', () => {
   const context = processSessionStart({

@@ -6,7 +6,7 @@ Observe selected native invocations for conditional workflow assistance. Loaded 
 
 ## Conventions
 
-- The matcher observes Bash and the `runtime` MCP tool's participation actions (`step`, `start`, `resume`, `pause`, `finish`); `dial` is not in `parseWorkflowRequest`'s whitelist and stays unobserved here.
+- The matcher is `Bash|mcp__plugin_seiri_tools__runtime`. It observes Bash and the `runtime` MCP tool's participation actions (`step`, `start`, `resume`, `pause`, `finish`); `dial` is not in `parseWorkflowRequest`'s whitelist and stays unobserved here.
 
 ## Boundaries
 

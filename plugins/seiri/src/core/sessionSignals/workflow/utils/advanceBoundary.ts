@@ -4,9 +4,9 @@ import type {
 } from '../../../../types/workflow.js';
 
 /**
- * Advance one actor transaction's turn bookkeeping, optionally suspending
- * its binding. Shared by `observeBoundary` (boundaries) and the
- * entry-request seed in `observeInvocation`.
+ * Advance one actor transaction's turn bookkeeping and optionally suspend
+ * its binding. Shared by `observeBoundary` and entry-request seeds in
+ * `observeInvocation`.
  * @param state Actor state, mutated in place.
  * @param turn Turn hash (native for the main actor, agent-stable for a child) to record as the current anchor, or
  *   `undefined` to leave the actor with no anchored turn.

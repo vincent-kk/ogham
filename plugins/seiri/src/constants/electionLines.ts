@@ -1,16 +1,19 @@
 import { INTERVENTION } from './intervention.js';
 
 /**
- * Standard's election line, keyed on work moments rather than word signals.
- * It fixes the moment (before any plan text) and states that a
- * user-prescribed procedure fills the steps' actors, never the steps.
+ * Standard's election line, keyed to behavior changes in source or tests.
+ * Documentation and read-only answers need no workflow; a contained fix can
+ * enter implement directly. User-prescribed procedures name actors in steps.
  */
 export const ELECTION_STANDARD_LINE =
-  'Election: decide it before writing any plan text — a multi-step change → seiri:write-plan; an approved plan → seiri:execute; a failure inside an active task → seiri:trace-cause; your own completion claim inside an active task → seiri:verify. A user-prescribed procedure (who reviews, who implements) names actors inside these steps; it never replaces a step or moves the plan. A single surgical change, an explanation, or a short investigation needs no workflow.';
+  'Election: decide it before the first edit — a behavior change to source or tests (logic, a fix, a refactor) → seiri:write-plan, or seiri:implement for one contained fix; an approved plan → seiri:execute; inside an active task, a failure → seiri:trace-cause and your completion claim → seiri:verify. Documentation, comments, formatting, or a read-only answer (review, explanation, analysis) starts no workflow. A user-prescribed procedure (who reviews, who implements) names actors inside these steps, never replacing a step or moving the plan.';
 
-/** Strict's owner contract, adding review-plan, implement, request-review, and receive-review to the standard four. */
+/**
+ * Strict's election line for behavior changes in source or tests, adding
+ * review-plan, implement, request-review, and receive-review to standard.
+ */
 export const ELECTION_STRICT_LINE =
-  'Election[strict]: decide it before writing any plan text — a multi-step change → seiri:write-plan, checked by seiri:review-plan before seiri:execute carries it out; each planned change unit → seiri:implement; a failure inside an active task → seiri:trace-cause; your own completion claim → seiri:verify; substantial finished work → seiri:request-review; review feedback → seiri:receive-review. A user-prescribed procedure (who reviews, who implements) names actors inside these steps; it never replaces a step or moves the plan. A single surgical change, an explanation, or a short investigation needs no workflow.';
+  'Election[strict]: decide it before the first edit: a behavior change to source or tests → seiri:write-plan, reviewed by seiri:review-plan, then seiri:execute with each unit through seiri:implement; a failure inside an active task → seiri:trace-cause; your completion claim → seiri:verify; finished work → seiri:request-review; review feedback → seiri:receive-review. Documentation, comments, formatting, or a read-only answer starts no workflow. A user-prescribed procedure (who reviews, who implements) names actors inside these steps, never replacing a step or moving the plan.';
 
 /**
  * Returned by the runtime MCP tool's dial posture echo at standard and

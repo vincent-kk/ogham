@@ -77,7 +77,7 @@ it.each(['claude', 'codex'])(
         ...native,
         hook_event_name: 'UserPromptSubmit',
       }),
-    ).toBe('');
+    ).toContain('No task bound. Before editing:');
     const input = {
       ...native,
       tool_use_id: 'start',

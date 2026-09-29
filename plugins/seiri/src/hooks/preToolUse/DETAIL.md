@@ -4,11 +4,11 @@
 
 - standard/strict의 진입 요청은 부재·만료·손상 actor를 payload의 native turn으로 seed한다. 그 외에는 기존 actor anchor와 같은 turn(main은 native turn, 자식은 agent-stable turn)의 Bash 또는 runtime 참여 호출(`step`·`start`·`resume`·`pause`·`finish`)만 관측한다. `dial`은 화이트리스트 밖이라 관측하지 않는다.
 - Bash는 active binding이 있을 때만 기록한다. runtime 참여 호출은 validated explicit request만 기록한다.
-- 관측은 호스트 호출 ID와 입력 해시를 저장하며 결정·주입을 하지 않는다.
+- 호출 관측은 호스트 호출 ID와 입력 해시를 저장하며 결정·주입을 하지 않는다.
 
 ## API Contracts
 
-- processToolStart는 native PreToolUse payload를 받고 항상 비차단 무주입 결과를 반환한다.
+- `processToolStart(input, adapter?, now?)`는 native PreToolUse payload를 받고 항상 `EMPTY_RESULT`를 반환한다.
 
 ## Acceptance Criteria
 
@@ -19,4 +19,4 @@
 
 ## Last Updated
 
-2026-09-27
+2026-09-29

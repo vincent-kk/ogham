@@ -2,8 +2,7 @@ import { INJECTION_PREFIX } from '../../../constants/plugin.js';
 import { WORKFLOW_CHAIN_LINE } from '../../../constants/workflowChain.js';
 
 /**
- * The fixed one-line chain summary, injected in place of a progress line
- * when no binding is active.
+ * Render the fixed SessionStart chain summary as a standalone line.
  * @returns The chain line to inject.
  */
 export function renderChainLine(): string {

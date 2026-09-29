@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Observe trusted host boundaries and paired invocations for explicitly participating tasks. standard/strict SessionStart states the stable chain, an election line, and a rule/dial/drift summary as advisory text, never a forced skill call; other hooks report only task-scoped progress and, under strict, the chain line on turns with no active binding (none or paused). Hooks never block actions or inject rule bodies.
+Observe trusted host boundaries and paired invocations for explicitly participating tasks. standard/strict SessionStart states the stable chain, an election line, and a rule/dial/drift summary as advisory text, never a forced skill call; UserPromptSubmit reports task progress or a dial-specific entry line when no binding is active (none or paused). Hooks never block actions or inject rule bodies.
 
 ## Structure
 

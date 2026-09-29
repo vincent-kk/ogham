@@ -58,7 +58,7 @@ afterEach(() =>
     .forEach((root) => rmSync(root, { recursive: true, force: true })),
 );
 
-it.each(['write-plan', 'execute'] as const)(
+it.each(['write-plan', 'execute', 'implement'] as const)(
   'entry step %s with no binding creates one',
   (step) => {
     const id = identity();
@@ -91,7 +91,7 @@ it('resume with no binding is rejected and creates nothing', () => {
     false,
   );
 });
-it.each(['write-plan', 'execute'] as const)(
+it.each(['write-plan', 'execute', 'implement'] as const)(
   'entry step %s on the same active task only updates step',
   (step) => {
     const id = identity();
@@ -295,6 +295,40 @@ it('a switched binding clears a pending Bash invocation observed under the prior
   expect(
     completeInvocation(bash, 'echo pending', NOW, () => 'pending-effect'),
   ).toBeUndefined();
+});
+it('implement on a different active task is a mismatch and leaves state untouched', () => {
+  const id = identity();
+  observeBoundary(id, true, NOW);
+  lifecycle(id, request(id, { step: 'execute' }));
+  withWorkflowState(id, false, NOW, (s) => {
+    s.binding!.counts['echo OK'] = 3;
+  });
+  const before = state(id);
+  expect(
+    lifecycle(
+      { ...id, call: 'unit' },
+      request(id, { task: 'task-b', step: 'implement' }),
+    ),
+  ).toBe('mismatch');
+  expect(state(id).binding).toEqual(before.binding);
+  expect(state(id).generation).toBe(before.generation);
+});
+it('implement on a different paused task switches', () => {
+  const id = identity();
+  observeBoundary(id, true, NOW);
+  lifecycle(id, request(id, { step: 'write-plan' }));
+  lifecycle(
+    { ...id, call: 'pause' },
+    { action: 'pause', project_root: id.root, task: 'task-a' },
+  );
+  expect(
+    lifecycle(
+      { ...id, call: 'unit' },
+      request(id, { task: 'task-b', step: 'implement' }),
+    ),
+  ).toBe('switched');
+  expect(state(id).binding.task).toBe('task-b');
+  expect(state(id).binding.state).toBe('active');
 });
 it('a non-entry step on a different task is a mismatch and leaves state untouched', () => {
   const id = identity();

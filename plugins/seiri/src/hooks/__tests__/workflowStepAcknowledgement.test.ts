@@ -8,6 +8,7 @@ import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.j
 import { processToolOutcome } from '../postToolUse/postToolUse.js';
 import { processToolStart } from '../preToolUse/preToolUse.js';
 import { renderCreatedAck } from '../shared/progressLine/renderCreatedAck.js';
+import { renderMismatchNotice } from '../shared/progressLine/renderMismatchNotice.js';
 import { renderSwitchedAck } from '../shared/progressLine/renderSwitchedAck.js';
 import { processUserPromptSubmit } from '../userPromptSubmit/userPromptSubmit.js';
 
@@ -212,7 +213,7 @@ it('finish clears a redundant in-flight entry step, leaving no ACK and no bindin
   });
   expect(stepResult.hookSpecificOutput).toBeUndefined();
 });
-it('a non-entry step with no prior binding is rejected: no ACK, no binding, and the next turn stays silent', () => {
+it('a non-entry step with no prior binding is rejected: no ACK or binding, and the next turn gets the entry line', () => {
   const base = fixture();
   processUserPromptSubmit({ ...base, hook_event_name: 'UserPromptSubmit' });
   const rejected = call(
@@ -222,13 +223,13 @@ it('a non-entry step with no prior binding is rejected: no ACK, no binding, and 
       action: 'step',
       project_root: base.cwd,
       task: 'task-a',
-      step: 'implement',
+      step: 'verify',
     },
     {
       status: 'accepted',
       action: 'step',
       task: 'task-a',
-      step: 'implement',
+      step: 'verify',
       intent: 'change',
     },
   );
@@ -238,6 +239,54 @@ it('a non-entry step with no prior binding is rejected: no ACK, no binding, and 
       ...base,
       prompt_id: 'turn-b',
       hook_event_name: 'UserPromptSubmit',
-    }),
-  ).toEqual({ continue: true });
+    }).hookSpecificOutput?.additionalContext,
+  ).toContain('No task bound. Before editing:');
+});
+
+/**
+ * Pair one `implement` step for `task` and return its acknowledgement.
+ * @param base Native actor provenance from {@link fixture}.
+ * @param task Task the step names.
+ * @returns The injected context, or `undefined` for none.
+ */
+function implementStep(base: ReturnType<typeof fixture>, task: string) {
+  return call(
+    base,
+    `implement-${task}`,
+    { action: 'step', project_root: base.cwd, task, step: 'implement' },
+    {
+      status: 'accepted',
+      action: 'step',
+      task,
+      step: 'implement',
+      intent: 'change',
+    },
+  ).hookSpecificOutput?.additionalContext;
+}
+it('an implement step with no prior binding opens its task', () => {
+  const base = fixture();
+  processUserPromptSubmit({ ...base, hook_event_name: 'UserPromptSubmit' });
+  expect(implementStep(base, 'task-a')).toBe(
+    renderCreatedAck('task-a', 'change', 'implement'),
+  );
+});
+it('an implement step never switches a different active task', () => {
+  const base = fixture();
+  activateWorkflow(base.cwd, { task: 'task-a' });
+  expect(implementStep(base, 'task-b')).toBe(
+    renderMismatchNotice('task-b', 'task-a'),
+  );
+});
+it('an implement step switches from a different paused task', () => {
+  const base = fixture();
+  activateWorkflow(base.cwd, { task: 'task-a' });
+  call(
+    base,
+    'pause-task-a',
+    { action: 'pause', project_root: base.cwd, task: 'task-a' },
+    { status: 'accepted', action: 'pause', task: 'task-a' },
+  );
+  expect(implementStep(base, 'task-b')).toBe(
+    renderSwitchedAck('task-b', 'task-a', 'change', 'implement'),
+  );
 });

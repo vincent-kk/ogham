@@ -1,3 +1,4 @@
+import { CHAIN_SWITCH_STEPS } from '../../../constants/workflowChain.js';
 import type {
   WorkflowRequest,
   WorkflowState,
@@ -17,15 +18,17 @@ export type WorkflowTransitionResult =
  * @param request Explicit lifecycle request to apply.
  * @returns `'created'` for a brand new binding, or for a `start` that names
  *   the already-bound task (a full restart from scratch, not an in-place
- *   update); `'switched'` when an entry `step` or `start` replaces a
- *   different bound task (a fresh binding, counts and verdicts reset);
+ *   update); `'switched'` when a `start`, or an entry `step`, replaces a
+ *   different bound task (a fresh binding, counts and verdicts reset) —
+ *   only a {@link CHAIN_SWITCH_STEPS} step may replace an active one;
  *   `'updated'` when a same-task `step` refreshes its recorded step without
  *   touching generation or in-flight invocations, for a same-task `resume`
  *   (generation and invocations untouched), or for a same-task `pause` or
  *   `finish` (generation bumped and in-flight invocations cleared, as for
  *   `created`/`switched`); `'mismatch'` when a non-entry
- *   request names a task other than the bound one (state is left
- *   untouched); or `'rejected'` for every other unmet precondition —
+ *   request names a task other than the bound one, or an entry `step`
+ *   outside {@link CHAIN_SWITCH_STEPS} names a task other than the active
+ *   one (state is left untouched); or `'rejected'` for every other unmet precondition —
  *   including a `resume` or non-entry `step` with no prior binding, which
  *   never creates one.
  */
@@ -36,6 +39,13 @@ export function transitionWorkflow(
   const previous = state.binding;
   const entry = isEntryRequest(request);
   const sameTask = previous?.task === request.task;
+  if (
+    request.action === 'step' &&
+    previous?.state === 'active' &&
+    !sameTask &&
+    !(CHAIN_SWITCH_STEPS as readonly string[]).includes(request.step ?? '')
+  )
+    return 'mismatch';
   if (previous && !sameTask && !entry) return 'mismatch';
   if (!previous && !entry) return 'rejected';
 

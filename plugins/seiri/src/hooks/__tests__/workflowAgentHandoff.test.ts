@@ -15,8 +15,8 @@ import type { HookBaseInput } from '../../types/hooks.js';
 import type { WorkflowHostAdapter } from '../../types/workflow.js';
 import { processToolOutcome } from '../postToolUse/postToolUse.js';
 import { processToolStart } from '../preToolUse/preToolUse.js';
-import { renderChainLine } from '../shared/progressLine/renderChainLine.js';
 import { renderCreatedAck } from '../shared/progressLine/renderCreatedAck.js';
+import { renderEntryLine } from '../shared/progressLine/renderEntryLine.js';
 import { renderProgressLine } from '../shared/progressLine/renderProgressLine.js';
 import { renderSwitchedAck } from '../shared/progressLine/renderSwitchedAck.js';
 import { CLAUDE_WORKFLOW_ADAPTER } from '../shared/workflowAdapters/claude.js';
@@ -238,7 +238,7 @@ it('(b) a CHECK-matching Bash in the implementer session records into the shared
   );
 });
 
-it('(c) a fresh session whose first call is a non-entry step gets no acknowledgment and no binding, staying silent at standard and falling back to the chain line at strict', () => {
+it("(c) a fresh session whose first call is a non-entry step gets no acknowledgment or binding, and receives each dial's entry line", () => {
   const cwd = fixture();
   const c = { cwd, session_id: 'session-c', prompt_id: 'turn-c1' };
   processUserPromptSubmit(
@@ -248,13 +248,13 @@ it('(c) a fresh session whose first call is a non-entry step gets no acknowledgm
   const rejected = runtimeCall(
     CLAUDE_WORKFLOW_ADAPTER,
     c,
-    'c-implement',
-    { action: 'step', project_root: cwd, task: 't-handoff', step: 'implement' },
+    'c-verify',
+    { action: 'step', project_root: cwd, task: 't-handoff', step: 'verify' },
     {
       status: 'accepted',
       action: 'step',
       task: 't-handoff',
-      step: 'implement',
+      step: 'verify',
       intent: 'change',
     },
   );
@@ -263,8 +263,8 @@ it('(c) a fresh session whose first call is a non-entry step gets no acknowledgm
     processUserPromptSubmit(
       { ...c, prompt_id: 'turn-c2', hook_event_name: 'UserPromptSubmit' },
       CLAUDE_WORKFLOW_ADAPTER,
-    ),
-  ).toEqual({ continue: true });
+    ).hookSpecificOutput?.additionalContext,
+  ).toBe(renderEntryLine('standard'));
 
   writeConfig(cwd, 'project', { intervention: 'strict' });
   const strictTurn = processUserPromptSubmit(
@@ -272,7 +272,7 @@ it('(c) a fresh session whose first call is a non-entry step gets no acknowledgm
     CLAUDE_WORKFLOW_ADAPTER,
   );
   expect(strictTurn.hookSpecificOutput?.additionalContext).toBe(
-    renderChainLine(),
+    renderEntryLine('strict'),
   );
 });
 
@@ -286,13 +286,13 @@ it('(d) that same fresh session then calling start creates a binding, and its ne
   runtimeCall(
     CLAUDE_WORKFLOW_ADAPTER,
     c,
-    'c-implement',
-    { action: 'step', project_root: cwd, task: 't-handoff', step: 'implement' },
+    'c-verify',
+    { action: 'step', project_root: cwd, task: 't-handoff', step: 'verify' },
     {
       status: 'accepted',
       action: 'step',
       task: 't-handoff',
-      step: 'implement',
+      step: 'verify',
       intent: 'change',
     },
   );

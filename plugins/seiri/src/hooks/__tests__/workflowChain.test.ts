@@ -16,7 +16,7 @@ import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.j
 import type { InterventionLevel } from '../../types/config.js';
 import { processToolOutcome } from '../postToolUse/postToolUse.js';
 import { processToolStart } from '../preToolUse/preToolUse.js';
-import { renderChainLine } from '../shared/progressLine/renderChainLine.js';
+import { renderEntryLine } from '../shared/progressLine/renderEntryLine.js';
 import { processUserPromptSubmit } from '../userPromptSubmit/userPromptSubmit.js';
 
 /** Projects created by the observation-only skill cases. */
@@ -80,7 +80,9 @@ describe('skill loading does not create workflow participation', () => {
       expect(
         existsSync(portableJoin(cwd, '.seiri', 'session-signals.json')),
       ).toBe(false);
-      expect(turn(cwd)).toEqual({ continue: true });
+      expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+        renderEntryLine('standard'),
+      );
       processToolStart({
         cwd,
         session_id: 'session-a',
@@ -109,7 +111,9 @@ describe('skill loading does not create workflow participation', () => {
     const cwd = seedRepo();
     for (let index = 0; index < 3; index++) {
       expect(load(cwd, 'seiri:verify')).toEqual({ continue: true });
-      expect(turn(cwd)).toEqual({ continue: true });
+      expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+        renderEntryLine('standard'),
+      );
     }
   });
 
@@ -117,7 +121,9 @@ describe('skill loading does not create workflow participation', () => {
     const cwd = seedRepo();
     const path = ledger(cwd, 'payment-refactor');
     const before = readFileSync(path, 'utf8');
-    expect(turn(cwd)).toEqual({ continue: true });
+    expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+      renderEntryLine('standard'),
+    );
     expect(readFileSync(path, 'utf8')).toBe(before);
   });
 
@@ -125,13 +131,17 @@ describe('skill loading does not create workflow participation', () => {
     const cwd = seedRepo();
     ledger(cwd, 'login-fix');
     ledger(cwd, 'payment-refactor');
-    expect(turn(cwd)).toEqual({ continue: true });
+    expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+      renderEntryLine('standard'),
+    );
   });
 
   it('does not announce a completed ledger', () => {
     const cwd = seedRepo();
     ledger(cwd, 'payment-refactor', true);
-    expect(turn(cwd)).toEqual({ continue: true });
+    expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+      renderEntryLine('standard'),
+    );
   });
 
   it.each(['off', 'advisory', null] as const)(
@@ -146,7 +156,9 @@ describe('skill loading does not create workflow participation', () => {
 
   it('creates no state on a plain turn at standard', () => {
     const cwd = seedRepo('standard');
-    expect(turn(cwd)).toEqual({ continue: true });
+    expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+      renderEntryLine('standard'),
+    );
     expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(false);
   });
 
@@ -155,7 +167,7 @@ describe('skill loading does not create workflow participation', () => {
     const result = turn(cwd);
     expect(result.continue).toBe(true);
     expect(result.hookSpecificOutput?.additionalContext).toBe(
-      renderChainLine(),
+      renderEntryLine('strict'),
     );
     expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(false);
   });
@@ -173,7 +185,9 @@ describe('skill loading does not create workflow participation', () => {
     writeConfig(cwd, 'project', { intervention: 'off' });
     expect(turn(cwd)).toEqual({ continue: true });
     writeConfig(cwd, 'project', { intervention: 'standard' });
-    expect(turn(cwd)).toEqual({ continue: true });
+    expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+      renderEntryLine('standard'),
+    );
     expect(readFileSync(path, 'utf8')).toBe(legacy);
   });
 
@@ -181,7 +195,9 @@ describe('skill loading does not create workflow participation', () => {
     const cwd = seedRepo();
     for (const skill of ['seiri:setup', 'filid:scan', 42, undefined])
       expect(load(cwd, skill)).toEqual({ continue: true });
-    expect(turn(cwd)).toEqual({ continue: true });
+    expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+      renderEntryLine('standard'),
+    );
   });
 
   it('does not fall back to election when legacy state is damaged', () => {
@@ -190,6 +206,8 @@ describe('skill loading does not create workflow participation', () => {
       portableJoin(cwd, '.seiri', 'session-signals.json'),
       '{ not json',
     );
-    expect(turn(cwd)).toEqual({ continue: true });
+    expect(turn(cwd).hookSpecificOutput?.additionalContext).toBe(
+      renderEntryLine('standard'),
+    );
   });
 });

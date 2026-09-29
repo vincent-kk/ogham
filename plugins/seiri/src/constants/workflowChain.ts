@@ -26,11 +26,23 @@ export const WORKFLOW_SKILLS = [
 ] as const satisfies readonly WorkflowSkill[];
 
 /**
- * The only steps a `step` request may use to create or switch a binding.
- * Every other chain skill's `step` can only update an existing binding for
- * the same task.
+ * The only steps a `step` request may use to create a binding, and whose
+ * PreToolUse seeds an absent actor. Every other chain skill's `step` can
+ * only update an existing binding for the same task.
  */
-export const CHAIN_ENTRY_STEPS = ['write-plan', 'execute'] as const;
+export const CHAIN_ENTRY_STEPS = [
+  'write-plan',
+  'execute',
+  'implement',
+] as const;
+
+/**
+ * The entry steps that may also replace a different task's active binding.
+ * `implement` is absent: it opens a task only when none is active, so a
+ * change unit named inside an executing plan never resets that plan's
+ * counts and verdicts.
+ */
+export const CHAIN_SWITCH_STEPS = ['write-plan', 'execute'] as const;
 
 /**
  * Display order of the main chain, left to right, as rendered by a
@@ -83,8 +95,15 @@ export const STEP_PHRASES: Record<WorkflowSkill, string> = {
 
 /**
  * One-line chain summary, host-neutral (`seiri:<skill>`), injected at
- * SessionStart and at strict, in place of a progress line when no binding
- * is active.
+ * SessionStart.
  */
 export const WORKFLOW_CHAIN_LINE =
   'Workflow: seiri:write-plan → seiri:review-plan → seiri:execute → seiri:implement → seiri:verify → seiri:request-review; failures → seiri:trace-cause; indirect code → seiri:trace-structure; review feedback → seiri:receive-review.';
+
+/** Standard's per-turn entry guidance before a task is bound. */
+export const WORKFLOW_ENTRY_LINE_STANDARD =
+  'No task bound. Before editing: a behavior change to source or tests (new logic, a fix, a refactor) → seiri:write-plan first, seiri:implement alone for one contained fix, seiri:execute for an already approved plan. Documentation, comments, formatting, or a read-only answer (review, explanation, analysis) → no workflow.';
+
+/** Strict's per-turn entry guidance before a task is bound. */
+export const WORKFLOW_ENTRY_LINE_STRICT =
+  'No task bound. Before editing: a behavior change to source or tests → seiri:write-plan, checked by seiri:review-plan, carried out by seiri:execute with each unit through seiri:implement; a failure → seiri:trace-cause; a completion claim → seiri:verify; finished work → seiri:request-review; review feedback → seiri:receive-review. Documentation, comments, formatting, or a read-only answer (review, explanation, analysis) → no workflow.';

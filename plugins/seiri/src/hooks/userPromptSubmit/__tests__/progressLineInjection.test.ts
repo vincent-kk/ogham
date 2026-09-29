@@ -9,7 +9,6 @@ import type { InterventionLevel } from '../../../types/config.js';
 import { activateWorkflow } from '../../__tests__/helpers/workflowHarness.js';
 import { processToolOutcome } from '../../postToolUse/postToolUse.js';
 import { processToolStart } from '../../preToolUse/preToolUse.js';
-import { renderChainLine } from '../../shared/progressLine/renderChainLine.js';
 import { renderProgressLine } from '../../shared/progressLine/renderProgressLine.js';
 import { processUserPromptSubmit } from '../userPromptSubmit.js';
 
@@ -70,22 +69,28 @@ it.each(['standard', 'strict'] as const)(
   },
 );
 
-it('a paused binding at standard injects nothing', () => {
+it('a paused binding at standard receives the standard entry line', () => {
   const cwd = seedRepo('standard');
   activateWorkflow(cwd, { task: 'payment-refactor' });
   pause(cwd, 'payment-refactor');
-  expect(nextTurn(cwd)).toEqual({ continue: true });
+  const context = nextTurn(cwd).hookSpecificOutput?.additionalContext;
+  expect(context).toContain('No task bound. Before editing:');
+  expect(context).toContain('seiri:implement alone for one contained fix');
+  expect(context).not.toContain('payment-refactor');
 });
 
-it('a paused binding at strict falls back to the chain line', () => {
+it('a paused binding at strict receives the strict entry line', () => {
   const cwd = seedRepo('strict');
   activateWorkflow(cwd, { task: 'payment-refactor' });
   pause(cwd, 'payment-refactor');
-  expect(nextTurn(cwd).hookSpecificOutput?.additionalContext).toBe(
-    renderChainLine(),
-  );
+  const context = nextTurn(cwd).hookSpecificOutput?.additionalContext;
+  expect(context).toContain('No task bound. Before editing:');
+  expect(context).toContain('checked by seiri:review-plan');
+  expect(context).not.toContain('payment-refactor');
 });
 
-it('no binding at standard injects nothing', () => {
-  expect(nextTurn(seedRepo('standard'))).toEqual({ continue: true });
+it('no binding at standard receives the standard entry line', () => {
+  expect(
+    nextTurn(seedRepo('standard')).hookSpecificOutput?.additionalContext,
+  ).toContain('seiri:implement alone for one contained fix');
 });
