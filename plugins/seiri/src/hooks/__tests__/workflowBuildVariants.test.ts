@@ -60,7 +60,7 @@ it.each(['claude', 'codex'])(
         ? 'mcp__plugin_seiri_tools__runtime'
         : 'mcp__seiri__runtime',
     );
-    expect(Buffer.byteLength(source)).toBeLessThanOrEqual(23 * 1024);
+    expect(Buffer.byteLength(source)).toBeLessThanOrEqual(22 * 1024);
   },
 );
 it.each(['claude', 'codex'])(

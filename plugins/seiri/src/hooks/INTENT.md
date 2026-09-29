@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Observe trusted host boundaries and paired invocations for explicitly participating tasks. standard/strict SessionStart states the stable chain, an election line, and a rule/dial/drift summary as advisory text, never a forced skill call; PreToolUse restates the election at the first file edit of a turn with no active binding and once more at that turn's third distinct file; other hooks report only task-scoped progress and, under strict, the chain line on turns with no active binding (none or paused). Hooks never block actions or inject rule bodies.
+Observe trusted host boundaries and paired invocations for explicitly participating tasks. standard/strict SessionStart states the stable chain, an election line, and a rule/dial/drift summary as advisory text, never a forced skill call; other hooks report task-scoped progress and, under strict, the chain line on turns with no active binding (none or paused). Hooks never block actions or inject rule bodies.
 
 ## Structure
 

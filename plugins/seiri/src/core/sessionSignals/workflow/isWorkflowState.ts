@@ -1,8 +1,4 @@
 import {
-  EDIT_NOTICE_KINDS,
-  EDIT_TRACKED_FILES_CAP,
-} from '../../../constants/editNotice.js';
-import {
   TRACKED_CALL_IDS_CAP,
   TRACKED_COMMANDS_CAP,
   TRACKED_INVOCATIONS_CAP,
@@ -16,21 +12,6 @@ import { parseWorkflowRequest } from './parseWorkflowRequest.js';
 /** Narrow JSON maps; arrays and null cannot stand in for state records. */
 function record(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
-}
-
-/** {@link EDIT_NOTICE_KINDS} widened for membership tests on unvalidated input. */
-const NOTICE_KINDS: readonly unknown[] = EDIT_NOTICE_KINDS;
-
-/** Validate a present per-turn edit record against its cap and notice kinds. */
-function isEditRecord(value: unknown): boolean {
-  return (
-    record(value) &&
-    Array.isArray(value.files) &&
-    value.files.length <= EDIT_TRACKED_FILES_CAP &&
-    value.files.every((v) => typeof v === 'string') &&
-    Array.isArray(value.notices) &&
-    value.notices.every((v) => NOTICE_KINDS.includes(v))
-  );
 }
 
 /** Validate bounded persisted actor data before any callback can cause effects. */
@@ -75,7 +56,6 @@ export function isWorkflowState(value: unknown): value is WorkflowState {
     )
       return false;
   }
-  if (value.edits !== undefined && !isEditRecord(value.edits)) return false;
   const binding = value.binding;
   if (binding === undefined) return true;
   if (

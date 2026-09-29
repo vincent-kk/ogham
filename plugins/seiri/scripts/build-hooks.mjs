@@ -46,8 +46,7 @@ const hookEntries = [
   {
     name: 'pre-tool-use',
     entry: 'preToolUse',
-    // carries @ogham/cross-platform's apply_patch parser for Codex edit notices
-    maxBytes: 22 * KILO_BYTE,
+    maxBytes: LIGHT_HOOK_BYTES,
     forbiddenContent: [/Election/],
   },
   {
@@ -55,8 +54,8 @@ const hookEntries = [
     entry: 'setup',
     // One session-start read of rule status, dial and configLoader chains,
     // plus the fixed election/chain/posture render and, after compaction, the
-    // active progress line. Runs at every SessionStart source. Actor-state
-    // validation of the per-turn edit record took it past 22 KiB.
+    // active progress line. Runs at every SessionStart source.
+    // This path currently measures 22.1 KiB in both host bundles.
     maxBytes: 23 * KILO_BYTE,
   },
   {
@@ -69,9 +68,8 @@ const hookEntries = [
     name: 'post-tool-use',
     entry: 'postToolUse',
     // Paired provenance, atomic actor state, gate judging and progress-line
-    // rendering share this entry. Actor-state validation of the per-turn
-    // edit record took it past 22 KiB.
-    maxBytes: 23 * KILO_BYTE,
+    // rendering share this entry.
+    maxBytes: 22 * KILO_BYTE,
     forbiddenContent: [/Election/, /A plan was produced/],
   },
   {

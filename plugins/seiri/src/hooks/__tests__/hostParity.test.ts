@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
@@ -9,8 +8,6 @@ import { ELECTION_STRICT_LINE } from '../../constants/electionLines.js';
 import { STRICT_POSTURE_LINE } from '../../constants/postureLines.js';
 import { WORKFLOW_CHAIN_LINE } from '../../constants/workflowChain.js';
 import { writeConfig } from '../../core/infra/configLoader/loaders/writeConfig.js';
-import { processToolStart } from '../preToolUse/preToolUse.js';
-import { expandEditInputs } from '../preToolUse/utils/expandEditInputs.js';
 import { processSessionStart } from '../setup/setup.js';
 import { renderProgressLine } from '../shared/progressLine/renderProgressLine.js';
 import { renderSubagentLine } from '../shared/progressLine/renderSubagentLine.js';
@@ -54,89 +51,6 @@ function seedRepo(): string {
   writeConfig(cwd, 'project', { intervention: 'strict' });
   return cwd;
 }
-
-/**
- * Edit files the way each host does: one Claude `Edit` per file, or one
- * Codex `apply_patch` updating every file, expanded as the entry does.
- * @param cwd Repository working directory.
- * @param host Concrete adapter with its native turn fields.
- * @param files Absolute target paths in edit order.
- * @param extra Payload fields such as `agent_id`.
- * @returns The injected notices in order.
- */
-function editNotices(
-  cwd: string,
-  host: (typeof HOSTS)[number],
-  files: string[],
-  extra: { agent_id?: string } = {},
-): string[] {
-  const base = {
-    cwd,
-    session_id: 'session-a',
-    ...host.native,
-    ...extra,
-    hook_event_name: 'PreToolUse' as const,
-  };
-  const inputs =
-    host.adapter.name === 'claude'
-      ? files.map((file) => ({
-          ...base,
-          tool_use_id: randomUUID(),
-          tool_name: 'Edit',
-          tool_input: { file_path: file },
-        }))
-      : expandEditInputs({
-          ...base,
-          tool_use_id: randomUUID(),
-          tool_name: 'apply_patch',
-          tool_input: {
-            command: `*** Begin Patch\n${files.map((file) => `*** Update File: ${file}\n@@\n-a\n+b`).join('\n')}\n*** End Patch`,
-          },
-        });
-  return inputs.flatMap(
-    (input) =>
-      processToolStart(input, host.adapter).hookSpecificOutput
-        ?.additionalContext ?? [],
-  );
-}
-
-describe('edit notice host parity', () => {
-  it('gives the same first-edit, active-task and child results on either host', () => {
-    const results = HOSTS.map((host) => {
-      const unbound = seedRepo();
-      const file = portableJoin(unbound, 'src', 'a.ts');
-      const bound = seedRepo();
-      activateWorkflow(bound, host.native);
-      const child = seedRepo();
-      return [
-        editNotices(unbound, host, [file]),
-        editNotices(unbound, host, [file]),
-        editNotices(bound, host, [portableJoin(bound, 'src', 'a.ts')]),
-        editNotices(child, host, [portableJoin(child, 'src', 'a.ts')], {
-          agent_id: 'agent-a',
-        }),
-      ];
-    });
-    expect(results[0]).toEqual(results[1]);
-    expect(results[0]?.[0]?.[0]).toContain('First edit this turn');
-    expect(results[0]?.slice(1)).toEqual([[], [], []]);
-  });
-
-  it('observes both notices for three files: one Codex patch or three Claude edits', () => {
-    const results = HOSTS.map((host) => {
-      const cwd = seedRepo();
-      return editNotices(
-        cwd,
-        host,
-        ['a', 'b', 'c'].map((name) => portableJoin(cwd, 'src', `${name}.ts`)),
-      );
-    });
-    expect(results[0]).toEqual(results[1]);
-    expect(results[0]).toHaveLength(2);
-    expect(results[0]?.[0]).toContain('First edit this turn');
-    expect(results[0]?.[1]).toContain('2 files edited this turn');
-  });
-});
 
 describe('non-Bash hook host payload parity', () => {
   it.each(['startup', 'resume', 'clear', 'fork'])(

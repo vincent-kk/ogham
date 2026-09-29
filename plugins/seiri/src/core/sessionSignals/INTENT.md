@@ -7,10 +7,9 @@ Own ephemeral actor-scoped workflow participation and observations. The host and
 ## Conventions
 
 - A host session and its main or child actor have separate hashed state addresses.
-- Only an entry request's PreToolUse, or a main actor's file edit with no active binding, creates actor metadata, anchored on its payload's native turn. Boundary hooks update or suspend existing actors without creating them. Tool events never replace a valid existing anchor.
+- Only an entry request's PreToolUse creates actor metadata, anchored on its payload's native turn. Boundary hooks update or suspend existing actors without creating them. Tool events never replace a valid existing anchor.
 - Explicit lifecycle requests take effect only through paired successful host results.
 - Only an entry step (`write-plan`, `execute`, `implement`) or `start` can create a binding. Only `start`, `write-plan`, and `execute` can switch an active binding to another task; `implement` opens a task only when no other task is active. `resume` and every other step only update an existing same-task binding.
-- A turn's edited files are recorded only as hashes of repository-relative paths and are cleared at every turn boundary.
 - A read of another actor's binding (for a one-time handoff) never locks or writes that actor's state.
 - Store hashes and bounded counters, never commands, prompts, outputs, or transcripts.
 - MCP startup retires actor files unmodified for more than 72 hours; access-time expiry remains seven days.

@@ -32,7 +32,7 @@
 ### AC-hook-bundle-size — 번들 크기 가드
 
 - `build:hooks` 의 바이트 캡을 넘는 번들이 생기지 않는다.
-- setup과 post-tool-use는 `build:hooks`에 고정한 22KiB 상한을 두며, 번들이 그 값을 넘으면 실측한 뒤 상한과 그 사유 주석을 손으로 갱신합니다. 나머지는 16KiB를 유지하며 금지 의존 검사도 유지합니다.
+- setup은 실측 크기 22.1KiB로 23KiB 상한을 유지하고, post-tool-use는 22KiB 상한을 둡니다. 번들이 그 값을 넘으면 실측한 뒤 상한과 그 사유 주석을 손으로 갱신합니다. 나머지는 16KiB를 유지하며 금지 의존 검사도 유지합니다.
 
 ### AC-mcp-bundle-wiring — 배포 MCP 번들 검증
 

@@ -131,17 +131,6 @@ describe('hook entry silence', () => {
         tool_input: { command: 'echo OK' },
       },
     },
-    {
-      name: 'PreToolUse Edit with explicit off',
-      configuration: 'off',
-      bundle: 'pre-tool-use.mjs',
-      payload: {
-        hook_event_name: 'PreToolUse',
-        tool_use_id: 'edit-a',
-        tool_name: 'Edit',
-        tool_input: { file_path: 'src/a.ts' },
-      },
-    },
   ] as const)('$name exits without a wire response', (testCase) => {
     const repoRoot = mkdtempSync(portableJoin(tmpdir(), 'seiri-hook-silence-'));
     createdRoots.push(repoRoot);
@@ -184,77 +173,6 @@ describe('hook entry silence', () => {
     if (testCase.bundle === 'instructions-loaded.mjs')
       expect(existsSync(observationLogPath())).toBe(false);
   });
-
-  it.each([
-    {
-      name: 'Claude',
-      directory: 'claude',
-      native: { prompt_id: 'turn-a' },
-      payload: {
-        tool_name: 'Edit',
-        tool_input: { file_path: 'src/a.ts' },
-      },
-      notices: ['First edit this turn'],
-    },
-    {
-      name: 'Codex',
-      directory: 'codex',
-      native: { turn_id: 'turn-a' },
-      payload: {
-        tool_name: 'apply_patch',
-        tool_input: {
-          command:
-            '*** Begin Patch\n*** Add File: src/a.ts\n+a\n*** Add File: src/b.ts\n+b\n*** Add File: src/c.ts\n+c\n*** End Patch',
-        },
-      },
-      notices: ['First edit this turn', '2 files edited this turn'],
-    },
-  ] as const)(
-    'injects the edit notice through the $name manifest runner at standard',
-    (host) => {
-      const repoRoot = mkdtempSync(portableJoin(tmpdir(), 'seiri-hook-edit-'));
-      createdRoots.push(repoRoot);
-      mkdirSync(portableJoin(repoRoot, '.git'));
-      mkdirSync(portableJoin(repoRoot, '.seiri'));
-      writeFileSync(
-        portableJoin(repoRoot, '.seiri', 'config.json'),
-        '{"intervention":"standard"}',
-      );
-      const result = spawnSync(
-        process.execPath,
-        [
-          portableJoin(pluginRoot, 'libs', 'run.cjs'),
-          portableJoin(
-            pluginRoot,
-            'bridge',
-            host.directory,
-            'pre-tool-use.mjs',
-          ),
-        ],
-        {
-          cwd: repoRoot,
-          encoding: 'utf8',
-          env: { ...process.env, CLAUDE_PLUGIN_ROOT: pluginRoot },
-          input: JSON.stringify({
-            cwd: repoRoot,
-            session_id: 'session-a',
-            ...host.native,
-            hook_event_name: 'PreToolUse',
-            tool_use_id: 'edit-a',
-            ...host.payload,
-          }),
-          windowsHide: true,
-        },
-      );
-      expect(result.status).toBe(0);
-      expect(result.stderr).toBe('');
-      const output = JSON.parse(result.stdout) as HookOutput;
-      const context = output.hookSpecificOutput?.additionalContext ?? '';
-      for (const notice of host.notices) expect(context).toContain(notice);
-      expect(context.split('\n')).toHaveLength(host.notices.length);
-      expect(context).not.toContain('Election');
-    },
-  );
 
   it.each([
     {
