@@ -42,6 +42,7 @@ it('accepts a request without creating an actor state or ledger', () => {
     action: 'start',
     task: 'test-task',
     intent: 'change',
+    notice: expect.stringContaining('seiri skill for the current step'),
   });
   expect(existsSync(portableJoin(input.project_root, '.seiri/sessions'))).toBe(
     false,
@@ -96,7 +97,24 @@ it('accepts a step request and echoes the derived intent', () => {
     task: 'test-task',
     step: 'review-plan',
     intent: 'review',
+    notice: expect.stringContaining('seiri:review-plan'),
   });
+});
+it('names the calling skill in a step notice and points other actions at the current step', () => {
+  const input = fixture();
+  const step = handleWorkflow({ ...input, action: 'step', step: 'implement' });
+  const pause = handleWorkflow({
+    ...input,
+    action: 'pause',
+    intent: undefined,
+  });
+  expect(step.status === 'accepted' && step.notice).toMatch(
+    /inside the seiri:implement skill.*invoke it now.*Skill tool/,
+  );
+  expect(pause.status === 'accepted' && pause.notice).toMatch(
+    /inside a seiri workflow skill.*seiri skill for the current step.*Skill tool/,
+  );
+  expect(pause.status === 'accepted' && pause.notice).not.toContain('seiri:');
 });
 it('rejects a step request naming a value outside WorkflowStep', () => {
   const input = fixture();

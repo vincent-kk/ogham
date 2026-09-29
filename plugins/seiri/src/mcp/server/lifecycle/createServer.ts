@@ -101,48 +101,44 @@ export function createServer(): McpServer {
     ToolName.RUNTIME,
     {
       description:
-        'Session runtime: optional workflow participation after a skill has been selected, plus the intervention dial. step is the first verb of every chain skill; write-plan, execute and implement are entry steps that create a binding; write-plan and execute may also switch a different bound task, implement opens a task only when none is active and never switches an active one; the other six only update an existing binding for the same task. Sequence participation lifecycle calls (step, start, resume, pause, finish); accepted validates the request, and only the matching PostToolUse acknowledgment confirms participation. No ledger is required. Missing acknowledgment or disabled assistance never blocks work. finish ends participation, not proof of success. dial reads or moves the intervention valve immediately, with no acknowledgment pair.',
+        'Seiri workflow participation and intervention dial. Call a participation action (step, start, resume, pause, finish) only from inside the seiri skill that owns it, after invoking that skill; the skill states when and how. dial reads or moves the intervention valve.',
       inputSchema: {
         action: z
           .enum(['step', 'start', 'resume', 'pause', 'finish', 'dial'])
-          .describe(
-            'Participation transition to sequence, or dial to read or move the intervention valve.',
-          ),
+          .describe('Participation transition, or dial.'),
         project_root: z
           .string()
           .describe(
-            'Required absolute workspace root; never infer it from the MCP server working directory.',
+            'Absolute workspace root; never the MCP server working directory.',
           ),
         task: z
           .string()
           .optional()
           .describe(
-            'Kebab-case task name, with or without a gate ledger. Required for step, start, resume, pause and finish.',
+            'Kebab-case task name. Required for every action but dial.',
           ),
         step: z
           .enum(WORKFLOW_SKILLS)
           .optional()
           .describe(
-            'Calling chain skill; required for action "step". write-plan, execute and implement are entry steps.',
+            'The seiri skill this call runs inside. Required for step.',
           ),
         intent: z
           .enum(['change', 'review'])
           .optional()
           .describe(
-            'Required for start and resume. Optional for step, where it is derived from the step when absent.',
+            'Required for start and resume; derived from the step otherwise.',
           ),
         dial_op: z
           .enum(['get', 'set', 'clear'])
           .nullish()
           .describe(
-            'For action "dial", default get. set stores an untracked session valve that overrides the committed baseline; clear drops it so the baseline applies again. Neither writes the committed baseline — that stays a setup-surface act.',
+            'For dial, default get. set stores a session override; clear drops it.',
           ),
         intervention: z
           .enum(['off', 'advisory', 'standard', 'strict'])
           .nullish()
-          .describe(
-            'Dial position for dial_op "set". off and advisory add no automatic context and suspend existing participation at turn boundaries. standard and strict open each session with the election and chain lines, state the entry line on turns with no active task, and report task progress once an entry step or start binds a task. No position blocks work or forces a skill call.',
-          ),
+          .describe('Dial position for dial_op set.'),
       },
     },
     wrapHandler(handleRuntime),

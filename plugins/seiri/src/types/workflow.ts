@@ -47,6 +47,8 @@ export type WorkflowReply =
       /** Echoed for `action: "step"`. */
       step?: WorkflowStep;
       intent?: WorkflowIntent;
+      /** Skill-invocation reminder; the server cannot see whether the caller is inside a skill, so every accepted reply carries it. */
+      notice: string;
     };
 
 /** Bounded observations belonging to one task and actor. */
