@@ -104,6 +104,11 @@ export const WORKFLOW_CHAIN_LINE =
 export const WORKFLOW_ENTRY_LINE_STANDARD =
   'No task bound. Before editing: a behavior change to source or tests (new logic, a fix, a refactor) → seiri:write-plan first, seiri:implement alone for one contained fix, seiri:execute for an already approved plan. Documentation, comments, formatting, or a read-only answer (review, explanation, analysis) → no workflow.';
 
-/** Strict's per-turn entry guidance before a task is bound. */
+/**
+ * Strict's per-turn entry guidance before a task is bound: the same
+ * categories as standard, stated as a firm instruction that admits no
+ * exception for small changes. Never contains the word "Election" — the
+ * user-prompt-submit bundle forbids it as a tree-shaking canary.
+ */
 export const WORKFLOW_ENTRY_LINE_STRICT =
-  'No task bound. Before editing: a behavior change to source or tests → seiri:write-plan, checked by seiri:review-plan, carried out by seiri:execute with each unit through seiri:implement; a failure → seiri:trace-cause; a completion claim → seiri:verify; finished work → seiri:request-review; review feedback → seiri:receive-review. Documentation, comments, formatting, or a read-only answer (review, explanation, analysis) → no workflow.';
+  'No task bound. Before editing: strict, so no edit to source or tests until the owning seiri skill is invoked; no exception for a small or obvious change. Every behavior change must enter seiri:write-plan, be checked by seiri:review-plan, and run under seiri:execute with each unit via seiri:implement; a failure → seiri:trace-cause; a completion claim → seiri:verify; finished work → seiri:request-review; review feedback → seiri:receive-review. Editing without the workflow is a deviation: stop, invoke the owning skill, then continue. Documentation, comments, formatting, or a read-only answer (review, explanation, analysis) → no workflow.';

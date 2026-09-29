@@ -42,31 +42,35 @@ describe('user-turn boundary', () => {
 
   it('states the standard entry line without creating an actor file', () => {
     const cwd = seedRepo('standard');
-    expect(
-      processUserPromptSubmit({
-        cwd,
-        session_id: 'session-a',
-        prompt_id: 'turn-a',
-        hook_event_name: 'UserPromptSubmit',
-      }).hookSpecificOutput?.additionalContext,
-    ).toContain(
+    const context = processUserPromptSubmit({
+      cwd,
+      session_id: 'session-a',
+      prompt_id: 'turn-a',
+      hook_event_name: 'UserPromptSubmit',
+    }).hookSpecificOutput?.additionalContext;
+    expect(context).toContain(
       '[seiri] No task bound. Before editing: a behavior change to source or tests',
     );
+    expect(context).not.toContain('no exception for a small or obvious change');
+    expect(context).not.toContain('must enter seiri:write-plan');
     expect(existsSync(portableJoin(cwd, '.seiri', 'sessions'))).toBe(false);
   });
 
-  it('states the strict entry line with no binding', () => {
+  it('states the strict entry line with no binding, as a firm instruction', () => {
     const context = processUserPromptSubmit({
       cwd: seedRepo('strict'),
       session_id: 'session-a',
       prompt_id: 'turn-a',
       hook_event_name: 'UserPromptSubmit',
     }).hookSpecificOutput?.additionalContext;
-    expect(context).toContain(
-      'No task bound. Before editing: a behavior change to source or tests',
-    );
+    expect(context).toContain('No task bound. Before editing:');
+    expect(context).toContain('no exception for a small or obvious change');
+    expect(context).toContain('must enter seiri:write-plan');
     expect(context).toContain('checked by seiri:review-plan');
+    expect(context).toContain('stop, invoke the owning skill');
+    expect(context).toContain('read-only answer');
     expect(context).not.toContain('Workflow:');
+    expect(context).not.toContain('Election');
   });
 
   it.each(['I am done', 'Review this plan', 'The test failed'])(

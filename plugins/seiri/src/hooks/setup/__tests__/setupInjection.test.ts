@@ -61,6 +61,9 @@ it('carries the strict-only posture line at strict, absent at standard', () => {
     source: 'startup',
   }).hookSpecificOutput?.additionalContext;
   expect(strictContext).toContain('Posture[strict]');
+  expect(strictContext).toContain('Election[strict]');
+  expect(strictContext).toContain('however small');
+  expect(strictContext).toContain('must enter seiri:write-plan');
 
   const standardContext = processSessionStart({
     cwd: seedRepo('standard'),
@@ -70,6 +73,8 @@ it('carries the strict-only posture line at strict, absent at standard', () => {
     source: 'startup',
   }).hookSpecificOutput?.additionalContext;
   expect(standardContext).not.toContain('Posture');
+  expect(standardContext).not.toContain('however small');
+  expect(standardContext).not.toContain('must enter seiri:write-plan');
 });
 
 it('appends the active binding’s progress line last at compact, and suspends it at resume', () => {

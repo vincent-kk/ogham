@@ -43,7 +43,7 @@
       value: 'strict',
       label: 'strict',
       description:
-        'Uses the same explicit participation boundary as standard. Verification remains proportional to the claim and valid evidence can be reused.',
+        'Uses the same explicit participation boundary as standard, stated as a firm instruction: every behavior change enters the workflow, however small. Verification remains proportional to the claim and valid evidence can be reused.',
     },
   ];
 
