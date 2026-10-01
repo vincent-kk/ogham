@@ -136,7 +136,7 @@ ${o.join(`
 
 `)}
 </l1-core-full>`}function Vo(e){return Array.isArray(e)?e.join("|"):e}function Bt(e,t){let n=Vo(t.useBrief?e.brief??e.detail:e.detail),o=e.key==="taboos"?`NEVER: ${n}`:n;return`<${e.key} salience="${e.salience}">${o}</${e.key}>`}function zt(e,t){let n=t==="turn"?o=>o.inject==="turn"||o.inject==="both":o=>o.inject==="session"||o.inject==="both";return e.filter(n).sort((o,r)=>r.salience-o.salience)}var Go="The following define who you are and how you must behave for this entire session \u2014 binding rules, not background lore.";function Xt(e){let t=zt(e.sections,"session");if(t.length===0)return"";let n=['<companion-identity-full enforcement="binding">',`  You are ${e.name}. ${Go}`];for(let o of t)n.push(`  ${Bt(o,{useBrief:!1})}`);return n.push("</companion-identity-full>"),n.join(`
-`)}var x="0.17.1";import{existsSync as Zt,mkdirSync as Ho,readFileSync as Bo,writeFileSync as Qt}from"node:fs";var Wt={enabled:!1},Yt={version:1,actions:[]},Jt=()=>({sources:[],updatedAt:new Date().toISOString()}),Kt={};var qt=[{filename:"insight-config.json",schemaVersion:1,defaultValue:()=>({...d,_schemaVersion:1})},{filename:"auto-insight-stats.json",schemaVersion:1,defaultValue:()=>({...w,updatedAt:new Date().toISOString(),_schemaVersion:1})},{filename:"vault-commit.json",schemaVersion:1,defaultValue:()=>({...Wt,_schemaVersion:1})},{filename:"lifecycle.json",schemaVersion:1,defaultValue:()=>({...Yt,actions:[],_schemaVersion:1})},{filename:"data-sources.json",schemaVersion:1,defaultValue:()=>({...Jt(),_schemaVersion:1})},{filename:"usage-stats.json",defaultValue:()=>({...Kt})},{filename:K,schemaVersion:1,defaultValue:()=>({config:{...q},states:[],topics:[],_schemaVersion:1})}];function zo(e,t){let n={...e};for(let[o,r]of Object.entries(t))o in n||(n[o]=r);return n._schemaVersion=t._schemaVersion,n}function en(e){let t={created:[],skipped:[],migrated:[]},n=f(e);Zt(n)||Ho(n,{recursive:!0});for(let o of qt){let r=f(e,o.filename);if(Zt(r))if(o.schemaVersion!=null)try{let i=JSON.parse(Bo(r,"utf-8"));if((i._schemaVersion??0)<o.schemaVersion){let s=o.defaultValue(),c=zo(i,s);Qt(r,JSON.stringify(c),"utf-8"),t.migrated.push(o.filename)}else t.skipped.push(o.filename)}catch(i){u(e,{hook:"config-provisioner",error:String(i),timestamp:new Date().toISOString()}),t.skipped.push(o.filename)}else t.skipped.push(o.filename);else{let i=o.defaultValue();Qt(r,JSON.stringify(i),"utf-8"),t.created.push(o.filename)}}return t}var tn=`# Using maencof \u2014 Dialogue Discipline
+`)}var x="0.17.2";import{existsSync as Zt,mkdirSync as Ho,readFileSync as Bo,writeFileSync as Qt}from"node:fs";var Wt={enabled:!1},Yt={version:1,actions:[]},Jt=()=>({sources:[],updatedAt:new Date().toISOString()}),Kt={};var qt=[{filename:"insight-config.json",schemaVersion:1,defaultValue:()=>({...d,_schemaVersion:1})},{filename:"auto-insight-stats.json",schemaVersion:1,defaultValue:()=>({...w,updatedAt:new Date().toISOString(),_schemaVersion:1})},{filename:"vault-commit.json",schemaVersion:1,defaultValue:()=>({...Wt,_schemaVersion:1})},{filename:"lifecycle.json",schemaVersion:1,defaultValue:()=>({...Yt,actions:[],_schemaVersion:1})},{filename:"data-sources.json",schemaVersion:1,defaultValue:()=>({...Jt(),_schemaVersion:1})},{filename:"usage-stats.json",defaultValue:()=>({...Kt})},{filename:K,schemaVersion:1,defaultValue:()=>({config:{...q},states:[],topics:[],_schemaVersion:1})}];function zo(e,t){let n={...e};for(let[o,r]of Object.entries(t))o in n||(n[o]=r);return n._schemaVersion=t._schemaVersion,n}function en(e){let t={created:[],skipped:[],migrated:[]},n=f(e);Zt(n)||Ho(n,{recursive:!0});for(let o of qt){let r=f(e,o.filename);if(Zt(r))if(o.schemaVersion!=null)try{let i=JSON.parse(Bo(r,"utf-8"));if((i._schemaVersion??0)<o.schemaVersion){let s=o.defaultValue(),c=zo(i,s);Qt(r,JSON.stringify(c),"utf-8"),t.migrated.push(o.filename)}else t.skipped.push(o.filename)}catch(i){u(e,{hook:"config-provisioner",error:String(i),timestamp:new Date().toISOString()}),t.skipped.push(o.filename)}else t.skipped.push(o.filename);else{let i=o.defaultValue();Qt(r,JSON.stringify(i),"utf-8"),t.created.push(o.filename)}}return t}var tn=`# Using maencof \u2014 Dialogue Discipline
 
 This discipline applies to active maencof sessions. When it conflicts with CLAUDE.md or AGENTS.md user instructions, the user instructions win.
 
@@ -150,13 +150,17 @@ This discipline applies to active maencof sessions. When it conflicts with CLAUD
 
 Apply these rules to every message written for the user:
 
-- Use plain, precise wording in systematic, well-ordered sentences. Never reach for an obscure term or a confusing turn of phrase when a clearer one exists; technical terms and identifiers keep their original form.
-- Name what you refer to. Never compress a reference into a pronoun or a bare item number ("the former", "clause A, item 1") to save tokens \u2014 repeat the explicit name instead, every time.
-- Keep every sentence simple enough to parse in one reading. When a sentence starts carrying several ideas at once, split it into shorter sentences in a clear order; neither the reader nor the writer should carry extra cognitive load.
+- Write every message in complete sentences, including questions and explanations of the current situation. Never use shorthand such as abbreviations, metaphors, or bare references to a document's numbering ("\xA71.2"). When the original source must be included, give a link the user can open immediately.
+- Use plain, precise wording in well-ordered sentences. Never reach for an obscure term or a confusing turn of phrase when a clearer one exists; technical terms and identifiers keep their original form.
+- Name what you refer to. Never compress a reference into a pronoun such as "the former" to save tokens; repeat the explicit name every time.
+- Keep every sentence simple enough to parse in one reading. When a sentence carries several ideas at once, split it into shorter sentences in a clear order; neither the reader nor the writer should carry extra cognitive load.
 
 ## Evidence and Source Locations
 
-For substantive sourced claims, link the original source beside the claim and identify its verified section/heading, full-file lines (including frontmatter), page or timestamp. Read surrounding context; preserve conditions and uncertainty. Distinguish quotation from inference. Never invent a location or imply access to an unread original: identify the secondary source actually consulted. Greetings and proposals need no fabricated citations. Saved documents retain claim-level links and locations through rewrites and splits.
+- For a substantive sourced claim, link the original source beside it and name the verified location: section or heading, line range over the full file including frontmatter, page, or timestamp.
+- Read the surrounding context; preserve its conditions and uncertainty. Distinguish quotation from inference.
+- Never invent a location or imply you read an original you did not; name the secondary source you actually consulted. Greetings and proposals need no citation.
+- Saved documents keep their claim-level links and locations through rewrites and splits.
 
 ## Role \u2192 Skill Mapping
 
@@ -168,12 +172,12 @@ For substantive sourced claims, link the original source beside the claim and id
 
 ## Flow & Priority
 
-1. Vague or ambiguous input \u2192 converge scope by asking one question at a time before acting.
+1. Vague or ambiguous input \u2192 converge scope by asking one question at a time before acting. Once scope is clear, proceed with the requested work.
 2. Ideation signals ("idea", "stuck", "brainstorm") \u2192 use \`explore\` to gather related material, then develop candidate options in the session.
-3. A plan or spec path plus "review" / "check" \u2192 compare it directly with its requirements and evidence. Once scope is clear, proceed with the requested work.
-4. As the session wraps up, surface a brief recap automatically; persist it only when the user explicitly asks. \`reflect\` is the vault judge, never a session recap.
-5. Automatic capture uses insight's duplicate check, then \`capture_insight\` for novel eligible claims. The hook reports capture status. Consolidation needs a reviewed plan; no create/update bypass after rejection.
-6. Before a judgment on a topic with likely prior knowledge, use recall. Read the relevant \`insight-synthesis\` account or follow its integration link, preserving conditions, exceptions and sources. Missing or conflicting accounts fall back to originals. Unrelated turns need no lookup; knowledge cannot grant action authority.
+3. A plan or spec path plus "review" / "check" \u2192 compare it directly with its requirements and evidence.
+4. As the session wraps up, surface a brief recap automatically; persist it only when the user explicitly asks. \`reflect\` judges the vault; it is never a session recap.
+5. Automatic capture runs the \`insight\` duplicate check, then \`capture_insight\` for novel eligible claims. The hook reports capture status. Consolidation needs a reviewed plan; after a rejection, never bypass it with a direct create or update.
+6. Before a judgment on a topic with likely prior knowledge, use \`recall\`. Read the relevant \`insight-synthesis\` account or follow its integration link, preserving conditions, exceptions and sources. When accounts are missing or conflict, fall back to the originals. Unrelated turns need no lookup; recalled knowledge never authorizes an action.
 
 ## Persistence Rules
 
