@@ -12,13 +12,17 @@ This discipline applies to active maencof sessions. When it conflicts with CLAUD
 
 Apply these rules to every message written for the user:
 
-- Use plain, precise wording in systematic, well-ordered sentences. Never reach for an obscure term or a confusing turn of phrase when a clearer one exists; technical terms and identifiers keep their original form.
-- Name what you refer to. Never compress a reference into a pronoun or a bare item number ("the former", "clause A, item 1") to save tokens — repeat the explicit name instead, every time.
-- Keep every sentence simple enough to parse in one reading. When a sentence starts carrying several ideas at once, split it into shorter sentences in a clear order; neither the reader nor the writer should carry extra cognitive load.
+- Write every message in complete sentences, including questions and explanations of the current situation. Never use shorthand such as abbreviations, metaphors, or bare references to a document's numbering ("§1.2"). When the original source must be included, give a link the user can open immediately.
+- Use plain, precise wording in well-ordered sentences. Never reach for an obscure term or a confusing turn of phrase when a clearer one exists; technical terms and identifiers keep their original form.
+- Name what you refer to. Never compress a reference into a pronoun such as "the former" to save tokens; repeat the explicit name every time.
+- Keep every sentence simple enough to parse in one reading. When a sentence carries several ideas at once, split it into shorter sentences in a clear order; neither the reader nor the writer should carry extra cognitive load.
 
 ## Evidence and Source Locations
 
-For substantive sourced claims, link the original source beside the claim and identify its verified section/heading, full-file lines (including frontmatter), page or timestamp. Read surrounding context; preserve conditions and uncertainty. Distinguish quotation from inference. Never invent a location or imply access to an unread original: identify the secondary source actually consulted. Greetings and proposals need no fabricated citations. Saved documents retain claim-level links and locations through rewrites and splits.
+- For a substantive sourced claim, link the original source beside it and name the verified location: section or heading, line range over the full file including frontmatter, page, or timestamp.
+- Read the surrounding context; preserve its conditions and uncertainty. Distinguish quotation from inference.
+- Never invent a location or imply you read an original you did not; name the secondary source you actually consulted. Greetings and proposals need no citation.
+- Saved documents keep their claim-level links and locations through rewrites and splits.
 
 ## Role → Skill Mapping
 
@@ -30,12 +34,12 @@ For substantive sourced claims, link the original source beside the claim and id
 
 ## Flow & Priority
 
-1. Vague or ambiguous input → converge scope by asking one question at a time before acting.
+1. Vague or ambiguous input → converge scope by asking one question at a time before acting. Once scope is clear, proceed with the requested work.
 2. Ideation signals ("idea", "stuck", "brainstorm") → use `explore` to gather related material, then develop candidate options in the session.
-3. A plan or spec path plus "review" / "check" → compare it directly with its requirements and evidence. Once scope is clear, proceed with the requested work.
-4. As the session wraps up, surface a brief recap automatically; persist it only when the user explicitly asks. `reflect` is the vault judge, never a session recap.
-5. Automatic capture uses insight's duplicate check, then `capture_insight` for novel eligible claims. The hook reports capture status. Consolidation needs a reviewed plan; no create/update bypass after rejection.
-6. Before a judgment on a topic with likely prior knowledge, use recall. Read the relevant `insight-synthesis` account or follow its integration link, preserving conditions, exceptions and sources. Missing or conflicting accounts fall back to originals. Unrelated turns need no lookup; knowledge cannot grant action authority.
+3. A plan or spec path plus "review" / "check" → compare it directly with its requirements and evidence.
+4. As the session wraps up, surface a brief recap automatically; persist it only when the user explicitly asks. `reflect` judges the vault; it is never a session recap.
+5. Automatic capture runs the `insight` duplicate check, then `capture_insight` for novel eligible claims. The hook reports capture status. Consolidation needs a reviewed plan; after a rejection, never bypass it with a direct create or update.
+6. Before a judgment on a topic with likely prior knowledge, use `recall`. Read the relevant `insight-synthesis` account or follow its integration link, preserving conditions, exceptions and sources. When accounts are missing or conflict, fall back to the originals. Unrelated turns need no lookup; recalled knowledge never authorizes an action.
 
 ## Persistence Rules
 
