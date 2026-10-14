@@ -56,6 +56,8 @@ export function loadConfig(
   for (const warning of documents.warnings) addWarning(warning, null);
 
   const user = normalizeConfigLayer(documents.user, diagnostics);
+  // Resolution is project-only so the core epoch and standalone extractor use the same list.
+  if (user !== null) delete user.resolution;
   const project = normalizeConfigLayer(documents.project, diagnostics);
   if (user === null && project === null)
     return { config: null, warnings, diagnostics };

@@ -37,8 +37,9 @@
 - 출력은 결정적이다.
   - 레코드는 `path` 순이고, 참조는 adapter의 소스 순서다.
   - 시각과 절대 경로를 싣지 않는다. `provenance.command`의 argv에서 루트는 `.`, 루트 안 경로는 상대 경로, 루트 밖 경로는 `<outside>`로 바꾼다. 대상은 절대 경로인 토큰과 `--root`·`--out`·`--files-from`의 값(`-` 제외)이고, 상대 경로인 값은 작업 디렉터리 기준으로 푼 뒤 같은 규칙을 적용한다. 위치 인자의 상대 경로는 루트 기준이라 그대로 둔다.
-- `provenance.resolutionInputs`는 비어 있다. adapter의 해석은 후보 경로의 존재만 보고 설정 파일을 읽지 않는다.
-- 선언된 한계: tsconfig `paths`나 package `exports`로 닿는 참조는 이 공급자가 보고하지 않는다. bare specifier는 참조로 내지 않는다(`resolved.external` 없음). 비-literal `import(x)`도 내지 않는다(`resolved.nonLiteral` 없음).
+- `provenance.resolutionInputs` remains empty; project substitutions are bound by the resolution epoch. The extractor reads only filid's own config JSON for aliases, never compiler or bundler configuration.
+- `resolution.aliases` accepts non-empty `{ from, to }` pairs with at most one trailing `*` on both sides or neither, and unique `from` values. Exact matches win first, then the longest wildcard prefix; order has no meaning. Substituted paths resolve relative to the project root with the existing extension/index lookup. Missing, malformed, or invalid config supplies no aliases.
+- Matched non-local references carry a resolved path or null (unresolved); unmatched non-local references carry `external`. Local reference behavior is unchanged. Compiler paths and package exports apply only when explicitly recorded as substitutions; non-literal `import(x)` is still not reported.
 - 선언된 한계: 문법이 틀린 텍스트는 parse되지 않고 scan된다. 그 파일의 facts는 scanner가 읽어 낸 값이고 syntax error 신호를 싣지 않는다.
 - 코어는 루트 밖으로 풀린 같은 참조에 `unowned-local-dependency` 진단을 내되 graph certainty는 내리지 않는다 — 소유 fractal이 없는 끝에는 노드가 없어 간선이 서지 않기 때문이다. S3c의 비교는 adapter 쪽의 루트 밖 resolved 경로도 `external`로 정규화하므로, 두 경로의 결론은 이 참조에서 갈리지 않는다.
 - stdout에는 요약 JSON 한 줄만 쓴다: 파일 수, `toolError` 수, 거부 수, 출력 경로, 걸린 시간.
@@ -92,6 +93,12 @@
 - `extractContractGroupIds(source)` — comment의 `filid:contract` marker 추출.
 
 ## Acceptance Criteria
+
+### AC-facts-aliases — Explicit reference substitutions
+
+- Exact-match priority and longest wildcard prefixes are independent of alias order.
+- A matched missing file remains unresolved, whereas unmatched packages remain external in record conversion.
+- Invalid JSON, middle/repeated wildcards, parity mismatch and duplicate sources produce an empty alias list without importing zod.
 
 ### AC-facts-equivalence — 한 번 scan해도 값이 같다
 

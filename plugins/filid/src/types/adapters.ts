@@ -15,10 +15,20 @@ export type DependencyReferenceKind =
   | 're-export'
   | 'framework';
 
+/** Explicit project-relative substitution for a reference specifier. */
+export interface ResolutionAlias {
+  /** Exact specifier or prefix followed by one trailing wildcard. */
+  from: string;
+  /** Project-relative target with the same wildcard shape as `from`. */
+  to: string;
+}
+
 export interface DependencyReference {
   sourceFile: string;
   rawSpecifier: string;
   resolvedPath: string | null;
+  /** Non-local specifier that matched no configured substitution. */
+  external?: string;
   kind: DependencyReferenceKind;
   /**
    * `indeterminate` when the adapter found the reference where it could not

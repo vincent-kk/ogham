@@ -11,7 +11,7 @@ import { toPosixRelative } from '../paths/toPosixRelative.js';
  * not by a path the server would refuse on every submission.
  * @param projectRoot Absolute root the resolved path is made relative to.
  * @param reference Reference the adapter reported.
- * @returns The record reference: `{ unresolved: true }` for a null
+ * @returns The record reference: declared `external` first, `{ unresolved: true }` for a null
  *   `resolvedPath`, `{ external: specifier }` for one outside the root, and
  *   the project-relative `{ path }` otherwise.
  */
@@ -30,10 +30,12 @@ export function toReference(
       ? { certainty: 'indeterminate' as const }
       : {}),
     resolved:
-      reference.resolvedPath === null
-        ? { unresolved: true }
-        : isInsideRoot(projectRoot, reference.resolvedPath)
-          ? { path: toPosixRelative(projectRoot, reference.resolvedPath) }
-          : { external: reference.rawSpecifier },
+      reference.external !== undefined
+        ? { external: reference.external }
+        : reference.resolvedPath === null
+          ? { unresolved: true }
+          : isInsideRoot(projectRoot, reference.resolvedPath)
+            ? { path: toPosixRelative(projectRoot, reference.resolvedPath) }
+            : { external: reference.rawSpecifier },
   };
 }

@@ -8,6 +8,7 @@
 
 - 이 디렉터리가 확장자, entry filename, package/framework 이름과 verification 이름 규칙의 유일한 출처다. 추출 프로그램은 그 상수를 복제하지 않고 직접 가져간다(DETAIL의 Boundary Exemptions).
 - 파일의 내용은 읽지 않는다. manifest(`package.json`)만 JSON으로 읽는다.
+- The ecosystem reference reader consumes filid's explicit substitution list; filid's own config is not ecosystem configuration.
 - 정적 확정이 불가능하면 indeterminate를 반환한다.
 
 ## Boundaries

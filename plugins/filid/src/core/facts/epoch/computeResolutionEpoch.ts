@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import type { Hash } from 'node:crypto';
 
 import { FACTS_HASH_PREFIX } from '../../../constants/facts.js';
+import type { ResolutionAlias } from '../../../types/adapters.js';
 
 import { hashResolutionInput } from './utils/hashResolutionInput.js';
 
@@ -46,12 +47,14 @@ export interface ResolutionEpochSnapshot {
  * @param scannedPaths - Project-relative POSIX paths, raw-byte sorted.
  * @param resolutionInputPaths - Default resolution inputs whose bytes enter the
  * digest.
+ * @param resolutionAliases - Project-only substitutions, normalized by source before framing.
  * @returns The epoch and the inputs it was built from.
  */
 export function computeResolutionEpoch(
   projectRoot: string,
   scannedPaths: readonly string[],
   resolutionInputPaths: readonly string[],
+  resolutionAliases: readonly ResolutionAlias[] = [],
 ): ResolutionEpochSnapshot {
   const resolutionInputs = resolutionInputPaths.map((path) => ({
     path,
@@ -62,6 +65,12 @@ export function computeResolutionEpoch(
   frame(
     digest,
     resolutionInputs.flatMap((input) => [input.path, input.contentHash ?? '']),
+  );
+  frame(
+    digest,
+    [...resolutionAliases]
+      .sort((left, right) => left.from < right.from ? -1 : left.from > right.from ? 1 : 0)
+      .flatMap((alias) => [alias.from, alias.to]),
   );
   return {
     resolutionEpoch: `${FACTS_HASH_PREFIX}${digest.digest('hex')}`,

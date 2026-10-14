@@ -54,6 +54,13 @@ Resolve the absolute target path for settings and rule-document calls.
 3. On an interactive local host, call `mcp__plugin_filid_tools__project_setup` with `action: "settings"` and a bounded wait, then dispatch on `saved`, `closed`, or `pending`.
 4. In a headless environment, use `project_setup` actions `rules-manifest`, `rules-status`, and `rules-sync`; do not invent another config editing workflow.
 5. After initialization, collect test, benchmark, and fixture directory names from the scan results. If they differ from the defaults, record them in `.filid/config.json` under `verification.organNames`. Record directory names only, independent of programming-language conventions; every scanned file beneath a matching organ is verification code.
+6. Collect the most common import specifier shapes in source. Identify prefixes that are paths relative to neither the importing file nor the project root, then confirm their meaning in the applicable compiler, bundler, test runner, or package manager configuration. Record explicit `from`/`to` substitutions in `.filid/config.json` under `resolution.aliases`: permit only one trailing `*`, present on both sides or neither, and each `from` once. Exact matches win before the longest wildcard prefix, independent of list order.
+   - tsconfig `paths`: `@app/*` → `src/*`.
+   - Vite/Webpack alias: `@ui/*` → `src/ui/*`.
+   - Workspace package name: `@workspace/library` → `packages/library/src/index.ts`.
+   - Python package root: `application/*` → `src/application/*`.
+   - Go module path: `example.org/module/*` → `*`.
+   filid reads only this list; a prefix not listed stays an external reference.
 
 If `--rules` is present, emit the managed-rule summary and stop.
 

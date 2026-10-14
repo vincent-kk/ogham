@@ -1,4 +1,4 @@
-// filid:contract AC-config-verification
+// filid:contract AC-config-verification AC-config-resolution
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -29,6 +29,43 @@ afterEach(() => {
 });
 
 describe('verification configuration', () => {
+  it('accepts and round-trips resolution.aliases in raw and normalized schemas', () => {
+    const aliases = [{ from: '@app/*', to: 'src/*' }, { from: 'entry', to: 'src/index' }];
+    const config = { ...createDefaultConfig(), resolution: { aliases } };
+    const { root, path } = project(config);
+    expect(FilidConfigFileSchema.parse(config).resolution?.aliases).toEqual(aliases);
+    expect(FilidConfigSchema.parse(config).resolution?.aliases).toEqual(aliases);
+    expect(loadConfig(root, { user: join(root, 'absent.json'), project: path }).config?.resolution?.aliases).toEqual(aliases);
+  });
+
+  it('rejects middle and repeated wildcards, parity mismatches and duplicate sources', () => {
+    for (const aliases of [
+      [{ from: '@app/*/utils', to: 'src/*' }],
+      [{ from: '@app/**', to: 'src/*' }],
+      [{ from: '@app/*', to: 'src' }],
+      [{ from: '@app', to: 'src/*' }],
+      [{ from: '', to: 'src' }],
+      [{ from: '@app', to: '' }],
+      [{ from: '@app', to: 'src' }, { from: '@app', to: 'lib' }],
+    ]) {
+      const config = { ...createDefaultConfig(), resolution: { aliases } };
+      expect(FilidConfigFileSchema.safeParse(config).success).toBe(false);
+      expect(FilidConfigSchema.safeParse(config).success).toBe(false);
+    }
+  });
+
+  it('drops user resolution while preserving the project list', () => {
+    const userAliases = [{ from: 'user/*', to: 'personal/*' }];
+    const projectAliases = [{ from: 'project/*', to: 'src/*' }];
+    const { root, path } = project(createDefaultConfig());
+    const user = join(root, 'user.json');
+    writeFileSync(user, JSON.stringify({ ...createDefaultConfig(), resolution: { aliases: userAliases } }));
+    expect(loadConfig(root, { user, project: path }).config?.resolution).toBeUndefined();
+    expect(loadConfig(root, { user, project: null }).config?.resolution).toBeUndefined();
+    writeFileSync(path, JSON.stringify({ ...createDefaultConfig(), resolution: { aliases: projectAliases } }));
+    expect(loadConfig(root, { user, project: path }).config?.resolution?.aliases).toEqual(projectAliases);
+  });
+
   it('records defaults in both schemas and round-trips through loadConfig', () => {
     const config = createDefaultConfig();
     expect(config.verification?.organNames).toEqual(['__tests__', '__benchmarks__', 'test', 'tests', 'spec', 'specs', 'fixtures', 'e2e']);
