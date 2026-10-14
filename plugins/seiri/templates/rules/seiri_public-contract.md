@@ -4,7 +4,7 @@
 
 ## 1. Export only what has a consumer
 
-An export with no consumer carries a stated intent — or gets removed. Remove leftovers your change added or orphaned; leave a pre-existing one for a deliberate cleanup. Usage is tool-checkable; intent you must write.
+An export with no consumer carries a stated intent — or gets removed. Remove leftovers your change added or orphaned; leave a pre-existing one for a deliberate cleanup. Usage is tool-checkable; intent you must write. A consumer of a module's entry point is product code outside that module's subtree; the parent is outside. Verification, benchmark and demonstration code is not a consumer, except code declared to exercise the package's public surface, which consumes the root entry point only.
 
 ## 2. Name every re-export
 

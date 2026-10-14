@@ -18,7 +18,7 @@ Nothing speculative. Validation at trust boundaries (public APIs, user input, ex
 
 ## 3. Surgical changes
 
-Every changed line traces to the request. Remove what YOUR change orphaned; leave pre-existing dead code in place, mentioned, not buried in an unrelated diff.
+Every changed line traces to the request. Remove what YOUR change orphaned; leave pre-existing dead code in place, mentioned, not buried in an unrelated diff. A root file or entry-point name without an outside consumer is not ordinary dead code: remove it or move it below the root.
 
 ---
 

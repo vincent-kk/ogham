@@ -235,7 +235,7 @@ When a direct call and an indirect mechanism are equally capable, choose direct 
 
 ## 1. Export only what has a consumer
 
-An export with no consumer carries a stated intent — or gets removed. Remove leftovers your change added or orphaned; leave a pre-existing one for a deliberate cleanup (`seiri_reuse-first` §3). Usage is tool-checkable; intent you must write.
+An export with no consumer carries a stated intent — or gets removed. Remove leftovers your change added or orphaned; leave a pre-existing one for a deliberate cleanup. Usage is tool-checkable; intent you must write. A consumer of a module's entry point is product code outside that module's subtree; the parent is outside. Verification, benchmark and demonstration code is not a consumer, except code declared to exercise the package's public surface, which consumes the root entry point only.
 
 ## 2. Name every re-export
 
@@ -243,15 +243,15 @@ Wildcard re-exports hide the surface three ways: a new symbol in an internal fil
 
 ## 3. Entry points declare, internals implement
 
-The set of symbols reachable from the entry point IS the public contract; everything behind it is free to change. An entry point holds re-exports and wiring, not implementation; consumers outside the module hold only entry-point symbols.
+The set of symbols reachable from the entry point IS the public contract; everything behind it is free to change. An entry point holds re-exports and wiring, not implementation; consumers outside the module hold only entry-point symbols. The split is structural at every scale, not only at the entry point: in a directory with no entry point, the units it offers sit at its top and whatever serves only them sits beneath. A reader tells a unit's reach from its path, without searching for importers.
 
 ## 4. Framework-invoked files are entry points too
 
-A file the framework calls by convention — routes, pages, handlers, plugin manifests — is public surface even though no import names it. Treat changes to its exported shape as contract changes, and label the convention that invokes it (`seiri_agent-legible` §1).
+A file the framework calls by convention — routes, pages, handlers, plugin manifests — is public surface even though no import names it. Treat changes to its exported shape as contract changes, and label the convention that invokes it in one line at the file's head.
 
 ---
 
-**This rule is working if:** the public surface can be enumerated by reading entry points, and removing an internal symbol breaks no consumer. **This rule is wrong for you if:** the code is a single-file script or notebook with no module boundary — there is no contract to keep small.
+**This rule is working if:** the public surface can be enumerated by reading entry points, who may import a file can be predicted from its path and a search confirms it, and removing an internal symbol breaks no consumer. **This rule is wrong for you if:** the code is a single-file script or notebook with no module boundary — there is no contract to keep small.
 <!-- SEIRI:END:seiri_public-contract.md -->
 
 <!-- SEIRI:START:seiri_test-validity.md -->
@@ -324,7 +324,7 @@ Nothing speculative. Validation at trust boundaries (public APIs, user input, ex
 
 ## 3. Surgical changes
 
-Every changed line traces to the request. Remove what YOUR change orphaned; leave pre-existing dead code in place, mentioned, not buried in an unrelated diff.
+Every changed line traces to the request. Remove what YOUR change orphaned; leave pre-existing dead code in place, mentioned, not buried in an unrelated diff. A root file or entry-point name without an outside consumer is not ordinary dead code: remove it or move it below the root.
 
 ---
 
