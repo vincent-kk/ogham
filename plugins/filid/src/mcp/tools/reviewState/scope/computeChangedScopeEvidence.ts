@@ -6,17 +6,17 @@ import {
 
 import { REVIEW_STATE_DELETED_FILE_HASH } from '../../../../constants/reviewState.js';
 import { RULE_SCOPES } from '../../../../constants/ruleScopes.js';
+import { resolveFactsScope } from '../../../../core/facts/index.js';
 import {
   classifyRelevanceTarget,
   collectTargetNames,
   loadConfig,
   validateStructure,
 } from '../../../../core/index.js';
-import { resolveFactsScope } from '../../../../core/facts/index.js';
-import { compareByBytes } from '../../../../lib/compareByBytes.js';
-import { isIgnoredPath } from '../../../../lib/matchesPathPattern.js';
 import { readUnknownFileText } from '../../../../core/restructure/index.js';
 import { aggregateCertainty } from '../../../../core/verification/index.js';
+import { compareByBytes } from '../../../../lib/compareByBytes.js';
+import { isIgnoredPath } from '../../../../lib/matchesPathPattern.js';
 import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type { RuleScope } from '../../../../types/rules.js';
 import type { ToolDiagnostic } from '../../../../types/toolEnvelope.js';
@@ -24,6 +24,7 @@ import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
 import { isAttributedToUnknownFile } from '../../utils/isAttributedToUnknownFile.js';
 import { isFindingDiagnostic } from '../../utils/isFindingDiagnostic.js';
 import { selectVerificationEvidence } from '../../utils/selectVerificationEvidence.js';
+import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js';
 import type { ReviewScopeViolation } from '../state/reviewStateTypes.js';
 
 import { buildScopeCandidates } from './buildScopeCandidates.js';
@@ -31,24 +32,23 @@ import type {
   CollectChangedScopeEvidenceInput,
   ComputedChangedScopeEvidence,
 } from './changedScopeEvidenceTypes.js';
-import { computeReviewArtifactHash } from '../hash/computeReviewArtifactHash.js';
-
 import { classifyChangedFile } from './classifyChangedFile.js';
-import { selectFrozenFacts } from './utils/selectFrozenFacts.js';
-import { isOutOfScopeVerificationDiagnostic } from './utils/isOutOfScopeVerificationDiagnostic.js';
-import { outsideFactsScopeDiagnostic } from './utils/outsideFactsScopeDiagnostic.js';
-import { selectReviewScopePaths } from './utils/selectReviewScopePaths.js';
+import { countRetainedViolations } from './countRetainedViolations.js';
 import { deriveEvidenceStatuses } from './deriveEvidenceStatuses.js';
 import { readChangedFileRoster } from './readChangedFileRoster.js';
 import { readReviewWorktree } from './readReviewWorktree.js';
 import { selectChangedScopeVerificationFiles } from './selectChangedScopeVerificationFiles.js';
 import { selectChangedScopeViolations } from './selectChangedScopeViolations.js';
 import { selectReviewScopeUnknownFiles } from './selectReviewScopeUnknownFiles.js';
-import { haveSameReviewPaths } from './utils/haveSameReviewPaths.js';
 import { assertReviewScopeFacts } from './utils/assertReviewScopeFacts.js';
+import { haveSameReviewPaths } from './utils/haveSameReviewPaths.js';
+import { isOutOfScopeVerificationDiagnostic } from './utils/isOutOfScopeVerificationDiagnostic.js';
+import { outsideFactsScopeDiagnostic } from './utils/outsideFactsScopeDiagnostic.js';
 import { scopeGraphUncertaintyViolations } from './utils/scopeGraphUncertaintyViolations.js';
-import { toolErrorViolations } from './utils/toolErrorViolations.js';
+import { selectFrozenFacts } from './utils/selectFrozenFacts.js';
+import { selectReviewScopePaths } from './utils/selectReviewScopePaths.js';
 import { sortScopeDiagnostics } from './utils/sortScopeDiagnostics.js';
+import { toolErrorViolations } from './utils/toolErrorViolations.js';
 
 /**
  * Compute committed roster and FCA evidence from one shared project snapshot.
@@ -229,16 +229,12 @@ export async function computeChangedScopeEvidence(
     selection.retained,
     ruleScopeById,
   );
-  const retainedStructureCount = selection.retained.filter(
-    ({ source }) => source === 'structure',
-  ).length;
-  const retainedVerificationCount =
-    selection.retained.length - retainedStructureCount;
+  const retainedCounts = countRetainedViolations(selection.retained);
   const statuses = deriveEvidenceStatuses(
     context.snapshot,
     scopedDiagnostics,
-    retainedStructureCount,
-    retainedVerificationCount,
+    retainedCounts.structure,
+    retainedCounts.verification,
     scopedVerificationCertainty,
     scopedDependencyCertainty,
   );
@@ -263,7 +259,9 @@ export async function computeChangedScopeEvidence(
   const outsideFactsScope = [
     ...new Set([...scopePaths.changed, ...scopePaths.neighbours]),
   ]
-    .filter((path) => factsScope.defaultCovers(path) && !factsScope.covers(path))
+    .filter(
+      (path) => factsScope.defaultCovers(path) && !factsScope.covers(path),
+    )
     .sort(compareByBytes);
   const outsideScopeReport = outsideFactsScopeDiagnostic(outsideFactsScope);
   const evidenceDiagnostics = normalizeDiagnostics([

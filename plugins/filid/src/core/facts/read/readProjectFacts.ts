@@ -126,6 +126,7 @@ export async function readProjectFacts(
       projectRoot,
       scannedPaths,
       collectDefaultResolutionInputs(scannedPaths),
+      config?.resolution?.aliases ?? [],
     ),
   };
 }

@@ -19,6 +19,13 @@ const TEST_ORGAN_NAMES: readonly string[] = [
   'e2e',
 ] as const;
 
+/** Directory names whose organ subtrees contain verification code. */
+export const DEFAULT_VERIFICATION_ORGAN_NAMES: readonly string[] = [
+  '__tests__',
+  '__benchmarks__',
+  ...TEST_ORGAN_NAMES,
+];
+
 // Docs-as-code compartments (references, docs, plans, skills, agents, ...)
 // are deliberately absent: the set is open, and a name shipped here silently
 // reclassifies a real code module of that name as an organ, muting the rules

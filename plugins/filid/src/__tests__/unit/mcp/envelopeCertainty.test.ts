@@ -69,6 +69,7 @@ const EXACT_SNAPSHOT: ProjectSnapshot = {
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: [],
+  verificationPaths: [],
   verification: {
     files: [],
     violations: [],

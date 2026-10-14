@@ -9,6 +9,8 @@ Own validation, non-destructive v1/v2 migration, explicit saving of config v3, a
 - user와 project config는 레이어별 migration을 먼저 끝낸 뒤 병합하고, strict 검증은 병합 결과에만 적용한다.
 - managed rule channel의 실제 주소는 host target resolver가 소유한다. config loader는 scope를 전달하되 host별 경로를 만들지 않는다.
 - loader는 선언된 구조 옵션을 검증·보존하며, scan·merge-track 소비자의 경로 의미를 대신 해석하지 않는다.
+- Validate and preserve `verification.organNames` as language-neutral directory names.
+- Validate `resolution.aliases` as project-only reference substitutions without interpreting ecosystem configuration.
 
 ## Boundaries
 

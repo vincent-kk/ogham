@@ -9,7 +9,7 @@
       "title": "Fractal Boundaries",
       "description": "Node classification, fractal ownership, entry-point surfaces, level legibility, organ access, exemptions, and the acyclic dependency graph.",
       "grounding": "This rule rests on properties every codebase has: directories contain files, and files reference one another.",
-      "templateHash": "1de7fe989f39f0807abd2bcabb7fe0063f719f00e1a1e4ef9bde5e101e0a728e"
+      "templateHash": "30b39669fb872e3a37891751f47a229a07f2d65bc9dfafd401631e9c7fa12678"
     },
     {
       "id": "filid_module-documents",
@@ -36,7 +36,7 @@
       "title": "Code Placement",
       "description": "Ownership-first and lowest-common-fractal placement, restructure plan preconditions and postconditions, the document-before-code workflow, and PR-seam Filid validation.",
       "grounding": "This rule rests on properties every codebase has: a unit has a location, and its consumers have locations too.",
-      "templateHash": "11b8ae6ed6f33d03094f480e7b539751158f7095d812bc0d0237bbc9b9b0898f"
+      "templateHash": "d9116398312209c7341298bf46b41929209c5e6249d3f2d880cc391acacbce6e"
     }
   ]
 }

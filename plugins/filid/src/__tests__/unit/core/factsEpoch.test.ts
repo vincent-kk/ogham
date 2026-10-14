@@ -8,7 +8,9 @@ import {
   collectDefaultResolutionInputs,
   computeResolutionEpoch,
   diffEpochSnapshots,
+  readProjectFacts,
 } from '../../../core/facts/index.js';
+import { createDefaultConfig } from '../../../core/infra/configLoader/index.js';
 import { listScannedFilePaths } from '../../../core/tree/fractalTree/index.js';
 
 const roots: string[] = [];
@@ -49,6 +51,35 @@ async function epochOf(root: string) {
 }
 
 describe('resolutionEpoch', () => {
+  it('passes the loaded project substitution list into the current epoch', async () => {
+    const root = createProject({});
+    const config = createDefaultConfig();
+    const baseline = await readProjectFacts(root, config);
+    const changed = await readProjectFacts(root, {
+      ...config, resolution: { aliases: [{ from: '@app/*', to: 'src/*' }] },
+    });
+    expect(changed.epoch.resolutionEpoch).not.toBe(baseline.epoch.resolutionEpoch);
+  });
+
+  it('moves when substitution sources or targets change', () => {
+    const root = createProject({});
+    const before = computeResolutionEpoch(root, [], [], [{ from: '@app/*', to: 'src/*' }]);
+    expect(computeResolutionEpoch(root, [], [], [{ from: '@app/*', to: 'lib/*' }]).resolutionEpoch).not.toBe(before.resolutionEpoch);
+    expect(computeResolutionEpoch(root, [], [], [{ from: '@other/*', to: 'src/*' }]).resolutionEpoch).not.toBe(before.resolutionEpoch);
+  });
+
+  it('normalizes alias list order without mutating caller input', () => {
+    const root = createProject({});
+    const aliases = [{ from: 'z*', to: 'src/*' }, { from: 'a', to: 'lib/value' }];
+    expect(computeResolutionEpoch(root, [], [], aliases).resolutionEpoch).toBe(computeResolutionEpoch(root, [], [], [...aliases].reverse()).resolutionEpoch);
+    expect(aliases.map((alias) => alias.from)).toEqual(['z*', 'a']);
+  });
+
+  it('length-frames both alias fields independently', () => {
+    const root = createProject({});
+    expect(computeResolutionEpoch(root, [], [], [{ from: 'a', to: 'bc' }]).resolutionEpoch).not.toBe(computeResolutionEpoch(root, [], [], [{ from: 'ab', to: 'c' }]).resolutionEpoch);
+  });
+
   it('does not move when only a source file body changes', async () => {
     const root = createProject({
       'package.json': '{"name":"p"}',

@@ -83,6 +83,7 @@ function snapshotOf(entries: NodeEntry[]): ProjectSnapshot {
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture'],
+    verificationPaths: [],
     verification: {
       files: [],
       violations: [],

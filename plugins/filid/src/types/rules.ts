@@ -46,6 +46,8 @@ export interface RuleViolation {
   certainty?: AnalysisCertainty;
   /** File the offending import resolves to; set by import-boundary rules on every violation except the certainty warning. */
   importedPath?: string;
+  /** Matching config exemption pattern; its presence counts the evaluation as skipped. */
+  exemptedBy?: string;
 }
 
 /** 단일 규칙 정의. `check` 함수는 순수 함수여야 하며 부작용이 없어야 한다. */

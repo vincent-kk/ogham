@@ -110,6 +110,7 @@ function snapshotOf(
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture'],
+    verificationPaths: [],
     verification: {
       files: [],
       violations: [],

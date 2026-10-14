@@ -1,4 +1,5 @@
-import type { DependencyReference } from '../../../types/adapters.js';
+import { dirname } from 'node:path';
+import type { DependencyReference, ResolutionAlias } from '../../../types/adapters.js';
 import { findHiddenMatches } from '../lexing/findHiddenMatches.js';
 import type { ScannedSource } from '../scanSource.js';
 import { scanSource } from '../scanSource.js';
@@ -42,12 +43,21 @@ export const HIDDEN_REFERENCE_PATTERNS: readonly {
   },
 ];
 
-function isLocalSpecifier(specifier: string): boolean {
-  return specifier.startsWith('.') || specifier.startsWith('/');
+/**
+ * Distinguish unmatched non-local references from matched paths that are missing.
+ * @param specifier Reference text to classify.
+ * @param aliases Validated project substitutions.
+ * @returns Whether the reference is external to the substitution list.
+ */
+function isExternalSpecifier(specifier: string, aliases: readonly ResolutionAlias[]): boolean {
+  return !specifier.startsWith('.') && !specifier.startsWith('/') &&
+    !aliases.some((alias) => alias.from.endsWith('*')
+      ? specifier.startsWith(alias.from.slice(0, -1))
+      : specifier === alias.from);
 }
 
 /**
- * Extract the project-local references of one source text.
+ * Extract local, substituted and external references of one source text.
  *
  * On a line an unterminated `'` or `"` mispaired, everything after the first
  * quote is untrusted: references the scan read as code there are
@@ -59,12 +69,16 @@ function isLocalSpecifier(specifier: string): boolean {
  * @param source - The file's text
  * @param scanned - The scan of that text, when the caller already took one;
  * omitted, this reading takes its own.
+ * @param aliases Validated project substitution list.
+ * @param projectRoot Root for alias targets; local references remain source-relative.
  * @returns References the scan read as code, in source order, then the hidden ones
  */
 export function referencesInSource(
   filePath: string,
   source: string,
   scanned?: ScannedSource,
+  aliases: readonly ResolutionAlias[] = [],
+  projectRoot: string = dirname(filePath),
 ): DependencyReference[] {
   const { tokens, untrusted } = scanned ?? scanSource(source);
   const references: DependencyReference[] = [];
@@ -94,7 +108,7 @@ export function referencesInSource(
       kind = 'static';
       dependency = dependencyStringAfter(tokens, index + 1);
     }
-    if (!kind || !dependency || !isLocalSpecifier(dependency.value)) continue;
+    if (!kind || !dependency) continue;
 
     while (
       lineIndex < untrusted.lines.length &&
@@ -115,7 +129,8 @@ export function referencesInSource(
       ...(written === `${written[0]}${dependency.value}${written[0]}`
         ? {}
         : { sourceText: written }),
-      resolvedPath: resolveSpecifier(filePath, dependency.value),
+      resolvedPath: resolveSpecifier(filePath, dependency.value, aliases, projectRoot),
+      ...(isExternalSpecifier(dependency.value, aliases) ? { external: dependency.value } : {}),
       kind,
       ...(indeterminate
         ? {
@@ -134,7 +149,7 @@ export function referencesInSource(
       'afterFirstQuote',
     )) {
       const specifier = hit.groups?.specifier;
-      if (!specifier || !isLocalSpecifier(specifier)) continue;
+      if (!specifier) continue;
       if (
         references.some(
           (reference) =>
@@ -146,7 +161,8 @@ export function referencesInSource(
       references.push({
         sourceFile: filePath,
         rawSpecifier: specifier,
-        resolvedPath: resolveSpecifier(filePath, specifier),
+        resolvedPath: resolveSpecifier(filePath, specifier, aliases, projectRoot),
+        ...(isExternalSpecifier(specifier, aliases) ? { external: specifier } : {}),
         kind,
         certainty: 'indeterminate',
         line: lineAt(source, hit.offset),

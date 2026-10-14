@@ -13,6 +13,7 @@ import {
   resolveProjectFile,
 } from './utils/paths/resolveProjectFile.js';
 import { extractOneFile } from './utils/records/extractOneFile.js';
+import { readResolutionAliases } from './utils/input/readResolutionAliases.js';
 
 /** Name the program records as the producing tool. */
 const TOOL_NAME = 'filid-facts';
@@ -38,6 +39,7 @@ export async function extractFileFacts(
 ): Promise<FileFactsExtraction> {
   const root = resolve(projectRoot);
   const realRoot = realpathSync.native(root);
+  const aliases = readResolutionAliases(root);
   const provenance: FactsProvenance = {
     tool: TOOL_NAME,
     version: VERSION,
@@ -58,7 +60,7 @@ export async function extractFileFacts(
   for (const file of [...accepted.values()].sort((left, right) =>
     left.path < right.path ? -1 : left.path > right.path ? 1 : 0,
   )) {
-    const record = await extractOneFile(root, file, provenance);
+    const record = await extractOneFile(root, file, provenance, aliases);
     if (record) records.push(record);
     else unreadable.push(file.path);
   }

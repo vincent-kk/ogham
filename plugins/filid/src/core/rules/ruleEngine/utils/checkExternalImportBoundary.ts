@@ -49,11 +49,11 @@ function hasEntryPoint(node: FractalNode, path: string): boolean {
  * The edge has already promoted the organ to its owning fractal, so the organ
  * identity is recovered from `evidence.resolvedPath`.
  *
- * A consumer the adapter reports as a verification file is not judged at all.
+ * A consumer in the snapshot verification path union is not judged at all.
  * Verification exists to check a unit, and checking an internal unit means
  * reaching it; the alternative is exporting internals for tests alone, which
  * puts symbols on the public surface whose only consumer is a test. Which files
- * are verification is adapter evidence — core knows no filename patterns.
+ * are verification comes from adapter evidence and configured organ names.
  */
 export function checkExternalImportBoundary(context: {
   snapshot: ProjectSnapshot;
@@ -61,7 +61,7 @@ export function checkExternalImportBoundary(context: {
   const violations: RuleViolation[] = [];
   const { dependencyGraph } = context.snapshot;
   const verificationPaths = new Set(
-    context.snapshot.verification.files.map((file) => file.path),
+    context.snapshot.verificationPaths,
   );
 
   for (const edge of dependencyGraph.edges) {

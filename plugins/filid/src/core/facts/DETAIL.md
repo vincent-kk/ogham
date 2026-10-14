@@ -5,9 +5,9 @@
 - 사실은 에이전트가 제출한다. 이 fractal은 코드를 해석하지 않고 검사할 수 있는 성질만 본다: hash 결속, 문자열 존재, 해석 경로의 유효성.
 - 파일마다 레코드 하나이고 제출은 교체다. 합집합·충돌·투표·분쟁 상태는 없고, 레코드를 지우는 동작도 없다.
 - 레코드는 두 조건이 함께 맞을 때 유효하다. 구문 유효는 레코드의 `contentHash`가 현재 byte와 같다는 것이고, 해석 유효는 레코드가 받아들여진 epoch가 현재 epoch와 같다는 것이다.
-- `resolutionEpoch`는 스캔된 경로 목록과 **프로젝트 기본 해석 입력**(manifest·lockfile basename 패턴에 걸린 스캔 경로)의 내용으로만 만든다. 소스 파일의 내용은 들어가지 않는다 — 본문만 바뀌면 해석은 그대로 맞고, 파일이 늘거나 줄거나 옮겨지면 형제 이름 하나로 같은 specifier의 정답이 바뀌므로 모든 레코드의 해석이 한꺼번에 무효가 된다.
+- `resolutionEpoch`는 스캔된 경로 목록, **프로젝트 기본 해석 입력**(manifest·lockfile basename 패턴에 걸린 스캔 경로)의 내용과 정규화된 프로젝트 참조 치환 목록으로 만든다. 소스 파일의 내용은 들어가지 않는다 — 본문만 바뀌면 해석은 그대로 맞고, 파일이 늘거나 줄거나 옮겨지면 형제 이름 하나로 같은 specifier의 정답이 바뀌므로 모든 레코드의 해석이 한꺼번에 무효가 된다.
 - 레코드가 선언한 `provenance.resolutionInputs`는 epoch에 **들어가지 않고 그 레코드 자신을 묶는다**. 제출 시 선언된 입력마다 현재 hash가 선언된 값과 같아야 하고(아니면 그 레코드 거부), 분류 시 달라졌거나 읽을 수 없으면 그 레코드의 파일이 `needs-resolution`이다. 선언 입력은 프로젝트 밖을 가리킬 수 있다.
-- epoch digest는 원소마다 길이를 붙여 먹인다. 구분자만 쓰면 `"a\0b"` 한 개와 `"a"`,`"b"` 두 개가 같은 digest가 된다.
+- epoch digest는 원소마다 길이를 붙여 먹인다. 구분자만 쓰면 `"a\0b"` 한 개와 `"a"`,`"b"` 두 개가 같은 digest가 된다. Project-only `resolution.aliases` also enters the digest, sorted by `from` and length-framed in `from`, `to` order; changing a substitution moves the epoch while reordering the list does not.
 - **저장소 경로는 정규화한 루트에서 파생한다.** 호출자마다 같은 프로젝트를 다르게 적는다 — 리뷰는 git이 답한 실제 경로를 쓰고, 다른 도구는 건네받은 철자를 그대로 넘기며, 대부분의 시스템에서 임시 디렉터리는 symlink를 지나 닿는다. 두 철자가 두 저장소를 열면 끝난 부트스트랩이 제출한 사실이 그것을 요구한 분석에게 보이지 않아, 빠져나갈 길 없는 고리가 된다(P5). 아직 없는 경로는 자기 자신으로 키가 된다.
 - 레코드는 경로 digest 앞 2 hex로 나눈 shard 파일에 모여 있다. 쓰기는 원자적 치환과 `(shard, 이전 byte digest)`의 compare-and-set이며, **CAS 단위는 레코드가 아니라 shard**다. 스키마를 벗어난 **항목 하나**는 그 파일만 `missing`으로 읽히고 shard는 그대로 다시 쓸 수 있다. shard의 JSON 자체가 깨지면 그 shard의 항목 전부가 `missing`이 되고, shard digest가 CAS token으로 남아 재제출로 복구된다.
 - 제출 파일은 절대 경로이고, **정규화한 실제 위치**가 프로젝트 트리 밖이며, 일반 파일이고 크기 상한 안이어야 한다. 경로는 비교·검사·열기 전에 모두 정규화하므로 프로젝트 밖으로 이어지는 symlink는 통과하고 안으로 이어지는 symlink는 거절된다.
@@ -85,7 +85,7 @@
 - `listScannedFilePaths`와 `scanFileSetOptions`는 이 fractal이 소유하지 않는다. `core/tree/fractalTree`의 entry point에서 가져온다 — 규칙의 정본을 scan 쪽에 한 벌만 두기 위해서다.
 - `readProjectFacts(projectRoot, config): Promise<ProjectFacts>` — 지금 트리에 대해 저장소가 무엇을 아는지 한 번에 읽는다: 범위, 스캔된 경로, 저장소 경로, 파일별 레코드, shard의 CAS token, 현재 epoch. **읽기 전용**이다 — epoch snapshot을 쓰는 것은 drift를 세는 쪽의 일이고 분석 경로가 그것을 해서는 안 된다. `config`를 인자로 받는 이유도 같다: snapshot을 만드는 쪽은 이미 config를 들고 있고, 여기서 다시 읽으면 한 호출 안에서 설정이 두 번 읽혀 서로 다를 수 있다.
 - 조직: `store/`는 shard의 입출력이고 `read/`는 그것을 현재 트리와 맞춰 한 장의 그림으로 만드는 자리다. 분석(`core/projectSnapshot`)과 도구(`mcp/tools/facts`)가 **같은 함수**로 읽어야 두 쪽이 다른 사실을 보지 않는다.
-- `computeResolutionEpoch(projectRoot, scannedPaths, resolutionInputPaths): ResolutionEpochSnapshot` — epoch와 그것을 만든 입력을 함께 돌려준다.
+- `computeResolutionEpoch(projectRoot, scannedPaths, resolutionInputPaths, resolutionAliases): ResolutionEpochSnapshot` — epoch와 그것을 만든 입력을 함께 돌려준다. Omitted aliases retain an empty list for existing callers; `readProjectFacts` supplies the loaded project's aliases.
 - `diffEpochSnapshots(previous, current): EpochDifference` — `added`·`removed`·바뀐 해석 입력. `previous`가 null이면 셋 다 빈 목록이며 추측하지 않는다.
 - `resolveFactsScope(config): FactsScope` — `facts.covers`를 선언했으면 그것이 범위이고(`source: 'config'`), 없으면 adapter의 소스 확장자로 만든 기본 범위다(`source: 'default'`). 서버는 프로젝트 설정을 쓰지 않으므로, 선언이 없는 것을 "아무것도 덮지 않음"으로 읽으면 facts 이전의 모든 프로젝트가 도구 안에서 빠져나올 길 없이 분석 불가가 된다. `declared`는 **유효 범위가 비었을 때만** false이고, 그것은 `covers: []`를 명시한 프로젝트 — 참조 분석을 원하지 않는다는 선언 — 뿐이다.
 - `readFactsStore(directory)` / `writeFactsShardFile(directory, shardFileName, entries, expectedDigest)` — 레코드 key는 프로젝트 상대 경로의 digest다. 경로에서 이름을 직접 만들면 구분자와 길이 한계가 그대로 조작면이 된다. 쓰기는 방금 쓴 bytes의 digest를 돌려주고 CAS 패배에는 `null`을 돌려준다 — 같은 호출의 다음 batch가 이어받을 token을 직렬화 결정이 있는 자리에서만 만들기 위해서다(밖에서 다시 hash하면 직렬화가 두 벌이 된다).

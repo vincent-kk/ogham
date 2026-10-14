@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- `verificationPaths` unions adapter-discovered verification files with already scanned facts paths below organ nodes whose basename appears in `verification.organNames` (the built-in list when absent). It drives boundary exemptions and cycle filtering without another scan or changes to adapter roles and case counts.
+
 - Reference, entry-surface and verification evidence comes from the facts store, read once per snapshot and classified with the same function the `facts` tool reports from, so analysis and `status` cannot disagree about a file. An adapter is never asked to fill a file the store does not hold: filling it would hide a missing bootstrap and change behaviour the day the adapter is removed.
 - Dependency diagnostics carry stable consumer/specifier cause identity, the unresolved specifier, and explicit dependencies/boundaries impact. Value/type imports of the same target share an identity. Independent verification remains exact when its own evidence is exact.
 - Every diagnostic declares `affects`, the analysis axes (`dependencies`, `boundaries`, `verification`) whose conclusions it can change; `[]` means none. A producer narrows the list only where the code shows the other axes cannot change: dependency references affect dependencies and boundaries; entry-point surface failures affect boundaries (entry-point and node rules have no axis of their own); adapter selection, structure ownership and verification discovery failures affect all three, since classification and the verification set feed every axis.
@@ -42,6 +44,12 @@
 - graph evidence는 source file, raw specifier와 resolved target을 보존한다.
 
 ## Acceptance Criteria
+
+### AC-snapshot-verification-organs — Verification path union
+
+- Suffix-free files beneath declared verification organs do not violate import boundaries or close cycles; removing the name restores product-code checks.
+- Mixed product and verification evidence on the same directed edge preserves product cycles.
+- Adapter verification roles and case counts remain unchanged by the organ list.
 
 ### AC-snapshot-consistency — 동일 실행 증거
 

@@ -7,11 +7,13 @@ import type {
   ValidationReport,
 } from '../../../../../types/report.js';
 
+import { countUnexemptedViolations } from './countUnexemptedViolations.js';
+
 /**
  * Builds bounded whole-tree counts for a scan response.
  *
  * @param snapshot - Snapshot supplying identity, adapters, and tree counts.
- * @param validation - Structure report supplying the finding count.
+ * @param validation - Structure report; exempted findings are not counted.
  * @param certainty - Resolved certainty after diagnostics are considered.
  * @returns The bounded whole-tree scan summary.
  */
@@ -30,7 +32,7 @@ export function buildFractalScanSummary(
     totalNodes: snapshot.tree.totalNodes,
     depth: snapshot.tree.depth,
     nodesByType,
-    violationCount: validation.result.violations.length,
+    violationCount: countUnexemptedViolations(validation.result.violations),
     certainty,
     filesOutsideFactsScope: snapshot.filesOutsideFactsScope,
   };

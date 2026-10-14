@@ -86,6 +86,7 @@ function snapshotWith(evidence: DependencyEvidence[]): ProjectSnapshot {
       certainty: ANALYSIS_CERTAINTIES.EXACT,
     },
     adapterIds: ['fixture'],
+    verificationPaths: [],
     verification: {
       files: [],
       violations: [],

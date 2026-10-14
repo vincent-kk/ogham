@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import type { ResolutionAlias } from '../../../types/adapters.js';
 
 import { inspectEntrySurface } from '../../analysis/entrySurface/readEntrySurface.js';
 import { extractDependencyReferences } from '../../analysis/references/extractDependencyReferences.js';
@@ -49,6 +50,7 @@ function redactMessage(
  * @param projectRoot Absolute project root.
  * @param file Accepted file inside the root.
  * @param provenance Provenance shared by every record of the run.
+ * @param aliases Validated substitutions read once for this extraction run.
  * @returns The record, or null when the file cannot be read: a record without
  *   the file's bytes could never match the server's hash binding.
  */
@@ -56,6 +58,7 @@ export async function extractOneFile(
   projectRoot: string,
   file: ProjectFile,
   provenance: FactsProvenance,
+  aliases: readonly ResolutionAlias[] = [],
 ): Promise<FileFacts | null> {
   let bytes: Buffer;
   try {
@@ -80,6 +83,8 @@ export async function extractOneFile(
     const references = await extractDependencyReferences(
       file.absolutePath,
       scanned,
+      aliases,
+      projectRoot,
     );
     const surface = await inspectEntrySurface(file.absolutePath, scanned);
     const { role, cases } = verificationFromSource(file.absolutePath, scanned);

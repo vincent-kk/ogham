@@ -1,4 +1,15 @@
-import { describe, expect, it } from 'vitest';
+import {
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { validatePreToolUse } from '../../../hooks/preToolUse/helpers/preToolValidator/index.js';
 import { isDetailMd } from '../../../hooks/shared/index.js';
@@ -188,6 +199,152 @@ describe('pre-tool-validator', () => {
       expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
       expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
         'Delete',
+      );
+    },
+  );
+});
+
+describe('protected document demotion', () => {
+  /** Temporary project whose config and directory entries drive deletion. */
+  let projectRoot: string;
+  /** Directory retaining its contract documents until the Delete operation. */
+  let directory: string;
+
+  beforeEach(() => {
+    projectRoot = realpathSync.native(
+      mkdtempSync(join(tmpdir(), 'filid-demotion-')),
+    );
+    directory = join(projectRoot, 'module');
+    mkdirSync(directory);
+    mkdirSync(join(projectRoot, '.filid'));
+    writeFileSync(join(projectRoot, '.filid/config.json'), '{}');
+    writeFileSync(join(directory, 'INTENT.md'), '# Contract');
+    writeFileSync(join(directory, 'DETAIL.md'), '# Contract');
+  });
+
+  afterEach(() => {
+    rmSync(projectRoot, { recursive: true, force: true });
+  });
+
+  it.each(['index.ts', 'main.ts', 'page.tsx', 'package.json'])(
+    'denies deletion while the %s entry point remains',
+    (entry) => {
+      writeFileSync(join(directory, entry), '');
+      const result = validatePreToolUse({
+        ...baseInput,
+        cwd: projectRoot,
+        tool_name: 'Delete',
+        tool_input: { file_path: join(directory, 'INTENT.md') },
+      });
+      expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+      expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+        'To demote this fractal to an organ',
+      );
+    },
+  );
+
+  it('denies deletion while a declared override entry file remains', () => {
+    writeFileSync(
+      join(projectRoot, '.filid/config.json'),
+      JSON.stringify({
+        structure: { entryPointOverrides: { ecmascript: ['custom.entry.ts'] } },
+      }),
+    );
+    writeFileSync(join(directory, 'custom.entry.ts'), '');
+    const result = validatePreToolUse({
+      ...baseInput,
+      cwd: projectRoot,
+      tool_name: 'Delete',
+      tool_input: { file_path: join(directory, 'INTENT.md') },
+    });
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'To demote this fractal to an organ',
+    );
+  });
+
+  it('allows demotion when a declared override names a file absent here', () => {
+    writeFileSync(
+      join(projectRoot, '.filid/config.json'),
+      JSON.stringify({
+        structure: { entryPointOverrides: { ecmascript: ['custom.entry.ts'] } },
+      }),
+    );
+    const result = validatePreToolUse({
+      ...baseInput,
+      cwd: projectRoot,
+      tool_name: 'Delete',
+      tool_input: { file_path: join(directory, 'INTENT.md') },
+    });
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('allow');
+  });
+
+  it.each(['INTENT.md', 'DETAIL.md'])(
+    'allows demotion by deleting %s when no entry point remains',
+    (file) => {
+      const result = validatePreToolUse({
+        ...baseInput,
+        cwd: projectRoot,
+        tool_name: 'Delete',
+        tool_input: { file_path: join(directory, file) },
+      });
+      expect(result.continue).toBe(true);
+      expect(result.hookSpecificOutput?.permissionDecision).toBe('allow');
+      expect(result.hookSpecificOutput?.additionalContext).toBe(
+        `Demotion: ${directory} has no entry point, so deleting ${file} drops its fractal claim. Record the demotion in the parent DETAIL.md.`,
+      );
+    },
+  );
+
+  it('denies deletion of a symlinked DETAIL.md without an entry point', () => {
+    const documentPath = join(directory, 'DETAIL.md');
+    const targetPath = join(projectRoot, 'contract.md');
+    writeFileSync(targetPath, '# Contract');
+    rmSync(documentPath);
+    symlinkSync(targetPath, documentPath);
+
+    const result = validatePreToolUse({
+      ...baseInput,
+      cwd: projectRoot,
+      tool_name: 'Delete',
+      tool_input: { file_path: documentPath },
+    });
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'To demote this fractal to an organ',
+    );
+  });
+
+  it('denies deletion when the directory cannot be read', () => {
+    rmSync(directory, { recursive: true });
+    const result = validatePreToolUse({
+      ...baseInput,
+      cwd: projectRoot,
+      tool_name: 'Delete',
+      tool_input: { file_path: join(directory, 'DETAIL.md') },
+    });
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'To demote this fractal to an organ',
+    );
+  });
+
+  it.each(['missing', 'invalid JSON'])(
+    'denies deletion when config is %s',
+    (state) => {
+      const configPath = join(projectRoot, '.filid/config.json');
+      if (state === 'missing') rmSync(configPath);
+      else writeFileSync(configPath, '{');
+      const result = validatePreToolUse({
+        ...baseInput,
+        cwd: projectRoot,
+        tool_name: 'Delete',
+        tool_input: { file_path: join(directory, 'DETAIL.md') },
+      });
+      expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+      expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+        'To demote this fractal to an organ',
       );
     },
   );

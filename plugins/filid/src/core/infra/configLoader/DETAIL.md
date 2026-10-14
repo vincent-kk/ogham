@@ -2,6 +2,11 @@
 
 ## Requirements
 
+- `resolution.aliases` is a project-only list of `{ from, to }` substitutions; user-layer `resolution` is ignored. `to` is a project-relative path. Each string permits only one trailing `*`, and both sides must either have it or omit it; duplicate `from` values are rejected.
+- Exact alias matches precede wildcard matches; the longest matching wildcard prefix wins, independent of list order. Replace the trailing `*` with the specifier remainder and resolve against the project root before candidate lookup. A matched missing file is unresolved; an unmatched non-local specifier remains external.
+
+- `verification.organNames` is an optional list of non-empty directory names shared by raw and normalized schemas. Defaults explicitly record the built-in verification organs; an empty list disables directory-based verification.
+
 - Project config schema version is `3.0`; it governs document language, adapters, override-only rules, structure, and the cross-cutting `ignore` list.
 - `language`는 문서 출력 언어일 뿐 프로그래밍 언어 선택값이 아니다.
 - adapter mode `auto`는 등록 adapter claim을 사용하고 `explicit`은 `enabled` ID만 사용한다. explicit의 빈 목록과 미등록 ID는 validation finding이다.
@@ -64,6 +69,16 @@ interface FilidConfigV3 {
 - `loadRuleDocsManifest(pluginRoot)` / `resolvePluginRoot(pluginRoot?)` — canonical manifest와 설치 root를 해석한다.
 
 ## Acceptance Criteria
+
+### AC-config-verification — Verification directory declaration
+
+- Default configuration records the built-in verification organ names and round-trips them through saving and loading.
+- Empty directory-name elements are rejected by both schemas.
+
+### AC-config-resolution — Project-only substitution contract
+
+- Raw and normalized schemas preserve valid aliases and reject middle/repeated wildcards, wildcard parity mismatches, empty strings, and duplicate sources.
+- Loading ignores user-layer resolution and preserves project-layer substitutions.
 
 ### AC-config-v3 — schema 3.0
 

@@ -8,6 +8,7 @@
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로 평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag, verification을 지원한다.
 - rule exception과 indeterminate/unsupported evidence를 PASS로 숨기지 않는다.
+- config 면제는 일치한 패턴을 `exemptedBy`에 담은 info finding을 남긴다. 면제 finding만 반환한 평가 단위는 passed·failed 대신 skipped로 집계하고, severity override는 면제 finding의 info 수준을 바꾸지 않는다.
 - violation `message`에 적는 경로는 project root 기준 POSIX 상대 경로다(root 자신은 `.`). `path` 필드는 절대 경로 그대로다. message는 review 후보로 hash되므로 저장소 위치에 따라 달라지면 안 된다. root는 `RuleContext.tree.root`나 snapshot의 `projectRoot`에서 읽는다(둘은 같은 값이다).
 - exception과 allowed-peer scope는 portable separator/case path identity로 평가한다.
 - `legacy-criteria-ledger`는 project granularity로 snapshot evidence를 평가하고 root DETAIL migration target을 suggestion으로 반환한다.
@@ -20,7 +21,7 @@
   | 소유 프랙탈 subtree | organ 구체 파일 직접 | 통과                             |
   | subtree 밖          | organ 구체 파일 직접 | 위반 — 선언된 면책이 있으면 통과 |
 
-- **소비자가 검증 파일이면 boundary를 적용하지 않는다.** 검증은 계약을 확인하는 행위이고, 내부 단위를 검사하려면 내부에 닿아야 한다. 이를 위해 진입점을 넓히면 소비자가 테스트뿐인 공개 심볼이 생겨 공개 계약이 오염된다 (`seiri_public-contract` §1). 판정 근거는 어댑터가 보고한 `snapshot.verification.files`이며, core는 파일명 패턴을 알지 못한다.
+- **소비자가 검증 파일이면 boundary를 적용하지 않는다.** 검증은 계약을 확인하는 행위이고, 내부 단위를 검사하려면 내부에 닿아야 한다. 이를 위해 진입점을 넓히면 소비자가 테스트뿐인 공개 심볼이 생겨 공개 계약이 오염된다 (`seiri_public-contract` §1). 판정 근거는 adapter 발견 파일과 선언된 검증 organ 아래 스캔 파일을 합친 `snapshot.verificationPaths`이며, core는 파일명 패턴을 알지 못한다.
 - 대상이 fractal 내부 파일일 때도 같은 면책을 조회한다. 진입점을 경유할 수 **없는** 정당한 소비자가 존재하기 때문이다 — 표준 사례는 훅 번들이며, 배럴을 import하면 번들러가 배럴이 재노출하는 모듈 전체를 끌어온다. 면책이 없으면 기존 진입점 규칙 그대로 위반이다.
 - 면책은 소유 프랙탈 DETAIL.md의 `## Boundary Exemptions` 선언에서 온다 (`## Organ Exemptions`는 legacy 별칭으로 계속 인정한다). 선언된 `targetPath`가 대상 경로를 담고, `Direct import`가 allowed이며, consumer glob이 소비 파일에 매치하고, `Reason`이 비어 있지 않을 때만 통과시킨다.
 - 모든 violation은 `suggestion`을 채운다. `evaluateRule`은 rule 실행이 던졌을 때 재시도와 보고를 안내하고, snapshot 부재로 인한 indeterminate finding(`external-import-boundary`, `checkDependencyCycles`, `checkPureFunctionIsolation`, `checkVerificationPolicy`, `checkLegacyCriteriaLedger`)은 각자 필요한 `fractal_inspect` action을 안내한다. cycle과 graph 불확실성, entry-point surface의 세 상태(enumerated indeterminate·unsupported·opaque)도 각자 다음 행동을 담는다.
@@ -77,6 +78,12 @@
 
 - Windows target path는 POSIX separator로 작성된 literal/glob scope와 동일하게 매치된다.
 
+### AC-rules-config-exemption — 면제의 가시성과 skipped 집계
+
+- 정확 경로 일치를 glob보다 먼저 선택하고 일치한 원본 config 패턴을 `exemptedBy`에 기록한다.
+- 면제는 rule ID·패턴·노드 경로·면제 제거 suggestion을 갖춘 info finding 한 건을 반환하며 내부 검사를 실행하지 않는다.
+- 비어 있지 않은 finding 전체가 면제이면 skipped만 증가하고 finding은 결과에 남는다.
+
 ## Last Updated
 
-2026-07-28 — rule 기본 severity를 `constants/builtinRuleSeverities` 정본에서 읽는다. organ 접근은 소비자 위치로 판정하고, DETAIL 면책 선언을 organ과 fractal 대상 모두에 연결한다.
+2026-10-14

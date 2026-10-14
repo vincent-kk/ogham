@@ -107,6 +107,25 @@ const FactsConfigSchema = z
   })
   .strict();
 
+/** A substitution has at most one trailing wildcard, present on both sides or neither. */
+const ResolutionAliasSchema = z
+  .object({
+    from: z.string().min(1).refine(
+      (value) => /^[^*]*\*?$/.test(value),
+      'only one trailing wildcard is allowed',
+    ),
+    to: z.string().min(1).refine(
+      (value) => /^[^*]*\*?$/.test(value),
+      'only one trailing wildcard is allowed',
+    ),
+  })
+  .strict()
+  .refine(
+    (value) => value.from.endsWith('*') === value.to.endsWith('*'),
+    'from and to must have the same wildcard shape',
+  );
+
+/** Configuration fields shared by disk documents and normalized consumers. */
 const configFields = {
     version: z.literal('3.0'),
     language: z.string().optional(),
@@ -114,6 +133,18 @@ const configFields = {
     adapters: AdapterSelectionSchema,
     review: ReviewConfigSchema.optional(),
     facts: FactsConfigSchema.optional(),
+    verification: z.object({ organNames: z.array(z.string().min(1)).optional() }).strict().optional(),
+    resolution: z
+      .object({
+        aliases: z.array(ResolutionAliasSchema).refine(
+          (aliases) => aliases.every((alias, index) =>
+            aliases.findIndex((candidate) => candidate.from === alias.from) === index,
+          ),
+          'duplicate alias sources are not allowed',
+        ).optional(),
+      })
+      .strict()
+      .optional(),
 };
 
 /** Strict, shorthand-preserving schema for a complete v3 file on disk. */

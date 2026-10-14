@@ -27,6 +27,7 @@ const EXACT_SNAPSHOT: ProjectSnapshot = {
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture'],
+  verificationPaths: [],
   verification: {
     files: [],
     violations: [],
