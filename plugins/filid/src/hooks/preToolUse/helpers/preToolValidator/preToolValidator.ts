@@ -1,3 +1,4 @@
+import { lstatSync } from 'node:fs';
 import { basename, dirname } from 'node:path';
 
 import {
@@ -35,7 +36,8 @@ export {
  * - Warns when an inexact edit's new_string exceeds 20 lines
  *
  * Delete of INTENT.md or DETAIL.md permits demotion only when no entry point
- * remains; unreadable directory or config evidence keeps deletion denied.
+ * remains; symlinks or unreadable document, directory or config evidence keep
+ * deletion denied.
  *
  * Branch names and criteria ledgers do not affect this validator.
  * Write/Edit follow the physical target; Delete preserves the final entry.
@@ -65,7 +67,13 @@ export function validatePreToolUse(
     (isIntentMd(documentPath) || isDetailMd(documentPath))
   ) {
     const directory = dirname(documentPath);
-    if (!hasEntryPoint(directory, safeCwd))
+    let isSymlink = true;
+    try {
+      isSymlink = lstatSync(documentPath).isSymbolicLink();
+    } catch {
+      // Unreadable document metadata cannot establish a demotion.
+    }
+    if (!isSymlink && !hasEntryPoint(directory, safeCwd))
       return {
         continue: true,
         hookSpecificOutput: {

@@ -3,6 +3,7 @@ import {
   mkdtempSync,
   realpathSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -273,6 +274,26 @@ describe('protected document demotion', () => {
       );
     },
   );
+
+  it('denies deletion of a symlinked DETAIL.md without an entry point', () => {
+    const documentPath = join(directory, 'DETAIL.md');
+    const targetPath = join(projectRoot, 'contract.md');
+    writeFileSync(targetPath, '# Contract');
+    rmSync(documentPath);
+    symlinkSync(targetPath, documentPath);
+
+    const result = validatePreToolUse({
+      ...baseInput,
+      cwd: projectRoot,
+      tool_name: 'Delete',
+      tool_input: { file_path: documentPath },
+    });
+
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
+    expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
+      'To demote this fractal to an organ',
+    );
+  });
 
   it('denies deletion when the directory cannot be read', () => {
     rmSync(directory, { recursive: true });

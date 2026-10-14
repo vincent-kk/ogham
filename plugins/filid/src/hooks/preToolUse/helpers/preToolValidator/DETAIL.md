@@ -41,7 +41,7 @@
 - INTENT.md와 DETAIL.md Delete는 entry point가 있거나 판별 불가이면 명시적 보호 문서 삭제 reason과 강등 절차로 deny된다.
 - 문서만 남은 디렉터리와 읽을 수 있는 override 없는 config에서는 Delete가 allow되고 Demotion context를 반환한다.
 - host가 `intent.md` 또는 `detail.md`를 기존 보호 문서와 같은 대상으로 해석하면 해당 case alias Delete도 같은 entry point 판정을 적용한다.
-- terminal symlink의 basename이 INTENT.md 또는 DETAIL.md이면 referent 이름과 무관하게 같은 entry point 판정을 적용한다.
+- A symlinked contract document is never a demotion: deny deletion regardless of entry points, conservatively treating lstat failure as a symlink.
 - 일반 파일 Delete는 문서 validator가 별도 처리하지 않는다.
 
 ## Boundary Exemptions
