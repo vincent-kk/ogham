@@ -11,15 +11,15 @@
  * function always returns a boolean, so callers can trust it without defensive
  * try/catch (AC10a).
  */
-import { pathForCompare } from '@ogham/cross-platform';
-
-import { globToRegExp } from '../../../../lib/globToRegexp.js';
-import { isDynamicGlob } from '../../../../lib/isDynamicGlob.js';
 import type { FractalNode } from '../../../../types/fractal.js';
+
+import { matchExempt } from './matchExempt.js';
 
 /**
  * Does `target.path` match ANY of the supplied glob patterns?
  *
+ * @param target Node or path-bearing target to match.
+ * @param patterns Config literal paths and glob patterns.
  * @returns `true` if at least one pattern matches. `false` for
  *   undefined / empty patterns, for invalid glob syntax, and for any runtime
  *   exception — never throws.
@@ -28,21 +28,5 @@ export function isExempt(
   target: FractalNode | { path: string },
   patterns: string[] | undefined,
 ): boolean {
-  if (!patterns || patterns.length === 0) return false;
-  const targetPath = pathForCompare(target.path);
-  for (const pattern of patterns) {
-    if (typeof pattern !== 'string' || pattern.length === 0) continue;
-    const comparablePattern = pathForCompare(pattern);
-    if (!isDynamicGlob(comparablePattern)) {
-      if (targetPath === comparablePattern) return true;
-      continue;
-    }
-    try {
-      const re = globToRegExp(comparablePattern);
-      if (re.test(targetPath)) return true;
-    } catch {
-      continue;
-    }
-  }
-  return false;
+  return matchExempt(target, patterns) !== null;
 }

@@ -32,7 +32,7 @@ export function resolveProjectValidationStatus(
     certainties.includes(ANALYSIS_CERTAINTIES.INDETERMINATE)
   )
     return TOOL_STATUSES.INDETERMINATE;
-  return report.result.violations.length > 0
+  return report.result.violations.some((violation) => !violation.exemptedBy)
     ? TOOL_STATUSES.VIOLATIONS
     : TOOL_STATUSES.OK;
 }

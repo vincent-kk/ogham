@@ -8,6 +8,7 @@
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로 평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag, verification을 지원한다.
 - rule exception과 indeterminate/unsupported evidence를 PASS로 숨기지 않는다.
+- config 면제는 일치한 패턴을 `exemptedBy`에 담은 info finding을 남긴다. 면제 finding만 반환한 평가 단위는 passed·failed 대신 skipped로 집계하고, severity override는 면제 finding의 info 수준을 바꾸지 않는다.
 - violation `message`에 적는 경로는 project root 기준 POSIX 상대 경로다(root 자신은 `.`). `path` 필드는 절대 경로 그대로다. message는 review 후보로 hash되므로 저장소 위치에 따라 달라지면 안 된다. root는 `RuleContext.tree.root`나 snapshot의 `projectRoot`에서 읽는다(둘은 같은 값이다).
 - exception과 allowed-peer scope는 portable separator/case path identity로 평가한다.
 - `legacy-criteria-ledger`는 project granularity로 snapshot evidence를 평가하고 root DETAIL migration target을 suggestion으로 반환한다.
@@ -77,6 +78,12 @@
 
 - Windows target path는 POSIX separator로 작성된 literal/glob scope와 동일하게 매치된다.
 
+### AC-rules-config-exemption — 면제의 가시성과 skipped 집계
+
+- 정확 경로 일치를 glob보다 먼저 선택하고 일치한 원본 config 패턴을 `exemptedBy`에 기록한다.
+- 면제는 rule ID·패턴·노드 경로·면제 제거 suggestion을 갖춘 info finding 한 건을 반환하며 내부 검사를 실행하지 않는다.
+- 비어 있지 않은 finding 전체가 면제이면 skipped만 증가하고 finding은 결과에 남는다.
+
 ## Last Updated
 
-2026-07-28 — rule 기본 severity를 `constants/builtinRuleSeverities` 정본에서 읽는다. organ 접근은 소비자 위치로 판정하고, DETAIL 면책 선언을 organ과 fractal 대상 모두에 연결한다.
+2026-10-14

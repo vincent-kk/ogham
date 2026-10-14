@@ -13,12 +13,20 @@ import type {
 import { evaluateRule } from './evaluateRule.js';
 import { loadBuiltinRules } from './loadBuiltinRules.js';
 
+/** @param input Evaluation input. @returns Whether snapshot evidence accompanies the tree. */
 function isProjectSnapshot(
   input: ProjectSnapshot | FractalTree,
 ): input is ProjectSnapshot {
   return 'tree' in input && 'dependencyGraph' in input;
 }
 
+/**
+ * Evaluates selected rules, preserving findings and exemption accounting.
+ * @param input Snapshot or legacy tree to evaluate.
+ * @param rules Rules to use; defaults to the built-in roster.
+ * @param options Scope and scan limits for evaluation.
+ * @returns Findings, evaluation counts and elapsed duration.
+ */
 export function evaluateRules(
   input: ProjectSnapshot | FractalTree,
   rules?: Rule[],
@@ -62,7 +70,9 @@ export function evaluateRules(
         scanOptions: options,
       };
       const findings = evaluateRule(rule, context);
-      if (findings.length === 0) passed++;
+      if (findings.length > 0 && findings.every((finding) => finding.exemptedBy))
+        skipped++;
+      else if (findings.length === 0) passed++;
       else failed++;
       violations.push(...findings);
     }

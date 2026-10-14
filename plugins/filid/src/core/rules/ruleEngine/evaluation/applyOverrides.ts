@@ -10,6 +10,9 @@ import { wrapExempt } from '../utils/wrapExempt.js';
  * composition explicit — each wrapper takes the previous check as input and
  * returns the next one. Rule bodies never see either mechanism, preserving
  * `Rule.check` purity.
+ * @param rules Rules to configure without mutating them.
+ * @param overrides Project overrides keyed by rule ID.
+ * @returns Rules with enabled state, severity and exemption wrappers applied.
  */
 export function applyOverrides(
   rules: Rule[],
@@ -31,7 +34,7 @@ export function applyOverrides(
     let check = rule.check;
     if (newSeverity !== rule.severity)
       check = remapSeverity(check, newSeverity);
-    if (hasExempt) check = wrapExempt(check, override.exempt!);
+    if (hasExempt) check = wrapExempt(check, override.exempt!, rule.id);
     return { ...rule, enabled: newEnabled, severity: newSeverity, check };
   });
 }
