@@ -295,7 +295,7 @@ describe('what the scan reads as a dependency and what it does not', () => {
     ]);
   });
 
-  it('skips external packages but preserves unresolved project-local dependencies', async () => {
+  it('records external packages as external and preserves unresolved project-local dependencies', async () => {
     const source = writeIn(
       'src/source.ts',
       [
@@ -307,6 +307,11 @@ describe('what the scan reads as a dependency and what it does not', () => {
     expect(
       await extractDependencyReferences(source),
     ).toEqual([
+      expect.objectContaining({
+        rawSpecifier: 'external-package',
+        external: 'external-package',
+        resolvedPath: null,
+      }),
       expect.objectContaining({
         rawSpecifier: './missing.js',
         resolvedPath: null,
@@ -328,7 +333,18 @@ describe('what the scan reads as a dependency and what it does not', () => {
 
     expect(
       await extractDependencyReferences(source),
-    ).toEqual([]);
+    ).toEqual([
+      expect.objectContaining({
+        rawSpecifier: 'node:path',
+        external: 'node:path',
+        resolvedPath: null,
+      }),
+      expect.objectContaining({
+        rawSpecifier: 'node:url',
+        external: 'node:url',
+        resolvedPath: null,
+      }),
+    ]);
   });
 
   it('does not read an identifier named from inside an exported function as a re-export', async () => {

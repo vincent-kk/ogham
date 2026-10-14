@@ -83,11 +83,35 @@ describe('snapshot DAG certainty and dependency diagnostics', () => {
     const snapshot = await createProjectSnapshot(
       root,
       createAdapterRegistry(),
-      createDefaultConfig(),
+      { ...createDefaultConfig(), verification: { organNames: [] } },
     );
 
     expect(snapshot.verification.files).toEqual([]);
     expect(snapshot.dependencyGraph.certainty).toBe('indeterminate');
+    expect(snapshot.diagnostics).toContainEqual(
+      expect.objectContaining({
+        code: 'unresolved-local-dependency',
+        path: sourceFile,
+      }),
+    );
+  });
+
+  it('classifies test-looking production imports in default verification organs as verification code', async () => {
+    const sourceFile = join(root, '__tests__', 'feature.test.ts');
+    writeFileSync(
+      sourceFile,
+      "import './missing.helpers'; export const value = true;",
+    );
+    await seedFacts(root);
+
+    const snapshot = await createProjectSnapshot(
+      root,
+      createAdapterRegistry(),
+      createDefaultConfig(),
+    );
+
+    expect(snapshot.verificationPaths).toContain(sourceFile);
+    expect(snapshot.dependencyGraph.certainty).toBe('exact');
     expect(snapshot.diagnostics).toContainEqual(
       expect.objectContaining({
         code: 'unresolved-local-dependency',
