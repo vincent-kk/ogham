@@ -53,6 +53,7 @@ Resolve the absolute target path for settings and rule-document calls.
 2. Call `mcp__plugin_filid_tools__project_setup` with `action: "rules-status"`.
 3. On an interactive local host, call `mcp__plugin_filid_tools__project_setup` with `action: "settings"` and a bounded wait, then dispatch on `saved`, `closed`, or `pending`.
 4. In a headless environment, use `project_setup` actions `rules-manifest`, `rules-status`, and `rules-sync`; do not invent another config editing workflow.
+5. After initialization, collect test, benchmark, and fixture directory names from the scan results. If they differ from the defaults, record them in `.filid/config.json` under `verification.organNames`. Record directory names only, independent of programming-language conventions; every scanned file beneath a matching organ is verification code.
 
 If `--rules` is present, emit the managed-rule summary and stop.
 

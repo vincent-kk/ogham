@@ -35,6 +35,7 @@ const SNAPSHOT_BASE = {
   outputLanguage: 'en',
   snapshotHash: 'snapshot-hash',
   adapterIds: [],
+  verificationPaths: [],
   verification: {
     files: [],
     violations: [],

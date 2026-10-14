@@ -314,6 +314,7 @@ function makeSnapshot(
       certainty,
     },
     adapterIds: ['fixture'],
+    verificationPaths: [],
     verification: {
       files: [],
       violations: [],

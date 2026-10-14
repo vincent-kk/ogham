@@ -309,6 +309,7 @@ function makeSnapshot(
     tree,
     dependencyGraph: graphFor(graphState),
     adapterIds: ['fixture'],
+    verificationPaths: [],
     verification: {
       files: [],
       violations: [],
@@ -401,6 +402,7 @@ function sccSnapshot(
     tree,
     dependencyGraph: sccGraph(bOrZPath, cycleRoute),
     adapterIds: ['fixture'],
+    verificationPaths: [],
     verification: {
       files: [],
       violations: [],

@@ -66,6 +66,7 @@ const snapshot: ProjectSnapshot = {
     certainty: 'exact',
   },
   adapterIds: ['fixture'],
+  verificationPaths: [],
   verification: { files: [], violations: [], certainty: 'exact' },
   legacyCriteriaLedger: null,
   diagnostics: [],

@@ -139,6 +139,7 @@ const SNAPSHOT: ProjectSnapshot = {
     certainty: ANALYSIS_CERTAINTIES.EXACT,
   },
   adapterIds: ['fixture-adapter'],
+  verificationPaths: [VERIFICATION_PATH],
   verification: {
     files: [
       {

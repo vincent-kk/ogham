@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- `verification.organNames` is an optional list of non-empty directory names shared by raw and normalized schemas. Defaults explicitly record the built-in verification organs; an empty list disables directory-based verification.
+
 - Project config schema version is `3.0`; it governs document language, adapters, override-only rules, structure, and the cross-cutting `ignore` list.
 - `language`는 문서 출력 언어일 뿐 프로그래밍 언어 선택값이 아니다.
 - adapter mode `auto`는 등록 adapter claim을 사용하고 `explicit`은 `enabled` ID만 사용한다. explicit의 빈 목록과 미등록 ID는 validation finding이다.
@@ -64,6 +66,11 @@ interface FilidConfigV3 {
 - `loadRuleDocsManifest(pluginRoot)` / `resolvePluginRoot(pluginRoot?)` — canonical manifest와 설치 root를 해석한다.
 
 ## Acceptance Criteria
+
+### AC-config-verification — Verification directory declaration
+
+- Default configuration records the built-in verification organ names and round-trips them through saving and loading.
+- Empty directory-name elements are rejected by both schemas.
 
 ### AC-config-v3 — schema 3.0
 

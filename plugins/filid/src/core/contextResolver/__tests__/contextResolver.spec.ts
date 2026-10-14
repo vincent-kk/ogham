@@ -265,6 +265,7 @@ describe('context resolver', () => {
         certainty: 'exact',
       },
       adapterIds: [],
+      verificationPaths: [],
       verification: { files: [], violations: [], certainty: 'exact' },
       legacyCriteriaLedger: null,
       diagnostics: [],

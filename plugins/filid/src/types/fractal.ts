@@ -290,6 +290,8 @@ export interface ProjectSnapshot {
   dependencyGraph: DependencyGraph;
   adapterIds: string[];
   verification: VerificationProjectAnalysis;
+  /** Adapter-discovered verification files plus scanned files beneath verification organs. */
+  verificationPaths: readonly string[];
   legacyCriteriaLedger: LegacyCriteriaLedgerEvidence | null;
   diagnostics: SnapshotDiagnostic[];
   /**

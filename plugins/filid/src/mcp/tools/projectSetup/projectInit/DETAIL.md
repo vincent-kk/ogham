@@ -6,6 +6,7 @@
 - Create config version 2 with automatic adapter selection by default.
 - When adapter IDs are supplied, create explicit adapter selection preserving their order.
 - Keep rule-document synchronization outside this action.
+- Initialization explicitly records the built-in `verification.organNames` list in the default configuration.
 
 ## API Contracts
 

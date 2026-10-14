@@ -1,9 +1,10 @@
-import { pathForCompare, portableResolve } from '@ogham/cross-platform';
+import { pathForCompare, portableResolve, portableBasename, portableRelative, portableIsAbsolute } from '@ogham/cross-platform';
 
 import { resolveAdapters } from '../../adapters/index.js';
 import { ANALYSIS_AXES } from '../../constants/analysisAxes.js';
 import { DEPENDENCY_DIAGNOSTIC_CODES } from '../../constants/dependencyDiagnosticCodes.js';
 import { ALL_SNAPSHOT_AXES } from '../../constants/snapshotAxes.js';
+import { DEFAULT_VERIFICATION_ORGAN_NAMES } from '../../constants/organNames.js';
 import type { AdapterRegistry } from '../../types/adapters.js';
 import type {
   ProjectSnapshot,
@@ -188,7 +189,20 @@ export async function createProjectSnapshot(
   const ownerNodePaths = [...tree.nodes.values()]
     .filter((node) => node.type !== 'organ')
     .map((node) => node.path);
-  const verificationFilePaths = verification.files.map((file) => file.path);
+  const verificationOrganNames = config.verification?.organNames ?? DEFAULT_VERIFICATION_ORGAN_NAMES;
+  const verificationOrganPaths = [...tree.nodes.values()]
+    .filter((node) => node.type === 'organ' && verificationOrganNames.includes(portableBasename(node.path)))
+    .map((node) => node.path);
+  const verificationPaths = [...new Set([
+    ...verification.files.map((file) => file.path),
+    ...(stored?.facts.scannedPaths ?? []).map((filePath) => portableResolve(root, filePath)).filter((filePath) =>
+      verificationOrganPaths.some((organPath) => {
+        const relative = portableRelative(organPath, filePath);
+        const comparable = pathForCompare(relative);
+        return comparable !== '..' && !comparable.startsWith('../') && !portableIsAbsolute(relative);
+      }),
+    ),
+  ])];
   const dependencyGraph = axes.dependencies
     ? buildDependencyGraph(
         ownerNodePaths,
@@ -200,7 +214,7 @@ export async function createProjectSnapshot(
           organPaths: [...tree.nodes.values()]
             .filter((node) => node.type === 'organ')
             .map((node) => node.path),
-          verificationPaths: verificationFilePaths,
+          verificationPaths,
         },
       )
     : {
@@ -212,7 +226,7 @@ export async function createProjectSnapshot(
       };
   const unownedDependencyDiagnostics = axes.dependencies
     ? findUnownedReferences(ownerNodePaths, dependencies.references, {
-        verificationPaths: verificationFilePaths,
+        verificationPaths,
       }).map(({ reference, unownedPath }) =>
         createDependencyDiagnostic(
           DEPENDENCY_DIAGNOSTIC_CODES.UNOWNED,
@@ -286,6 +300,7 @@ export async function createProjectSnapshot(
     adapterIds,
     verification,
     legacyCriteriaLedger,
+    verificationPaths,
     diagnostics,
     normalizedFacts: normalizeFactsEvidence(
       root,

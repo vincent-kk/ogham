@@ -97,6 +97,7 @@ const snapshot: ProjectSnapshot = {
     certainty: 'exact',
   },
   adapterIds: ['fixture'],
+  verificationPaths: [],
   verification: { files: [], violations: [], certainty: 'exact' },
   legacyCriteriaLedger: null,
   diagnostics: [],
@@ -462,6 +463,7 @@ function checkVerificationBoundary(files: VerificationFileAnalysis[]) {
     snapshot: {
       ...snapshot,
       verification: { files, violations: [], certainty: 'exact' },
+      verificationPaths: files.map((file) => file.path),
       dependencyGraph: {
         ...snapshot.dependencyGraph,
         edges: [

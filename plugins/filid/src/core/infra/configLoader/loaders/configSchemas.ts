@@ -114,6 +114,7 @@ const configFields = {
     adapters: AdapterSelectionSchema,
     review: ReviewConfigSchema.optional(),
     facts: FactsConfigSchema.optional(),
+    verification: z.object({ organNames: z.array(z.string().min(1)).optional() }).strict().optional(),
 };
 
 /** Strict, shorthand-preserving schema for a complete v3 file on disk. */
