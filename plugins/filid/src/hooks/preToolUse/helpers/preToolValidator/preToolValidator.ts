@@ -1,3 +1,5 @@
+import { basename, dirname } from 'node:path';
+
 import {
   DENY_RETRY_GUIDANCE,
   HOOK_TOOL_NAME,
@@ -11,6 +13,7 @@ import { resolveHookTargetPath } from '../../utils/resolveHookTargetPath.js';
 import { handleDetailMdWrite } from './utils/handleDetailMdWrite.js';
 import { handleIntentMdEdit } from './utils/handleIntentMdEdit.js';
 import { handleIntentMdWrite } from './utils/handleIntentMdWrite.js';
+import { hasEntryPoint } from './utils/hasEntryPoint.js';
 
 export {
   projectMoveContent,
@@ -31,8 +34,8 @@ export {
  * - Validates projected content against the line cap when the edit is exact
  * - Warns when an inexact edit's new_string exceeds 20 lines
  *
- * Delete of INTENT.md or DETAIL.md is denied because it removes the active
- * boundary contract rather than revising it.
+ * Delete of INTENT.md or DETAIL.md permits demotion only when no entry point
+ * remains; unreadable directory or config evidence keeps deletion denied.
  *
  * Branch names and criteria ledgers do not affect this validator.
  * Write/Edit follow the physical target; Delete preserves the final entry.
@@ -60,14 +63,24 @@ export function validatePreToolUse(
   if (
     input.tool_name === HOOK_TOOL_NAME.DELETE &&
     (isIntentMd(documentPath) || isDetailMd(documentPath))
-  )
+  ) {
+    const directory = dirname(documentPath);
+    if (!hasEntryPoint(directory, safeCwd))
+      return {
+        continue: true,
+        hookSpecificOutput: {
+          permissionDecision: 'allow',
+          additionalContext: `Demotion: ${directory} has no entry point, so deleting ${basename(documentPath)} drops its fractal claim. Record the demotion in the parent DETAIL.md.`,
+        },
+      };
     return {
       continue: true,
       hookSpecificOutput: {
         permissionDecision: 'deny',
-        permissionDecisionReason: `Delete rejected: ${filePath} is an FCA contract document. Revise the contract instead of deleting it. ${DENY_RETRY_GUIDANCE}`,
+        permissionDecisionReason: `Delete rejected: ${filePath} is an FCA contract document. Revise the contract instead of deleting it. To demote this fractal to an organ, remove its entry point (index or main file, framework entry, manifest, or entryPointOverrides entry) first, then delete INTENT.md and DETAIL.md and record the demotion in the parent DETAIL.md. ${DENY_RETRY_GUIDANCE}`,
       },
     };
+  }
 
   if (input.tool_name === HOOK_TOOL_NAME.EDIT && isIntentMd(documentPath))
     return handleIntentMdEdit(input, safeCwd, documentPath);
