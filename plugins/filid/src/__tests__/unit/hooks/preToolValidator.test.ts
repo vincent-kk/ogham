@@ -211,7 +211,9 @@ describe('protected document demotion', () => {
   let directory: string;
 
   beforeEach(() => {
-    projectRoot = realpathSync(mkdtempSync(join(tmpdir(), 'filid-demotion-')));
+    projectRoot = realpathSync.native(
+      mkdtempSync(join(tmpdir(), 'filid-demotion-')),
+    );
     directory = join(projectRoot, 'module');
     mkdirSync(directory);
     mkdirSync(join(projectRoot, '.filid'));
