@@ -1,6 +1,6 @@
 // Entry-point knowledge belongs to the adapter; hook bundle constraints permit importing only its constants here.
 import { readFileSync, readdirSync } from 'node:fs';
-import { basename, extname, join, relative, sep } from 'node:path';
+import { basename, extname, join } from 'node:path';
 
 import {
   EXECUTABLE_ENTRY_BASENAMES,
@@ -11,7 +11,8 @@ import {
 } from '../../../../../adapters/ecmascript/structure/ecmascriptConventions.js';
 
 /**
- * Reads directory entries and project overrides before allowing a demotion.
+ * Reads directory entries and the project's declared entry-point file names
+ * (`structure.entryPointOverrides`, keyed by adapter id) before allowing a demotion.
  * @param directory - Absolute, host-canonical directory containing the document.
  * @param projectRoot - Validated absolute project cwd containing .filid/config.json.
  * @returns True when an entry point exists or directory/config evidence cannot be read or parsed; false only when absence is established.
@@ -40,12 +41,10 @@ export function hasEntryPoint(directory: string, projectRoot: string): boolean {
     const config = JSON.parse(
       readFileSync(join(projectRoot, '.filid', 'config.json'), 'utf8'),
     ) as { structure?: { entryPointOverrides?: Record<string, unknown> } };
-    const directoryKey =
-      relative(projectRoot, directory).split(sep).join('/') || '.';
-    return Object.hasOwn(
+    const declaredNames = Object.values(
       config.structure?.entryPointOverrides ?? {},
-      directoryKey,
-    );
+    ).flatMap((names) => (Array.isArray(names) ? names : []));
+    return entries.some((name) => declaredNames.includes(name));
   } catch {
     return true;
   }

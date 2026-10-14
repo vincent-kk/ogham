@@ -8,7 +8,7 @@
 - INTENT.md Write는 50줄 cap과 3-tier boundary를, Edit은 최종 투영 가능한 경우 50줄 cap을 검사한다.
 - DETAIL.md Write는 기존 내용이 있을 때 append-only 변경을 거부한다.
 - INTENT.md/DETAIL.md Delete는 content 투영 없이 entry point를 판정한다. host-canonical parent와 보존된 terminal entry로 문서를 판정해 case alias와 보호 문서 symlink 삭제 우회를 막고, 존재하지 않는 대상도 같은 entry 의미로 판정한다.
-- entry point는 어댑터 상수의 index/main 소스 파일, framework entry 이름, package manifest와 프로젝트 config의 디렉터리 상대 경로 entryPointOverrides 키로 판정한다. 디렉터리 또는 config 읽기·파싱 실패는 보수적으로 entry point가 있는 것으로 취급한다.
+- entry point는 어댑터 상수의 index/main 소스 파일, framework entry 이름, package manifest와 프로젝트 config `structure.entryPointOverrides`(어댑터 ID별 선언 파일명 목록)의 어느 파일명이 디렉터리에 존재하는지로 판정한다. 디렉터리 또는 config 읽기·파싱 실패는 보수적으로 entry point가 있는 것으로 취급한다.
 - branch, spike 상태, criteria ledger 또는 agent 역할을 입력으로 받거나 면제 근거로 사용하지 않는다.
 
 ## API Contracts

@@ -241,11 +241,14 @@ describe('protected document demotion', () => {
     },
   );
 
-  it('denies deletion while a project-relative override remains', () => {
+  it('denies deletion while a declared override entry file remains', () => {
     writeFileSync(
       join(projectRoot, '.filid/config.json'),
-      JSON.stringify({ structure: { entryPointOverrides: { module: [] } } }),
+      JSON.stringify({
+        structure: { entryPointOverrides: { ecmascript: ['custom.entry.ts'] } },
+      }),
     );
+    writeFileSync(join(directory, 'custom.entry.ts'), '');
     const result = validatePreToolUse({
       ...baseInput,
       cwd: projectRoot,
@@ -256,6 +259,22 @@ describe('protected document demotion', () => {
     expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
       'To demote this fractal to an organ',
     );
+  });
+
+  it('allows demotion when a declared override names a file absent here', () => {
+    writeFileSync(
+      join(projectRoot, '.filid/config.json'),
+      JSON.stringify({
+        structure: { entryPointOverrides: { ecmascript: ['custom.entry.ts'] } },
+      }),
+    );
+    const result = validatePreToolUse({
+      ...baseInput,
+      cwd: projectRoot,
+      tool_name: 'Delete',
+      tool_input: { file_path: join(directory, 'INTENT.md') },
+    });
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('allow');
   });
 
   it.each(['INTENT.md', 'DETAIL.md'])(

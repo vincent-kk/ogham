@@ -16,6 +16,7 @@ import { scopeDiagnosticsToPaths } from '../../../utils/scopeDiagnosticsToPaths.
 import { buildFractalScanFullData } from './buildFractalScanFullData.js';
 import { buildFractalScanPathsData } from './buildFractalScanPathsData.js';
 import { buildFractalScanSummary } from './buildFractalScanSummary.js';
+import { countUnexemptedViolations } from './countUnexemptedViolations.js';
 
 /**
  * Assemble the scan payload for one detail level.
@@ -36,7 +37,9 @@ export function buildScanResult(
   nameFilter?: string,
 ): ToolPayload<FractalScanSummary, FractalScanData> {
   const certainty = resolveFractalScanCertainty(snapshot, diagnostics);
-  const violationCount = validation.result.violations.length;
+  const violationCount = countUnexemptedViolations(
+    validation.result.violations,
+  );
   const summary = buildFractalScanSummary(snapshot, validation, certainty);
   const data =
     detail === FRACTAL_SCAN_DETAILS.PATHS

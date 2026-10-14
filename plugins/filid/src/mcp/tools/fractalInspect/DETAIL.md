@@ -34,6 +34,7 @@
 
 - 면제 finding만 있으면 OK이고 실제 위반이 함께 있으면 VIOLATIONS이다.
 - unsupported와 indeterminate 판정은 면제 finding보다 우선한다.
+- `scan`의 status와 summary `violationCount`도 면제 finding을 세지 않아 `validate`와 같은 판정을 낸다.
 
 ## Last Updated
 
