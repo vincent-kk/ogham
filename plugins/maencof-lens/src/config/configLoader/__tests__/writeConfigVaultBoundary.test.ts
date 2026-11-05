@@ -188,4 +188,39 @@ describe("writeConfig vault boundary", () => {
 
     expect(readdirSync(outside)).toEqual([]);
   });
+
+  it("refuses user-layer writes inside a relative vault when the project root differs from cwd", () => {
+    const projectRoot = join(base, "outside-project");
+    vi.stubEnv("CLAUDE_CONFIG_DIR", join(vault, "host-state"));
+    const originalCwd = process.cwd();
+    try {
+      process.chdir(vault);
+
+      expect(() =>
+        writeConfig(projectRoot, "user", createDefaultConfig(".", "vault")),
+      ).toThrow(guidance);
+
+      expect(readdirSync(vault)).toEqual([]);
+      expect(existsSync(projectRoot)).toBe(false);
+    } finally {
+      process.chdir(originalCwd);
+    }
+  });
+
+  it("allows an outside user destination while preserving a relative vault path", () => {
+    const projectRoot = join(base, "outside-project");
+    const config = createDefaultConfig(".", "vault");
+    const originalCwd = process.cwd();
+    try {
+      process.chdir(vault);
+
+      const written = writeConfig(projectRoot, "user", config);
+
+      expect(written).toBe(configLayers(projectRoot).user);
+      expect(JSON.parse(readFileSync(written, "utf-8"))).toEqual(config);
+      expect(readdirSync(vault)).toEqual([]);
+    } finally {
+      process.chdir(originalCwd);
+    }
+  });
 });

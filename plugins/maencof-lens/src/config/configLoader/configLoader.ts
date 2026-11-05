@@ -68,11 +68,12 @@ export function writeConfig(
       : mergeConfigLayers(documents.user, document);
   const target = scope === "user" ? layers.user : layers.project;
   if (target !== null)
-    assertConfigOutsideVaults(projectRoot, target, [
-      documents.user,
-      documents.project,
-      document,
-    ]);
+    assertConfigOutsideVaults(
+      projectRoot,
+      target,
+      [documents.user, documents.project, document],
+      process.cwd(),
+    );
   if (!isValidLensConfig(merged))
     throw new Error(
       `Cannot write ${scope} config: merged configuration has no valid vault list.`,

@@ -9,9 +9,10 @@ import {
 
 /**
  * Refuse a config destination beneath any registered vault without writing files.
- * @param projectRoot Host workspace anchoring config and vault paths.
+ * @param projectRoot Host workspace anchoring the config destination.
  * @param targetPath Explicitly selected layer destination, including missing suffixes.
  * @param configs Existing layer documents and the proposed document to inspect.
+ * @param vaultPathBase Process working folder used by readers for relative vault paths.
  * @returns Nothing when both the lexical and physical destination are outside all vaults.
  * @throws Error with relocation guidance when a vault contains the destination.
  */
@@ -19,6 +20,7 @@ export function assertConfigOutsideVaults(
   projectRoot: string,
   targetPath: string,
   configs: readonly unknown[],
+  vaultPathBase: string,
 ): void {
   const targets = [
     resolve(projectRoot, targetPath),
@@ -28,8 +30,8 @@ export function assertConfigOutsideVaults(
     if (!isValidLensConfig(config)) continue;
     for (const vault of normalizeLensConfig(config).vaults) {
       const roots = [
-        resolve(projectRoot, vault.path),
-        canonicalizeTargetPathSync(projectRoot, vault.path),
+        resolve(vaultPathBase, vault.path),
+        canonicalizeTargetPathSync(vaultPathBase, vault.path),
       ];
       if (
         roots.some((root) => targets.some((target) => isWithin(root, target)))
