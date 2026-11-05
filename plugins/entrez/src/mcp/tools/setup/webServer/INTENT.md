@@ -2,20 +2,11 @@
 
 ## Purpose
 
-`setup` 도구의 로컬 설정 HTTP 서버. 127.0.0.1 임의 포트에서 기동해 라우트 테이블(`/` `/status` `/test` `/submit`)과 요청별 컨텍스트(`RouteContext`: config/credentials 로드·저장, 연결 테스트, 타이머·서버 종료 콜백)를 제공한다. 유휴 시 자동 종료.
-
-## Structure
-
-| 파일           | 역할                                                                   |
-| -------------- | ---------------------------------------------------------------------- |
-| `webServer.ts` | `startSetupServer` — 서버 기동, 토큰 발급, resetTimer/closeServer 결선 |
-| `routing/`     | `routes.ts`(guard + 디스패치) · `routeContext.ts`(RouteContext 타입)   |
-| `handlers/`    | `/`·`/status`·`/test`·`/submit` 핸들러 organ                           |
-| `utils/`       | `maskApiKey`·`buildStatus`·`buildPathSuggestions` organ                |
+`setup` 도구의 로컬 설정 HTTP 서버다. 서버 수명주기와 설정 폼·상태 조회·연결 테스트·저장의 HTTP 경계를 소유한다.
 
 ## Conventions
 
-- 공개 진입점은 `index.ts` 배럴만 — `startSetupServer`, `SetupServerOptions`, `createRouteHandler`, `RouteContext`.
+- 공개 경계는 배럴로 한정한다 — 내부 라우트·서버 상태에 소비자가 직접 결합하지 않게 한다.
 - 모듈 전역 가변 상태 없음 — 서버 상태(`server`/`timer`/`closed`)는 `startSetupServer` 클로저에 캡슐화.
 - 서버 기동 시마다 새 토큰 발급 → 반환 URL에 `?token=` 부착.
 - 매 요청 `ctx.resetTimer()` 호출로 유휴 자동 종료 타이머 갱신.
@@ -24,7 +15,7 @@
 
 ### Always do
 
-- 새 라우트는 `routes.ts` 디스패치에 등록하고 `handlers/` 아래 핸들러 파일로 추가한다.
+- 새 라우트는 `routing/routes.ts` 디스패치에 등록하고 `handlers/` 아래 핸들러 파일로 추가한다.
 - 요청 처리 시작 시 `resetTimer()`를 호출해 자동 종료 타이머를 갱신한다.
 
 ### Ask first
@@ -34,8 +25,3 @@
 ### Never do
 
 - CORS 헤더 추가, 모듈 전역 가변 상태 도입, `index.ts` 외 내부 파일 직접 import로 소비.
-
-## Dependencies
-
-- `@ogham/http-kit` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
-- `../../../../types/setup` · `../../../../constants/defaults`(`SETUP_AUTO_SHUTDOWN_MS`)

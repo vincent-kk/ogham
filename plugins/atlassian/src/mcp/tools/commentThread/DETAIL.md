@@ -9,7 +9,7 @@
 
 ## API Contracts
 
-- `handleCommentThread(args, ctx)` — 모드별 결과 객체를 그대로 반환한다(봉투는 `wrapHandler` 가 씌운다).
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -27,4 +27,4 @@
 
 ## Last Updated
 
-2026-08-28 — 어댑터의 공개 MCP 이름과 Cloud 거부 오류를 `comment_thread` 로 맞췄다.
+모드별 검증·도메인 위임 또는 Cloud 거부 계약이 바뀔 때 갱신한다.

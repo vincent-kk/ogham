@@ -9,9 +9,7 @@
 
 ## API Contracts
 
-- `planSegments(options: SegmentPlanOptions)` — 재귀 분할 진입점. `countFn` 주입 필수.
-- `bucketByDate(...): DateBucket[]` — 날짜 범위를 비중첩 연속 버킷으로 나눈다.
-- `probeCount(...)` — 버킷별 Count 재조회. 관련 타입: `CountFn`, `CountRange`.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -30,4 +28,4 @@
 
 ## Last Updated
 
-2026-07-30 — UID 상한 우회 분할 계약을 문서화했다.
+UID 상한 분할·완전 분할과 capped 표시 정책이 바뀔 때 갱신한다.

@@ -2,15 +2,6 @@
 
 대량 검색 async job 레지스트리(디스크 영속). MCP 동기 타임아웃을 넘는 검색을 job으로 돌리고, 진행률·cursor 페이지네이션으로 결과를 조회한다.
 
-## Structure
-
-| 파일                        | 역할                                                          |
-| --------------------------- | ------------------------------------------------------------- |
-| `operations/createJob.ts`   | `createJob` — QUEUED 레코드 생성·0o600 기록                   |
-| `operations/getJob.ts`      | `getJob` — id로 로드, 없으면 null                             |
-| `operations/updateJob.ts`   | `updateJob` — 부분 패치·status 전이·updatedAt 갱신            |
-| `operations/pollResults.ts` | `pollResults` — status/진행률 + `union.records` cursor 페이지 |
-
 ## Conventions
 
 - 읽기·쓰기 모두 `JobRecordSchema`로 zod 검증. 기록은 항상 0o600.
@@ -32,10 +23,3 @@
 
 - adapters/mcp 직접 import(단방향: mcp → core). 인라인 문자열.
 - 영속 레코드를 직접 변형(페이지네이션은 shallow-clone).
-
-## Dependencies
-
-- `../../types/{job,enums}` — `JobRecord`·`JobStatus`·`ErrorCode`
-- `../../constants/{paths,defaults,messages}` — `jobPath`·`DEFAULT_BATCH_SIZE`·메시지
-- `../../lib/fileIo` — `readJson`/`writeJson`
-- `../../utils/{isoNow,randomId}` — 시계·id

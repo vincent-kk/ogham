@@ -9,14 +9,13 @@
 
 ## API Contracts
 
-- `createServer()` — 서버를 만들고 도구 5종을 등록해 돌려준다.
-- `startServer()` — stdio transport 로 연결한다.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
 ### AC-server-registration — 등록 규약
 
-- 등록 도구가 5개이고 각 콜백이 `wrapHandler` 를 거친다.
+- 등록된 각 도구의 콜백이 `wrapHandler` 를 거친다.
 - 각 도구의 `inputSchema` 가 `types/` 의 스키마와 동일 객체다.
 
 ### AC-server-boundary — 경계 준수
@@ -25,4 +24,4 @@
 
 ## Last Updated
 
-2026-07-30 — 서버 등록 계약을 문서화했다.
+도구 등록·스키마 재사용과 stdio 통신 계약이 바뀔 때 갱신한다.

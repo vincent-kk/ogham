@@ -12,9 +12,7 @@
 
 ## API Contracts
 
-- `handleSetup(...)` — 서버를 기동하고 브라우저를 연 뒤 저장 completion을 기다린다. 성공 결과는 `config_path`를 포함하며 시작 실패·명시적 종료·유휴 timeout·서버 오류는 경로 없는 실패다.
-- `utils/loadSettingsHtml` — 런타임에 `public/settings.html` 을 읽는다.
-- `webServer/` — 라우팅과 가드.
+MCP 성공은 선택 scope의 설정과 자격증명이 모두 저장된 뒤에만 성립한다. 반환 경로는 저장기가 확정한 경로이며 기동·종료·유휴 timeout·서버 오류만으로 성공 경로를 만들지 않는다.
 
 ## Acceptance Criteria
 
@@ -42,4 +40,4 @@
 
 ## Last Updated
 
-2026-08-23 — 실제 scope 저장 completion과 resolver-owned config_path 계약을 추가했다.
+설정 성공의 저장 완료 의미와 반환 경로 계약이 바뀔 때 갱신한다.

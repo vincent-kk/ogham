@@ -12,11 +12,7 @@
 
 ## API Contracts
 
-- `server/` — 서버 생성과 도구 5개 등록, stdio 연결.
-- `serverEntry/` — `bridge/mcp-server.cjs` 번들 진입점.
-- `tools/` — 범용 도구 핸들러 4종과 도메인 어댑터 1종.
-- `shared/` — 응답 포맷과 `FetchContext` 조립.
-- `pages/` — 브라우저 UI 정적 자산.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -35,4 +31,4 @@
 
 ## Last Updated
 
-2026-08-28 — 승인된 도메인 어댑터의 공개 MCP 이름을 `comment_thread` 로 단순화했다.
+범용 도구와 도메인 어댑터의 권한 또는 응답 경계가 바뀔 때 갱신한다.

@@ -2,14 +2,6 @@
 
 NCBI E-utilities 설정 폼 페이지(개발자 도구 스타일, 라이트/다크). "한 번 설정" 맥락에 맞춰 필수 입력은 contact email 하나뿐이고 나머지는 `<details>` 고급으로 접는다. 서버 주입 상태를 prefill하고, EInfo 테스트·저장을 로컬 서버 API로 수행한다.
 
-## Structure
-
-| 파일                | 역할                                           |
-| ------------------- | ---------------------------------------------- |
-| `index.html`        | 폼 마크업 + 상태 주입 자리(`__ENTREZ_STATE__`) |
-| `styles/styles.css` | 토큰 기반 스타일(prefers-color-scheme)         |
-| `scripts/app.js`    | prefill·검증·rate badge·/test·/submit          |
-
 ## Conventions
 
 - 의존성 없는 vanilla JS(ES5 호환), SVG 아이콘(이모지 금지), 접근성 라벨/포커스.

@@ -2,13 +2,6 @@
 
 `auth_check` 도구. 설정 상태(tool/email·api_key 존재)·EInfo 도달성·유효 rate를 보고한다. 미설정에서도 동작(configured:false). setup의 pre-flight·복구 진입점.
 
-## Structure
-
-| 파일           | 역할                                                   |
-| -------------- | ------------------------------------------------------ |
-| `authCheck.ts` | `runAuthCheck` — config/credentials 로드 + EInfo probe |
-| `index.ts`     | 배럴                                                   |
-
 ## Conventions
 
 - config/credentials를 직접 로드(미설정 허용 — buildToolContext 미사용).
@@ -28,8 +21,3 @@
 ### Never do
 
 - api_key 값을 응답/로그에 노출. 핸들러가 httpClient 우회.
-
-## Dependencies
-
-- `../../../core/{config,sourceResolver,httpClient}` · `../../../utils/url`
-- `../../../types/{tool,http,enums}` · `../../../constants/defaults`

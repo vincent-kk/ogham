@@ -9,22 +9,12 @@
 
 ## API Contracts
 
-- `handleAuthCheck(...)` — 설정 상태와(요청 시) 연결 테스트 결과를 돌려준다.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
-### AC-unconfigured-report — 미설정 보고
-
-- 설정이 없어도 throw 하지 않고 미설정 상태로 응답한다.
-
-### AC-optional-connection-test — 선택적 연결 테스트
-
-- 연결 테스트는 요청받았을 때만 수행된다.
-
-### AC-credential-secrecy — 자격증명 비노출
-
-- 응답에 자격증명 값이 나타나지 않는다.
+구체적인 입출력 수락 기준은 해당 모듈 테스트가 고정한다.
 
 ## Last Updated
 
-2026-07-30 — 인증 상태 점검 계약을 문서화했다.
+미설정 보고·선택적 연결 점검·비밀 비노출 정책이 바뀔 때 갱신한다.

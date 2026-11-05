@@ -9,9 +9,7 @@
 
 ## API Contracts
 
-- 호출 함수: `esearch`, `efetch`, `esummary`, `espell`, `elink`, `idconv`, `oaService`
-- 순수 파서: `parseEsearch`, `parseEfetch`, `parseEsummary`, `parseEspell`, `parseElink`, `parseIdConv`, `parseOa`
-- 인자 타입: `EsearchArgs`, `EfetchArgs`, `EsummaryArgs`, `EspellArgs`, `ElinkArgs`, `IdConvArgs`, `OaArgs`
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -25,4 +23,4 @@
 
 ## Last Updated
 
-2026-07-30 — 어댑터 계층 경계를 문서화하고 배럴 표면을 열거형으로 고정했다.
+외부 API 어댑터의 네트워크·파서 공개 경계가 바뀔 때 갱신한다.

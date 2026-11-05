@@ -2,8 +2,6 @@
 
 ## Requirements
 
-- 실제 HTTP 요청을 보내 연결 가능 여부와 인증 유효성을 검증한다.
-- `resolveEnvironment` 로 Cloud/Server 를 판별한 뒤 서비스별 테스트 엔드포인트를 고른다 — Jira 는 `/rest/api/<v>/myself`, Confluence 는 `space` 조회다.
 - 인증 헤더 생성이 실패하면 요청을 보내지 않고 즉시 실패 결과를 돌려준다.
 - 성공·실패 구분과 레이턴시(ms)를 항상 결과에 담는다.
 - 응답 본문은 `include_body` 가 명시된 경우에만 포함한다.
@@ -12,7 +10,7 @@
 
 ## API Contracts
 
-- `testConnection(params: TestConnectionParams): Promise<ConnectionTestResult>` — 판별 → 엔드포인트 선택 → 요청 실행. 자격증명 원문은 결과에 담지 않는다.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -34,4 +32,4 @@
 
 ## Last Updated
 
-2026-07-30 — 연결 검증 계약을 문서화하고 형제 배럴 경유 규칙을 명시했다.
+연결 점검의 엔드포인트·실패 보고·응답 노출 정책이 바뀔 때 갱신한다.

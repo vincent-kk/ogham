@@ -2,19 +2,6 @@
 
 E-utility 함수별 어댑터(1함수 1파일). 각 어댑터는 `core/httpClient`로 호출하고 응답을 파싱해 도메인 타입으로 변환한다. 파싱 함수는 별도 export해 fixture로 테스트.
 
-## Structure
-
-| 파일                      | 역할                                              |
-| ------------------------- | ------------------------------------------------- |
-| `operations/esearch.ts`   | ESearch(JSON) — count·UID·QueryTranslation·WebEnv |
-| `operations/efetch.ts`    | EFetch(XML) — 구조화 저자·MeSH·abstract·doi·pmcid |
-| `operations/esummary.ts`  | ESummary(JSON) — 경량 메타                        |
-| `operations/espell.ts`    | ESpell(XML) — 교정어                              |
-| `operations/elink.ts`     | ELink(JSON) — Similar Articles                    |
-| `operations/idconv.ts`    | idconv(JSON) — PMID↔PMCID↔DOI (PMC utils 호스트)  |
-| `operations/oaService.ts` | oa.fcgi(XML) — OA 여부·license·format 링크        |
-| `index.ts`                | 배럴(외부 경계)                                   |
-
 ## Conventions
 
 - 모든 HTTP는 `httpRequest`(DI deps) 경유 — 직접 `fetch` 금지.
@@ -35,10 +22,3 @@ E-utility 함수별 어댑터(1함수 1파일). 각 어댑터는 `core/httpClien
 ### Never do
 
 - core 외 레이어 import. 핸들러가 이 모듈 우회해 fetch. 인라인 호스트 문자열.
-
-## Dependencies
-
-- `../../core/httpClient` — `httpRequest`
-- `../../core/sourceResolver` — `buildBaseUrl`
-- `../../lib/xmlParse` — `parseXml`·`asArray`·`textOf`·`collectText`
-- `../../types/{eutils,record,enums,http}` · `../../constants/defaults`

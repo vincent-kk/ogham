@@ -1,6 +1,6 @@
 ## Purpose
 
-entrez 플러그인의 TypeScript 소스 루트(프랙탈 루트). NCBI E-utilities 결정론 검색 엔진과 MCP 도구 5종을 담는다. 유일한 닻은 검색 **누락 방지(recall)**.
+entrez 플러그인의 TypeScript 소스 루트(프랙탈 루트). NCBI E-utilities 결정론 검색 엔진과 MCP 도구를 담는다. 유일한 닻은 검색 **누락 방지(recall)**.
 
 ## Conventions
 

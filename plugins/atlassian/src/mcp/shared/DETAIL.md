@@ -9,8 +9,7 @@
 
 ## API Contracts
 
-- `helpers/toolResponse` — `toolResult`·`toolError`·`mapReplacer`·`wrapHandler`.
-- `helpers/buildFetchContext` — `buildFetchContext(...)`: 설정·인증·환경을 합쳐 `FetchContext` 를 만든다.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -26,4 +25,4 @@
 
 ## Last Updated
 
-2026-08-28 — 다섯 번째 도구도 공통 응답 봉투를 사용함을 반영했다.
+응답 봉투와 컨텍스트 조립·비밀 격리 계약이 바뀔 때 갱신한다.

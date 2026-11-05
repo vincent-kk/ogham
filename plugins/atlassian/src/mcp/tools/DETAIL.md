@@ -9,11 +9,7 @@
 
 ## API Contracts
 
-- `fetch/` — HTTP GET/POST/PUT/PATCH/DELETE 통합 처리, ADF 자동 변환, 응답 본문 파일 저장(`save_to_path`).
-- `convert/` — 순수 로컬 포맷 변환(네트워크 없음).
-- `authCheck/` — 인증 설정 상태 보고와 선택적 연결 테스트.
-- `setup/` — 로컬 HTTP 서버로 인증 설정 UI 제공.
-- `commentThread/` — Jira DC reply-plugin 댓글 스레드 어댑터(`mode: read | scan | probe | save_profile`); 규칙은 `src/jira/commentThread` 가 소유.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -27,4 +23,4 @@
 
 ## Last Updated
 
-2026-08-28 — 도메인 어댑터가 공개 `jira` entry point만 소비하도록 경계를 정규화했다.
+도구 격리와 도메인 계층 위임 권한이 바뀔 때 갱신한다.

@@ -12,10 +12,7 @@
 
 ## API Contracts
 
-- `readCommentThread(ctx, params, deps)` — `CommentThreadResult`.
-- `scanCommentThreads(ctx, params, deps)` — `CommentThreadScanResult`.
-- `probeCommentThread(ctx, params, deps)` — `CommentThreadProbeResult`; proposal 유무와 관계없이 `warnings[]` 를 전달한다.
-- `saveCommentThreadProfile(ctx, params, deps)` — `CommentThreadSaveResult`.
+- probe는 proposal 유무와 관계없이 `warnings[]`를 전달한다.
 - `defaultCommentThreadDeps` 는 요청, 프로필 읽기·쓰기, 시계를 잇는 운영 기본값이며 숨은 가변 상태를 소유하지 않는다.
 - `CommentThreadDeps` 는 네트워크·파일·시계 효과를 호출자가 대체할 수 있게 하는 주입 경계다. 공개 작업은 주입된 경계 밖에서 효과를 수행하지 않는다.
 
@@ -133,4 +130,4 @@
 
 ## Last Updated
 
-2026-08-28 — 프로필 부재 hint 를 증거와 스킬 단서 절 포인터만 담는 선언문으로 계약화했다.
+스레드 복원·열화·프로필 저장 또는 바인딩된 수락 기준이 바뀔 때 갱신한다.

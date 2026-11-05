@@ -9,11 +9,7 @@
 
 ## API Contracts
 
-- `paperSearch/` — `paper_search`(+ async start/status/results): 다중 검색식의 결정론 union.
-- `meshLookup/` — `mesh_lookup`: 자연어 → MeSH 어휘 매핑.
-- `fetchFulltext/` — `fetch_fulltext`: OA 본문 확보.
-- `authCheck/` — `auth_check`: 설정 상태·도달성·rate 보고.
-- `setup/` — `setup`: 로컬 브라우저 설정 폼.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -28,4 +24,4 @@
 
 ## Last Updated
 
-2026-07-30 — 도구 컨테이너 계약을 문서화했다.
+도구 오케스트레이션 경계와 미설정 복구 신호가 바뀔 때 갱신한다.

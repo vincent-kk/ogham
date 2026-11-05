@@ -4,14 +4,9 @@
 
 Markdown 텍스트를 ADF(Atlassian Document Format) JSON 문서로 변환하는 순수 함수 모듈. 파싱된 블록/인라인 토큰을 ADF 노드 트리로 조립한다.
 
-## Structure
+## Conventions
 
-| 파일                         | 역할                                             |
-| ---------------------------- | ------------------------------------------------ |
-| `markdownToAdf.ts`           | 진입점 — doc 루트 노드 조립 및 빈 입력 처리      |
-| `operations/renderBlocks.ts` | MarkdownBlock 배열을 ADF 블록 노드로 변환        |
-| `operations/renderInline.ts` | 인라인 토큰을 마크가 적용된 ADF text 노드로 변환 |
-| `index.ts`                   | 배럴 — `markdownToAdf` 단일 재수출               |
+공용 파서의 블록·인라인 해석을 재사용해 변환 방향 간 문법 차이를 막는다.
 
 ## Boundaries
 
@@ -28,12 +23,6 @@ Markdown 텍스트를 ADF(Atlassian Document Format) JSON 문서로 변환하는
 
 ### Never do
 
-- `core/`, `mcp/` 디렉터리에서 임포트하지 않는다
+- 인증·설정 기반 계층이나 MCP 계층에서 임포트하지 않는다
 - HTTP 호출, 파일 I/O, 인증 로직을 포함하지 않는다
 - Markdown 토큰화/파싱 로직을 이 모듈 내부에 직접 구현하지 않는다
-
-## Dependencies
-
-- `../markdownParsing/parseBlocks.ts` — 블록 파싱 (sibling fractal)
-- `../markdownParsing/tokenizeInline.ts` — 인라인 토큰화 (sibling fractal)
-- `../types/adfNode.ts` — AdfNode 타입 정의 (internal organ)

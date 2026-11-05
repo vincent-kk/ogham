@@ -10,12 +10,7 @@
 
 ## API Contracts
 
-- `runPaperSearch(...)` — 동기 오케스트레이션 진입점.
-- `operations/executeQuery.ts` — 쿼리별 lint→count→segment→id 수집.
-- `operations/fetchMetadata.ts` — union pmid 배치 메타 수집과 부분 복구.
-- `operations/writeManifest.ts` — `SearchManifest` 생성·영속.
-- `operations/{startJob,pollJob,readJob}.ts` — async job 트리오.
-- `operations/jobLocation.ts` — job 경로 해석.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -38,4 +33,4 @@
 
 ## Last Updated
 
-2026-07-30 — union 검색 도구 계약을 문서화했다.
+검색 누락 방지·부분 복구와 manifest·비동기 job 계약이 바뀔 때 갱신한다.

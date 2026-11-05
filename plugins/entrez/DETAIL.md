@@ -7,14 +7,11 @@
 - 모든 outbound 요청에 SSRF allowlist 를 적용한다.
 - `api_key` 는 stdout·로그·MCP 응답에 노출하지 않는다. 저장은 `credentials.json`(0o600) 한 곳이다.
 - `bridge/` 와 `public/` 은 커밋하는 빌드 산출물이며 손편집하지 않는다.
-- `src/version.ts` 와 `plugin.json` 의 version 은 `injectVersion.mjs` 만 갱신한다.
+- `src/version.ts` 와 `plugin.json` 의 version 은 `scripts/injectVersion.mjs` 만 갱신한다.
 
 ## API Contracts
 
-- **MCP 도구 5종** (서버 이름 `tools`): `paper_search`, `mesh_lookup`, `fetch_fulltext`, `auth_check`, `setup`.
-- **스킬 4종**: `search`(전체 파이프라인), `query`(검색식만), `download`(본문 확보), `setup`(설정).
-- **에이전트 1종**: `paper-search-expert`(검색식 생성·재랭킹 2모드).
-- **빌드 파이프라인**: `clean → version:sync → pages → compile → mcp → compile-plugin`.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -36,8 +33,8 @@
 ### AC-generated-artifacts — 산출물 규약
 
 - `bridge/`·`public/` 이 커밋되고 손편집 흔적이 없다.
-- `version.ts` 와 `plugin.json` 의 version 이 생성기 산출과 일치한다.
+- `src/version.ts` 와 `plugin.json` 의 version 이 생성기 산출과 일치한다.
 
 ## Last Updated
 
-2026-07-30 — 플러그인 루트 계약을 문서화했다.
+recall 책임과 비밀 보호·미설정 복구·산출물 정책이 바뀔 때 갱신한다.

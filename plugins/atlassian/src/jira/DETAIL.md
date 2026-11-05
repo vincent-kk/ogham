@@ -7,7 +7,7 @@
 
 ## API Contracts
 
-- `commentThread/` — `readCommentThread`, `scanCommentThreads`, `probeCommentThread`, `saveCommentThreadProfile`, `defaultCommentThreadDeps`, 타입 `CommentThreadDeps`.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -21,4 +21,4 @@
 
 ## Last Updated
 
-2026-08-28 — 도메인 레시피 계층의 허용 I/O와 MCP 역방향 금지를 현재 계약으로 명확히 했다.
+Jira 레시피의 허용 I/O와 공개 경계가 바뀔 때 갱신한다.

@@ -8,8 +8,7 @@
 
 ## API Contracts
 
-- 빌드 산출: `settings/` → `public/settings.html`(마크업·스타일·스크립트 인라인).
-- 서버 주입 상태 자리: `__ENTREZ_STATE__`.
+상태 주입 자리 `__ENTREZ_STATE__`는 서버와 정적 페이지의 결합점이다. 소스는 빌드 시 인라인되며 런타임에는 디스크의 산출물을 읽는다.
 
 ## Acceptance Criteria
 
@@ -23,4 +22,4 @@
 
 ## Last Updated
 
-2026-07-30 — 설정 FE 빌드 입력 계약을 문서화했다.
+정적 UI 빌드·상태 주입과 외부 자산 정책이 바뀔 때 갱신한다.

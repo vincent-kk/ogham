@@ -40,4 +40,4 @@
 
 ## Last Updated
 
-2026-08-28 — npm 배럴 제한의 순환 근거를 실재하는 server lifecycle source에 연결했다.
+검색 규칙의 계층 소유권과 버전 상수 예외가 바뀔 때 갱신한다.

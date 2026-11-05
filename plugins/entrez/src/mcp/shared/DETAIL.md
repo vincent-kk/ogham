@@ -9,10 +9,7 @@
 
 ## API Contracts
 
-- `toolResult(...)` · `mapReplacer` — 결과 직렬화(Map 포함).
-- `toolError(...)` — 던져진 값을 에러 봉투로 변환.
-- `wrapHandler(...)` — try/catch 와 응답 포맷을 묶는다.
-- `buildToolContext(...): ToolContext` — config·credentials 로드 + `HttpDeps` DI 조립.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -28,4 +25,4 @@
 
 ## Last Updated
 
-2026-07-30 — 응답 포맷과 실행 컨텍스트 조립 계약을 문서화했다.
+응답 직렬화와 실행 컨텍스트·비밀 격리 계약이 바뀔 때 갱신한다.

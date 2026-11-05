@@ -4,14 +4,7 @@ Atlassian 인증 설정을 위한 브라우저 UI 정적 파일 모음. 로컬 H
 
 ## Structure
 
-| Directory    | Role                                          |
-| ------------ | --------------------------------------------- |
-| `scripts/`   | Client-side JS (app logic, JSON import modal) |
-| `styles/`    | CSS theme and component styles                |
-| `__mocks__/` | Dev-only fetch interceptor (file:// protocol) |
-
-- `index.html` — entry point (references scripts/, styles/, **mocks**/)
-- `index.ts` — barrel (`export {}`; no runtime exports — satisfies module-entry-point)
+`index.html`은 정적 페이지 진입점이며 `index.ts`는 빈 빌드 표식이다. 런타임 TypeScript export로 UI를 가져오는 구조가 아니다.
 
 ## Conventions
 
@@ -42,7 +35,3 @@ Atlassian 인증 설정을 위한 브라우저 UI 정적 파일 모음. 로컬 H
 - 프레임워크(React, Vue 등) 추가
 - mock-api.js를 프로덕션 경로에서 실행
 - 실 에셋(CSS/JS/폰트/이미지) 비인라인 참조 — 토큰 게이트 서버에 비토큰 정적 라우트가 없어 401
-
-## Dependencies
-
-없음 (순수 정적 파일)

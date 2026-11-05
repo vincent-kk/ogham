@@ -9,13 +9,7 @@
 
 ## API Contracts
 
-- `esearch` / `parseEsearch` — ESearch(JSON): count·UID·QueryTranslation·WebEnv.
-- `efetch` / `parseEfetch` — EFetch(XML): 구조화 저자·MeSH·abstract·doi·pmcid.
-- `esummary` / `parseEsummary` — ESummary(JSON): 경량 메타.
-- `espell` / `parseEspell` — ESpell(XML): 교정어.
-- `elink` / `parseElink` — ELink(JSON): Similar Articles.
-- `idconv` / `parseIdConv` — PMID↔PMCID↔DOI 변환(PMC utils 호스트).
-- `oaService` / `parseOa` — oa.fcgi(XML): OA 여부·license·format 링크.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -29,4 +23,4 @@
 
 ## Last Updated
 
-2026-07-30 — 어댑터 구현을 `operations/` organ 으로 내리고 계약을 문서화했다.
+E-utilities 파서 분리와 응답 도메인 변환 계약이 바뀔 때 갱신한다.

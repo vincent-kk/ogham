@@ -9,12 +9,7 @@
 
 ## API Contracts
 
-- HTTP: `httpRequest`, `validateUrl`
-- db 해석: `resolveDb`, `buildBaseUrl`
-- 설정: `loadConfig`, `saveConfig`, `loadCredentials`, `saveCredentials`, `resolveRateLimit`(+ `ResolvedRateLimit`)
-- recall 엔진: `union`(`mergeRecords` 외), `segmenter`(`planSegments` 외), `espell`, `queryLint`, `searchJob`
-
-각 심볼의 의미는 소유 fractal 의 DETAIL 계약을 따른다. 배럴은 의미를 더하지 않는다.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -29,4 +24,4 @@
 
 ## Last Updated
 
-2026-07-30 — core 묶음의 경계와 배럴 표면을 문서화했다.
+결정론 검색 규칙의 소유권과 네트워크 주입 경계가 바뀔 때 갱신한다.

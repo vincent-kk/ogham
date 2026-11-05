@@ -13,10 +13,7 @@
 
 ## API Contracts
 
-- **MCP 도구 5종**: 범용 `fetch`(HTTP 5메서드 + 포맷 자동 변환), `convert`(로컬 변환), `auth_check`(인증 상태), `setup`(설정 UI)과 도메인 어댑터 `comment_thread`.
-- **스킬**: Jira·Confluence 도메인 라우터와 설정·다운로드·미디어 분석.
-- **에이전트 3종**: `jira`, `confluence`, `media`.
-- **변환 계층**: ADF·Storage XHTML·Wiki Markup ↔ Markdown(순수 로컬, Python 레퍼런스 17개 노드 타입).
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -37,8 +34,8 @@
 ### AC-generated-artifacts — 산출물 규약
 
 - `bridge/`·`public/` 이 커밋되고 손편집 흔적이 없다.
-- `version.ts` 와 매니페스트 version 이 생성기 산출과 일치한다.
+- `src/version.ts` 와 매니페스트 version 이 생성기 산출과 일치한다.
 
 ## Last Updated
 
-2026-08-28 — 도메인 어댑터의 공개 MCP 이름을 `comment_thread` 로 단순화했다.
+도메인 책임 배치, 자격증명 보호 또는 배포 산출물 정책이 바뀔 때 갱신한다.

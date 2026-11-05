@@ -1,16 +1,6 @@
 ## Purpose
 
-MCP 서버 계층. 결정론·계약 실행 레이어로, core/adapters를 얇게 오케스트레이션해 도구 5종(`paper_search`·`mesh_lookup`·`fetch_fulltext`·`setup`·`auth_check`)을 노출한다.
-
-## Structure
-
-| 디렉토리       | 역할                                                               |
-| -------------- | ------------------------------------------------------------------ |
-| `server/`      | `createServer`(도구 등록)·`startServer`(stdio 연결)                |
-| `serverEntry/` | esbuild 번들 진입점 — `bridge/mcp-server.cjs`                      |
-| `tools/`       | 도구 5종 (1도구 1디렉토리)                                         |
-| `shared/`      | `wrapHandler`·`toolResult`·`toolError` 등 공유 헬퍼                |
-| `pages/`       | 설정 폼 프론트엔드(마크업·스타일·스크립트, `public/settings.html`) |
+MCP 서버 계층. 결정론·계약 실행 레이어로, core/adapters를 얇게 오케스트레이션해 도구를 노출한다.
 
 ## Conventions
 
@@ -33,10 +23,3 @@ MCP 서버 계층. 결정론·계약 실행 레이어로, core/adapters를 얇�
 
 - 검색 도메인 하드 규칙(10k cap·POST·dedup)을 이 계층에 직접 구현(core 소관).
 - `api_key` 값을 응답·로그에 노출.
-
-## Dependencies
-
-- `@modelcontextprotocol/sdk` — `McpServer`·`StdioServerTransport`
-- `../core` — 검색 엔진·config·httpClient
-- `../adapters/eutils` — E-utility 어댑터
-- `../types` · `../constants` — 계약·상수

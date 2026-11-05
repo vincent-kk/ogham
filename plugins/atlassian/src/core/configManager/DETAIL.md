@@ -15,18 +15,9 @@
 
 ## API Contracts
 
-- `loadConfig(...)` — 병합된 유효 설정.
-- `loadConfigByScope(...)` · `loadConfigScope(...)` — 계층별 값과 재정의 상태(`ConfigByScope`).
-- `saveConfig(...)` — 명시된 한 계층에만 기록.
-- `mergeConfig(...)` — 두 계층 병합 규칙.
-- `configLayers(...)` — 두 계층의 파일 경로.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
-
-### AC-layer-precedence — 계층 우선순위
-
-- project 값이 user 값을 키 단위로 재정의한다.
-- 저장이 지정된 계층 파일만 바꾼다.
 
 ### AC-credentials-not-layered — 자격증명 비레이어링
 
@@ -38,4 +29,4 @@
 
 ## Last Updated
 
-2026-07-30 — 두 계층 설정과 자격증명 분리 계약을 문서화했다.
+설정 레이어 병합·저장과 자격증명 분리 정책이 바뀔 때 갱신한다.

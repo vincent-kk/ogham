@@ -4,12 +4,9 @@
 
 Jira/Confluence 자격증명의 JSON 파일 기반 저장·로드와 HTTP 인증 헤더 조립을 담당한다.
 
-## Structure
+## Conventions
 
-| 파일             | 역할                                                       |
-| ---------------- | ---------------------------------------------------------- |
-| `authManager.ts` | `loadCredentials`, `saveCredentials`, `getAuthHeader` 구현 |
-| `index.ts`       | 배럴 재내보내기                                            |
+완성된 인증 헤더만 소비 경계로 전달한다. 저장 형식·경로 변경은 기존 자격증명 사용에 영향을 준다.
 
 ## Boundaries
 
@@ -31,12 +28,3 @@ Jira/Confluence 자격증명의 JSON 파일 기반 저장·로드와 HTTP 인증
 - mcp/ 레이어에서 import하지 않는다 (단방향: mcp → core).
 - 원시 자격증명(토큰·패스워드 문자열)을 이 모듈 밖으로 노출하지 않는다.
 - `getAuthHeader` 외부에서 `loadCredentials` 결과를 직접 직렬화하지 않는다.
-
-## Dependencies
-
-| 대상               | 이유                           |
-| ------------------ | ------------------------------ |
-| `../../types/`     | `AuthType`, `Credentials` 타입 |
-| `../../constants/` | `CREDENTIALS_PATH` 기본 경로   |
-| `../../lib/fileIo` | `readJson`, `writeJson`        |
-| `../../utils/`     | `buildAuthHeader`              |
