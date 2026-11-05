@@ -134,6 +134,46 @@ describe('migration backups', () => {
     expect(fs.existsSync(backup)).toBe(false);
   });
 
+  it('retains copies and allows retry when the final rollback WAL write fails', () => {
+    vi.mocked(fs.writeFileSync).mockImplementation((path, data, options) => {
+      if (path === version) throw new Error('version unavailable');
+      actual.writeFileSync(path, data, options);
+    });
+    const result = executeMigration(vault, plan);
+    expect(result.success).toBe(false);
+    vi.resetAllMocks();
+    const walPath = join(vault, '.maencof-meta', 'migration-wal.json');
+    const backup = join(
+      vault,
+      '.maencof-meta',
+      'migration-backups',
+      result.walId,
+    );
+    vi.mocked(fs.writeFileSync).mockImplementation((path, data, options) => {
+      if (path === walPath && JSON.parse(String(data)).status === 'rolled_back')
+        throw new Error('final WAL unavailable');
+      actual.writeFileSync(path, data, options);
+    });
+
+    expect(rollbackMigration(vault)).toMatchObject({
+      success: false,
+      error: 'final WAL unavailable',
+    });
+    expect(fs.existsSync(backup)).toBe(true);
+    expect(JSON.parse(fs.readFileSync(walPath, 'utf-8')).status).toBe(
+      'in_progress',
+    );
+    expect(fs.readFileSync(source, 'utf-8')).toBe(original);
+    vi.resetAllMocks();
+    expect(rollbackMigration(vault)).toEqual({ success: true, rolledBack: 0 });
+    expect(fs.readFileSync(source, 'utf-8')).toBe(original);
+    expect(fs.readFileSync(version, 'utf-8')).toBe(originalVersion);
+    expect(JSON.parse(fs.readFileSync(walPath, 'utf-8')).status).toBe(
+      'rolled_back',
+    );
+    expect(fs.existsSync(backup)).toBe(false);
+  });
+
   it('preserves an overwritten move destination and retains copies after a failed rollback', () => {
     fs.mkdirSync(join(vault, 'nested', 'child'), { recursive: true });
     fs.writeFileSync(target, 'destination original');

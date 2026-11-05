@@ -40,6 +40,10 @@ describe('readCachedNodesArray generations', () => {
 
   it('rejects a shard from another generation', () => {
     writeFileSync(
+      join(cache, 'nodes.json'),
+      JSON.stringify([{ title: 'stale fallback' }]),
+    );
+    writeFileSync(
       join(cache, 'generations', 'selected', 'nodes.json'),
       JSON.stringify({ generation: 'other', data: [{ title: 'mixed' }] }),
     );

@@ -68,20 +68,17 @@ export function rollbackMigration(vaultPath: string): {
   try {
     if (restoreBytes && wal.backup)
       restoreMigrationBackup(backupDir, wal.backup);
+    wal.status = 'rolled_back';
+    wal.completedAt = new Date().toISOString();
+    writeWAL(walPath, wal);
     rmSync(backupDir, { recursive: true, force: true });
   } catch (err) {
-    wal.status = 'in_progress';
-    writeWAL(walPath, wal);
     return {
       success: false,
       rolledBack,
       error: err instanceof Error ? err.message : String(err),
     };
   }
-
-  wal.status = 'rolled_back';
-  wal.completedAt = new Date().toISOString();
-  writeWAL(walPath, wal);
 
   return { success: true, rolledBack };
 }

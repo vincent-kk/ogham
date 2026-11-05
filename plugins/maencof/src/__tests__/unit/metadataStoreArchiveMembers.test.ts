@@ -1,6 +1,6 @@
 /**
  * @file metadataStoreArchiveMembers.test.ts
- * @description archive-members.json 샤드 왕복 + 샤드 부재·손상 시 cache miss 검증.
+ * @description archive-members.json 샤드 왕복 + 선택적 샤드 부재·손상 시 본 그래프 가용성 검증.
  */
 import { mkdirSync, rmSync } from 'node:fs';
 import { readFile, unlink, writeFile } from 'node:fs/promises';
@@ -83,7 +83,7 @@ describe('MetadataStore archive-members 샤드', () => {
     );
   });
 
-  it('archive-members.json이 없는 세대는 cache miss다', async () => {
+  it('archive-members.json이 없어도 본 그래프는 읽을 수 있다', async () => {
     await store.saveGraph(makeMinimalGraph());
     const meta = JSON.parse(
       await readFile(join(vault, '.maencof', 'graph-meta.json'), 'utf-8'),
@@ -98,10 +98,11 @@ describe('MetadataStore archive-members 샤드', () => {
       ),
     );
     const loaded = await store.loadGraph();
-    expect(loaded).toBeNull();
+    expect(loaded?.nodes.size).toBe(1);
+    expect(loaded?.archiveClusterMembers).toBeUndefined();
   });
 
-  it('archive-members.json이 손상된 세대는 cache miss다', async () => {
+  it('archive-members.json이 손상되어도 본 그래프는 읽을 수 있다', async () => {
     await store.saveGraph(makeMinimalGraph());
     const meta = JSON.parse(
       await readFile(join(vault, '.maencof', 'graph-meta.json'), 'utf-8'),
@@ -118,6 +119,7 @@ describe('MetadataStore archive-members 샤드', () => {
       'utf-8',
     );
     const loaded = await store.loadGraph();
-    expect(loaded).toBeNull();
+    expect(loaded?.nodes.size).toBe(1);
+    expect(loaded?.archiveClusterMembers).toBeUndefined();
   });
 });

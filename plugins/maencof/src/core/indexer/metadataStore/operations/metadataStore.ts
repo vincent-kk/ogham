@@ -169,10 +169,9 @@ export class MetadataStore {
       );
       if (!meta) return null;
       const dir = join(this.cacheDir, CACHE_FILES.GENERATIONS, meta.generation);
-      const [nodesRaw, edgesRaw, membersRaw] = await Promise.all([
+      const [nodesRaw, edgesRaw] = await Promise.all([
         readFile(join(dir, CACHE_FILES.NODES), 'utf-8'),
         readFile(join(dir, CACHE_FILES.EDGES), 'utf-8'),
-        readFile(join(dir, CACHE_FILES.ARCHIVE_MEMBERS), 'utf-8'),
       ]);
       const nodes = parseGenerationShard<SerializedNodes[number]>(
         nodesRaw,
@@ -182,22 +181,55 @@ export class MetadataStore {
         edgesRaw,
         meta.generation,
       );
-      const members = parseGenerationShard<ArchiveClusterMember>(
-        membersRaw,
-        meta.generation,
-      );
       const graph = hydrateRuntimeMaps(deserializeShards(nodes, edges, meta));
+      const members = await this.loadArchiveMembers(dir, meta.generation);
+      if (members) graph.archiveClusterMembers = members;
+      return graph;
+    } catch (error) {
+      this.reportLoadError(error);
+      return null;
+    }
+  }
+
+  /**
+   * 선택적 서고 자료를 복원하면서 명시적 세대 불일치를 차단한다.
+   * @param dir 마커가 지정한 세대의 샤드 디렉터리. 읽기 중 파일을 변경하지 않는다.
+   * @param generation 해당 마커의 세대 식별자.
+   * @returns 복원한 서고 멤버 맵. 부재·손상은 undefined이며 ENOENT 외 오류만 진단한다.
+   * @throws 읽을 수 있는 샤드에 명시된 세대가 다르면 전체 그래프 읽기를 중단한다.
+   */
+  private async loadArchiveMembers(
+    dir: string,
+    generation: string,
+  ): Promise<Map<string, ArchiveClusterMember[]> | undefined> {
+    let shard: { generation?: unknown; data?: unknown } | null;
+    try {
+      shard = JSON.parse(
+        await readFile(join(dir, CACHE_FILES.ARCHIVE_MEMBERS), 'utf-8'),
+      );
+    } catch (error) {
+      this.reportLoadError(error);
+      return undefined;
+    }
+    if (
+      typeof shard?.generation === 'string' &&
+      shard.generation !== generation
+    )
+      throw new Error('Graph shard generation mismatch');
+    try {
+      if (shard?.generation !== generation || !Array.isArray(shard.data))
+        throw new Error('Invalid optional archive shard');
+      const members = shard.data as SerializedArchiveMembers;
       const map = new Map<string, ArchiveClusterMember[]>();
       for (const member of members) {
         const list = map.get(member.clusterKey);
         if (list) list.push(member);
         else map.set(member.clusterKey, [member]);
       }
-      graph.archiveClusterMembers = map;
-      return graph;
+      return map;
     } catch (error) {
       this.reportLoadError(error);
-      return null;
+      return undefined;
     }
   }
 

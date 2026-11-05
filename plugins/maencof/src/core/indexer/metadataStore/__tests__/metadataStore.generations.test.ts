@@ -17,6 +17,8 @@ import type { KnowledgeGraph } from '../../../../types/graph.js';
 import { atomicWriteJson } from '../operations/atomicWriteJson.js';
 import { MetadataStore } from '../operations/metadataStore.js';
 
+import { buildGenerationGraph } from './helpers/buildGenerationGraph.js';
+
 vi.mock('../operations/atomicWriteJson.js', async (importOriginal) => {
   const actual =
     await importOriginal<typeof import('../operations/atomicWriteJson.js')>();
@@ -106,10 +108,24 @@ describe('MetadataStore generations', () => {
 
   it('never reads an unpublished generation left by a crash', async () => {
     await store.saveGraph(graph);
-    await mkdir(join(cache, 'generations', 'unpublished'));
+    const unpublished = buildGenerationGraph('unpublished');
+    const dir = join(cache, 'generations', 'unpublished');
+    await mkdir(dir, { recursive: true });
+    for (const [file, data] of [
+      [CACHE_FILES.NODES, [...unpublished.nodes.values()]],
+      [CACHE_FILES.EDGES, unpublished.edges],
+      [CACHE_FILES.ARCHIVE_MEMBERS, []],
+    ] as const)
+      await writeFile(
+        join(dir, file),
+        JSON.stringify({ generation: 'unpublished', data }),
+      );
     await writeFile(
-      join(cache, 'generations', 'unpublished', CACHE_FILES.NODES),
-      '{broken',
+      join(cache, CACHE_FILES.INDEX),
+      JSON.stringify({
+        ...unpublished,
+        nodes: [...unpublished.nodes.values()],
+      }),
     );
     await expect(store.loadGraph()).resolves.toMatchObject({
       builtAt: 'first',
@@ -119,7 +135,9 @@ describe('MetadataStore generations', () => {
   });
 
   it('keeps the committed graph readable if publishing the next marker fails', async () => {
-    await store.saveGraph(graph);
+    const first = buildGenerationGraph('committed');
+    const second = buildGenerationGraph('uncommitted');
+    await store.saveGraph(first);
     const markerPath = join(cache, CACHE_FILES.GRAPH_META);
     const before = await readFile(markerPath, 'utf-8');
     vi.mocked(atomicWriteJson).mockImplementation(
@@ -128,13 +146,12 @@ describe('MetadataStore generations', () => {
         return originalAtomic.atomicWriteJson(path, data, options);
       },
     );
-    await expect(
-      store.saveGraph({ ...graph, builtAt: 'uncommitted' }),
-    ).rejects.toThrow('marker unavailable');
+    await expect(store.saveGraph(second)).rejects.toThrow('marker unavailable');
     expect(await readFile(markerPath, 'utf-8')).toBe(before);
-    await expect(store.loadGraph()).resolves.toMatchObject({
-      builtAt: 'first',
-    });
+    const loaded = await store.loadGraph();
+    expect(loaded?.nodes).toEqual(first.nodes);
+    expect(loaded?.edges).toEqual(first.edges);
+    expect(loaded?.builtAt).toBe(first.builtAt);
   });
 
   it.each(['legacy', 'split-v2'])(

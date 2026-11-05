@@ -77,14 +77,33 @@ describe('MetadataStore load error reporting', () => {
     expect(onLoadError).not.toHaveBeenCalled();
   });
 
-  it('reports a corrupt archive shard and rejects the generation', async () => {
+  it('reports a corrupt archive shard and keeps the main graph readable', async () => {
     await writeFile(join(shardDir, CACHE_FILES.ARCHIVE_MEMBERS), '{broken');
 
-    await expect(store.loadGraph()).resolves.toBeNull();
+    const graph = await store.loadGraph();
+    expect(graph).toMatchObject({ builtAt: 'test' });
+    expect(graph?.archiveClusterMembers).toBeUndefined();
     expect(onLoadError).toHaveBeenCalledExactlyOnceWith(
       expect.any(SyntaxError),
     );
   });
+
+  it.each(['null', '{}', '{"generation":"unreadable","data":null}'])(
+    'ignores a damaged optional archive shape: %s',
+    async (raw) => {
+      if (raw.includes('unreadable')) {
+        const meta = JSON.parse(
+          await readFile(join(cacheDir, CACHE_FILES.GRAPH_META), 'utf-8'),
+        );
+        raw = JSON.stringify({ generation: meta.generation, data: null });
+      }
+      await writeFile(join(shardDir, CACHE_FILES.ARCHIVE_MEMBERS), raw);
+      const graph = await store.loadGraph();
+      expect(graph).toMatchObject({ builtAt: 'test' });
+      expect(graph?.archiveClusterMembers).toBeUndefined();
+      expect(onLoadError).toHaveBeenCalledOnce();
+    },
+  );
 
   it.each([
     [CACHE_FILES.WEIGHTS, 'loadWeights'],
