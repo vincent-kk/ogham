@@ -4,7 +4,7 @@
 
 - freshness read는 현재 그래프를 부분 갱신하되 진행 중인 전체 rebuild를 await하지 않는다. plain read를 인덱스 상태에 묶지 않는다.
 - mutate 성공은 영향 경로의 stale 기록과 사용량 통계를 수행하고 누적 임계에서 background rebuild를 트리거한다. move는 소스 삭제와 대상 변경을 모두 기록해야 한다.
-- 부팅 시 shutdown 등록은 transport connect보다 먼저 해야 한다. connect 뒤의 sweep·외부 변경 감지·필요한 rebuild 체인은 detach하여 서버 기동을 막지 않는다.
+- 부팅 시 transport connect 뒤에 shutdown 등록을 먼저 하고, 이어지는 sweep·외부 변경 감지·필요한 rebuild 체인은 detach하여 서버 기동을 막지 않는다. 등록이 앞서야 정리 체인이 도는 동안 종료되어도 자기 세션의 best-effort 마감이 걸려 있다.
 - 두 rebuild 경로(explicit `kg_build` / background) 모두 성공 시 `refreshTurnContextSafe(vaultPath)` 로 훅 주입용 turn-context 스냅샷을 재빌드한다 — 매 턴 `<kg-core>` 요약이 자신이 요약하는 디스크 인덱스를 따라가게 하는 동일 계약의 확장 (best-effort, 실패는 error-log).
 - turn-context 갱신 실패는 error-log로 격리한다. 이 부수 작업이 빌드 성공을 실패로 바꾸지 않아야 한다.
 

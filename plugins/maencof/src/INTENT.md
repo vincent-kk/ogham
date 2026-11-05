@@ -6,7 +6,7 @@ maencof 플러그인 소스 루트. 5-Layer Knowledge Model v3 기반 개인 지
 
 ## Structure
 
-- `core/` 는 순수 비즈니스 로직 소유가 원칙이지만 vault I/O 경계도 여기서 끝난다 — I/O 를 한 층에 몰아두기 위한 결정이며, 예외 모듈 목록은 아래 `Always do` 가 정본이다.
+- core는 순수 계산과 도메인별 저장소를 소유하고, MCP 문서 CRUD·빌드는 파일 I/O를 조립한다. 저장소 정책을 도구에 복제하거나 순수 계산에 디스크 의존성을 넣지 않기 위한 경계다.
 
 ## Conventions
 
@@ -19,7 +19,7 @@ maencof 플러그인 소스 루트. 5-Layer Knowledge Model v3 기반 개인 지
 ### Always do
 
 - types/ 중앙 타입을 import하여 사용
-- core/ 모듈은 순수 함수로 유지 (I/O 예외: vaultScanner, insightStats, transitionHistory, errorLog, autonomy, cacheManager, turnContext)
+- core/ 계산은 순수 함수로 유지하고, 디스크 I/O는 그 데이터의 저장 책임을 소유한 하위 모듈 경계에 가둔다 — 서버·훅의 수명주기와 저장 구현을 결합하지 않는다
 - index.ts barrel export를 통해 외부 공개
 - hooks/ 추가 시 configRegistry.ts에 등록하고 bridge/ 스크립트 빌드 확인
 

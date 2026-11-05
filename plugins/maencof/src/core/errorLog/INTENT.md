@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Hook 운영 에러를 `.maencof-meta/error-log.json`에 영속화. checkup 에이전트가 반복 패턴 진단에 활용.
+Hook 운영 에러를 볼트의 운영 에러 로그 파일에 영속화. checkup 에이전트가 반복 패턴 진단에 활용.
 
 ## Conventions
 

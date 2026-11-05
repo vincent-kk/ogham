@@ -4,7 +4,7 @@
 
 - 훅 특화 로직을 두지 않는다. 여기 있는 것은 네 훅이 전부 같은 방식으로 쓰는 것뿐이다.
 - 지침 경로는 runtime host → 목적별 project instruction target → stored section 검사 순으로 해석한다. `@ogham/cross-platform`과 `@ogham/agent-artifacts` package root에서 필요한 symbol만 named import하며, `sideEffects: false` tree-shaking 뒤 emitted-byte cap과 `FORBIDDEN_PATTERNS`가 출력을 검증한다.
-- vault 판정(`isMaencofVault`)이 모든 훅의 첫 게이트다. 볼트가 아니면 훅은 아무 일도 하지 않는다.
+- vault 상태를 다루는 관심사는 `isMaencofVault` 판정을 먼저 거쳐 비볼트에 상태를 만들지 않는다. SessionStart의 호스트 환경 진단과 setup 안내는 이 게이트 밖이다 — 초기화되지 않은 곳에서도 설치 문제와 시작 방법을 알려야 한다.
 - stdin·stdout 처리는 이 fractal 이 소유한다. envelope 형태를 훅마다 다시 만들면 Claude Code 가 조용히 버리는 필드가 섞인다.
 
 ## API Contracts
@@ -15,7 +15,7 @@ stdin·stdout envelope는 이 공통 경계가 소유한다. 이벤트별로 복
 
 ### AC-vault-gate-first — 볼트 게이트 우선
 
-- 볼트가 아닌 cwd 에서 훅이 부수효과 없이 통과한다.
+- 볼트가 아닌 cwd 에서 vault 상태를 생성·수정하지 않는다. SessionStart의 setup 안내와 호스트 진단·진단 로그는 허용한다.
 
 ### AC-envelope-no-unsupported-fields — 미지원 필드 부재
 

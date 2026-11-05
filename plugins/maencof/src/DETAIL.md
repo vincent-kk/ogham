@@ -4,7 +4,7 @@
 
 - `index.ts` 가 `@ogham/maencof` 의 유일한 라이브러리 표면이다. 모든 export 를 이름으로 열거하며, 여기 없는 심볼은 계약이 아니다.
 - `createServer` · `startServer` 는 이 표면에 없다. 실행 진입점은 esbuild 가 `mcp/serverEntry/serverEntry.ts` 에서 만드는 `bridge/mcp-server.cjs` 이고, 배럴이 `mcp/server` 를 끌어오면 `server.ts → version.ts` 참조와 맞물려 `src → mcp → mcp/server → src` 순환이 된다.
-- 의존 방향은 한쪽이다. `core/` 는 `mcp/` · `hooks/` 에 의존하지 않고, `types/` 는 zod 외 외부 의존성을 갖지 않는다.
+- 의존 방향은 한쪽이다. `core/` 는 `mcp/` · `hooks/` 에 의존하지 않고, `types/` 의 외부 의존은 스키마 검증용 zod와 호스트 간 경로 해석을 통일하는 @ogham/cross-platform으로 한정한다. 호스트별 경로 정규화를 다시 구현하지 않는다.
 - 서브레이어 허용값은 `types/frontmatter.ts` 의 `SubLayerSchema` 하나가 소유한다. frontmatter 검증도 MCP 도구 스키마도 이 스키마에서 파생하며, 값 목록을 리터럴로 다시 적지 않는다 — `SubLayer` 타입만 좁히고 어딘가의 리터럴을 놓치면 그 자리는 폐기된 값을 계속 광고한다.
 - `version.ts` 는 빌드 시 생성한다. 직접 수정하지 않는다.
 - `bridge/` 산출물은 esbuild 가 만든다. 소스는 `src/hooks/<event>/<event>.entry.ts` 와 `src/mcp/serverEntry/serverEntry.ts` 이며 산출물을 손대지 않는다.
@@ -35,7 +35,7 @@
 
 ### AC-types-dependency-free — types 무의존
 
-- `types/` 가 zod 외 외부 의존성을 갖지 않는다.
+- `types/` 의 외부 의존은 zod와 @ogham/cross-platform으로 한정하고, MCP·훅 수명주기를 끌어오지 않는다.
 
 ### AC-sublayer-single-source — 서브레이어 값 단일 소유
 

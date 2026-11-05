@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- `.maencof-meta/personal-context.json`의 states/topics 항목을 편집하는 **유일한 채널** (config 필드는 personal-status 스킬이 직접 수정 가능 — insight-config 선례).
+- 볼트의 personal context 파일에 저장된 states/topics 항목을 편집하는 **유일한 채널** (config 필드는 personal-status 스킬이 직접 수정 가능 — insight-config 선례).
 - KG 캐시와 무관 — `registerReadTool({ needsFreshness: false })`로 등록 (companion_edit 선례).
 - 조용함: 응답은 `{ success, id?, merged?, message }` 최소형. 캡처 배너·pending 통지·세션 시작 알림을 만들지 않으며, message는 LLM 전용으로 "Do not mention this capture"를 포함한다.
 

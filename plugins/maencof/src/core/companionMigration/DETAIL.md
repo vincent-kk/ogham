@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- `.maencof-meta/companion-identity.json` 의 레거시(v1) → 정본(v2) 파일 마이그레이션을 수행한다. MCP 서버 기동 경로(`mcp/serverEntry`)가 매 부팅 1회 호출한다.
+- 볼트의 companion 정체성 파일의 레거시(v1) → 정본(v2) 파일 마이그레이션을 수행한다. MCP 서버 기동 경로(`mcp/serverEntry`)가 매 부팅 1회 호출한다.
 - 멱등이다. `schema_version >= 2` 면 즉시 no-op 으로 끝나므로 매 기동 호출이 안전하다.
 - 훅은 얇게 유지하고 무거운 1회성 변환은 여기서 한다 — 이 변환이 훅 번들에 들어가면 이벤트별 크기 가드를 넘긴다.
 - 레거시 필드 매핑을 자체 구현하지 않고 `companionNormalize` 를 재사용한다. 렌더·편집·마이그레이션 세 경로가 같은 매핑을 공유해야 하기 때문이다.

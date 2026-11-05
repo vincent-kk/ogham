@@ -13,7 +13,7 @@ rebuild 성공 뒤의 후속 동기화는 middlewares가 소유한다.
 ### Always do
 
 - 도구 등록은 registrations/ organ에 위임, server.ts는 오케스트레이션만
-- 모든 도구 핸들러를 tools/ barrel에서 import
+- 핸들러는 각 도구 fractal의 진입점으로 가져온다 — 상위 tools 배럴을 경유하면 실제 소유 경계가 가려진다
 - shared의 toolResult/toolError 사용
 - mutate 도구는 `registerMutateTool`, freshness 필요 read는 `registerReadTool({ needsFreshness: true })` wrapper로만 등록
 - read-path는 in-flight rebuild를 await하지 않는다 (non-blocking partial reindex)

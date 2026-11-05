@@ -8,7 +8,7 @@
 
 ## API Contracts
 
-자기참조 제외 prefix는 `02_Derived/changelog/`, `02_Derived/dailynotes/`, `.maencof/`, `.maencof-meta/`다. 모두 maencof 자체 관리 write이므로 활동 이벤트로 다시 기록하지 않는다.
+자기참조 제외 prefix는 `ACTIVITY_RECORDER_EXCLUSION_PREFIXES`가 정의하는 볼트의 변경 기록·일일 노트·그래프 캐시·메타데이터 영역이다. 모두 maencof 자체 관리 write이므로 활동 이벤트로 다시 기록하지 않는다.
 
 kg_build는 내부 유지보수라 기록하면 실제 지식 활동 대비 잡음이 커진다. context_cache_manage의 pin·unpin·refresh는 휘발성 캐시 작업이므로 기록하지 않는다. kg_build의 카테고리 매핑은 향후 opt-in 대비이며 기록 허가는 아니다.
 

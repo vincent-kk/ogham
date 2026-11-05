@@ -9,7 +9,7 @@
 
 ## API Contracts
 
-독립 브리지 없이 UserPromptSubmit 관심사로 실행한다. turn 빌더와 캐시는 MCP와 같은 core 구현을 사용해 두 경로의 컨텍스트가 갈라지지 않게 한다. 모든 I/O 실패는 로그로 격리하며 턴을 막지 않는 것이 정책이다.
+독립 브리지 없이 UserPromptSubmit 관심사로 실행한다. turn 빌더와 캐시는 MCP와 같은 core 구현을 사용해 두 경로의 컨텍스트가 갈라지지 않게 한다. 관심사 밖으로 전파되는 I/O 실패는 호출자의 `safeConcern`이 로그로 격리한다. 이 호출 경계를 유지해 컨텍스트 주입 실패가 다른 관심사나 턴 진행을 막지 않게 한다.
 
 ## Acceptance Criteria
 

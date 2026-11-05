@@ -2,7 +2,7 @@
 
 ## Purpose
 
-대화 규율(meta-skill 주입) 설정 로더. `.maencof-meta/dialogue-config.json` 의 injection.enabled 를 안전 파싱으로 읽고, env `MAENCOF_DISABLE_DIALOGUE` 우선 OR 결합으로 off-switch 판정.
+대화 규율(meta-skill 주입) 설정 로더. 볼트의 대화 규율 설정 파일의 injection.enabled 를 안전 파싱으로 읽고, env `MAENCOF_DISABLE_DIALOGUE` 우선 OR 결합으로 off-switch 판정.
 
 ## Conventions
 

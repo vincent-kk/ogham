@@ -25,4 +25,4 @@
 
 - SIBLING 엣지 물질화 — `node.path` 폴더 멤버십의 O(k²) 전개이므로 런타임 맵 구성 시점에 `operations/deriveSiblingEdges.ts` 가 파생한다
 - 입력 노드 배열 변형 (호출자가 소유한다)
-- 상한 없는 쌍 전개 (cross-layer 는 노드당 캡을 적용한다)
+- 상한 없는 쌍 전개를 새로 도입 — 그룹 크기의 제곱으로 엣지가 늘어 인덱스가 폭증한다. cross-layer 는 노드당 캡을 적용하고, DOMAIN·RELATIONSHIP 의 그룹 내 전체 쌍 전개는 상한이 없는 알려진 한계다

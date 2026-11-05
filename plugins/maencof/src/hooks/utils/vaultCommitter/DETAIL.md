@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- MCP BootSweep(직전 세션 마무리) 또는 UserPromptSubmit 트리거에서 opt-in 설정 (`.maencof-meta/vault-commit.json::enabled=true`) 이 있을 때만 vault 변경사항을 자동 커밋한다.
-- 커밋 범위는 `scope` 필드로 제어한다. 필드 부재 시 기본 scope 는 5-Layer 문서 트리 + `.maencof-meta/` (`DEFAULT_COMMIT_SCOPE`). `.maencof/` 그래프 캐시는 재생성 가능하므로 기본 scope 에 포함하지 않는다.
+- MCP BootSweep(직전 세션 마무리) 또는 UserPromptSubmit 트리거에서 볼트 자동 커밋의 opt-in 설정 (`enabled=true`) 이 있을 때만 vault 변경사항을 자동 커밋한다.
+- 커밋 범위는 `scope` 필드로 제어한다. 필드 부재 시 기본 scope 는 5-Layer 문서 트리 + 볼트 메타데이터 디렉터리 (`DEFAULT_COMMIT_SCOPE`). 볼트의 그래프 캐시는 재생성 가능하므로 기본 scope 에 포함하지 않는다.
 - 민감 파일 2차 방어: 모든 staging 은 `SENSITIVE_EXCLUDE_PATH_SPECS` (credential/secret/token/apikey 류 `.json`, `.pem`, `.key`, `.env*`) 를 exclude pathspec 으로 동반한다. 1차 방어는 vault 의 `.gitignore`. 지식 문서(`.md`) 는 이름과 무관하게 exclude 대상이 아니다.
 - 하루 1커밋 정책: `fold_daily`(기본 true) 가 켜져 있으면 당일의 연속된 자동 커밋을 `git reset --soft` 로 하나로 접은 뒤 재커밋한다 (`helpers/foldDaily`). 수동 커밋은 폴딩 경계로 작동하며 절대 접지 않는다.
 - UserPromptSubmit 은 사용자의 프롬프트가 설정된 `skip_patterns` 중 하나와 매칭될 때만 트리거된다. 미설정 시 기본 패턴은 `/clear`.
@@ -13,7 +13,7 @@
 
 ## API Contracts
 
-### Config schema (`.maencof-meta/vault-commit.json`)
+### Config schema (`VAULT_COMMIT_CONFIG_FILE`)
 
 - `enabled` (필수, boolean): true 가 아니면 훅은 즉시 반환.
 - `scope` (선택, string[]): vault 루트 상대 디렉터리/파일 목록 (`/` 구분자, 디렉터리는 trailing slash 권장). **루트 전체 모드 `["."]`** 를 지원한다 — vault 루트 전체가 커밋 대상이 되며, 제외는 전적으로 `.gitignore` 계층(로컬·하위·전역)이 담당한다. vault 고유 자산 디렉터리(dashboard/, web/ 등 이름이 vault 마다 다른 것)까지 설정 갱신 없이 포함하려면 이 모드를 쓴다. 절대 경로·`..`·`:` 포함·`.git` 은 항목 단위로 거부된다. 유효 항목이 하나도 없으면 `DEFAULT_COMMIT_SCOPE` 로 fallback.
@@ -25,7 +25,7 @@
 ### Commit behavior
 
 - 커밋 메시지: `message_template` 렌더 결과. 기본 `chore(maencof): session wrap [<top-level dirs>] (<YYYY-MM-DD HH:MM>)`. 디렉터리 목록은 커밋에 실제 포함되는 staged 파일에서 도출 (폴딩 시 접힌 변경 포함).
-- `.git/index.lock` 존재 시: mtime 이 `INDEX_LOCK_STALE_MS`(30분) 미만이면 live 로 존중해 skip, 초과면 stale(SIGKILL 절단 잔존)로 판정해 로그 기록 후 회수(unlink)하고 진행 — 절단 사고가 커밋 게이트를 영구 차단하지 못하게 한다. 회수 경합(동시 unlink)은 ENOENT 무시로 멱등, 이후 git 자체 lock 이 쓰기를 재직렬화. 실행 중 lock 충돌 (`index.lock` stderr) 은 `runGit` 이 backoff 재시도. 잔여 리스크: 30분 초과 장기 수동 git 작업(중단된 rebase 등)은 오판 가능 — 로그로 추적.
+- Git 인덱스 잠금 파일 존재 시: mtime 이 `INDEX_LOCK_STALE_MS`(30분) 미만이면 live 로 존중해 skip, 초과면 stale(SIGKILL 절단 잔존)로 판정해 로그 기록 후 회수(unlink)하고 진행 — 절단 사고가 커밋 게이트를 영구 차단하지 못하게 한다. 회수 경합(동시 unlink)은 ENOENT 무시로 멱등, 이후 git 자체 lock 이 쓰기를 재직렬화. 실행 중 lock 충돌 (`index.lock` stderr) 은 `runGit` 이 backoff 재시도. 잔여 리스크: 30분 초과 장기 수동 git 작업(중단된 rebase 등)은 오판 가능 — 로그로 추적.
 - 폴딩: HEAD 부터 당일+자동 커밋을 걷어 BASE 를 찾고, `git reset --soft BASE` → re-stage → commit. 자동 커밋 판정은 `AUTO_COMMIT_SUBJECT_MARKERS` includes 매칭(레거시 `*_session_wrap` 및 은퇴한 vault 로컬 스크립트의 subject 포함) + `message_template` 정적 접두부 startsWith 매칭. 재커밋 실패 시 `git reset --soft ORIG_HEAD` 로 복구. root 도달·탐색 상한(`FOLD_SCAN_MAX_COMMITS`) 초과 시 폴딩을 포기하고 일반 커밋한다.
 
 ## Acceptance Criteria

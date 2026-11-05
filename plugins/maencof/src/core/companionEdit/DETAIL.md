@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- `.maencof-meta/companion-identity.json` 을 바꾸는 유일한 허가 채널이다. 파일 직접 편집 금지 규칙의 예외는 이 경로 하나뿐이고, `companion_edit` MCP 도구가 여기로 위임한다.
+- 볼트의 companion 정체성 파일을 바꾸는 유일한 허가 채널이다. 파일 직접 편집 금지 규칙의 예외는 이 경로 하나뿐이고, `companion_edit` MCP 도구가 여기로 위임한다.
 - preview 경로는 파일을 절대 쓰지 않는다. `commit` 이 참이 아닌 모든 호출에서 디스크는 불변이고, 반환되는 `identity_preview` 는 메모리상의 후보다.
 - 로드는 항상 `companionNormalize` 를 거친다. 레거시 v1 파일도 같은 편집 연산을 받을 수 있어야 하고, 매핑을 여기서 다시 구현하면 렌더·마이그레이션과 어긋난다.
 - 저장 전 검증은 세 겹이다 — 정본 `CompanionIdentitySchema` Zod 파싱, 매 턴 예산 단조-개선 게이트, brief 길이 역전 검사. 앞의 두 개 중 하나라도 error 를 만들면 커밋을 거부한다.

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-인사이트 캡처 설정·통계·대기 알림 관리. `.maencof-meta/`에 insight-config.json, auto-insight-stats.json, pending-notification.json을 영속화하고, 민감도 자동 조정 및 메타 프롬프트 생성을 담당.
+인사이트 캡처 설정·통계·대기 알림 관리. 볼트의 메타데이터 디렉터리에 insight-config.json, auto-insight-stats.json, pending-notification.json을 영속화하고, 민감도 자동 조정 및 메타 프롬프트 생성을 담당.
 
 ## Conventions
 

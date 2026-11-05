@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Layer 간 문서 전이(TransitionDirective) 이력을 영속화하고 조회하는 모듈. `.maencof-meta/transition-history.json`에 최대 500건 저장.
+Layer 간 문서 전이(TransitionDirective) 이력을 영속화하고 조회하는 모듈. 볼트의 전이 이력 파일에 최대 500건 저장.
 
 ## Conventions
 

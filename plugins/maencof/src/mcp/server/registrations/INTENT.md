@@ -12,7 +12,7 @@
 
 ### Always do
 
-- 핸들러는 `mcp/tools/` barrel 에서 가져온다 — 등록부에 로직을 인라인하지 않는다
+- 핸들러는 각 도구 fractal의 진입점에서 가져온다 — 상위 배럴로 소유 경계를 가리거나 등록부에 로직을 인라인하지 않는다
 - 부수효과가 필요한 도구는 `middlewares` 의 `registerMutateTool` / `registerReadTool` 을 경유한다
 - 도구 등록명은 `constants` 의 도구 이름 상수에서 가져온다
 

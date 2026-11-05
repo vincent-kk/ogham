@@ -5,7 +5,7 @@
 - 캐시 좌표는 해시로 파생한다: `cwdHash` 가 프로젝트를, `sessionIdHash` 가 세션을 가른다. 호출자가 경로를 직접 조립하지 않는다.
 - 캐시 부재는 정상이다. read 는 빈 값으로 degrade 하고 throw 하지 않는다 — 캐시는 재생성 가능한 파생물이다.
 - prompt-scope 와 turn-scope 는 수명이 다르다. 세션 마커·prompt 정리와 turn-context 정리를 분리해 각 수명을 보존한다.
-- 만료 정책은 여기 있지 않다. `pruneOldSessions` 는 호출자가 준 기준으로만 지운다.
+- 세션 마커와 짝인 prompt 캐시의 만료 정책은 이 모듈이 소유한다. 호출자는 정리 시점만 정하고 공통 TTL을 다시 구현하지 않는다 — 훅별로 세션 수명이 갈라지는 것을 막는다.
 
 ## API Contracts
 

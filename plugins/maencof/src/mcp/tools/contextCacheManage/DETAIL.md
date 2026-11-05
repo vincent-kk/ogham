@@ -10,7 +10,7 @@
 - 핀 총수는 `MAX_PINNED_NODES` 를 넘지 못한다. 초과하면 `pinnedAt` 최신순으로 잘라 가장 오래된 핀부터 밀어낸다.
 - 잘못된 입력은 throw 가 아니라 `success: false` + `error` 문자열로 돌려준다 — 미지의 `action` 도 유효 액션 목록과 함께 같은 형태로 거부한다.
 - KG 그래프와 무관하므로 `registerReadTool({ needsFreshness: false })` 로 등록된다. 캐시 파일을 쓰지만 그래프 캐시는 건드리지 않는다.
-- 응답은 turn context 본문을 되돌려주지 않는다. 그 문자열은 매 턴 UserPromptSubmit 주입으로 이미 모델 컨텍스트에 있어 도구 응답의 에코는 순수 중복이다. 재빌드가 일어난 액션은 `contextChars` 로 크기만 보고한다.
+- 응답은 turn context 본문을 되돌려주지 않는다. 그 문자열은 매 턴 UserPromptSubmit 주입으로 이미 모델 컨텍스트에 있어 도구 응답의 에코는 순수 중복이다. 신규 pin과 refresh는 본문 대신 `contextChars` 로 크기만 보고한다.
 
 ## API Contracts
 

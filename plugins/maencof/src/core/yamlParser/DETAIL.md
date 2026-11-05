@@ -17,7 +17,7 @@
 ### AC-frontmatter-parsing — frontmatter 파싱
 
 - 인라인 배열과 블록 배열이 같은 배열 값으로 파싱된다.
-- frontmatter 가 없거나 닫히지 않은 입력에서 빈 맵을 반환하고 throw 하지 않는다.
+- 입력은 구분자를 제거한 YAML 블록이다. Markdown 구분자의 존재·닫힘 검증은 documentParser가 소유하여 raw YAML을 받는 소비자까지 Markdown 형식에 결합하지 않는다. 빈 블록이나 키-값 줄이 없는 입력에서는 빈 맵을 반환하고 throw 하지 않는다 — frontmatter 부재를 빈 문자열로 넘기는 소비자가 예외 처리를 따로 두지 않게 한다.
 
 ### AC-yaml-serialization — 직렬화 안전성
 

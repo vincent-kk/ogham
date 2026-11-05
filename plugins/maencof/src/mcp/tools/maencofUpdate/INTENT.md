@@ -20,4 +20,4 @@ metadata 쓰기를 update로 통합해 L1 게이트와 쓰기 전 검증이 복�
 
 ### Never do
 
-- 파일 I/O 직접 수행 또는 제외 사유 없이 metadata 쓰기 표면 축소
+- core의 파싱·경로 검증을 우회하거나 제외 사유 없이 metadata 쓰기 표면 축소

@@ -5,8 +5,8 @@
 - 이 fractal 은 엣지 타입별 생성 규칙만 소유한다. 어떤 엣지를 물질화할지는 부모 `graphBuilder` 가 정하고, 여기 함수들은 `KnowledgeNode[]` 을 받아 `KnowledgeEdge[]` 를 돌려주는 순수 함수다.
 - 순수성을 지킨다. 파일·시각·모듈 상태를 읽지 않고 입력 노드 배열을 변형하지 않는다 — 배열은 호출자가 소유한다.
 - SIBLING 엣지를 만들지 않는다. 폴더 멤버십의 O(k²) 전개라 런타임 맵 구성 시점에 `operations/deriveSiblingEdges.ts` 가 파생하며, 여기서 물질화하면 그 설계가 무너진다. 이 fractal 이 폴더 멤버십에 대해 제공하는 것은 `buildDirectoryMap` 한 개다.
-- 상한 없는 쌍 전개를 하지 않는다. cross-layer 는 노드당 `MAX_CROSS_LAYER_EDGES_PER_NODE` 캡을 적용한다.
-- 임계값·상한은 `constants/thresholds.ts` 에서 가져온다. 시스템이 만든 엣지는 사용자가 쓴 LINK 와 타입으로 구분된다.
+- 상한 없는 쌍 전개를 새로 들이지 않는다 — 그룹 크기의 제곱으로 엣지가 늘어 인덱스가 폭증한다. cross-layer 는 노드당 `MAX_CROSS_LAYER_EDGES_PER_NODE` 캡을 적용한다. DOMAIN·RELATIONSHIP 은 같은 그룹의 모든 쌍을 전개하며 상한이 없다 — 알려진 한계이고, 상한 도입 여부는 그래프 의미를 바꾸므로 Ask first 다.
+- 생성 엣지의 초기 weight·상한은 공통 thresholds 상수에서 가져온다 — 같은 정책을 빌더별 리터럴로 복제하여 조정이 갈라지는 것을 막는다. 시스템이 만든 엣지는 사용자가 쓴 LINK 와 타입으로 구분된다.
 
 ## API Contracts
 

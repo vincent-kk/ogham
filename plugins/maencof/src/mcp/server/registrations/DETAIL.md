@@ -3,7 +3,7 @@
 ## Requirements
 
 - 도메인별 등록 함수만 소유한다. 도구 핸들러 구현은 `mcp/tools/` 가, 등록 순서 오케스트레이션은 부모 `server` 의 `server.ts` 가 갖는다.
-- 핸들러는 `mcp/tools/` 의 도구 배럴에서 가져온다. 등록부에 로직을 인라인하지 않는다 — 인라인하면 도구 계약이 두 곳에 흩어지고 핸들러 단위 검증이 불가능해진다.
+- 핸들러는 각 도구 fractal의 진입점에서 가져온다. 상위 tools 배럴로 실제 소유 경계를 가리지 않고 등록부에 로직을 인라인하지 않는다 — 인라인하면 도구 계약이 두 곳에 흩어지고 핸들러 단위 검증이 불가능해진다.
 - 모든 등록은 `middlewares` 의 wrapper 를 경유한다. mutate 는 `registerMutateTool`, read 는 `registerReadTool({ needsFreshness })` 다. 직접 `server.tool(...)` 을 부르면 vault 경로 해석·사용량 통계·stale 기록·에러 처리를 전부 잃는다.
 - 도구 이름은 `constants/mcpToolNames.ts` 의 `McpToolName` 에서 가져온다. 문자열 리터럴을 등록부에 적으면 이름이 상수·문서·권한 목록과 갈라진다.
 - `needsFreshness` 는 그래프 의존성으로 결정한다. SA·이웃 탐색처럼 그래프를 읽는 도구만 `true` 이고, 그래프와 무관한 도구는 `false` 다 — 무관한 도구에 freshness 를 걸면 매 호출이 인덱스 상태에 묶인다.
