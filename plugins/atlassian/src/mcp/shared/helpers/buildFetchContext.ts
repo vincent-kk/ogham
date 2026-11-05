@@ -18,13 +18,12 @@ export async function buildFetchContext(
 ): Promise<FetchContext | null> {
   const config = await loadConfig();
   const sites = config[service];
-  const siteConfig = sites?.length
-    ? resolveSiteConfig(service, sites, baseUrl, endpoint)
-    : undefined;
+  // Validate storage before site-selection errors can hide the setup instruction.
+  await getAuthHeader(service);
+  if (!sites?.length) return null;
 
-  const authHeader = await getAuthHeader(service, siteConfig?.username);
-
-  if (!siteConfig) return null;
+  const siteConfig = resolveSiteConfig(service, sites, baseUrl, endpoint);
+  const authHeader = await getAuthHeader(service, siteConfig.username);
 
   const http: HttpClientConfig = {
     base_url: siteConfig.base_url,
