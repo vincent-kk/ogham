@@ -139,7 +139,7 @@ const ROOT_OWNER_REPOSITORY: PinnedReviewRepositoryFiles = {
   base: {
     'INTENT.md': FIXTURE_INTENT,
     'DETAIL.md':
-      '# Fixture contract\n\n## Requirements\n\n- Keep the value.\n\n## API Contracts\n\n- The entry exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- The value is exported.\n\n## Last Updated\n\n2026-09-20\n',
+      '# Fixture contract\n\n## Requirements\n\n- Keep the value.\n\n## API Contracts\n\n- The entry exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- The value is exported.\n\n## Last Updated\n\nWhen the contract changes.\n',
     'index.ts': "export { value } from './src/value.js';\n",
     'src/value.ts': 'export const value = 1;\n',
   },

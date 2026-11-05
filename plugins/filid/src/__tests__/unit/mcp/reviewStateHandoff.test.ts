@@ -24,10 +24,10 @@ import {
   type ReviewHandoffSeed,
 } from '../../../mcp/tools/reviewState/scope/reviewHandoffSeedSchema.js';
 import { resolveReviewStatePaths } from '../../../mcp/tools/reviewState/state/resolveReviewStatePaths.js';
-
-import { runReviewStateFixtureGit } from './reviewState/helpers/runReviewStateFixtureGit.js';
 import { createFixtureProjectRoot } from '../../integration/helpers/createFixtureProjectRoot.js';
 import { seedFacts } from '../../integration/helpers/seedFacts.js';
+
+import { runReviewStateFixtureGit } from './reviewState/helpers/runReviewStateFixtureGit.js';
 
 vi.mock(
   '../../../mcp/tools/reviewState/scope/computeChangedScopeEvidence.js',
@@ -134,7 +134,7 @@ beforeEach(async () => {
   );
   writeProjectFile(
     'DETAIL.md',
-    '# Fixture contract\n\n## Requirements\n\n- Keep the value deterministic.\n\n## API Contracts\n\n- The entry point exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- The value is exported.\n\n## Last Updated\n\n2026-09-07\n',
+    '# Fixture contract\n\n## Requirements\n\n- Keep the value deterministic.\n\n## API Contracts\n\n- The entry point exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- The value is exported.\n\n## Last Updated\n\nWhen the contract changes.\n',
   );
   writeProjectFile('index.ts', "export { value } from './src/value.js';\n");
   writeProjectFile('src/value.ts', "export const value = 'base';\n");
@@ -176,14 +176,17 @@ describe('review_state handoff', () => {
     expect(mockedComputeChangedScopeEvidence).toHaveBeenCalledWith(
       expect.objectContaining({ ignore: ['src/value.ts'] }),
     );
-    const computed = await mockedComputeChangedScopeEvidence.mock.results.at(-1)?.value as
-      | Awaited<ReturnType<typeof computeChangedScopeEvidence>>
-      | undefined;
-    expect(computed?.candidates.map((candidate) => candidate.path)).not.toContain(
-      'src/value.ts',
-    );
+    const computed = (await mockedComputeChangedScopeEvidence.mock.results.at(
+      -1,
+    )?.value) as
+      Awaited<ReturnType<typeof computeChangedScopeEvidence>> | undefined;
+    expect(
+      computed?.candidates.map((candidate) => candidate.path),
+    ).not.toContain('src/value.ts');
     expect(result.data.scope).toEqual([]);
-    const parsed = parseHandoffBlock(readFileSync(result.data.handoffPath, 'utf8'));
+    const parsed = parseHandoffBlock(
+      readFileSync(result.data.handoffPath, 'utf8'),
+    );
     expect(parsed.handoff?.recorded.map((entry) => entry.path)).not.toContain(
       'src/value.ts',
     );

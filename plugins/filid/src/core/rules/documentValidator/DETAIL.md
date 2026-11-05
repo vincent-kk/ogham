@@ -2,6 +2,10 @@
 
 ## Requirements
 
+- fence의 닫힘은 여는 구분자 종류와 길이를 만족해야 하므로 중첩된 예시 구분자로 본문이 잘못 노출되지 않는다. INTENT와 DETAIL의 fence 밖 level-2 `History` 제목은 `history-section` error다. 결정과 이유를 계약 섹션의 현재 사실로 옮기고 섹션을 삭제하도록 안내한다.
+- DETAIL의 `Last Updated` 본문은 갱신 조건을 말해야 한다. 빈 본문이나 네 자리 연도의 하이픈·점·슬래시 날짜는 `last-updated-trigger` error다.
+- 위 두 위치 밖 날짜 메모와 “previously” 표현은 기계 검사 범위 밖이다. 코드 예시와 도메인 용어의 오탐을 피하려 cross-review `DOC-9`가 판단한다. 스캔은 두 기계 검사를 훅 Edit 경로와 무관하게 적용한다.
+
 - INTENT.md의 50줄 cap과 3-tier boundary heading을 검증한다.
 - INTENT.md에서 한 `## ` 섹션에 경로 토큰 3개 이상이면 `derivable-content` warning을 낸다. 경로 토큰은 `/`를 포함한 공백 없는 code span이다 — 생태계 확장자 목록은 참조하지 않는다(core 언어 중립). code fence 안, glob(`*` 포함), `@` scope 이름, `<placeholder>`, scheme 접두 지정자(`node:`·`https:` 류)는 토큰이 아니다.
 - DETAIL.md의 append-only 변경을 거부하고 필수 section과 안정 acceptance group ID를 검증한다.
@@ -12,7 +16,7 @@
 - target path, 각 consumer 항목과 `Direct import` 값은 code span으로 감쌀 수 있고, 파서는 감싼 backtick을 벗긴 값을 읽는다. markdown formatter가 `__tests__`를 강조 문법으로 바꿔 버리므로 code span이 이름을 원문 그대로 지키는 유일한 표기이며, backtick이 없는 표기도 계속 읽는다.
 - `Reason`은 산문이라 code span을 벗기지 않는다. 그 안의 backtick은 저자가 쓴 그대로 남는다.
 - `Reason`이 비면 면책이 아니라 미충족 계약이므로 error다.
-- `missing-boundaries`, `duplicate-id`, acceptance group 없음(`missing-field`)의 문장은 다음 행동을 직접 담는다. hook deny 문장도 같은 문장을 그대로 쓴다.
+- `missing-boundaries`, `duplicate-id`, `history-section`, `last-updated-trigger`의 문장은 다음 행동을 직접 담는다. hook deny 문장도 같은 문장을 그대로 쓴다.
 
 ## API Contracts
 
@@ -26,9 +30,9 @@
 
 ### AC-detail-groups — Stable acceptance oracle
 
-- 필수 DETAIL section과 한 개 이상의 고유 acceptance group이 있으면 validation을 통과한다.
+- 필수 DETAIL section이 있으면 acceptance group 없이도 validation을 통과할 수 있다. 테스트에서 유도되는 기준을 중복 작성하게 만들지 않기 위해서다.
 - section, group ID 또는 title 누락과 duplicate ID는 error다.
-- `missing-boundaries`, `duplicate-id`, acceptance group 없음(`missing-field`) 메시지는 각각 다음 행동을 담는다: 누락된 tier를 섹션으로 추가하라, 그룹 이름을 바꿔 ID를 유일하게 하라, `## Acceptance Criteria` 아래 `### <stable-id> — <title>`을 추가하라.
+- 선언한 그룹은 필드와 고유 ID 계약을 지키며, 누락 경계와 중복 ID 메시지는 각 섹션 추가와 그룹 이름 변경을 안내한다.
 
 ### AC-detail-restructure — Append-only prohibition
 
@@ -64,4 +68,4 @@
 
 ## Last Updated
 
-2026-08-16 — 경로 토큰을 언어 중립(구분자 필수)으로 재정의하고 scheme·placeholder 제외와 violation `section` 필드를 추가했다.
+기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.

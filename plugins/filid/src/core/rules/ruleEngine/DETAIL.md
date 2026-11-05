@@ -2,9 +2,11 @@
 
 ## Requirements
 
+- 문서 계약의 누락 오류는 INTENT.md에만 적용한다. DETAIL.md는 선택이며 존재하는 문서의 위반만 보고한다. organ 승격 안내는 module 진입점을 요구하지만 DETAIL.md가 승격 의도 증거인 기존 판정은 유지한다.
+
 - canonical 15개 built-in rule만 등록한다.
-- Rule default severity comes from the built-in roster. Config v3 writes only overrides; an absent rule ID retains its built-in enabled state and severity. Explicit project severity wins through `applyOverrides`.
-- Allowed-peer basenames may contain minimal glob wildcards. Exact names use direct membership; dynamic names match only the basename, with path and adapter scopes unchanged.
+- 규칙 기본 severity는 built-in roster가 정한다. config v3는 override만 기록하며 누락된 rule ID는 기본 enabled와 severity를 유지한다. 명시 프로젝트 severity는 `applyOverrides`에서 우선한다.
+- allowed-peer basename은 제한된 glob wildcard를 허용한다. 정확 이름은 직접 조회하고 동적 이름은 basename만 비교하며 path·adapter 범위는 유지한다.
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로 평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag, verification을 지원한다.
 - rule exception과 indeterminate/unsupported evidence를 PASS로 숨기지 않는다.
@@ -86,4 +88,4 @@
 
 ## Last Updated
 
-2026-10-14
+기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.

@@ -28,7 +28,7 @@ Snapshot hash         : <hash>
 Adapters              : <ids>
 Nodes                 : <counts by type>
 Missing INTENT.md     : <count and proposed paths>
-Missing DETAIL.md     : <count and proposed paths>
+Required DETAIL drafts: <reasons and proposed paths; absence alone is not a finding>
 Validation findings   : <count by severity>
 Certainty             : <certainty>
 Diagnostics           : <list or "none">

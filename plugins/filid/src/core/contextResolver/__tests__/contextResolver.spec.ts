@@ -57,7 +57,7 @@ function detail(name: string, marker: string): string {
     `### AC-${name} — stable evidence`,
     '- The documented behavior is available.',
     '## Last Updated',
-    '2026-07-27',
+    'When the contract changes.',
   ].join('\n');
 }
 
@@ -171,7 +171,7 @@ describe('context resolver', () => {
     expect(resolution.chain[0]).toMatchObject({
       fractalPath: fixture.empty,
       detailPath: null,
-      documentStatus: 'missing',
+      documentStatus: 'valid',
     });
     expect(resolution.nearestDetailPath).toBe(join(root, 'DETAIL.md'));
   });
@@ -270,8 +270,8 @@ describe('context resolver', () => {
       legacyCriteriaLedger: null,
       diagnostics: [],
       normalizedFacts: [],
-    filesOutsideFactsScope: 0,
-    collectedAxes: ALL_SNAPSHOT_AXES,
+      filesOutsideFactsScope: 0,
+      collectedAxes: ALL_SNAPSHOT_AXES,
       createdAt: '2026-07-27T00:00:00.000Z',
     };
 

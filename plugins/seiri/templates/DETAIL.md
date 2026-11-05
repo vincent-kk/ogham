@@ -38,4 +38,4 @@
 
 ## Last Updated
 
-2026-08-30 — 작성 시점의 규칙 편입 근거를 manifest로 옮겨 배포 본문과 분리했다.
+규칙 문서의 계약이나 배포 조건, acceptance criteria가 바뀔 때 갱신한다.

@@ -9,16 +9,16 @@
       "title": "Fractal Boundaries",
       "description": "Node classification, fractal ownership, entry-point surfaces, level legibility, organ access, exemptions, and the acyclic dependency graph.",
       "grounding": "This rule rests on properties every codebase has: directories contain files, and files reference one another.",
-      "templateHash": "30b39669fb872e3a37891751f47a229a07f2d65bc9dfafd401631e9c7fa12678"
+      "templateHash": "4fbbccd55f5f57206eb61270782d7357283a89f0dcaf113456dcf8f8c787b7e3"
     },
     {
       "id": "filid_module-documents",
       "filename": "filid_module-documents.md",
       "required": true,
       "title": "Module Documents",
-      "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, the derivable-content ban, the current-state contract ledger, the single history section, and organ exemption entries.",
+      "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, reader-relative content, the current-state contract ledger, history kept in version control, and organ exemption entries.",
       "grounding": "This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs.",
-      "templateHash": "d3a3fd8a4135d5f6740e744fda1a04b5201330b7c2e389bab2063d1fad982d04"
+      "templateHash": "6bf7a069face92ee2e177f1ea33f80c2ed935abd49c07a58fac3c4d1687e819a"
     },
     {
       "id": "filid_verification-records",
@@ -36,7 +36,7 @@
       "title": "Code Placement",
       "description": "Ownership-first and lowest-common-fractal placement, restructure plan preconditions and postconditions, the document-before-code workflow, and PR-seam Filid validation.",
       "grounding": "This rule rests on properties every codebase has: a unit has a location, and its consumers have locations too.",
-      "templateHash": "d9116398312209c7341298bf46b41929209c5e6249d3f2d880cc391acacbce6e"
+      "templateHash": "a55e1fad6d29c3689eb42157b5d51e3ddf1df7cbb2678b1c50d41a08ce671358"
     }
   ]
 }

@@ -17,7 +17,7 @@
 ### Always do
 
 - LCA, source/target, basis와 decision reason을 각 move에 기록하고, 사유·충돌·finding마다 message와 nextAction을 싣기
-- independent fractal에 문서 두 역할과 adapter-derived entry 역할을 요구
+- independent fractal에 INTENT 문서 역할과 adapter-derived entry 역할을 요구
 - non-exact graph와 stale snapshot을 PASS가 아닌 finding으로 반환
 - 계획이 싣거나 읽는 경로는 symlink를 따라간 실제 위치가 project root 안일 때만 다루기(`isPhysicallyWithin`)
 

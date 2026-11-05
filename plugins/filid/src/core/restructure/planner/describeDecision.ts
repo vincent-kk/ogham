@@ -60,7 +60,7 @@ const DECISION_SENTENCES: Record<
       'Follow the nextAction of each diagnostic on those files until none of them is unknown, then create a new plan. Filid cannot verify a restructure while a related file is unknown, so passing consumerPaths alone does not unblock it.',
   }),
   [RESTRUCTURE_DECISION_REASONS.CONTRACT_INTENT_UNKNOWN]: (context) => ({
-    message: `Filid cannot tell whether ${context.sourcePath} is internal to its consumers or an independent module: the request gave no contractIntent, and the unit is not already a fractal with INTENT.md, DETAIL.md and an entry point.`,
+    message: `Filid cannot tell whether ${context.sourcePath} is internal to its consumers or an independent module: the request gave no contractIntent, and the unit is not already a fractal with INTENT.md and an entry point.`,
     nextAction:
       'Decide from the unit\'s documents and how it is used — never from its name — and create a new plan with contractIntent "internal" (an organ its consumers own) or "independent" (its own fractal). If the evidence does not settle it, ask the user.',
   }),

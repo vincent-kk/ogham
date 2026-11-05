@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 독립 계약은 INTENT.md와 하나 이상의 진입점으로 추론한다. fractal 대상은 INTENT.md와 진입점만 필수 산출물로 요구하며 DETAIL.md는 선택이다. 읽은 선택 문서의 변화는 여전히 계획 전제를 바꾸므로 precondition hash에 포함한다.
+
 - `createRestructurePlan`은 입력 snapshot과, 계획의 입력인 경로(`readPaths`·`probePaths`)만 읽고 project tree를 변경하지 않는다. `readHash`는 그 경로들의 hash이며 precondition이 같은 경로로 다시 계산해 비교한다. 계획과 무관한 편집이 실행을 막지 않게 하기 위해서다.
   - `readPaths`: move source 안의 파일, source를 import하는 소비자 파일, source가 import하는 파일, 그리고 관련성 거름망이 텍스트를 읽은 `unknownFiles`. 내용 byte를 hash한다. import 요구와 "이 파일은 무관하다"는 판정이 이 파일들에서 나온다. 무관하다고 본 파일에 계획 뒤 토큰이 생기면 계획의 전제가 달라지므로 precondition이 잡아야 한다.
   - `probePaths`: 각 move의 target 경로, 그리고 프로젝트 루트부터 각 source·target까지의 조상 디렉터리마다 `INTENT.md`·`DETAIL.md`. 상태 `missing | file | directory`를 hash하고 `file`이면 내용도 섞는다. 조상 문서는 분류와 LCA, target 경로는 사전 점유를 정한다. 없던 것이 생기는 것도 불일치다. 상위 성분이 파일이면(ENOTDIR) `missing`으로 읽고, 그 밖의 fs 오류는 올린다. `readPaths`와 겹치면 `readPaths`에만 둔다.
@@ -170,14 +172,7 @@
 - 다른 move가 source 안쪽에 착지해도, 그 target 밖에 남은 원본은 `source-still-present`다.
 - surface가 `unsupported`인 요구 entry point는 `entry-point-surface-unsupported`다.
 
-## History
-
-- 2026-09-20 — 그래프의 불확실성을 파일(`unknownFiles`)로 받아 계획에 관련된 것만 막게 했다. 무관한 파일 하나의 `indeterminate`가 모든 계획을 멈추었다. postcondition이 계획 전부터 있던 순환·경계 위반을 새 결함으로 보고해 무관한 이동도 실패했다. 이제 계획 시점 기준선과 비교해 `preexisting`으로 나눈다. plan schema version을 4로 올렸다.
-- 2026-09-20 — import 변경 요구를 `requiredResolvedPath`로 표현하고 postcondition을 해석 결과로만 판정하게 했다. 문자열·stem·디렉터리 포함 비교는 같은 이름의 파일이 디렉터리 index를 가로채거나 디렉터리의 다른 파일로 해석돼도 통과시켰고, 올바르게 해석되지만 제안과 다르게 쓴 import는 막았다. rewrite와 위임을 `affectedImports` 하나로 합치고 합성 가능한 경우에만 `suggestedSpecifier`를 싣는다. 변경·보존 요구는 한 술어로 판정한다. 남은 옛 specifier 참조가 계획이 요구하지 않은 파일로 해석되면 하나를 고쳐도 통과하던 가림을 막고, 보존 import를 index 파일 명시로 고친 경우를 통과시킨다. precondition hash를 계획의 입력(읽은 파일과, 배치를 정한 조상 문서·target 경로의 상태)으로 한정하고, 디렉터리 unit의 target이 일반 파일로 존재할 때와 source 안쪽 재점유 시 남은 원본과 surface를 확인할 수 없는 entry point를 finding으로 바꿨다. root가 다른 계획은 아무것도 읽지 않게 하고, symlink로 root를 벗어나는 probe를 계획에서 빼고, read path 조상이 파일로 바뀐 경우를 예외 대신 `snapshot-hash-mismatch`로 바꿨다.
-- 2026-09-19 — 다시 쓸 수 없는 import를 호출자에게 위임하고 해석 결과로 검증하게 했다. 디렉터리 index 참조 하나가 move 전체를 unresolved로 두어 계획 전체가 멈추었고, 이동 뒤에도 그대로 유효한 디렉터리 참조까지 막혔다. 결정 사유, 순서 충돌 원인과 validation finding마다 다음 행동 문장을 붙였다. entry 형태 후보를 module entry로 한정하고, 그래프에서 소비자를 찾을 때 unit 자신의 파일을 빼고, `organNameHint` `.`을 거절했다.
-- 2026-09-19 — `moves`를 실행 순서로 정하고, import 수정은 끝점이 움직이는 edge마다 정확히 한 move가 최종 배치 기준으로 싣게 했다. 겹치는 이동에서 move마다 따로 계산한 수정이 서로 모순되었다. 옮기는 파일의 나가는 import와 명시적 소비자 목록 밖의 import는 계획에서 빠져 있었다. 자동으로 순서를 정할 수 없는 경우만 `move-order-conflict`로 남겼다. deepest-wins 재배치는 target 쪽 겹침을 표현하지 못해 순차 적용으로 바꿨다.
-- 2026-09-19 — rewrite 소비자를 계획 전체 실행 뒤의 위치로 재배치했다. move마다 따로 계산하던 rewrite가 같은 계획으로 옮겨지는 소비자의 옛 경로를 가리켜, 올바르게 실행한 계획이 postcondition에서 실패하고 있었다. LCA 재계산은 target끼리 서로 의존해 수렴을 보장할 수 없어 실행 전 증거에 남겼다.
 
 ## Last Updated
 
-2026-09-20
+기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.

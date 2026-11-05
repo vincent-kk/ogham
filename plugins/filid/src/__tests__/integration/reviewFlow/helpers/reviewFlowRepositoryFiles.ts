@@ -6,7 +6,7 @@ export const FIXTURE_INTENT =
 
 /** DETAIL.md body shared by every fixture fractal. */
 const FIXTURE_DETAIL =
-  '# Fixture contract\n\n## Requirements\n\n- Keep the value deterministic.\n\n## API Contracts\n\n- The entry point exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- The value is exported.\n\n## Last Updated\n\n2026-09-07\n';
+  '# Fixture contract\n\n## Requirements\n\n- Keep the value deterministic.\n\n## API Contracts\n\n- The entry point exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- The value is exported.\n\n## Last Updated\n\nWhen the contract changes.\n';
 
 /** Non-FCA repository: one changed source and one skipped lockfile, no FCA candidates. */
 export const PLAIN_REVIEW_REPOSITORY: PinnedReviewRepositoryFiles = {

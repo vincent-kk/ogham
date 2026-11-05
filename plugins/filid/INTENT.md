@@ -19,10 +19,10 @@
 
 ### Always do
 
-- DETAIL.md를 코드보다 먼저 갱신하고 공개 경계 변경 시 INTENT.md도 갱신
+- 기록된 계약이 달라지면 DETAIL.md를 코드보다 먼저 갱신하고, 기록할 계약 내용이 생기면 추가하며, 공개 경계 변경 시 INTENT.md도 갱신
 - canonical source를 바꾼 뒤 공식 build로 생성물과 rule hash 동기화
 - 구조 이동 기능은 정확한 계획과 검증 결과만 반환
-- Apply project-relative `ignore` patterns across scans, review, context resolution, skills, and hooks; report ignored paths without reviewing them.
+- 프로젝트 상대 `ignore` 패턴을 스캔·리뷰·컨텍스트 해석·스킬·훅에 동일하게 적용하고 제외 경로는 리뷰하지 않고 보고
 
 ### Ask first
 

@@ -18,13 +18,13 @@ import {
   REVIEW_STATE_FILE_NAMES,
 } from '../../../constants/reviewState.js';
 import { handleReviewState } from '../../../mcp/tools/reviewState/index.js';
+import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 import { prepareWithFacts } from './reviewState/helpers/prepareWithFacts.js';
 import { readReviewStateFixtureJson } from './reviewState/helpers/readReviewStateFixtureJson.js';
 import { resolveReviewArtifactFromDirectory } from './reviewState/helpers/resolveReviewArtifactFromDirectory.js';
 import { writeReviewActorMethods } from './reviewState/helpers/writeReviewActorMethods.js';
 import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewStateFixtureFile.js';
-import { seedFacts } from '../../integration/helpers/seedFacts.js';
 
 /** Temporary repository exercised by the prepare contract tests. */
 let projectRoot: string;
@@ -124,7 +124,7 @@ beforeEach(async () => {
   );
   writeProjectFile(
     'DETAIL.md',
-    '# Fixture contract\n\n## Requirements\n\n- Stay deterministic.\n\n## API Contracts\n\n- None.\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- The fixture loads.\n\n## Last Updated\n\n2026-09-04\n',
+    '# Fixture contract\n\n## Requirements\n\n- Stay deterministic.\n\n## API Contracts\n\n- None.\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- The fixture loads.\n\n## Last Updated\n\nWhen the contract changes.\n',
   );
   writeProjectFile(
     'index.ts',

@@ -18,7 +18,7 @@
       "description": "Inline comments are a capped last resort; declarations take the language's documentation form and state the current spec, never history.",
       "grounding": "This rule rests on properties every codebase has: the language provides a form for comments, and a comment sits beside the code it describes.",
       "recommended": true,
-      "templateHash": "a7001fb99fb097d5a2eae5abe94558f63203ee6f50ff3f34f23ac005f58d5b59"
+      "templateHash": "0bc841e0f1c7c227d69b4165b33c16c15a4d663a5d6e7a4c835b5675b08a26fa"
     },
     {
       "id": "seiri_public-contract",
@@ -82,6 +82,15 @@
       "grounding": "This rule rests on a property of every session, not of any codebase: context is finite, and reading spends it.",
       "recommended": false,
       "templateHash": "3fde6203b4bf4c49c4966fc4bdfb1568997af9ea82d8650164cd984531269cb6"
+    },
+    {
+      "id": "seiri_documents",
+      "filename": "seiri_documents.md",
+      "title": "Documents",
+      "description": "Record what the reader cannot establish, omit what they derive, keep current-behavior documents true and canonical, and write consumer change records for their readers.",
+      "grounding": "This rule rests on a property every codebase with documentation has: a document describes code or its intended use for a reader whose information differs from its author's.",
+      "recommended": false,
+      "templateHash": "22919ab43b92bf1438411e303371ae0514fa7dc00799949c251c5a18162302cc"
     }
   ]
 }

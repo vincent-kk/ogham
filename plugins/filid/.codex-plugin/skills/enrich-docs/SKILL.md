@@ -21,7 +21,7 @@ Improve only INTENT.md/DETAIL.md, without changing source code, under one contra
 | `--min-quality`    | `70`                                            | RICH/SPARSE threshold, integer 0–100                        |
 | `--dry-run`        | off                                             | Show the plan without writes                                |
 | `--auto-approve`   | off                                             | Authorize the displayed bounded plan                        |
-| `--include-detail` | off                                             | Audit DETAIL.md and draft it when missing                   |
+| `--include-detail` | off                                             | Audit existing DETAIL.md files                   |
 | `--repair`         | off                                             | Plan document findings regardless of quality score          |
 
 Report project path, snapshot hash, classifications, approval mode, before/after line counts, rewritten sections, evidence paths, per-document validation, and reverted items; then `Repaired: <n>`, `Relocated: <n>`, `Needs rework: <k>`, `Deferred: <m>` in that order, deferred rows, and `Diagnostics` ([§7](./reference.md#7-report)). End with exactly one marker:
@@ -35,7 +35,8 @@ Report project path, snapshot hash, classifications, approval mode, before/after
 Invariants:
 
 - No document writes before approval; unapproved files remain unchanged.
-- RICH content is editable only with `--repair`, within finding-named ranges.
+- A missing DETAIL.md is not a finding and is not drafted by default. Draft one only when the user asks for that fractal or a finding requires it: `spec-contract-link` for an owner with several spec-documents, or a boundary exemption that must be declared.
+- RICH content is editable only with `--repair`, within finding-named ranges, except that a `history-section` repair also covers approved destination contract sections as defined in [reference §3](reference.md#3-plan-items).
 - Plan one item per SPARSE or MISSING document and per REPAIR candidate; coalesce findings for the same document.
 - Never add derivable file, export, or dependency inventories or their counts.
 - INTENT.md keeps the English anchors, all three boundary tiers, and the 50-line cap.
@@ -49,7 +50,7 @@ Invariants:
 
 2. **Resolve context.** Call one `fractal_inspect` `resolve` batch with ordered candidate requests. Read only the resolved document chain, target, entry point, and bounded implementation evidence in [§1](./reference.md#1-tool-calls-and-evidence).
 
-3. **Classify and plan.** Apply RICH/SPARSE/MISSING and REPAIR rules, including missing DETAIL.md, from [§2](./reference.md#2-classification). Show sections, findings, evidence, and any predicted INTENT-to-DETAIL relocation in the [§3 plan](./reference.md#3-plan-items).
+3. **Classify and plan.** Apply RICH/SPARSE/MISSING and REPAIR rules, with optional DETAIL.md creation only as §2 permits, from [§2](./reference.md#2-classification). Show sections, findings, evidence, and any predicted INTENT-to-DETAIL relocation in the [§3 plan](./reference.md#3-plan-items).
 
 4. **Obtain approval.** Display the complete plan and apply `approve`, `modify`, `cancel`, or the invocation flags at [§4](./reference.md#4-approval). A widened relocation plan is displayed before writes even with `--auto-approve`.
 

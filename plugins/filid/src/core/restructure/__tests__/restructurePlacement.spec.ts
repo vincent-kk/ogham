@@ -70,7 +70,6 @@ const SNAPSHOT_HASH = 'placement-snapshot';
 const EMPTY_LIST: never[] = [];
 const EXPECTED_ARTIFACT_ROLES = [
   REQUIRED_ARTIFACT_ROLES.INTENT_DOCUMENT,
-  REQUIRED_ARTIFACT_ROLES.DETAIL_DOCUMENT,
   REQUIRED_ARTIFACT_ROLES.ENTRY_POINT,
 ];
 const EXPECTED_INCOMING_CONSUMERS = [PATHS.A_CONSUMER, PATHS.B_CONSUMER];
@@ -384,7 +383,7 @@ describe('read-only restructure placement', () => {
     expect(move.lowestCommonFractalPath).toBe(PATHS.A);
   });
 
-  it('plans an independent contract with three required artifact roles', () => {
+  it('plans an independent contract with two required artifact roles', () => {
     const move = planFor(makeSnapshot(), REQUESTS.INDEPENDENT).moves[0];
     expect(move.targetPath).toBe(PATHS.SERVICE_TARGET);
     expect(move.targetNodeType).toBe(RESTRUCTURE_NODE_TYPES.FRACTAL);

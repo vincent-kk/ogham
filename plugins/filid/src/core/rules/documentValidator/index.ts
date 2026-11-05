@@ -3,8 +3,6 @@ export { parseBoundaryExemptions } from './boundaryExemptions/parseBoundaryExemp
 export { extractPathTokens } from './derivableContent/utils/extractPathTokens.js';
 export { splitMarkdownSections } from './derivableContent/utils/splitMarkdownSections.js';
 export { countLines } from './validators/countLines.js';
-export {
-  detectAppendOnly,
-  validateDetailMd,
-} from './validators/validateDetailMd.js';
+export { detectAppendOnly } from './validators/utils/detectAppendOnly.js';
+export { validateDetailMd } from './validators/validateDetailMd.js';
 export { validateIntentMd } from './validators/validateIntentMd.js';

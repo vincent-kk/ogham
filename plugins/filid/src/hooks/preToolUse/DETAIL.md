@@ -8,14 +8,14 @@
 - 선택적 방문 실패는 hook failure logger에 기록한다. filesystem canonicalization이 실패하면 입력 경로로 문서·중복 경로 검사를 계속해 이미 계산된 batch deny를 보존한다.
 - batch loop는 앞선 deny에도 모든 후속 operation을 실행하며, 하나라도 deny면 전체 물리 호출을 deny한다.
 - Write/Edit/Delete는 방문 통과 후 문서 gate를 거치고 Write/Edit은 이어서 구조 가드를 실행한다.
-- Delete도 owner 방문 상태를 갱신하며 host가 INTENT.md/DETAIL.md와 같은 파일로 해석하는 대상 삭제는 명시적 사유로 deny한다.
+- Delete도 owner 방문 상태를 갱신하며 INTENT.md의 삭제는 강등 조건으로 보호하고 DETAIL.md 삭제는 선택 문서 안내와 함께 허용한다.
 - `apply_patch` 파싱이 불완전하면 유효 prefix도 실행하지 않고 FCA 프로젝트에서는 parser reason과 유효한 V4A 재발행 안내로 deny하며, 비-FCA 프로젝트에서는 bare allow한다.
 - Move destination projection이 exact면 전체 내용을 검증하고, ambiguous/stale이면 계약 문서는 exact-content 사유로 deny한다. 일반 파일은 source와 모든 추가 line을 합친 import superset으로 구조 위험을 검사해 warning이 있으면 deny하고 없으면 허용한다.
 - Move source를 읽을 수 없으면 source path와 부재 사유를 포함해 destination 종류와 무관하게 deny한다.
 - branch 이름, spike 상태, criteria ledger 또는 agent 역할에 따라 검증을 면제하지 않는다.
 - 비-FCA 프로젝트와 유효하지 않은 cwd는 상태를 변경하지 않고 통과시킨다.
-- On an FCA project, a target matching the effective two-layer `ignore` config passes through before context injection, document validation, or structure guarding. Project `ignore` replaces the user list when present.
-- Compare ignored targets and the config root using the same physical path resolution; reject targets outside that root on both slash conventions.
+- FCA 프로젝트에서 유효한 두 계층 `ignore` config와 맞는 대상은 컨텍스트 주입·문서 검증·구조 가드 전에 통과한다. 프로젝트 `ignore`가 있으면 사용자 목록을 대체한다.
+- 제외 대상과 config root를 같은 물리 경로 해석으로 비교하며, 두 종류 경로 구분자 모두에서 root 밖 대상을 거부한다.
 
 ## API Contracts
 
@@ -43,7 +43,7 @@
 - ambiguous/stale projection은 INTENT.md/DETAIL.md에서 exact content와 bodyless Move 재시도를 요구한다. 일반 파일에서는 source와 모든 추가 line의 superset으로 structure guard를 실행하고 warning을 보수적 deny로 승격하며, 위험이 없으면 허용한다.
 - 존재하지 않는 Move source는 source path와 `does not exist` 사유로 destination 종류와 무관하게 deny한다.
 - 앞선 physical section이 Move source 또는 후속 Edit target과 canonical 동일한 경로를 touch했으면 stale disk projection 대신 patch 분리 실행을 요구한다.
-- Move의 source `Delete`와 destination `Write`도 같은 deny-wins 집계를 거쳐 일반 경로는 허용하고 보호 문서 source rename은 거부한다.
+- Move의 source `Delete`와 destination `Write`도 같은 deny-wins 집계를 거쳐 일반 경로는 허용하고 INTENT.md source rename은 삭제 보호를 적용하고 DETAIL.md source는 삭제 안내를 반환한다.
 
 ### AC-pre-tool-document-gate — 일관된 문서 계약
 
@@ -51,7 +51,7 @@
 - Write/Edit의 실제 대상이 보호 문서이면 case alias와 symlink alias에도 같은 문서 gate를 적용한다. DETAIL.md Write는 그 실제 대상의 이전 내용으로 append-only 여부를 검사한다.
 - dangling symlink를 통한 Write가 새 INTENT.md를 만드는 경우에도 물리 target의 문서 gate를 적용한다. INTENT.md라는 link 이름이 새 일반 파일을 가리키면 그 일반 파일로 판정한다.
 - inexact Move destination의 실제 대상이 보호 문서이면 alias 이름과 무관하게 exact content를 요구한다.
-- host-canonical parent 아래의 INTENT.md 또는 DETAIL.md terminal entry를 Delete하는 operation은 보호 문서 삭제 사유로 deny된다.
+- host-canonical parent 아래의 INTENT.md terminal entry Delete는 강등 조건을 확인하고 DETAIL.md Delete는 선택 문서 안내와 함께 허용된다.
 - legacy criteria ledger는 일반 파일처럼 통과하며 hook 전용 deny나 audit을 만들지 않는다.
 
 ### AC-pre-tool-malformed — 보수적 파싱 실패
@@ -69,4 +69,4 @@
 
 ## Last Updated
 
-2026-09-05 — 물리 target 기준 문서 gate와 선택적 방문 캐시 실패의 격리를 명시했다.
+기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.

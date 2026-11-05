@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 // loaded by: manual invocation — node .metadata/rule-bench/apply-rules-sync.mjs
-// Syncs canonical rule templates (plugins/*/templates/rules/*.md) to their two
-// deployed copies: .claude/rules/<file> (verbatim bytes) and the root AGENTS.md
+// Syncs already deployed canonical rule templates (plugins/*/templates/rules/*.md)
+// to their two deployed copies: .claude/rules/<file> (verbatim bytes) and the root AGENTS.md
 // marker sections (<!-- NS:START:file --> ... <!-- NS:END:file -->). Run AFTER
 // editing templates and re-injecting manifest hashes (yarn build:rules).
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,6 +22,10 @@ for (const { ns, dir } of plugins) {
   for (const entry of manifest.rules) {
     const content = readFileSync(join(dir, 'templates', 'rules', entry.filename), 'utf8');
     const deployed = join(repoRoot, '.claude', 'rules', entry.filename);
+    if (!existsSync(deployed)) {
+      console.log(`skipped undeployed rule: ${entry.filename}`);
+      continue;
+    }
     if (readFileSync(deployed, 'utf8') !== content) {
       writeFileSync(deployed, content);
       changed.push(`.claude/rules/${entry.filename}`);

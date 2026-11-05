@@ -83,6 +83,25 @@ function makeSnapshot(
 
 describe('rule-engine (rules)', () => {
   describe('document contract rules', () => {
+    it('accepts a fractal without an optional DETAIL document', () => {
+      const rule = loadBuiltinRules().find(
+        (candidate) => candidate.id === 'detail-document-contract',
+      )!;
+      const node = makeNode({
+        hasIntentMd: true,
+        hasDetailMd: false,
+        documentEvidence: {
+          intentPath: '/root/module/INTENT.md',
+          detailPath: null,
+          status: 'valid',
+          findings: [],
+        },
+      });
+      const tree = makeTree([node]);
+
+      expect(rule.check({ node, tree })).toEqual([]);
+    });
+
     it('reports one finding for a missing document already represented in snapshot evidence', () => {
       const rule = loadBuiltinRules().find(
         (candidate) => candidate.id === 'intent-document-contract',

@@ -7,11 +7,15 @@
 
 ## Requirements
 
+- 리뷰 그룹과 공통 checklist는 큰 PR의 액터·입력 비용을 억제하기 위해 사용한다. 문서 동기화가 검증의 indeterminate 상태 때문에 게시 전체를 막지 않도록, 해결하지 못한 finding은 handoff로 review에 전달한다.
+- 같은 lifecycle의 MCP 기능은 상시 schema 비용과 도구 이름의 불일치를 줄이기 위해 action으로 묶는다. cross-review의 증거 준비·opinion 검증·봉인은 review_state가 소유하여 orchestrator가 대형 본문을 읽지 않고 재개하고, 검증 뒤 변조된 판단을 신뢰하지 않게 한다.
+- review_state scope는 프로젝트 루트 `.` 위반을 변경 범위 ancestor matching에서 제외하며, 검증 certainty는 변경 검증 파일과 교차하는 범위로 좁히고 graph certainty는 프로젝트 전체로 유지한다. committed roster·FCA 후보·작업 트리 관측·canonical evidence는 같은 snapshot에서 생성한다.
+
 - Filid는 INTENT.md와 DETAIL.md의 의도, 경계, 현재 계약을 관리한다.
 - Filid는 FCA 노드, 어댑터가 보고한 진입점, 외부 import 경계와 실제 의존 DAG를 검사한다.
 - Filid는 소비자 소유 프랙탈을 근거로 `sourcePath → targetPath` 이동 계획과 사전·사후조건을 만들되 프로젝트 파일을 이동하거나 import를 고치지 않는다.
-- Cross-review prepares committed evidence, validates ordinary actor opinions and deterministically seals trusted results without changing code. Defect disposition and reviewComplete are independent; blocker reports retain evidence recovery and human decisions alongside confirmed corrections.
-- Cross-review keeps config-ignored files in the roster as skipped entries with a reason and count, without assigning review work or freezing facts for them.
+- cross-review는 커밋된 증거를 준비하고 일반 액터의 의견을 검증한 뒤 코드를 바꾸지 않고 신뢰 가능한 결과를 결정론적으로 봉인한다. 결함 처리와 `reviewComplete`는 독립적이며, 차단 보고서는 확정 수정과 함께 증거 복구·사람의 결정을 보존한다.
+- cross-review는 config로 제외된 파일도 이유와 개수를 가진 skipped roster 항목으로 유지하며 리뷰를 배정하거나 사실을 동결하지 않는다.
 - cross-review는 일반 첫 reviewer와 verifier에 효율 모델을 사용한다. 기본 동시성 8·1024줄·자동 최대 32파일로 그룹을 구성하며 기본 전체 그룹 상한 64를 배정 전에 검사한다. 기본 auto는 reviewable group이 설정 threshold(기본 16) 이상이면 low, 미만이면 medium을 선택한다. low는 전체 그룹을 한 번씩 검토하며 위험 그룹은 첫 회부터 상위 모델을 사용한다. medium/high는 위험·불확실성과 신규 finding에 따라 남은 예산에서 후속 검토한다. 전체 roster와 완전한 opinion 예시를 brief마다 반복하지 않고 미리 쓴 reviewer skeleton을 재사용한다. 적용 규칙·전체 diff·독립 verifier·불확실성 판정은 유지한다.
 - `revalidate`는 FCA category를 항목 소유 프랙탈에서 재측정하고, 관련 규칙의 증거가 스캔 경계 밖이라 불확실할 때만 해당 `fractal_inspect` `resolve` 결과의 `data.results[].summary.chainPaths` 상위 프랙탈을 순서대로 재시도해 최초의 exact 결과로 판정한다. 비-FCA category는 accepted FIX ID를 canonical fix request와 결합해 원 finding 전체를 복원하고 verifier 재검증으로 판정한다.
 - `pull-request`는 변경 경로 중 FCA owner가 있는 범위만 문서 동기화하고, config-declared 또는 현재 `HEAD`에 존재하는 ownerless non-FCA 경로는 이유와 함께 보고한다. owner를 잃은 삭제 경로와 다른 해석 실패는 PR 본문의 `FCA Handoff`에 `unresolved-path`로 기록하고 계속한다.
@@ -27,21 +31,21 @@
 
 ## API Contracts
 
-- Cross-review keeps Claude's completion-notification lifecycle in the canonical skill. An explicit handoffs marker selects a Codex-only paragraph that keeps the parent turn active through child completion, validation, subsequent review/verify handoffs, and the existing seal/delivery or diagnostic stop conditions.
+- cross-review 정본 스킬은 Claude의 완료 알림 수명주기를 유지한다. 명시적 handoffs 표식은 Codex 전용 문단을 선택하며, 자식 완료·검증·후속 review/verify 전달과 기존 봉인·전달 또는 진단 중단 조건까지 부모 turn을 유지한다.
 - 공개 MCP 도구는 `project_setup`, `fractal_inspect`, `restructure`, `review_state`의 4개다.
 - `fractal_inspect`의 `resolve` action은 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
 - 참조 기반 판정을 하는 skill(`scan`, `guide`, `restructure`, `cross-review`, `revalidate`, `pull-request`)은 첫 참조 기반 분석 호출 앞에서 facts 부트스트랩 정본 `skills/.shared/facts-bootstrap.md`를 가리키는 단계 하나만 둔다. 부트스트랩의 순서·도구 호출·다음 행동은 정본 한 곳에만 쓰고, skill은 그것을 복제하지 않는다. 정본의 "If the bootstrap cannot finish" 절 하나가 부트스트랩 실패의 효과를 정한다 — 지금은 분석이 사실을 읽지 않으므로 한 줄을 기록하고 같은 turn에서 본 흐름을 잇는다.
 - merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3과 handoff 블록 §7, review report와 PR comment는 `skills/cross-review/report-formats.md`, fix request의 여덟 필드 블록은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 스킬 실행에 필요한 형식은 스킬 폴더 안에 두며 플러그인 내부 INTENT/DETAIL을 색인하지 않는다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
-- Cross-review retains review_schema 7, state schema 2 and validationPolicyVersion 2. Optional diagnostics, analysisAxes and reviewComplete preserve legacy reading; old policy still requires explicit fresh preparation. New incomplete seals, including REQUEST_CHANGES, retain identity-bound review-blockers.md. Missing or mismatched marked sidecars stop cache reuse.
+- cross-review는 `review_schema` 7, state schema 2, `validationPolicyVersion` 2를 유지한다. 선택 필드 diagnostics·analysisAxes·reviewComplete는 오래된 상태 읽기를 보존하지만 오래된 정책은 새 prepare를 명시적으로 요구한다. REQUEST_CHANGES를 포함한 불완전 봉인은 신원에 결속된 review-blockers.md를 유지하며, 표시된 sidecar가 없거나 맞지 않으면 cache를 재사용하지 않는다.
 - fix request는 검증 가능한 원 claim을 포함하며, resolve가 만든 accepted FIX ID는 revalidate에서 해당 canonical request의 Severity, Category, Path, Rule, Claim, Evidence, Consequence, Recommended Action과 정확히 결합된다.
 - interactive resolve는 항목별 질문을 반복하지 않는다. 전체 sheet 뒤 한 batch decision round에서 추천안 일괄 적용, 전체 적용, ID별 적용·논의·warning 생략·근거 있는 거부를 받고, 논의가 남으면 미결 항목만 다시 묶는다. `--auto`도 같은 sheet와 원래 추천을 보여 주되 decision만 전부 자동 선택하고 질문하지 않는다.
 - `cross-review`와 `revalidate`는 브랜치에 pull request가 있을 때 판정을 PR 코멘트로 남긴다. PR이 없으면 남기지 않으며, 코멘트 부재는 실패가 아니다. 코멘트 형식은 각각 `skills/cross-review/report-formats.md`와 `skills/revalidate/reference.md` §4가 정의한다 — 판정표는 접힘 밖, 본문은 접힘 안, 호스트 코멘트 크기 상한 안에 들어가고, 같은 표제의 기존 코멘트는 새로 달지 않고 갱신한다.
 - 단계 간 중간 산출물은 `.filid/review/<branch>/`에 파일로 남기고 다음 단계와 서브에이전트에는 **경로만** 전달한다. 대형 변경에서 컨텍스트가 터지지 않게 하는 장치이며 이 파일들은 커밋하지 않는다.
 - 모든 큰 MCP 결과는 16 KiB inline 예산의 공통 envelope를 거쳐 검증 가능한 임시 artifact로 전달한다. 스킬은 inline data가 없으면 artifact의 JSON data를 읽고, 누락·읽기 실패를 빈 성공 결과로 해석하지 않는다.
 - managed rule 문서의 host target 선택과 동기화는 `@ogham/agent-artifacts`에 위임하며 Filid owner 주소 밖의 사용자 내용을 보존한다.
-- Config schema 3.0 defines adapter selection, override-only rules with string shorthand, allowed-peer shorthand, and project-relative `ignore`, `structure.excludeFromScan`, and `review.generatedPaths` globs. A pattern covers its matching path and descendants. v1/v2 migrate in memory; reads never persist a migration.
-- PR document audit resolves all changed paths in one `fractal_inspect resolve` batch. `context-target-ignored` paths form an ignored class outside document sync and handoff, while remaining visible in the Changes table. An existing `context-target-unresolved` path is ownerless non-FCA; other failures remain unresolved handoffs.
+- config schema 3.0은 adapter 선택, 문자열 축약을 허용하는 override 전용 규칙, allowed-peer 축약, 프로젝트 상대 `ignore`·`structure.excludeFromScan`·`review.generatedPaths` glob을 정의한다. 패턴은 매칭 경로와 하위 전체를 포함한다. v1/v2는 메모리에서만 변환하며 읽기가 변환 결과를 저장하지 않는다.
+- PR 문서 감사는 모든 변경 경로를 한 `fractal_inspect resolve` batch로 해석한다. `context-target-ignored` 경로는 문서 동기화와 handoff에서 제외되지만 Changes 표에는 남는다. 존재하는 `context-target-unresolved` 경로는 ownerless non-FCA이며, 다른 실패는 unresolved handoff로 유지한다.
 
 ## Acceptance Criteria
 
@@ -59,9 +63,9 @@
 
 - 구조 변경 API는 계획과 검증만 제공하고 프로젝트 파일을 수정하지 않는다.
 - cross-review는 변경 범위에 한해 결함·보안·성능·유지보수·테스트·문서·FCA 계약을 판정하고, 모든 후보 finding을 독립 검증한다.
-- Current user requirements retain stable IDs for independent review. A source-matched trusted confirmed defect requires REQUEST_CHANGES even with gaps; reviewComplete remains false. Without confirmed defects an incomplete review is INCONCLUSIVE; only complete review can be APPROVED.
+- 현재 사용자 요구는 독립 검토를 위한 안정 ID를 유지한다. 소스와 일치하는 신뢰 가능한 확정 결함은 증거 공백이 있어도 REQUEST_CHANGES이며 `reviewComplete`는 false다. 확정 결함 없는 불완전 리뷰는 INCONCLUSIVE이고 완전한 리뷰만 APPROVED가 될 수 있다.
 - cross-review는 review schema 7·state schema 2·현재 검증 정책을 만족한 resumable·cached 산출물만 반환한다. prepared effective effort는 최초 배정부터 고정하며, reviewable COMPLETE opinion은 nonblank checked 및 그룹 정책상 필수인 riskPlan을 요구한다.
-- Blockers distinguish human decisions, agent evidence recovery and triage. PR comments lead with confirmed count, review completeness, human-decision requirement and agent next action. Explicit diagnostic causes aggregate affected groups, paths, original descriptions and sources; rule IDs alone never merge causes.
+- 차단 항목은 사람의 결정, 에이전트 증거 복구, 분류를 구분한다. PR 코멘트는 확정 개수·리뷰 완결성·사람의 결정 필요 여부·에이전트 다음 행동을 먼저 보여 준다. 명시 진단 원인은 영향 그룹·경로·원문 설명·출처를 모으되 rule ID만 같다고 원인을 합치지 않는다.
 - reviewable unit의 configured group cap, skipped roster의 가시성과 validate hash handoff 중 어느 것도 편의를 위해 완화하지 않는다.
 
 ### AC-root-pr-comment — 판정의 PR 전달
@@ -73,7 +77,7 @@
 
 ### AC-root-pr-document-scope — PR 문서 동기화 범위
 
-- Paths under `ignore` are counted and reported as `(ignored)` without document sync or handoff. An ownerless path whose ancestor matches `structure.excludeFromScan` is reported as config-declared non-FCA and is still reviewed. Existing ownerless paths are reported as non-FCA.
+- `ignore` 아래 경로는 문서 동기화나 handoff 없이 `(ignored)`로 집계·보고한다. 조상이 `structure.excludeFromScan`과 맞는 ownerless 경로는 config-declared non-FCA로 보고하지만 리뷰는 수행한다. 존재하는 ownerless 경로는 non-FCA로 보고한다.
 - `HEAD`에 없는 unresolved 경로와 `context-target-unresolved` 이외의 실패는 non-FCA로 바뀌지 않고 `FCA Handoff`에 `unresolved-path`로 기록된다. PR 생성은 계속된다.
 - non-FCA 경로도 PR의 `Changes` 표에서는 유지되며 owner가 하나도 없으면 document sync는 `no-change`다.
 - PR 문서 동기화와 resolve의 문서 수정 위임은 INTENT와 DETAIL을 모두 평가한다.
@@ -89,20 +93,20 @@
 
 ### AC-root-pr-handoff — 문서 동기화 자기복구와 handoff
 
-- Stage 1은 `documents` 스코프 finding 중 `derivable-content`, `derivable-structure`, `stale-path`(`review.generatedPaths` 비매치), `line-limit`, `missing-boundaries`, `missing-field`, `missing-section`, `duplicate-id`, `missing-document`만 `enrich-docs --repair`로 고친다. 수락 그룹의 `missing-field`는 근거가 없으면 `needs-rework`, `duplicate-id`는 정본 그룹 선택에 판단이 필요하면 `needs-rework`로 보류하며, Boundary Exemption의 Reason 누락은 `config-decision`으로 보류한다.
+- Stage 1은 `documents` 스코프 finding 중 `derivable-content`, `derivable-structure`, `stale-path`(`review.generatedPaths` 비매치), `line-limit`, `missing-boundaries`, `missing-field`, `missing-section`, `duplicate-id`, `missing-document`, `history-section`, `last-updated-trigger`만 `enrich-docs --repair`로 고친다. 수락 그룹의 `missing-field`는 근거가 없으면 `needs-rework`, `duplicate-id`는 정본 그룹 선택에 판단이 필요하면 `needs-rework`로 보류하며, Boundary Exemption의 Reason 누락은 `config-decision`으로 보류한다.
 - `boundaries`, `dag`, `nodes`, `entry-points`, `verification` 스코프 finding과 certainty가 `indeterminate`/`unsupported`로 명시된 모든 finding은 고치지 않고 기록한다.
 - 스캔 `status`는 편집 가부의 근거가 아니다. enrich-docs는 `scan detail: "full"`의 노드별 `documentEvidence.findings`를 편집 입력으로 쓰고, `documentEvidence`가 없거나 scan을 읽을 수 없는 문서만 보류한다. non-finding 진단은 보고하되 편집을 막지 않는다.
-- RICH 문서는 `--repair`에서 finding이 이름 붙인 범위만 고치고 그 밖의 RICH 내용은 건드리지 않는다.
+- RICH 문서는 `--repair`에서 finding 범위만 고치되 History는 승인된 목적 계약 섹션으로 결정과 이유를 옮길 수 있다.
 - PR 본문 네 번째 섹션 `## FCA Handoff`는 항상 존재하며, `review_state handoff`가 접히는 표와 한 줄 JSON `<!-- filid:handoff v1 -->` 블록을 생성한다. 0건이면 `None`과 빈 `recorded`이며 본문 문자 예산은 두지 않는다.
 - PR 본문 조회는 caller가 소유하고 `review_state prepare`는 `changeContextPath`의 파일을 읽는다. `changeContext`와 함께 주면 오류이며, handoff 블록을 먼저 파싱한 뒤 `## Summary`·`## Contract`·`## Review notes`만 발췌해 3000자로 제한하여 brief의 `## FCA Handoff`와 change context로 전달한다.
 - 터미널 출력은 `Handoff:` 줄로 class별 개수와 repaired 개수를 보고한다.
 - 입력 오류만 abort다: Stage 0의 detached/empty branch, base 대비 커밋 0, `source-dirty`, `documents-only` + `--skip-enrich`; Stage 2의 base 미해결. `GH_AUTH = false`와 `--no-push`는 body 저장 fallback이다.
-- 리뷰 단계가 문서를 정교화한다. cross-review는 handoff 표의 행을 검증할 주장으로 다루고 초안 충분성·INTENT 예산·파생 내용을 `documentation` finding으로 낸다. resolve는 문서 항목을 `enrich-docs --include-detail --repair`로 위임하고, enrich-docs는 DETAIL 부재를 MISSING으로, INTENT 50행 초과분을 DETAIL로 이관한다.
+- 리뷰 단계가 문서를 정교화한다. cross-review는 handoff 표의 행을 검증할 주장으로 다루고 초안 충분성·INTENT 예산·파생 내용을 `documentation` finding으로 낸다. resolve는 문서 항목을 `enrich-docs --include-detail --repair`로 위임하고, enrich-docs는 기존 DETAIL을 감사하고 INTENT 50행 초과 계약을 DETAIL로 이관한다. DETAIL 부재 자체는 finding이 아니며 명시 요청이나 결속·면제 계약이 요구할 때만 추가한다.
 
 ### AC-root-document-quality — 빠짐없는 문서 품질 분류
 
-- 존재하는 문서는 0점 이상 임계값 미만이면 SPARSE, 임계값 이상이면 RICH다. 문서가 없을 때만 MISSING이다.
-- SPARSE와 MISSING은 편집 계획 대상으로 남는다. RICH는 `--repair`에서 `documents` 스코프 finding이 이름 붙인 섹션만 고치고 그 밖에는 편집하지 않는다. `--include-detail`에서 DETAIL.md 부재도 MISSING이다.
+- 존재하는 문서는 0점 이상 임계값 미만이면 SPARSE, 임계값 이상이면 RICH다. INTENT가 없을 때 MISSING이며 DETAIL 부재는 finding이 아니다.
+- SPARSE와 MISSING은 편집 계획 대상으로 남는다. RICH는 `--repair`에서 문서 finding의 범위와 승인된 History 이관 목적 섹션만 고친다. `--include-detail`은 기존 DETAIL.md를 감사한다. DETAIL 초안은 해당 프랙탈의 명시 요청, 여러 spec-document 소유자의 `spec-contract-link`, 또는 선언할 경계 면제가 요구할 때만 만든다.
 
 ### AC-root-pipeline-freshness — 현재 커밋의 재검증 결과
 
@@ -131,21 +135,7 @@
 - 추출 출력은 실행마다 `mktemp`로 만든 고유 파일(`${TMPDIR:-/tmp}` 아래, 프로젝트 트리 밖)에 쓴다. `dismiss`의 확인은 항목을 올리지 않은 별도 subagent가 한다.
 - 부트스트랩 절에는 사람을 부르는 문장이 없고, 실패의 효과는 한 절에만 있다.
 
-## History
-
-- 2026-09-06 — 대형 PR에서 작은 파일 분할과 roster 반복이 액터·입력 비용을 확대해, 효율 모델 기본값·조건부 후속 리뷰·자동 그룹 크기·선택 그룹 예산·공통 checklist 참조를 도입했다.
-- 2026-09-05 — `pull-request`의 문서 동기화 BLOCKED 종료를 제거하고 자기복구·handoff 기록으로 바꿨다. 테스트 파일 하나의 indeterminate certainty가 규칙 네 개와 스캔 status를 거쳐 PR 생성 전체를 막았기 때문이며, 고칠 수 없는 finding은 PR 본문에 실려 review의 입력이 된다.
-- 2026-09-05 — 같은 lifecycle의 기능을 action으로 묶어 상시 schema 비용을 줄이고 도구 이름을 일관되게 만들기 위해 공개 MCP 표면을 9개에서 4개로 병합했다.
-- 2026-09-04 — cross-review의 선별·청킹·그룹·규칙 해석·diff/brief 생성·JSON 검증·verdict fold·렌더링을 단일 `review_state` lifecycle로 옮겼다. orchestrator가 대형 diff와 opinion 본문을 열지 않아도 재개 가능하고, seal이 검증 후 변조된 판단을 신뢰하지 않게 하기 위한 결정이다.
-- 2026-09-04 — `review_state scope`가 project-relative root `.` 위반을 변경 범위 ancestor matching에서 제외하고, verification certainty는 변경 범위와 교차하는 verification 파일에서만 계산하되 graph certainty는 project-wide로 유지하도록 수정했다.
-- 2026-09-04 — `review_state scope`가 committed 변경 범위의 roster·FCA 후보·working-tree 관측과 canonical `evidence.md`를 한 snapshot에서 만들도록 책임을 옮겼다. 리뷰 프롬프트는 그룹별 판단과 독립 검증에만 집중한다.
-- 2026-09-04 — cross-review를 파일별 단일 리뷰 패스와 효율 모델 독립 검증으로 전환했다. 변경 범위의 코드 품질 판정을 소유하되 전역 규칙 엔진은 소유하지 않으며, 단계 간 관점 필드를 Category로 치환했다.
-- 2026-08-31 — repository-level 관리 파일 때문에 FCA owner가 있는 변경까지 PR이 막히지 않도록 config-declared와 existing ownerless 경로를 명시적 non-FCA 문서 범위로 분리했다. 삭제 경로는 자동 제외하지 않아 document drift를 숨기지 않는다.
-- 2026-08-28 — 100개 이상의 변경 경로도 한 번의 snapshot으로 해석하도록 `context_resolve`와 shipped caller를 batch 계약으로 전환했다.
-- 2026-08-22 — 자잘한 correction이 논쟁적인 결정을 가리지 않도록 resolve의 항목별 질문을 recommendation 기반 전체 decision sheet와 batch 입력으로 바꿨다.
-- 2026-08-22 — 좁은 소비자 범위가 형제 프랙탈 증거를 보지 못해 false-INCONCLUSIVE를 만들지 않도록 revalidate를 owner-to-root 최초 exact 측정으로 바꿨다.
-- 2026-08-22 — `pull-request`의 암묵적 branch push를 제거하고 호출자 책임으로 돌렸다. PR 생성 실패와 push 실패를 한 단계가 함께 숨기지 않게 하기 위한 결정이다.
 
 ## Last Updated
 
-2026-09-10 — Separate diagnostic impact, review completeness and evidence recovery from defect disposition.
+기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.

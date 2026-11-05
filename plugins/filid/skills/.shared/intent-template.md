@@ -50,9 +50,11 @@ this file is the defect.
   trailing newline, so leave a line of slack when editing.
 - Records only this fractal's own purpose, ownership and boundaries — never a
   copy of an ancestor's.
-- Nothing a tool can derive: no file lists, no export lists, no dependency
-  rosters, no counts of any of these. A path reference that must stay carries
-  its reason beside it.
+- Omit what a maintainer derives directly from the source and tests: inventories,
+  signatures, function steps and values a test already pins. Keep reasons and
+  change permissions even when the behavior is visible in code; keep anything
+  the reader would not establish unambiguously. A path reference that must stay
+  carries its reason beside it.
 - An organ never has one.
 - Headings stay in English; descriptive content follows `[filid:lang]`,
   defaulting to English. Identifiers, paths, and rule IDs keep their original
@@ -66,8 +68,9 @@ boundary tiers (`warning`), and three findings against derivable content, all
 spans containing `/`; bare filenames do not count) in one section
 (`derivable-content`); an existence-asserting token — a `dir/` marker or a
 dotted basename — that resolves to nothing from the node's directory or its
-ancestors (`stale-path`; `## Dependencies`, `## History`, `## Last Updated`
-and exemption sections are not checked); and a section naming half or more of
+ancestors (`stale-path`; `## Dependencies`, legacy `## History`, `## Last Updated`
+and exemption sections are not checked — skipping legacy history does not
+authorize a history section in new documents); and a section naming half or more of
 the node's own children (`derivable-structure`, which replaces
 `derivable-content` for that section). The remaining headings are contract
 expectations that no rule fails on.

@@ -68,6 +68,7 @@ const POST_STATES = {
   VALID_FRACTAL: 'valid-fractal',
   MISSING_ENTRY_POINT: 'missing-entry-point',
   MISSING_DETAIL: 'missing-detail',
+  MISSING_INTENT: 'missing-intent',
 } as const;
 
 const GRAPH_STATES = {
@@ -108,10 +109,6 @@ const FRACTAL_ARTIFACTS = [
   {
     role: REQUIRED_ARTIFACT_ROLES.INTENT_DOCUMENT,
     path: PATHS.FRACTAL_INTENT,
-  },
-  {
-    role: REQUIRED_ARTIFACT_ROLES.DETAIL_DOCUMENT,
-    path: PATHS.FRACTAL_DETAIL,
   },
   {
     role: REQUIRED_ARTIFACT_ROLES.ENTRY_POINT,
@@ -245,7 +242,7 @@ function entriesFor(state: PostState): NodeEntry[] {
       path: PATHS.FRACTAL,
       name: 'service',
       type: NODE_TYPES.FRACTAL,
-      hasIntentMd: true,
+      hasIntentMd: state !== POST_STATES.MISSING_INTENT,
       hasDetailMd: fractalHasDetail,
       entryPoints: fractalEntryPoints,
       peerFiles: [
@@ -542,9 +539,18 @@ describe('restructure plan validation', () => {
     );
   });
 
-  it('rejects a missing required document artifact', () => {
+  it('accepts a fractal with INTENT and entry point but no DETAIL', () => {
+    expect(
+      validatePlanPostconditions(
+        makeSnapshot(POST_STATES.MISSING_DETAIL),
+        makePlan(FRACTAL_MOVE),
+      ).valid,
+    ).toBe(true);
+  });
+
+  it('rejects a missing required INTENT artifact', () => {
     const result = validatePlanPostconditions(
-      makeSnapshot(POST_STATES.MISSING_DETAIL),
+      makeSnapshot(POST_STATES.MISSING_INTENT),
       makePlan(FRACTAL_MOVE),
     );
     expect(findingCodes(result)).toContain(
@@ -616,11 +622,11 @@ describe('restructure plan validation', () => {
   });
 
   it('classifies a cycle as preexisting by SCC membership, even when the plan changes its representative route', () => {
-    const preSnapshot = sccSnapshot(SCC_PATHS.B, [
-      SCC_PATHS.A,
+    const preSnapshot = sccSnapshot(
       SCC_PATHS.B,
-      SCC_PATHS.A,
-    ], PLAN_SNAPSHOT_HASH);
+      [SCC_PATHS.A, SCC_PATHS.B, SCC_PATHS.A],
+      PLAN_SNAPSHOT_HASH,
+    );
     const move: MoveInstruction = {
       ...ORGAN_MOVE,
       sourcePath: SCC_PATHS.B,
@@ -630,22 +636,24 @@ describe('restructure plan validation', () => {
       ...makePlan(move),
       baseline: collectPlanBaseline(preSnapshot),
     };
-    const postSnapshot = sccSnapshot(SCC_PATHS.Z, [
-      SCC_PATHS.A,
-      SCC_PATHS.C,
-      SCC_PATHS.A,
-    ], POST_SNAPSHOT_HASH);
+    const postSnapshot = sccSnapshot(
+      SCC_PATHS.Z,
+      [SCC_PATHS.A, SCC_PATHS.C, SCC_PATHS.A],
+      POST_SNAPSHOT_HASH,
+    );
 
     const result = validateDependencyPostconditions(postSnapshot, plan, []);
 
     expect(
       result.findings.some(
-        (finding) => finding.code === RESTRUCTURE_VALIDATION_CODES.DEPENDENCY_CYCLE,
+        (finding) =>
+          finding.code === RESTRUCTURE_VALIDATION_CODES.DEPENDENCY_CYCLE,
       ),
     ).toBe(false);
     expect(
       result.preexisting.some(
-        (finding) => finding.code === RESTRUCTURE_VALIDATION_CODES.DEPENDENCY_CYCLE,
+        (finding) =>
+          finding.code === RESTRUCTURE_VALIDATION_CODES.DEPENDENCY_CYCLE,
       ),
     ).toBe(true);
   });

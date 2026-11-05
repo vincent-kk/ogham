@@ -20,6 +20,11 @@ function isPresent(context: RuleContext, document: DocumentKind): boolean {
     : context.node.hasDetailMd;
 }
 
+/**
+ * Build a document rule that reports existing violations and required INTENT absence.
+ * @param document - Contract kind selected by the built-in rule registration.
+ * @returns A read-only node check; missing optional DETAIL never creates a finding.
+ */
 export function checkDocumentContract(document: DocumentKind): Rule['check'] {
   return (context: RuleContext): RuleViolation[] => {
     const { node } = context;
@@ -40,6 +45,7 @@ export function checkDocumentContract(document: DocumentKind): Rule['check'] {
         'Revise the document as the message states; the enrich-docs skill repairs contract documents.',
     }));
     if (
+      document !== 'intent' ||
       node.type !== 'fractal' ||
       isPresent(context, document) ||
       findings.length > 0

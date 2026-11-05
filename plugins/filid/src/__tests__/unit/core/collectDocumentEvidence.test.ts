@@ -142,7 +142,7 @@ describe('collectDocumentEvidence derivable checks', () => {
         '### AC-app — behavior',
         '- ok',
         '## Last Updated',
-        '2026-08-16 — removed `old/thing.md`.',
+        'When the contract for `old/thing.md` changes.',
       ].join('\n'),
     );
     const tree = buildFractalTree([entry(root, 'fractal', true, true)]);
@@ -192,7 +192,7 @@ describe('collectDocumentEvidence derivable checks', () => {
         '- **Direct import**: `allowed`',
         '- **Reason**: kept for the test; see `ghost/notes.md`.',
         '## Last Updated',
-        '2026-08-16',
+        'When the contract changes.',
       ].join('\n'),
     );
     const tree = buildFractalTree([entry(root, 'fractal', true, true)]);
@@ -372,7 +372,7 @@ describe('collectDocumentEvidence derivable checks', () => {
     );
   });
 
-  it('skips the History section when checking stale paths', () => {
+  it('checks stale paths in the prohibited History section', () => {
     const root = makeProject();
     writeFileSync(join(root, 'INTENT.md'), ['# app', ...boundaries].join('\n'));
     writeFileSync(
@@ -389,7 +389,7 @@ describe('collectDocumentEvidence derivable checks', () => {
         '## History',
         '- 2026-08-16 — removed `old/thing.md` and its callers.',
         '## Last Updated',
-        '2026-08-16',
+        'When the contract changes.',
       ].join('\n'),
     );
     const tree = buildFractalTree([entry(root, 'fractal', true, true)]);
@@ -398,6 +398,6 @@ describe('collectDocumentEvidence derivable checks', () => {
       intentFindings(root, tree).filter(
         (f) => f.rule === 'stale-path' && f.document === 'detail',
       ),
-    ).toHaveLength(0);
+    ).toHaveLength(1);
   });
 });

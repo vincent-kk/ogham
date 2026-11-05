@@ -2,15 +2,17 @@
 
 ## Requirements
 
-- `verificationPaths` unions adapter-discovered verification files with already scanned facts paths below organ nodes whose basename appears in `verification.organNames` (the built-in list when absent). It drives boundary exemptions and cycle filtering without another scan or changes to adapter roles and case counts.
+- fractal과 hybrid의 문서 부재 finding과 missing 상태는 INTENT.md에만 적용한다. DETAIL.md는 존재할 때 검증하며, 부재만으로 finding을 만들지 않는다.
 
-- Reference, entry-surface and verification evidence comes from the facts store, read once per snapshot and classified with the same function the `facts` tool reports from, so analysis and `status` cannot disagree about a file. An adapter is never asked to fill a file the store does not hold: filling it would hide a missing bootstrap and change behaviour the day the adapter is removed.
-- Dependency diagnostics carry stable consumer/specifier cause identity, the unresolved specifier, and explicit dependencies/boundaries impact. Value/type imports of the same target share an identity. Independent verification remains exact when its own evidence is exact.
-- Every diagnostic declares `affects`, the analysis axes (`dependencies`, `boundaries`, `verification`) whose conclusions it can change; `[]` means none. A producer narrows the list only where the code shows the other axes cannot change: dependency references affect dependencies and boundaries; entry-point surface failures affect boundaries (entry-point and node rules have no axis of their own); adapter selection, structure ownership and verification discovery failures affect all three, since classification and the verification set feed every axis.
-- The document-contract messages (a missing INTENT.md or DETAIL.md, a stale path token) name the node by its project-root-relative POSIX path, `.` for the root, so the review candidates built from them hash the same wherever the repository sits. Evidence diagnostics keep absolute paths in their messages; they are not hashed.
-- Every diagnostic carries a `nextAction`, stated by its producer. A dependency graph that is not exact always has an explaining diagnostic: every file it lists in `unknownFiles` carries its facts state as the cause (`facts-missing`, `facts-needs-resolution`, `facts-uncertain`, `facts-tool-error`), plus the causes the collector attributes outside the records. An `exact` file whose record resolves a reference nowhere still reaches the graph with a null target, so `unresolved-local-dependency` names a file the graph lists in `unknownFiles` with that code as a cause. `unowned-local-dependency` is the exception: a reference with no owning fractal at one of its ends has no node to hang on, so it carries no edge, no cycle and no `unknownFiles` entry — it is reported as a finding naming its source file and its owner-less target, judged with the graph builder's own order and exemptions.
+- `verificationPaths`는 adapter가 발견한 검증 파일과, `verification.organNames`(없으면 built-in 목록)에 basename이 속하는 organ 아래 이미 스캔된 facts 경로의 합집합이다. 재스캔이나 adapter 역할·case count 변경 없이 경계 면제와 순환 필터에 사용한다.
 
-- Build one `ProjectSnapshot` from registered adapters and normalized config v3.
+- 참조·진입 표면·검증 증거는 facts 저장소를 snapshot당 한 번 읽고 `facts` 도구와 같은 함수로 분류하므로 분석과 status가 파일에 대해 다른 답을 낼 수 없다. 저장소에 없는 파일을 adapter로 보충하면 bootstrap 누락을 숨기고 adapter 제거 시 동작이 달라지므로 보충하지 않는다.
+- 의존 진단은 안정적인 consumer/specifier 원인 신원, 미해석 specifier, 명시적인 dependencies/boundaries 영향을 담는다. 같은 대상의 value/type import는 신원을 공유하며 독립 검증 증거가 exact면 검증도 exact를 유지한다.
+- 모든 진단은 결론을 바꿀 수 있는 분석 축(`dependencies`, `boundaries`, `verification`)을 `affects`에 선언하며 빈 배열은 영향 없음을 뜻한다. 다른 축이 바뀔 수 없다는 코드 근거가 있을 때만 범위를 좁힌다. 의존 참조는 dependencies와 boundaries, 진입 표면 실패는 boundaries에 영향을 준다. 별도 축 없는 entry-point·node 규칙도 이 분류를 따른다. adapter 선택·구조 소유권·검증 탐색 실패는 분류와 검증 집합이 모든 축의 입력이므로 세 축에 영향을 준다.
+- INTENT 누락·stale path 등 문서 계약 메시지는 노드를 프로젝트 상대 POSIX 경로(루트는 `.`)로 명명한다. 저장소 위치와 무관하게 리뷰 후보 hash가 같아야 하기 때문이다. hash에 쓰이지 않는 증거 진단 메시지는 절대 경로를 유지한다.
+- 모든 진단은 생성자가 정한 `nextAction`을 담는다. exact가 아닌 의존 그래프는 설명 진단을 항상 갖는다. `unknownFiles`의 모든 파일은 facts 상태(`facts-missing`, `facts-needs-resolution`, `facts-uncertain`, `facts-tool-error`)와 수집기가 레코드 밖에서 귀속한 원인을 담는다. exact 레코드의 미해석 참조도 null 대상으로 그래프에 도달하므로 `unresolved-local-dependency`는 해당 원인을 가진 unknown 파일을 명명한다. `unowned-local-dependency`는 예외다. 참조 한쪽에 소유 프랙탈이 없으면 간선·순환·unknown 항목을 만들 노드가 없으므로, 그래프 작성자의 순서와 면제를 따르는 finding에 source와 소유자 없는 target을 보고한다.
+
+- 등록된 adapter와 정규화한 config v3로 하나의 `ProjectSnapshot`을 만든다.
 - 호출자는 수집할 증거 축(entry surface, dependency, verification)을 고를 수 있고 기본값은 전부 수집이다. tree와 문서 증거는 축이 아니라 언제나 수집한다 — 나머지 축이 그 위에서만 의미를 갖기 때문이다.
 - 수집하지 않은 축은 빈 값에 `unsupported` certainty로 남고, 무엇을 수집했는지는 `collectedAxes`가 말한다. 빈 결과와 미수집을 구분하는 근거는 이 필드 하나이며, 이를 읽지 않고 축을 신뢰하는 소비자는 계약을 어긴 것이다.
 - 축 선택은 snapshot hash 입력에 포함한다. 축이 다른 두 snapshot이 같은 hash를 갖지 않는다.
@@ -19,16 +21,16 @@
 - 수집기 자체의 certainty는 선언된 범위가 아무것도 덮지 않을 때(`facts.covers: []`) `unsupported`이고 `facts-uninitialized` 진단 하나를 남기며, 그 밖에는 `exact`다. adapter의 유무는 참조의 출처를 정하지 않으므로 certainty를 바꾸지 않는다.
 - entry point surface는 그 파일의 레코드 `entrySurface`에서 읽는다. manifest entry point만 예외로 adapter가 manifest를 판독한다 — 소스 해석이 아니라 선언된 표면을 읽는 일이고, manifest는 기본 facts 범위 밖이다. 레코드가 없거나 `exact`가 아니거나 `entrySurface`를 담지 않으면 surface는 `indeterminate`(범위 밖이면 `unsupported`)이고 `entry-point-facts-unavailable` 진단이 다음 행동을 싣는다 — 빈 exact surface로 접히지 않는다.
 - snapshot은 `normalizedFacts`로 파일별 유효 참조를 함께 싣는다: 프로젝트 안으로 해석된 `(sourceText ?? specifier, kind, resolvedPath)`를 정렬한 목록과 적용된 판정. **facts 범위 안 스캔 파일마다 항목이 있고, 간선이 없으면 빈 목록이다** — 범위 안에서 "보고 나니 없었다"와 범위 밖이라 "애초에 보지 않았다"는 다른 사실이고, 항목의 있고 없음이 그 둘을 가른다. 범위 밖(`unsupported`) 파일은 항목이 없다. 리뷰가 자기가 판단한 사실을 동결할 때(스펙 §9) 저장소를 다시 읽지 않게 하려는 것이며 — 두 번 읽으면 다른 답이 나올 수 있다 — snapshot hash 입력은 아니다.
-- Verification role, case count, and contract group come from submitted facts. Candidates are adapter-discovered files inside `facts.scannedSet`; paths ignored by config `ignore`, built-in patterns, dot-prefix, or gitignore are outside that set and cannot create unavailable-facts diagnostics. A scanned candidate without a usable record remains indeterminate. This selection is based on the scanned set, independently of `facts.covers`.
-- Symlinks are not followed. A link outside the project root that an adapter would otherwise discover yields `symlink-not-followed` and unknown-file evidence. Its diagnostic first suggests an exact project-relative `ignore` pattern; replacing or moving the link remains a user decision. In-root targets are analyzed at their real path; broken links and loops have no readable content.
+- 검증 역할·case count·contract group은 제출된 facts에서 온다. 후보는 `facts.scannedSet` 안에서 adapter가 발견한 파일이며 config ignore·기본 패턴·dot-prefix·gitignore로 제외된 경로는 facts 부재 진단을 만들지 않는다. 스캔된 후보의 유효 레코드가 없으면 indeterminate다. 이 선택은 `facts.covers`와 독립적이다.
+- symlink는 따라가지 않는다. adapter가 발견할 수 있는 root 밖 링크는 `symlink-not-followed`와 unknown 증거를 만든다. 진단은 먼저 정확한 프로젝트 상대 ignore 패턴을 제안하고 링크 교체·이동은 사용자 결정으로 남긴다. root 안 대상은 실제 경로에서 분석하며 깨진 링크와 루프에는 읽을 본문이 없다.
 - snapshot hash 입력의 dependency graph에서는 `unknownFiles`를 뺀다. 그 목록은 hash에 이미 들어가는 `diagnostics`의 경로와 코드로 정해진다. 그래서 목록을 도입해도 같은 프로젝트의 hash가 바뀌지 않는다.
 - snapshot은 tree, owner-level dependency graph, verification, adapter IDs, diagnostics, output language, legacy criteria evidence와 content-derived hash를 함께 가진다.
 - ambiguous/unsupported ownership, unresolved local dependency와 문서 위반은 숨기지 않는다.
-- 문서 evidence 수집이 두 파생 검사를 함께 낸다: 존재 주장 형태(말미 `/` 디렉터리 표기 또는 basename에 `.`)이고 home(`~`)·변수(`$`) 표기가 아닌 상대 경로 토큰이 해석 기준 어디에서도 존재하지 않으면 `stale-path` warning, INTENT 한 섹션이 직계 children(4개 이상일 때) 절반 이상을 나열하면 `derivable-structure` warning. 해석 기준은 node 디렉터리부터 project root까지의 조상 체인이되 `..` 포함 토큰은 node 디렉터리 하나뿐이고, 말미 `/` 토큰은 디렉터리로만 충족된다. 면책 섹션·`## History`·`## Last Updated`·`## Dependencies`·fence 내부는 제외하고, 같은 섹션에 `derivable-structure`가 있으면 그 섹션의 `derivable-content`를 대체한다(구체 규칙 우선).
+- 문서 evidence 수집이 두 파생 검사를 함께 낸다: 존재 주장 형태(말미 `/` 디렉터리 표기 또는 basename에 `.`)이고 home(`~`)·변수(`$`) 표기가 아닌 상대 경로 토큰이 해석 기준 어디에서도 존재하지 않으면 `stale-path` warning, INTENT 한 섹션이 직계 children(4개 이상일 때) 절반 이상을 나열하면 `derivable-structure` warning. 해석 기준은 node 디렉터리부터 project root까지의 조상 체인이되 `..` 포함 토큰은 node 디렉터리 하나뿐이고, 말미 `/` 토큰은 디렉터리로만 충족된다. 면책 섹션·갱신 조건을 담는 `## Last Updated`·`## Dependencies`·fence 내부는 제외하고, 같은 섹션에 `derivable-structure`가 있으면 그 섹션의 `derivable-content`를 대체한다(구체 규칙 우선).
 - structure/verification detect와 discovery는 adapter마다 한 번 수행하고 portable absolute path claim으로 정규화해 분석에 전달한다.
 - tree entry evidence는 확정된 structure ownership만 사용하고 adapter별 entry override를 해당 adapter에 전달한다.
 - config `maxDepth`는 validation 한계이며 snapshot tree traversal을 자르지 않는다.
-- Pass config `ignore` and `structure.excludeFromScan` to tree scanning and adapter ownership in the same snapshot; filter verification discovery by the resulting scanned set. Both consumers must agree so ignored files cannot remain as dependency or verification evidence.
+- 동일 snapshot의 tree scan과 adapter 소유권에 config ignore와 excludeFromScan을 전달하고, 결과 scanned set으로 검증 탐색을 거른다. 제외 파일이 의존·검증 증거로 남지 않으려면 두 소비자의 집합이 같아야 한다.
 - DETAIL.md가 `## Boundary Exemptions`를 선언하면 그 항목을 `node.documentEvidence.boundaryExemptions`에 보존한다. `targetPath`는 소유 프랙탈 기준으로 정규화한 절대 경로이며, rule engine은 다시 파일을 읽지 않고 이 evidence만 읽는다.
 - dependency graph는 non-organ owner path와 함께 organ path 목록도 받아, owner subtree 안의 owned-organ 참조를 cycle adjacency에서 제외한다.
 - 동일 bytes와 구조는 프로젝트 absolute root 및 mtime과 무관하게 같은 hash이고 file content 또는 구조 입력 변경은 hash를 바꾼다.
@@ -47,9 +49,9 @@
 
 ### AC-snapshot-verification-organs — Verification path union
 
-- Suffix-free files beneath declared verification organs do not violate import boundaries or close cycles; removing the name restores product-code checks.
-- Mixed product and verification evidence on the same directed edge preserves product cycles.
-- Adapter verification roles and case counts remain unchanged by the organ list.
+- 선언된 verification organ 아래 suffix 없는 파일도 import 경계를 위반하거나 순환을 닫지 않는다. 해당 organ 이름을 제거하면 제품 코드 검사를 다시 적용한다.
+- 같은 방향 간선의 제품·검증 증거가 섞여 있어도 제품 순환은 보존한다.
+- organ 목록이 adapter의 검증 역할과 case count를 바꾸지 않는다.
 
 ### AC-snapshot-consistency — 동일 실행 증거
 
@@ -84,7 +86,7 @@
 - 존재 주장 형태의 상대 경로 토큰은 node 디렉터리에서 project root까지 조상 디렉터리 체인으로 해석한 뒤 전부 실패하면 `stale-path` warning finding이 되고, finding 메시지에 섹션명이 들어간다. 존재를 주장하지 않는 토큰(`application/json` 같은 무점 basename·무말미슬래시)과 저장소에서 해석 불가한 위치(`~` 접두 home 표기, `$` 포함 변수 표기)는 검사하지 않는다.
 - `..` 포함 토큰은 저자 상대 표기이므로 node 디렉터리 기준으로만 해석한다 — 조상 기준 재적용은 우연한 충족을 만든다.
 - 말미 `/` 토큰은 같은 이름의 파일로 충족되지 않는다 — 디렉터리 주장은 디렉터리만 충족한다.
-- `## Boundary Exemptions`/`## Organ Exemptions`/`## History`/`## Last Updated`/`## Dependencies` 섹션은 건너뛴다. History·Last Updated는 제거된 경로의 서술 장소이고, Dependencies는 파일 존재 주장이 아닌 결합 주소(컴파일 지정자 포함)를 담는다.
+- `## Boundary Exemptions`/`## Organ Exemptions`/`## History`/`## Last Updated`/`## Dependencies` 섹션은 건너뛴다. Last Updated는 파일 존재 주장이 아닌 문서 갱신 조건을 담는다. History는 아직 이행하지 않은 문서와 상위 저장소 지침에 따라 해당 섹션을 유지하는 문서를 허용하기 위해 건너뛰는 legacy 섹션이며, 새 문서에 허용하는 섹션이 아니다. Dependencies는 파일 존재 주장이 아닌 결합 주소(컴파일 지정자 포함)를 담는다.
 - 섹션 판정은 제목 문자열 단위다 — 같은 제목의 중복 섹션은 하나의 섹션으로 취급된다.
 - INTENT 한 섹션이 직계 children(childFractalPaths+organPaths 기준 4개 이상) 절반 이상 basename을 나열하면 `derivable-structure` warning finding이 된다.
 - 같은 섹션에서 `derivable-structure`가 발화하면 그 섹션의 `derivable-content`는 내지 않는다 — 다른 섹션의 `derivable-content`는 유지된다.
@@ -112,4 +114,4 @@
 
 ## Last Updated
 
-2026-09-27 — verification discovery is narrowed to the facts scan set, so excluded directories no longer produce unresolvable `verification-facts-unavailable` diagnostics.
+snapshot 증거 수집, 문서 검사 제외 조건이나 acceptance criteria가 바뀔 때 갱신한다.

@@ -148,6 +148,21 @@ describe('postcondition reads only the plan artifact the server stored', () => {
     });
   });
 
+  it('requires a fresh plan when a stored artifact uses the removed detail role', async () => {
+    const { projectRoot, planPath } = await executeWithNewCycle();
+    const artifact = JSON.parse(readFileSync(planPath, 'utf8'));
+    artifact.data.moves[0].requiredArtifacts.push({
+      role: 'detail-document',
+      path: join(projectRoot, 'domain/model/DETAIL.md'),
+    });
+    await expect(
+      postcondition(projectRoot, persistPlanArtifact(artifact)),
+    ).rejects.toMatchObject({
+      code: 'plan-artifact-invalid',
+      nextAction: expect.stringContaining('Create a new plan'),
+    });
+  });
+
   it('refuses a stored artifact whose baseline names a path outside its root', async () => {
     const { projectRoot, planPath } = await executeWithNewCycle();
     const artifact = JSON.parse(readFileSync(planPath, 'utf8'));

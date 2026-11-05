@@ -44,7 +44,7 @@ const ROOT_DETAIL = `# fixture contract
 ### AC-fixture — Observable fixture
 - The fixture has one root contract.
 ## Last Updated
-2026-07-27
+When the contract changes.
 `;
 const INITIAL_LEDGER_CONTENT = '# Legacy criteria\n\n- preserve this claim\n';
 const CHANGED_LEDGER_CONTENT = `${INITIAL_LEDGER_CONTENT}- preserve another claim\n`;

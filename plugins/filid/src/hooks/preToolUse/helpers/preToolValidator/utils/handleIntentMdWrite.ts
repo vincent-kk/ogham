@@ -13,11 +13,8 @@ export function handleIntentMdWrite(content: string): HookOutput {
       continue: true,
       hookSpecificOutput: {
         permissionDecision: 'deny',
-        // Name only what failed. `validateIntentMd` raises `error` for the
-        // line limit alone — the 3-tier check is a warning and never reaches
-        // here — so the old blanket "add the 3-tier sections" instruction
-        // named a cause this branch cannot have, and buried the real one.
-        // Each violation message already states its own remedy.
+        // Each validateIntentMd error (line cap or History section) states its
+        // own remedy. The 3-tier check is a warning and never reaches this deny.
         permissionDecisionReason: `INTENT.md write rejected: ${errors} ${DENY_RETRY_GUIDANCE}`,
       },
     };

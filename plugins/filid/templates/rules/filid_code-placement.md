@@ -4,7 +4,7 @@
 
 ## 1. A unit sits with the contract it implements; shared code sits at its users' lowest common fractal
 
-A unit belongs to the fractal whose contract it implements. Only a unit serving the implementations of two or more fractals is shared: compute the lowest common fractal of the owners that use it and place the unit under it — their common ancestor is the address; anything higher is a guess. A consumer is product code outside the unit's fractal subtree; verification, benchmark and demonstration code is not a consumer and never pulls a unit upward. Count the consumers that use the unit: code that merely constructs it and hands it on is wiring, and counting wiring pulls everything up to the composition root. A unit with one using owner is an organ of that owner — one user is not shared code. A unit with a contract of its own, published or not, becomes a child fractal instead, with its intent, detail and entry-point artifacts.
+A unit belongs to the fractal whose contract it implements. Only a unit serving the implementations of two or more fractals is shared: compute the lowest common fractal of the owners that use it and place the unit under it — their common ancestor is the address; anything higher is a guess. A consumer is product code outside the unit's fractal subtree; verification, benchmark and demonstration code is not a consumer and never pulls a unit upward. Count the consumers that use the unit: code that merely constructs it and hands it on is wiring, and counting wiring pulls everything up to the composition root. A unit with one using owner is an organ of that owner — one user is not shared code. A unit with a contract of its own, published or not, becomes a child fractal instead, with its intent and entry-point artifacts, and a detail document when it has a contract to record.
 
 ## 2. An organ cannot be a lowest common ancestor
 
@@ -20,7 +20,7 @@ A functionally working but different result is a failed restructure. The restruc
 
 ## 5. The document changes before the code does
 
-Contracts lead; implementations follow: before changing a fractal, update DETAIL, and update INTENT only when its public boundary changes. Run Filid scans and validations once at the pull-request or merge-track seam, after implementation and accepted review fixes — earlier only when explicitly requested; ordinary development checks and edits never trigger them. At the seam, record warnings as findings and note any deviation from the plan.
+Contracts lead; implementations follow: before changing a fractal, update its DETAIL when the change alters what it records — adding one when the change gives it contract content to record — and update INTENT only when its public boundary changes. Run Filid scans and validations once at the pull-request or merge-track seam, after implementation and accepted review fixes — earlier only when explicitly requested; ordinary development checks and edits never trigger them. At the seam, record warnings as findings and note any deviation from the plan.
 
 ---
 

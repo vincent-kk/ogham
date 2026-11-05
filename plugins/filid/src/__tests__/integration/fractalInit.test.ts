@@ -162,7 +162,7 @@ describe('fractal-init pipeline', () => {
       '### AC-foo — Foo contract',
       '- Calling foo completes without an error.',
       '## Last Updated',
-      '2026-07-26',
+      'When the contract changes.',
     ].join('\n');
     const validation = validateDetailMd(specContent);
 

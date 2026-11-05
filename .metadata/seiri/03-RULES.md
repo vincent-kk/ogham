@@ -6,21 +6,22 @@
 
 ## 상태표
 
-| #   | 파일                            | 형식 층  | 형태              | 상태                                  |
-| --- | ------------------------------- | -------- | ----------------- | ------------------------------------- |
-| S1  | `seiri_agent-legible.md`        | L0·L1    | 레시피            | ✅ lite                               |
-| S2  | `seiri_public-contract.md`      | L2       | 레시피            | ✅ lite                               |
-| S3  | `seiri_test-validity.md`        | L4       | 혼합              | ✅ 이관본 · **`paths:` 조건부**(유일) |
-| S4  | `seiri_reuse-first.md`          | L3       | 레시피            | ✅ lite                               |
-| S5  | `seiri_naming.md`               | L0       | 레시피(발견 위임) | ✅ lite                               |
-| S6  | `seiri_structure.md`            | L0·L1    | 방향형            | ✅ 이관본 (방향형)                    |
-| S7  | `seiri_context-efficiency.md`   | 6층 예외 | 레시피            | ✅ 통과 (D8 무삭감)                   |
-| S8  | `seiri_cognitive-discipline.md` | 6층 예외 | **금지+합리화표** | 🪦 은퇴 (2026-08-30, R5)              |
-| S9  | `seiri_decision-trail.md`       | L5       | 템플릿 슬롯       | ⏸ opt-in 확정 · 대조군 대기           |
+| #   | 파일                            | 형식 층     | 형태              | 상태                                              |
+| --- | ------------------------------- | ----------- | ----------------- | ------------------------------------------------- |
+| S1  | `seiri_agent-legible.md`        | L0·L1       | 레시피            | ✅ lite                                           |
+| S2  | `seiri_public-contract.md`      | L2          | 레시피            | ✅ lite                                           |
+| S3  | `seiri_test-validity.md`        | L4          | 혼합              | ✅ 이관본 · **`paths:` 조건부**(유일)             |
+| S4  | `seiri_reuse-first.md`          | L3          | 레시피            | ✅ lite                                           |
+| S5  | `seiri_naming.md`               | L0          | 레시피(발견 위임) | ✅ lite                                           |
+| S6  | `seiri_structure.md`            | L0·L1       | 방향형            | ✅ 이관본 (방향형)                                |
+| S7  | `seiri_context-efficiency.md`   | 6층 예외    | 레시피            | ✅ 통과 (D8 무삭감)                               |
+| S8  | `seiri_cognitive-discipline.md` | 6층 예외    | **금지+합리화표** | 🪦 은퇴 (2026-08-30, R5)                          |
+| S9  | `seiri_decision-trail.md`       | L5          | 템플릿 슬롯       | ⏸ opt-in 확정 · 대조군 대기                       |
+| S10 | `seiri_documents.md`            | L2·L3·L4·L5 | 레시피            | opt-in 등재(`recommended: false`) · 대조군 반전 3과제 ([기록](./phase0/s10-documents.md)) |
 
 **공통 검증**: 전 규칙에 우선순위 사슬·형식 근거·이중 반증 적용. 임계 숫자 0건, 언어 특정 예시 0건, 각 200줄 미만.
 
-**재단·배포**: 구조 4종(agent-legible·public-contract·reuse-first·naming)은 lite로 재단하고, test-validity·structure·context-efficiency는 절차·방향을 보존합니다. 현행 templates는 S1~S7과 후속 `code-comments`·`function-boundaries` 9종을 배포하며, S8은 상시 규칙층에서 은퇴했습니다. S9는 대조군 통과 후 opt-in 등재합니다. 근거·수치는 [phase0/](./phase0/).
+**재단·배포**: 구조 4종(agent-legible·public-contract·reuse-first·naming)은 lite로 재단하고, test-validity·structure·context-efficiency는 절차·방향을 보존합니다. 현행 templates는 S1~S7과 후속 `code-comments`·`function-boundaries`·`documents` 10종을 배포하며, S8은 상시 규칙층에서 은퇴했습니다. S9는 대조군 통과 후 opt-in 등재합니다. 근거·수치는 [phase0/](./phase0/).
 
 **v2 압축(2026-08-01)**: 전 10종(+filid 4종)을 압축형으로 재재단 — 골격을 1줄 헤더(B1+목적+B5+B7 병합)와 1줄 B6로 줄이고, Ask-yourself는 reuse-first §1 하나만 유지하며, 레시피·표·D8 관용구·규범 내용은 보존. rule-bench 80런 haiku A/B(R0 무규칙/R1 v1/R2 v2)에서 전 이슈 R2 ≥ R1로 채택 게이트 통과 — 판별 이슈 iC(reuse)는 R0 0% vs R1·R2 100%로 v2가 효능을 보존. 바이트 -24%(전체)·-23%(상시). 하네스·수치는 [../rule-bench/](../rule-bench/).
 
@@ -170,7 +171,7 @@ Ask yourself: "<행동 앵커>"
 
 **판정 노트**: filid 5조 계승 + §6 무한 축적 금지(하방 개방). 오라클은 전부 역할 지칭 — 구체 명령 0건. §1의 리팩토링 계약 반전 조항은 filid `restructurer` 안전 조항의 원본이므로 문구를 보존합니다.
 
-**조건부 로드 (유일)**: 8종 중 이 규칙만 `paths:` frontmatter를 갖습니다 — 테스트 파일을 연 동안에만 구속하는 유일한 규칙이라 상시 상주시킬 이유가 없습니다.
+**조건부 로드 (유일)**: 현행 규칙 중 이 규칙만 `paths:` frontmatter를 갖습니다 — 테스트 파일을 연 동안에만 구속하는 유일한 규칙이라 상시 상주시킬 이유가 없습니다.
 
 키는 **`paths:`** 입니다(하니스 파서 실측). `globs:` 는 파서가 읽지 않아 무시되고, 그러면 규칙이 조건부가 아니라 **무조건 로드**로 되돌아갑니다 — 커뮤니티의 "paths 불량" 보고는 이 방향 착오로 보이며, 이벤트 페이로드의 필드명이 `globs`(매칭된 `paths:` 패턴)인 것이 혼동의 근원입니다. `ruleInvariants` 가 `globs:` 사용을 기계 차단합니다.
 
@@ -293,6 +294,14 @@ re-deriving them; no trailer has ever needed redaction.
 format that excludes trailers, or keeps decisions in a dedicated system —
 follow the repository; the trail matters, not the format.
 ```
+
+## S10. `seiri_documents.md`
+
+**판정 노트**: 문서가 있는 코드베이스에서 문서는 코드나 그 사용 의도를 저자와 다른 정보를 가진 독자에게 설명합니다. 공개 경계(L2)에 따른 독자 입력, 문서와 코드의 동시 변경(L3), 독자 성공을 통한 검증(L4), 현재 계약과 이력의 분리(L5)가 이 형식 근거를 따릅니다. maintainer는 소스와 테스트를, consumer는 배포된 선언·문서·도구를 가진다는 독자 상대 기준으로 기록과 생략을 판단합니다. 삭제 검사는 §1이 요구하지 않는 문장에만 적용하므로 이유·정책·불명확한 지식의 기록 의무를 지우지 않습니다. 문서 전체도 §1의 필수 내용이 없고 §7의 비교에서 제거가 독자의 성공을 낮추지 않을 때 삭제하며, 다른 문서 규칙의 필수 내용은 유지합니다.
+
+§3은 배포된 선언에 포함되는 문서 주석도 소비자 문서로 다루므로 그 예시에도 적용됩니다. 문서가 설명하는 코드를 변경할 때는 §6, 소비자용 변경 기록 작성 중에는 §8이 적용되므로 문서 파일을 열지 않은 시점까지 구속하는 무조건 규칙입니다. §6의 어느 쪽이 틀렸는지 먼저 판단하고 위반 코드에 맞춰 정책·계약을 약화하지 않는 문장은 이슈 #146 문구에 대한 추가입니다. §7의 비교는 문서 없는 실행이 일부 과제에서 실패하는 설정에서 수행하고, 결과가 다른 실험군을 반복하며, 문서가 성과를 낮추면 오도하는 내용을 먼저 고칩니다. 숫자 예산은 저장소나 그 도구가 소유하며 규칙은 수치·러너·다른 플러그인에 의존하지 않습니다. 무지침 대조군 비교([phase0/s10-documents.md](./phase0/s10-documents.md))에서 1·2절, 4절, 3절을 겨냥한 세 과제 모두 대조군 5건이 실패하고 처치군 실패는 1건 이하입니다. 6절은 대조군도 지켜 실패가 재현되지 않았고 7절과 8절은 과제가 없으므로, 규칙은 `recommended: false`인 opt-in으로 둡니다. 이슈 #146의 평가 스킬은 이 규칙의 범위 밖이며 Claude Code의 플러그인 평가 기능으로 구현할 별도 이슈로 둡니다.
+
+**규칙 전문 (정본)**: [`plugins/seiri/templates/rules/seiri_documents.md`](../../plugins/seiri/templates/rules/seiri_documents.md). 이 문서는 판정 노트만 보유하며 규칙 문언은 정본에서 고칩니다.
 
 ---
 

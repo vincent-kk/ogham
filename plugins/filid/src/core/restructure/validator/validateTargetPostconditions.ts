@@ -18,7 +18,7 @@ import { validateRequiredArtifacts } from './validateRequiredArtifacts.js';
 /** The next action for a target that classifies as another node type than the plan requires. */
 function typeMismatchAction(node: FractalNode, expected: string): string {
   if (expected === RESTRUCTURE_NODE_TYPES.FRACTAL)
-    return `Give ${node.path} INTENT.md, DETAIL.md and the entry point that requiredArtifacts lists, then run postcondition again.`;
+    return `Give ${node.path} INTENT.md and the entry point that requiredArtifacts lists, then run postcondition again.`;
   if (expected === RESTRUCTURE_NODE_TYPES.ORGAN)
     return `Remove what makes ${node.path} classify as ${node.type} — INTENT.md, DETAIL.md, or a module entry file such as index.ts — or, if the unit needs its entry file, create a new plan with contractIntent "independent". Then run postcondition again.`;
   return `Make ${node.path} a ${expected} as the plan lists it, then run postcondition again.`;

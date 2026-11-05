@@ -4,7 +4,7 @@
 
 ## 1. A comment states the current spec, never its history
 
-When the code changes, its comment changes in the same edit. No changelog lines, no dated notes, no "previously" or "used to", no commented-out predecessor kept for reference — nothing verifies any of it, so it rots silently and then misleads with the authority of a comment. History that must be kept goes where this repository keeps it (the version-control trail, a changelog, a decision record, a module document) — never the source. Delete the code, delete its comment with it.
+When the code changes, its comment changes in the same edit. No changelog lines, no dated notes, no "previously" or "used to", no commented-out predecessor kept for reference — nothing verifies any of it, so it rots silently and then misleads with the authority of a comment. History that must be kept goes to the version-control trail or to the change records the repository keeps, such as a changelog; never the source, and never a document that describes current behavior. Delete the code, delete its comment with it.
 
 ## 2. An inline comment is a last resort — three lines at most, for what the code cannot say
 

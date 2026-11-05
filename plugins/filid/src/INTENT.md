@@ -15,7 +15,7 @@ Filid 1.0의 canonical TypeScript source. 서버 밖 공급자가 의존 사실�
 
 ### Always do
 
-- 새 fractal에 INTENT.md, DETAIL.md와 named-export entry point 추가
+- 새 fractal에 INTENT.md와 named-export entry point를 추가하고, 기록할 계약이 있을 때 DETAIL.md 추가
 - 사실과 어댑터 증거의 unsupported/indeterminate/unknown을 PASS와 구분
 
 ### Ask first

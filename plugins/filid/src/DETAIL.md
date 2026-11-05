@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 문서 위반 타입은 `history-section`과 `last-updated-trigger`를 error로 표현한다. 필수 재구조화 산출물 역할은 INTENT 문서와 진입점이며, 선택 문서의 부재를 필수 산출물 누락으로 표시하지 않는다.
+
 - 레이어 의존 방향은 `mcp`/`hooks` → `core` → `adapters` → `types`/`constants`/`lib` 한 방향이며 역방향 edge는 0이다.
 - `factsExtractor`는 `hooks`와 같은 host 경계지만 `core`를 거치지 않는다: `factsExtractor` → `adapters` → `types`/`constants`/`lib`. `mcp`·`core`·`hooks`와 `factsExtractor` 사이의 import는 어느 방향으로도 0이다. 서버 번들과 추출 프로그램 번들이 서로의 코드를 싣지 않게 하기 위해서다.
 - `core`는 생태계 리터럴을 알지 못한다. 확장자, 진입점 파일명, import 문법, 테스트 호출 문법은 `adapters/` 안에만 존재한다.
@@ -46,12 +48,7 @@
 - **Direct import**: allowed
 - **Reason**: 같은 fractal 내부 소비자는 자기 entry point를 경유하지 않고 concrete peer를 직접 참조한다. `version.ts`는 생성된 단일 상수 파일이고 아무것도 import하지 않아 런타임 순환을 만들지 않는다. 자식 fractal은 루트 파일을 직접 import하면 `src`로 가는 의존 edge가 생기므로 `constants` organ의 재노출을 경유한다.
 
-## History
-
-- 2026-09-20 — 스캔 결과 재사용을 `AsyncLocalStorage` 요청 스코프 메모 하나로 한정했다. 스냅샷 1회가 같은 git 질의와 같은 트리 워크를 다섯 번 반복하고 있었는데, 모듈 전역 캐시로 없애면 요청 사이에 움직인 트리를 답하게 된다. 스코프가 없을 때 아무것도 저장하지 않게 해서 훅과 추출 프로그램의 동작은 그대로 두었다.
-- 2026-09-05 — setup, inspection과 restructure lifecycle을 action-dispatched 도구로 병합해 MCP 표면을 4개로 줄였다.
-- 2026-08-28 — 대규모 변경의 반복 snapshot 비용을 없애기 위해 `context_resolve` 공개 DTO를 array-first batch로 바꿨다.
 
 ## Last Updated
 
-2026-09-20
+기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.

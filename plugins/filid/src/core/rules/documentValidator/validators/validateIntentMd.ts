@@ -9,17 +9,22 @@ import type {
 import { detectDerivableEnumeration } from '../derivableContent/detectDerivableEnumeration.js';
 
 import { countLines } from './countLines.js';
+import { validateDocumentHistory } from './utils/validateDocumentHistory.js';
 
 /**
  * Validate an INTENT.md document.
  * - 50-line limit
  * - 3-tier boundary presence (Always do / Ask first / Never do)
  * - derivable enumeration (three or more path tokens in one section)
+ * @param content - Complete proposed Markdown document.
+ * @returns Boundary and history errors and advisory content findings.
  */
 export function validateIntentMd(content: string): IntentMdValidation {
-  const violations: DocumentViolation[] = [];
+  const violations: DocumentViolation[] = validateDocumentHistory(
+    content,
+    false,
+  );
 
-  // Check 50-line limit
   const lines = countLines(content);
   if (lines > INTENT_MD_LINE_LIMIT)
     violations.push({
@@ -28,7 +33,6 @@ export function validateIntentMd(content: string): IntentMdValidation {
       severity: 'error',
     });
 
-  // Check 3-tier boundary system presence
   const hasAlwaysDo = BOUNDARY_KEYWORDS.alwaysDo.test(content);
   const hasAskFirst = BOUNDARY_KEYWORDS.askFirst.test(content);
   const hasNeverDo = BOUNDARY_KEYWORDS.neverDo.test(content);

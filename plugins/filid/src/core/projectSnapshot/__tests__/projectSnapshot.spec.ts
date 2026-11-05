@@ -14,12 +14,12 @@ import {
 } from '@ogham/cross-platform';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { seedFacts } from '../../../__tests__/integration/helpers/seedFacts.js';
 import { createAdapterRegistry } from '../../../adapters/index.js';
 import type {
   StructureAdapter,
   VerificationAdapter,
 } from '../../../types/adapters.js';
-import { seedFacts } from '../../../__tests__/integration/helpers/seedFacts.js';
 import { createDefaultConfig } from '../../infra/configLoader/index.js';
 import { computeSnapshotHash, createProjectSnapshot } from '../index.js';
 
@@ -70,7 +70,7 @@ function detail(name: string): string {
     `### AC-${name} — stable evidence`,
     '- The public value is available.',
     '## Last Updated',
-    '2026-07-27',
+    'When the contract changes.',
   ].join('\n');
 }
 
@@ -138,8 +138,12 @@ describe('project snapshot', () => {
     });
 
     expect(included.snapshotHash).not.toBe(excluded.snapshotHash);
-    expect(included.tree.nodes.get(fixture.producer)?.peerFiles).toContain('value.ts');
-    expect(excluded.tree.nodes.get(fixture.producer)?.peerFiles).not.toContain('value.ts');
+    expect(included.tree.nodes.get(fixture.producer)?.peerFiles).toContain(
+      'value.ts',
+    );
+    expect(excluded.tree.nodes.get(fixture.producer)?.peerFiles).not.toContain(
+      'value.ts',
+    );
   });
 
   it('prunes structure.excludeFromScan paths from the tree like ignore does', async () => {
@@ -151,11 +155,16 @@ describe('project snapshot', () => {
     const included = await createProjectSnapshot(root, registry, config);
     const excluded = await createProjectSnapshot(root, registry, {
       ...config,
-      structure: { ...config.structure, excludeFromScan: ['producer/value.ts'] },
+      structure: {
+        ...config.structure,
+        excludeFromScan: ['producer/value.ts'],
+      },
     });
 
     expect(included.snapshotHash).not.toBe(excluded.snapshotHash);
-    expect(excluded.tree.nodes.get(fixture.producer)?.peerFiles).not.toContain('value.ts');
+    expect(excluded.tree.nodes.get(fixture.producer)?.peerFiles).not.toContain(
+      'value.ts',
+    );
   });
 
   it('bundles one tree, owner graph, and verification analysis', async () => {

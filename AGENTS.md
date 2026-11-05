@@ -25,7 +25,7 @@ Resolve in this strict order: (1) `INTENT.md` present → fractal; (2) `DETAIL.m
 
 Traversal continues inside organs: a nested directory with its own documents or module index is its own fractal. `hybrid` is never auto-assigned, and unproven purity stays an organ. What a node _should_ be is a rule result, not a classification: an organ consumed from outside its owner's subtree is reported with the consumer paths as evidence, never silently reclassified — which is what lets a non-FCA codebase be adopted.
 
-When the shape is yours to decide: a directory that others call by name while its internals stay free to change is a fractal — whether or not the package publishes it — and a fractal owns the implementation of its contract. An entry point that only re-exports a parent's organs is a facade, not a fractal: move the implementation in, or drop the claim. Dropping the claim is a demotion: remove the entry point, then delete `INTENT.md` and `DETAIL.md` and record the demotion in the parent's `DETAIL.md`.
+When the shape is yours to decide: a directory that others call by name while its internals stay free to change is a fractal — whether or not the package publishes it — and a fractal owns the implementation of its contract. An entry point that only re-exports a parent's organs is a facade, not a fractal: move the implementation in, or drop the claim. Dropping the claim is a demotion, documents first: state in the parent's `DETAIL.md`, as the parent's present decision, what the parent now owns and why that directory is not a fractal — the parent adds the document for this purpose if it has none — then remove the entry point and delete the directory's `INTENT.md` and any `DETAIL.md`.
 
 ## 3. A fractal is crossed through its entry point
 
@@ -74,15 +74,15 @@ paths:
 
 # Module Documents
 
-> **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults — the higher source wins. INTENT records the boundary; DETAIL records the current contract and, when a change is worth remembering, the history behind it. Applies when you are creating or editing an `INTENT.md` or a `DETAIL.md`.
+> **Precedence**: repository instructions (CLAUDE.md, project rules) > repository conventions > this rule > filid defaults — the higher source wins. INTENT records the boundary; DETAIL records the current contract; neither records history. Applies when you are creating or editing an `INTENT.md` or a `DETAIL.md`.
 
 ## 1. INTENT records the boundary; DETAIL records the contract
 
-Two documents, two jobs — neither substitutes for the other. The section headings `Purpose`, `Conventions`, `Boundaries`, `Always do`, `Ask first` and `Never do` in INTENT — plus `Structure` and `Dependencies` only under the conditions §2 sets — and `Requirements`, `API Contracts`, `Acceptance Criteria` and `Last Updated` in DETAIL, stay in English; descriptive content follows `[filid:lang]`, defaulting to English. INTENT records only this fractal's own purpose, ownership and boundaries — never a copy of an ancestor's — and updates only when the public boundary or contract changes.
+Two documents, two jobs — neither substitutes for the other. Every fractal has an `INTENT.md`; `DETAIL.md` is optional and exists only when the fractal has contract content that §2 requires or another rule requires the document: acceptance groups that verification files bind (`filid_verification-records` §5), a boundary exemption (§7), or a child's demotion record. A fractal whose maintainer derives the whole contract from the entry point and the tests has none, and its absence is not a finding; a `DETAIL.md` that holds nothing §2 requires and that no other rule requires is deleted rather than kept as a shell. The section headings `Purpose`, `Conventions`, `Boundaries`, `Always do`, `Ask first` and `Never do` in INTENT — plus `Structure` and `Dependencies` only under the conditions §2 sets — and `Requirements`, `API Contracts`, `Acceptance Criteria` and `Last Updated` in DETAIL, stay in English; descriptive content follows `[filid:lang]`, defaulting to English. INTENT records only this fractal's own purpose, ownership and boundaries — never a copy of an ancestor's — and updates only when the public boundary or contract changes.
 
-## 2. A document states what tools cannot derive
+## 2. A document records what its reader cannot establish and omits what that reader derives
 
-Anything a reader's tools answer in one command is not content — it is a second copy that drifts. File and directory inventories, export lists, dependency rosters and counts of any of these come from `ls`, a symbol index or the package manifest, and are never written into INTENT or DETAIL; the documents keep what no tool can print — boundary decisions, reasons, invariants, and warnings about what the tree misleads on. `Structure` and `Dependencies` are therefore conditional sections: `Structure` appears only to defuse what the tree cannot say — a name trap, a generated-vs-canonical split, a misleading conventional name; `Dependencies` appears only for a coupling the manifest cannot show. A path reference that must stay carries its reason beside it, the way an exemption does (§7); three or more path tokens in one section read as an inventory, and the scanner flags them.
+A document records every mental model, policy, invariant, rejected alternative, known limit and other idea that its reader cannot establish from what they hold, with its reason; a policy or invariant also names the failure it prevents. The reader of INTENT and DETAIL is a maintainer who holds the source and the tests. Reasons and change permissions stay even when the behavior they govern is visible in the code, and anything the reader would not establish unambiguously stays in. What that reader derives directly, such as inventories, signatures, the steps a function takes and values a test already pins, is a second copy that drifts and stays out. For a sentence that the first part of this section does not require, ask whether deleting it raises the chance that a competent newcomer holding only the code and the tests makes a wrong change; if it does not, delete it. `Structure` and `Dependencies` are therefore conditional sections: `Structure` appears only to defuse what the tree cannot say — a name trap, a generated-vs-canonical split, a misleading conventional name; `Dependencies` appears only for a coupling the manifest cannot show. A path reference that must stay carries its reason beside it, the way an exemption does (§7); three or more path tokens in one section read as an inventory, and the scanner flags them.
 
 ## 3. INTENT is at most 50 lines and names its three boundaries
 
@@ -94,11 +94,11 @@ Independent documentation is a claim to an independent contract. An organ does n
 
 ## 5. DETAIL's contract sections are current state, not an append-only ledger
 
-Restructure the contract sections to the currently intended behavior on every update; a superseded clause is removed, not left standing beside its replacement. Update DETAIL before the code it describes. Acceptance groups carry stable IDs, unique within that document. `DETAIL.md` is the sole acceptance-criteria ledger; a legacy `.filid/criteria.md` is reported as such — never auto-deleted, never silently migrated.
+Restructure the contract sections to the currently intended behavior on every update; a superseded clause is removed, not left standing beside its replacement. Update DETAIL before the code it describes. Acceptance groups carry stable IDs, unique within that document. `Acceptance Criteria` declares only the groups a verification file binds or that state a contract the tests do not; when the tests pin every criterion, the section says so in one sentence and declares none. `DETAIL.md` is the sole acceptance-criteria ledger; a legacy `.filid/criteria.md` is reported as such — never auto-deleted, never silently migrated. The body of `## Last Updated` states what triggers an update of this document, for example "with every change to the acceptance criteria", never a date; the date is in version control.
 
-## 6. History has one address, and the contract is not it
+## 6. History lives in version control, not in the documents
 
-INTENT carries no history — no changelog, no dated notes; a retired boundary leaves by deletion, not by annotation. The code carries none either. `## History` in DETAIL is the one place the past is written down: optional, below the contract sections and above `## Last Updated`, entries newest first, recording the decision and the reason it was taken or reversed — the diff itself is version control's job. An entry that no longer informs a present decision is dropped, not archived deeper. A history entry accompanies the contract change that produced it; an edit that only appends an entry is the append-only pattern §5 rejects.
+History lives in version control. INTENT and DETAIL carry no history section, dated note or "previously": a decision and its reason are written as present facts in the contract sections, and when or how the decision was reached stays in the commit that made the change. A retired clause is deleted, not annotated.
 
 ## 7. An exemption without a reason is a disabled rule in costume
 
@@ -119,7 +119,7 @@ A missing or empty `Reason` is an unmet contract, not a granted exemption.
 
 ---
 
-**This rule is working if:** every fractal's boundary fits on one screen, nothing in it repeats what `ls` can print, and the only past tense in the tree sits under a `## History` heading. **This rule is wrong for you if:** the directory is an organ, or a part of the tree that has not adopted FCA — then it has no contract of its own to document, and adding one is the wrong move.
+**This rule is working if:** every fractal's boundary fits on one screen, nothing in either document restates what a maintainer derives from the source and the tests, and neither carries a history section, a dated note or a "previously". **This rule is wrong for you if:** the directory is an organ, or a part of the tree that has not adopted FCA — then it has no contract of its own to document, and adding one is the wrong move.
 <!-- FILID:END:filid_module-documents.md -->
 
 <!-- FILID:START:filid_verification-records.md -->
@@ -182,7 +182,7 @@ It sits in the test directory — `__tests__/`, or the repository's own conventi
 
 ## 1. A unit sits with the contract it implements; shared code sits at its users' lowest common fractal
 
-A unit belongs to the fractal whose contract it implements. Only a unit serving the implementations of two or more fractals is shared: compute the lowest common fractal of the owners that use it and place the unit under it — their common ancestor is the address; anything higher is a guess. A consumer is product code outside the unit's fractal subtree; verification, benchmark and demonstration code is not a consumer and never pulls a unit upward. Count the consumers that use the unit: code that merely constructs it and hands it on is wiring, and counting wiring pulls everything up to the composition root. A unit with one using owner is an organ of that owner — one user is not shared code. A unit with a contract of its own, published or not, becomes a child fractal instead, with its intent, detail and entry-point artifacts.
+A unit belongs to the fractal whose contract it implements. Only a unit serving the implementations of two or more fractals is shared: compute the lowest common fractal of the owners that use it and place the unit under it — their common ancestor is the address; anything higher is a guess. A consumer is product code outside the unit's fractal subtree; verification, benchmark and demonstration code is not a consumer and never pulls a unit upward. Count the consumers that use the unit: code that merely constructs it and hands it on is wiring, and counting wiring pulls everything up to the composition root. A unit with one using owner is an organ of that owner — one user is not shared code. A unit with a contract of its own, published or not, becomes a child fractal instead, with its intent and entry-point artifacts, and a detail document when it has a contract to record.
 
 ## 2. An organ cannot be a lowest common ancestor
 
@@ -198,7 +198,7 @@ A functionally working but different result is a failed restructure. The restruc
 
 ## 5. The document changes before the code does
 
-Contracts lead; implementations follow: before changing a fractal, update DETAIL, and update INTENT only when its public boundary changes. Run Filid scans and validations once at the pull-request or merge-track seam, after implementation and accepted review fixes — earlier only when explicitly requested; ordinary development checks and edits never trigger them. At the seam, record warnings as findings and note any deviation from the plan.
+Contracts lead; implementations follow: before changing a fractal, update its DETAIL when the change alters what it records — adding one when the change gives it contract content to record — and update INTENT only when its public boundary changes. Run Filid scans and validations once at the pull-request or merge-track seam, after implementation and accepted review fixes — earlier only when explicitly requested; ordinary development checks and edits never trigger them. At the seam, record warnings as findings and note any deviation from the plan.
 
 ---
 
@@ -353,7 +353,7 @@ Avoid `common`, `misc`, `util2`, `temp`, `new`, `stuff`, `extra` and their kin �
 
 ## 4. Derived names follow their source
 
-Tests, specs, fixtures, and generated companions are named for what they verify or accompany, and rename with their source — a base name that matches nothing is a name trap (`seiri_agent-legible` §3).
+Tests, specs, fixtures, and generated companions are named for what they verify or accompany, and rename with their source — a base name that matches nothing is a name trap.
 
 ---
 
@@ -371,7 +371,7 @@ A cycle is two units pretending to be one — no reading order exists. Extract t
 
 ## 2. Group by purpose before minimizing depth
 
-Group related files in subdirectories named for their topic or responsibility, including inside directories such as `utils/` and `helpers/`. When adding a file, reuse its topic's directory or create one for a distinct responsibility. Flatten only levels that add no topic or ownership boundary; a single child alone is not a reason to collapse a directory.
+Group related files in subdirectories named for their topic or responsibility, including inside directories such as `utils/` and `helpers/`. When adding a file, reuse its topic's directory or create one for a distinct responsibility. Flatten only levels that add no topic, ownership or role boundary: a level that separates a directory's modules from the code supporting them earns its place even when it names no topic, and topic names continue inside it. A single child alone is not a reason to collapse a directory.
 
 ## 3. Cohesion splits, complexity compresses
 
@@ -379,7 +379,7 @@ Parts of a unit that share no state or purpose are several units — split where
 
 ---
 
-**This rule is working if:** directory names reveal responsibilities, call chains rarely reverse direction, and splits land at recognizable seams. **This rule is wrong for you if:** the tree is vendored or generated — a generator owns that structure; change the generator or leave it be (`seiri_context-efficiency` §1).
+**This rule is working if:** directory names reveal responsibilities, call chains rarely reverse direction, and splits land at recognizable seams. **This rule is wrong for you if:** the tree is vendored or generated — a generator owns that structure; change the generator or leave it be.
 <!-- SEIRI:END:seiri_structure.md -->
 
 <!-- SEIRI:START:seiri_function-boundaries.md -->
@@ -389,7 +389,7 @@ Parts of a unit that share no state or purpose are several units — split where
 
 ## 1. Inputs arrive as parameters
 
-The signature is the full list of what a function can see. Compute from arguments; module state read at call time, ambient config, the clock, and the environment are passed in, not reached for. When a dependency genuinely cannot be passed — a framework injects it, a runtime owns it — say so at the function or its file head (`seiri_agent-legible` §1) instead of reaching through it silently.
+The signature is the full list of what a function can see. Compute from arguments; module state read at call time, ambient config, the clock, and the environment are passed in, not reached for. When a dependency genuinely cannot be passed — a framework injects it, a runtime owns it — say so at the function or its file head instead of reaching through it silently.
 
 ## 2. Effects live at the edge
 
@@ -397,11 +397,11 @@ Pure by default; effectful on purpose, in one named place. I/O, module-state wri
 
 ## 3. One file, one exported function
 
-Name a function file for the function it exports, and export that one only (`seiri_naming` §2); a second export earns its place only when the two cannot be read apart. At most two unexported helpers may share the file, and each helper's implementation body must be 8 lines or fewer; its declaration or signature and enclosing braces do not count. A longer helper is its own file (`seiri_structure` §3). At most three types, newly defined here; derived types — aliases, narrowings, unions over what already exists — stay with their source, and type-only files are outside this budget. These counts are defaults; a budget this repository declares wins.
+Name a function file for the function it exports, and export that one only; a second export earns its place only when the two cannot be read apart. At most two unexported helpers may share the file, and each helper's implementation body must be 8 lines or fewer; its declaration or signature and enclosing braces do not count. A longer helper is its own file. At most three types, newly defined here; derived types — aliases, narrowings, unions over what already exists — stay with their source, and type-only files are outside this budget. These counts are defaults; a budget this repository declares wins.
 
 ## 4. A helper that moves out moves down
 
-Extraction is not relocation to the same shelf. Helpers pulled out of a function do not become its flat neighbors: give the function a directory and file them one level under it — `utils/` or `helpers/` while their only claim is "these serve the function above", renamed for the topic once the set has one (`seiri_naming` §3). The path states which function is served and which serves.
+Extraction is not relocation to the same shelf. Helpers pulled out of a function do not become its flat neighbors: give the function a directory and file them one level under it — `utils/` or `helpers/` while their only claim is "these serve the function above", renamed for the topic once the set has one. The path states which function is served and which serves.
 
 ---
 
@@ -433,11 +433,11 @@ Re-running a command to re-read its output pays twice: capture long output once 
 
 ## 1. A comment states the current spec, never its history
 
-When the code changes, its comment changes in the same edit. No changelog lines, no dated notes, no "previously" or "used to", no commented-out predecessor kept for reference — nothing verifies any of it, so it rots silently and then misleads with the authority of a comment. History that must be kept goes where this repository keeps it (the version-control trail, a changelog, a decision record, a module document) — never the source. Delete the code, delete its comment with it.
+When the code changes, its comment changes in the same edit. No changelog lines, no dated notes, no "previously" or "used to", no commented-out predecessor kept for reference — nothing verifies any of it, so it rots silently and then misleads with the authority of a comment. History that must be kept goes to the version-control trail or to the change records the repository keeps, such as a changelog; never the source, and never a document that describes current behavior. Delete the code, delete its comment with it.
 
 ## 2. An inline comment is a last resort — three lines at most, for what the code cannot say
 
-A truer name, a smaller function, or an extracted constant beats an explanation (`seiri_naming` §2, `seiri_structure` §3), and what a declaration needs said belongs in its documentation comment (§3). A comment that must sit on the code states only what the code itself cannot — the invariant no type can express, the workaround and its external trigger, the effect that lands elsewhere — and it stays within 3 lines. What the code already shows, no comment repeats: a paraphrase of the next line is a second copy that nothing checks and the next edit orphans (§1). There is no orientation exception: a line summarizing the block below it restates what reading the block shows, and it goes.
+A truer name, a smaller function, or an extracted constant beats an explanation, and what a declaration needs said belongs in its documentation comment (§3). A comment that must sit on the code states only what the code itself cannot — the invariant no type can express, the workaround and its external trigger, the effect that lands elsewhere — and it stays within 3 lines. What the code already shows, no comment repeats: a paraphrase of the next line is a second copy that nothing checks and the next edit orphans (§1). There is no orientation exception: a line summarizing the block below it restates what reading the block shows, and it goes.
 
 ## 3. A function's documentation comment names its parameters, its result, and its purpose
 

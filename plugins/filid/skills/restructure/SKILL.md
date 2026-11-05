@@ -49,7 +49,7 @@ Show the plan ID/hash and every Current/Target/Type/Basis/LCA decision, artifact
 
 ### 4. Execute outside MCP
 
-The calling environment updates DETAIL.md and boundary-changing INTENT.md first, then creates the required artifacts of `alreadyPlaced` entries. It runs `moves` in listed order — each move relocates its exact source path to its `targetPath` and then creates that move's required artifacts — and only after the last move changes each `affectedImports` entry so it loads its `requiredResolvedPath` — its `suggestedSpecifier` when present, otherwise a relative path-like specifier in the file's existing style. Never reorder moves. Use cross-platform path/file helpers and preserve unrelated changes.
+The calling environment updates an existing DETAIL.md when its recorded contract changes, adds one when the change gives it contract content to record, and updates boundary-changing INTENT.md first. DETAIL.md is optional and its absence alone is not a finding. It then creates the required artifacts of `alreadyPlaced` entries. It runs `moves` in listed order — each move relocates its exact source path to its `targetPath` and then creates that move's required artifacts — and only after the last move changes each `affectedImports` entry so it loads its `requiredResolvedPath` — its `suggestedSpecifier` when present, otherwise a relative path-like specifier in the file's existing style. Never reorder moves. Use cross-platform path/file helpers and preserve unrelated changes.
 
 Filid MCP never moves a file and never rewrites an import. This skill does not turn those operations into a generic MCP capability.
 
