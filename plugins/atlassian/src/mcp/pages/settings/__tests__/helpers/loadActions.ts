@@ -36,7 +36,7 @@ export function loadActions(
   const root = join(import.meta.dirname, "../..");
   const html = readFileSync(join(root, "index.html"), "utf8");
   let api: { onSubmit(closeAfter: boolean): void; onTest(): void } | undefined;
-  for (const match of html.matchAll(/<script src="\.\/(scripts\/[^\"]+)"/g)) {
+  for (const match of html.matchAll(/<script src="\.\/(scripts\/[^"]+)"/g)) {
     if (match[1] === "scripts/json-import.js") continue;
     let source = readFileSync(join(root, match[1]), "utf8");
     if (match[1] === "scripts/app.js") {

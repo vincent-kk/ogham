@@ -32,7 +32,7 @@ it("inlines every production script in source order without emitting mock code",
   expect(output.html).not.toContain("mock-api");
   const names = [
     ...source.matchAll(
-      /<script src="\.\/scripts\/helpers\/(?:[^\"]*\/)?([^/\"]+)\.js"/g,
+      /<script src="\.\/scripts\/helpers\/(?:[^"]*\/)?([^/"]+)\.js"/g,
     ),
   ]
     .map((match) => match[1])
@@ -51,7 +51,7 @@ it("inlines every stylesheet in source order with all declarations intact", asyn
   const source = readFileSync(join(settingsDir, "index.html"), "utf8");
   const stylesheets = [
     ...source.matchAll(
-      /<link href="\.\/(styles\/[^\"]+\.css)" rel="stylesheet"/g,
+      /<link href="\.\/(styles\/[^"]+\.css)" rel="stylesheet"/g,
     ),
   ];
   const expected = await Promise.all(

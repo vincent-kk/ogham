@@ -56,7 +56,7 @@ export function loadForm(values: Record<string, string>, tab = "cloud") {
   let api:
     | { collectFormData(): Record<string, unknown>; validateForm(): boolean }
     | undefined;
-  for (const match of html.matchAll(/<script src="\.\/(scripts\/[^\"]+)"/g)) {
+  for (const match of html.matchAll(/<script src="\.\/(scripts\/[^"]+)"/g)) {
     if (match[1] === "scripts/json-import.js") continue;
     let source = readFileSync(join(settingsDir, match[1]), "utf8");
     if (match[1] === "scripts/app.js") {
