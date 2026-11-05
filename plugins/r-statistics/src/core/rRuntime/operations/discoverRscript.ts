@@ -5,7 +5,7 @@ import {
   readdirSync,
   statSync,
 } from "node:fs";
-import { delimiter, join, resolve } from "node:path";
+import { delimiter, isAbsolute, join, resolve } from "node:path";
 
 import { spawnCliSync } from "@ogham/cross-platform";
 
@@ -74,7 +74,10 @@ export function discoverRscript(): string | null {
   const platform = detectPlatform();
 
   const envOverride = process.env[RSCRIPT_ENV_VAR];
-  if (envOverride && isExecutableFile(envOverride)) return resolve(envOverride);
+  const overrideCandidate =
+    envOverride && !isAbsolute(envOverride) ? resolve(envOverride) : envOverride;
+  if (overrideCandidate && isExecutableFile(overrideCandidate))
+    return overrideCandidate;
 
   const fromPath = scanPath(
     platform === Platform.Windows ? "Rscript.exe" : "Rscript",

@@ -1,4 +1,10 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { isAbsolute, join, relative } from "node:path";
 
@@ -42,6 +48,32 @@ describe("discoverRscript", () => {
     process.env[RSCRIPT_ENV_VAR] = relative(process.cwd(), process.execPath);
     expect(discoverRscript()).toBe(process.execPath);
   });
+
+  it.skipIf(process.platform === "win32")(
+    "preserves an absolute override with parent traversal after a POSIX symlink",
+    () => {
+      mkdirSync(join(executableDir, "real", "sub"), { recursive: true });
+      writeFileSync(join(executableDir, "real", "Rscript"), "", { mode: 0o700 });
+      symlinkSync(join(executableDir, "real", "sub"), join(executableDir, "link"));
+      const override = `${executableDir}/link/../Rscript`;
+      process.env[RSCRIPT_ENV_VAR] = override;
+
+      expect(discoverRscript()).toBe(override);
+    },
+  );
+
+  it.skipIf(process.platform === "win32")(
+    "rejects a relative POSIX symlink override whose normalized path is not executable",
+    () => {
+      mkdirSync(join(executableDir, "real", "sub"), { recursive: true });
+      writeFileSync(join(executableDir, "real", "Rscript"), "", { mode: 0o700 });
+      symlinkSync(join(executableDir, "real", "sub"), join(executableDir, "link"));
+      process.env[RSCRIPT_ENV_VAR] =
+        `${relative(process.cwd(), executableDir)}/link/../Rscript`;
+
+      expect(discoverRscript()).not.toBe(join(executableDir, "Rscript"));
+    },
+  );
 
   it("returns an absolute path for an executable in a relative PATH entry", () => {
     delete process.env[RSCRIPT_ENV_VAR];
