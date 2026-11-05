@@ -13,7 +13,7 @@ MCP setup tool with a local HTTP UI that completes only after the selected confi
 
 ### Always do
 
-- Mask credentials in responses (use `••••••••••`)
+- Mask valid credentials in responses (use `••••••••••`); open with empty credentials after a stored-schema validation failure and overwrite that file on a successful save.
 - Test connection before saving config
 - Auto-shutdown server after 5 minutes of inactivity
 - Bind to 127.0.0.1 only
