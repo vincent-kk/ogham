@@ -46,17 +46,29 @@ export function loadConfigScope(projectRoot: string): ConfigScopeState {
  * The scope is required rather than defaulted: both layers are valid targets
  * and a silent default would put a project's vault list in the personal
  * config or the reverse.
+ * @param projectRoot Host workspace root used to resolve both config layers.
+ * @param scope Explicit destination layer; project values override user values.
+ * @param config Proposed layer document, stored without normalization.
+ * @returns The path written after the effective merged config passes its guard.
+ * @throws Error naming the scope when the merge has no valid vault list; no file is written.
  */
 export function writeConfig(
   projectRoot: string,
   scope: ConfigScope,
   config: LensConfig,
 ): string {
-  return writeConfigLayer(
-    configLayers(projectRoot),
-    scope,
-    config as unknown as Record<string, unknown>,
-  );
+  const layers = configLayers(projectRoot);
+  const documents = readConfigLayers(layers);
+  const document = { ...config };
+  const merged =
+    scope === "user"
+      ? mergeConfigLayers(document, documents.project)
+      : mergeConfigLayers(documents.user, document);
+  if (!isValidLensConfig(merged))
+    throw new Error(
+      `Cannot write ${scope} config: merged configuration has no valid vault list.`,
+    );
+  return writeConfigLayer(layers, scope, document);
 }
 
 /**
