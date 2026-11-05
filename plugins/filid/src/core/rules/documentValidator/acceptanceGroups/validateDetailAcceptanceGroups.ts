@@ -4,6 +4,7 @@ import type {
   DocumentViolation,
 } from '../../../../types/documents.js';
 
+/** Required anchors remain even when no acceptance groups are declared. */
 const REQUIRED_DETAIL_SECTIONS = [
   'Requirements',
   'API Contracts',
@@ -11,8 +12,14 @@ const REQUIRED_DETAIL_SECTIONS = [
   'Last Updated',
 ] as const;
 
+/** Stable IDs and titles let verification files bind an unambiguous contract. */
 const GROUP_HEADING = /^###\s+([A-Za-z][A-Za-z0-9._-]*)\s+—\s+(.+?)\s*$/;
 
+/**
+ * Validate declared acceptance groups while allowing contracts with none.
+ * @param content - Complete DETAIL document with the required section headings.
+ * @returns Groups with source lines and errors for missing sections or malformed groups.
+ */
 export function validateDetailAcceptanceGroups(
   content: string,
 ): DetailAcceptanceGroupValidation {
@@ -63,17 +70,6 @@ export function validateDetailAcceptanceGroups(
     seen.add(id);
     groups.push({ id, title, line: index + 1 });
   }
-
-  if (
-    lines.some((line) => line.trim() === '## Acceptance Criteria') &&
-    groups.length === 0
-  )
-    violations.push({
-      rule: 'missing-field',
-      message:
-        'DETAIL.md must declare at least one acceptance group. Add "### <stable-id> — <title>" under "## Acceptance Criteria".',
-      severity: 'error',
-    });
 
   return { groups, violations };
 }

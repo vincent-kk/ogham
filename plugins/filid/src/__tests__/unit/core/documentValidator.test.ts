@@ -128,7 +128,7 @@ describe('document-validator', () => {
         '### AC-feature — Feature behavior',
         '- The feature is observable.',
         '## Last Updated',
-        '2026-07-26',
+        'When the contract changes.',
       ].join('\n');
       const result = validateDetailMd(content);
       expect(result.valid).toBe(true);
@@ -145,7 +145,7 @@ describe('document-validator', () => {
         '### AC-feature — Feature behavior',
         '- The feature is observable.',
         '## Last Updated',
-        '2026-07-26',
+        'When the contract changes.',
       ].join('\n');
 
       expect(validateDetailAcceptanceGroups(content)).toEqual({
@@ -160,7 +160,7 @@ describe('document-validator', () => {
       });
     });
 
-    it('should reject a DETAIL.md without required sections or groups', () => {
+    it('should reject a DETAIL.md without required sections', () => {
       const result = validateDetailMd('# Spec\n## Requirements\n- Feature A\n');
 
       expect(result.valid).toBe(false);
@@ -184,7 +184,7 @@ describe('document-validator', () => {
         '### AC-feature — Second behavior',
         '- The second behavior is observable.',
         '## Last Updated',
-        '2026-07-26',
+        'When the contract changes.',
       ].join('\n');
 
       const result = validateDetailMd(content);
@@ -200,7 +200,7 @@ describe('document-validator', () => {
       );
     });
 
-    it('should reject an Acceptance Criteria section with no groups', () => {
+    it('should accept an Acceptance Criteria section with no groups', () => {
       const content = [
         '# Spec',
         '## Requirements',
@@ -209,20 +209,14 @@ describe('document-validator', () => {
         '- `feature(): void`',
         '## Acceptance Criteria',
         '## Last Updated',
-        '2026-07-26',
+        'When the contract changes.',
       ].join('\n');
 
       const result = validateDetailMd(content);
 
-      expect(result.valid).toBe(false);
-      expect(result.violations).toContainEqual(
-        expect.objectContaining({
-          rule: 'missing-field',
-          severity: 'error',
-          message:
-            'DETAIL.md must declare at least one acceptance group. Add "### <stable-id> — <title>" under "## Acceptance Criteria".',
-        }),
-      );
+      expect(result.valid).toBe(true);
+      expect(result.acceptanceGroups).toEqual([]);
+      expect(result.violations).toEqual([]);
     });
 
     it('should fail when append-only pattern detected', () => {
@@ -367,7 +361,7 @@ describe('document-validator', () => {
         '## Acceptance Criteria',
         '### AC-one — First',
         '## Last Updated',
-        '2026-07-28',
+        'When the contract changes.',
         exemptionSection(''),
       ].join('\n');
       const result = validateDetailMd(content);

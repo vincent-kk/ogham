@@ -101,7 +101,7 @@ describe('merge-track skill recovery contracts', () => {
 
   it('keeps an existing zero-score document in the editable quality partition', () => {
     expect(enrichment).toMatch(/^0 <= score < min-quality\s+SPARSE$/mu);
-    expect(enrichment).toMatch(/^document absent\s+MISSING$/mu);
+    expect(enrichment).toMatch(/^INTENT absent\s+MISSING$/mu);
     expect(enrichment).toContain('SPARSE or MISSING');
   });
 

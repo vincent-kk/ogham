@@ -232,7 +232,7 @@ describe('pre-tool-use bundle apply_patch policy', () => {
     );
     writeFileSync(
       portableResolve(cwd, 'DETAIL.md'),
-      '## Requirements\n\n- Fixture\n\n## API Contracts\n\n- Stable\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- Verifiable\n\n## Last Updated\n\n2026-08-23\n',
+      '## Requirements\n\n- Fixture\n\n## API Contracts\n\n- Stable\n\n## Acceptance Criteria\n\n### AC-fixture\n\n- Verifiable\n\n## Last Updated\n\nWhen the contract changes.\n',
     );
     writeFileSync(portableResolve(cwd, 'index.ts'), '');
     writeFileSync(portableResolve(cwd, 'safe.md'), 'safe');
@@ -388,9 +388,13 @@ describe('pre-tool-use bundle apply_patch policy', () => {
       });
 
       expect(result.hookSpecificOutput?.permissionDecision).toBe(
-        hostResolvesAlias ? 'deny' : undefined,
+        hostResolvesAlias && canonicalName !== 'DETAIL.md' ? 'deny' : undefined,
       );
-      if (hostResolvesAlias) {
+      if (hostResolvesAlias && canonicalName === 'DETAIL.md')
+        expect(result.hookSpecificOutput?.additionalContext).toContain(
+          'DETAIL.md is optional',
+        );
+      if (hostResolvesAlias && canonicalName !== 'DETAIL.md') {
         expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
           'Delete rejected',
         );

@@ -29,15 +29,14 @@ export {
  * - Warns if missing 3-tier boundary sections (warning, no block)
  *
  * For Write tool targeting DETAIL.md:
- * - Blocks if detected as append-only (when oldContent provided)
+ * - Validates every full write and detects append-only when oldContent is provided
  *
  * For Edit tool targeting INTENT.md:
  * - Validates projected content against the line cap when the edit is exact
  * - Warns when an inexact edit's new_string exceeds 20 lines
  *
- * Delete of INTENT.md or DETAIL.md permits demotion only when no entry point
- * remains; symlinks or unreadable document, directory or config evidence keep
- * deletion denied.
+ * INTENT.md deletion permits demotion only without an entry point; symlinks or
+ * unreadable evidence keep it denied. DETAIL.md deletion returns retention guidance.
  *
  * Branch names and criteria ledgers do not affect this validator.
  * Write/Edit follow the physical target; Delete preserves the final entry.
@@ -62,10 +61,17 @@ export function validatePreToolUse(
         ? resolveHookTargetPath(safeCwd, filePath)
         : filePath;
 
-  if (
-    input.tool_name === HOOK_TOOL_NAME.DELETE &&
-    (isIntentMd(documentPath) || isDetailMd(documentPath))
-  ) {
+  if (input.tool_name === HOOK_TOOL_NAME.DELETE && isDetailMd(documentPath))
+    return {
+      continue: true,
+      hookSpecificOutput: {
+        permissionDecision: 'allow',
+        additionalContext:
+          'DETAIL.md is optional: delete it only when it holds no reason, policy, exemption or acceptance group that a verification file binds.',
+      },
+    };
+
+  if (input.tool_name === HOOK_TOOL_NAME.DELETE && isIntentMd(documentPath)) {
     const directory = dirname(documentPath);
     let isSymlink = true;
     try {
@@ -78,14 +84,14 @@ export function validatePreToolUse(
         continue: true,
         hookSpecificOutput: {
           permissionDecision: 'allow',
-          additionalContext: `Demotion: ${directory} has no entry point, so deleting ${basename(documentPath)} drops its fractal claim. State in the parent DETAIL.md, as the parent's present decision, what the parent now owns and why that directory is not a fractal.`,
+          additionalContext: `Demotion: ${directory} has no entry point, so deleting ${basename(documentPath)} drops its fractal claim. The parent DETAIL.md states first, as the parent's present decision, what the parent now owns and why that directory is not a fractal; add that statement now if it is missing.`,
         },
       };
     return {
       continue: true,
       hookSpecificOutput: {
         permissionDecision: 'deny',
-        permissionDecisionReason: `Delete rejected: ${filePath} is an FCA contract document. Revise the contract instead of deleting it. To demote this fractal to an organ, remove its entry point (index or main file, framework entry, manifest, or entryPointOverrides entry) first, then delete INTENT.md and DETAIL.md and state in the parent DETAIL.md, as the parent's present decision, what the parent now owns and why that directory is not a fractal. ${DENY_RETRY_GUIDANCE}`,
+        permissionDecisionReason: `Delete rejected: ${filePath} is the fractal's boundary document. Revise it instead of deleting it. To demote this fractal to an organ, first state in the parent DETAIL.md, as the parent's present decision, what the parent now owns and why that directory is not a fractal; then remove its entry point (index or main file, framework entry, manifest, or entryPointOverrides entry) and delete INTENT.md and any DETAIL.md. ${DENY_RETRY_GUIDANCE}`,
       },
     };
   }
@@ -100,10 +106,8 @@ export function validatePreToolUse(
   // No truthiness gate: empty content must still satisfy the full document.
   if (isIntentMd(documentPath)) return handleIntentMdWrite(content ?? '');
 
-  if (!content) return { continue: true };
-
-  if (isDetailMd(documentPath) && oldContent !== undefined)
-    return handleDetailMdWrite(content, oldContent);
+  if (isDetailMd(documentPath))
+    return handleDetailMdWrite(content ?? '', oldContent);
 
   return { continue: true };
 }

@@ -17,12 +17,10 @@ import {
 
 /**
  * Contract targets, update triggers and coupling addresses are not live paths.
- * History remains skipped for unmigrated documents and repository overrides.
  */
 const EXEMPT_SECTIONS = new Set([
   'Boundary Exemptions',
   'Organ Exemptions',
-  'History',
   'Last Updated',
   'Dependencies',
 ]);

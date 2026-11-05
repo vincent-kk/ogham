@@ -5,44 +5,27 @@ import type {
 import { validateDetailAcceptanceGroups } from '../acceptanceGroups/validateDetailAcceptanceGroups.js';
 import { parseBoundaryExemptions } from '../boundaryExemptions/parseBoundaryExemptions.js';
 
-/**
- * Detect pure append-only changes.
- * Returns true if all old lines remain at the start of new content
- * and only new lines are added at the end.
- */
-export function detectAppendOnly(
-  oldContent: string,
-  newContent: string,
-): boolean {
-  if (oldContent.length === 0) return false;
-
-  const oldLines = oldContent.trimEnd().split('\n');
-  const newLines = newContent.trimEnd().split('\n');
-
-  // New content must be longer for append
-  if (newLines.length <= oldLines.length) return false;
-
-  // All existing lines must remain identical
-  for (let i = 0; i < oldLines.length; i++)
-    if (oldLines[i] !== newLines[i]) return false;
-
-  return true;
-}
+import { detectAppendOnly } from './utils/detectAppendOnly.js';
+import { validateDocumentHistory } from './utils/validateDocumentHistory.js';
 
 /**
- * Validate a DETAIL.md document.
- * - Append-only pattern prohibited (when oldContent provided)
+ * Validate the current DETAIL contract before accepting a replacement.
+ * @param content - Complete proposed Markdown document.
+ * @param oldContent - Optional existing text for append-only detection.
+ * @returns Contract errors, acceptance groups and declared boundary exemptions.
  */
 export function validateDetailMd(
   content: string,
   oldContent?: string,
 ): DetailMdValidation {
-  const violations: DocumentViolation[] = [];
+  const violations: DocumentViolation[] = validateDocumentHistory(
+    content,
+    true,
+  );
   const acceptance = validateDetailAcceptanceGroups(content);
   const boundaryExemptions = parseBoundaryExemptions(content);
   violations.push(...acceptance.violations, ...boundaryExemptions.violations);
 
-  // Detect append-only (when previous content is provided)
   if (oldContent !== undefined && detectAppendOnly(oldContent, content))
     violations.push({
       rule: 'append-only',

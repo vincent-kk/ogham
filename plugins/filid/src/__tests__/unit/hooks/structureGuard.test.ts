@@ -33,7 +33,7 @@ describe('structure-guard', () => {
       'reclassified from organ to fractal',
     );
     expect(result.hookSpecificOutput?.additionalContext).toContain(
-      'Complete the fractal with DETAIL.md and an entry point, or remove INTENT.md to keep it an organ.',
+      'Complete the fractal with an entry point, or remove INTENT.md to keep it an organ.',
     );
   });
 

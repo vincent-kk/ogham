@@ -44,6 +44,11 @@ export interface CollectedDocumentEvidence {
   filePaths: string[];
 }
 
+/**
+ * Collect current document contracts and attach their evidence to the snapshot tree.
+ * @param tree - Mutable classified tree; nodes receive documentEvidence in place.
+ * @returns Read paths, DETAIL contracts and diagnostics; unreadable files propagate errors.
+ */
 export function collectDocumentEvidence(
   tree: FractalTree,
 ): CollectedDocumentEvidence {
@@ -113,16 +118,9 @@ export function collectDocumentEvidence(
           path: detailPath,
           content: detailContent,
         });
-    } else if (expected)
-      findings.push({
-        document: 'detail',
-        rule: 'missing-document',
-        message: `${DETAIL_MD} is required for ${node.type} node ${toProjectRelativePath(tree.root, node.path)}.`,
-        severity: 'error',
-      });
+    }
 
-    const missing =
-      expected && (intentContent === null || detailContent === null);
+    const missing = expected && intentContent === null;
     node.documentEvidence = {
       intentPath: intentContent === null ? null : intentPath,
       detailPath: detailContent === null ? null : detailPath,

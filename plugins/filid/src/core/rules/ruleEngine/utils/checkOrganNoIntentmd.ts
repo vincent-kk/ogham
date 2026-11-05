@@ -35,7 +35,7 @@ export function checkOrganNoIntentMd(
         message: `Organ-named directory "${node.name}" became a fractal through INTENT.md alone. Organ nodes do not own standalone documentation.`,
         path: node.path,
         suggestion:
-          'Remove INTENT.md to keep it an organ, or complete the promotion with DETAIL.md and a module entry point.',
+          'Remove INTENT.md to keep it an organ, or complete the promotion with a module entry point.',
       },
     ];
   };

@@ -1,5 +1,4 @@
 import { writeReviewStateFixtureFile } from '../../../unit/mcp/reviewState/helpers/writeReviewStateFixtureFile.js';
-
 import { createFixtureProjectRoot } from '../../helpers/createFixtureProjectRoot.js';
 import { seedFacts } from '../../helpers/seedFacts.js';
 
@@ -7,7 +6,7 @@ import { FIXTURE_INTENT } from './reviewFlowRepositoryFiles.js';
 
 /** Valid DETAIL.md with one acceptance group, shared by every fractal. */
 const DETAIL =
-  '# Fixture contract\n\n## Requirements\n\n- Keep the value deterministic.\n\n## API Contracts\n\n- The entry point exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture — Value export\n\n- The value is exported.\n\n## Last Updated\n\n2026-09-07\n';
+  '# Fixture contract\n\n## Requirements\n\n- Keep the value deterministic.\n\n## API Contracts\n\n- The entry point exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture — Value export\n\n- The value is exported.\n\n## Last Updated\n\nWhen the contract changes.\n';
 
 /** Project files: `domain/a/value.ts` is consumed by `domain/a` and `domain/b`. */
 const PROJECT_FILES: Readonly<Record<string, string>> = {

@@ -5,7 +5,7 @@ import {
   portableRelative,
 } from '@ogham/cross-platform';
 
-import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
+import { INTENT_MD } from '../../../constants/documentFiles.js';
 import { PORTABLE_PATH_MARKERS } from '../../../constants/pathMarkers.js';
 import {
   REQUIRED_ARTIFACT_ROLES,
@@ -35,6 +35,13 @@ function isOwnedRelativePath(path: string): boolean {
   );
 }
 
+/**
+ * Describe mandatory artifacts without inventing an entry-point convention.
+ * @param snapshot - Existing module-entry evidence for the selected project.
+ * @param targetContainerPath - Absolute directory of the planned target.
+ * @param targetNodeType - Only fractals own required boundary artifacts.
+ * @returns INTENT and a proven entry form, or an explicit decision requirement.
+ */
 export function buildRequiredArtifacts(
   snapshot: ProjectSnapshot,
   targetContainerPath: string,
@@ -61,10 +68,6 @@ export function buildRequiredArtifacts(
     {
       role: REQUIRED_ARTIFACT_ROLES.INTENT_DOCUMENT,
       path: portableJoin(targetContainerPath, INTENT_MD),
-    },
-    {
-      role: REQUIRED_ARTIFACT_ROLES.DETAIL_DOCUMENT,
-      path: portableJoin(targetContainerPath, DETAIL_MD),
     },
   ];
   const forms = [...entryForms.values()]

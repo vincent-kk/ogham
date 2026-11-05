@@ -40,7 +40,7 @@ export interface DetailMdSchema {
   apiContracts: string[];
   /** Stable acceptance groups declared by this contract */
   acceptanceGroups: DetailAcceptanceGroup[];
-  /** Last updated timestamp */
+  /** Condition that triggers a contract update; never a date. */
   lastUpdated: string;
   /** Compression metadata */
   compressionMeta?: CompressionMeta;
@@ -126,7 +126,9 @@ export interface DocumentViolation {
     | 'missing-section'
     | 'missing-field'
     | 'duplicate-id'
-    | 'derivable-content';
+    | 'derivable-content'
+    | 'history-section'
+    | 'last-updated-trigger';
   /** `## ` section title the violation sits in; '' names the preamble. Set by section-scoped rules. */
   section?: string;
   /** Violation description */

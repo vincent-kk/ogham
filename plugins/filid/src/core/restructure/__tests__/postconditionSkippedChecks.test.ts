@@ -180,10 +180,6 @@ const SERVICE_ARTIFACTS: MoveInstruction['requiredArtifacts'] = [
     path: `${P.SVC}/INTENT.md`,
   },
   {
-    role: REQUIRED_ARTIFACT_ROLES.DETAIL_DOCUMENT,
-    path: `${P.SVC}/DETAIL.md`,
-  },
-  {
     role: REQUIRED_ARTIFACT_ROLES.ENTRY_POINT,
     path: P.SVC_ENTRY,
     adapterId: 'fixture',

@@ -831,6 +831,38 @@
       "class": "N",
       "text": "The only code path that writes to `.claude/rules/` is `syncRuleDocs()` in `src/core/infra/configLoader/loaders/syncRuleDocs.ts`, which is invoked exclusively by the `mcp__plugin_filid_tools__project_setup` `rules-sync` action from the `setup` skill after the user confirms a checkbox selection.",
       "note": "Describes the deployment path and the setup skill existing checkbox step; not a call."
+    },
+    {
+      "file": "skills/enrich-docs/reference.md",
+      "hash": "4f72c526f6cc2bb7",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Draft one only when the user asks for that fractal or a finding requires it: `spec-contract-link` for an owner with several spec-documents, or a boundary exemption that must be declared.",
+      "note": "An existing explicit request can justify a DETAIL draft; this sentence adds no human approval or escalation step."
+    },
+    {
+      "file": "skills/enrich-docs/SKILL.md",
+      "hash": "4f72c526f6cc2bb7",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Draft one only when the user asks for that fractal or a finding requires it: `spec-contract-link` for an owner with several spec-documents, or a boundary exemption that must be declared.",
+      "note": "An existing explicit request can justify a DETAIL draft; this sentence adds no human approval or escalation step."
+    },
+    {
+      "file": "skills/pull-request/SKILL.md",
+      "hash": "4f72c526f6cc2bb7",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Draft one only when the user asks for that fractal or a finding requires it: `spec-contract-link` for an owner with several spec-documents, or a boundary exemption that must be declared.",
+      "note": "An existing explicit request can justify a DETAIL draft; this sentence adds no human approval or escalation step."
+    },
+    {
+      "file": "skills/setup/sections/section-4-detail-md-scaffolding.md",
+      "hash": "4f72c526f6cc2bb7",
+      "kind": "human-call",
+      "class": "N",
+      "text": "Draft one only when the user asks for that fractal or a finding requires it: `spec-contract-link` for an owner with several spec-documents, or a boundary exemption that must be declared.",
+      "note": "An existing explicit request can justify a DETAIL draft; this sentence adds no human approval or escalation step."
     }
   ]
 }

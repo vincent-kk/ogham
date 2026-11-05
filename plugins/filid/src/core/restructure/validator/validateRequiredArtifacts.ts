@@ -1,6 +1,6 @@
 import { portableJoin, samePath } from '@ogham/cross-platform';
 
-import { DETAIL_MD, INTENT_MD } from '../../../constants/documentFiles.js';
+import { INTENT_MD } from '../../../constants/documentFiles.js';
 import { FACTS_SECTION_UNAVAILABLE_NEXT_ACTION } from '../../../constants/facts.js';
 import {
   REQUIRED_ARTIFACT_ROLES,
@@ -15,21 +15,6 @@ import type {
   PlanValidationFinding,
   RequiredArtifact,
 } from '../../../types/restructure.js';
-
-function documentExists(
-  node: FractalNode,
-  artifact: RequiredArtifact,
-): boolean {
-  if (artifact.role === REQUIRED_ARTIFACT_ROLES.INTENT_DOCUMENT)
-    return (
-      node.hasIntentMd &&
-      samePath(artifact.path, portableJoin(node.path, INTENT_MD))
-    );
-  return (
-    node.hasDetailMd &&
-    samePath(artifact.path, portableJoin(node.path, DETAIL_MD))
-  );
-}
 
 /**
  * The entry point of the target node that satisfies a required entry-point artifact.
@@ -48,6 +33,12 @@ function findEntryPoint(
   );
 }
 
+/**
+ * Check the plan's mandatory boundary artifacts against post-execution evidence.
+ * @param move - Planned target and required artifacts, at their final paths.
+ * @param targetNode - Resolved target; missing targets are reported by the caller.
+ * @returns Missing or unsupported artifacts without requiring an optional DETAIL.
+ */
 export function validateRequiredArtifacts(
   move: MoveInstruction,
   targetNode: FractalNode | null,
@@ -80,7 +71,8 @@ export function validateRequiredArtifacts(
             },
           ];
     }
-    return documentExists(targetNode, artifact)
+    return targetNode.hasIntentMd &&
+      samePath(artifact.path, portableJoin(targetNode.path, INTENT_MD))
       ? []
       : [
           {

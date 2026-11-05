@@ -60,12 +60,12 @@ describe('preToolValidator write gate (empty content)', () => {
     expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
   });
 
-  it('empty-content Write to non-INTENT targets keeps the passthrough', () => {
+  it('empty-content DETAIL Write is rejected', () => {
     const result = validatePreToolUse(
       writeInput('/workspace/mod/DETAIL.md', ''),
       '# old detail\n',
     );
     expect(result.continue).toBe(true);
-    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
+    expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
   });
 });

@@ -2,9 +2,15 @@ import { DENY_RETRY_GUIDANCE } from '../../../../../constants/hookDefaults.js';
 import { validateDetailMd } from '../../../../../core/rules/documentValidator/validators/validateDetailMd.js';
 import type { HookOutput } from '../../../../../types/hooks.js';
 
+/**
+ * Apply the shared DETAIL contract to every Write, including first and empty writes.
+ * @param content - Complete proposed document text.
+ * @param oldContent - Optional existing text for append-only detection.
+ * @returns Continue on validity or deny with the canonical repair guidance.
+ */
 export function handleDetailMdWrite(
   content: string,
-  oldContent: string,
+  oldContent?: string,
 ): HookOutput {
   const result = validateDetailMd(content, oldContent);
   if (result.valid) return { continue: true };

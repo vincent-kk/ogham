@@ -35,7 +35,7 @@ import { writeReviewStateFixtureFile } from './reviewState/helpers/writeReviewSt
 
 /** DETAIL.md for the added fractals. */
 const DETAIL =
-  '# Fixture contract\n\n## Requirements\n\n- Keep the value deterministic.\n\n## API Contracts\n\n- The entry point exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture — Value export\n\n- The value is exported.\n\n## Last Updated\n\n2026-09-07\n';
+  '# Fixture contract\n\n## Requirements\n\n- Keep the value deterministic.\n\n## API Contracts\n\n- The entry point exports the value.\n\n## Acceptance Criteria\n\n### AC-fixture — Value export\n\n- The value is exported.\n\n## Last Updated\n\nWhen the contract changes.\n';
 
 /**
  * Fractals `domain/c` and `domain/d` that import each other's entry point, and

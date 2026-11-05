@@ -26,9 +26,9 @@ export const PLACEMENT_BASES = {
   BOUNDARY_RULE: 'boundary-rule',
 } as const;
 
+/** Mandatory fractal boundary roles; DETAIL content is conditional, never required by placement alone. */
 export const REQUIRED_ARTIFACT_ROLES = {
   INTENT_DOCUMENT: 'intent-document',
-  DETAIL_DOCUMENT: 'detail-document',
   ENTRY_POINT: 'entry-point',
 } as const;
 

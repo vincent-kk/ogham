@@ -169,11 +169,13 @@ describe('pre-tool-validator', () => {
       ...baseInput,
       tool_input: {
         file_path: '/app/DETAIL.md',
-        content: '# Refactored\n- New structure\n',
+        content:
+          '# Refactored\n## Requirements\nKeep reasons.\n## API Contracts\nKeep policies.\n## Acceptance Criteria\nTests pin each criterion.\n## Last Updated\nWhen the contract changes.\n',
       },
     };
     const result = validatePreToolUse(input, '# Old\n- Old content\n');
     expect(result.continue).toBe(true);
+    expect(result.hookSpecificOutput?.permissionDecision).toBeUndefined();
   });
 
   it('should pass .filid/criteria.md through without a hook-specific decision', () => {
@@ -188,7 +190,7 @@ describe('pre-tool-validator', () => {
     expect(result.hookSpecificOutput).toBeUndefined();
   });
 
-  it.each(['/app/INTENT.md', '/app/DETAIL.md'])(
+  it.each(['/app/INTENT.md'])(
     'should block Delete of protected document %s',
     (filePath) => {
       const result = validatePreToolUse({
@@ -279,7 +281,7 @@ describe('protected document demotion', () => {
     expect(result.hookSpecificOutput?.permissionDecision).toBe('allow');
   });
 
-  it.each(['INTENT.md', 'DETAIL.md'])(
+  it.each(['INTENT.md'])(
     'allows demotion by deleting %s when no entry point remains',
     (file) => {
       const result = validatePreToolUse({
@@ -291,13 +293,13 @@ describe('protected document demotion', () => {
       expect(result.continue).toBe(true);
       expect(result.hookSpecificOutput?.permissionDecision).toBe('allow');
       expect(result.hookSpecificOutput?.additionalContext).toBe(
-        `Demotion: ${directory} has no entry point, so deleting ${file} drops its fractal claim. State in the parent DETAIL.md, as the parent's present decision, what the parent now owns and why that directory is not a fractal.`,
+        `Demotion: ${directory} has no entry point, so deleting ${file} drops its fractal claim. The parent DETAIL.md states first, as the parent's present decision, what the parent now owns and why that directory is not a fractal; add that statement now if it is missing.`,
       );
     },
   );
 
-  it('denies deletion of a symlinked DETAIL.md without an entry point', () => {
-    const documentPath = join(directory, 'DETAIL.md');
+  it('denies deletion of a symlinked INTENT.md without an entry point', () => {
+    const documentPath = join(directory, 'INTENT.md');
     const targetPath = join(projectRoot, 'contract.md');
     writeFileSync(targetPath, '# Contract');
     rmSync(documentPath);
@@ -322,7 +324,7 @@ describe('protected document demotion', () => {
       ...baseInput,
       cwd: projectRoot,
       tool_name: 'Delete',
-      tool_input: { file_path: join(directory, 'DETAIL.md') },
+      tool_input: { file_path: join(directory, 'INTENT.md') },
     });
     expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
     expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
@@ -340,7 +342,7 @@ describe('protected document demotion', () => {
         ...baseInput,
         cwd: projectRoot,
         tool_name: 'Delete',
-        tool_input: { file_path: join(directory, 'DETAIL.md') },
+        tool_input: { file_path: join(directory, 'INTENT.md') },
       });
       expect(result.hookSpecificOutput?.permissionDecision).toBe('deny');
       expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
