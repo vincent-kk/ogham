@@ -7,7 +7,7 @@
 - 디스크 JSON 키는 snake_case (`session_id`, `project_hash`, `turn_count`, `last_used_at`)
 - `tier` 는 세션을 시작한 tier 를 기록한다(기록 전 legacy 세션은 없음) — `continue_conversation` 이 모델 유지를 위해 복원
 - `getSession` 은 `projectHash` 불일치 시 항상 `null` — fallback 검색 금지
-- TTL 기준은 중앙 기본값의 `SESSION_TTL_MS` 단독 신뢰
+- TTL은 호출자가 유효 설정의 `session_ttl_hours`에서 주입한다 — 저장소가 별도 상수를 적용하면 사용자가 정한 보존 기간과 삭제 기준이 갈라진다
 - 모든 write 는 `atomicWrite` 경유; `sessionId` 는 `node:crypto` `randomUUID`
 
 ## Boundaries
@@ -19,7 +19,7 @@
 
 ### Ask first
 
-- TTL 또는 prune 정책 변경 (`SESSION_TTL_MS` 조정 포함)
+- TTL 기본값·설정 해석 또는 prune 정책 변경
 - `SessionMeta` 스키마 필드 추가·제거
 
 ### Never do

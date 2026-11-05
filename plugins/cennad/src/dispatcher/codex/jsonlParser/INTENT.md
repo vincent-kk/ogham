@@ -26,4 +26,4 @@ codex-cli `codex exec` 의 JSONL stdout 을 라인 단위로 파싱해 `{ thread
 
 - throw — 파싱 실패는 항상 partial result 반환
 - 미완성 라인 버퍼링 없이 처리 (입력은 완전한 stdout 문자열)
-- 외부 의존성 import (`../../../types` 외 패키지 금지)
+- I/O·프로세스 실행·상태 저장 의존성 도입 — 순수 문자열·JSON 처리 경계를 유지하며 줄바꿈 정규화는 `@ogham/cross-platform`의 `normalizeEol`을 재사용한다

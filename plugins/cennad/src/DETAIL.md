@@ -3,7 +3,7 @@
 ## Requirements
 
 - 의존 방향은 `mcp → dispatcher → core` 한 방향이다. `core` 는 dispatcher 를, dispatcher 는 mcp 를 알지 못한다.
-- 훅은 `core`·`types` 를 import 하지 않는다 — zod·MCP SDK 가 번들에 들어오면 크기 캡을 넘긴다. 훅은 `hooks/shared` organ 의 concrete 파일만 쓴다.
+- 훅은 `core`·`types` 를 import 하지 않는다 — zod·MCP SDK 가 번들에 들어오면 크기 캡을 넘긴다. 내부 공유 구현은 concrete 파일로 참조하고, 호스트 경로·설정 병합은 `@ogham/cross-platform`의 named export를 재사용하되 번들 크기·금지 의존성 가드를 통과해야 한다.
 - 모든 외부 CLI 호출은 `@ogham/cross-platform` 을 경유한다.
 - 디스크 JSON 키는 snake_case, 심볼·파일명은 camelCase 다.
 - `version.ts` 는 생성물이며 직접 수정하지 않는다.
@@ -12,7 +12,7 @@
 
 - 실행 진입점은 esbuild 산출물이다: MCP 서버(`bridge/mcp-server.cjs`)와 호스트별 훅 번들 2종(`bridge/<host>/*.mjs`).
 - `src/index.ts` 는 타입체크·테스트가 소비하는 집합 배럴이다. `package.json` 에 `main: dist/index.js` 와 `files: ["dist", ...]` 가 남아 있지만 이 패키지에는 `publish:npm` 스크립트가 없어 npm 으로 배송되지 않으며, 워크스페이스 안에서 `@ogham/cennad` 를 소비하는 패키지도 없다.
-- 배럴은 `mcp/` 를 재노출하지 않는다 — `mcp/server/lifecycle/createServer.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
+- 패키지 배럴은 MCP 실행 계층을 재노출하지 않는다 — MCP 계층은 esbuild 진입점으로만 실행되고 배럴을 통해 이를 쓰는 소비자가 없다.
 - host-session resolver는 core와 훅의 내부 concrete import이며 `src/index.ts` 공개 표면에 노출하지 않는다.
 
 ## Acceptance Criteria
@@ -33,7 +33,7 @@
 
 ### AC-no-runtime-cycle — 런타임 순환 부재
 
-- 배송되는 그래프(`mcp/serverEntry → mcp/server → version.ts`)에 순환이 없다.
+- 실행 진입점이 버전 상수와 서버를 각각 참조하고 서버에 버전을 주입하는 그래프에 순환이 없다.
 - `src/index.ts` 가 `mcp/` 를 재노출하지 않는다.
 
 **서버 identity 는 주입된다**: `createServer(version)`·`startServer(version)` 은 버전을 인자로 받고 `mcp/server` 안에서 `version.ts` 를 읽지 않는다. 실행 경로에서는 `mcp/serverEntry` 가, 테스트에서는 e2e Layer A 하네스가 `VERSION` 을 넘긴다. 이렇게 두는 이유는 `mcp/server` 가 `src` 루트를 참조하면 하네스의 `src → mcp/server` 엣지와 맞물려 의존 순환이 되기 때문이다 — 하네스는 케이스가 없어 어댑터가 검증 파일로 인식하지 않으므로 그 엣지는 사라지지 않는다.

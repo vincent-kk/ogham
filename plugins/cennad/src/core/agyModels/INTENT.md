@@ -2,7 +2,7 @@
 
 ## Purpose
 
-`agy models` CLI 출력을 실행·파싱·캐싱해 사용 가능한 Antigravity canonical model slug 목록을 제공한다. settings UI 드롭다운 및 provider-status 조회의 단일 소스. 네트워크·OAuth 의존이므로 실패 시 빈 배열로 graceful degrade 한다.
+`agy models` CLI 출력을 실행·파싱·캐싱해 사용 가능한 Antigravity canonical model slug 목록을 제공한다. settings UI 드롭다운 및 provider-status 조회의 단일 소스. 네트워크·OAuth 장애가 선택지를 지우지 않도록 stale 캐시를 우선하고 캐시도 없을 때만 빈 배열로 degrade한다.
 
 ## Conventions
 

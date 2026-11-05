@@ -5,12 +5,12 @@
 - 격리 플래그 `--strict-mcp-config` + `--safe-mode` 를 start/resume 모두 항상 부착한다. cennad 는 Claude 세션 안에서 claude 를 호출하므로, 격리하지 않으면 자식이 부모의 MCP(특히 cennad `tools` 서버)·훅·CLAUDE.md·스킬을 상속한다.
 - tier 는 `config.model_map.claude` 의 `{model, effort}` 로 해석한다. env override `CENNAD_CLAUDE_<TIER>_MODEL`/`_EFFORT` 가 우선한다. effort 가 없으면(haiku 등) `--effort` 를 부착하지 않는다.
 - sandbox 개념이 없다(claude-code 에 `--sandbox` 없음). 격리는 권한 기반이며 `permission_mode` 단일 노브(6종)로 제어한다.
-- 빈 stdout·비JSON·비정상 종료코드는 `../errorMap` 로 정규화하며, 손상된 출력을 성공으로 위장하지 않는다.
+- 빈 stdout·비JSON·비정상 종료코드는 `../errorMap` 로 정규화하며, 손상된 출력을 성공으로 위장하지 않는다. CLI 가 구조화 출력으로 보고한 실패 사유도 종료 코드와 무관하게 이 경로로 정규화한다.
 
 ## API Contracts
 
 - env override가 tier map보다 우선하며, effort를 결정하지 못하면 CLI에 맡긴다. 지원하지 않는 effort를 임의로 보충하지 않는다.
-- resume에서는 `--session-id` 대신 기존 ref를 지목하고 `--fallback-model`을 부착하지 않는 정책을 유지한다.
+- 재개에도 설정된 fallback model을 유지하여 사용자의 모델 대체 정책이 새 호출과 이어지는 호출에 동일하게 적용되게 한다.
 - JSONL의 마지막 result가 호출의 판정이며 깨진 출력은 성공으로 위장하지 않는다. 인자 배열과 파싱 결과의 세부 형태는 구현과 테스트를 읽는다.
 
 ## Acceptance Criteria

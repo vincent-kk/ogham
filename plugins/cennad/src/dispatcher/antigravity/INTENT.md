@@ -20,7 +20,7 @@ Antigravity CLI(`agy`) 어댑터. 세션마다 격리된 `runtime/antigravity-cw
 
 ### Always do
 
-- antigravity-cwd 부재 시 `0o700` 생성; 모든 에러 `errorMap` 정규화
+- antigravity-cwd 부재 시 `0o700` 생성; CLI 종료·진단·취소 신호는 `mapError`로 분류하고 종료 코드 0의 복구 불가능한 빈 출력은 어댑터가 실패로 판정한다
 - 빈 stdout 시 transcript 복구 시도 → 실패하면 cli_error 로 정규화
 
 ### Ask first

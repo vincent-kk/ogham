@@ -3,13 +3,13 @@
 ## Requirements
 
 - `agy models` CLI 출력을 실행·파싱·캐싱해 사용 가능한 Antigravity canonical model slug 목록을 제공한다. `slug<TAB>표시명` 행은 첫 열만 취하며, settings UI 드롭다운과 provider-status 조회의 단일 소스다.
-- 네트워크·OAuth 에 의존하므로 실패는 정상 경로다 — 빈 배열로 graceful degrade 하고 throw 하지 않는다.
+- 네트워크·OAuth 장애로 UI 선택지가 사라지지 않도록 조회 실패 시 stale 캐시를 우선 사용하고, 캐시도 없을 때만 빈 배열로 degrade한다. 실패를 throw하지 않는다.
 - CLI 호출은 `@ogham/cross-platform` 을 경유한다.
 - agy의 탭 구분 카탈로그는 표시명과 machine-readable slug를 함께 담으므로 첫 열만 canonical 값으로 삼고, 같은 형태의 저장 cache도 읽기 호환한다.
 
 ## API Contracts
 
-- 모델 목록 조회 — 성공 시 canonical model slug 배열, 실패 시 빈 배열. 이전 버전이 저장한 탭 구분 cache도 읽을 때 같은 slug 배열로 정규화한다.
+- 탭 구분 cache와의 읽기 호환성을 유지하여 저장된 표시명이 모델 식별자로 전달되지 않게 한다.
 
 ## Acceptance Criteria
 

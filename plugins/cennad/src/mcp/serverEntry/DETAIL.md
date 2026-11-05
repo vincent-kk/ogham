@@ -3,7 +3,7 @@
 ## Requirements
 
 - esbuild 가 `bridge/mcp-server.cjs` 로 번들하는 진입점이다. `startServer` 호출과 미처리 예외 처리 외에는 아무 로직도 갖지 않는다.
-- 프로세스 종료를 다루는 유일한 자리다.
+- 시작 실패의 stderr 보고와 비정상 종료를 소유한다. 정상 종료 시 실행 중 CLI 정리는 서버 lifecycle이 공유 finalizer에 등록한다 — provider 프로세스가 서버보다 오래 남지 않도록 실행 수명과 정리 책임을 묶는다.
 
 ## API Contracts
 

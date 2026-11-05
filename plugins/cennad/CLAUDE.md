@@ -10,7 +10,7 @@
 
 ## Hook invariants
 
-- 훅 번들은 10 KB LIGHT 상한 안에서 Node 내장 모듈만 사용한다. `src/core/`·`src/types/`와 무거운 의존성을 가져오지 않는다.
+- Hook bundles may use Node builtins and named exports from `@ogham/cross-platform` to share host paths and config merging, while passing the 10 KB LIGHT cap and forbidden-dependency guards. Do not import the core or types layers, zod, or the MCP SDK.
 - self host 판정은 훅 전용 `resolveHostDescriptor`를 사용한다. MCP용 `detectHost()`를 훅에서 호출하면 호스트를 잘못 판정한다.
 - 금지 모듈 가드는 번들 문자열도 검사하므로 주입 문구의 일반 단어가 가드 패턴과 충돌할 수 있다.
 

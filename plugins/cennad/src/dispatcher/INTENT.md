@@ -15,9 +15,9 @@ codex-cli / agy / claude 호출 본체. MCP 도구 핸들러에서 받은 `Dispa
 
 ### Always do
 
-- 모든 에러를 오류 매핑 모듈의 단일 테이블로 정규화
+- CLI 종료·진단·취소 신호는 종료 코드와 무관하게 오류 매핑 모듈로 정규화한다 — 같은 진단이 provider마다 다른 코드로 갈리는 것을 막는다. 직접 코드는 CLI 가 사유를 보고하지 않은 Codex 세션 참조 누락의 `unknown`과 복구 불가능한 Antigravity 빈 출력의 `cli_error`에 한정한다
 - `ignoredOptions` 에 supportedOptions 미포함 키만 담기
-- claude resume 시 `--session-id` → `--resume <ref>` 교체, `--fallback-model` 제거
+- Claude 재개는 기존 세션 참조를 사용하고 설정된 fallback model을 유지한다 — 이어지는 호출에도 사용자가 정한 모델 대체 정책이 적용되어야 한다
 - codex resume 시 sandbox/yolo/search/cd 플래그 자동 제거
 
 ### Ask first

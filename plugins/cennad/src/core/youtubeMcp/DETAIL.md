@@ -21,7 +21,7 @@
 ### AC-target-isolation — 대상별 격리
 
 - claude·codex 는 목적별 사용자 MCP target 과 manager 를 쓰고, antigravity 는 글로벌 `~/.gemini/config/mcp_config.json` 을 관리한다.
-- 체크되지 않은 대상 CLI 의 설정은 건드리지 않는다.
+- 비활성 대상에서도 `yt-dlp-mcp` 키의 서버 등록은 해제한다 — 선택 해제가 이미 등록된 서버를 남겨서는 안 된다. 그 키 밖의 서버와 최상위 설정 키는 보존한다.
 
 ### AC-language-passthrough — 언어 전달
 
