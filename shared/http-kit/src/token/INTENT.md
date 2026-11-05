@@ -2,18 +2,8 @@
 
 로컬 HTTP 서버용 세션 단위 베어러 토큰 발급·검증 모듈. 서버 기동마다 1개 발급해 종료까지 재사용한다. timing-safe 비교로 timing attack 을 방지한다.
 
-## Structure
-
-| File               | Role                                                          |
-| ------------------ | ------------------------------------------------------------- |
-| `generateToken.ts` | `randomBytes(16).toString('hex')` — 32자 hex 토큰 반환        |
-| `verifyToken.ts`   | `timingSafeEqual` 로 `expected` vs `provided` UTF-8 버퍼 비교 |
-| `index.ts`         | barrel — `generateToken`, `verifyToken` re-export             |
-
 ## Conventions
 
-- 토큰 형식은 32자 hex (`randomBytes(16)`).
-- 비교는 항상 `timingSafeEqual`; 길이 불일치 시 즉시 `false` 반환.
 - 호출자가 토큰을 메모리에 보관 — 디스크 영속화 안 함.
 
 ## Boundaries
@@ -31,7 +21,3 @@
 
 - 평문 `===` 비교.
 - 토큰을 디스크·로그에 저장.
-
-## Dependencies
-
-- `node:crypto` (`randomBytes`, `timingSafeEqual`), `node:buffer` (`Buffer`).

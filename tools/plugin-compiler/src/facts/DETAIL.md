@@ -19,4 +19,4 @@
 
 ## Last Updated
 
-2026-09-26
+Update this document when compiler-only fact ownership or adapter validation responsibilities change.

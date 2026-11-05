@@ -18,18 +18,6 @@
 
 외부 소비자는 `@ogham/cross-platform` 패키지 루트에서 이 API를 가져온다.
 
-```ts
-resolveConfigLayers(options: ResolveConfigLayersOptions): ConfigLayerPaths;
-readConfigLayers(paths: ConfigLayerPaths): ConfigLayerDocuments;
-writeConfigLayer(
-  paths: ConfigLayerPaths,
-  scope: ConfigScope,
-  document: Record<string, unknown>,
-  directoryMode?: number,
-): string;
-buildConfigScopeState(paths: ConfigLayerPaths): ConfigScopeState;
-```
-
 user 레이어는 `pluginCache(pluginName)/config.json`, project 레이어는
 `<projectRoot>/.<pluginName>/config.json` 이다. `projectRoot` 를 넘기지 않으면
 project 경로는 `null` 이고, 그 상태는 "이 워크스페이스에는 project 레이어를 둘
@@ -45,7 +33,6 @@ project 경로는 `null` 이고, 그 상태는 "이 워크스페이스에는 pro
 
 ### LAYERS-5 — 초기 범위 판단 공유
 
-- 최초 실행은 project이고, user만 존재하면 user, project가 존재하면 두 레이어 동시 존재 여부와 관계없이 project다.
 - 페이지는 원문 존재 여부를 재판단하지 않고 서버가 전달한 `initialScope`를 사용한다.
 
 ### LAYERS-1 — 좌표는 파일을 보지 않고 정해진다
@@ -57,7 +44,6 @@ project 경로는 `null` 이고, 그 상태는 "이 워크스페이스에는 pro
 
 ### LAYERS-2 — 읽기는 던지지 않고 부재와 손상을 구별한다
 
-- 파일이 없으면 해당 레이어는 `null`, 경고는 없다.
 - 파싱에 실패하면 해당 레이어는 `null` 이고 `warnings` 에 사유가 남는다.
   손상된 config 하나가 세션을 죽여서는 안 된다.
 - 읽기는 원문을 정화하지 않는다. `FORBIDDEN_KEYS` 를 발견해도 `warnings` 에만
@@ -74,12 +60,9 @@ project 경로는 `null` 이고, 그 상태는 "이 워크스페이스에는 pro
 
 ### LAYERS-4 — 상태는 원문·병합·재정의를 함께 싣는다
 
-- `ConfigScopeState` 는 두 레이어 원문(`layers`), 병합 결과(`effective`),
-  project가 재정의한 dot path 목록, 두 레이어 경로(`paths`)를 담는다.
 - 병합은 `../merge` 의 `mergeConfigLayers` 로만 한다. 런타임과 설정 페이지가
   다르게 합치면 "보이는 값"과 "먹는 값"이 갈라진다.
 
 ## Last Updated
 
-2026-07-30 — 외부 공개 주소를 패키지 루트로 통합하면서 레이어 연산 계약을
-그대로 유지했다.
+설정 좌표·읽기 실패·원자 저장 또는 초기 범위 선택 정책의 범위가 바뀔 때 갱신한다.

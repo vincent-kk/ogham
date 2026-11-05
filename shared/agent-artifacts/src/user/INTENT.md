@@ -3,13 +3,6 @@
 호스트의 사용자 상태 위치에 한정된 artifact manager를 제공한다. 사용자
 scope 선택은 모든 프로젝트가 상속할 구성을 변경하려는 명시적 권한 경계다.
 
-## Structure
-
-| File       | Role                                     |
-| ---------- | ---------------------------------------- |
-| `index.ts` | 사용자 공개 계약 배럴                    |
-| `user.ts`  | host·owner를 호스트 사용자 target에 결합 |
-
 ## Conventions
 
 - 사용자 root는 host와 환경을 통해 cross-platform에서 해석한다.
@@ -30,7 +23,3 @@ scope 선택은 모든 프로젝트가 상속할 구성을 변경하려는 명�
 
 - 호출자 지정 출력 경로를 받거나 프로젝트 파일에 쓰기.
 - Claude/Codex 외 호스트의 사용자 위치를 추측.
-
-## Dependencies
-
-- `rules`, `instructions`, `mcp`, `targets`, `transactions`.

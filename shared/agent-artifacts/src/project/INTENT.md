@@ -3,13 +3,6 @@
 절대 프로젝트 루트에 한정된 artifact manager를 제공한다. 프로젝트 scope를
 선택한 호출만 저장소의 규칙, 지침, MCP 구성을 변경할 수 있다.
 
-## Structure
-
-| File         | Role                                       |
-| ------------ | ------------------------------------------ |
-| `index.ts`   | 프로젝트 공개 계약 배럴                    |
-| `project.ts` | host·owner·절대 root를 하위 manager에 결합 |
-
 ## Conventions
 
 - `projectRoot`는 생성 시 한 번 절대 경로로 검증한다.
@@ -31,7 +24,3 @@
 
 - 상대 프로젝트 루트를 수용하거나 사용자 상태 루트에 쓰기.
 - 다른 프랙탈의 내부 구현 파일 import.
-
-## Dependencies
-
-- `rules`, `instructions`, `mcp`, `targets`, `transactions`.

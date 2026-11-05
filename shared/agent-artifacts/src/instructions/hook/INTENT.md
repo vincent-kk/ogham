@@ -2,15 +2,6 @@
 
 크기 제한 훅이 이미 해석된 지침 후보에서 한 marker 구간만 검사하고 동기화한다.
 
-## Structure
-
-| Path       | Role                                       |
-| ---------- | ------------------------------------------ |
-| `index.ts` | 패키지 내부 호환 barrel·루트 재노출 source |
-| `status/`  | 후보 판독과 conflict 검사 organ            |
-| `apply/`   | marker 병합·재배치·backup 쓰기 organ       |
-| `types/`   | 훅 snapshot·결과·옵션 타입 organ           |
-
 ## Conventions
 
 - 범용 manager보다 약한 동기식 compatibility writer임을 API 이름에 드러낸다.
@@ -38,8 +29,3 @@
 
 - 범용 manager·planning·transaction·locking 모듈 import
 - root/host 재해석 또는 파일 전체 소유
-
-## Dependencies
-
-- 내부 타입: `types/instructions`, `targets`
-- 런타임: `@ogham/cross-platform` 루트의 판독·marker·쓰기 심볼

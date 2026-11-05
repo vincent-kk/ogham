@@ -2,20 +2,6 @@
 
 외부 CLI 호출 단일 진입점. timeout + EOL 정규화. win32 `.cmd`/`.bat` shim 은 node entry 를 직접 실행해 cmd.exe 래핑(멀티라인 argv 를 첫 개행에서 절단)을 우회하고, 그 외 경로·POSIX 는 `cross-spawn`. 호출자는 `child_process.spawn` 직접 사용 금지.
 
-## Structure
-
-| File                 | Role                                                     |
-| -------------------- | -------------------------------------------------------- |
-| `index.ts`           | barrel                                                   |
-| `types.ts`           | SpawnOptions / SpawnResult                               |
-| `spawnCli.ts`        | 메인 Promise-based spawn 래퍼                            |
-| `spawnCliSync.ts`    | spawn.sync 기반 동기 변형 (블로킹)                       |
-| `spawnDetached.ts`   | fire-and-forget detached 데몬 (unref, 미추적, no-throw)  |
-| `execCli.ts`         | `spawnCli` thin alias (이름 호환성)                      |
-| `osTimeout.ts`       | win32 ×3 (floor 5000ms), 호출자 opt-out 가능             |
-| `resolveLauncher.ts` | win32: bin → cmd.exe 우회 launcher (.exe 직접/shim→node) |
-| `parseCmdShim.ts`    | `.cmd`/`.bat` shim → node entry 파서 (pure, win32 path)  |
-
 ## Conventions
 
 - timeoutMs 미지정 시 timeout 없음. win32 는 프로세스 기동분을 흡수하려 `timeoutMs`·`idleTimeoutMs` 를 ×3 하는데, `scaleWindowsTimeout: false` 면 준 값을 그대로 쓴다 — 호출자가 스스로 고른 상한이거나 같은 값을 자식에게도 넘기는 경우(값 크기로는 구분할 수 없다).
@@ -42,8 +28,3 @@
 
 - `child_process.spawn` / `exec` / `execSync` / `execFile` 직접 import.
 - timeout kill 에 SIGKILL 외 signal 사용 (Windows 호환 깨짐).
-
-## Dependencies
-
-- 외부: `cross-spawn ^7`, `which ^4` (inline).
-- 내부: `../env`, `../eol`.

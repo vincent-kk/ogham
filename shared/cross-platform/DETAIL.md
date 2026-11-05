@@ -2,6 +2,10 @@
 
 ## Requirements
 
+공개 주소는 패키지 루트와 agy runner 빌드 진입점으로 제한한다. 목적별 subpath 대신 `sideEffects: false`와 출력 번들 가드로 격리를 검증하여 aggregate 재노출 그래프가 제한 훅에 통째로 남지 않게 한다.
+
+런타임과 설정 페이지가 서로 다른 병합을 하면 표시값과 실행값이 갈라지므로, 서버가 병합을 전담하고 페이지는 `configByScope`로 받은 레이어별 문서를 선택한다.
+
 - 모든 파일·경로·CLI 시스템 호출은 상위 공유 패키지가 재사용할 수 있는
   이름 있는 루트 API로 제공한다.
 - 사용자 상태 루트는 호출자가 선택한 임의 경로가 아니라 명시적 host와
@@ -11,17 +15,11 @@
 - 파일 교체는 sibling 임시 파일을 사용하고, 동시 변경 적용은 owner-token
   lock과 호출자 리비전 검사로 보호할 수 있어야 한다.
 - ENOENT만 정상적인 부재로 취급하고 그 밖의 파일 시스템 오류는 보존한다.
-- 공식 Codex patch 입력은 모든 파일 연산을 보존하며 불완전한 parse를 성공으로 축소하지 않는다.
+- 공식 Codex patch 입력은 모든 파일 연산을 보존하며 불완전한 parse를 성공으로 축소하지 않는다 — 첫 파일만 정규화하면 같은 patch의 뒤쪽 target이 경계 검사를 우회한다.
 
 ## API Contracts
 
 ### Host registry
-
-```ts
-resolveRuntimeHost(
-  env: Readonly<Record<string, string | undefined>>,
-): Host;
-```
 
 미인식 marker 또는 서로 충돌하는 훅 신호는 `unknown`이며 Claude로 추측하지
 않는다.
@@ -32,14 +30,6 @@ resolveRuntimeHost(
 
 ### Paths
 
-```ts
-hostStateRoot(
-  host: KnownHost,
-  env?: Readonly<Record<string, string | undefined>>,
-): string;
-resolveContainedPath(root: string, ...segments: string[]): string;
-```
-
 `resolveContainedPath`는 절대 root만 받고 절대 segment, `..` component,
 다른 drive 및 root 밖 결과를 거부한다.
 
@@ -48,52 +38,11 @@ resolveContainedPath(root: string, ...segments: string[]): string;
 
 ### Host paths
 
-```ts
-requireAbsoluteRoot(value: string): string;
-```
-
 POSIX와 Windows 절대 경로 문자열을 현재 실행 OS와 무관하게 정규화한다.
 
 ### Config scope
 
-```ts
-type ConfigScope = "user" | "project";
-
-resolveConfigLayers(options: {
-  pluginName: string;
-  projectRoot: string | null;
-  fileName?: string;
-  projectDirName?: string;
-  userDir?: string;
-}): ConfigLayerPaths;
-readConfigLayers(paths: ConfigLayerPaths): ConfigLayerDocuments;
-writeConfigLayer(
-  paths: ConfigLayerPaths,
-  scope: ConfigScope,
-  document: Record<string, unknown>,
-  options?: { fileMode?: number; directoryMode?: number },
-): string;
-buildConfigScopeState(paths: ConfigLayerPaths): ConfigScopeState;
-
-mergeConfigLayers(
-  base: Record<string, unknown> | null,
-  override: Record<string, unknown> | null,
-): Record<string, unknown>;
-listOverriddenPaths(
-  override: Record<string, unknown> | null,
-): readonly string[];
-clearConfigPaths(
-  source: Record<string, unknown>,
-  paths: readonly string[],
-): Record<string, unknown>;
-```
-
-`FORBIDDEN_KEYS`, `isPlainObject`, `stripForbiddenKeys`, `paths` facade는 루트
-계약에서 뺐다. 앞의 셋은 `./config-scope/merge` 하위 주소로만 닿던 병합 하위
-단계이고, `mergeConfigLayers`와 `writeConfigLayer`가 이미 그 단계를 적용한다.
-`paths`는 같은 경로 함수 8개를 묶은 두 번째 주소라, import 하면 개별 함수 81 B
-대신 8개 전부인 3,007 B를 retain 한다. 네 심볼 모두 파일은 그대로 두고 루트
-재수출만 멈춘다 — 패키지 내부 소비는 계속 concrete 파일을 쓴다.
+`FORBIDDEN_KEYS`, `isPlainObject`, `stripForbiddenKeys`는 병합과 저장이 이미 적용하는 내부 단계이므로 루트에서 공개하지 않는다. 객체형 `paths` facade는 같은 경로 함수 8개를 묶은 두 번째 주소라 import 하면 개별 함수 81 B 대신 8개 전부인 3,007 B를 번들에 남기므로 내부에만 둔다. 내부 소비는 concrete 파일을 사용한다.
 
 user 레이어는 `pluginCache(pluginName)` 아래의 설정 파일, project 레이어는
 `<projectRoot>/.<pluginName>/config.json`이며 project가 user를 재정의한다.
@@ -226,30 +175,6 @@ config를 소유한 섹션마다 붙이고 배지는 prefix로 판정한다 — 
 
 ### Filesystem and hook helpers
 
-```ts
-readUtf8FileIfExistsSync(path: string): string | null;
-readFileIfExistsSync(path: string): Uint8Array | null;
-listDirectoryIfExistsSync(path: string): readonly string[];
-canonicalizeTargetPathSync(
-  cwd: string,
-  targetPath: string,
-  options?: { preserveTerminalEntry?: boolean },
-): string;
-ensureDirectorySync(path: string, options?: { mode?: number }): void;
-removeFileIfExistsSync(path: string): boolean;
-writeFileAtomicallySync(
-  path: string,
-  content: string | Uint8Array,
-  options?: { fileMode?: number; directoryMode?: number },
-): void;
-assertNoSymlinkDescendantsSync(root: string, targetPath: string): void;
-withFileLockSync<T>(
-  targetPath: string,
-  operation: () => T,
-  options?: { timeoutMs?: number; staleMs?: number },
-): { acquired: true; value: T } | { acquired: false };
-```
-
 원자 쓰기는 지정 mode가 없으면 기존 파일 mode를 보존한다. 잠금 timeout은
 operation을 호출하지 않고 `acquired: false`를 반환한다. stale lock은 고유
 quarantine 이름으로 atomic rename한 프로세스만 정리하며 owner token이
@@ -283,23 +208,6 @@ artifact apply는 계속 atomic write와 lock을 사용한다.
 - malformed patch와 아직 destination을 판정하지 못하는 move patch는 성공한 빈 입력이 아니다.
 - Claude `Write`/`Edit` identity와 기존 단일 파일·Bash read 의미는 유지된다.
 
-## History
-
-2026-08-23 — 첫 파일만 정규화하던 측정 기반 가정을 폐기했다. 하나의 patch 안에서 뒤쪽 target이 경계를 우회할 수 있으므로 전체 순서 보존과 보수적 parse 실패를 공개 계약으로 정했다.
-
-2026-07-30 — 공개 주소를 패키지 루트 하나와 agy runner 빌드 진입점으로
-통합했다. `sideEffects: false`와 출력 번들 가드가 목적별 subpath의 격리 역할을
-대신한다.
-
-2026-07-29 — user/project 두 네임스페이스를 병합해 읽는 `config-scope` 추가.
-설정 페이지가 계층마다 폼을 다시 앉히도록 `configByScope` 규약을 함께 정했다.
-병합을 서버가 전담하는 쪽을 택한 이유는, 런타임과 설정 페이지가 각자 합치면
-"보이는 값"과 "먹는 값"이 갈라지기 때문이다.
-
-2026-07-26 — agent artifact 프리미티브와 hook용 목적별 entry point 추가.
-훅 번들이 aggregate 진입점을 잡으면 재노출 그래프를 통째로 끌어오므로,
-목적별 subpath를 따로 냈다.
-
 ## Last Updated
 
-2026-09-05 — 기존 target canonicalization의 missing symlink referent 해석과 반복 link 종료를 명시했다.
+호스트·파일 시스템 보장 또는 설정 페이지 공통 정책의 범위가 바뀔 때 갱신한다.

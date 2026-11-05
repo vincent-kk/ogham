@@ -13,12 +13,8 @@
 
 ## Acceptance Criteria
 
-### AC-pipeline-mcp-references — Validation before emission
-
-- Invalid marked skill references produce `codex-mcp-tool-reference` and no files.
-- Invalid owned hook expressions produce `codex-mcp-hook-matcher` and no files.
-- Valid marked sources produce matching manifests, hooks and a complete skill tree without changing any canonical file.
+Tests pin the behavioral criteria; the policy and ownership requirements remain above.
 
 ## Last Updated
 
-2026-09-26
+Update this document when validation-before-emission, runtime ownership, or deterministic planning guarantees change.

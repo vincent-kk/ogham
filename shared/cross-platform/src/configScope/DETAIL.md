@@ -17,33 +17,10 @@
 - 초기 설정 범위는 `resolveInitialConfigScope`가 project 존재 → user 존재 → 최초 project 순으로 결정한다. 서버는 결과를 `initialScope`로 주입하며, 페이지별 판단 분기는 두지 않는다.
 
 외부 소비자는 `@ogham/cross-platform` 패키지 루트 하나에서 이 fractal의 공개
-심볼을 가져온다. `index.ts`, `merge/`, `layers/`의 중간 배럴은 패키지 내부 조직과
-루트 재노출을 위해 남아 있으며 `package.json`의 별도 공개 주소가 아니다.
-
-- 레이어 4종 — `resolveConfigLayers`·`readConfigLayers`·`writeConfigLayer`·`buildConfigScopeState`
-- 병합 6종 — `mergeConfigLayers`·`listOverriddenPaths`·`clearConfigPaths`·
-  `stripForbiddenKeys`·`FORBIDDEN_KEYS`·`isPlainObject`
-- 타입 5종 — `ConfigScope`·`ConfigLayerPaths`·`ConfigLayerDocuments`·
-  `ConfigScopeState`·`ResolveConfigLayersOptions`
+심볼을 가져온다. 중간 배럴은 패키지 내부 조직과 루트 재노출을 위한 것이며 별도 공개 주소가 아니다.
 
 `stripForbiddenKeys`·`FORBIDDEN_KEYS`·`isPlainObject` 는 기존 공개 계약을 유지하기
-위해 패키지 루트에서도 재노출한다. 소비처 없는 export 정리는 별도 후속 작업이다.
-
-```ts
-type ConfigScope = "user" | "project";
-type ConfigLayerPaths = { user: string; project: string | null };
-type ConfigLayerDocuments = {
-  user: Record<string, unknown> | null;
-  project: Record<string, unknown> | null;
-  warnings: readonly string[];
-};
-type ConfigScopeState = {
-  paths: ConfigLayerPaths;
-  layers: ConfigLayerDocuments;
-  effective: Record<string, unknown>;
-  overridden: readonly string[];
-};
-```
+위해 패키지 루트에서도 재노출한다. 소비처 없는 export의 정리는 이 호환 정책과 별개로 결정한다.
 
 `ConfigScopeState` 는 설정 페이지 7곳의 wire 계약이다. 필드를 바꾸면 그 7곳을
 함께 본다. 형태별 허용 범위는 `shared/cross-platform/DETAIL.md` 의 "설정 페이지
@@ -76,5 +53,4 @@ type ConfigScopeState = {
 
 ## Last Updated
 
-2026-07-30 — 외부 공개 주소를 패키지 루트로 통합하고 기존 병합 심볼 계약을
-그 루트에서 유지했다.
+레이어 소유권·저장 범위 또는 설정 페이지 wire 계약의 범위가 바뀔 때 갱신한다.

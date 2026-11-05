@@ -2,20 +2,6 @@
 
 호스트가 **지침 문서로 읽는 파일**의 이름과, 그 파일 안에서 **플러그인 소유 구간을 다루는 순수 문자열 연산**. 부수효과·env 판독이 전혀 없어 **훅 도달 코드에서도 안전**하다 — 훅에는 `OGHAM_HOST` 가 없으므로(어댑터는 MCP 선언에만 주입) 호스트 분기 대신 **채널 합집합 판독**을 쓴다.
 
-## Structure
-
-| File                | Role                                                                |
-| ------------------- | ------------------------------------------------------------------- |
-| `index.ts`          | package root 재노출용 내부 barrel                                   |
-| `read/`             | `readSection`과 marker를 조립하는 하위 fractal                      |
-| `write/`            | merge/remove와 marker를 조립하는 하위 fractal                       |
-| `types.ts`          | `SectionMarkers`                                                    |
-| `files.ts`          | `CLAUDE.md` / `AGENTS.md` 상수 + `INSTRUCTIONS_FILES` (합집합)      |
-| `sectionMarkers.ts` | `<!-- NS:START:id -->` 마커 쌍 생성 (id 생략형 = maencof 기존 규약) |
-| `mergeSection.ts`   | 구간 삽입/치환 (idempotent)                                         |
-| `readSection.ts`    | 구간 본문 판독 (부재 시 null)                                       |
-| `removeSection.ts`  | 구간 제거 (부재 시 null)                                            |
-
 ## Conventions
 
 - **순수 함수만** — `node:fs` 금지. 파일 I/O 는 소비처가 소유한다 (filid=원자적 쓰기, maencof=`.bak` 백업).
@@ -43,7 +29,3 @@
 
 - 이 모듈에서 `process.env` 판독 (훅 안전성이 깨진다).
 - 파일 경로를 인자로 받는 API 추가 (I/O 는 소비처 몫).
-
-## Dependencies
-
-- 없음 (Node 내장조차 쓰지 않는다).

@@ -32,16 +32,6 @@
 - Dedicated hook and manifest selection responds to command changes even without matcher changes. Missing opt-in retains previous output.
 - Invalid directory declarations prevent adapter emission with their own diagnostic.
 
-### AC-adapters-purity — 순수성과 결정성
-
-- 같은 facts를 두 번 전달하면 깊게 동일하고 안정된 순서의 결과가 나오며 입력 facts는 변경되지 않는다.
-- 어떤 공개 빌더도 파일 읽기나 쓰기를 수행하지 않는다.
-
-### AC-adapters-manifest-routing — 매니페스트 라우팅 일치
-
-- 스킬 또는 훅 변이가 방출되는 조건과 매니페스트가 그 변이를 가리키는 조건이 동일하다.
-- 선택적 facts가 없으면 해당 매니페스트 필드나 조건부 산출물이 생기지 않는다.
-
 ### AC-adapters-mcp-portability — MCP 이식성과 실패
 
 - 단일 및 복수 Codex 서버명이 각각 플러그인명과 `<plugin>-<server>` 규칙을 따르고 모든 Codex 서버에 `cwd: "."`와 `OGHAM_HOST=codex`가 있다.
@@ -75,4 +65,4 @@
 
 ## Last Updated
 
-2026-09-26 — Added explicit owned MCP callable-reference and exact hook adaptation.
+호스트별 변환·opt-in 검증 또는 정본 보존의 보장 범위가 바뀔 때 갱신한다.

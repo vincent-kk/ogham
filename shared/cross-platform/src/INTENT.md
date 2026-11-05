@@ -28,8 +28,3 @@ OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
 
 - 루트 `index.ts`에 선언 구현.
 - 패키지 외부 소비자가 하위 파일을 deep import.
-
-## Dependencies
-
-- 내부: 하위 fractal과 공개 심볼의 구체 소유 파일.
-- 외부: 각 하위 fractal이 자체 소유.

@@ -2,17 +2,6 @@
 
 호스트 ID, 마커, 상태 루트 좌표와 훅 판별 신호의 단일 진실원이다.
 
-## Structure
-
-| File                       | Role                                   |
-| -------------------------- | -------------------------------------- |
-| `index.ts`                 | package root 재노출용 내부 배럴        |
-| `types.ts`                 | `Host`, `KnownHost`, descriptor        |
-| `registry.ts`              | `HOSTS`와 marker env의 순수 데이터     |
-| `hostFromMarker.ts`        | MCP marker 판별                        |
-| `runtime/`                 | marker/훅 신호에서 명시적 host ID 판별 |
-| `resolveHostDescriptor.ts` | 기존 상태 경로 호환용 descriptor 판별  |
-
 ## Conventions
 
 - 내부 의존이 없는 leaf를 유지한다.
@@ -41,7 +30,3 @@
 
 - 내부 모듈 import, 파일 I/O, `process` 직접 읽기.
 - 미인식 호스트를 명시적 Claude 결과로 반환.
-
-## Dependencies
-
-- 내부/외부: 없음.

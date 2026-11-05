@@ -2,14 +2,6 @@
 
 `@ogham/plugin-compiler` 패키지 루트. 모노레포 내부 전용 어댑터 생성기로, 각 플러그인의 **Claude 산출물을 무수정 정본**으로 읽어 Codex(플러그인별 Codex 매니페스트)·Antigravity(`mcp_config.json`)·루트 마켓플레이스(`.agents/*`) 어댑터를 결정적으로 생성한다. 설계 SSoT 는 [`../../.metadata/plugin-compiler/`](../../.metadata/plugin-compiler/), 적용 절차는 [migration-playbook.md](../../.metadata/plugin-compiler/migration-playbook.md).
 
-## Structure
-
-| Path               | Role                                            |
-| ------------------ | ----------------------------------------------- |
-| `src/`             | TypeScript 소스 (fractal 루트 — 진입 `main.ts`) |
-| `vitest.config.ts` | 스펙 러너 (`src/**/__tests__/**`)               |
-| `package.json`     | private 워크스페이스 (npm 게시 금지)            |
-
 ## Conventions
 
 - `tsx` 로 실행 — dist 빌드 산출물 없음 (`private: true`).
@@ -36,5 +28,4 @@
 
 ## Dependencies
 
-- **개발**: `typescript ^5.7`, `vitest`, `tsx`(루트) — Node.js ≥ 20, Yarn 4.12 workspaces. 런타임 의존성 없음(Node 내장만).
 - 버전 동기화는 [`scripts/injectVersion.mjs`](../../scripts/injectVersion.mjs) 가 담당(`.claude-plugin` + `.codex-plugin`).

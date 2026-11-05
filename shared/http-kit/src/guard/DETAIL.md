@@ -15,38 +15,12 @@
 
 패키지 `exports` 는 `.` 하나만 선언한다. 소비자는 `@ogham/http-kit` 패키지 루트에서 이 fractal의 심볼을 가져오며, 내부 파일 직접 소비 경로는 없다.
 
-- `inspectRequest(options: GuardOptions): GuardVerdict` — 요청 사실만으로 통과/거부를 판정한다. 부수효과 없음.
-- `GuardOptions` — `host`·`method` 필수, `origin`·`contentType`·`expectedToken`·`providedToken`·`allowedContentTypes` 선택. 호출자가 `IncomingMessage` 에서 뽑아 넘기는 원시 사실이다.
-- `GuardVerdict` — `{ ok: true }` 또는 `{ ok: false; status; code; message }`.
-- `GuardRejectionCode` — `invalid_host` · `invalid_token` · `invalid_origin` · `unsupported_media_type` 네 값.
-- `operations/` organ — `inspectRequest` 구현, loopback 정규식, 타입 선언. 배럴이 `inspectRequest` 와 세 타입만 이름으로 재수출하므로 `LOOPBACK_HOST`·`LOOPBACK_ORIGIN` 은 공개 표면이 아니다.
+loopback 정규식은 내부 정책이므로 공개 표면으로 확장하지 않는다. 구체적인 입력 타입과 verdict 필드는 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
-### AC-check-order — 검증 순서 고정
-
-- 유효한 토큰을 동봉해도 비-loopback Host 요청이 403 `invalid_host` 로 거부된다.
-- 토큰 불일치는 401 `invalid_token`, 교차 출처 POST 는 403 `invalid_origin`, 미허용 매체 타입 POST 는 415 `unsupported_media_type` 로 거부된다.
-
-### AC-post-only-csrf — POST 한정 CSRF 검사
-
-- 비-POST 요청은 교차 출처 Origin 과 미허용 Content-Type 을 함께 갖고도 통과한다.
-- Origin 헤더가 없는 POST 는 통과하고, loopback Origin 도 통과한다.
-
-### AC-token-optional — 토큰 검증 선택성
-
-- `expectedToken` 이 없으면 임의의 `providedToken` 이 와도 통과한다.
-- `expectedToken` 과 일치하는 토큰이 통과한다.
-
-### AC-content-type-prefix — 매체 타입 prefix 매칭
-
-- `allowedContentTypes` 를 지정하면 파라미터가 붙은 값(`multipart/form-data; boundary=x`)이 prefix 매칭으로 통과한다.
-
-### AC-verdict-purity — verdict 형태와 순수성
-
-- 통과 verdict 는 `{ ok: true }` 뿐이고 status·code·message 를 갖지 않는다.
-- 함수가 응답 객체를 요구하지 않으므로 요청 사실만으로 호출·검증된다.
+동작별 결과는 테스트가 고정하며, 정책과 경계 보장은 위 계약을 따른다.
 
 ## Last Updated
 
-2026-07-30 — 검증 순서·POST 한정 검사·verdict 형태 계약과 `operations/` organ 배치를 문서화했다.
+요청 검사 순서·POST 정책 또는 verdict 책임의 범위가 바뀔 때 갱신한다.

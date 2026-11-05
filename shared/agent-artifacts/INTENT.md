@@ -7,21 +7,11 @@
 
 ## Structure
 
-실제 TypeScript entry point는 package export가 `src/index.ts`를 빌드한
-`dist/index.js`다. 패키지 루트 자체는 소스 entry가 아니다.
-
-| Path                | Role                                 |
-| ------------------- | ------------------------------------ |
-| `src/project/`      | 절대 프로젝트 루트를 요구하는 관리자 |
-| `src/user/`         | 호스트 사용자 루트를 쓰는 관리자     |
-| `src/rules/`        | 규칙 문서 계획·상태·적용             |
-| `src/instructions/` | 소유 마커 지침 구간 계획·상태·적용   |
-| `src/mcp/`          | 호스트별 MCP 등록 계획·상태·적용     |
-| `src/targets/`      | 범위·호스트·종류별 물리 대상 해석    |
-| `src/transactions/` | 리비전 검증, 잠금, 원자적 파일 적용  |
-| `src/types/`        | 공개 계약 타입을 담는 organ          |
+패키지 루트와 소스 루트는 다르다. package export는 소스 진입점을 빌드한 결과를 가리키므로, 루트에 소스 구현을 추가하지 않는다.
 
 ## Conventions
+
+- `smol-toml`은 Codex 프로젝트 TOML 검증에만 사용하며 전체 문서 재직렬화를 피한다.
 
 - 판단 우선순위: 1. 사용자 콘텐츠 보존 2. 소유권 격리 3. 호스트 호환성.
 - 소비자는 `@ogham/agent-artifacts` 패키지 루트만 사용한다.
@@ -44,7 +34,3 @@
 
 - 프로덕션 소스에서 `node:fs`, `node:path`, `node:os`, `node:child_process` 사용.
 - 알 수 없는 호스트를 Claude로 암묵 매핑하거나 사용자 범위에 출력 경로 노출.
-
-## Dependencies
-
-- `@ogham/cross-platform`; `smol-toml`은 Codex 프로젝트 TOML 검증에만 사용.

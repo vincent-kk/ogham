@@ -3,12 +3,6 @@
 owner-token lock directory로 파일 단위 변경을 직렬화하고 timeout을 명시적으로
 보고한다.
 
-## Structure
-
-- `index.ts`: 잠금 함수 공개 배럴.
-- `operations/`: lock 획득·실행을 소유하는 organ.
-- `helpers/`: owner token, stale 판정, quarantine, 대기 organ.
-
 ## Conventions
 
 - 판단 우선순위: 1. 소유권 안전성 2. timeout 결정성 3. cleanup.
@@ -29,7 +23,3 @@ owner-token lock directory로 파일 단위 변경을 직렬화하고 timeout을
 
 - timeout 후 잠금 없이 operation을 실행한다.
 - 검증되지 않은 경로를 재귀 삭제한다.
-
-## Dependencies
-
-- Node `fs`, `crypto`; sibling `paths` entry point.

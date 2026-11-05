@@ -3,16 +3,6 @@
 OS별 home/tmp/config/cache, 명시적 호스트 상태 루트, Windows/POSIX 경로
 문자열 연산의 단일 진입점이다.
 
-## Structure
-
-| Path          | Role                        |
-| ------------- | --------------------------- |
-| `index.ts`    | package root 재노출용 배럴  |
-| `paths.ts`    | 객체형 convenience facade   |
-| `state/`      | host·cache 상태 경로 organ  |
-| `operations/` | normalize·containment organ |
-| `compat/`     | portable 경로 연산          |
-
 ## Conventions
 
 - 외부 OS별 config/cache 위치는 `env-paths`에 위임한다.
@@ -43,8 +33,3 @@ OS별 home/tmp/config/cache, 명시적 호스트 상태 루트, Windows/POSIX �
 
 - 호출 측에서 `os.homedir()`나 호스트 상태 경로를 하드코딩.
 - 상대 프로젝트 루트 또는 root 밖 결과를 반환.
-
-## Dependencies
-
-- 내부: `hostRegistry`, `compat`.
-- 외부: `env-paths`, Node `os`/`path`.
