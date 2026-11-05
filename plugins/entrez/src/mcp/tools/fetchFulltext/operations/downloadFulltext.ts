@@ -11,6 +11,7 @@ import type {
   DownloadedItem,
   UnavailableItem,
 } from "../../../../types/tool.js";
+import type { OaRecord } from "../../../../types/eutils.js";
 import type { ToolContext } from "../../../shared/index.js";
 import { oaService } from "../../../../adapters/eutils/index.js";
 import { httpRequest } from "../../../../core/httpClient/index.js";
@@ -169,7 +170,14 @@ async function downloadFromTgz(
 
 /**
  * Resolve → oa.fcgi → download for one input id. Enforces the OA + license gate
- * (no license ⇒ link-only, not stored) and isolates per-format failures.
+ * (no license ⇒ link-only, not stored) and isolates OA lookup and format failures.
+ * @param id PMID or PMCID to resolve and download.
+ * @param formats Requested output formats, each attempted independently.
+ * @param outDir Directory containing all persisted fulltext files.
+ * @param overwrite Whether existing files may be replaced.
+ * @param extractTgz Whether to extract requested formats from an archive fallback.
+ * @param ctx Configuration and injected HTTP dependencies.
+ * @returns Saved file metadata or unavailable reasons with fallback links.
  */
 export async function downloadFulltext(
   id: string,
@@ -203,7 +211,17 @@ export async function downloadFulltext(
     return { downloaded, unavailable };
   }
 
-  const oa = await oaService({ pmcid }, ctx.deps);
+  let oa: OaRecord;
+  try {
+    oa = await oaService({ pmcid }, ctx.deps);
+  } catch {
+    unavailable.push({
+      id,
+      reason: UnavailableReason.FETCH_FAILED,
+      links: fallbackLinks(doi, pmcid),
+    });
+    return { downloaded, unavailable };
+  }
   if (oa.oaStatus !== OaStatus.OPEN_ACCESS) {
     unavailable.push({
       id,
