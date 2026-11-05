@@ -6,8 +6,8 @@
 
 - 플러그인은 `skills` 만으로 로드되어야 한다 — `mcpServers`·`hooks`·빌드 산출물 없음. `validate-plugin` 이 `.claude-plugin/plugin.json` 에 대해 통과해야 한다.
 - 페르소나 id, 산출물 파일명, axis id, verdict/status enum 은 `agents/*.md`, `skills/peer-review/orchestration.md`, `skills/peer-review/prompt-templates.md`, `skills/peer-review/templates.md`, 그리고 각 `SKILL.md` 에서 동일해야 한다.
-- verdict 는 게이트 이상에서 미해결인 **soundness** finding 만의 순수 함수여야 한다 (게이트 = `--gate`, 기본 `major` — accept 를 차단할 수 있는 최저 severity). 게이트 미만 미해결 finding 은 advisory 로 `review-report.md` 의 Advisory Notes 섹션에 보존되며, advisory 가 비어 있지 않은 accept 는 본문에서 "accept (with notes)" 로 표기한다(frontmatter·터미널 마커는 `accept` 그대로). 치명 결함 override 는 게이트와 무관하다. 중요성(`impact-assessor`)은 advisory 이며 verdict 를 Minor Revision 이상으로 올리지 못한다.
-- 모든 스킬의 산출물 베이스 경로는 단일 WORKDIR 규약을 따른다: 우선순위 `--workdir <dir>` > 환경변수 `PRAWF_WORKDIR` > 기본값 `./.prawf`. 해석 규칙의 단일 출처는 `skills/.shared/operations/resolve_workdir.md` 이며 4개 스킬이 공유한다.
+- verdict 는 게이트 이상 **soundness** finding 의 최종 상태만의 순수 함수여야 한다 — 미해결(UNRESOLVED)이 등급을 정하고, 게이트 이상 미해결이 없을 때 게이트 이상 MITIGATED 가 남아 있으면 Minor Revision 이다 (게이트 = `--gate`, 기본 `major` — accept 를 차단할 수 있는 최저 severity). 게이트 미만 미해결 finding 은 advisory 로 `review-report.md` 의 Advisory Notes 섹션에 보존되며, advisory 가 비어 있지 않은 accept 는 본문에서 "accept (with notes)" 로 표기한다(frontmatter·터미널 마커는 `accept` 그대로). 치명 결함 override 는 게이트와 무관하다. 중요성(`impact-assessor`)은 advisory 이며 verdict 를 Minor Revision 이상으로 올리지 못한다.
+- 모든 스킬의 산출물 베이스 경로는 단일 WORKDIR 규약을 따른다: 우선순위 `--workdir <dir>` > 환경변수 `PRAWF_WORKDIR` > 현재 작업 디렉터리 아래의 기본 prawf 산출물 디렉터리. 해석 규칙의 단일 출처는 `skills/.shared/operations/resolve_workdir.md` 이며 4개 스킬이 공유한다.
 
 ## API Contracts
 
@@ -24,7 +24,7 @@
 
 - `.claude-plugin/plugin.json` 에 `mcpServers`·`hooks` 키가 없고 `agents` 필드도 없다 (agents 는 런타임 자동 발견).
 - `validate-plugin` 이 매니페스트에 대해 통과한다.
-- 저장소에 `bridge/`·`src/version.ts` 가 없으며 `version:sync` 는 `plugin.json` 만 갱신한다.
+- 플러그인에 런타임 번들 디렉터리와 버전 소스 파일이 없으며 `version:sync` 는 `plugin.json` 만 갱신한다.
 
 ### AC-identifier-consistency — 식별자 단일성
 
@@ -34,14 +34,14 @@
 
 ### AC-verdict-gate-purity — verdict 순수성
 
-- verdict 는 게이트(`--gate`, 기본 `major`) 이상에서 미해결인 soundness finding 만의 함수다.
+- verdict 는 게이트(`--gate`, 기본 `major`) 이상 soundness finding 의 최종 상태만의 함수다: 미해결이 등급을 정하고, 미해결 없이 MITIGATED 만 남으면 `minor-revision` 이다.
 - 게이트 미만 미해결 finding 은 `review-report.md` 의 Advisory Notes 에만 나타나고 verdict 를 바꾸지 않는다.
 - `impact-assessor` 의 중요성 판정은 verdict 를 `minor-revision` 이상으로 올리지 못한다.
 - consequence 를 명명하지 못한 finding 의 severity 는 `minor` 를 넘지 않는다.
 
 ### AC-workdir-resolution — 산출물 경로 규약
 
-- WORKDIR 해석 우선순위가 `--workdir <dir>` > `PRAWF_WORKDIR` > `./.prawf` 이며, 해석 규칙의 정의는 `skills/.shared/operations/resolve_workdir.md` 한 곳에만 있다.
+- WORKDIR 해석 우선순위가 `--workdir <dir>` > `PRAWF_WORKDIR` > 현재 작업 디렉터리 아래의 기본 prawf 산출물 디렉터리 이며, 해석 규칙의 정의는 `skills/.shared/operations/resolve_workdir.md` 한 곳에만 있다.
 - 4개 스킬이 같은 `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/` 를 공유한다.
 
 ## Last Updated

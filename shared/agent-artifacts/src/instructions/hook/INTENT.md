@@ -7,8 +7,7 @@
 - 범용 manager보다 약한 동기식 compatibility writer임을 API 이름에 드러낸다.
 - 대상 해석은 호출자가 목적별 target resolver로 먼저 끝낸다.
 - 외부 소비자는 `@ogham/agent-artifacts` 루트에서 공개 심볼만 import한다.
-- 같은 패키지 subtree의 읽기·쓰기 훅은 각각 `status/`·`apply/` concrete
-  파일을 직접 import한다.
+- 같은 패키지 subtree의 읽기·쓰기 훅은 목적에 맞는 concrete 파일을 직접 import한다.
 - hook 격리는 `sideEffects: false` tree-shaking과 emitted byte·output
   forbidden-pattern guard로 검증한다.
 

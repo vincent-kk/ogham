@@ -8,8 +8,10 @@
   받지 않고 `@ogham/cross-platform`의 호스트 상태 루트를 사용한다.
 - 규칙, 지침, MCP는 각각 독립된 manager로 `inspect`, `plan`, `apply` 계약을
   제공한다.
-- `plan`은 읽기 전용이며 대상 리비전을 기록한다. `apply`는 잠금 아래에서
-  리비전을 다시 확인하고 stale plan을 `conflict`로 거부한다.
+- `plan`은 읽기 전용이다. 직접 편집하는 파일의 계획은 대상 리비전을 기록하고,
+  `apply`는 잠금 아래에서 재검증하여 stale plan을 `conflict`로 거부한다.
+  호스트 CLI에 위임하는 MCP 등록에는 이 파일 트랜잭션 보장을 적용하지 않는다.
+  엔진이 관찰하거나 잠그지 않는 호스트 저장소까지 보호한다고 약속하지 않기 위해서다.
 - 규칙 파일명, 소유자 ID, MCP 이름은 대상 경로 또는 명령으로 전달하기 전에
   검증한다.
 - 비소유 텍스트·파일·MCP 서버 및 명시적으로 교체하지 않은 drift는 보존한다.
@@ -29,7 +31,7 @@ hook 소비자도 같은 루트를 쓰면서 비기여 manager·planning·apply 
 제거한다.
 
 `HookInstructionSnapshot`은 hook instruction 판독의 중간 단계 타입이라 루트
-계약으로 공개하지 않는다. 공개 계약 타입은 `types/` organ이 소유하는데 이 타입은 거기
+계약으로 공개하지 않는다. 공개 계약 타입은 `src/types/` organ이 소유하는데 이 타입은 거기
 속하지 않고, 공개 심볼 어느 시그니처에도 나타나지 않는다. 내부 타입으로만 유지해 불필요한 공개 의존을 만들지 않는다.
 
 ### Scope and manager types
@@ -41,7 +43,7 @@ resolver의 결과를 조합만 한다.
 
 ### Shared outcomes
 
-계획은 요청, 예상 outcome, 대상별 revision을 보존한다. 설정 UI에는 outcome과
+계획은 요청, 예상 outcome, 직접 편집하는 파일의 대상별 revision을 보존한다. 설정 UI에는 outcome과
 revision의 직렬화 가능한 preview만 전달하고, 저장 시 원래 요청으로 다시
 계획한다.
 
@@ -87,6 +89,10 @@ backup을 만든다.
 `existing-or-effective`는 유일한 기존 후보를 유지한다.
 
 ### MCP
+
+사용자 CLI 등록은 호스트가 저장소를 소유하므로 엔진이 직접 읽거나 잠그지 않는다.
+CLI 계획의 빈 revisions는 상태를 확인했다는 증거가 아니며 stale plan 검출을
+보장하지 않는다. 적용 결과는 호스트 명령의 성공·실패로 판단한다.
 
 Claude 사용자 CLI의 가변 옵션보다 필수 위치 인자를 먼저 둔다. stdio는
 `<name>` 뒤에 `--env <env...>`와 `-- <command> [args...]`를, HTTP는
