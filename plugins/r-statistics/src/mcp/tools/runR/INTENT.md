@@ -7,7 +7,7 @@
 - 실행 전 `validateRScript` 정적 게이트 통과 필수 (실패 → `COMMAND_BLOCKED`)
 - Rscript 미탐색 → `R_NOT_FOUND` (setup 안내)
 - 기본 `executionMode=async` (jobId 반환 후 get_r_job 폴링), `sync` 는 즉시 결과
-- 모든 잡은 jobStore 에 등록 (사전 실패도 synthetic 잡으로 일관 반환)
+- 실행 잡과 정적 차단·R 미탐색의 synthetic 잡은 jobStore에 등록한다. 입력 검증 실패는 잡 생성 전 오류로 알려 잘못된 요청을 실행 이력으로 취급하지 않는다.
 - 데이터 ref 경로는 allow-root(`R_STATISTICS_DATA_ROOT`, 기본 프로젝트 루트) 하위 realpath 만 수용
 - 선택 인자 `project_root`(절대경로)는 핸들러 진입 즉시 `rememberProjectRoot` 로 기억 — allow-root 를 해석하는 깊은 leaf(`inputDataRoot`)가 이를 소비한다 (Claude 에서는 무시되어 기존 CWD 동작 유지)
 - 모든 상태 봉투는 module graph가 확정한 `MANAGED_R_LIB_DIR` 을 노출한다.

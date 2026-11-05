@@ -23,4 +23,4 @@ MCP `tools` 서버 lifecycle 모듈. 도구 4개를 등록하고 stdio 로 기�
 ### Never do
 
 - stdout 직접 쓰기 (stdio transport 전용; 로그는 stderr)
-- 핸들러에서 `process.exit` 직접 호출
+- 도구 핸들러에서 `process.exit` 직접 호출 — 개별 요청 실패로 서버 수명이 끝나지 않게 한다.

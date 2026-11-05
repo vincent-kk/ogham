@@ -21,5 +21,5 @@ r-statistics의 MCP host 경계를 소유한다. 도구 등록·전송·응답�
 
 ### Never do
 
-- 핸들러에서 `process.exit` 직접 호출(serverEntry 제외)
+- 도구 핸들러에서 `process.exit` 직접 호출 — 개별 요청 실패로 서버 수명이 끝나지 않게 한다.
 - 통계 정책·도메인 어휘를 실행 레이어에 도입

@@ -4,7 +4,7 @@
 
 - 플러그인의 유일한 도메인은 통계 방법론이다. 스킬·에이전트·예시·기본값 어디에도 특정 응용 분야를 암시하는 어휘를 두지 않는다.
 - 비결정 추론(에이전트)과 결정적 판정(MCP)을 분리한다: 에이전트는 방법을 **추천**하고, `assert_analysis_plan` 의 hard gate 가 실행 가능 여부를 **결정**한다.
-- 디스크 경로는 `~/.claude/plugins/r-statistics/` 하위로 한정한다.
+- 관리 상태와 실행 워크스페이스는 공유 host resolver가 선택한 plugin cache 하위에 둔다. 호스트별 루트를 다시 계산하면 setup과 실행이 서로 다른 관리형 library를 사용하게 된다.
 - `bridge/` 는 의도적으로 커밋하는 배포 산출물이고 배포용 중간 디렉터리는 커밋하지 않는다.
 - 버전은 `scripts/injectVersion.mjs` 만 갱신한다 — `src/version.ts` 와 `plugin.json` 의 version 을 손으로 고치지 않는다.
 - 에이전트는 `agents/` 에서 자동 발견된다. `plugin.json` 에 `agents` 필드를 두지 않는다.
