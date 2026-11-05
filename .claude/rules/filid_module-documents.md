@@ -10,7 +10,7 @@ paths:
 
 ## 1. INTENT records the boundary; DETAIL records the contract
 
-Two documents, two jobs — neither substitutes for the other. The section headings `Purpose`, `Conventions`, `Boundaries`, `Always do`, `Ask first` and `Never do` in INTENT — plus `Structure` and `Dependencies` only under the conditions §2 sets — and `Requirements`, `API Contracts`, `Acceptance Criteria` and `Last Updated` in DETAIL, stay in English; descriptive content follows `[filid:lang]`, defaulting to English. INTENT records only this fractal's own purpose, ownership and boundaries — never a copy of an ancestor's — and updates only when the public boundary or contract changes.
+Two documents, two jobs — neither substitutes for the other. Every fractal has an `INTENT.md`; `DETAIL.md` is optional and exists only when the fractal has contract content that §2 requires or another rule requires the document: acceptance groups that verification files bind (`filid_verification-records` §5), a boundary exemption (§7), or a child's demotion record. A fractal whose maintainer derives the whole contract from the entry point and the tests has none, and its absence is not a finding; a `DETAIL.md` that holds nothing §2 requires and that no other rule requires is deleted rather than kept as a shell. The section headings `Purpose`, `Conventions`, `Boundaries`, `Always do`, `Ask first` and `Never do` in INTENT — plus `Structure` and `Dependencies` only under the conditions §2 sets — and `Requirements`, `API Contracts`, `Acceptance Criteria` and `Last Updated` in DETAIL, stay in English; descriptive content follows `[filid:lang]`, defaulting to English. INTENT records only this fractal's own purpose, ownership and boundaries — never a copy of an ancestor's — and updates only when the public boundary or contract changes.
 
 ## 2. A document records what its reader cannot establish and omits what that reader derives
 
@@ -26,7 +26,7 @@ Independent documentation is a claim to an independent contract. An organ does n
 
 ## 5. DETAIL's contract sections are current state, not an append-only ledger
 
-Restructure the contract sections to the currently intended behavior on every update; a superseded clause is removed, not left standing beside its replacement. Update DETAIL before the code it describes. Acceptance groups carry stable IDs, unique within that document. `DETAIL.md` is the sole acceptance-criteria ledger; a legacy `.filid/criteria.md` is reported as such — never auto-deleted, never silently migrated. The body of `## Last Updated` states what triggers an update of this document, for example "with every change to the acceptance criteria", never a date; the date is in version control.
+Restructure the contract sections to the currently intended behavior on every update; a superseded clause is removed, not left standing beside its replacement. Update DETAIL before the code it describes. Acceptance groups carry stable IDs, unique within that document. `Acceptance Criteria` declares only the groups a verification file binds or that state a contract the tests do not; when the tests pin every criterion, the section says so in one sentence and declares none. `DETAIL.md` is the sole acceptance-criteria ledger; a legacy `.filid/criteria.md` is reported as such — never auto-deleted, never silently migrated. The body of `## Last Updated` states what triggers an update of this document, for example "with every change to the acceptance criteria", never a date; the date is in version control.
 
 ## 6. History lives in version control, not in the documents
 

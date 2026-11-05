@@ -20,7 +20,7 @@ PreToolUse 이벤트에서 하나의 물리 도구 호출을 논리 operation으
 - Codex Move destination은 exact hunk projection이면 전체 내용을 검증한다. ambiguous/stale projection의 계약 문서는 exact content를 요구해 거부하고, 일반 파일은 source와 모든 추가 line의 superset으로 구조 위험을 검사하며, source가 없거나 앞선 section이 canonical 동일 경로를 touch했으면 거부한다.
 - `validateCwd` 실패 시 즉시 `{ continue: true }` 반환
 - Write/Edit는 host의 물리 target으로 문서를 판정하고, DETAIL.md의 기존 content를 같은 target에서 먼저 읽어 old 인자로 전달
-- Delete도 mutation 방문을 거치게 하고 host가 INTENT.md/DETAIL.md와 같은 대상으로 해석하는 삭제는 명시적으로 deny
+- Delete도 mutation 방문을 거치게 하고 INTENT.md 삭제 보호와 DETAIL.md 선택 문서 안내 적용
 - 미해석 `apply_patch`는 FCA 프로젝트에서 parser reason과 유효한 V4A 재발행 안내로 deny하고 비-FCA 프로젝트에서는 그대로 허용
 - branch 이름과 무관하게 동일한 방문·문서 gate를 적용
 

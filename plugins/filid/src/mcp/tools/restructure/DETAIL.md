@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 필수 산출물 역할은 INTENT 문서와 진입점뿐이다. `detail-document` 역할을 담은 저장 계획은 `plan-artifact-invalid`로 거절하고 계획을 다시 만들게 한다. 계획은 스냅샷에 결속된 일회성 산출물이므로 호환 변환을 제공하지 않는다.
+
 - `plan`, `precondition`, `postcondition` action만 허용한다.
 - plan은 같은 snapshot에서 placement evidence를 계산하고 크기와 무관하게 ephemeral artifact로 저장한다.
 - validation은 absolute `planPath`의 common payload 또는 bare plan을 read-only로 검사한다.
@@ -49,12 +51,7 @@
 - precondition과 postcondition summary의 `scopes`는 입력 echo가 아니라 canonical 여섯 scope 전체다.
 - plan validation input은 `scopes`를 받지 않는다.
 
-## History
-
-- 2026-09-20 — plan artifact schema를 4로 올렸다. 계획이 `unknownFiles`와 postcondition 기준선을 싣는다. 무관한 `unknownFiles`에 귀속된 진단은 상태를 흐리지 않는다.
-- 2026-09-20 — plan artifact schema를 3으로 올렸다. import 요구의 모양과 precondition 기준(`readPaths`·`probePaths`·`readHash`)이 바뀌었다. summary의 `delegatedImportCount`를 `affectedImportCount`로 바꿨다. 위임 import가 `affectedImports`에 합쳐졌기 때문이다. artifact의 root 밖 경로(symlink 경유 포함)를 읽기 전에 거절하게 했다.
-- 2026-09-19 — 응답 summary와 plan artifact 오류에 다음 단계를 붙였다. 호출자가 여러 단계로 된 절차의 다음 호출을 스킬 문서에서 추측해야 했다. adapter 없는 프로젝트가 진단 때문에 `indeterminate`로만 보고되어 `unsupported` 판정이 도달하지 않던 순서도 바꿨다.
 
 ## Last Updated
 
-2026-09-20
+기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.

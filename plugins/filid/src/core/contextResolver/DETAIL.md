@@ -2,6 +2,8 @@
 
 ## Requirements
 
+- 문서 evidence가 없는 fallback에서도 INTENT.md 부재만 missing을 뜻한다. DETAIL.md는 기록할 계약이 있을 때만 필요하므로 부재를 오류로 표시하지 않는다.
+
 - target path를 포함하는 가장 깊은 node에서 소유 fractal을 결정한다.
 - organ target은 `parentFractalPath`를 사용하고 nested fractal은 자신의 경계를 유지한다.
 - owner부터 root까지 document ref만 반환하며 본문은 반환하지 않는다.
@@ -27,4 +29,4 @@
 
 ## Last Updated
 
-2026-07-29 — containment 판정을 공개 표면에 추가했다.
+기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.

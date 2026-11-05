@@ -25,7 +25,7 @@ Resolve in this strict order: (1) `INTENT.md` present → fractal; (2) `DETAIL.m
 
 Traversal continues inside organs: a nested directory with its own documents or module index is its own fractal. `hybrid` is never auto-assigned, and unproven purity stays an organ. What a node _should_ be is a rule result, not a classification: an organ consumed from outside its owner's subtree is reported with the consumer paths as evidence, never silently reclassified — which is what lets a non-FCA codebase be adopted.
 
-When the shape is yours to decide: a directory that others call by name while its internals stay free to change is a fractal — whether or not the package publishes it — and a fractal owns the implementation of its contract. An entry point that only re-exports a parent's organs is a facade, not a fractal: move the implementation in, or drop the claim. Dropping the claim is a demotion: remove the entry point, then delete `INTENT.md` and `DETAIL.md` and state in the parent's `DETAIL.md`, as the parent's present decision, what the parent now owns and why that directory is not a fractal.
+When the shape is yours to decide: a directory that others call by name while its internals stay free to change is a fractal — whether or not the package publishes it — and a fractal owns the implementation of its contract. An entry point that only re-exports a parent's organs is a facade, not a fractal: move the implementation in, or drop the claim. Dropping the claim is a demotion, documents first: state in the parent's `DETAIL.md`, as the parent's present decision, what the parent now owns and why that directory is not a fractal — the parent adds the document for this purpose if it has none — then remove the entry point and delete the directory's `INTENT.md` and any `DETAIL.md`.
 
 ## 3. A fractal is crossed through its entry point
 
@@ -78,7 +78,7 @@ paths:
 
 ## 1. INTENT records the boundary; DETAIL records the contract
 
-Two documents, two jobs — neither substitutes for the other. The section headings `Purpose`, `Conventions`, `Boundaries`, `Always do`, `Ask first` and `Never do` in INTENT — plus `Structure` and `Dependencies` only under the conditions §2 sets — and `Requirements`, `API Contracts`, `Acceptance Criteria` and `Last Updated` in DETAIL, stay in English; descriptive content follows `[filid:lang]`, defaulting to English. INTENT records only this fractal's own purpose, ownership and boundaries — never a copy of an ancestor's — and updates only when the public boundary or contract changes.
+Two documents, two jobs — neither substitutes for the other. Every fractal has an `INTENT.md`; `DETAIL.md` is optional and exists only when the fractal has contract content that §2 requires or another rule requires the document: acceptance groups that verification files bind (`filid_verification-records` §5), a boundary exemption (§7), or a child's demotion record. A fractal whose maintainer derives the whole contract from the entry point and the tests has none, and its absence is not a finding; a `DETAIL.md` that holds nothing §2 requires and that no other rule requires is deleted rather than kept as a shell. The section headings `Purpose`, `Conventions`, `Boundaries`, `Always do`, `Ask first` and `Never do` in INTENT — plus `Structure` and `Dependencies` only under the conditions §2 sets — and `Requirements`, `API Contracts`, `Acceptance Criteria` and `Last Updated` in DETAIL, stay in English; descriptive content follows `[filid:lang]`, defaulting to English. INTENT records only this fractal's own purpose, ownership and boundaries — never a copy of an ancestor's — and updates only when the public boundary or contract changes.
 
 ## 2. A document records what its reader cannot establish and omits what that reader derives
 
@@ -94,7 +94,7 @@ Independent documentation is a claim to an independent contract. An organ does n
 
 ## 5. DETAIL's contract sections are current state, not an append-only ledger
 
-Restructure the contract sections to the currently intended behavior on every update; a superseded clause is removed, not left standing beside its replacement. Update DETAIL before the code it describes. Acceptance groups carry stable IDs, unique within that document. `DETAIL.md` is the sole acceptance-criteria ledger; a legacy `.filid/criteria.md` is reported as such — never auto-deleted, never silently migrated. The body of `## Last Updated` states what triggers an update of this document, for example "with every change to the acceptance criteria", never a date; the date is in version control.
+Restructure the contract sections to the currently intended behavior on every update; a superseded clause is removed, not left standing beside its replacement. Update DETAIL before the code it describes. Acceptance groups carry stable IDs, unique within that document. `Acceptance Criteria` declares only the groups a verification file binds or that state a contract the tests do not; when the tests pin every criterion, the section says so in one sentence and declares none. `DETAIL.md` is the sole acceptance-criteria ledger; a legacy `.filid/criteria.md` is reported as such — never auto-deleted, never silently migrated. The body of `## Last Updated` states what triggers an update of this document, for example "with every change to the acceptance criteria", never a date; the date is in version control.
 
 ## 6. History lives in version control, not in the documents
 
@@ -182,7 +182,7 @@ It sits in the test directory — `__tests__/`, or the repository's own conventi
 
 ## 1. A unit sits with the contract it implements; shared code sits at its users' lowest common fractal
 
-A unit belongs to the fractal whose contract it implements. Only a unit serving the implementations of two or more fractals is shared: compute the lowest common fractal of the owners that use it and place the unit under it — their common ancestor is the address; anything higher is a guess. A consumer is product code outside the unit's fractal subtree; verification, benchmark and demonstration code is not a consumer and never pulls a unit upward. Count the consumers that use the unit: code that merely constructs it and hands it on is wiring, and counting wiring pulls everything up to the composition root. A unit with one using owner is an organ of that owner — one user is not shared code. A unit with a contract of its own, published or not, becomes a child fractal instead, with its intent, detail and entry-point artifacts.
+A unit belongs to the fractal whose contract it implements. Only a unit serving the implementations of two or more fractals is shared: compute the lowest common fractal of the owners that use it and place the unit under it — their common ancestor is the address; anything higher is a guess. A consumer is product code outside the unit's fractal subtree; verification, benchmark and demonstration code is not a consumer and never pulls a unit upward. Count the consumers that use the unit: code that merely constructs it and hands it on is wiring, and counting wiring pulls everything up to the composition root. A unit with one using owner is an organ of that owner — one user is not shared code. A unit with a contract of its own, published or not, becomes a child fractal instead, with its intent and entry-point artifacts, and a detail document when it has a contract to record.
 
 ## 2. An organ cannot be a lowest common ancestor
 
@@ -198,7 +198,7 @@ A functionally working but different result is a failed restructure. The restruc
 
 ## 5. The document changes before the code does
 
-Contracts lead; implementations follow: before changing a fractal, update DETAIL, and update INTENT only when its public boundary changes. Run Filid scans and validations once at the pull-request or merge-track seam, after implementation and accepted review fixes — earlier only when explicitly requested; ordinary development checks and edits never trigger them. At the seam, record warnings as findings and note any deviation from the plan.
+Contracts lead; implementations follow: before changing a fractal, update its DETAIL when the change alters what it records — adding one when the change gives it contract content to record — and update INTENT only when its public boundary changes. Run Filid scans and validations once at the pull-request or merge-track seam, after implementation and accepted review fixes — earlier only when explicitly requested; ordinary development checks and edits never trigger them. At the seam, record warnings as findings and note any deviation from the plan.
 
 ---
 
