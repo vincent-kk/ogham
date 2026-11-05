@@ -34,15 +34,13 @@ async function minifyAsset(source, loader) {
 }
 
 let html = await readPageFile("index.html");
-const css = await minifyAsset(
-  await readPageFile("styles", "styles.css"),
-  "css",
-);
-// Inline CSS
-html = html.replace(
-  /<link\s+href="\.\/styles\/styles\.css"\s+rel="stylesheet"\s*\/?>/,
-  `<style>\n${css}\n</style>`,
-);
+// The source page's stylesheet order determines the cascade in the inline build.
+for (const match of html.matchAll(
+  /<link\s+href="\.\/(styles\/[^"<>]+\.css)"\s+rel="stylesheet"\s*\/?>/g,
+)) {
+  const css = await minifyAsset(await readPageFile(match[1]), "css");
+  html = html.replace(match[0], () => `<style>\n${css}\n</style>`);
+}
 
 // The source page orders dependencies before app.js; preserve that order inline.
 for (const match of html.matchAll(
