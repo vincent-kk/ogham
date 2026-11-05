@@ -22,7 +22,7 @@ Anti-yield exception: when the host launches an actor in the background and retu
 - `templates.md` owns actor opinion contracts, the canonical fix-request block, and terminal output.
 - [report-formats.md](./report-formats.md) defines the sealed verdict and rendered report formats.
 - Prepare embeds `reviewers/reviewer.md` and `reviewers/verifier.md` in the briefs; the orchestrator neither opens these files nor passes their paths.
-- `rules/fca.md` FCA-13 and `rules/documents.md` DOC-6–DOC-8 judge Stage 1 document drafts and the PR body's handoff. `review_state prepare` reads the PR body's handoff block and the top template sections as change context, parsing the machine block (the HTML comment marker defined in `pull-request/reference.md` §7) into each review brief's `## FCA Handoff` section. The body file is read once at dispatch; a PR body edited after prepare reaches briefs only through `--force`.
+- `rules/fca.md` FCA-13 and `rules/documents.md` DOC-6–DOC-9 judge Stage 1 document drafts and the PR body's handoff. `review_state prepare` reads the PR body's handoff block and the top template sections as change context, parsing the machine block (the HTML comment marker defined in `pull-request/reference.md` §7) into each review brief's `## FCA Handoff` section. The body file is read once at dispatch; a PR body edited after prepare reaches briefs only through `--force`.
 
 ## Step 0 — Load the tool and bootstrap facts
 

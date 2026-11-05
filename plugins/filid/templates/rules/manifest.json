@@ -18,7 +18,7 @@
       "title": "Module Documents",
       "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, reader-relative content, the current-state contract ledger, history kept in version control, and organ exemption entries.",
       "grounding": "This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs.",
-      "templateHash": "e70168b860e9e55c7f219bce9b20e4dcdb82bc077e446cb3b9065370374e336f"
+      "templateHash": "3be21cfe2fa820f2ea87563bb70b2ff821b5fcfaa2809bcbddecc98cd003604a"
     },
     {
       "id": "filid_verification-records",

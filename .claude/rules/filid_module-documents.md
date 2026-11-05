@@ -51,4 +51,4 @@ A missing or empty `Reason` is an unmet contract, not a granted exemption.
 
 ---
 
-**This rule is working if:** every fractal's boundary fits on one screen, nothing in either document restates what a maintainer derives from the source and the tests, and neither carries a history section, a date or a "previously". **This rule is wrong for you if:** the directory is an organ, or a part of the tree that has not adopted FCA — then it has no contract of its own to document, and adding one is the wrong move.
+**This rule is working if:** every fractal's boundary fits on one screen, nothing in either document restates what a maintainer derives from the source and the tests, and neither carries a history section, a dated note or a "previously". **This rule is wrong for you if:** the directory is an organ, or a part of the tree that has not adopted FCA — then it has no contract of its own to document, and adding one is the wrong move.

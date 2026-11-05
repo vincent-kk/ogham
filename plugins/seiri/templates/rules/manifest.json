@@ -87,10 +87,10 @@
       "id": "seiri_documents",
       "filename": "seiri_documents.md",
       "title": "Documents",
-      "description": "Record what the reader cannot establish, omit what they derive, and keep documents present-tense, true, single-homed, sized for attention and changed with the code.",
-      "grounding": "This rule rests on properties every codebase has: its documents are files apart from the code they describe, and each is read by someone who holds only part of that code.",
+      "description": "Record what the reader cannot establish, omit what they derive, keep current-behavior documents true and canonical, and write consumer change records for their readers.",
+      "grounding": "This rule rests on a property every codebase with documentation has: a document describes code or its intended use for a reader whose information differs from its author's.",
       "recommended": false,
-      "templateHash": "debf808677b1fcd60321c3f340a3a2c5351497c033ca1c929334ccc4239ec724"
+      "templateHash": "22919ab43b92bf1438411e303371ae0514fa7dc00799949c251c5a18162302cc"
     }
   ]
 }
