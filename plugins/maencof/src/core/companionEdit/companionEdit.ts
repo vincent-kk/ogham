@@ -5,7 +5,13 @@
  * 로드(→ 레거시면 정본 정규화) → 연산 적용(메모리) → 검증(Zod 정본 + 매 턴 예산 + brief 동기화)
  * → commit≠true면 diff만(파일 불변), commit이면 백업 후 저장. 예산·동기화 위반은 커밋 거부.
  */
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 
 import { TURN_IDENTITY_CHAR_BUDGET } from '../../constants/companionIdentity.js';
@@ -281,12 +287,21 @@ export function applyCompanionEdit(
     };
 
   const backupPath = backupPathFor(identityPath);
-  copyFileSync(identityPath, backupPath);
-  writeFileSync(
-    identityPath,
-    JSON.stringify(parsed.data, null, 2) + '\n',
-    'utf-8',
-  );
+  try {
+    copyFileSync(identityPath, backupPath);
+    const tempPath = `${identityPath}.temp`;
+    writeFileSync(
+      tempPath,
+      JSON.stringify(parsed.data, null, 2) + '\n',
+      'utf-8',
+    );
+    renameSync(tempPath, identityPath);
+  } catch (e) {
+    return failResult(
+      input,
+      `Failed to save companion-identity.json: ${String(e)}`,
+    );
+  }
 
   return {
     success: true,
