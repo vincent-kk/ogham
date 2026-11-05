@@ -64,6 +64,15 @@ Config location: `<cwd>/.maencof-lens/config.json`
 - `init`: if config exists → show current + ask to overwrite
 - Mutations (`add`/`remove`/`set-default`/`set-layers`): load → validate → mutate → write → read-back verify
 
+### Before Every Write — Vault Boundary Check
+
+This skill writes with the agent's file tools, so it must enforce the same vault boundary as `writeConfig` before any config or `.gitignore` write:
+
+1. Read the registered vault roots from both existing user and project config layers, and include the roots in the proposed config. Check all of them even when the project list overrides the user list or a mutation removes a vault.
+2. Check whether the working folder is the same as or inside any registered vault root. Also check the actual config destination; compare whole path components after resolving dot segments and filesystem aliases, including symbolic links and existing ancestors of a missing destination.
+3. If the working folder or destination is inside a registered vault, do not create directories, write config, or update `.gitignore` there. Stop the mutation and show: "Cannot save lens settings inside a registered vault. Set MAENCOF_LENS_CONFIG_ROOT to a folder outside the vault, or save to the user layer."
+4. Never switch config roots or layers automatically. Wait for the user to explicitly select a safe destination and check it again before writing; the user layer must also be outside every registered vault.
+
 ### Step 2 — Execute Subcommand
 
 **`init`**:

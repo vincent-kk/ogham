@@ -14,6 +14,7 @@ import {
 import type { LensConfig } from "../configSchema/index.js";
 import { CONFIG_VERSION, DEFAULT_LAYERS } from "../defaults/index.js";
 
+import { assertConfigOutsideVaults } from "./utils/assertConfigOutsideVaults.js";
 import { configLayers } from "./utils/configLayers.js";
 
 /**
@@ -51,6 +52,7 @@ export function loadConfigScope(projectRoot: string): ConfigScopeState {
  * @param config Proposed layer document, stored without normalization.
  * @returns The path written after the effective merged config passes its guard.
  * @throws Error naming the scope when the merge has no valid vault list; no file is written.
+ * @throws Error with relocation guidance when the destination is inside a registered vault.
  */
 export function writeConfig(
   projectRoot: string,
@@ -64,6 +66,13 @@ export function writeConfig(
     scope === "user"
       ? mergeConfigLayers(document, documents.project)
       : mergeConfigLayers(documents.user, document);
+  const target = scope === "user" ? layers.user : layers.project;
+  if (target !== null)
+    assertConfigOutsideVaults(projectRoot, target, [
+      documents.user,
+      documents.project,
+      document,
+    ]);
   if (!isValidLensConfig(merged))
     throw new Error(
       `Cannot write ${scope} config: merged configuration has no valid vault list.`,
