@@ -36,6 +36,12 @@ export function createNavigateGraph(): KnowledgeGraph {
       ],
     ),
   );
+  edges.push({ from: nodes[1].id, to: nodes[2].id, type: "LINK", weight: 1 });
+  for (const node of nodes)
+    node.outboundLinks = edges
+      .filter((edge) => edge.type === "LINK" && edge.from === node.id)
+      .map((edge) => edge.to);
+  target.outboundLinks?.push("02_Derived/missing.md");
   return {
     nodes: new Map(nodes.map((node) => [node.id, node])),
     edges,

@@ -3,6 +3,8 @@ import type { KnowledgeGraph } from "@ogham/maencof";
 
 import { computeEffectiveLayers } from "../../filter/layerGuard/index.js";
 
+import { filterNodeLinks } from "./utils/filterNodeLinks.js";
+
 /** Navigation request scoped to a configured vault and its layer ceiling. */
 export interface LensNavigateInput {
   /** Registered vault name; routing supplies the default when omitted. */
@@ -53,25 +55,30 @@ export async function handleLensNavigate(
     };
 
   const output = { ...result } as Record<string, unknown>;
-  const filterNodes = (nodes: unknown): unknown => {
-    if (!Array.isArray(nodes)) return nodes;
-    return nodes.filter(
-      (n: Record<string, unknown>) =>
-        n.layer === undefined || effectiveLayers.includes(n.layer as number),
-    );
-  };
-
-  if (output.inbound) output.inbound = filterNodes(output.inbound);
-  if (output.outbound) output.outbound = filterNodes(output.outbound);
-  if (output.children) output.children = filterNodes(output.children);
-  if (output.siblings) output.siblings = filterNodes(output.siblings);
-  if (output.crossLayer) output.crossLayer = filterNodes(output.crossLayer);
-  if (output.domain) output.domain = filterNodes(output.domain);
-  if (
-    result.parent?.layer !== undefined &&
-    !effectiveLayers.includes(result.parent.layer)
-  )
-    output.parent = undefined;
+  output.node = filterNodeLinks(result.node, graph, effectiveLayers);
+  for (const key of [
+    "inbound",
+    "outbound",
+    "children",
+    "siblings",
+    "crossLayer",
+    "domain",
+  ] as const) {
+    const nodes = result[key];
+    if (Array.isArray(nodes))
+      output[key] = nodes
+        .filter(
+          (node) =>
+            node.layer === undefined || effectiveLayers.includes(node.layer),
+        )
+        .map((node) => filterNodeLinks(node, graph, effectiveLayers));
+  }
+  if (result.parent)
+    output.parent =
+      result.parent.layer === undefined ||
+      effectiveLayers.includes(result.parent.layer)
+        ? filterNodeLinks(result.parent, graph, effectiveLayers)
+        : undefined;
 
   return output;
 }

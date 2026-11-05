@@ -81,7 +81,7 @@ describe("handleLensNavigate layer ceiling", () => {
 
     const result = await handleLensNavigate(graph, { path: targetPath }, [2]);
 
-    expect(result.parent).toBe(node);
+    expect(result.parent).toEqual(node);
     for (const field of [
       "inbound",
       "outbound",
@@ -89,9 +89,8 @@ describe("handleLensNavigate layer ceiling", () => {
       "siblings",
       "crossLayer",
       "domain",
-    ]) {
+    ])
       expect(result[field]).toEqual(expect.arrayContaining([node]));
-    }
   });
 
   it("retains index absence guidance", async () => {
@@ -108,6 +107,42 @@ describe("handleLensNavigate layer ceiling", () => {
     const result = await handleLensNavigate(graph, { path: targetPath }, [2]);
 
     expect(result.error).toBeUndefined();
-    expect(result.node).toBe(node);
+    expect(result.node).toEqual({
+      ...node,
+      outboundLinks: node.outboundLinks?.filter(
+        (path) => path !== restrictedPath,
+      ),
+    });
+  });
+
+  it("filters links on an allowed parent without changing cached nodes", async () => {
+    const graph = createNavigateGraph();
+    const before = structuredClone(graph);
+
+    const result = await handleLensNavigate(
+      graph,
+      { path: "02_Derived/allowed.md" },
+      [2],
+    );
+
+    expect(result.parent).toEqual(
+      expect.objectContaining({ path: targetPath }),
+    );
+    expect(JSON.stringify(result)).not.toContain(restrictedPath);
+    expect(graph).toEqual(before);
+  });
+
+  it("retains allowed and unresolved outbound links", async () => {
+    const result = await handleLensNavigate(
+      createNavigateGraph(),
+      { path: targetPath },
+      [2],
+    );
+
+    expect(result.node).toEqual(
+      expect.objectContaining({
+        outboundLinks: ["02_Derived/allowed.md", "02_Derived/missing.md"],
+      }),
+    );
   });
 });
