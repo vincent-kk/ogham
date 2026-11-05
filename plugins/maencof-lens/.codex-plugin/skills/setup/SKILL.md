@@ -59,10 +59,19 @@ Update layer filter for a vault. Example: `set-layers personal 2,3,4,5`
 
 ### Step 1 — Resolve Config Path
 
-Config location: `<cwd>/.maencof-lens/config.json`
+Default config location: `<cwd>/.maencof-lens/config.json`. If the user explicitly selects an outside config root (including `MAENCOF_LENS_CONFIG_ROOT`) or the user layer, resolve that selected destination instead and use it for every read and write in this workflow. Never select a different root or layer automatically.
 
 - `init`: if config exists → show current + ask to overwrite
 - Mutations (`add`/`remove`/`set-default`/`set-layers`): load → validate → mutate → write → read-back verify
+
+### Before Every Write — Vault Boundary Check
+
+This skill writes with the agent's file tools, so it must enforce the same vault boundary as `writeConfig` before any config or `.gitignore` write:
+
+1. Read the registered vault roots from both existing user and project config layers, and include the roots in the proposed config. Check all of them even when the project list overrides the user list or a mutation removes a vault.
+2. Check the working folder and the actual config destination separately against every registered vault root. Resolve relative vault paths against the process working folder, as the vault readers do; compare whole path components after resolving dot segments and filesystem aliases, including symbolic links and existing ancestors of a missing destination.
+3. Never create config directories, write config, or update `.gitignore` inside a vault working folder. If the default or explicitly selected config destination is inside a registered vault, stop before writing and show: "Cannot save lens settings inside a registered vault. Set MAENCOF_LENS_CONFIG_ROOT to a folder outside the vault, or save to the user layer."
+4. Never switch config roots or layers automatically. If the user explicitly chooses an outside config root or the user layer, check that destination against every registered vault and allow the save when it is safe, even if the working folder remains inside a vault. Write only at the selected outside destination and skip the in-vault `.gitignore` update.
 
 ### Step 2 — Execute Subcommand
 
@@ -71,7 +80,7 @@ Config location: `<cwd>/.maencof-lens/config.json`
 1. Ask user for vault name and absolute path
 2. Validate the absolute vault path using the Vault Index Check above
 3. Create config with default layers `[2, 3, 4, 5]`
-4. Write `.maencof-lens/config.json`
+4. Write config to the selected destination after the Vault Boundary Check
 5. Run `.gitignore` guard (see Step 3)
 
 **`add`**:
@@ -91,12 +100,14 @@ Config location: `<cwd>/.maencof-lens/config.json`
 
 **`show`**:
 
-1. Read `.maencof-lens/config.json` (error if missing)
+1. Read config from the selected destination (error if missing)
 2. Display formatted table: name, path, layers, default status
 
 ### Step 3 — `.gitignore` Guard
 
 After `init` or `add` creates/modifies config, ensure `.maencof-lens` is git-ignored:
+
+Skip this entire step when the working folder is inside a registered vault, including after a successful save to an explicitly selected outside destination. Also skip it when the config destination is not `<cwd>/.maencof-lens/config.json`; this guard manages only the working folder's project config.
 
 1. Check if `<cwd>` is a git repository (`<cwd>/.git` exists)
    - If NOT a git repo → skip this step entirely
