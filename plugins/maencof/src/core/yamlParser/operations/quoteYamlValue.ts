@@ -8,10 +8,15 @@
  */
 import {
   YAML_BOOLEAN_NULL,
-  YAML_NUMERIC,
   YAML_UNSAFE_START,
 } from '../../../constants/regexes.js';
 
+import { parseScalarValue } from './parseScalarValue.js';
+
+/**
+ * @param value 다시 읽을 때 문자열로 보존해야 하는 YAML 스칼라 값.
+ * @returns 스칼라 파서가 값을 변환하거나 YAML 문법과 충돌하면 이스케이프한 인용문.
+ */
 export function quoteYamlValue(value: string): string {
   if (value === '') return '""';
 
@@ -20,7 +25,7 @@ export function quoteYamlValue(value: string): string {
     value.includes(' #') ||
     YAML_UNSAFE_START.test(value) ||
     YAML_BOOLEAN_NULL.test(value) ||
-    YAML_NUMERIC.test(value)
+    typeof parseScalarValue(value) === 'number'
   ) {
     const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     return `"${escaped}"`;
