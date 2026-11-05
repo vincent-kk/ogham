@@ -1,12 +1,12 @@
 // filid:contract AC-save-to-path
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { handleFetch } from "../mcp/tools/fetch/index.js";
-import type { FetchContext, HttpClientConfig } from "../types/index.js";
+import { handleFetch } from "../fetch.js";
+import type { FetchContext, HttpClientConfig } from "../../../../types/index.js";
 
 // Mock executeRequest
-vi.mock("../core/httpClient/index.js", async (importOriginal) => {
+vi.mock("../../../../core/httpClient/index.js", async (importOriginal) => {
   const actual =
-    await importOriginal<typeof import("../core/httpClient/index.js")>();
+    await importOriginal<typeof import("../../../../core/httpClient/index.js")>();
   return {
     ...actual,
     executeRequest: vi.fn(),
@@ -14,14 +14,14 @@ vi.mock("../core/httpClient/index.js", async (importOriginal) => {
 });
 
 // Mock file-io
-vi.mock("../lib/fileIo.js", () => ({
+vi.mock("../../../../lib/fileIo.js", () => ({
   writeBinary: vi.fn().mockResolvedValue(undefined),
   writeJson: vi.fn().mockResolvedValue(undefined),
 }));
 
 // Mock validateSavePath to return resolved path (skip cwd check in test)
-vi.mock("../utils/index.js", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("../utils/index.js")>();
+vi.mock("../../../../utils/index.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../../../utils/index.js")>();
   return {
     ...actual,
     validateSavePath: vi.fn((p: string) => {
@@ -44,8 +44,8 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("saves binary response to file and returns metadata", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
-    const { writeBinary } = await import("../lib/fileIo.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
+    const { writeBinary } = await import("../../../../lib/fileIo.js");
     const buffer = new ArrayBuffer(100);
 
     (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -75,7 +75,7 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("rejects save_to_path with path traversal", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
     const buffer = new ArrayBuffer(10);
 
     (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -97,8 +97,8 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("writes a JSON response as pretty JSON and returns metadata", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
-    const { writeBinary, writeJson } = await import("../lib/fileIo.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
+    const { writeBinary, writeJson } = await import("../../../../lib/fileIo.js");
 
     (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,
@@ -132,8 +132,8 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("converts ADF in a saved JSON response unless accept_format is raw", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
-    const { writeJson } = await import("../lib/fileIo.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
+    const { writeJson } = await import("../../../../lib/fileIo.js");
 
     (executeRequest as ReturnType<typeof vi.fn>)
       .mockResolvedValueOnce({
@@ -199,8 +199,8 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("writes a JSON null body as null instead of skipping the write", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
-    const { writeJson } = await import("../lib/fileIo.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
+    const { writeJson } = await import("../../../../lib/fileIo.js");
 
     (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,
@@ -227,8 +227,8 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("performs the request on every persisted GET without consulting the filesystem", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
-    const { writeBinary } = await import("../lib/fileIo.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
+    const { writeBinary } = await import("../../../../lib/fileIo.js");
     const buffer = new ArrayBuffer(64);
 
     (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -252,7 +252,7 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("forwards expand as a query param on persisted GETs", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
     const buffer = new ArrayBuffer(50);
 
     (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
@@ -280,8 +280,8 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("returns the error envelope untouched and writes nothing when the request fails", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
-    const { writeBinary, writeJson } = await import("../lib/fileIo.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
+    const { writeBinary, writeJson } = await import("../../../../lib/fileIo.js");
     const errorResponse = {
       success: false,
       status: 404,
@@ -313,7 +313,7 @@ describe("fetch GET with save_to_path", () => {
   });
 
   it("still applies ADF conversion when no save_to_path", async () => {
-    const { executeRequest } = await import("../core/httpClient/index.js");
+    const { executeRequest } = await import("../../../../core/httpClient/index.js");
 
     (executeRequest as ReturnType<typeof vi.fn>).mockResolvedValue({
       success: true,

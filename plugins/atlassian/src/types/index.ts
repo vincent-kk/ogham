@@ -104,3 +104,9 @@ export type {
   ThreadCompleteness,
   ThreadEntry,
 } from "./commentThread.js";
+
+export {
+  FetchInputSchema,
+  AuthCheckInputSchema,
+  SetupInputSchema,
+} from "./toolInputs.js";
