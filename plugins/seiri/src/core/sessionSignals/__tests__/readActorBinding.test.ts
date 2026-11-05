@@ -81,6 +81,12 @@ it('returns undefined for corrupt JSON', () => {
   writeFileSync(path, '{ not json');
   expect(readActorBinding(id, NOW)).toBeUndefined();
 });
+it('returns undefined when the actor file cannot be read', () => {
+  const { id, path } = fixture();
+  rmSync(path);
+  mkdirSync(path);
+  expect(readActorBinding(id, NOW)).toBeUndefined();
+});
 it('returns undefined for a different root', () => {
   const { id } = fixture();
   const other = mkdtempSync(

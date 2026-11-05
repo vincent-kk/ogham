@@ -8,7 +8,7 @@
 
 ## Conventions
 
-- **페이로드 전체 저장.** 이벤트별 키가 문서에 없어, 필드를 골라내면 측정 대상을 버린다. 실사용 세션이 스키마를 드러내게 둔다.
+- **허용 목록만 저장.** 공통 필드 `cwd`, `session_id`, `hook_event_name`, `transcript_path`, `turn_id`, `prompt_id`, `tool_use_id`, `agent_id`, `model`, `permission_mode`와 로드 필드 `reason`, `file_path`, `memory_type`, `load_reason`, `globs`, `trigger_file_path`, `parent_file_path`만 보존하여 본문이 담긴 추가 필드의 저장을 막는다. `observedAt`은 훅이 생성한다.
 - **off 면 관측도 skip.** 재등록되더라도 skills-only가 계측 파일을 쓰지 않게 config 판정을 먼저 한다.
 - **matcher 미지원·종료코드 무시.** 로드 사유는 페이로드로 오므로 훅에서 분기.
 - 로그는 `pluginCache('seiri')` 경유 — `~/.claude/...` 하드코딩 금지.
@@ -21,11 +21,12 @@
 
 - 실패를 삼킨다 — 관측 부작용이 대상 세션을 방해하지 않는다.
 - processor 출력은 `{ continue: true }` 고정이고 `hookSpecificOutput`은 없다. entry stdout은 항상 빈 문자열이다.
+- 호스트가 보낸 허용 목록 밖 필드는 버린다.
 
 ### Ask first
 
 - hooks.json 재등록 (상시 컨텍스트·부작용 복귀).
-- 레코드 스키마 축소 · 크기 상한 변경.
+- 크기 상한 변경.
 
 ### Never do
 

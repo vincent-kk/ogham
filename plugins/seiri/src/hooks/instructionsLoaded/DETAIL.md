@@ -4,7 +4,7 @@
 
 - 지시 파일(`CLAUDE.md`·`.claude/rules/*.md`)이 컨텍스트에 로드됐는지 기록하는 계측기다. **주입은 0이다.**
 - 현재 `hooks.json` 에 **미등록(dormant)** 이다. 빌드는 되지만 상시 세션에서 돌지 않는다. 재측정하려면 `hooks/hooks.json` 에 `InstructionsLoaded` 블록을 되살린다. `DORMANT_HOOKS`(`constants/hooks.ts`)와 wiring 테스트가 이 미등록을 박제한다.
-- 페이로드를 통째로 저장한다. 이벤트별 키가 문서화되어 있지 않아 필드를 골라내면 측정 대상을 버리게 된다.
+- 입력은 허용 목록의 필드만 저장한다: 공통 필드 `cwd`, `session_id`, `hook_event_name`, `transcript_path`, `turn_id`, `prompt_id`, `tool_use_id`, `agent_id`, `model`, `permission_mode`와 로드 필드 `reason`, `file_path`, `memory_type`, `load_reason`, `globs`, `trigger_file_path`, `parent_file_path`이다. 호스트가 보낸 나머지 필드는 버려 본문이 담긴 추가 필드의 저장을 막으며, `observedAt`은 훅이 생성한다.
 - 로그 경로는 `pluginCache('seiri')` 를 거친다 — `~/.claude/...` 를 하드코딩하지 않는다.
 - 레코드마다 `cwd` 와 `session_id` 를 남겨, 한 파일에서 프로젝트·워크트리를 사후 분리할 수 있게 한다.
 - 크기 상한 초과 시 회전이 아니라 절단한다 — "지금 전달되는가" 에는 최근 구간이면 족하다.
@@ -30,6 +30,7 @@
 ### AC-log-containment — 로그 내용 제한
 
 - 저장된 레코드에 규칙 본문이나 사용자 코드가 없다.
+- 허용 목록 밖 입력 필드는 저장하지 않으며 호스트 입력이 관측 시각을 덮어쓰지 않는다.
 - 상한을 넘으면 절단되고 파일이 무한히 자라지 않는다.
 
 ## Last Updated

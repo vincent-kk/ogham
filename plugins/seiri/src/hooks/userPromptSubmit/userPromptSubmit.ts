@@ -13,11 +13,11 @@ import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 /**
  * Advance an existing actor's turn anchor; suspend participation only when the dial is off/advisory.
  * An active binding gets a progress line at standard and strict alike;
- * with no active binding, each dial states its entry guidance.
+ * with no active binding, each dial states its entry guidance unless the actor transaction failed.
  * @param input Native UserPromptSubmit payload for the new user turn.
  * @param adapter Host adapter selecting the Claude/Codex ABI, fixed at build time.
  * @param now Epoch ms read once at the calling hook's outermost handler.
- * @returns A fixed non-blocking `HookOutput`, regardless of outcome; empty when the dial is off/advisory or no actor identity resolves.
+ * @returns A fixed non-blocking `HookOutput`, regardless of outcome; empty when the dial is off/advisory, no actor identity resolves, or the actor transaction failed.
  */
 export function processUserPromptSubmit(
   input: UserPromptSubmitInput,
@@ -30,7 +30,7 @@ export function processUserPromptSubmit(
     ? observeBoundary(identity, enabled, now, { suspend: !enabled })
     : undefined;
 
-  if (!enabled || !identity) return EMPTY_RESULT;
+  if (!enabled || !identity || binding === null) return EMPTY_RESULT;
   if (binding?.state === 'active')
     return wire(
       input.hook_event_name,
