@@ -6,4 +6,4 @@ Propose DETAIL.md only for a fractal with contract content that requires it unde
 
 Each proposed DETAIL.md must later satisfy [`../../.shared/detail-template.md`](../../.shared/detail-template.md) — its required heading set, the acceptance-group shape, and the language rule. Do not restate that template here.
 
-The proposal entry contains the node path, proposed document path, observed entry-point state, and the evidence that contract content or another rule requires this document. If the available evidence cannot establish a public boundary, report the proposal as unresolved instead of guessing.
+The proposal entry contains the node path, proposed document path, observed entry-point state, and the evidence that contract content or another rule requires this document. If the available evidence cannot establish that contract content or another rule requires this document, report the proposal as unresolved instead of guessing.

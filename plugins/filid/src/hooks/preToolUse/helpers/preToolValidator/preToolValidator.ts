@@ -25,7 +25,7 @@ export {
  * PreToolUse hook logic for INTENT.md/DETAIL.md validation.
  *
  * For Write tool targeting INTENT.md:
- * - Blocks if content exceeds 50-line limit (error)
+ * - Blocks validateIntentMd errors: content exceeds 50 lines or has a History section
  * - Warns if missing 3-tier boundary sections (warning, no block)
  *
  * For Write tool targeting DETAIL.md:

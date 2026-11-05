@@ -242,6 +242,12 @@ describe('protected document demotion', () => {
       expect(result.hookSpecificOutput?.permissionDecisionReason).toContain(
         'To demote this fractal to an organ',
       );
+      const reason = result.hookSpecificOutput!.permissionDecisionReason!;
+      expect(reason).toContain('first state in the parent DETAIL.md');
+      expect(reason.indexOf('first state in the parent DETAIL.md')).toBeLessThan(
+        reason.indexOf('then remove its entry point'),
+      );
+      expect(reason).toContain('delete INTENT.md and any DETAIL.md.');
     },
   );
 

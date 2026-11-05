@@ -36,7 +36,7 @@ Invariants:
 
 - No document writes before approval; unapproved files remain unchanged.
 - A missing DETAIL.md is not a finding and is not drafted by default. Draft one only when the user asks for that fractal or a finding requires it: `spec-contract-link` for an owner with several spec-documents, or a boundary exemption that must be declared.
-- RICH content is editable only with `--repair`, within finding-named ranges.
+- RICH content is editable only with `--repair`, within finding-named ranges, except that a `history-section` repair also covers approved destination contract sections as defined in [reference §3](reference.md#3-plan-items).
 - Plan one item per SPARSE or MISSING document and per REPAIR candidate; coalesce findings for the same document.
 - Never add derivable file, export, or dependency inventories or their counts.
 - INTENT.md keeps the English anchors, all three boundary tiers, and the 50-line cap.

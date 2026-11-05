@@ -219,6 +219,32 @@ describe('document-validator', () => {
       expect(result.violations).toEqual([]);
     });
 
+    it('should reject an acceptance group heading without a title', () => {
+      const content = [
+        '# Spec',
+        '## Requirements',
+        '- Feature A',
+        '## API Contracts',
+        '- The contract is stable.',
+        '## Acceptance Criteria',
+        '### AC-only',
+        '## Last Updated',
+        'When the contract changes.',
+      ].join('\n');
+
+      const result = validateDetailMd(content);
+
+      expect(result.valid).toBe(false);
+      expect(result.violations).toContainEqual(
+        expect.objectContaining({
+          rule: 'missing-field',
+          severity: 'error',
+          message:
+            'Invalid acceptance group heading at line 7; expected "### <stable-id> — <title>".',
+        }),
+      );
+    });
+
     it('should fail when append-only pattern detected', () => {
       const oldContent = '# Spec\n## Log\n- Entry 1\n- Entry 2\n';
       const newContent =
