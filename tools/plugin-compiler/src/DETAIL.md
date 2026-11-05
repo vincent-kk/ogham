@@ -3,7 +3,7 @@
 ## Requirements
 
 - 데이터 흐름은 단방향이다. Claude 정본 → `facts/`(읽기) → `adapters/`(순수 변환) → `pipeline/` 계획 → 디스크 반영 순으로만 흐르고 역방향 참조를 두지 않는다.
-- 부수효과는 두 지점뿐이다. 디스크 쓰기는 `pipeline/`, 스트림 출력과 exit 코드는 `main.ts` 가 독점한다. `adapters/`·`lint/`·`cli/` 는 순수 함수만 갖고 디스크에 닿지 않는다.
+- 정본 읽기는 facts가 소유하고 pipeline은 대상 탐색·비교·쓰기를 조율한다. 디스크 쓰기는 pipeline, 스트림 출력과 exit 코드는 `main.ts`가 독점한다. 변환·진단·인자 해석은 순수하게 유지해 입력 사실이 같을 때 주변 파일 상태가 결과를 바꾸지 않게 한다.
 - JSON 방출은 `utils/stableJson`(2-space 들여쓰기 + 끝 개행) 단일 경로를 거친다. 같은 정본이면 재실행이 바이트 동일한 산출을 낸다.
 - Claude 가 소비하는 파일은 읽기 전용이다. 쓰기 대상 경로는 `constants/adapterPaths.ts` 가 선언한 상수로만 만들어진다.
 - Codex hook matcher 해석은 `constants/hosts.ts` 의 단일 capability 정책을 따른다. 같은 정책이 지원하지 않는 exact tool 제거, Pre read fallback, 그리고 lint 진단을 함께 결정한다.
@@ -25,7 +25,7 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 - 스트림 분리: 진단(`✗`/`⚠`)은 stderr, 파일별 액션과 `✓ sync:` 요약은 stdout. 진단이 없으면 stderr 에 아무것도 쓰지 않는다. 액션 경로는 어느 OS 에서나 저장소 상대 forward-slash 한 형식이고 `unchanged` 는 줄로 출력하지 않는다.
 - exit 코드: error 수준 진단이 하나라도 있으면 1. `--check` 실행에서 `stale`·`missing` 이 있으면 1. 그 밖에는 0 이며, `--check` 없는 실행의 차이는 쓰기로 해소되므로 종료 코드에 반영되지 않는다.
 - 쓰기 실패: `applyFiles` 가 도중에 실패하면 `ApplyFilesError` 를 잡아 이미 반영된 outcome 을 stdout 으로 보고하고 `apply-io-error` 진단을 stderr 로 쓴 뒤 exit 1 한다. raw stacktrace 는 사용자에게 도달하지 않는다.
-- 어댑터별 생성 규칙과 진단 코드 목록은 패키지 루트 `DETAIL.md` 가 소유한다. 여기서 되풀이하지 않는다.
+- 어댑터별 생성 규칙과 진단 코드 목록은 패키지 루트 `../DETAIL.md`가 소유한다. 여기서 되풀이하지 않는다.
 - Explicit MCP adaptation shares one pure validator between builders and lint. Invalid opt-in content produces its typed diagnostic before any adapter file is planned.
 
 ## Acceptance Criteria

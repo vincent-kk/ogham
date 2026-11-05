@@ -48,6 +48,9 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 | error   | `codex-hook-runtime`      | An explicit prebuilt Codex hook directory is outside the supported relative bridge path syntax       |
 | warning | `codex-unknown-event`      | hooks.json 에 Codex 공식 지원 집합 밖 이벤트 — 생성물에서는 제거하고 정본 차이는 진단                |
 | warning | `codex-read-matcher`       | matcher 에 `Read` — Codex 는 Read 미발화(단순 셸 읽기만 Bash 채널 복구, 복합 읽기 미추적)            |
+| warning | `codex-unsupported-tool-matcher` | PreToolUse·PostToolUse matcher 에 Codex 가 hook tool 로 노출하지 않는 exact tool(`Skill`) — Codex 어댑터는 그 exact token 을 제거 |
+
+진단 코드는 소비자가 필터링하는 안정된 계약이다. 코드 추가·변경과 수준 승격은 CI 판정을 바꾸므로 계약 변경으로 검토한다.
 
 ## Acceptance Criteria
 
