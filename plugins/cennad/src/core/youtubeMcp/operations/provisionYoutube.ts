@@ -27,20 +27,24 @@ async function provisionUserTarget(
   return { ok: true, action: 'unchanged' };
 }
 
-// Reconciles the yt-dlp-mcp MCP server across all target CLIs from the saved
-// addon config. The effective per-CLI state is `enabled && targets.<cli>`.
-// Claude and Codex delegate user-scoped MCP reconciliation to agent-artifacts;
-// Antigravity keeps its JSON adapter. `prev` gates needless user CLI work.
+/**
+ * Reconciles target registrations while preserving inactive manual Antigravity entries.
+ * @param next Settings being saved, including target switches and server language.
+ * @param prev Previously saved settings; Antigravity removal requires prior activation.
+ * @returns Per-target outcomes, including provisioning failures without rejecting the save.
+ */
 export async function provisionYoutube(
   next: YoutubeAddonConfig,
   prev?: YoutubeAddonConfig,
 ): Promise<YoutubeProvisionSummary> {
   const claude = await provisionUserTarget('claude', next, prev);
   const codex = await provisionUserTarget('codex', next, prev);
-  const antigravity = await provisionAntigravityYoutube(
-    next.enabled && next.targets.antigravity,
-    next.language,
-  );
+  const antigravityEnabled = next.enabled && next.targets.antigravity;
+  const antigravityWasEnabled = prev?.enabled && prev.targets.antigravity;
+  const antigravity: ProvisionResult =
+    antigravityEnabled || antigravityWasEnabled
+      ? await provisionAntigravityYoutube(antigravityEnabled, next.language)
+      : { ok: true, action: 'unchanged' };
 
   return { claude, codex, antigravity };
 }
