@@ -1,8 +1,9 @@
 /**
  * @file executeMigration.ts
- * @description WAL(Write-Ahead Log) 기반으로 마이그레이션을 원자적으로 실행한다.
+ * @description WAL(Write-Ahead Log) 기반으로 백업 후 마이그레이션을 실행하고 실패 시 명시적 복원용 WAL을 남긴다.
  */
-import { mkdirSync, renameSync, rmdirSync } from 'node:fs';
+import { randomUUID } from 'node:crypto';
+import { mkdirSync, renameSync, rmSync, rmdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import type {
@@ -12,6 +13,7 @@ import type {
   MigrationWAL,
 } from '../../../types/setup.js';
 
+import { createMigrationBackup } from './helpers/createMigrationBackup.js';
 import { updateFrontmatterField } from './updateFrontmatterField.js';
 import { updateVersionFile } from './updateVersionFile.js';
 import { writeWAL } from './writeWAL.js';
@@ -25,7 +27,7 @@ export function executeMigration(
 ): MigrationResult {
   const walPath = join(vaultPath, '.maencof-meta', 'migration-wal.json');
   const wal: MigrationWAL = {
-    id: `mig-${Date.now()}`,
+    id: `mig-${randomUUID()}`,
     startedAt: new Date().toISOString(),
     status: 'in_progress',
     operations: plan.operations.map((op) => ({
@@ -37,11 +39,31 @@ export function executeMigration(
   // WAL 기록
   writeWAL(walPath, wal);
 
+  const backupDir = join(
+    vaultPath,
+    '.maencof-meta',
+    'migration-backups',
+    wal.id,
+  );
   let executedCount = 0;
   let failedCount = 0;
+  try {
+    wal.backup = createMigrationBackup(backupDir, plan.operations);
+    writeWAL(walPath, wal);
+  } catch (err) {
+    return {
+      success: false,
+      walId: wal.id,
+      operationsExecuted: 0,
+      operationsFailed: 1,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
 
   for (const entry of wal.operations)
     try {
+      entry.status = 'in_progress';
+      writeWAL(walPath, wal);
       executeOp(entry.op, vaultPath);
       entry.status = 'done';
       entry.executedAt = new Date().toISOString();
@@ -63,6 +85,7 @@ export function executeMigration(
   wal.status = 'completed';
   wal.completedAt = new Date().toISOString();
   writeWAL(walPath, wal);
+  rmSync(backupDir, { recursive: true, force: true });
 
   return {
     success: true,

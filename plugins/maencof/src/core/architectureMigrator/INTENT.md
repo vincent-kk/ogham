@@ -13,7 +13,7 @@
 ### Always do
 
 - EXPECTED_ARCHITECTURE_VERSION 기준으로 마이그레이션 판단
-- 마이그레이션 실행 전 백업 로직 포함
+- 첫 변경 전에 수정·이동 대상 파일을 `.maencof-meta/migration-backups/<run-id>/`에 모두 복사한다. 실행 또는 rollback 성공 시 삭제하고 실패 시 보존한다.
 
 ### Ask first
 

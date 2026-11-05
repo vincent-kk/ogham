@@ -5,6 +5,8 @@
 - 벌트 아키텍처를 `EXPECTED_ARCHITECTURE_VERSION`(현재 `3.0.0`)으로 올린다. 목표 버전의 정본은 `constants/architecture.ts` 다.
 - `planMigration` 은 부수효과가 없다 — 파일시스템을 읽어 연산 목록만 만든다. 실제 변경은 `executeMigration` 이 맡는다.
 - 실행은 WAL(Write-Ahead Log) 기반이다. 실패한 실행은 진행 중 로그를 남기고 실패 결과를 반환한다. 명시적 rollback(`--rollback`)이 기록된 연산을 역순으로 되돌려 실행 전 상태를 복원한다.
+- 첫 변경 전에 수정·이동할 모든 기존 파일을 `.maencof-meta/migration-backups/<run-id>/`에 복사하고, 복사가 모두 끝나기 전에는 연산을 시작하지 않는다. 이동 목적지의 기존 파일도 보존하여 덮어쓰기를 되돌릴 수 있게 한다.
+- 실행 또는 rollback이 성공하면 실행별 사본을 삭제하고, 실패하면 보존한다. rollback은 역연산과 함께 사본이 덮는 파일의 원본 바이트를 복원하며, 실행이 만든 파일·부모 디렉터리는 제거한다.
 - L5 는 평면 구조다. 만들 서브디렉토리가 없고, v2 의 L5 버퍼 문서는 L5 루트로 올리면서 `sub_layer` 를 제거한다.
 - v2 의 L5 경계 문서는 L3-structural 로 옮기고 hub 속성으로 바꾼다 — 허브는 레이어가 아니라 역할이므로 자리를 옮기고 속성만 남긴다. `boundary_type` 은 `hub_kind` 로 매핑하며 알 수 없는 값은 `cross_domain` 으로 수렴한다.
 - `hub: true` 의 필수 짝인 `purpose` 없이 이관하지 않는다 — 없이 옮기면 즉시 frontmatter 검증에 걸린다.
@@ -22,6 +24,7 @@
 ### AC-rollback-restores — 롤백 복원
 
 - 실행 중 실패하면 진행 중 WAL과 실패 결과가 남는다. rollback(`--rollback`)을 실행하면 기록된 연산을 역순으로 되돌려 볼트의 실행 전 상태를 복원한다.
+- 백업이 끝나기 전에는 대상 파일을 변경하지 않는다. rollback은 부분 쓰기 실패에도 백업 대상의 원본 바이트를 복원하고, 성공한 실행 또는 rollback만 사본을 삭제한다.
 
 ### AC-version-last — 버전 갱신 최후
 
