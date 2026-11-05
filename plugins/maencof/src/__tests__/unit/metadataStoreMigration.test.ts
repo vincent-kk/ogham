@@ -1,6 +1,6 @@
 /**
  * @file metadataStoreMigration.test.ts
- * @description saveGraph/loadGraph 3-shard layout + legacy index.json one-shot migration 검증.
+ * @description saveGraph/loadGraph 세대별 샤드 layout + 구포맷 cache miss 검증.
  */
 import {
   existsSync,
@@ -59,16 +59,23 @@ function makeMinimalGraph(): KnowledgeGraph {
 }
 
 describe('MetadataStore.saveGraph 샤드 layout', () => {
-  it('3 파일(nodes/edges/graph-meta)을 모두 생성한다', async () => {
+  it('고정 마커와 세대별 nodes/edges를 생성한다', async () => {
     const store = new MetadataStore(vaultDir);
     await store.saveGraph(makeMinimalGraph());
 
-    expect(existsSync(join(cacheDir, 'nodes.json'))).toBe(true);
-    expect(existsSync(join(cacheDir, 'edges.json'))).toBe(true);
+    const meta = JSON.parse(
+      readFileSync(join(cacheDir, 'graph-meta.json'), 'utf-8'),
+    );
+    expect(
+      existsSync(join(cacheDir, 'generations', meta.generation, 'nodes.json')),
+    ).toBe(true);
+    expect(
+      existsSync(join(cacheDir, 'generations', meta.generation, 'edges.json')),
+    ).toBe(true);
     expect(existsSync(join(cacheDir, 'graph-meta.json'))).toBe(true);
   });
 
-  it('graph-meta.json 은 schemaVersion: 2 와 builtAt/nodeCount/edgeCount 를 담는다', async () => {
+  it('graph-meta.json 은 schemaVersion: 3 와 builtAt/nodeCount/edgeCount 를 담는다', async () => {
     const store = new MetadataStore(vaultDir);
     await store.saveGraph(makeMinimalGraph());
 
@@ -80,7 +87,7 @@ describe('MetadataStore.saveGraph 샤드 layout', () => {
       nodeCount: number;
       edgeCount: number;
     };
-    expect(meta.schemaVersion).toBe(2);
+    expect(meta.schemaVersion).toBe(3);
     expect(meta.builtAt).toBe('2026-01-01T00:00:00Z');
     expect(meta.nodeCount).toBe(1);
     expect(meta.edgeCount).toBe(0);
@@ -138,7 +145,7 @@ describe('MetadataStore.loadGraph 샤드 round-trip', () => {
   });
 });
 
-describe('MetadataStore.loadGraph legacy 자동 마이그레이션', () => {
+describe('MetadataStore.loadGraph legacy cache miss', () => {
   function writeLegacyIndex(): void {
     const node = {
       id: '01_Core/legacy.md',
@@ -164,31 +171,28 @@ describe('MetadataStore.loadGraph legacy 자동 마이그레이션', () => {
     );
   }
 
-  it('legacy index.json 만 있는 vault 는 첫 loadGraph 시 샤드로 마이그레이션된다', async () => {
+  it('legacy index.json 만 있는 vault는 읽기 중 변경 없이 cache miss로 처리한다', async () => {
     writeLegacyIndex();
     expect(existsSync(join(cacheDir, 'nodes.json'))).toBe(false);
 
     const store = new MetadataStore(vaultDir);
     const loaded = await store.loadGraph();
 
-    expect(loaded).not.toBeNull();
-    expect(loaded?.nodes.size).toBe(1);
-    // 샤드 파일이 새로 생성됨
-    expect(existsSync(join(cacheDir, 'nodes.json'))).toBe(true);
-    expect(existsSync(join(cacheDir, 'edges.json'))).toBe(true);
-    expect(existsSync(join(cacheDir, 'graph-meta.json'))).toBe(true);
-    // legacy 파일은 제거됨
-    expect(existsSync(join(cacheDir, 'index.json'))).toBe(false);
+    expect(loaded).toBeNull();
+    expect(existsSync(join(cacheDir, 'nodes.json'))).toBe(false);
+    expect(existsSync(join(cacheDir, 'edges.json'))).toBe(false);
+    expect(existsSync(join(cacheDir, 'graph-meta.json'))).toBe(false);
+    expect(existsSync(join(cacheDir, 'index.json'))).toBe(true);
   });
 
-  it('마이그레이션 이후 두 번째 loadGraph 는 fast path 로 동일 결과를 반환', async () => {
+  it('구포맷을 반복해서 읽어도 cache miss를 반환', async () => {
     writeLegacyIndex();
     const store = new MetadataStore(vaultDir);
     const first = await store.loadGraph();
     const second = await store.loadGraph();
 
-    expect(first?.nodes.size).toBe(second?.nodes.size);
-    expect(first?.builtAt).toBe(second?.builtAt);
+    expect(first).toBeNull();
+    expect(second).toBeNull();
   });
 });
 
@@ -199,7 +203,7 @@ describe('MetadataStore.cacheExists', () => {
     expect(await store.cacheExists()).toBe(true);
   });
 
-  it('legacy index.json 만 있어도 true', async () => {
+  it('legacy index.json 만 있으면 false', async () => {
     writeFileSync(
       join(cacheDir, 'index.json'),
       JSON.stringify({
@@ -212,7 +216,7 @@ describe('MetadataStore.cacheExists', () => {
       'utf-8',
     );
     const store = new MetadataStore(vaultDir);
-    expect(await store.cacheExists()).toBe(true);
+    expect(await store.cacheExists()).toBe(false);
   });
 
   it('아무 캐시도 없으면 false', async () => {

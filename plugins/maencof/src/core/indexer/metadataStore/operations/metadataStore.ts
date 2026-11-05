@@ -6,7 +6,8 @@
  * 형식: JSON (외부 의존성 제로, 디버깅 가능)
  * 원칙: .maencof/ 전체 삭제 후 원본 마크다운에서 완전 재빌드 가능
  */
-import { access, mkdir, readFile, unlink } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import { mkdir, readFile, rm, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import {
@@ -20,11 +21,12 @@ import type {
   KnowledgeGraph,
   SerializedArchiveMembers,
   SerializedEdges,
-  SerializedGraph,
   SerializedGraphMeta,
   SerializedNodes,
 } from '../../../../types/graph.js';
 import { hydrateRuntimeMaps } from '../../../graphBuilder/index.js';
+import { parseGenerationShard } from '../../../utils/parseGenerationShard.js';
+import { parseGraphGeneration } from '../../../utils/parseGraphGeneration.js';
 import type {
   FileSnapshot,
   StaleEntries,
@@ -33,7 +35,6 @@ import type {
 } from '../types/types.js';
 
 import { atomicWriteJson } from './atomicWriteJson.js';
-import { deserializeGraph } from './deserializeGraph.js';
 import { deserializeShards } from './deserializeShards.js';
 import { withVaultLock } from './withVaultLock.js';
 
@@ -97,171 +98,103 @@ export class MetadataStore {
     await mkdir(this.cacheDir, { recursive: true });
   }
 
-  /**
-   * 캐시 디렉토리 존재 여부를 확인한다.
-   * 신규 샤드 commit marker(graph-meta.json) 우선, 없으면 legacy index.json 검사.
-   */
+  /** @returns 현재 세대의 모든 그래프 샤드를 읽을 수 있을 때만 true. */
   async cacheExists(): Promise<boolean> {
-    try {
-      await access(join(this.cacheDir, CACHE_FILES.GRAPH_META));
-      return true;
-    } catch {
-      // fall through to legacy
-    }
-    try {
-      await access(join(this.cacheDir, CACHE_FILES.INDEX));
-      return true;
-    } catch {
-      return false;
-    }
+    return (await this.loadGraph()) !== null;
   }
 
   /**
-   * KnowledgeGraph를 nodes.json + edges.json + archive-members.json + graph-meta.json 샤드로 저장한다.
-   *
-   * - 단일 vault lock 안에서 nodes/edges/archive-members 병렬 쓰기 → graph-meta(commit marker)를 마지막에 쓴다.
-   * - archive-members 샤드는 인덱스 부재 시에도 빈 배열로 항상 기록한다.
-   * - 성공 후 legacy index.json 이 남아있으면 best-effort 로 정리한다 (ENOENT swallow).
-   * - 모든 쓰기는 atomicWriteJson(tmp + rename)으로 per-file atomicity 보장.
+   * @param graph 새 불변 세대에 저장할 그래프. 기존 호출자가 가진 데이터는 변경하지 않는다.
+   * @returns 샤드 완성 후 고정 마커를 공개하고 직전 세대를 정리하면 완료한다.
    */
   async saveGraph(graph: KnowledgeGraph): Promise<void> {
     await this.ensureCacheDir();
-    const nodes: SerializedNodes = Array.from(graph.nodes.values());
-    const edges: SerializedEdges = graph.edges;
-    const archiveMembers: SerializedArchiveMembers = graph.archiveClusterMembers
-      ? Array.from(graph.archiveClusterMembers.values()).flat()
-      : [];
-    const meta: SerializedGraphMeta = {
-      builtAt: graph.builtAt,
-      nodeCount: graph.nodeCount,
-      edgeCount: graph.edgeCount,
-      schemaVersion: 2,
-    };
-
     await withVaultLock(this.vaultPath, async () => {
+      const generation = randomUUID();
+      const dir = join(this.cacheDir, CACHE_FILES.GENERATIONS, generation);
+      await mkdir(dir, { recursive: true });
+      const nodes: SerializedNodes = Array.from(graph.nodes.values());
+      const edges: SerializedEdges = graph.edges;
+      const archiveMembers: SerializedArchiveMembers =
+        graph.archiveClusterMembers
+          ? Array.from(graph.archiveClusterMembers.values()).flat()
+          : [];
       await Promise.all([
-        atomicWriteJson(join(this.cacheDir, CACHE_FILES.NODES), nodes),
-        atomicWriteJson(join(this.cacheDir, CACHE_FILES.EDGES), edges),
-        atomicWriteJson(
-          join(this.cacheDir, CACHE_FILES.ARCHIVE_MEMBERS),
-          archiveMembers,
-        ),
+        atomicWriteJson(join(dir, CACHE_FILES.NODES), {
+          generation,
+          data: nodes,
+        }),
+        atomicWriteJson(join(dir, CACHE_FILES.EDGES), {
+          generation,
+          data: edges,
+        }),
+        atomicWriteJson(join(dir, CACHE_FILES.ARCHIVE_MEMBERS), {
+          generation,
+          data: archiveMembers,
+        }),
       ]);
-      // commit marker — 이 파일이 존재해야 cache 가 commit 된 것으로 간주
+      let previous: SerializedGraphMeta | null = null;
+      try {
+        previous = parseGraphGeneration(
+          await readFile(join(this.cacheDir, CACHE_FILES.GRAPH_META), 'utf-8'),
+        );
+      } catch {
+        // 구포맷/손상 마커는 새 세대의 공개를 막지 않는다.
+      }
+      const meta: SerializedGraphMeta = {
+        builtAt: graph.builtAt,
+        nodeCount: graph.nodeCount,
+        edgeCount: graph.edgeCount,
+        schemaVersion: 3,
+        generation,
+      };
       await atomicWriteJson(join(this.cacheDir, CACHE_FILES.GRAPH_META), meta);
-      // legacy 정리 — 이전 단일 index.json 이 남아있으면 제거
+      if (previous)
+        await rm(
+          join(this.cacheDir, CACHE_FILES.GENERATIONS, previous.generation),
+          { recursive: true, force: true },
+        );
       await this.unlinkLegacyIndex();
     });
   }
 
   /**
-   * 필수 샤드 3 파일(graph-meta/nodes/edges) + 옵셔널 archive-members 샤드에서 KnowledgeGraph를 로드한다.
-   *
-   * 분기 정책:
-   * - graph-meta.json (commit marker) 부재 → 신규 layout 미commit 상태. legacy 마이그레이션 경로 진입.
-   *   * 이 분기는 fresh vault / partial-shard(nodes/edges 만 있고 commit 미완) / legacy-only 를 모두 포괄한다.
-   *   * partial-shard 의 nodes/edges 는 commit 되지 않았으므로 사용하지 않으며, legacy 가 없으면 null.
-   * - graph-meta.json 존재 → 정상 commit. schemaVersion 검증 후 nodes/edges 병렬 로드.
-   *   * schemaVersion ≠ 2 → 알 수 없는 버전, null (호출자가 재빌드 결정).
-   *   * commit 후 nodes/edges read 실패는 real I/O 오류로 간주, legacy 로 폴백하지 않고 null.
-   * - archive-members.json 은 옵셔널 샤드 — 존재 시 archiveClusterMembers 로 복원하고,
-   *   부재(구버전 캐시)·손상 시 필드 미설정으로 로드를 계속한다.
+   * @returns 마커가 가리키는 단일 세대의 그래프. 구포맷·미완·불일치는 null이다.
+   * 읽기는 파일을 쓰거나 legacy 캐시를 마이그레이션하지 않는다.
    */
   async loadGraph(): Promise<KnowledgeGraph | null> {
-    let metaRaw: string;
     try {
-      metaRaw = await readFile(
-        join(this.cacheDir, CACHE_FILES.GRAPH_META),
-        'utf-8',
+      const meta = parseGraphGeneration(
+        await readFile(join(this.cacheDir, CACHE_FILES.GRAPH_META), 'utf-8'),
       );
-    } catch (error) {
-      // commit marker 부재 — legacy 마이그레이션 트리거 (legacy 도 없으면 null)
-      this.reportLoadError(error);
-      return this.loadLegacyAndMigrate();
-    }
-
-    try {
-      const meta = JSON.parse(metaRaw) as SerializedGraphMeta;
-      if (meta.schemaVersion !== 2)
-        // 미래 또는 손상된 schemaVersion — cache miss 로 처리하여 호출자 재빌드 유도
-        return null;
-
-      const [nodesRaw, edgesRaw] = await Promise.all([
-        readFile(join(this.cacheDir, CACHE_FILES.NODES), 'utf-8'),
-        readFile(join(this.cacheDir, CACHE_FILES.EDGES), 'utf-8'),
+      if (!meta) return null;
+      const dir = join(this.cacheDir, CACHE_FILES.GENERATIONS, meta.generation);
+      const [nodesRaw, edgesRaw, membersRaw] = await Promise.all([
+        readFile(join(dir, CACHE_FILES.NODES), 'utf-8'),
+        readFile(join(dir, CACHE_FILES.EDGES), 'utf-8'),
+        readFile(join(dir, CACHE_FILES.ARCHIVE_MEMBERS), 'utf-8'),
       ]);
-      const nodesArr = JSON.parse(nodesRaw) as SerializedNodes;
-      const edgesArr = JSON.parse(edgesRaw) as SerializedEdges;
-      // 디스크 샤드는 nodes/edges 만 보존하므로, 런타임 조회 맵(invertedIndex·adjacency·
-      // edgeWeight/Type)을 빌드와 동일 로직으로 재수화해 빌드직후/리로드 동작을 일치시킨다.
-      const graph = hydrateRuntimeMaps(
-        deserializeShards(nodesArr, edgesArr, meta),
+      const nodes = parseGenerationShard<SerializedNodes[number]>(
+        nodesRaw,
+        meta.generation,
       );
-      const archiveMembers = await this.loadArchiveMembers();
-      if (archiveMembers) graph.archiveClusterMembers = archiveMembers;
-      return graph;
-    } catch (error) {
-      // commit marker 는 있으나 부속 파일 read/parse 실패 — legacy 로 폴백하지 않고 cache miss
-      this.reportLoadError(error);
-      return null;
-    }
-  }
-
-  /**
-   * archive-members.json 을 clusterKey 그룹 Map 으로 복원한다.
-   *
-   * @returns 복원된 인덱스. 샤드 부재(구버전 캐시)·파싱 실패 시 undefined —
-   *   옵셔널 샤드이므로 그래프 로드는 계속된다.
-   */
-  private async loadArchiveMembers(): Promise<
-    Map<string, ArchiveClusterMember[]> | undefined
-  > {
-    try {
-      const raw = await readFile(
-        join(this.cacheDir, CACHE_FILES.ARCHIVE_MEMBERS),
-        'utf-8',
+      const edges = parseGenerationShard<SerializedEdges[number]>(
+        edgesRaw,
+        meta.generation,
       );
-      const arr = JSON.parse(raw) as SerializedArchiveMembers;
-      if (!Array.isArray(arr)) return undefined;
+      const members = parseGenerationShard<ArchiveClusterMember>(
+        membersRaw,
+        meta.generation,
+      );
+      const graph = hydrateRuntimeMaps(deserializeShards(nodes, edges, meta));
       const map = new Map<string, ArchiveClusterMember[]>();
-      for (const member of arr) {
+      for (const member of members) {
         const list = map.get(member.clusterKey);
         if (list) list.push(member);
         else map.set(member.clusterKey, [member]);
       }
-      return map;
-    } catch (error) {
-      this.reportLoadError(error);
-      return undefined;
-    }
-  }
-
-  /**
-   * legacy index.json 을 1회 자동 마이그레이션한다.
-   * 성공 시 신규 샤드를 즉시 saveGraph 로 commit (이 과정에서 legacy 파일은 unlink 됨).
-   * 부재 시 null.
-   *
-   * 잠금 경계:
-   * - legacy read 자체는 vault lock 밖에서 수행 (read-only fast path).
-   * - 신규 샤드 commit + legacy unlink 는 `saveGraph` 가 자체 vault lock 안에서 직렬화.
-   * - read 와 saveGraph 사이에는 잠금이 끊긴 짧은 윈도우가 존재한다. 동일 vault 에 대한 다른 writer 가
-   *   그 윈도우에서 saveGraph 로 신규 데이터를 commit 한 경우, 본 함수의 saveGraph 가 legacy 데이터로
-   *   해당 신규 데이터를 덮어쓸 수 있는 이론적 race 가 있다. legacy v1 layout 은 v2 마이그레이션 후
-   *   1회만 잔존하므로 cold-start 첫 호출에서만 트리거되며, 동시 saveGraph 충돌은 무시 수준이다.
-   *   더 강한 보장이 필요해질 경우 read 를 lock 안으로 옮겨야 한다.
-   */
-  private async loadLegacyAndMigrate(): Promise<KnowledgeGraph | null> {
-    try {
-      const raw = await readFile(
-        join(this.cacheDir, CACHE_FILES.INDEX),
-        'utf-8',
-      );
-      const data = JSON.parse(raw) as SerializedGraph;
-      const graph = deserializeGraph(data);
-      // 즉시 신규 layout 으로 재기록 — 다음 호출부터는 fast path
-      await this.saveGraph(graph);
-      // 반환 graph 도 런타임 맵을 재수화해 shard 경로와 동일한 servable 상태로 맞춘다.
-      return hydrateRuntimeMaps(graph);
+      graph.archiveClusterMembers = map;
+      return graph;
     } catch (error) {
       this.reportLoadError(error);
       return null;

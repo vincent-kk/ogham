@@ -6,6 +6,7 @@
 - 훅 계약 타입에 의존하지 않는다. 그래서 `hooks/` 가 아니라 `core/` 에 있다.
 - L1 은 두 형태로 나간다: SessionStart 는 `buildL1CoreBlock` 의 전체 본문 블록을, 매 턴은 gist 만 싣는다. 매 턴에 전체 본문을 실으면 턴 예산이 무너진다.
 - 핀·캐시 읽기는 `core/cacheManager` 를 경유한다.
+- 그래프 노드의 동기 읽기는 고정 마커가 지정한 저장 세대만 사용한다. 구포맷·부재·세대 불일치는 빈 배열로 처리하여 중단된 저장을 턴 컨텍스트에 노출하지 않는다.
 - 인덱서 내부 상태(stale-node·freshness)를 컨텍스트에 노출하지 않는다.
 - 섹션 텍스트는 `resolveSectionText` 가 문자열/배열을 `|` 로 join 해 정규화한다. 배열 원형은 `companionNormalize` 가 보존하고 join 은 이 렌더 시점의 일이다.
 

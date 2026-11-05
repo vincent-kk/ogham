@@ -1,9 +1,9 @@
 /**
  * @file metadataStoreArchiveMembers.test.ts
- * @description archive-members.json 샤드 왕복 + 샤드 부재(구버전 캐시)·손상 시 그래프 로드 호환 검증.
+ * @description archive-members.json 샤드 왕복 + 샤드 부재·손상 시 cache miss 검증.
  */
 import { mkdirSync, rmSync } from 'node:fs';
-import { unlink, writeFile } from 'node:fs/promises';
+import { readFile, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -83,23 +83,41 @@ describe('MetadataStore archive-members 샤드', () => {
     );
   });
 
-  it('archive-members.json 이 없는 캐시(구버전)도 그래프 로드가 성공하고 필드는 미설정이다', async () => {
+  it('archive-members.json이 없는 세대는 cache miss다', async () => {
     await store.saveGraph(makeMinimalGraph());
-    await unlink(join(vault, '.maencof', 'archive-members.json'));
+    const meta = JSON.parse(
+      await readFile(join(vault, '.maencof', 'graph-meta.json'), 'utf-8'),
+    );
+    await unlink(
+      join(
+        vault,
+        '.maencof',
+        'generations',
+        meta.generation,
+        'archive-members.json',
+      ),
+    );
     const loaded = await store.loadGraph();
-    expect(loaded).not.toBeNull();
-    expect(loaded?.archiveClusterMembers).toBeUndefined();
+    expect(loaded).toBeNull();
   });
 
-  it('archive-members.json 이 손상돼도 그래프 로드는 계속된다', async () => {
+  it('archive-members.json이 손상된 세대는 cache miss다', async () => {
     await store.saveGraph(makeMinimalGraph());
+    const meta = JSON.parse(
+      await readFile(join(vault, '.maencof', 'graph-meta.json'), 'utf-8'),
+    );
     await writeFile(
-      join(vault, '.maencof', 'archive-members.json'),
+      join(
+        vault,
+        '.maencof',
+        'generations',
+        meta.generation,
+        'archive-members.json',
+      ),
       '{not json',
       'utf-8',
     );
     const loaded = await store.loadGraph();
-    expect(loaded).not.toBeNull();
-    expect(loaded?.archiveClusterMembers).toBeUndefined();
+    expect(loaded).toBeNull();
   });
 });

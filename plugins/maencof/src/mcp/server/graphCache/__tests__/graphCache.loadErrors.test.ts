@@ -27,10 +27,16 @@ describe('graphCache load diagnostics', () => {
     await mkdir(cacheDir);
     await writeFile(
       join(cacheDir, CACHE_FILES.GRAPH_META),
-      JSON.stringify({ schemaVersion: 2 }),
+      JSON.stringify({ schemaVersion: 3, generation: 'fixture' }),
     );
-    await writeFile(join(cacheDir, CACHE_FILES.NODES), '{broken json');
-    await writeFile(join(cacheDir, CACHE_FILES.EDGES), '[]');
+    const dir = join(cacheDir, 'generations', 'fixture');
+    await mkdir(dir, { recursive: true });
+    await writeFile(join(dir, CACHE_FILES.NODES), '{broken json');
+    for (const file of [CACHE_FILES.EDGES, CACHE_FILES.ARCHIVE_MEMBERS])
+      await writeFile(
+        join(dir, file),
+        JSON.stringify({ generation: 'fixture', data: [] }),
+      );
 
     await expect(loadGraphIfNeeded(vaultPath)).resolves.toBeNull();
     expect(readErrorLog(vaultPath)).toEqual([
