@@ -1,8 +1,9 @@
-import { stat } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 import {
   MetadataStore,
+  CACHE_FILES,
   mergeStaleNodesIntoGraph,
   READ_REINDEX_CAP,
 } from "@ogham/maencof";
@@ -29,7 +30,12 @@ export class GraphCache {
   private readonly cache = new Map<string, CacheEntry>();
   private readonly inFlight = new Map<string, Promise<void>>();
 
-  /** Get graph for a vault path. Lazy-loads on first access, then applies stale-merge each call. */
+  /**
+   * Read a vault's graph only after its split-index commit marker is readable.
+   * @param vaultPath Vault root whose disk contents must remain unchanged.
+   * @returns The cached or loaded graph, or null on initial read failure.
+   * Applies stale deltas in memory; a missing marker never discards an existing cache.
+   */
   async getGraph(vaultPath: string): Promise<KnowledgeGraph | null> {
     const entry = this.cache.get(vaultPath);
     if (entry) {
@@ -38,6 +44,11 @@ export class GraphCache {
     }
 
     try {
+      // The maencof loader migrates legacy indexes when it cannot read this marker.
+      await readFile(
+        join(vaultPath, ".maencof", CACHE_FILES.GRAPH_META),
+        "utf-8",
+      );
       const store = new MetadataStore(vaultPath);
       const graph = await store.loadGraph();
       if (!graph) return null;
