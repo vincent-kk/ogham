@@ -10,7 +10,7 @@ Claude Code 플러그인 모노레포. 사용자용 카탈로그는 [README.md](
 ## Generated surfaces
 
 - `.codex-plugin/`, 루트 `plugin.json`, `mcp_config.json`, `hooks.json`은 plugin compiler 산출물이다. 원본 매니페스트·스킬·훅을 수정한 뒤 재생성하며 손편집하지 않는다.
-- `bridge/` and `public/` contain generated runtime artifacts. Rebuild them without hand edits and commit them in a separate build commit after the source commits.
+- `bridge/` and `public/` contain generated runtime artifacts and are never hand-edited. They are rebuilt and committed only in a plugin's version-bump commit, because that commit is the release; feature and fix pull requests run the builds and guards but do not commit the bundles. CI compares them with a fresh build only when a plugin's version changes.
 
 ## Hidden loader and bundle rules
 

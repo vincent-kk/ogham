@@ -18,7 +18,7 @@ Rules and TypeScript are canonical. Runtime bundles and host adapters are genera
 
 ### Always do
 
-- Build and verify distribution artifacts; commit regenerated runtime and adapters in a separate build commit after the source commits.
+- Build and verify distribution artifacts; commit regenerated adapters in a separate build commit after the source commits, and runtime bundles only with a version bump.
 - Keep rule writes behind a host-target and revision-bound preview.
 - Preserve independent skill selection and proportionate verification.
 

@@ -1,7 +1,7 @@
 # Repository Requirements
 
 - For arrays with fewer than 5,000 elements, prefer direct array operations for one-off work. Avoid constructing a `Set` only to inspect its size or perform a single lookup. Use a `Set` when repeated membership operations reuse the index enough to amortize construction. Verify performance-sensitive choices with measurements.
-- Keep build outputs out of source commits: run the designated builds and artifact checks, then commit regenerated runtime bundles and adapters in their own build commit.
+- Keep build outputs out of source commits. Regenerate host adapters (`.codex-plugin/`, generated `plugin.json`, `mcp_config.json`, `hooks.json`) whenever their sources change and commit them in their own build commit. Runtime bundles under `bridge/` and `public/` are committed only with a plugin's version bump, because a version bump is the release: other changes run the builds and their guards but do not commit the bundles.
 
 <!-- FILID:START:filid_fractal-boundaries.md -->
 # Fractal Boundaries

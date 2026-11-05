@@ -298,8 +298,9 @@ jobs:
           # A markdown-only workspace (prawf) matches no lintable file.
           yarn eslint --no-error-on-unmatched-pattern "${targets[@]}"
 
-  # The committed runtime and adapters of seiri, cennad, filid, maencof and
-  # maencof-lens must equal a fresh build, and seiri's distribution must also
+  # The committed adapters of seiri, cennad, filid, maencof and maencof-lens
+  # must equal a fresh build, their runtime bundles must too whenever the
+  # plugin's version changes, and seiri's distribution must also
   # be preparable from source alone in isolated staging; other plugins and
   # root adapters keep the committed-byte drift gate. This
   # job deliberately does not depend on the plan: the generator reads every
@@ -332,14 +333,41 @@ jobs:
         run: node scripts/buildAll.mjs --only=@ogham/cross-platform,@ogham/agent-artifacts,@ogham/http-kit,@ogham/session-finalizer,@ogham/seiri,@ogham/cennad,@ogham/filid,@ogham/maencof,@ogham/maencof-lens
 
       # Marketplaces install each plugin directory from the branch as committed,
-      # so a stale bundle or adapter ships even when fresh-build checks pass.
+      # so a stale adapter ships even when fresh-build checks pass. Runtime
+      # bundles (`bridge/`, `public/`) are committed only with a version bump,
+      # so they are compared only for a plugin whose version changed.
       # Pinned by scripts/__tests__/ciCommittedArtifacts.test.mjs.
-      - name: Committed hook plugin artifacts match the fresh build
+      - name: Committed hook plugin adapters match the fresh build
         run: |
-          changes="$(git status --porcelain --untracked-files=all -- plugins/seiri plugins/cennad plugins/filid plugins/maencof plugins/maencof-lens)"
+          changes="$(git status --porcelain --untracked-files=all -- plugins/seiri plugins/cennad plugins/filid plugins/maencof plugins/maencof-lens ':(exclude,glob)plugins/*/bridge/**' ':(exclude,glob)plugins/*/public/**')"
           if [ -n "$changes" ]; then
             echo "$changes"
-            echo "::error::Plugin artifacts differ from a fresh build; rebuild the listed plugins and commit the generated files."
+            echo "::error::Plugin adapters differ from a fresh build; regenerate the listed plugins and commit the generated files."
+            exit 1
+          fi
+
+      - name: Version-bumped hook plugins ship fresh runtime bundles
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "0000000000000000000000000000000000000000" ] || ! git fetch --quiet --no-tags --depth=1 origin "$BASE_SHA"; then
+            echo "No base commit to compare plugin versions against; skipping."
+            exit 0
+          fi
+          stale=""
+          for plugin in seiri cennad filid maencof maencof-lens; do
+            before="$(git show "$BASE_SHA:plugins/$plugin/package.json" 2>/dev/null | node -p 'JSON.parse(require("fs").readFileSync(0, "utf8")).version' 2>/dev/null || true)"
+            now="$(node -p "require('./plugins/$plugin/package.json').version")"
+            if [ "$before" != "$now" ]; then
+              changes="$(git status --porcelain --untracked-files=all -- "plugins/$plugin/bridge" "plugins/$plugin/public")"
+              if [ -n "$changes" ]; then
+                stale="$stale$changes"$'\n'
+              fi
+            fi
+          done
+          if [ -n "$stale" ]; then
+            printf '%s' "$stale"
+            echo "::error::A plugin version changed but its runtime bundles differ from a fresh build; rebuild it and commit bridge/ and public/ with the version bump."
             exit 1
           fi
 

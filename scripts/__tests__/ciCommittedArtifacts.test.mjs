@@ -2,7 +2,10 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { describe, it } from "node:test";
 
-/** Plugins whose committed bridge bundles and adapters must match a fresh build. */
+/**
+ * Plugins whose committed adapters must always match a fresh build and whose
+ * runtime bundles must match it whenever the plugin's version changes.
+ */
 const HOOK_PLUGINS = ["seiri", "cennad", "filid", "maencof", "maencof-lens"];
 
 const ci = readFileSync(
@@ -35,7 +38,7 @@ describe("CI committed artifact gate", () => {
       assert.ok(built.includes(`@ogham/${plugin}`), `builds @ogham/${plugin}`);
 
     const committed = job.match(
-      /git status --porcelain --untracked-files=all -- ([^)"]+)/,
+      /git status --porcelain --untracked-files=all -- (.+?)\)"/,
     );
     assert.ok(committed, "adapters job checks the committed tree");
     assert.ok(committed.index > build.index);
@@ -45,6 +48,32 @@ describe("CI committed artifact gate", () => {
         checked.includes(`plugins/${plugin}`),
         `checks plugins/${plugin}`,
       );
+    for (const bundleDir of ["bridge", "public"])
+      assert.ok(
+        checked.includes(`':(exclude,glob)plugins/*/${bundleDir}/**'`),
+        `leaves ${bundleDir}/ to the version-bump check`,
+      );
+  });
+
+  it("compares runtime bundles with the fresh build only for a version-bumped plugin", () => {
+    const build = job.indexOf("run: node scripts/buildAll.mjs");
+    const bump = job.indexOf(
+      "- name: Version-bumped hook plugins ship fresh runtime bundles",
+    );
+    assert.ok(bump > build, "the bump check runs after the build");
+    const step = job.slice(bump).split("\n      - name:")[0];
+    assert.match(
+      step,
+      /BASE_SHA: \$\{\{ github\.event\.pull_request\.base\.sha \|\| github\.event\.before \}\}/,
+    );
+    const loop = step.match(/for plugin in ([^;]+); do/);
+    assert.ok(loop, "iterates over the hook plugins");
+    assert.deepEqual(loop[1].trim().split(/\s+/), HOOK_PLUGINS);
+    assert.ok(step.includes('git show "$BASE_SHA:plugins/$plugin/package.json"'));
+    assert.ok(
+      step.includes('-- "plugins/$plugin/bridge" "plugins/$plugin/public"'),
+    );
+    assert.ok(step.includes("exit 1"));
   });
 
   it("checks Codex MCP tool markers in the job that runs on every trigger", () => {

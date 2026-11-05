@@ -14,7 +14,7 @@
 
 ### Always do
 
-- 빌드 산출물은 생성 명령으로 갱신하고 함께 커밋
+- 빌드 산출물은 생성 명령으로만 갱신하고 배포인 버전 올림 커밋에서만 커밋
 - 모든 outbound 요청에 SSRF guard 적용
 - ADF / Storage ↔ Markdown 변환은 기존 포팅 로직 재사용
 
