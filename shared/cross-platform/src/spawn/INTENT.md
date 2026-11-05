@@ -17,7 +17,7 @@
 
 ### Always do
 
-- 모든 spawn 호출은 `spawnCli` (async) / `spawnCliSync` (sync) / `spawnDetached` (fire-and-forget 데몬) 경유.
+- 외부 CLI를 실행하는 호출자는 `spawnCli` (async) / `spawnCliSync` (sync) / `spawnDetached` (fire-and-forget 데몬)를 경유한다 — OS별 실행·종료 정책이 소비자마다 갈라지지 않게 한다.
 
 ### Ask first
 
@@ -26,5 +26,5 @@
 
 ### Never do
 
-- `child_process.spawn` / `exec` / `execSync` / `execFile` 직접 import.
+- 호출자가 이 모듈을 우회해 `child_process.spawn` / `exec` / `execSync` / `execFile`을 직접 import하기. 모듈 내부의 Node 실행은 Windows shim의 멀티라인 인자 보존과 프로세스 트리 종료를 위한 구현 경계다.
 - timeout kill 에 SIGKILL 외 signal 사용 (Windows 호환 깨짐).

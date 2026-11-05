@@ -1,6 +1,6 @@
 ## Purpose
 
-agy 훅 **런타임 어댑터**. 순수 번역(`agyHooks`)을 감싸 실제 I/O 를 수행한다 — agy stdin 판독, Claude 핸들러 번들 스폰(번역된 페이로드 주입), 응답 역변환, SessionStart once-guard. 각 플러그인의 `bridge/run-agy.mjs` 로 번들되어 emit 된 agy `hooks.json` 이 이 러너를 경유한다. **Claude/Codex 경로는 이 파일에 닿지 않는다.**
+agy 훅 **런타임 어댑터**. 순수 번역(`agyHooks`)을 감싸 실제 I/O 를 수행한다 — agy stdin 판독, Claude 핸들러 번들 스폰(번역된 페이로드 주입), 응답 역변환, SessionStart once-guard. 각 플러그인의 agy 훅 러너 산출물로 번들되어 emit 된 agy `hooks.json` 이 이 러너를 경유한다. **Claude/Codex 경로는 이 파일에 닿지 않는다.**
 
 ## Conventions
 

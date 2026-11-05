@@ -8,7 +8,7 @@ self-probe 계열은 node/git/PATH/plugin root를 진단하며, 실패를 기록
 - 모든 hook entry 는 `runHookEntry` 경유 (PATH 결손 방지).
 - selfProbe 의 writeLog: true + pkg 시 에러를 자동 logHookFailure.
 - 외부 hook은 `@ogham/cross-platform` 루트에서 필요한 심볼만 import한다.
-- 같은 패키지 subtree는 `probe/`·`error/` concrete 파일을 직접 import한다.
+- 같은 패키지 subtree는 진단·오류 기록의 concrete 파일을 직접 import한다.
 - error-log.json 은 256 KB cap; 초과 시 가장 오래된 항목부터 drop.
 - `sideEffects: false` tree-shaking과 emitted byte·output forbidden-pattern guard가 제한 hook의 격리를 검증한다.
 
