@@ -10,7 +10,7 @@
 
 ## API Contracts
 
-- search·context만 호출별 레이어 필터를 받으며 나머지 조회는 볼트 상한을 사용한다.
+- search·context만 호출별 레이어 필터를 받으며 navigate·read는 볼트 상한을 사용한다. status 집계는 볼트 전체의 인덱스 건강 상태를 알리기 위해 필터를 적용하지 않는다.
 - seed와 cluster의 상호배타 검증은 maencof가 소유한다. 열거 결과에도 볼트 상한을 유지한다.
 - read 결과의 오류 필드만 MCP `isError`로 승격한다. 다른 조회의 결과 오류는 본문으로 돌려주므로 소비자는 이 차이를 구분해야 한다.
 
