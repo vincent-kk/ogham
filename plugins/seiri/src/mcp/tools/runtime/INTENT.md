@@ -26,4 +26,4 @@ The tool name is runtime; workflow is the participation state machine. An accept
 
 - Guess host IDs from environment, transcripts, or model arguments.
 - Create a ledger or certify task completion.
-- Let `dial` write anything but the untracked runtime valve.
+- Let `dial` write beyond the runtime valve and its seiri-owned ignore maintenance; the latter keeps session state out of commits and preserves user-owned ignore files.

@@ -19,6 +19,32 @@
 
 ## Acceptance Criteria
 
+스킬 정책의 제품 계약은 플러그인 루트의 [DETAIL.md](../DETAIL.md)가 소유한다. 아래 여섯 그룹은 이 모듈의 검증 파일이 그 계약을 고정하는 바인딩이며, 스킬 목록과 템플릿이 서로 다른 정책을 갖지 않도록 같은 ID를 사용한다.
+
+### AC-architecture-records — 아키텍처 기록의 호출 경계
+
+- 스킬 분류와 워크플로우 체인은 루트의 AC-architecture-records를 보존한다. 아키텍처 기록을 구현 단계로 오인해 자동 실행하지 않기 위한 경계다.
+
+### AC-skill-visibility — 발견과 참여의 분리
+
+- 스킬 분류와 frontmatter는 루트의 AC-skill-visibility를 함께 만족한다. 모델이 스킬을 발견하는 것과 작업에 참여하는 것을 혼동하지 않도록 한다.
+
+### AC-check-expect-pair — 검증 조건의 보존
+
+- 계획·검토 스킬은 루트의 AC-check-expect-pair를 함께 적용한다. 명령의 정상 종료만으로 결과 조건을 충족했다고 판단하지 않도록 한다.
+
+### AC-workflow-entry-validity — 유효한 진입 경로
+
+- 진입 스킬은 루트의 AC-workflow-entry-validity를 보존한다. 입력 옵션, 새 심볼, 비테스트 증상을 잘못 분류하여 정당한 작업 진입을 막지 않도록 한다.
+
+### AC-planning-method-selection — 선택한 계획법의 보존
+
+- 계획·검토 스킬은 루트의 AC-planning-method-selection을 함께 적용한다. 검토가 선택된 방법을 기본법으로 바꾸거나 구조적 판단의 근거를 잃지 않도록 한다.
+
+### AC-document-language — 문서 언어의 일관성
+
+- 문서 작성 스킬 목록과 템플릿은 루트의 AC-document-language를 함께 만족한다. 영어 템플릿이 세션의 문서 언어를 덮어쓰지 않도록 한다.
+
 ### AC-no-rule-injection — 규칙 본문 비주입
 
 - 어떤 훅 출력에도 규칙 문서 본문이 실리지 않는다.
