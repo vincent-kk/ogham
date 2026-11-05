@@ -16,7 +16,7 @@ export function filterNodeLinks(
   const copy = { ...node };
   if (copy.outboundLinks)
     copy.outboundLinks = copy.outboundLinks.filter((path) => {
-      const layer = graph?.nodes.get(toNodeId(path))?.layer;
+      const layer = graph?.nodes.get(toNodeId(path.split("#")[0]))?.layer;
       return layer === undefined || effectiveLayers.includes(layer);
     });
   return copy;

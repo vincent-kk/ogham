@@ -109,9 +109,11 @@ describe("handleLensNavigate layer ceiling", () => {
     expect(result.error).toBeUndefined();
     expect(result.node).toEqual({
       ...node,
-      outboundLinks: node.outboundLinks?.filter(
-        (path) => path !== restrictedPath,
-      ),
+      outboundLinks: [
+        "02_Derived/allowed.md",
+        "02_Derived/missing.md",
+        "02_Derived/allowed.md#section",
+      ],
     });
   });
 
@@ -141,7 +143,11 @@ describe("handleLensNavigate layer ceiling", () => {
 
     expect(result.node).toEqual(
       expect.objectContaining({
-        outboundLinks: ["02_Derived/allowed.md", "02_Derived/missing.md"],
+        outboundLinks: [
+          "02_Derived/allowed.md",
+          "02_Derived/missing.md",
+          "02_Derived/allowed.md#section",
+        ],
       }),
     );
   });
