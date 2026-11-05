@@ -1,7 +1,9 @@
-// Atlassian Settings UI - App
+// Loaded by index.html after helpers; DOMContentLoaded initializes the settings app.
 "use strict";
 
 (function () {
+  /** Page-local helper registry populated by the preceding scripts. */
+  var helpers = window.__settingsHelpers;
   // The server issues a per-session token; every request must echo it back.
   var TOKEN = new URLSearchParams(window.location.search).get("token") || "";
 
@@ -33,10 +35,7 @@
     }
   }
 
-  // Parsed once, at load, because two readers need it at different times: the
-  // edit-mode prefill on DOMContentLoaded and the scope toggle below, which is
-  // derived while this script runs. Parsing per reader is what once left the
-  // toggle reading a field nobody filled.
+  /** One injected document supplies both initial prefill and scope controls. */
   var injected = readInjectedState();
 
   // --- Animation Helper ---
@@ -188,99 +187,9 @@
     });
   }
 
-  // --- Element Factory ---
-  function elementFactory(tag, attrs, children) {
-    var node = document.createElement(tag);
-    if (attrs) {
-      Object.keys(attrs).forEach(function (key) {
-        if (key === "className") node.className = attrs[key];
-        else if (key === "textContent") node.textContent = attrs[key];
-        else if (key === "hidden") node.hidden = attrs[key];
-        else if (key.indexOf("data-") === 0) node.setAttribute(key, attrs[key]);
-        else node.setAttribute(key, attrs[key]);
-      });
-    }
-    if (children) {
-      children.forEach(function (child) {
-        node.appendChild(child);
-      });
-    }
-    return node;
-  }
-
-  function svgElement(tag, attrs) {
-    var node = document.createElementNS("http://www.w3.org/2000/svg", tag);
-    if (attrs) {
-      Object.keys(attrs).forEach(function (key) {
-        node.setAttribute(key, attrs[key]);
-      });
-    }
-    return node;
-  }
-
-  function createRemoveIcon() {
-    var svg = svgElement("svg", {
-      width: "12",
-      height: "12",
-      viewBox: "0 0 12 12",
-      fill: "none",
-      stroke: "currentColor",
-      "stroke-width": "1.5",
-      "stroke-linecap": "round",
-    });
-    svg.appendChild(
-      svgElement("line", { x1: "2", y1: "2", x2: "10", y2: "10" }),
-    );
-    svg.appendChild(
-      svgElement("line", { x1: "10", y1: "2", x2: "2", y2: "10" }),
-    );
-    return svg;
-  }
-
+  /** @param {number} idx Unique field index. @returns {HTMLElement} Removable site row. */
   function createSiteEntry(idx) {
-    var input = elementFactory("input", {
-      type: "text",
-      "data-field": "cloud.sites." + idx + ".base_url",
-      placeholder: "your-site-name or https://your-site-name.atlassian.net",
-      autocomplete: "off",
-    });
-
-    var removeBtn = elementFactory(
-      "button",
-      {
-        type: "button",
-        className: "btn-remove-site",
-        "aria-label": "Remove site",
-        "data-remove-index": String(idx),
-      },
-      [createRemoveIcon()],
-    );
-
-    var entry = elementFactory(
-      "div",
-      { className: "site-entry", "data-site-index": String(idx) },
-      [
-        elementFactory("div", { className: "form-group" }, [
-          elementFactory("label", {}, [
-            document.createTextNode("Site Name "),
-            elementFactory("span", {
-              className: "optional",
-              textContent: "(optional)",
-            }),
-          ]),
-          elementFactory("div", { className: "input-with-action" }, [
-            input,
-            removeBtn,
-          ]),
-          elementFactory("span", { className: "field-error", hidden: true }),
-        ]),
-      ],
-    );
-
-    removeBtn.addEventListener("click", function () {
-      entry.remove();
-    });
-    return entry;
+    return helpers.createSiteEntry(document, idx, helpers);
   }
 
   // --- Multi-site Cloud ---
@@ -321,82 +230,16 @@
   }
 
   // --- Validation ---
+  /** @returns {boolean} Whether current fields are valid; displays field errors. */
   function validateForm() {
-    clearErrors();
-    var data = collectFormData();
-    var valid = true;
-
-    function requireField(fieldPath, value) {
-      if (!value || !value.trim()) {
-        showError(fieldPath, "This field is required.");
-        valid = false;
-      }
-    }
-
-    function requireUrl(fieldPath, value) {
-      if (!value || !value.trim()) {
-        showError(fieldPath, "This field is required.");
-        valid = false;
-      } else if (!/^https?:\/\//i.test(value.trim())) {
-        showError(fieldPath, "Must start with http:// or https://");
-        valid = false;
-      }
-    }
-
-    function requireCloudSite(fieldPath, value) {
-      if (!value || !value.trim()) {
-        showError(fieldPath, "This field is required.");
-        valid = false;
-      } else {
-        var v = value.trim();
-        var isUrl = /^https?:\/\//i.test(v);
-        var isSiteName = /^[a-zA-Z0-9][a-zA-Z0-9-]*$/.test(v);
-        if (!isUrl && !isSiteName) {
-          showError(
-            fieldPath,
-            "Enter a site name (e.g. my-company) or full URL (https://my-company.atlassian.net)",
-          );
-          valid = false;
-        }
-      }
-    }
-
-    if (data.deployment_type === "cloud") {
-      // Validate each site URL
-      var siteEntries = document.querySelectorAll(
-        "#cloud-sites-container .site-entry",
-      );
-      siteEntries.forEach(function (entry, i) {
-        var idx = entry.dataset.siteIndex;
-        var fieldPath = "cloud.sites." + idx + ".base_url";
-        var value = getField(fieldPath);
-        if (i === 0) {
-          requireCloudSite(fieldPath, value);
-        } else if (value && value.trim()) {
-          // Optional sites: validate format only when filled
-          requireCloudSite(fieldPath, value);
-        }
-      });
-      requireField("cloud.username", data.jira ? data.jira.username : "");
-      requireField("cloud.api_token", data.jira ? data.jira.api_token : "");
-    } else {
-      // On-prem: username is optional (PAT/Bearer auth path).
-      requireUrl("onprem.jira.base_url", data.jira ? data.jira.base_url : "");
-      requireField(
-        "onprem.jira.api_token",
-        data.jira ? data.jira.api_token : "",
-      );
-      requireUrl(
-        "onprem.confluence.base_url",
-        data.confluence ? data.confluence.base_url : "",
-      );
-      requireField(
-        "onprem.confluence.api_token",
-        data.confluence ? data.confluence.api_token : "",
-      );
-    }
-
-    return valid;
+    return helpers.validateForm(
+      document,
+      collectFormData,
+      getField,
+      clearErrors,
+      showError,
+      helpers,
+    );
   }
 
   function showError(fieldPath, msg) {
@@ -425,73 +268,17 @@
   }
 
   // --- Collect Form Data ---
+  /** @returns {object} Current fields as a submission payload; does not persist. */
   function collectFormData() {
-    var isCloud = state.tab === TABS.CLOUD;
-    var deployType = isCloud ? "cloud" : "onprem";
-
-    function normalizeCloudUrl(value) {
-      if (!value) return value;
-      var v = value.trim();
-      if (/^https?:\/\//i.test(v)) return v.replace(/\/+$/, "");
-      return "https://" + v + ".atlassian.net";
-    }
-
-    if (isCloud) {
-      // Collect all site URLs
-      var siteUrls = [];
-      var siteEntries = document.querySelectorAll(
-        "#cloud-sites-container .site-entry",
-      );
-      siteEntries.forEach(function (entry) {
-        var idx = entry.dataset.siteIndex;
-        var url = getField("cloud.sites." + idx + ".base_url");
-        if (url) siteUrls.push(normalizeCloudUrl(url));
-      });
-
-      var username = getField("cloud.username");
-      var apiToken = getField("cloud.api_token");
-      var sslVerify = getCheckbox("cloud.ssl_verify");
-      var timeout = getNumberField("cloud.timeout");
-
-      return {
-        deployment_type: deployType,
-        cloud_sites: siteUrls,
-        jira: {
-          base_url: siteUrls[0] || "",
-          username: username,
-          api_token: apiToken,
-          ssl_verify: sslVerify,
-          timeout: timeout,
-        },
-        confluence: {
-          base_url: siteUrls[0] || "",
-          username: username,
-          api_token: apiToken,
-          ssl_verify: sslVerify,
-          timeout: timeout,
-        },
-      };
-    } else {
-      return {
-        deployment_type: deployType,
-        jira: {
-          base_url: getField("onprem.jira.base_url"),
-          username: getField("onprem.jira.username"),
-          api_token: getField("onprem.jira.api_token"),
-          ssl_verify: getCheckbox("onprem.jira.ssl_verify"),
-          timeout: getNumberField("onprem.jira.timeout"),
-          api_version_override:
-            getRadioValue("onprem.jira.api_version_override") || undefined,
-        },
-        confluence: {
-          base_url: getField("onprem.confluence.base_url"),
-          username: getField("onprem.confluence.username"),
-          api_token: getField("onprem.confluence.api_token"),
-          ssl_verify: getCheckbox("onprem.confluence.ssl_verify"),
-          timeout: getNumberField("onprem.confluence.timeout"),
-        },
-      };
-    }
+    return helpers.collectFormData(
+      document,
+      state,
+      TABS,
+      getField,
+      getCheckbox,
+      getNumberField,
+      getRadioValue,
+    );
   }
 
   // --- Status Message ---
@@ -599,76 +386,35 @@
   renderScope();
 
   // --- Save (validate -> test connection -> save) ---
+  /** @param {boolean} closeAfter Complete setup after saving. @returns {void} Starts saving. */
   function onSubmit(closeAfter) {
-    if (!validateForm()) return;
-
-    if (state.editMode) {
-      var confirmed = window.confirm(
-        "This will overwrite existing settings. Continue?",
-      );
-      if (!confirmed) return;
-    }
-
-    var data = collectFormData();
-    data.closeAfter = closeAfter;
-    data.scope = configScope;
-    setLoading(true);
-    hideStatusMessage();
-    showStatusMessage(true, "Testing connection...");
-
-    fetch("/submit?token=" + encodeURIComponent(TOKEN), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    })
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (result) {
-        if (result.success) {
-          if (closeAfter) {
-            showSuccessScreen();
-          } else {
-            showStatusMessage(true, "Saved. Settings updated.");
-          }
-        } else {
-          showStatusMessage(false, result.message || "Save failed");
-        }
-      })
-      .catch(function (err) {
-        showStatusMessage(false, "Request failed: " + err.message);
-      })
-      .finally(function () {
-        setLoading(false);
-      });
+    helpers.onSubmit(closeAfter, {
+      validateForm,
+      collectFormData,
+      setLoading,
+      hideStatusMessage,
+      showStatusMessage,
+      fetch: fetch.bind(window),
+      TOKEN,
+      state,
+      window,
+      configScope,
+      showSuccessScreen,
+    });
   }
 
   // --- Test connection (no save) ---
+  /** @returns {void} Starts a connection check and displays its result. */
   function onTest() {
-    if (!validateForm()) return;
-
-    var data = collectFormData();
-    setLoading(true);
-    hideStatusMessage();
-    showStatusMessage(true, "Testing connection...");
-
-    fetch("/test?token=" + encodeURIComponent(TOKEN), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
-    })
-      .then(function (res) {
-        return res.json();
-      })
-      .then(function (result) {
-        showStatusMessage(!!result.success, result.message || "Test complete");
-      })
-      .catch(function (err) {
-        showStatusMessage(false, "Request failed: " + err.message);
-      })
-      .finally(function () {
-        setLoading(false);
-      });
+    helpers.onTest({
+      validateForm,
+      collectFormData,
+      setLoading,
+      hideStatusMessage,
+      showStatusMessage,
+      fetch: fetch.bind(window),
+      TOKEN,
+    });
   }
 
   function showSuccessScreen() {

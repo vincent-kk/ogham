@@ -38,29 +38,19 @@ const css = await minifyAsset(
   await readPageFile("styles", "styles.css"),
   "css",
 );
-const appJs = await minifyAsset(await readPageFile("scripts", "app.js"), "js");
-const jsonImportJs = await minifyAsset(
-  await readPageFile("scripts", "json-import.js"),
-  "js",
-);
-
 // Inline CSS
 html = html.replace(
   /<link\s+href="\.\/styles\/styles\.css"\s+rel="stylesheet"\s*\/?>/,
   `<style>\n${css}\n</style>`,
 );
 
-// Inline app.js
-html = html.replace(
-  /<script\s+src="\.\/scripts\/app\.js"\s*><\/script>/,
-  `<script>\n${appJs}\n</script>`,
-);
-
-// Inline json-import.js
-html = html.replace(
-  /<script\s+src="\.\/scripts\/json-import\.js"\s*><\/script>/,
-  `<script>\n${jsonImportJs}\n</script>`,
-);
+// The source page orders dependencies before app.js; preserve that order inline.
+for (const match of html.matchAll(
+  /<script\s+src="\.\/(scripts\/[^"<>]+\.js)"\s*><\/script>/g,
+)) {
+  const script = await minifyAsset(await readPageFile(match[1]), "js");
+  html = html.replace(match[0], () => `<script>\n${script}\n</script>`);
+}
 
 // Remove mock-api.js
 html = html.replace(
