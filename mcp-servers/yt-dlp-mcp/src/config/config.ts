@@ -9,6 +9,9 @@ import {
 } from '@/constants/tool-defaults.js';
 import { DEFAULT_PLAYER_CLIENT } from '@/constants/ytdlp.js';
 
+import { boolEnv } from './helpers/bool-env.js';
+import { intEnv } from './helpers/int-env.js';
+
 const LOG_LEVELS = [
   'trace',
   'debug',
@@ -69,27 +72,9 @@ function expandHome(p: string): string {
   return p;
 }
 
-function boolEnv(value: string | undefined): boolean {
-  if (!value) return false;
-  const v = value.trim().toLowerCase();
-  return v === '1' || v === 'true' || v === 'yes' || v === 'on';
-}
-
-/** Tri-state: unset/empty → fallback (the tool's default); set → parsed boolean. */
-function flagEnv(value: string | undefined, fallback: boolean): boolean {
-  if (value === undefined || value.trim() === '') return fallback;
-  return boolEnv(value);
-}
-
 function enableEnvName(key: EnableKey): string {
   const suffix = key.replace(/[A-Z]/g, (m) => `_${m}`).toUpperCase();
   return `YTDLP_ENABLE_${suffix}`;
-}
-
-function intEnv(value: string | undefined, fallback: number): number {
-  if (value === undefined || value.trim() === '') return fallback;
-  const n = Number.parseInt(value, 10);
-  return Number.isFinite(n) ? n : fallback;
 }
 
 function listEnv(value: string | undefined): string[] {
@@ -145,11 +130,15 @@ export function loadConfig(env: Env = process.env): Config {
   const downloadsDir = expandHome(
     env.YTDLP_DOWNLOADS_DIR?.trim() || path.join(home, 'downloads'),
   );
-  const enableAll = boolEnv(env.YTDLP_ENABLE_ALL);
+  const enableAll = boolEnv('YTDLP_ENABLE_ALL', env.YTDLP_ENABLE_ALL);
   const enable = Object.fromEntries(
     (Object.keys(TOOL_DEFAULT_ENABLED) as EnableKey[]).map((key) => [
       key,
-      enableAll || flagEnv(env[enableEnvName(key)], TOOL_DEFAULT_ENABLED[key]),
+      boolEnv(
+        enableEnvName(key),
+        env[enableEnvName(key)],
+        TOOL_DEFAULT_ENABLED[key],
+      ) || enableAll,
     ]),
   ) as Record<EnableKey, boolean>;
 
