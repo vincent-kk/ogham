@@ -23,7 +23,8 @@ export interface ProjectInitInput {
  * setup skill drives that through the `rules-sync` action so users
  * always make an explicit checkbox choice about optional rule files.
  *
- * Existing config.json is never overwritten.
+ * An existing config.json is never replaced with defaults; a v1/v2 file is
+ * rewritten as v3 only when the conversion is lossless.
  */
 export function handleProjectInit(args: unknown): InitResult {
   const input = args as ProjectInitInput;
