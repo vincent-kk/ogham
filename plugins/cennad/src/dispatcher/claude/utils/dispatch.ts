@@ -27,6 +27,11 @@ export interface ClaudeDispatchInternal {
   signal?: AbortSignal;
 }
 
+/**
+ * Runs Claude with active-run tracking and normalizes CLI failures through errorMap.
+ * @param input Prepared CLI arguments, session identity, limits, and caller options.
+ * @returns The parsed response and session metadata, with mapped CLI errors on failure.
+ */
 export async function dispatch(
   input: ClaudeDispatchInternal,
 ): Promise<DispatchResult> {
@@ -87,7 +92,11 @@ export async function dispatch(
     return {
       status: 'failure',
       response: parsed.response,
-      error: { code: 'unknown', message: parsed.error },
+      error: mapError({
+        exitCode: spawnResult.exitCode,
+        stderr: spawnResult.stderr,
+        cliMessage: parsed.error,
+      }),
       externalSessionRef: input.externalSessionRef,
       ignoredOptions,
       resolvedModel: input.resolvedModel,
