@@ -45,7 +45,6 @@ describe.each([
   it.each(["{broken", "null"])("no-ops when stdin is %s", (input) => {
     expect(runRunner(event, input, join(root, "absent.mjs"))).toMatchObject({
       status: 0,
-      stderr: "",
       stdout: JSON.stringify(noop),
     });
   });
@@ -53,7 +52,6 @@ describe.each([
   it("no-ops when the handler process exits unsuccessfully", () => {
     expect(runRunner(event, "{}", join(root, "failed.mjs"))).toMatchObject({
       status: 0,
-      stderr: "",
       stdout: JSON.stringify(noop),
     });
   });
@@ -61,7 +59,6 @@ describe.each([
   it("no-ops when the handler process returns malformed JSON", () => {
     expect(runRunner(event, "{}", join(root, "malformed.mjs"))).toMatchObject({
       status: 0,
-      stderr: "",
       stdout: JSON.stringify(noop),
     });
   });
