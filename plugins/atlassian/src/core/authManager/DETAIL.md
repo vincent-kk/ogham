@@ -3,9 +3,9 @@
 ## Requirements
 
 - 자격증명 파일 접근은 `loadCredentials`·`saveCredentials` 를 통해서만 한다.
-- 헤더 값 조립은 `utils` 의 `buildAuthHeader` 에 위임하고, 이 모듈은 **완성된 헤더 문자열만** 돌려준다. 호출자가 헤더를 직접 조합하지 않는다.
-- 원문 자격증명은 이 모듈 밖으로 나가지 않는다. `getAuthHeader` 밖에서 `loadCredentials` 결과를 직렬화하지 않는다.
-- 유효성은 `types/` 의 `AuthType`·`Credentials` Zod 스키마로 검증한다.
+- 저장된 인증과 저장 전 연결 점검은 같은 `buildAuthHeader`를 사용한다. Basic/Bearer 선택 규칙의 분기를 막기 위해 호출자가 별도 헤더 조립 규칙을 만들지 않는다.
+- 원문 자격증명 로드는 설정 편집·저장·연결 점검에 허용한다. 비밀이 프로토콜 밖으로 나가지 않도록 도구 응답·로그에 원문을 직렬화하지 않는다.
+- 유효성은 types 계층 의 `CredentialsSchema`로 검증한다.
 - Win32 에서 `chmod 0o600` 은 no-op 이며 파일 보호는 상위 디렉터리의 NTFS ACL 이 담당한다.
 - 자격증명이 없거나 형식이 맞지 않으면 헤더 대신 실패를 알린다 — 빈 헤더로 요청을 보내지 않는다.
 
@@ -17,7 +17,7 @@
 
 ### AC-single-header-source — 헤더 단일 출처
 
-- `authManager` 밖에서 인증 헤더 문자열을 조립하는 코드가 없다.
+- 인증 헤더 값의 조립은 공통 `buildAuthHeader`에만 두고, 저장된 인증과 저장 전 연결 점검에서 재사용한다.
 
 ### AC-credential-containment — 자격증명 격리
 

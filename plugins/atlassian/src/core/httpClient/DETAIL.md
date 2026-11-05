@@ -5,7 +5,7 @@
 - 외부 Atlassian REST API 호출의 유일한 진입점이다. 다른 곳에서 `fetch` 를 직접 부르지 않는다.
 - 모든 요청 전에 `validateUrl` 로 SSRF 검증을 수행한다.
 - 인증 토큰은 `config.auth_header` 로만 주입하고 호출자에게 노출하지 않는다.
-- 재시도 대상(429, 5xx)에 exponential backoff 를 적용한다.
+- 재시도는 rate limit, 일시적 서버 장애로 지정한 상태와 네트워크 오류에 한정한다. 영구 오류를 반복 전송하지 않도록 모든 5xx를 일괄 재시도하지 않고, backoff와 대기 상한을 적용한다.
 - 결과는 `McpResponse` 봉투로 반환한다.
 - private IP 는 호출자가 `allow_private_ip` 를 명시적으로 전달했을 때만 허용한다 — 기본은 차단이다.
 

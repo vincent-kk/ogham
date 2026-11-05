@@ -3,7 +3,7 @@
 ## Requirements
 
 - stdio transport 로만 통신한다. stdout 직접 쓰기를 하지 않고 로그는 stderr 로만 보낸다.
-- 도구 입력 스키마는 zod 로 정의하고 MCP SDK 가 검증한다.
+- 도구 입력 스키마는 소스의 types organ이 소유하고 MCP SDK가 검증한다. 서버 등록부에 스키마를 다시 정의하지 않아 입력 계약의 소유권을 한곳에 유지한다.
 - 모든 `registerTool` 콜백은 `wrapHandler` 로 감싼다.
 - 이 fractal 의 외부 소비자는 배럴을 경유한다 — 내부 구현 파일을 직접 참조하지 않는다.
 

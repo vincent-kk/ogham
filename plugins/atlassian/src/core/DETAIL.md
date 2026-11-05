@@ -19,7 +19,7 @@
 
 ### AC-sibling-barrel-crossing — 형제 경계 통과
 
-- core 하위 fractal 이 `../index.js`(부모 배럴)를 import 하지 않는다.
+- core 하위 fractal 이 `src/core/index.ts`(부모 배럴)를 import 하지 않는다.
 
 ### AC-credential-secrecy — 자격증명 비노출
 

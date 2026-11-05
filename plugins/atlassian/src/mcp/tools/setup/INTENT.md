@@ -6,7 +6,7 @@ MCP setup tool with a local HTTP UI that completes only after the selected confi
 
 - Server instance via closure/return value `{ url, close, completion }` only
 - Reuse core modules: configManager, authManager, httpClient, environmentResolver
-- FE code lives in `src/mcp/pages/settings/` — HTTP API interface only
+- FE code lives in the settings page fractal — HTTP API interface only
 - Tool name stays `setup` (public MCP interface); only the page/asset layer is named `settings`. Renaming the tool is an interface change — handle separately.
 
 ## Boundaries
@@ -28,6 +28,6 @@ MCP setup tool with a local HTTP UI that completes only after the selected confi
 
 - Expose credentials in responses or logs
 - Use external HTTP frameworks (Express, Koa)
-- Use module-level mutable state
+- Share request, credential, or server lifecycle state at module scope; only immutable deployment HTML may be cached to avoid repeated disk reads.
 - Include dev-only code (mock-api.js) in production build
 - Treat server startup alone as completed setup

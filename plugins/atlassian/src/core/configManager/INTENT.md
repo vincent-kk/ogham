@@ -17,7 +17,7 @@ Atlassian 설정 파일의 로드·저장·병합. user(플러그인 데이터 �
 - 설정 파일 부재 시 빈 기본값을 반환하고, 그 외 오류는 상위로 전파한다.
 - `mergeConfig` 는 **레이어 병합이 아니다** — 한 문서 안의 얕은 patch 이며, 병합 후 스키마 파싱으로 유효성을 재확인한다.
 - index.ts 배럴을 통해서만 외부에 심볼을 노출한다.
-- Win32 에서는 `chmod 0o600` 가 no-op 이며, `~/.claude/plugins/atlassian/` 부모 디렉토리의 NTFS ACL (기본값: 현재 사용자 전용 상속) 이 파일 보호를 담당함을 호출자에게 README Security 섹션으로 안내한다.
+- Win32 에서는 `chmod 0o600` 가 no-op 이며, 호스트 resolver가 선택한 설정 부모 디렉토리의 NTFS ACL (기본값: 현재 사용자 전용 상속) 이 파일 보호를 담당함을 호출자에게 README Security 섹션으로 안내한다.
 
 ### Ask first
 
