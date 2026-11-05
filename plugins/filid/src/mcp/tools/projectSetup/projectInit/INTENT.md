@@ -23,7 +23,3 @@ Validate project path, output language, and optional adapter IDs; create only ab
 
 - config schema를 로컬 재정의
 - rule docs나 project source를 직접 쓰기
-
-## Dependencies
-
-- core configLoader public entry point

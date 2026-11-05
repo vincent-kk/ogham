@@ -15,19 +15,8 @@
 
 ## API Contracts
 
-```ts
-interface FractalScanInput {
-  path: string;
-  maxDepth?: number;
-  detail?: 'summary' | 'paths' | 'full';
-  nameFilter?: string;
-}
-```
-
-- summary는 project root, snapshot hash, node counts, violation counts, certainty와 adapter IDs를 포함한다.
-- paths data는 정규화된 절대 node path와 분류 근거를 포함한다.
-- full data는 snapshot/tree 증거를 포함하되 16 KiB를 넘으면 artifact로만 전달된다.
-- 반환은 `ToolResultEnvelope`를 사용하며 별도 scan-specific report file 형식을 만들지 않는다.
+- 반환은 공통 envelope를 사용하며 별도 scan-specific report file 형식을 만들지 않는다.
+- summary는 전체 tree를 설명하며 좁힌 projection과 같은 집합이라고 해석하지 않는다.
 
 ## Acceptance Criteria
 
@@ -59,11 +48,6 @@ interface FractalScanInput {
 
 - scan 전후 project file tree와 config byte content가 같다.
 
-## History
-
-- 2026-09-05 — 기존 scan payload를 `fractal_inspect`의 `scan` action 뒤 child 계약으로 이동했다.
-- 2026-08-20 — 문서 계약 finding diagnostic과 불완전 evidence를 구분했다.
-
 ## Last Updated
 
-2026-09-05
+detail projection·필터 범위, max-depth 해석이나 진단 certainty 계약이 바뀔 때 갱신한다.

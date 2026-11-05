@@ -17,12 +17,8 @@
 
 ## API Contracts
 
-- MCP 도구 4개: `project_setup`, `fractal_inspect`, `restructure`, `review_state`.
-- `fractal_inspect`의 `resolve` action은 최소 한 item의 `requests[]`를 한 shared snapshot에서 해석하고 입력 순서의 `data.results[]`를 반환한다.
-- 훅 진입점 3개: `hooks/setup`, `hooks/userPromptSubmit`, `hooks/preToolUse`.
-- 추출 프로그램 진입점 1개: `factsExtractor/factsExtractor.entry.ts` → `bridge/filid-facts.mjs`.
-- 소스 루트 entry point의 공개 surface는 생성된 `VERSION` 하나다.
 - 모든 MCP 반환은 공통 envelope와 16 KiB inline 예산을 따른다.
+- 소스 루트는 FCA 경계 식별을 위한 버전만 노출하고 npm library surface는 두지 않는다.
 
 ## Acceptance Criteria
 
@@ -33,7 +29,6 @@
 
 ### AC-src-surface — 1.0 표면
 
-- MCP 도구가 정확히 4개 등록된다.
 - 소스 루트 entry point가 `VERSION`만 named export하고 npm manifest에는 library export가 없다.
 
 ### AC-src-generated — 생성물 불가침
@@ -51,4 +46,4 @@
 
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+레이어 의존 방향, 생태계 중립성, 서버·추출 번들 격리나 공개 진입점 계약이 바뀔 때 갱신한다.

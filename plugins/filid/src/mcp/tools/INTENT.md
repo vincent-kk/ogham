@@ -4,17 +4,6 @@
 
 Filid 1.0의 setup/inspection/restructure/review/facts 동작을 정확히 5개 독립 sub-fractal로 노출한다.
 
-## Structure
-
-| Tool fractal     | Role                                          |
-| ---------------- | --------------------------------------------- |
-| `projectSetup`   | 초기화, managed rules와 설정 session dispatch |
-| `fractalInspect` | FCA tree, rule, verification와 context 검사   |
-| `restructure`    | placement plan과 사전·사후조건 검증           |
-| `reviewState`    | merge-track review lifecycle                  |
-| `facts`          | 제출된 사실의 상태 보고와 수용             |
-| `utils/`         | shared host guards와 진단 scoping             |
-
 ## Conventions
 
 - 각 handler는 core 공개 entry point를 오케스트레이션한다.

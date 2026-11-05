@@ -14,9 +14,7 @@
 ## API Contracts
 
 - `resolveToolArtifactDirectory(toolName): string` — 그 도구의 artifact가 저장되는 디렉터리(`<plugin cache>/artifacts/<tool>`). 없을 수 있다. restructure의 plan reader가 "서버가 쓴 artifact인가"를 판정할 때 쓴다. `persistToolArtifact`도 이 디렉터리에 digest 파일 이름을 붙여 쓰므로 두 경로는 한 곳에서 조립된다.
-- `materializeToolEnvelope(toolName, payload): ToolResultEnvelope`.
 - `serializeCompactJson(value): string`은 artifact, byte budget과 transport가 공유하는 단일 compact serializer다.
-- `writeArtifactAtomic(path, content): void`는 `operations/`가 구현하고 entry point가 named export한다.
 - tool name은 canonical MCP object enum 값이어야 한다.
 - artifact media type은 `application/json`, `ephemeral`은 항상 true다.
 
@@ -39,4 +37,4 @@
 
 ## Last Updated
 
-2026-09-19 — bounded diagnostic의 `nextAction`.
+inline 예산, artifact 직렬화·원자 저장, 경로 봉쇄나 overflow 진단 계약이 바뀔 때 갱신한다.

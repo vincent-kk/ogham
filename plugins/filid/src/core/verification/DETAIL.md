@@ -17,10 +17,8 @@
 
 ## API Contracts
 
-- `analyzeVerification(input): Promise<VerificationProjectAnalysis>` — adapter evidence를 file analysis와 policy violation으로 조합한다.
-- `evaluateVerificationPolicy(files, contractGroups, projectRoot)` — 15/32와 spec 연결을 평가한다.
-- `findSpecFragmentation(files, contractGroups, projectRoot)` — 겹침, 누락, 알 수 없는 group과 레코드가 말하지 않은 group 선언의 finding을 만든다. `projectRoot`는 message의 경로를 상대 경로로 적는 데만 쓴다.
-- `resolveContractGroups(detailDocuments)` — DETAIL의 안정 acceptance group을 owner별 index로 만든다.
+- cap은 파일 역할별로 적용하며 프로젝트 전체 test-record 수를 제한하지 않는다.
+- 여러 spec의 oracle은 owner DETAIL의 안정 group ID다. 레코드에 없는 선언은 모르는 것으로 남겨야 누락을 PASS나 확정 오류로 오인하지 않는다.
 
 ## Acceptance Criteria
 
@@ -45,4 +43,4 @@
 
 ## Last Updated
 
-2026-09-20 — contract group id를 레코드에서 읽고, 레코드가 말하지 않은 선언을 indeterminate로 보존한다.
+역할별 case cap, spec과 수락 그룹의 연결 판정이나 레코드 부재 처리 정책이 바뀔 때 갱신한다.

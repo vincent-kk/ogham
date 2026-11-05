@@ -15,16 +15,7 @@
 
 ## API Contracts
 
-- `createProjectSnapshot(projectRoot, registry, config): Promise<ProjectSnapshot>` — 동일 scan·validate·plan이 소비하는 snapshot과 config-derived output language 생성.
-- `resolveContext(snapshot, targetPath): ContextResolution` — owner와 leaf-to-root document refs 반환.
-- `findLowestCommonFractal(tree, consumerPaths): FractalNode | null` — owner ancestor 교집합의 가장 깊은 fractal 반환.
-- `createRestructurePlan(snapshot, input): RestructurePlan` — 절대 source/target, 근거, artifact, import rewrite와 decision 상태 산출.
-- `validatePlanPreconditions(snapshot, plan)` / `validatePlanPostconditions(snapshot, plan)` — hash와 exact target·boundary·DAG 검사.
-- `analyzeVerification(input): Promise<VerificationProjectAnalysis>` — 역할, case count, contract link와 certainty 산출.
-- `evaluateRules(input, rules?, options?): RuleEvaluationResult` — 15개 FCA rule 결과 반환.
-- `listScannedFilePaths(projectRoot, options?): Promise<string[]>` — snapshot이 고르는 파일 집합을 평면 목록으로. `core/tree/fractalTree`가 소유한다.
-- facts 표면(`computeResolutionEpoch`, `validateFactsRecord`, `classifyFactsFile`, `selectUnknownFiles`, 저장소 접근자)은 `core/facts` entry point가 소유한다. 이 단계에서 snapshot은 사실을 읽지 않는다 — 분석 경로의 동작은 사실 유무와 무관하다.
-- built-in IDs: `intent-document-contract`, `detail-document-contract`, `organ-no-intentmd`, `entry-point-surface`, `module-entry-point`, `max-depth`, `circular-dependency`, `pure-function-isolation`, `zero-peer-file`, `external-import-boundary`, `spec-document-case-cap`, `test-record-case-cap`, `spec-fragmentation`, `spec-contract-link`, `legacy-criteria-ledger`.
+- facts 표면(`computeResolutionEpoch`, `validateFactsRecord`, `classifyFactsFile`, `selectUnknownFiles`, 저장소 접근자)은 `core/facts` entry point가 소유한다.
 
 ## Acceptance Criteria
 
@@ -46,4 +37,4 @@
 
 ## Last Updated
 
-2026-09-20 — 제출된 사실을 보관하는 `facts` 책임과 평면 경로 목록을 core 계약에 더했다.
+snapshot 증거의 소유권, 생태계 중립성, 불확실성 판정이나 읽기 전용 배치 계획 계약이 바뀔 때 갱신한다.

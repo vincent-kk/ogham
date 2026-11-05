@@ -20,11 +20,9 @@
 
 ## API Contracts
 
-- `validateIntentMd(content)` — INTENT validation result.
-- `validateDetailMd(content, oldContent?)` — append와 acceptance group을 합친 DETAIL validation result.
-- `validateDetailAcceptanceGroups(content)` — 추출된 groups와 document violations.
-- `parseBoundaryExemptions(content)` — 선언된 면책과 document violations. section이 없으면 빈 결과이며 violation도 없다.
-- `splitMarkdownSections(content)` — fence를 제거한 `## ` 단위 section 분해. `extractPathTokens(text)` — 구분자 보유 code span 경로 토큰 추출: 쓰인 형태(말미 `/` 포함)를 보존하고, 말미 `/`만 다른 중복은 등장 순서와 무관하게 디렉터리 표기(`/` 말미)를 우선해 하나로 접는다. snapshot evidence의 stale-path·derivable-structure 검사가 재사용한다.
+- 문서 텍스트만으로 검사하며 소스·filesystem을 조회하지 않는다.
+- 면책 section 부재는 정상이다. 선언된 면책의 이유가 없으면 error로 보존한다.
+- markdown 경로 토큰은 쓰인 철자를 보존한다. 같은 경로에 디렉터리 표기가 있으면 그 표기를 우선하여 파일 존재로 디렉터리 주장이 충족되지 않게 한다.
 
 ## Acceptance Criteria
 
@@ -68,4 +66,4 @@
 
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+문서 필수 섹션·이력·갱신 조건 검사, 경로 토큰 판정이나 경계 면제 파싱 계약이 바뀔 때 갱신한다.

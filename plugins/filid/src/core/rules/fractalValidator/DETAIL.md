@@ -10,22 +10,14 @@
 
 ## API Contracts
 
-- `validateStructure(snapshot, rules?, options?)`는 snapshot-derived `StructureValidationResult`를 반환한다.
-- `validateDependencies(graph)`는 실제 cycle과 graph certainty를 검증한다.
-- 전환 기간의 tree-only 호출은 공개 호환 경계에서만 지원하며 dependency 증거 부재를 `indeterminate` finding으로 반환한다. 새 분석 파이프라인은 snapshot을 전달한다.
+- tree-only 호출은 호환 경계에서만 유지하며 dependency 증거 부재를 indeterminate로 반환한다. containment로 dependency를 추정하지 않는다.
 - validator는 filesystem이나 config를 다시 읽지 않는다.
 
 ## Acceptance Criteria
 
-### AC-validator-graph — 실제 dependency 검증
-
-- 실제 A → B → A edge는 cycle violation을 만든다.
-- 부모-자식 containment만 있는 tree는 dependency cycle을 만들지 않는다.
-
 ### AC-validator-certainty — 억지 PASS 금지
 
 - unresolved dependency가 cycle 결론에 영향을 주면 결과에 indeterminate finding이 남는다.
-- legacy `FractalTree` 입력은 containment를 dependency로 추정하지 않고 dependency graph 부재를 indeterminate finding으로 반환한다.
 - rule evaluator 예외가 발생해도 빈 PASS로 보고되지 않는다.
 
 ### AC-validator-granularity — 중복 없는 결과
@@ -34,4 +26,4 @@
 
 ## Last Updated
 
-2026-07-27
+snapshot 단일 소비, legacy tree 입력 처리나 불확실성 finding 정책이 바뀔 때 갱신한다.

@@ -15,13 +15,8 @@
 
 ## API Contracts
 
-- `createAdapterRegistry(initial?)` — 중복 ID를 거부하고 structure/verification registry를 만든다.
-- `resolveAdapters(projectRoot, adapters, options?)` — returns claims, ownership, unsupported paths, unfollowed links, and diagnostics. `options.requestedPaths` selects explicit candidates; `options.exclude` filters both explicit and discovered paths with the shared path matcher.
-- `AdapterRegistry.registerStructure` / `registerVerification` — ID별 adapter 등록.
-- `AdapterRegistry.selectStructure` / `selectVerification` — detect 없이 explicit ID validation과 등록 candidate 선택만 수행한다.
-- `AdapterRegistry.resolveStructure` / `resolveVerification` — detect confidence가 양수인 adapter를 confidence 내림차순으로 반환.
-- `StructureAdapter`는 source discovery, 따라가지 않은 symlink 보고(선택), adapter별 entry point override 해석, entry point inspection(manifest JSON 판독), framework peer 판정과 entry point 제안을 제공한다. 소스 파일의 내용은 읽지 않는다.
-- `VerificationAdapter`는 이름·경로로 verification file discovery만 제공한다. role, case 수와 contract group id는 사실 레코드의 `verification`에서 온다.
+- structure adapter는 이름·경로·manifest만 판독하고 소스 내용의 사실은 만들지 않는다.
+- verification adapter는 후보 발견만 소유하며 role·case 수·contract group은 facts 레코드에서 온다.
 
 ## Acceptance Criteria
 
@@ -48,4 +43,4 @@
 
 ## Last Updated
 
-2026-07-30 — ownership 해석이 호출자가 지정한 제외 디렉터리 이름을 진단 없이 걸러내는 계약을 추가했다.
+adapter claim의 경합·제외 판정, discovery 증거의 수집 범위나 소스 판독 경계가 바뀔 때 갱신한다.

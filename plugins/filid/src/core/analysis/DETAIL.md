@@ -9,8 +9,7 @@
 
 ## API Contracts
 
-- `buildDependencyGraph`, `detectCycles`, `topologicalSort`, `getDirectDependencies`, `resolveOwningOrganPath`, `buildDAG` — 그래프.
-- `findLowestCommonFractal`, `resolveOwningFractal`, `getAncestorPaths` — 배치 계산.
+공개 함수와 DTO는 진입점에서 확인한다. 분석은 파일을 변경하지 않으며 owner 경계에 대한 증거를 사용한다.
 
 ## Acceptance Criteria
 
@@ -24,4 +23,4 @@
 
 ## Last Updated
 
-2026-07-28 — 중간 계층 fractal 계약을 문서화했다.
+실제 directed cycle, organ 참조의 adjacency 제외나 다중 소비자의 LCA 판정이 바뀔 때 갱신한다.

@@ -32,7 +32,3 @@
 - 소스 파일의 내용을 구문으로 해석 — 그 판단은 레코드에서 온다
 - 동적 구문을 exact로 가장
 - `.gitignore` 문법을 직접 해석하거나 git 부재를 discovery 실패로 취급
-
-## Dependencies
-
-- `../../types/`, `../../lib/` ignore filter, Node filesystem/path APIs

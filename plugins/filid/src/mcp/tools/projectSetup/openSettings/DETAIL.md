@@ -13,19 +13,16 @@
 
 ## API Contracts
 
-- Input: `{ path?: string, waitSeconds?: number }`.
-- Entry point exposes the handler, `OpenSettingsOutput`, and its `SaveSummary` component type so the dispatcher can describe the returned save result. Server startup inputs and page payload types remain internal.
 - Output uses the common envelope; summary preserves saved/closed/pending, URL, message and optional save summary.
-- `SettingsPageState` includes project root, config existence, normalized config v3, built-in rule defaults, diagnostics, and rule-document status.
 - `SaveBody.config` is strict raw config v3; unknown or legacy keys are rejected.
 
 ## Acceptance Criteria
 
 ### AC-open-settings-v2 — State and persistence
 
-- Missing config yields a valid v2 default state.
-- A v1 config is exposed as migrated v2 state with migration diagnostics.
-- A valid save writes v2 and settles the bounded waiter as saved.
+- Missing config yields a valid v3 default state.
+- A v1/v2 config is exposed as migrated v3 state with migration diagnostics.
+- A valid save writes v3 and settles the bounded waiter as saved.
 
 ### AC-open-settings-guard — Local session boundary
 
@@ -33,11 +30,6 @@
 - Wait timeout returns a reusable pending URL.
 - Overlapping calls for one project open one browser tab and use the same server. Failed startup releases the in-flight slot for retry.
 
-## History
-
-- 2026-09-05 — Moved the unchanged settings-session payload behind `project_setup` action `settings`.
-- 2026-07-26 — Moved settings state and saves to config v2.
-
 ## Last Updated
 
-2026-09-05
+설정 서버의 동시 기동·재사용, config 저장이나 bounded 대기 계약이 바뀔 때 갱신한다.

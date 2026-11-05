@@ -19,8 +19,6 @@
 
 ## API Contracts
 
-- `handlePreToolUse(input): Promise<HookOutput>` — 한 operation의 방문, 문서 검증, 구조 가드를 staged pipeline으로 실행한다.
-- `handlePreToolUseBatch(result): Promise<HookOutput>` — shared normalizer의 성공 batch는 전부 순서대로 실행하고 실패 variant는 원래 cwd의 FCA opt-in에 따라 결정한다.
 - Write/Edit 문서 판정과 DETAIL.md 이전 내용 읽기는 현재 host filesystem의 물리 target을 기준으로 하며, 기존 내용은 best-effort로 읽는다. Delete는 마지막 symlink entry를 보존한다.
 - 방문 context와 validator·structure guard 결과를 함께 병합하며, permission은 후자의 판단만 반영한다.
 - batch 결과의 reason과 non-empty additional context는 operation 순서로 결합하며 permission은 deny-wins다.
@@ -69,4 +67,4 @@
 
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+operation 파이프라인 순서, batch deny 집계, Move projection 처리나 ignore 통과 조건이 바뀔 때 갱신한다.

@@ -4,15 +4,12 @@
 
 - config, cache와 content-addressed ephemeral artifact의 host I/O를 소유한다.
 - core의 나머지 계층은 파일시스템을 직접 만지지 않고 이 계층을 통과한다.
-- config는 v2 strict schema이며 v1은 읽을 때 메모리에서만 변환되고 자동으로 기록되지 않는다.
+- config는 v3 strict schema이며 v1/v2는 읽을 때 메모리에서만 변환되고 자동으로 기록되지 않는다.
 - artifact는 임시 자료다. 장기 원장으로 취급하지 않는다.
 
 ## API Contracts
 
-- `loadConfig`, `writeConfig`, `initProject`, `migrateConfigV1`, `validateConfigPatch` — config 수명주기.
-- `getRuleDocsStatus`, `syncRuleDocs`, `loadRuleDocsManifest` — 관리형 규칙 문서 배포.
-- `getCacheDir`, `removeSessionFiles`, prune 게이트 — 세션 캐시.
-- artifact store — 16 KiB 초과 payload의 atomic write와 경로·해시 반환.
+공개 함수는 진입점에서 확인한다. config 저장, 세션 캐시와 ephemeral artifact는 수명이 다른 저장 경계로 유지한다.
 
 ## Acceptance Criteria
 
@@ -27,4 +24,4 @@
 
 ## Last Updated
 
-2026-07-28 — 중간 계층 fractal 계약을 문서화했다.
+config migration의 쓰기 경계, 세션 cache와 임시 artifact의 수명 계약이 바뀔 때 갱신한다.

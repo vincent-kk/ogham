@@ -6,8 +6,7 @@ MCP 서버 번들의 실행 진입점. `startServer()`를 호출해 서버를 �
 
 ## Structure
 
-- `serverEntry.ts` — `#!/usr/bin/env node` shebang을 가진 실행 진입점. `startServer()` 호출과 실패 처리가 전부다.
-- `index.ts` — 의도적으로 비어 있는 배럴. 이 fractal은 공개 심볼을 노출하지 않는다.
+- `index.ts`는 의도적으로 빈 배럴이다. 실행 진입점을 재수출하면 import만으로 서버가 기동하므로 공개 심볼을 노출하지 않는다.
 
 ## Conventions
 
@@ -32,7 +31,3 @@ MCP 서버 번들의 실행 진입점. `startServer()`를 호출해 서버를 �
 - 도구 등록, schema validation, envelope 조립을 여기에 인라인
 - `index.ts`에서 `serverEntry.ts`를 재수출 (import가 곧 기동 부작용이다)
 - 기동 실패를 삼키고 정상 종료 코드로 끝내기
-
-## Dependencies
-
-- `../server/` entry point의 `startServer`, `lib/logger.ts`의 `createLogger`

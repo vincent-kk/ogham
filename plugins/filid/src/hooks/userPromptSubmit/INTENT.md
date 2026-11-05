@@ -10,10 +10,9 @@
 
 ## Conventions
 
-- 오케스트레이터가 `validateCwd` + `isFcaProject`를 단 1회 수행; 비-FCA는 즉시 continue
-- 3줄 output 규약 (첫 프롬프트만): 포인터 / `[filid:lang]` / (선택) Disabled rules
-- `injectContext`의 Gate: `!isFirstInSession && hasPromptContext` → continue
-- branch·spike·harvest 상태는 prompt context 입력이 아님
+- 비-FCA 프로젝트에는 개입하지 않는다. map·turn 갱신은 FCA 방문 전달의 수명만 소유한다.
+- 세션 최초 context는 규칙 포인터와 언어 태그, 필요한 비활성 규칙 요약으로 제한한다. 본문을 복제하면 프롬프트마다 같은 규칙이 누적된다.
+- branch·spike·harvest 상태는 prompt context의 입력이 아니다.
 
 ## Boundaries
 

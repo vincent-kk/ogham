@@ -11,22 +11,11 @@
 
 ## API Contracts
 
-- `processSetup(input: SessionStartInput): HookOutput` — 초기화 결과와 세션 컨텍스트 문자열.
+입출력 형태는 handler에서 확인한다. 초기화 실패는 진단으로 남기되 세션 시작을 차단하지 않는다.
 
 ## Acceptance Criteria
 
-### AC-setup-epoch — 컨텍스트 소실에만 epoch를 리셋한다
-
-- `source`가 `compact`/`clear`이면 delivered·turn·guide·fmap 마커가 제거된다.
-- `resume`/`startup`에서는 기존 전달 기록이 보존된다.
-
-### AC-setup-rule-isolation — 규칙 파일 불가침
-
-- 훅 실행이 `.claude/rules/` 아래 어떤 파일도 생성·수정·삭제하지 않는다.
-
-### AC-setup-nonblocking — 실패해도 통과
-
-- 캐시 경로를 만들 수 없어도 `continue: true`를 반환한다.
+구체적인 동작과 경계값은 이 모듈의 테스트가 고정하므로 별도 수락 그룹을 중복 선언하지 않는다.
 
 ## Boundary Exemptions
 
@@ -36,11 +25,6 @@
 - **Direct import**: allowed
 - **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
 
-## History
-
-- 2026-09-05 — managed rule 배포 소유자를 `project_setup`의 `rules-sync` action으로 갱신했다.
-- 2026-07-28 — 훅 번들 직접 참조 면책을 선언하고 계약을 문서화했다.
-
 ## Last Updated
 
-2026-09-05
+session epoch 초기화 조건, cache 정리나 규칙 배포 비관여 정책이 바뀔 때 갱신한다.

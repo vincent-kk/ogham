@@ -4,12 +4,6 @@
 
 Node 20 filesystem recursion과 StructureAdapter metadata로 `FractalTree`를 만들고 path 관계 탐색을 제공한다.
 
-## Structure
-
-- `treeBuilder/` organ — 순수 관계 조립과 path traversal
-- `scanner/` organ — readdir recursion, adapter metadata와 bottom-up correction
-- `index.ts` — named barrel, 이 fractal의 유일한 공개 표면
-
 ## Conventions
 
 - 순수 관계 조립과 filesystem 접근을 분리해 tree relation 계산의 결정성을 유지한다.

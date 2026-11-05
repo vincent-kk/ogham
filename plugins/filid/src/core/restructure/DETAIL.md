@@ -66,49 +66,19 @@
     - 경계 위반의 신원은 (rule, 소비자 파일, 대상 파일)이고 같은 변환을 거친다. 대상 파일은 규칙 위반의 `importedPath`다. organ 접근 위반도 `importedPath`를 싣는다. `importedPath`가 없는 위반(규칙의 certainty 경고 제외)은 기준선과 비교할 수 없으므로 `findings`에 남긴다.
     - boundary 규칙의 certainty 경고는 finding으로 쓰지 않는다. 대신 관련 `unknownFiles`가 있으면 `dependency-graph-indeterminate` finding 하나가 그 목록을 싣는다. 관련 파일이 없으면 무관한 `unknownFiles`가 있어도 부재 결론(순환 없음, 경계 위반 없음, 보존 import 전부)을 낸다. 존재 결론(찾은 순환·위반)은 `unknownFiles`와 무관하게 보고한다.
 - 모든 validation finding은 경로·specifier를 담은 `message`와 `nextAction`을 싣는다. boundary finding은 규칙 위반의 `message`와 `suggestion`을 쓴다.
-- planner/imports/specifiers/validator는 flat leaf organ이며 한 파일이 한 exported function을 소유한다.
 
 ## API Contracts
 
-- `createRestructurePlan(snapshot, input, readText?): RestructurePlan` — deterministic plan ID, snapshot timestamp, 실행 순서의 moves, alreadyPlaced, unresolved, `unknownFiles`, `baseline`과 summary를 반환한다. `readText`는 관련성 판정의 텍스트 읽기이며 기본값은 `readUnknownFileText`다. 동작은 다음 순서다.
-  1. 첫 계산으로 실행 가능한 후보를 확정한다.
-  2. `orderPlannedMoves`로 순서와 conflict를 정한다.
-  3. 순서가 정해진 move를 넘겨 rewrite를 다시 계산하고, conflict move에 원인별 결정을 붙인다.
-- `planMoveInstruction(snapshot, request, orderedMoves?): MoveInstruction` — 한 request의 normalized source/target, basis, LCA, decision 상태와 `decisions`를 계산한다. `orderedMoves`는 import 요구의 최종 경로와 소유권에만 쓰고 target 계산에는 쓰지 않는다.
-- `describeDecision(reason, context): RestructureDecision` — `move-order-conflict`를 뺀 decision reason 하나의 message와 nextAction.
-- `orderPlannedMoves(moves, snapshot): { order: number[]; conflicts: OrderConflict[] }` — 입력 index 기준 실행 순서와, index 오름차순의 conflict(`{ index, cause, related }`).
-- `markOrderConflict(move, cause, relatedSources): MoveInstruction` — conflict move를 unresolved로 바꾸고 `move-order-conflict` 결정을 원인별 문장으로 붙인다.
-- `buildImportRewrites(snapshot, unit, orderedMoves?): ImportRewriteBuildResult` — `unit`은 `{ sourcePath, targetPath, rewriteTargetPath }`다. 이 unit이 소유한 `required`(제안이 있거나 없는 변경 요구)와 `preserved`를 반환한다. `orderedMoves`가 비면 unit 혼자 실행되는 것으로 본다.
-- `collectPlanReadPaths(snapshot, moves, unknownFilePaths?): string[]` — `readPaths`(source 파일, 소비자, source가 import하는 파일, 관련성 판정이 읽은 `unknownFiles`)를 정렬해 중복 없이 반환한다.
-- `partitionPlanUnknownFiles(snapshot, targets, consumerPaths, readText): { relevant, other, readPaths }` — 계획·precondition·postcondition이 같이 쓰는 관련성 판정. `targets`와 `consumerPaths`는 절대 경로다. `readPaths`는 텍스트를 읽은 파일의 절대 경로다.
-- `readUnknownFileText(projectRoot, relativePath): string | null` — 경로 문자열과 실제 위치가 root 안인 파일의 텍스트. 밖이거나 읽지 못하면 null.
-- `collectPlanBaseline(snapshot): PlanBaseline` — 계획 시점 그래프의 다중 노드 strongly connected component들의 node-path 집합과 경계 위반 신원(rule, 소비자, 대상).
-- `splitByBaseline(snapshot, plan): { findings, preexisting }` — post snapshot의 순환·경계 위반 finding을 기준선과 비교해 나눈다.
-- `collectPlanProbePaths(projectRoot, moves, readPaths): string[]` — `probePaths`(target 경로, source·target 조상 디렉터리의 `INTENT.md`·`DETAIL.md`)에서 `readPaths`와 겹치는 것을 뺀 정렬·중복 없는 목록.
-- `computePlanReadHash(projectRoot, readPaths, probePaths): string` — `readPaths`의 byte와 `probePaths`의 상태(`missing | file | directory`, file이면 내용)로 `readHash`를 계산한다. 계획과 precondition이 같은 함수를 쓴다. 두 목록 모두 `resolveHashFile`의 root containment를 거치므로 경로 문자열이 root 밖이면 읽기 전에 던진다. 이 함수 자체는 symlink를 따라가므로, symlink를 거친 탈출은 호출 전에 막아야 한다: 계획은 그런 probe를 싣지 않고, plan artifact reader는 그런 경로가 있는 artifact를 거절한다.
-- `isPhysicallyWithin(projectRoot, path): boolean` — 경로 위의 symlink를 모두 따라간 실제 위치가 root의 실제 위치 안인지 판정한다. 존재하지 않는 suffix는 그 앞의 링크로 판정하고, 중간 성분이 파일이면(ENOTDIR) 해석되는 가장 가까운 조상으로 판정한다. symlink loop(ELOOP)는 안에 있다고 확인할 수 없으므로 밖으로 본다: reader는 거절하고 planner는 그 probe를 뺀다. `@ogham/cross-platform`의 `canonicalizeTargetPathSync`를 쓴다. entry point로 공개되며 MCP plan artifact reader가 쓴다.
-- `listAncestorDirectories(projectRoot, path): string[]` — path의 부모부터 project root까지의 디렉터리.
-- `isMissingPathError(error): boolean` — ENOENT·ENOTDIR 판정.
-- `isDirectoryReadError(error): boolean` — EISDIR 판정. precondition만 쓴다.
-- `isSymlinkLoopError(error): boolean` — ELOOP 판정.
-- `sortUniquePaths(paths): string[]` — `pathForCompare`로 중복을 없애고 정렬한다.
-- `relocateThroughMoves(path, orderedMoves, fromIndex?): string` — `fromIndex`부터 순서대로 move를 적용한 최종 경로.
-- `stripPathExtension(path): string` — 마지막 세그먼트의 확장자 하나를 제거한 경로. 디렉터리 구분자, dot-prefixed 이름과 dot만으로 이루어진 상대 마커는 건드리지 않는다.
-- `specifierDenotesPath(consumerFile, rawSpecifier, resolvedPath): boolean` — path-like specifier가 stem 기준으로 resolved file을 가리키는지 판정. 제안 합성에만 쓴다.
-- `specifierDenotesDirectoryOf(consumerFile, rawSpecifier, resolvedPath): string | null` — path-like specifier가 resolved file의 엄밀한 상위 디렉터리를 가리키면 그 디렉터리를 반환한다. 제안 합성에만 쓴다.
-- `applySpecifierExtension(candidate, rawSpecifier): string` — 계산된 specifier에 원래 specifier의 확장자 표기를 되돌려 준다.
-- `validatePlanPreconditions(snapshot, plan): PlanValidationResult` — project root가 다르면 아무것도 읽지 않고 `project-root-mismatch` 하나만 반환한다. 같으면 `readPaths`·`probePaths`로 다시 계산한 hash와 `readHash`의 불일치(`snapshot-hash-mismatch`)와 unresolved 요청을 finding으로 반환한다. read path의 조상이 일반 파일이 되거나 사라지거나(ENOTDIR·ENOENT) read path가 디렉터리가 되어도(EISDIR) `snapshot-hash-mismatch`이고, 그 밖의 fs 오류는 던진다.
-- `validatePlanPostconditions(snapshot, plan, readText?): PlanValidationResult` — `moves`와 `alreadyPlaced` 양쪽의 최종 경로, import 요구와 보존 import의 해석 결과, 그리고 post snapshot의 boundary·DAG 불일치를 반환한다. boundary·DAG는 기준선과 비교해 `findings`와 `preexisting`으로 나누고, 관련 `unknownFiles`가 있으면 `dependency-graph-indeterminate`를 낸다. `unknownFiles`의 관련·무관 구분도 싣는다. precondition 결과의 `preexisting`은 언제나 비고, `unknownFiles`는 계획의 source 기준이다.
-- `validateImportRequirements(snapshot, move, requiredLoads): PlanValidationFinding[]` — 한 move의 `affectedImports`와 `preservedImports`를 post snapshot의 해석 결과로 검사한다.
-- `findImportMiss(snapshot, entry, requiredLoads): ImportMiss | null` — 두 종류의 요구가 함께 쓰는 술어. 성립하면 null, 아니면 unresolved 여부와 다른 파일로 해석되는 `currentSpecifier` 참조를 반환한다.
-- `collectRequiredLoads(moves): RequiredLoads` — 최종 경로의 요구에서 소비자별 요구 파일 집합을 한 번 계산한다.
+- `computePlanReadHash` — 두 목록 모두 `resolveHashFile`의 root containment를 거치므로 경로 문자열이 root 밖이면 읽기 전에 던진다. 이 함수 자체는 symlink를 따라가므로, symlink를 거친 탈출은 호출 전에 막아야 한다: 계획은 그런 probe를 싣지 않고, plan artifact reader는 그런 경로가 있는 artifact를 거절한다.
+- `isPhysicallyWithin` — symlink loop(ELOOP)는 안에 있다고 확인할 수 없으므로 밖으로 본다: reader는 거절하고 planner는 그 probe를 뺀다.
+- `validatePlanPreconditions` — project root가 다르면 아무것도 읽지 않고 `project-root-mismatch` 하나만 반환한다. 같으면 `readPaths`·`probePaths`로 다시 계산한 hash와 `readHash`의 불일치(`snapshot-hash-mismatch`)와 unresolved 요청을 finding으로 반환한다. read path의 조상이 일반 파일이 되거나 사라지거나(ENOTDIR·ENOENT) read path가 디렉터리가 되어도(EISDIR) `snapshot-hash-mismatch`이고, 그 밖의 fs 오류는 던진다.
 
 ## Acceptance Criteria
 
 ### AC-restructure-placement — read-only exact placement
 
 - sibling 둘과 consumer 셋은 true LCA 아래 organ, 단일 consumer는 owner 아래 organ으로 계획된다.
-- independent unit은 새 fractal과 intent/detail/entry-point 역할을 가진다.
+- independent unit은 새 fractal과 intent/entry-point 역할을 가진다.
 - unknown contract 또는 의미 이름 부족은 `requiresDecision` unresolved다.
 - planning 전후 project file tree는 동일하다.
 
@@ -172,7 +142,6 @@
 - 다른 move가 source 안쪽에 착지해도, 그 target 밖에 남은 원본은 `source-still-present`다.
 - surface가 `unsupported`인 요구 entry point는 `entry-point-surface-unsupported`다.
 
-
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+배치 근거, 이동 순서, import 보존 요구나 사전·사후 검증 한계가 바뀔 때 갱신한다.

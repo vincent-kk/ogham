@@ -9,22 +9,13 @@
 
 ## API Contracts
 
-- `resolveOwningFractal(tree, targetPath): FractalNode | null` — project 밖, unknown path 또는 owner chain 누락은 null.
-- `findLowestCommonFractal(tree, consumerPaths): FractalNode | null` — 모든 consumer가 해석될 때만 deepest common fractal 반환.
-- `getAncestorPaths(tree, nodePath): string[]` — canonical self-to-root structural path를 반환하며 portable alias를 허용.
+- 알 수 없는 consumer가 하나라도 있으면 임의 root로 대체하지 않는다. 누락된 owner를 추정하면 잘못된 공통 배치를 확정하게 된다.
+- 반환 경로는 snapshot의 canonical 경로이며 host별 문자열 prefix로 ownership을 추정하지 않는다.
 
 ## Acceptance Criteria
 
-### AC-lca-all-consumers — 전체 교집합
-
-- sibling 둘은 공통 부모, 세 번째가 다른 branch면 root를 반환한다.
-- 단일 consumer는 owner fractal을 반환하고 organ 자체를 반환하지 않는다.
-
-### AC-lca-portable-owner — host 독립 owner
-
-- Windows separator/case alias와 POSIX path를 각각 같은 canonical owner로 해석한다.
-- project 밖 또는 하나라도 unknown인 consumer 집합은 null이다.
+구체적인 동작과 경계값은 이 모듈의 테스트가 고정하므로 별도 수락 그룹을 중복 선언하지 않는다.
 
 ## Last Updated
 
-2026-07-27 — portable owner와 true multi-consumer lowest common fractal 계약.
+소비자 owner의 공통 조상 판정, 미확정 owner 처리나 portable path identity가 바뀔 때 갱신한다.

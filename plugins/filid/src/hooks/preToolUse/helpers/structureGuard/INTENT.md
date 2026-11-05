@@ -10,15 +10,9 @@ Write/Edit이 디렉토리 구조를 위반할 가능성을 PreToolUse 시점에
 
 ## Conventions
 
-- `tool_name`이 Write/Edit이 아니면 즉시 continue
-- `file_path`/`path` 둘 다 체크 (도구별 입력 키 호환)
-- content는 `tool_input.content` (Write) 또는 `new_string` (Edit) 우선순위로 선택
-- organ-중첩 경고는 생성에만 적용: 기존 파일 편집, INTENT.md/DETAIL.md 작성(sub-fractal 선언), organ 하위에 이미 선언된 sub-fractal이 있는 경로는 제외
-- 결과 파트:
-  - `[filid:info] structure-guard:` — 재분류 안내 (`checkIntentMdReclassification` 결과)
-  - `[filid:warn] structure-guard:` — 위반 경고 (`checkOrganSubdirectory` + `checkCircularImports`)
-- 번호 매기기는 각 블록 내에서 `${i + 1}. ` 형식
-- 경고/안내 둘 다 없으면 `{ continue: true }` (추가 컨텍스트 없음)
+- 이 단계는 경고만 생성하며 permission을 소유하지 않는다. 상위 orchestrator가 문서 gate와 결과를 합친다.
+- organ 중첩 경고는 새 디렉터리 생성에만 적용한다. 기존 파일 편집과 문서로 선언한 nested fractal까지 막으면 정상 작업에 과잉 경고가 된다.
+- 도구별 file_path/path와 content/new_string 입력을 같은 검사로 연결해 host 표기 차이로 위험 검사가 달라지지 않게 한다.
 
 ## Boundaries
 

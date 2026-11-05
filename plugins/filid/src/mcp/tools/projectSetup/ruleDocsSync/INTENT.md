@@ -4,11 +4,6 @@
 
 `project_setup`의 rules action을 받아 manifest에 등록된 managed rule 문서를 현재 host의 project rule target에 배포·제거한다. `status`, `manifest`, `sync` 세 child action만 가지며 project source와 config는 수정하지 않는다.
 
-## Structure
-
-- 입력 경계와 action 분기는 `ruleDocsSync.ts` 가 소유하고, `utils/` organ은 방어적 입력 정규화와 manifest 대조만 맡는다.
-- 배럴은 `handleRuleDocsSync` 와 입출력 타입만 노출한다.
-
 ## Conventions
 
 - 배포 상태의 단일 진실 원천은 host target 파일시스템이다. config에 별도 추적 상태를 두지 않는다.
@@ -34,7 +29,3 @@
 - SessionStart / UserPromptSubmit 훅에서 호출
 - `templates/rules/manifest.json`에 등록되지 않은 파일 복사
 - plugin root 미해석을 빈 manifest의 `ok`로 보고
-
-## Dependencies
-
-- `core/infra/configLoader` entry point (`getRuleDocsStatus`, `loadRuleDocsManifest`, `resolvePluginRoot`, `syncRuleDocs`), `constants/mcpContracts.ts`

@@ -4,13 +4,6 @@
 
 동일한 `ProjectSnapshot`에서 규칙 평가와 실제 dependency graph 검증을 조합해 구조 finding을 반환한다.
 
-## Structure
-
-- `validateStructure.ts` — snapshot 전체 규칙을 한 번 평가한다.
-- `validateDependencies.ts` — snapshot dependency graph의 cycle과 certainty를 검증한다.
-- `validateNode.ts` — node 단위 호환 검증을 제공한다.
-- `index.ts` — 공개 진입점을 구성한다.
-
 ## Conventions
 
 - tradeoff 우선순위는 1. 증거 보존 2. 중복 없는 평가 3. 이전 호출자 호환이다.

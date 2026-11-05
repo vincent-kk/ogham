@@ -11,10 +11,7 @@
 
 ## API Contracts
 
-- `scanProject(rootPath, options): Promise<FractalTree>` — adapter-aware read-only tree scan.
-- `classifyNode(input): NodeType` — language-neutral priority classification.
-- `buildFractalTree(entries): FractalTree` — node entries에서 immutable-consumer tree를 조립.
-- `findNode`, `getAncestors`, `getDescendants`, `getFractalsUnderOrgans` — path 관계 탐색.
+공개 함수와 DTO는 진입점에서 확인한다. tree는 계층·소유권 증거이며 import dependency를 대신하지 않는다.
 
 ## Acceptance Criteria
 
@@ -30,4 +27,4 @@
 
 ## Last Updated
 
-2026-07-26 — adapter evidence를 소비하는 language-neutral tree 계약을 정의했다.
+tree의 경로 identity, 분류 증거나 owner·parent 관계의 계약이 바뀔 때 갱신한다.

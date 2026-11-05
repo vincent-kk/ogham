@@ -9,7 +9,7 @@
 
 ## API Contracts
 
-- `hooks.json` — 이벤트명 → matcher → command·timeout 매핑.
+등록 형식과 이벤트별 값은 canonical hook 설정에서 확인한다. host별 파생 매니페스트는 compiler가 소유한다.
 
 ## Acceptance Criteria
 
@@ -19,4 +19,4 @@
 
 ## Last Updated
 
-2026-07-28 — 중간 계층 fractal 계약을 문서화했다.
+등록하는 lifecycle 이벤트나 `hooks.json`과 파생 매니페스트의 소유 관계가 바뀔 때 갱신한다.

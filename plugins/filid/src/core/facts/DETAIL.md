@@ -80,40 +80,17 @@
 - 같은 파일에 **tool 등급 레코드가 저장되면 pending을 폐기한다.** 남겨 두면 나중의 두 번째 attested 제출이 아무도 다시 읽지 않은 주장을 되살려 tool 레코드를 덮는다.
 - 축소 탐지의 "같은 도구·새 epoch" 면제는 **`resolution-changed`에만** 적용한다. epoch는 문자열이 어디로 해석되는지를 바꾸지, 그 문자열이 참조인지 아닌지를 바꾸지 않는다. 면제를 `coverage-shrank`까지 넓히면 무관한 파일 하나가 늘어난 것만으로 도구의 누락이 보이지 않게 된다 — 트리는 늘 조금씩 움직이므로 사실상 상시 면제다.
 
-## API Contracts
-
-- `listScannedFilePaths`와 `scanFileSetOptions`는 이 fractal이 소유하지 않는다. `core/tree/fractalTree`의 entry point에서 가져온다 — 규칙의 정본을 scan 쪽에 한 벌만 두기 위해서다.
-- `readProjectFacts(projectRoot, config): Promise<ProjectFacts>` — 지금 트리에 대해 저장소가 무엇을 아는지 한 번에 읽는다: 범위, 스캔된 경로, 저장소 경로, 파일별 레코드, shard의 CAS token, 현재 epoch. **읽기 전용**이다 — epoch snapshot을 쓰는 것은 drift를 세는 쪽의 일이고 분석 경로가 그것을 해서는 안 된다. `config`를 인자로 받는 이유도 같다: snapshot을 만드는 쪽은 이미 config를 들고 있고, 여기서 다시 읽으면 한 호출 안에서 설정이 두 번 읽혀 서로 다를 수 있다.
-- 조직: `store/`는 shard의 입출력이고 `read/`는 그것을 현재 트리와 맞춰 한 장의 그림으로 만드는 자리다. 분석(`core/projectSnapshot`)과 도구(`mcp/tools/facts`)가 **같은 함수**로 읽어야 두 쪽이 다른 사실을 보지 않는다.
-- `computeResolutionEpoch(projectRoot, scannedPaths, resolutionInputPaths, resolutionAliases): ResolutionEpochSnapshot` — epoch와 그것을 만든 입력을 함께 돌려준다. Omitted aliases retain an empty list for existing callers; `readProjectFacts` supplies the loaded project's aliases.
-- `diffEpochSnapshots(previous, current): EpochDifference` — `added`·`removed`·바뀐 해석 입력. `previous`가 null이면 셋 다 빈 목록이며 추측하지 않는다.
-- `resolveFactsScope(config): FactsScope` — `facts.covers`를 선언했으면 그것이 범위이고(`source: 'config'`), 없으면 adapter의 소스 확장자로 만든 기본 범위다(`source: 'default'`). 서버는 프로젝트 설정을 쓰지 않으므로, 선언이 없는 것을 "아무것도 덮지 않음"으로 읽으면 facts 이전의 모든 프로젝트가 도구 안에서 빠져나올 길 없이 분석 불가가 된다. `declared`는 **유효 범위가 비었을 때만** false이고, 그것은 `covers: []`를 명시한 프로젝트 — 참조 분석을 원하지 않는다는 선언 — 뿐이다.
-- `readFactsStore(directory)` / `writeFactsShardFile(directory, shardFileName, entries, expectedDigest)` — 레코드 key는 프로젝트 상대 경로의 digest다. 경로에서 이름을 직접 만들면 구분자와 길이 한계가 그대로 조작면이 된다. 쓰기는 방금 쓴 bytes의 digest를 돌려주고 CAS 패배에는 `null`을 돌려준다 — 같은 호출의 다음 batch가 이어받을 token을 직렬화 결정이 있는 자리에서만 만들기 위해서다(밖에서 다시 hash하면 직렬화가 두 벌이 된다).
-- `createDeclaredInputHasher(projectRoot)` — 호출당 memo. 저장소 전체 배치는 같은 manifest를 수천 번 선언한다.
-- `readSubmissionFile(projectRoot, filePath)` · `parseSubmittedRecords(entries)` — 신뢰 경계. 전자는 거부 사유만, 후자는 JSON pointer만 돌려준다.
-- `validateFactsRecord(context, facts, pointer): FactsValidationResult` — 레코드 단위 거부와 참조 단위 거부를 구분한다.
-- `classifyFactsFile(evidence, currentEpoch)` · `selectUnknownFiles(states)` — 순수 함수. 후자는 그래프의 `UnknownFile { path, causes }`를 그대로 돌려주어 facts발 unknown과 그래프발 unknown이 번역 없이 합쳐진다.
-- `adjudicateItem(item, decision, actor)` — 순수 함수. 상태 표의 한 셀을 적용하고 다음 행동을 함께 돌려준다.
-- `isOpenAdjudication(state)` — 항목이 아직 actor를 기다리는가. `status`의 목록, 파일의 `uncertain` 판정, 레코드가 닫을 수 있는 대상이 모두 같은 두 상태를 뜻하므로 정본을 한 곳에 둔다.
-- `compareReferences(candidate, stored)` — 순수 함수. 동일성은 `(sourceText ?? specifier, kind)`와 해석이다.
-- `selectValidReferences(recordEdges, page, path)` — 레코드 ∪ adopt. snapshot이 의존성 그래프의 입력으로 읽는다.
-- `computeLineDigest(contents, reference)` · `readAdjudicationTable(directory)` · `writeAdjudicationPages(...)` — 부속 표의 만료 key와 입출력.
-- `writeShardPages(directory, shards, updates, shardFileName, damaged)` — 부속 표와 pending 저장물이 함께 쓰는 배치 쓰기. shard당 한 번 쓰고, CAS 패배를 `conflicted` 경로 목록으로, 실제로 쓴 shard를 새 token과 함께 `shards`로 돌려준다(다음 batch가 이어받을 자리). `damaged`에 실린 shard는 아예 쓰지 않고 그 shard로 갈 페이지 전부를 결과의 `damaged` 목록으로 돌린다 — 읽을 수 없는 shard를 평범한 쓰기가 이 batch가 아는 페이지만으로 갈아치우면, 읽지 못한 나머지 항목의 판정이 조용히 사라진다. `conflicted`와 갈라 둔 것은 재시도로 나을 수 없는 손상을 재시도로 낫는 CAS 패배처럼 알리지 않기 위해서다 — 호출자는 `damaged` 목록을 `facts-judgements-unreadable` 진단으로 돌려 `discard-damaged`를 가리킨다. 그런 shard를 비우는 것은 `discard-damaged` 하나뿐이다. 두 저장물이 같은 모양이므로 배치 규칙과 이 손상 shard 배치 불변도 한 벌만 둔다 — 갈라지면 한쪽만 고쳐진다.
-- `readPendingStore(directory)` · `findUnaccountedLines(lines, facts)` · `comparePendingEdges(pending, submitted)` — attested 경로의 읽기·계정·확인 비교. 모두 순수하거나 읽기 전용이다.
-- `writeExtractionList(path, relativePaths)` — 추출 대상 목록을 줄 단위로 원자적 치환. 개행·NUL이 든 이름은 줄 단위 파일이 표현하지 못하므로 목록에서 빼고 개수만 센다.
-- `recordEpochDrift(path, newEpoch | null)` — 연속으로 서로 다른 새 epoch를 통보한 횟수. 성공한 제출이 초기화한다.
-
-## Design Decisions
+### Design Decisions
 
 - **스키마는 모든 층에서 `strict`다.** 모르는 key를 조용히 버리면 철자가 틀린 `resolved`가 신호 없이 그래프를 좁힌다 — §2.4가 금지하는 조용한 축소다. 거부는 JSON pointer를 주므로 고칠 수 있고, 앞으로의 필드 추가는 `schemaVersion`이 맡는다.
 - **schema 검사는 문서 전체가 아니라 항목마다 한다.** 레코드 하나가 틀렸다고 저장소 전체 배치를 버리면 다음 행동이 수천 개의 멀쩡한 레코드까지 덮어 P5를 어긴다.
 - **`line`은 거부 사유가 아니다.** 문자열이 파일에 있으면 참조는 남고, 보고된 줄에 없을 때만 `line`을 비우고 모든 출현 줄을 `candidateLines`에 담는다. `line`과 `candidateLines`는 받아들인 뒤 서버 소유이므로 제출값을 믿지 않고 다시 쓴다.
 - **줄바꿈을 품은 `sourceText`는 연속한 줄에 걸쳐 찾는다.** specifier가 line continuation(`\`+줄바꿈)을 지나면 공급자가 보고하는 원문이 두 줄 이상이다. 한 줄 안에서만 찾으면 그 참조는 다시 제출할 때마다 `REFERENCE_ABSENT`가 되어 에이전트가 풀 수 없는 거부가 된다. 찾는 문자열과 파일을 같은 줄바꿈 규칙(`\r\n`·`\r`·`\n`)으로 나눠 첫 조각은 줄의 끝, 가운데 조각은 줄 전체, 마지막 조각은 줄의 시작과 맞춘다. 보고하는 줄은 시작 줄이고, 어느 줄에서도 맞지 않으면 그대로 거부다.
 - **epoch 흔들림 계수는 프로젝트별로 디스크에 남긴다.** `submit`에 actor가 없어 서버가 호출자를 식별할 방법이 없으므로 프로젝트가 정직한 단위다. 서버 메모리에 두면 세션마다 일어나는 MCP 재시작이 무한 재시도를 막는 장치를 조용히 초기화한다.
-- **레코드 선언 입력은 epoch에서 뺐다.** 넣어 두면 레코드를 받아들이는 것이 다음 epoch를 움직여, 분할 제출의 두 번째 배치가 첫 배치가 옮긴 epoch에 거부된다. 세 번 반복하면 `facts-tree-unstable`이 되고 그 다음 행동은 거짓이다(트리는 움직이지 않았다). 레코드마다 자기 선언을 검사하면 같은 보장을 유지하면서 무효화 범위도 그 파일을 선언한 레코드로 좁아진다.
+- **레코드 선언 입력은 epoch에 넣지 않는다.** 넣어 두면 레코드를 받아들이는 것이 다음 epoch를 움직여, 분할 제출의 두 번째 배치가 첫 배치가 옮긴 epoch에 거부된다. 세 번 반복하면 `facts-tree-unstable`이 되고 그 다음 행동은 거짓이다(트리는 움직이지 않았다). 레코드마다 자기 선언을 검사하면 같은 보장을 유지하면서 무효화 범위도 그 파일을 선언한 레코드로 좁아진다.
 - **기본 해석 입력 목록은 상수 한 벌이다.** conventions pack(§7)이 이 자료의 정본이 될 자리이고, pack을 만드는 것은 뒤 단계다. 그때 이 상수는 pack의 기본값으로 옮겨 간다.
 
-## Declared Limits
+### Declared Limits
 
 - 공급자가 선언하지 않은 프로젝트 밖 입력, git이 무시하는 생성 파일, lockfile이 바뀌지 않은 `node_modules` 내부 변경은 epoch에 잡히지 않는다.
 - 줄 단위로 묶인 판정은, 그 줄이 그대로인 채 다른 줄의 블록 주석 구분자가 사라져 주석이던 참조가 코드가 되는 경우를 놓친다.
@@ -121,6 +98,20 @@
 - 축소 탐지는 문자열을 센다. 같은 따옴표 문자열이 **주석 안에** 남아 있으면 출현 수가 실제 import 수보다 커져 항목이 열린다 — 정당한 편집인데 두 actor의 판정을 요구하는 경우다. 줄 번호로 대조하는 대안은 편집마다 번호가 움직여 더 나쁘다.
 - `kind`는 type-only import와 value import를 구분하지 않는다. 도구마다 type-only를 보고하는지가 달라 그 차이는 독립 비교에서만 드러난다.
 - 한 도구가 체계적으로 빠뜨리는 참조는 그 도구만으로는 드러나지 않는다.
+
+## API Contracts
+
+- `listScannedFilePaths`와 `scanFileSetOptions`는 이 fractal이 소유하지 않는다. `core/tree/fractalTree`의 entry point에서 가져온다 — 규칙의 정본을 scan 쪽에 한 벌만 두기 위해서다.
+- `readProjectFacts` — 지금 트리에 대해 저장소가 무엇을 아는지 한 번에 읽는다: 범위, 스캔된 경로, 저장소 경로, 파일별 레코드, shard의 CAS token, 현재 epoch. **읽기 전용**이다 — epoch snapshot을 쓰는 것은 drift를 세는 쪽의 일이고 분석 경로가 그것을 해서는 안 된다. `config`를 인자로 받는 이유도 같다: snapshot을 만드는 쪽은 이미 config를 들고 있고, 여기서 다시 읽으면 한 호출 안에서 설정이 두 번 읽혀 서로 다를 수 있다.
+- 조직: `store/`는 shard의 입출력이고 `read/`는 그것을 현재 트리와 맞춰 한 장의 그림으로 만드는 자리다. 분석(`core/projectSnapshot`)과 도구(`mcp/tools/facts`)가 **같은 함수**로 읽어야 두 쪽이 다른 사실을 보지 않는다.
+- `computeResolutionEpoch` — 기존 호출자와의 호환성을 위해 aliases를 생략하면 빈 목록을 사용한다.
+- `resolveFactsScope` — `facts.covers`를 선언했으면 그것이 범위이고(`source: 'config'`), 없으면 adapter의 소스 확장자로 만든 기본 범위다(`source: 'default'`). 서버는 프로젝트 설정을 쓰지 않으므로, 선언이 없는 것을 "아무것도 덮지 않음"으로 읽으면 facts 이전의 모든 프로젝트가 도구 안에서 빠져나올 길 없이 분석 불가가 된다. `declared`는 **유효 범위가 비었을 때만** false이고, 그것은 `covers: []`를 명시한 프로젝트 — 참조 분석을 원하지 않는다는 선언 — 뿐이다.
+- `readFactsStore` / `writeFactsShardFile` — 레코드 key는 프로젝트 상대 경로의 digest다. 경로에서 이름을 직접 만들면 구분자와 길이 한계가 그대로 조작면이 된다. 쓰기는 방금 쓴 bytes의 digest를 돌려주고 CAS 패배에는 `null`을 돌려준다 — 같은 호출의 다음 batch가 이어받을 token을 직렬화 결정이 있는 자리에서만 만들기 위해서다(밖에서 다시 hash하면 직렬화가 두 벌이 된다).
+- `createDeclaredInputHasher` — 호출당 memo. 저장소 전체 배치는 같은 manifest를 수천 번 선언한다.
+- `readSubmissionFile` · `parseSubmittedRecords` — 신뢰 경계. 전자는 거부 사유만, 후자는 JSON pointer만 돌려준다.
+- `isOpenAdjudication` — 항목이 아직 actor를 기다리는가. `status`의 목록, 파일의 `uncertain` 판정, 레코드가 닫을 수 있는 대상이 모두 같은 두 상태를 뜻하므로 정본을 한 곳에 둔다.
+- `writeShardPages` — 부속 표와 pending 저장물이 함께 쓰는 배치 쓰기. shard당 한 번 쓰고, CAS 패배를 `conflicted` 경로 목록으로, 실제로 쓴 shard를 새 token과 함께 `shards`로 돌려준다(다음 batch가 이어받을 자리). `damaged`에 실린 shard는 아예 쓰지 않고 그 shard로 갈 페이지 전부를 결과의 `damaged` 목록으로 돌린다 — 읽을 수 없는 shard를 평범한 쓰기가 이 batch가 아는 페이지만으로 갈아치우면, 읽지 못한 나머지 항목의 판정이 조용히 사라진다. `conflicted`와 갈라 둔 것은 재시도로 나을 수 없는 손상을 재시도로 낫는 CAS 패배처럼 알리지 않기 위해서다 — 호출자는 `damaged` 목록을 `facts-judgements-unreadable` 진단으로 돌려 `discard-damaged`를 가리킨다. 그런 shard를 비우는 것은 `discard-damaged` 하나뿐이다. 두 저장물이 같은 모양이므로 배치 규칙과 이 손상 shard 배치 불변도 한 벌만 둔다 — 갈라지면 한쪽만 고쳐진다.
+- `writeExtractionList` — 추출 대상 목록을 줄 단위로 원자적 치환. 개행·NUL이 든 이름은 줄 단위 파일이 표현하지 못하므로 목록에서 빼고 개수만 센다.
 
 ## Acceptance Criteria
 
@@ -154,4 +145,4 @@
 
 ## Last Updated
 
-2026-09-20 — 사실 저장소, epoch, 제출 검사와 파일 상태 모델의 최초 계약. 독립 검토를 반영해 epoch를 기본 입력으로 좁히고, 저장소를 shard로 나누고, 여는 모든 파일을 non-blocking으로 만들었다.
+사실 수용, epoch 결속, 판정 복구 정책이나 선언된 검증 한계가 바뀔 때 갱신한다.

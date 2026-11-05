@@ -1,11 +1,12 @@
+
+
 ## Purpose
 
 The settings frontend opened by `project_setup settings`. It edits v3 adapter selection, rule overrides, path exclusions, language, structure settings, and current host rule-document state in one form.
 
 ## Structure
 
-- `index.html` 이 폼 마크업과 상태 주입 슬롯 `__FILID_STATE__` 를 가진다 — 서버는 이 슬롯 하나로만 상태를 넘긴다.
-- 스타일은 cennad 설정 페이지의 디자인 언어(다크 OLED 단색 토큰)를 따르고, `scripts/app.js` 가 prefill·동적 렌더·검증·저장 POST 를 전담한다.
+- `index.html`의 상태 주입 슬롯은 서버와 페이지가 상태를 교환하는 유일한 경계다. 페이지는 minify만 거치는 독립 스크립트라 공유 모듈을 import하지 않는다.
 
 ## Conventions
 

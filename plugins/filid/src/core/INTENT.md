@@ -29,7 +29,3 @@
 - 소스 파일을 구문으로 해석하거나 어떤 명령도 실행
 - project source 이동, import rewrite 또는 review fix 실행
 - unsupported/indeterminate를 PASS로 변환
-
-## Dependencies
-
-- `../types/`, `../constants/`와 주입된 adapter registry

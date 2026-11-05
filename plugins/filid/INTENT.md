@@ -1,3 +1,5 @@
+
+
 ## Purpose
 
 `@ogham/filid` 1.0 패키지 루트. 문서 계약, FCA 구조·DAG 검사, 읽기 전용 배치 계획과 변경 범위 코드 리뷰·독립 검증(cross-review)을 제공하는 독립 플러그인이다.
@@ -11,7 +13,6 @@
 ## Conventions
 
 - 판단 우선순위: 1. 증거의 확실성 2. FCA 경계 보존 3. 작은 응답과 이식성
-- 빌드: `clean → version:sync → rules → pages → mcp → hooks → compile-plugin`
 - 현재 생태계 리터럴은 `src/adapters/ecmascript/` 안에만 둔다.
 - spec-document는 15, test-record는 32 cases cap을 적용한다.
 
@@ -35,8 +36,3 @@
 - MCP에서 파일 이동, import rewrite, commit, push, PR 생성 수행
 - MCP 서버가 소스 파일을 해석 — 토큰화, AST 구축, 모듈 해석 규칙 흉내
 - Seiri나 특정 생태계 parser를 core runtime dependency로 요구
-
-## Dependencies
-
-- 런타임: MCP SDK, Zod, Ogham 공통 host·artifact 도구
-- 개발: Node.js ≥20, TypeScript, esbuild, Vitest, Playwright, Yarn workspaces

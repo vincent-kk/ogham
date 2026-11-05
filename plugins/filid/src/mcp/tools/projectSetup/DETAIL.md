@@ -11,26 +11,12 @@
 
 ## API Contracts
 
-| Action           | Input                               | Delegation                   | Payload                                |
-| ---------------- | ----------------------------------- | ---------------------------- | -------------------------------------- |
-| `init`           | `path?`, `language?`, `adapterIds?` | project initialization child | created/config path summary            |
-| `rules-status`   | `path`                              | rule-doc status child        | action/count summary + raw data        |
-| `rules-manifest` | `path`                              | rule-doc manifest child      | action/count summary + raw data        |
-| `rules-sync`     | `path`, `selections?`, `resync?`    | rule-doc sync child          | action/change-count summary + raw data |
-| `settings`       | `path?`, `waitSeconds?`             | settings-session child       | saved/closed/pending summary           |
+- 각 action은 기존 child 결과의 의미를 보존한다. settings에는 host abort signal을 전달해 종료된 호출의 대기가 남지 않게 한다.
 
 ## Acceptance Criteria
 
-### AC-project-setup-dispatch — action별 단일 위임
-
-- 각 action은 정확히 한 child entry point 또는 handler를 호출한다.
-- rules action은 각각 `status`, `manifest`, `sync`로 한 번만 매핑된다.
-
-### AC-project-setup-payload — 기존 payload 보존
-
-- action을 제외한 입력과 child 결과가 기존 setup 도구 계약과 동일하다.
-- settings action은 host abort signal을 그대로 전달한다.
+구체적인 동작과 경계값은 이 모듈의 테스트가 고정하므로 별도 수락 그룹을 중복 선언하지 않는다.
 
 ## Last Updated
 
-2026-09-05
+action별 경로 기본값, config·규칙 쓰기 범위나 잘못된 입력의 복구 안내가 바뀔 때 갱신한다.

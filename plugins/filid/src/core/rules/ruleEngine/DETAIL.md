@@ -30,9 +30,8 @@
 
 ## API Contracts
 
-- `loadBuiltinRules(overrides?, additionalAllowed?, organNames?): Rule[]` — config-bound canonical rule roster. 위치 인자이며, 3번째·4번째 자리는 어댑터가 사실을 소유하게 되어 무시된다.
-- `evaluateRule(rule, context): RuleViolation[]` — 단일 rule 결과 또는 indeterminate finding.
-- `evaluateRules(snapshot, rules?, options?): RuleEvaluationResult` — scope/granularity에 맞춘 전체 결과.
+- config는 canonical roster의 override이며 누락된 ID의 기본 의미를 바꾸지 않는다.
+- 공개 평가 경계는 check 예외를 불확실성 finding으로 보존한다. 예외를 빈 결과로 바꾸면 PASS를 조작하게 된다.
 
 ## Acceptance Criteria
 
@@ -88,4 +87,4 @@
 
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+규칙 roster·severity, config 면제, 소비자 경계 판정이나 실패 시 finding 정책이 바뀔 때 갱신한다.

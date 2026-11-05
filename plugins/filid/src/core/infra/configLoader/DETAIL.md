@@ -25,37 +25,15 @@
 - 레이어를 명시한 sync는 선택한 레이어에 먼저 쓴 다음 반대편 레이어의 `filid_` 소유 문서를 회수한다. 순서가 뒤집히면 중간 실패가 규칙이 어느 레이어에도 없는 상태를 남긴다. 레이어를 명시하지 않은 호출은 배치를 결정한 적이 없으므로 반대편을 건드리지 않는다.
 - required rule drift는 복구하고 optional rule drift는 명시적 resync에서만 덮어쓴다.
 - template 또는 plugin root를 읽지 못하면 throw 대신 진단과 skipped 상태로 저하한다.
+- 작은 파일이 많은 PR에서 액터 증가를 억제하려 자동 파일 상한과 전체 그룹 예산을 사용하며, 명시한 파일·churn 상한은 보존한다.
+- 저장소가 review effort와 그룹 한도를 조정하되 group과 chunk는 같은 churn 상한을 공유한다. 서로 다른 상한이 oversized unit을 만들기 때문이다.
+- 저장소별 제외 이름은 config에 선언한다. 내장 제외 집합에 저장소별 이름을 넣으면 같은 이름을 코드로 쓰는 다른 저장소의 증거가 사라지므로 생태계 관례만 내장한다. 저장소마다 다른 제외 대상은 열린 집합으로 유지한다.
+- 빌드 산출물 경로는 config가 선언한다. dirty worktree의 소스·생성물 구분은 프로젝트마다 다르고, gitignore는 커밋되는 산출물을 설명하지 못하기 때문이다.
+- 설정 페이지의 레이어 선택을 rule 문서 배포에도 사용한다. 같은 값을 다시 묻지 않기 위해 config와 배포 채널을 같은 축으로 유지한다.
+- 기본 severity는 rule roster와 같은 정본을 사용한다. 기본 config가 별도 severity 집합을 소유하지 않는다.
 
 ## API Contracts
 
-```ts
-interface FilidConfigV3 {
-  version: '3.0';
-  language?: string;
-  ignore?: string[];
-  adapters: { mode: 'auto' | 'explicit'; enabled: string[] };
-  rules: Record<string, RuleOverride>;
-  review?: {
-    effort?: 'auto' | 'low' | 'medium' | 'high';
-    autoLowEffortGroupThreshold?: number;
-    groupChurnLimit?: number;
-    groupFileLimit?: number;
-    maxGroups?: number;
-    highRiskPaths?: string[];
-    planChurnLimit?: number;
-    concurrency?: number;
-    lockfiles?: string[];
-    generatedPaths?: string[];
-  };
-  structure?: {
-    maxDepth?: number;
-    organNames?: string[];
-    allowedPeers?: AllowedPeerOverride[];
-    entryPointOverrides?: Record<string, string[]>;
-    excludeFromScan?: string[];
-  };
-}
-```
 
 - `loadConfig(projectRoot)` — normalized v3 config from v1/v2/v3 layers, warnings(`{ message, key }`), and diagnostics. Raw file validation permits rule and allowed-peer string shorthand; consumers receive object forms.
 - `review`의 숫자 필드는 integer·positive, effort는 `auto | low | medium | high`, lockfile은 비어 있지 않은 basename 문자열 목록이다. 위반은 기존 config validation error 경로를 따르고, 생략한 값은 review constants에서 채운다.
@@ -142,16 +120,6 @@ interface FilidConfigV3 {
 - **Direct import**: allowed
 - **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
 
-## History
-
-- 2026-09-06 — 작은 파일이 많은 PR의 액터 증가를 완화하기 위해 자동 파일 상한과 선택 전체 그룹 예산을 도입했다. 명시한 파일·churn 상한은 보존한다.
-- 2026-09-04 — cross-review의 review effort와 deterministic grouping 한도를 저장소가 조정할 수 있게 했다. group과 chunk가 서로 다른 상한을 가지면 oversized unit이 생기므로 churn 한도는 하나의 설정으로 공유한다.
-- 2026-07-30 — 스캔 제외 디렉터리를 config가 선언한다. 내장 제외 집합은 생태계 관례를 담는 자리이므로 저장소별 이름(`skills` 등)을 거기 넣으면 같은 이름을 실제 코드로 쓰는 다른 저장소의 증거가 조용히 사라진다. 제외 대상은 저장소마다 다른 열린 집합이라 `additional-*` 계열 키로 받는다.
-- 2026-07-29 — 빌드 산출물 경로를 config가 선언한다. merge-track이 dirty worktree를 소스와 생성물로 가르려면 판정 근거가 프로젝트마다 달라 하드코딩할 수 없고, `.gitignore`는 커밋되는 산출물을 설명하지 못한다.
-- 2026-07-29 — rule 문서 배포 레이어를 config 레이어와 같은 축으로 묶었다. 설정 페이지 토글이 이미 결정하는 값을 그대로 흘려보내면 사용자가 같은 질문에 두 번 답하지 않는다.
-- 2026-07-28 — `createDefaultConfig`가 자체 severity 집합을 버리고 rule roster와 같은 `constants/builtinRuleSeverities` 정본을 읽는다.
-
 ## Last Updated
 
-2026-09-19 — `migrateConfigV1`의 `ConfigDiagnostic`이 `nextAction`을 필수로 담는다.
-2026-09-06 — review 그룹 예산·자동 크기 선택과 추가 위험 경로 계약을 갱신했다.
+설정 레이어, migration, 제외 범위나 관리형 규칙 배포 정책이 바뀔 때 갱신한다.

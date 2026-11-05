@@ -9,8 +9,7 @@
 
 ## API Contracts
 
-- `startSettingsServer(options)` — 바인딩된 서버와 settle waiter를 반환한다.
-- `SETTINGS_SERVER_IDLE_MS` — idle 종료 기준값.
+- 저장·닫기와 서버 종료는 기다리는 호출을 settle한다. 대기는 bounded이며 취소된 호출을 새 waiter로 보존하지 않는다.
 
 ## Acceptance Criteria
 
@@ -18,16 +17,6 @@
 
 - 비 loopback Host, 잘못된 token, 잘못된 Origin 요청이 모두 거부된다.
 
-### AC-websrv-settle — bounded 대기 해소
-
-- 저장 또는 닫기 이벤트가 대기 중인 도구 호출을 정확히 한 번 깨운다.
-- 이미 취소된 signal은 waiter나 대기 타이머를 등록하지 않고 즉시 pending을 반환한다.
-
-## History
-
-- 2026-09-05 — HTTP 계약을 바꾸지 않고 `project_setup` settings child로 소유 관계를 갱신했다.
-- 2026-07-28 — 중간 계층 fractal 계약을 문서화했다.
-
 ## Last Updated
 
-2026-09-05
+요청 검증 순서, loopback 바인딩이나 settle 대기 계약이 바뀔 때 갱신한다.

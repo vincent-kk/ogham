@@ -28,7 +28,3 @@
 - target document 본문, source text 또는 전체 tree 반환
 - config나 project source 수정
 - 언어/entry filename 추측
-
-## Dependencies
-
-- core projectSnapshot/contextResolver, adapters와 common envelope

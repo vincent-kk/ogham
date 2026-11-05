@@ -4,14 +4,6 @@
 
 15개 내장 FCA-AI 규칙의 정의·평가와 INTENT/DETAIL 문서 계약 검증, 노드 단위 구조 검증을 소유한다.
 
-## Structure
-
-| 모듈                | 역할                                       |
-| ------------------- | ------------------------------------------ |
-| `ruleEngine`        | 15개 내장 규칙 로딩, 평가, 오버라이드 적용 |
-| `fractalValidator`  | 구조 유효성 검증, 의존성 검증              |
-| `documentValidator` | INTENT.md/DETAIL.md 유효성 검증            |
-
 ## Conventions
 
 - 규칙 roster는 정확히 15개다. 새 규칙은 단일 로더에 명시적으로 등록하고 ID는 canonical built-in 집합에서 가져온다.

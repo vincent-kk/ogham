@@ -18,12 +18,8 @@
 
 ## API Contracts
 
-
-- `ecmascriptStructureAdapter: StructureAdapter` — registry에 등록되는 초기 structure adapter.
-- `findEntryPoints(directoryPath, overrides?)` — module/executable/framework/manifest/configured descriptor 배열. 매 호출이 새 배열과 새 descriptor를 돌려준다.
-- `ecmascriptVerificationAdapter` — 이름으로 verification 후보를 찾는 초기 verification adapter.
-- `SOURCE_EXTENSIONS`·`ECMASCRIPT_ADAPTER_ID` 등 `structure/ecmascriptConventions.ts`의 생태계 상수 — 이 디렉터리가 확장자·entry 이름·framework 이름의 유일한 출처다.
-- `verificationRoleFromName(filePath)` — 이름이 제안하는 role. 파일을 열지 않는다.
+- 확장자·entry 이름·framework 이름의 유일한 출처는 이 adapter다. 추출 프로그램과 별도 상수를 두면 발견과 내용 판독의 대상이 갈라진다.
+- entry descriptor는 호출자가 변형할 수 있는 복사본으로 반환한다. 공유하면 스캐너의 정렬·필터가 다음 호출을 오염시킨다.
 
 ## Acceptance Criteria
 
@@ -51,7 +47,6 @@
 - 후보는 내용과 무관하게 `discover()` 결과에 남는다. 그 파일이 정말 verification인지는 레코드의 role이 가르며, 개명만 한 프로덕션 파일은 role이 `unsupported`라 분석에서 빠진다.
 - 상위 디렉터리와 dependency 디렉터리는 후보에서 제외한다.
 
-
 ## Boundary Exemptions
 
 ### `structure/` — 생태계 상수와 entry point 발견
@@ -66,12 +61,6 @@
 - **Direct import**: `allowed`
 - **Reason**: `.spec`·`.test` 접미사는 이 디렉터리가 소유하는 생태계 규칙이고, 서버의 discovery와 추출기의 role 확정이 **같은 규칙**을 써야 한다. 두 벌로 두면 이름 규칙이 갈려 discovery가 고른 후보와 레코드의 role이 서로 다른 파일을 말하게 된다.
 
-## History
-
-- 2026-09-20 — 파일 내용을 읽는 모듈(lexer, 참조 추출, entry surface 판독, case 계수, contract marker)의 소유를 추출 프로그램으로 넘겼다. 서버가 소스를 해석하지 않는다는 것이 이 단계의 계약이고(스펙 §11-8), adapter에 남는 일은 파일과 entry point의 발견이다.
-- 2026-09-20 — discovery와 entry point 판독을 요청 스코프 메모 뒤에 두고, entry point descriptor를 호출자 소유 복사본으로 돌려준다. 같은 디렉터리를 파일 수만큼 다시 읽고 있었는데, 캐시를 공유 배열로 돌려주면 결과를 정렬하는 스캐너가 캐시를 오염시킨다.
-- 2026-07-28 — source discovery에서 git이 무시하는 경로를 제외했다.
-
 ## Last Updated
 
-2026-09-20 — 파싱 소유를 추출기로 넘기고 discovery·manifest만 남겼다.
+source discovery 제외 규칙, entry point kind·surface 판정이나 추출 프로그램에 대한 경계 면제가 바뀔 때 갱신한다.

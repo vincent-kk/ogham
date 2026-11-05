@@ -10,7 +10,7 @@
 
 ## API Contracts
 
-- `processSetup`, `handleUserPromptSubmit`, `handlePreToolUse` — 각 이벤트 입력을 받아 `HookOutput`을 반환한다.
+이벤트별 입출력은 각 handler와 HookOutput 타입에서 확인한다. entry는 host 입출력 변환만 소유하여 판단이 별도 실행 경로로 갈라지지 않게 한다.
 
 ## Acceptance Criteria
 
@@ -24,4 +24,4 @@
 
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+host entry의 책임, 번들 직접 참조 경계나 경고·deny의 다음 행동 정책이 바뀔 때 갱신한다.

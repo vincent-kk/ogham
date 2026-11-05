@@ -4,13 +4,6 @@
 
 ProjectSnapshot의 문서, node, entry, boundary, DAG, verification과 legacy migration 증거로 정확히 15개 built-in rule을 평가한다.
 
-## Structure
-
-- `loadBuiltinRules.ts` — 15개 rule roster와 config override 결합
-- `evaluateRules.ts` — project/node granularity와 scope orchestration
-- `evaluateRule.ts` — 단일 rule 실행과 failure diagnostic
-- `utils/` — 관심 증거별 순수 check organ
-
 ## Conventions
 
 - tradeoff 우선순위: 1. violation/불확실성 보존 2. 결정론 3. 호환성
