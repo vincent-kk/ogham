@@ -9,29 +9,23 @@ import { stat, utimes } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
-import { MetadataStore, READ_REINDEX_CAP } from "@ogham/maencof";
+import { MetadataStore, READ_REINDEX_CAP, toNodeId } from "@ogham/maencof";
+import type { KnowledgeNode } from "@ogham/maencof";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { GraphCache } from "../vault/graphCache/index.js";
 
-interface ShardedNode {
-  id: string;
-  path: string;
-  title: string;
-  layer: number;
-  tags: string[];
-  created: string;
-  updated: string;
-  mtime: number;
-  accessed_count: number;
-}
-
 let vaultDir: string;
 let cache: GraphCache;
 
-function makeNode(path: string, title: string = path): ShardedNode {
+/**
+ * @param path 유효한 레이어 디렉터리 아래의 문서 상대 경로.
+ * @param title fixture에서 조회할 문서 제목. 생략하면 경로를 사용한다.
+ * @returns 디스크 I/O 없이 생성한 유효한 L2 그래프 노드.
+ */
+function makeNode(path: string, title: string = path): KnowledgeNode {
   return {
-    id: path,
+    id: toNodeId(path),
     path,
     title,
     layer: 2,
@@ -43,20 +37,19 @@ function makeNode(path: string, title: string = path): ShardedNode {
   };
 }
 
-function writeShardedGraph(nodes: ShardedNode[]): void {
-  const cacheDir = join(vaultDir, ".maencof");
-  writeFileSync(join(cacheDir, "nodes.json"), JSON.stringify(nodes), "utf-8");
-  writeFileSync(join(cacheDir, "edges.json"), JSON.stringify([]), "utf-8");
-  writeFileSync(
-    join(cacheDir, "graph-meta.json"),
-    JSON.stringify({
-      builtAt: "2026-01-01T00:00:00Z",
-      nodeCount: nodes.length,
-      edgeCount: 0,
-      schemaVersion: 2,
-    }),
-    "utf-8",
-  );
+/**
+ * @param nodes 격리된 테스트 볼트에 저장할 노드 목록. 입력은 변경하지 않는다.
+ * @returns maencof의 저장 경로가 현재 형식의 그래프와 마커를 완성하면 완료한다.
+ * @throws fixture 디스크 쓰기가 실패하면 테스트를 중단한다.
+ */
+async function writeShardedGraph(nodes: KnowledgeNode[]): Promise<void> {
+  await new MetadataStore(vaultDir).saveGraph({
+    nodes: new Map(nodes.map((node) => [node.id, node])),
+    edges: [],
+    builtAt: "2026-01-01T00:00:00Z",
+    nodeCount: nodes.length,
+    edgeCount: 0,
+  });
 }
 
 function writeStaleEntries(
@@ -103,14 +96,14 @@ describe("GraphCache stale-merge", () => {
   // --- Basic (happy path) ---
 
   it("returns the loaded graph unchanged when no stale entries exist", async () => {
-    writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
+    await writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
     const g = await cache.getGraph(vaultDir);
     expect(g).not.toBeNull();
     expect(g?.nodes.size).toBe(1);
   });
 
   it("applies a mutate entry by adding the fresh node parsed from disk", async () => {
-    writeShardedGraph([]);
+    await writeShardedGraph([]);
     writeVaultMarkdown("02_Derived/new.md", {
       layer: 2,
       created: "2026-01-01",
@@ -127,7 +120,7 @@ describe("GraphCache stale-merge", () => {
   });
 
   it("applies a delete entry by removing the node from the graph", async () => {
-    writeShardedGraph([makeNode("02_Derived/old.md", "Old")]);
+    await writeShardedGraph([makeNode("02_Derived/old.md", "Old")]);
     writeStaleEntries([{ path: "02_Derived/old.md", op: "delete" }]);
 
     const g = await cache.getGraph(vaultDir);
@@ -143,7 +136,7 @@ describe("GraphCache stale-merge", () => {
     const nodes = Array.from({ length: 16 }, (_, i) =>
       makeNode(`02_Derived/n${i}.md`, `N${i}`),
     );
-    writeShardedGraph(nodes);
+    await writeShardedGraph(nodes);
 
     const entries = Array.from({ length: 16 }, (_, i) => ({
       path: `02_Derived/n${i}.md`,
@@ -159,7 +152,7 @@ describe("GraphCache stale-merge", () => {
   });
 
   it("is idempotent: repeat calls return the same merged reference", async () => {
-    writeShardedGraph([makeNode("02_Derived/k.md", "K")]);
+    await writeShardedGraph([makeNode("02_Derived/k.md", "K")]);
     writeStaleEntries([{ path: "02_Derived/k.md", op: "delete" }]);
 
     const g1 = await cache.getGraph(vaultDir);
@@ -169,7 +162,7 @@ describe("GraphCache stale-merge", () => {
   });
 
   it("swallows merge failures and still returns the loaded graph", async () => {
-    writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
+    await writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
     // Malformed stale-nodes.json — loadStaleEntries falls back to empty entries,
     // but even an outright merge throw must not break read availability.
     writeFileSync(
@@ -196,7 +189,7 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
   });
 
   it("complex-2: same stale-nodes.json mtime → loadStaleEntries called only once across two getGraph calls", async () => {
-    writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
+    await writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
     writeStaleEntries([{ path: "02_Derived/a.md", op: "delete" }]);
 
     const loadSpy = vi.spyOn(MetadataStore.prototype, "loadStaleEntries");
@@ -214,7 +207,7 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
   });
 
   it("complex-3: changed stale-nodes.json mtime → second getGraph re-loads stale entries", async () => {
-    writeShardedGraph([
+    await writeShardedGraph([
       makeNode("02_Derived/a.md", "A"),
       makeNode("02_Derived/b.md", "B"),
     ]);
@@ -242,7 +235,7 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
   });
 
   it("complex-4: 5 concurrent getGraph(vault) calls → loadStaleEntries runs once (in-flight dedup)", async () => {
-    writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
+    await writeShardedGraph([makeNode("02_Derived/a.md", "A")]);
     writeStaleEntries([{ path: "02_Derived/a.md", op: "delete" }]);
 
     const loadSpy = vi.spyOn(MetadataStore.prototype, "loadStaleEntries");
@@ -265,7 +258,7 @@ describe("GraphCache mtime guard + in-flight dedup", () => {
     const seedNodes = Array.from({ length: 5 }, (_, i) =>
       makeNode(`02_Derived/n${i}.md`, `N${i}`),
     );
-    writeShardedGraph(seedNodes);
+    await writeShardedGraph(seedNodes);
 
     const fresh = new GraphCache();
     const initial = await fresh.getGraph(vaultDir);
