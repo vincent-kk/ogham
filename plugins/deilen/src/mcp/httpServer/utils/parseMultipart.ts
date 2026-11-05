@@ -1,4 +1,4 @@
-import { mkdir, rm } from "node:fs/promises";
+import { rm } from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import { join } from "node:path";
 
@@ -136,7 +136,6 @@ export async function parseMultipart(
   const written: string[] = [];
   const images: ImageRef[] = [];
   try {
-    if (accepted.length) await mkdir(dir, { recursive: true });
     for (const image of accepted) {
       const storageName = `${randomId()}.${IMAGE_EXT_BY_MIME[image.mimeType]}`;
       const fullPath = join(dir, storageName);

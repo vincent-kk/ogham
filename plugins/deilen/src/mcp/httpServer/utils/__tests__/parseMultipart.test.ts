@@ -5,7 +5,7 @@ import { dirname, join } from "node:path";
 
 import { describe, expect, it, vi } from "vitest";
 
-import { FILE_MODE } from "../../../../constants/defaults.js";
+import { DIR_MODE, FILE_MODE } from "../../../../constants/defaults.js";
 import { sessionImagesDir } from "../../../../constants/paths.js";
 import { parseMultipart } from "../parseMultipart.js";
 
@@ -69,5 +69,8 @@ describe("parseMultipart image persistence", () => {
     expect(
       await readFile(join(sessionImagesDir(sessionId), result.images[0].path)),
     ).toEqual(image);
+    expect((await stat(sessionImagesDir(sessionId))).mode & 0o777).toBe(
+      DIR_MODE,
+    );
   });
 });
