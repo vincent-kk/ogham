@@ -70,3 +70,9 @@ it('is first for corrupt JSON', () => {
   writeFileSync(path, '{ not json');
   expect(isFirstChildTurn(id, NOW)).toBe(true);
 });
+
+it('is first when the actor file cannot be read', () => {
+  const { id, path } = fixture();
+  mkdirSync(path, { recursive: true });
+  expect(isFirstChildTurn(id, NOW)).toBe(true);
+});

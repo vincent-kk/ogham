@@ -1,4 +1,5 @@
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -53,6 +54,21 @@ describe.each(['standard', 'strict'] as const)(
           hook_event_name: 'UserPromptSubmit',
         }),
       ).toEqual({ continue: true });
+    });
+
+    it('stays silent when the actor file cannot be read', () => {
+      rmSync(statePath);
+      mkdirSync(statePath);
+
+      expect(
+        processUserPromptSubmit({
+          cwd,
+          session_id: 'session-a',
+          prompt_id: 'turn-b',
+          hook_event_name: 'UserPromptSubmit',
+        }),
+      ).toEqual({ continue: true });
+      expect(existsSync(`${statePath}.revoked`)).toBe(true);
     });
 
     it('stays silent when actor and revocation writes fail', () => {

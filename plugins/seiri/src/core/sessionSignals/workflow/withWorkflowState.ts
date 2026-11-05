@@ -99,7 +99,7 @@ export function withWorkflowState<T, Failure = undefined>(
       for (const marker of [revoked, revokedSuspend])
         if (existsSync(marker)) unlinkSync(marker);
     }
-    let state = readState(path);
+    let state = existsSync(path) ? readState(path) : undefined;
     if (state && !isActorFresh(state, now)) {
       unlinkSync(path);
       if (existsSync(revoked)) unlinkSync(revoked);
