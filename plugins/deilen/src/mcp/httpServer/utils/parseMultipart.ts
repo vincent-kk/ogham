@@ -1,4 +1,4 @@
-import { mkdir, rm, writeFile } from "node:fs/promises";
+import { rm } from "node:fs/promises";
 import type { IncomingMessage } from "node:http";
 import { join } from "node:path";
 
@@ -9,6 +9,7 @@ import {
   IMAGE_EXT_BY_MIME,
 } from "../../../constants/defaults.js";
 import { sessionImagesDir } from "../../../constants/paths.js";
+import { atomicWrite } from "../../../lib/atomicWrite.js";
 import { ImageSource } from "../../../types/enums.js";
 import type { ImageRef } from "../../../types/feedback.js";
 import { randomId } from "../../../utils/randomId.js";
@@ -86,6 +87,10 @@ function inferSource(filename: string | undefined): ImageRef["source"] {
  * are images written to the session's images dir — so a rejected submission
  * never leaves partial files behind. Reading the request to end means no
  * mid-stream unpipe, so keep-alive needs no manual drain.
+ * @param request Multipart request with a boundary in its content-type header.
+ * @param options Session storage identifier and image/body byte limits.
+ * @returns Parsed JSON payload and references to atomically persisted images.
+ * @throws On malformed or oversized input, unsupported images, or storage failure.
  */
 export async function parseMultipart(
   request: IncomingMessage,
@@ -131,11 +136,10 @@ export async function parseMultipart(
   const written: string[] = [];
   const images: ImageRef[] = [];
   try {
-    if (accepted.length) await mkdir(dir, { recursive: true });
     for (const image of accepted) {
       const storageName = `${randomId()}.${IMAGE_EXT_BY_MIME[image.mimeType]}`;
       const fullPath = join(dir, storageName);
-      await writeFile(fullPath, image.data);
+      await atomicWrite(fullPath, image.data);
       written.push(fullPath);
       images.push({
         id: image.id,
