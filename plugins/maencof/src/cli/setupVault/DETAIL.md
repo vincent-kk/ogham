@@ -21,4 +21,4 @@ The standalone command is owned by the sibling command fractal. It calls this mo
 
 ## Last Updated
 
-2026-09-26
+Update when project connection ownership, preview/apply behavior, or conflict handling changes.

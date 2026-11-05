@@ -4,10 +4,9 @@
 
 대화 규율(meta-skill 주입) 설정 로더. `.maencof-meta/dialogue-config.json` 의 injection.enabled 를 안전 파싱으로 읽고, env `MAENCOF_DISABLE_DIALOGUE` 우선 OR 결합으로 off-switch 판정.
 
-## Structure
+## Conventions
 
-- `index.ts` — barrel (공개 API: readDialogueConfig/writeDialogueConfig/isDialogueInjectionDisabled)
-- `operations/` organ — 설정 IO·판정 (dialogueConfigPath 사설 헬퍼 + read/write/isDialogueInjectionDisabled, 함수 1개/파일)
+수동 가드는 훅 번들 크기를 위한 선택이다. Zod 스키마와 같은 변경에서 맞추어 훅과 MCP가 같은 설정을 다르게 해석하지 않게 한다.
 
 ## Boundaries
 

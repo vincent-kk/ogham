@@ -4,11 +4,9 @@
 
 호스트별 지침 파일의 maencof 섹션 병합/읽기/제거. 호출자가 결정한 파일에서 `<!-- MAENCOF:START -->` / `<!-- MAENCOF:END -->` 마커만 소유한다.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (raw filePath API·project instruction manager·타입·마커 재노출)
-- `types/` organ — 공개 타입 (MergeResult)
-- `operations/` organ — exact-path 호환 래퍼와 project instruction manager 조립
+raw 경로 API와 호스트 인식 API의 역할을 구분한다. 전자는 호출자가 고른 파일을 다시 해석하지 않아 호환 호출의 대상이 바뀌지 않게 한다.
 
 ## Boundaries
 
@@ -31,7 +29,3 @@
 
 - raw filePath API에서 호스트/프로젝트를 다시 해석
 - MAENCOF 구간 밖 파일 또는 다른 소유자의 구간 수정
-
-## Dependencies
-
-- `@ogham/agent-artifacts`, `@ogham/cross-platform`.

@@ -4,11 +4,9 @@
 
 companion-identity 정본의 매 턴/세션 렌더 길이를 측정하고 매 턴 예산(`constants/companionIdentity.ts::TURN_IDENTITY_CHAR_BUDGET`)을 게이트하며 brief↔detail 동기화를 검증하는 util. 렌더러와 동일 primitive(`renderIdentitySection`)로 측정해 측정↔렌더 드리프트를 차단한다. 렌더러·companionEdit·companionMigration·setup 스킬이 공유한다.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: measure/assert(turn·session) + checkBriefSubsumption + 타입)
-- `types/` organ — 공개 타입 (BudgetOffender/BudgetResult/BriefSubsumptionResult)
-- `operations/` organ — 측정/게이트 (measure·codePointLength 공유 헬퍼 + measureTurnChars/measureSessionChars/assertTurnBudget/assertSessionBudget/checkBriefSubsumption, 함수 1개/파일)
+예산은 저작 시점 게이트이며 런타임 절단 정책이 아니다. 의미상 brief가 detail을 넘는지는 자동 판정할 수 없으므로 저작자가 확인한다.
 
 ## Boundaries
 

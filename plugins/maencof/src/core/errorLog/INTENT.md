@@ -4,11 +4,9 @@
 
 Hook 운영 에러를 `.maencof-meta/error-log.json`에 영속화. checkup 에이전트가 반복 패턴 진단에 활용.
 
-## Structure
+## Conventions
 
-- `index.ts` — barrel (공개 API: readErrorLog/appendErrorLog/appendErrorLogSafe + ErrorLogEntry 타입)
-- `types/` organ — 공개 타입 (ErrorLogEntry)
-- `operations/` organ — IO (logPath 사설 헬퍼 + read/append/appendErrorLogSafe, 함수 1개/파일)
+진단 로그가 원래 오류를 가리지 않게 한다. 안전 append는 catch 안에서도 호출되므로 기록 실패를 호출자로 전파하지 않는다.
 
 ## Boundaries
 

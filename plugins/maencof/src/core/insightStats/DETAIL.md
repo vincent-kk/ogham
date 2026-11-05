@@ -5,17 +5,10 @@
 - `autoAdjustSensitivity` 는 제안만 반환한다(`adjusted: false`). 설정 파일을 직접 고치지 않는다 — 민감도 변경은 사용자가 볼 수 있는 결정이므로 호출자가 적용을 소유한다.
 - `calculatePrecision` 은 순수 함수다. 파일도 시각도 읽지 않는다.
 - 설정 파싱은 `InsightConfigSchema` 로 하고 실패 시 기본값으로 폴백한다. Zod 스키마와 수동 가드(`types/insightGuard.ts`)의 필드 집합은 같은 변경에서 함께 맞춘다 — 어긋나면 훅과 MCP 의 판정이 갈라진다.
-- 공유 private 헬퍼(`metaPath`·`ensureDir`)는 배럴에 노출하지 않는다.
 
 ## API Contracts
 
-- `readInsightConfig(cwd)` · `writeInsightConfig(cwd, config)` — 설정 IO. read 는 손상 시 기본값.
-- `readInsightStats(cwd)` · `incrementInsightStats(cwd, ...)` · `updatePromotionStats(cwd, ...)` — 통계 IO.
-- `readPendingNotification(cwd)` · `appendPendingCapture(cwd, ...)` · `deletePendingNotification(cwd)` — 대기 알림 큐.
-- `getSessionCaptureCount(cwd, sessionId)` — 세션당 캡처 수.
-- `calculatePrecision(stats)` — 정밀도. 순수.
-- `autoAdjustSensitivity(cwd)` — 민감도 조정 제안. 파일 무변경.
-- `buildMetaPrompt(...)` — 주입용 메타 프롬프트 문자열.
+민감도 함수는 제안만 반환하며 적용 여부를 소유하지 않는다. 메타 프롬프트는 설정을 전달하고 지식의 의미 중복 판단은 insight 스킬이 소유한다.
 
 ## Acceptance Criteria
 
@@ -46,4 +39,4 @@
 
 ## Last Updated
 
-2026-09-26 — Capture policy delivery and configured category allowlist.
+민감도 제안·캡처 정책 전달·가드 동기화 계약이 바뀔 때 갱신한다.

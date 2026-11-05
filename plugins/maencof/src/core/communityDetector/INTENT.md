@@ -4,11 +4,9 @@
 
 지식 그래프의 커뮤니티(클러스터) 탐지. 연결 밀도 기반 노드 그룹핑.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: CommunityDetector/detectCommunities + 타입)
-- `types/` organ — 공개 타입 (Community/CommunityDetectionResult/CommunityDetectorParams)
-- `operations/` organ — 탐지 실행 (CommunityDetector 클래스 + detectCommunities 래퍼, 함수 1개/파일)
+탐지 알고리즘 교체는 별도 결정을 거친다. 입력 그래프를 수정하지 않는 경계를 유지하여 탐지가 검색용 그래프를 바꾸지 않게 한다.
 
 ## Boundaries
 

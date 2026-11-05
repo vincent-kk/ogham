@@ -11,49 +11,15 @@
 
 ## API Contracts
 
-### Entry point (`index.ts`)
-
-- `measureTurnChars(sections): number` — 매 턴 대상 섹션 렌더 총합.
-- `measureSessionChars(sections): number` — 세션 대상 섹션 렌더 총합.
-- `assertTurnBudget(sections): BudgetResult` — `TURN_IDENTITY_CHAR_BUDGET` 대비 게이트(hard 기준).
-- `assertSessionBudget(sections): BudgetResult` — `SESSION_IDENTITY_CHAR_BUDGET` 대비 게이트(soft 안전판).
-- `checkBriefSubsumption(section): BriefSubsumptionResult` — 섹션 하나의 brief 길이 역전 검사.
-- 타입: `BudgetOffender` · `BudgetResult` · `BriefSubsumptionResult`.
-
-### `BudgetResult`
-
-`{ ok, total, budget, overBy, offenders }` — `ok` 는 `total <= budget`, `overBy` 는 `max(0, total - budget)`. `offenders` 는 `{ key, chars }` 를 `chars` 내림차순으로 정렬한 목록이라 첫 항목이 곧 최우선 압축·강등 후보다.
-
-### `BriefSubsumptionResult`
-
-`{ ok, warnings }` — brief 가 없으면 언제나 `ok: true`. 경고 문자열은 위반 섹션 key 를 포함한다.
-
-### 예산 상수
-
-두 예산은 `constants/companionIdentity.ts` 가 소유한다. 이 모듈은 값을 복제하지 않고 상수를 읽으며, 숫자를 직접 적는 소비처는 `skills/setup/reference.md` 뿐이다.
+- offender의 길이 내림차순은 저작 도구가 압축·강등 우선순위를 정하는 근거다. 예산 초과 처리 자체는 호출자가 소유한다.
+- 두 예산은 `constants/companionIdentity.ts`가 소유한다. 수치의 별도 소비처인 `skills/setup/reference.md`도 함께 검토하여 저작 안내와 게이트가 갈라지지 않게 한다.
 
 ## Acceptance Criteria
-
-### AC-render-shared-primitive — 렌더 공유 측정
-
-- 측정이 `renderIdentitySection` 결과 길이를 쓰고 자체 마크업 재구성을 하지 않는다.
 
 ### AC-code-point-length — 코드포인트 계수
 
 - 서로게이트 쌍 문자가 한 글자로 계산된다.
 
-### AC-no-throw-no-cut — 비예외·비절단
-
-- 예산 초과 시 예외 없이 `ok: false` 를 반환하고 섹션을 잘라내지 않는다.
-
-### AC-offenders-descending — offender 정렬
-
-- `offenders` 가 렌더 길이 내림차순으로 정렬되어 반환된다.
-
-### AC-brief-length-inversion — brief 길이 역전
-
-- brief 가 detail 보다 짧지 않은 섹션에 경고가 붙는다.
-
 ## Last Updated
 
-2026-07-30 — 공유 primitive 측정·코드포인트 계수·비절단 게이트·offender 정렬 계약을 문서화했다.
+저작 예산·렌더 공유 측정·brief 검증의 한계가 바뀔 때 갱신한다.

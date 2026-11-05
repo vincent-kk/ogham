@@ -4,11 +4,6 @@
 
 작업 이력 파생 계층. per-session 레코드 + 활동 로그에서 daily digest 를 멱등 생성하고, 기간 집계와 토픽/레이어 역색인을 제공한다.
 
-## Structure
-
-- `index.ts` — 순수 barrel (공개 API: inferTopicsLayers + getDigestsDir/getDailyDigestPath/buildDailyDigest/readDailyDigest/listDailyDigestDates/aggregatePeriod/queryWork)
-- `operations/` organ — 경로 → 레이어/토픽 추론(순수), digest 생성·기간 합산·역색인 재파생/조회, 함수 1개/파일 (getDailyDigestDir 는 비공개 헬퍼로 barrel 미노출)
-
 ## Conventions
 
 - daily digest 만 영구 파생물 — 주/월은 daily 합산, 역색인은 on-demand 재파생

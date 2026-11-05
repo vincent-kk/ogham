@@ -6,7 +6,7 @@ The package build loads this command entry point to produce a standalone executa
 
 ## API Contracts
 
-The command accepts `--host <claude|codex>`, `--vault-root <absolute-path>`, and optional `--apply`. It calls the project connection module through its public entry point, passing the bundle location so the sibling MCP server can be found independent of CWD. It writes a redacted JSON result and sets a nonzero process status on failure.
+It calls the project connection module through its public entry point, passing the bundle location so the sibling MCP server can be found independent of CWD. It writes a redacted JSON result and sets a nonzero process status on failure.
 
 ## Acceptance Criteria
 
@@ -18,4 +18,4 @@ The command accepts `--host <claude|codex>`, `--vault-root <absolute-path>`, and
 
 ## Last Updated
 
-2026-09-26
+Update when command ownership, redaction, or distributed-server resolution changes.

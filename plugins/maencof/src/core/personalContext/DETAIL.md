@@ -11,24 +11,13 @@
 
 ## API Contracts
 
-- `personalContextPath(cwd)` — envelope 파일 경로.
-- `readPersonalContext(cwd)` · `writePersonalContext(cwd, envelope)` — envelope IO.
-- `defaultPersonalContext()` — 빈 envelope.
-- `normalizePersonalContext(raw)` — zod-free graceful 정규화.
-- `renderPersonalContextBlock(envelope)` — SessionStart `<personal-context>` 블록. 만료 항목은 렌더 시점 lazy-filter 로 빠진다.
-- `prunePersonalContext(envelope)` — 세션 경계 정리(만료 제거·due 자동 resolve·보존 캡). `PersonalContextPruneResult`.
-- `evictTopicsOverCap(envelope)` — topics 보존 캡 집행. resolved 우선. `TopicEvictionResult`.
-- `applyPersonalContextMutation(...)` — MCP 캡처/재강화/해소 upsert. 훅 번들에 들어가지 않는 유일한 공개 함수다.
+만료 필터는 렌더 때 파일을 고치지 않는다. 구조 정규화와 수명주기를 훅에서 재사용하되 캡처 mutation 경로는 훅 번들에 넣지 않아 크기 제약을 유지한다.
 
 ## Acceptance Criteria
 
 ### AC-hook-path-zod-free — 훅 경로 zod-free
 
 - 훅이 도달하는 파일에서 zod import 가 0건이다.
-
-### AC-lazy-expiry-render — 만료 lazy-filter
-
-- 만료된 항목이 렌더 결과에 나타나지 않는다(파일은 그대로).
 
 ### AC-deterministic-id — 결정적 id
 
@@ -50,4 +39,4 @@
 
 ## Last Updated
 
-2026-07-30 — zod-free 훅 경로·수명주기 계약과 훅 직접 import 면책을 문서화했다.
+은닉·수명주기·검증 소유권 및 훅 번들 제약이 바뀔 때 갱신한다.

@@ -4,13 +4,9 @@
 
 엣지 타입별 생성기. `KnowledgeNode[]` 을 받아 `KnowledgeEdge[]` 를 만드는 순수 함수만 모아 둔다. 어떤 엣지를 물질화할지는 [`graphBuilder`](../INTENT.md)가 정하고, 여기는 타입별 규칙만 소유한다.
 
-## Structure
+## Conventions
 
-- `operations/tree.ts` — 디렉토리 계층 기반 PARENT_OF / CHILD_OF 엣지 + 디렉토리 맵
-- `operations/relationship.ts` — Person frontmatter 기반 RELATIONSHIP 엣지 (대칭은 양방향, 비대칭은 단방향)
-- `operations/domain.ts` — 동일 domain 태그 쌍 간 DOMAIN 엣지 (약한 cross-layer 연결, 양방향)
-- `operations/crossLayer.ts` — 허브 노드(`hub: true`)에서 태그 겹침 노드로 CROSS_LAYER 엣지 (레이어 무관)
-- `index.ts` — barrel
+어떤 엣지를 저장할지는 부모가 소유한다. cross-layer 상한에서 후보 선택을 결정적으로 유지해야 스캔 순서가 그래프를 바꾸지 않는다.
 
 ## Boundaries
 

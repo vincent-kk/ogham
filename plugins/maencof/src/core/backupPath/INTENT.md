@@ -4,6 +4,10 @@
 
 파일 덮어쓰기 전 타임스탬프 백업 경로(`<file>.bak-<ts>`)를 만드는 순수 util. companionMigration·companionEdit이 공유하는 백업 명명 규칙의 단일 진실 원천.
 
+## Conventions
+
+편집과 마이그레이션이 같은 백업 명명 규칙을 공유한다. 파일 복사는 호출자가 소유하여 경로 생성이 저장 책임을 갖지 않게 한다.
+
 ## Boundaries
 
 ### Always do

@@ -4,6 +4,10 @@
 
 Measure Markdown readability budgets without changing content.
 
+## Conventions
+
+Oversize content produces maintenance advice; preserving knowledge takes precedence over satisfying the readability budget.
+
 ## Boundaries
 
 ### Always do

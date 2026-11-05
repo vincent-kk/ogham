@@ -4,10 +4,9 @@
 
 인사이트 캡처 설정·통계·대기 알림 관리. `.maencof-meta/`에 insight-config.json, auto-insight-stats.json, pending-notification.json을 영속화하고, 민감도 자동 조정 및 메타 프롬프트 생성을 담당.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: config/stats read·write, pending 알림, 승격 통계, 정밀도/민감도, 메타 프롬프트)
-- `operations/` organ — 인사이트 연산 (config·stats read/write, pending read/append/delete, getSessionCaptureCount, updatePromotionStats, calculatePrecision, autoAdjustSensitivity, buildMetaPrompt; 공유 private helper metaPath·ensureDir 는 barrel 미노출; 함수 1개/파일)
+민감도 조정은 제안만 한다. 적용은 사용자에게 보이는 결정이므로 설정 변경을 호출자가 소유한다.
 
 ## Boundaries
 
