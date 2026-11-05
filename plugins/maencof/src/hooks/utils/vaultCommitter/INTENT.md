@@ -4,12 +4,9 @@
 
 볼트 변경사항 Git 자동 커밋. MCP bootSweep(직전 세션 마무리)과 UserPromptSubmit(skip_patterns 매칭, 기본 /clear)에서 opt-in 방식으로 동작. 커밋 범위는 `vault-commit.json::scope`(기본: 5-Layer 문서 트리 + .maencof-meta/)로 제어하고, 당일 자동 커밋은 `helpers/foldDaily`가 하루 1커밋으로 접는다. 커밋 게이트는 live index.lock 을 존중하되 stale lock(mtime 임계 초과)은 회수한다.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: readVaultCommitConfig/shouldCommitOnPrompt/isClearCommand/runVaultCommitter + DEFAULT_SKIP_PATTERN_SOURCE + 타입)
-- `types/` organ — 공개 타입 (VaultCommitConfig/VaultCommitterInput/VaultCommitterEvent/VaultCommitterResult)
-- `operations/` organ — config 읽기·프롬프트 판별·커밋 오케스트레이션 (함수 1개/파일)
-- `helpers/foldDaily/` — 당일 자동 커밋 폴딩 (git reset --soft, 실패 시 ORIG_HEAD 복구)
+커밋은 `--no-verify` 로 한다. 사용자 전역 원칙에 대한 명시적 예외이며 근거와 해제 조건은 DETAIL의 Requirements가 정본이다.
 
 ## Boundaries
 

@@ -9,13 +9,7 @@
 
 ## API Contracts
 
-- `isMaencofVault(cwd)` — 볼트 루트 여부. 모든 훅의 진입 게이트.
-- `isInsideMaencofVault(path)` — 경로가 볼트 안에 드는지.
-- `readStdin()` — 훅 stdin JSON 파싱.
-- `writeResult(result)` — 훅 응답 envelope 출력.
-- `metaPath(cwd, ...segments)` · `maencofPath(cwd, ...segments)` — `.maencof-meta` · `.maencof` 하위 경로.
-- `MAENCOF_MCP_TOOLS` · `isMaencofMcpToolName(name)` · `normalizeMaencofToolName(name)` — 훅이 참조하는 MCP 도구 이름 목록과 판별·정규화.
-- `instructionsPath(...)` — 호스트별 지침 파일 경로.
+stdin·stdout envelope는 이 공통 경계가 소유한다. 이벤트별로 복제하면 호스트가 조용히 버리는 필드를 도입하기 쉬우므로 개별 훅이 재정의하지 않는다.
 
 ## Acceptance Criteria
 
@@ -61,4 +55,4 @@
 
 ## Last Updated
 
-2026-07-30 — 훅 공통 게이트·envelope 계약과 직접 import 면책 5건을 유지하며 공유 패키지 root import를 현행화했다.
+볼트 진입 게이트, 호스트 지침 경로 해석 또는 공통 stdin·stdout envelope 경계가 바뀔 때 갱신한다.

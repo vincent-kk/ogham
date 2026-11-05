@@ -4,6 +4,10 @@
 
 라이프사이클 이벤트 디스패처. Pre/Post가 공유하는 host-neutral tool matcher로 등록된 action을 판정하고 이벤트별 context envelope를 만든다.
 
+## Conventions
+
+LifecycleEvent 타입 준수
+
 ## Boundaries
 
 ### Always do

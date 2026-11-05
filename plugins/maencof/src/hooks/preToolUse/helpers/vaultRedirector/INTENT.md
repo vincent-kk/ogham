@@ -4,11 +4,9 @@
 
 볼트 경로 리디렉션. .maencof 디렉토리 접근 차단 및 경로 보정.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: isVaultInternalPath/isVaultDocDirectory/runVaultRedirector + 타입)
-- `types/` organ — 훅 I/O 타입 (VaultRedirectorInput/VaultRedirectorResult)
-- `operations/` organ — 경로 판별·리디렉트 (함수 1개/파일: isVaultInternalPath/isVaultDocDirectory/runVaultRedirector; INTERNAL_DIRS 공용 상수)
+리디렉션 우회 경로를 만들지 않는다 — `.maencof` 내부는 MCP 도구가 소유하고 직접 편집은 캐시·상태를 깨뜨린다.
 
 ## Boundaries
 

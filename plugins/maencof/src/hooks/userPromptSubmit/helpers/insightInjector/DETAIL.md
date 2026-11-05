@@ -8,62 +8,15 @@
 
 ## API Contracts
 
-### Input (stdin)
+배너는 허용 카테고리를 알리는 표면이며 실제 필터 집행은 capture-time MCP 도구가 맡는다. top-level message·hookMessage는 호스트가 지원하지 않으므로 쓰지 않는다.
 
-```ts
-interface InsightInjectorInput {
-  session_id?: string;
-  cwd?: string;
-  prompt?: string;
-}
-```
-
-### Output envelope
-
-```ts
-interface InsightInjectorResult {
-  continue: boolean;
-  hookSpecificOutput?: {
-    hookEventName: 'UserPromptSubmit';
-    additionalContext: string;
-  };
-}
-```
-
-- vault 아님 / disabled / `cwd` 누락 → `{ continue: true }`.
-- 이외 경우 `hookSpecificOutput.additionalContext` 에 `<auto-insight status="active|limit-reached" …/>` 배너 포함.
-- Top-level `hookMessage` / `message` 방출 금지 (Claude Code spec 미지원 키).
-
-### Banner attributes
-
-- `status`: `active` | `limit-reached`
-- `sensitivity`: `high` | `medium` | `low` (active 일 때)
-- `captured`: `"<n>/<max>"`
-- `allowed-categories`: `config.category_filter` 의 true 키들만 콤마 구분 (active 일 때). 이 값은 정보 표시용이며 차단 동작은 capture-time 에서 수행됨.
-
-## Cross-event handoff invariant
-
-이 훅은 `pending-insight-notification.json` 을 읽지도 쓰지도 삭제하지도 않는다. 해당 파일의 수명 주기는 다음과 같다:
-
-1. **Turn N, `capture_insight` MCP call** → `pending-insight-notification.json` 에 append. 도구 응답 message 가 누적 개수를 함께 알린다 (capture-time 통지 채널).
-2. **다음 세션 첫 SessionStart** → bootstrap 이 읽어 Claude 에게 surface 하고 파일을 삭제한다.
-3. **소비 전 크래시** → 파일은 디스크에 남으며, 다음 세션의 SessionStart 가 다시 pick up 한다. TTL 없음; one-shot + self-cleaning.
-
-`insightInjector` 는 `config.category_filter` 에서 `allowed-categories` 만 읽어 배너에 투영할 뿐, 위 파이프라인과는 독립적이다. 이 분리가 깨지면 (예: 인젝터가 pending 파일을 읽거나 삭제) SessionStart 소비자와 레이스 컨디션이 생기므로 절대 도입하지 말 것.
+인젝터는 pending 통지 파일에 접근하지 않는다. capture가 append한 통지는 다음 SessionStart의 bootstrap만 읽고 삭제하며 소비 전 크래시에는 디스크에 남는다. TTL 없이 한 번 소비하고 정리하는 책임을 분리해 두 소비자의 경합을 막는다.
 
 ## Acceptance Criteria
 
 ### AC-no-pending-file-access — pending 파일 무접근
 
 - 이 fractal 이 `pending-insight-notification.json` 을 읽지도 쓰지도 지우지도 않는다.
-
-### AC-limit-reached-banner — 한도 도달 배너
-
-- 세션 캡처 수가 max 에 도달하면 `status="limit-reached"` 배너가 나간다.
-
-### AC-no-unsupported-fields — 미지원 필드 부재
-
-- 출력에 top-level `message`·`hookMessage` 가 없다.
 
 ## Boundary Exemptions
 
@@ -75,4 +28,4 @@ interface InsightInjectorResult {
 
 ## Last Updated
 
-2026-07-30 — acceptance group 을 채우고 훅 직접 import 면책을 선언했다.
+상태 배너의 카테고리 안내, capture-time 집행 분리 또는 pending 통지 소비 소유권이 바뀔 때 갱신한다.

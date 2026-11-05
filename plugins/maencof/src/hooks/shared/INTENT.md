@@ -4,6 +4,10 @@
 
 훅 공통 유틸리티. 호스트별 project target 경로, vault 검증, stdin/stdout 처리.
 
+## Conventions
+
+stdin·stdout 처리는 이 fractal 이 소유한다. envelope 형태를 훅마다 다시 만들면 Claude Code 가 조용히 버리는 필드가 섞인다.
+
 ## Boundaries
 
 ### Always do
@@ -19,7 +23,3 @@
 ### Never do
 
 - 훅 특화 로직 추가
-
-## Dependencies
-
-- `@ogham/agent-artifacts`, `@ogham/cross-platform`.

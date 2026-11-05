@@ -2,7 +2,11 @@
 
 ## Purpose
 
-21개 MCP 도구 핸들러. 지식 문서 CRUD, 그래프 연산, CLAUDE.md 관리, companion identity 편집, 작업 이력 조회, updated 기준 최근 문서 열거.
+MCP 도구 핸들러의 공개 경계. 지식 문서 CRUD, 그래프 연산, CLAUDE.md 관리, companion identity 편집, 작업 이력 조회, updated 기준 최근 문서 열거.
+
+## Conventions
+
+도구별 계약과 렌더링 규칙은 해당 자식 fractal이 소유한다. 상위 문서가 도구 이름·입출력 목록을 복제하지 않는다.
 
 ## Boundaries
 

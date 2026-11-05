@@ -8,10 +8,7 @@
 
 ## API Contracts
 
-- `isVaultInternalPath(path)` — 볼트 내부 관리 디렉터리인지.
-- `isVaultDocDirectory(path)` — 5-Layer 문서 트리인지.
-- `runVaultRedirector(input)` — `VaultRedirectorResult`. 내부 경로 접근이면 차단·보정 신호를 반환한다.
-- 입력 `VaultRedirectorInput`. 최종 stdout 번역은 `denyEnvelope` 가 한다.
+내부 관리 경로의 직접 접근 차단과 5-Layer 문서 경로 허용이 이 문서의 정책이다. 최종 stdout 표현은 상위 디스패처에 맡긴다.
 
 ## Acceptance Criteria
 
@@ -37,4 +34,4 @@
 
 ## Last Updated
 
-2026-07-30 — 내부 경로 판정 계약과 훅 직접 import 면책을 문서화했다.
+내부 관리 경로 보호, 문서 트리 허용 또는 리디렉션 우회 금지 경계가 바뀔 때 갱신한다.

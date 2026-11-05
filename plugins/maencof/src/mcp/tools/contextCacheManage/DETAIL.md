@@ -14,34 +14,7 @@
 
 ## API Contracts
 
-### Handler
-
-`handleContextCacheManage(vaultPath: string, input): Promise<{ success: boolean } & Record<string, unknown>>`
-
-### Input (`contextCacheManageInputSchema`)
-
-| Field        | Type                                      | Required | Notes                                       |
-| ------------ | ----------------------------------------- | -------- | ------------------------------------------- |
-| `action`     | `'pin' \| 'unpin' \| 'refresh' \| 'list'` | yes      | 관리 동작                                   |
-| `cwd`        | `string`                                  | no       | vault 루트. 생략 시 위의 해석 순서를 따른다 |
-| `node_id`    | `string`                                  | no       | `pin` · `unpin` 에 필수                     |
-| `node_title` | `string`                                  | no       | `pin` 에 필수                               |
-| `node_layer` | `number`                                  | no       | `pin` 에 필수 (레이어 1-5)                  |
-
-필수 조합이 빠진 호출은 `{ success: false, error }` 로 거부된다.
-
-### Output by action
-
-- `pin` — 신규: `{ success, pinned: true, totalPinned, contextChars }`. 이미 핀됨: `{ success: true, message, totalPinned }` (재빌드 없음).
-- `unpin` — 제거: `{ success, unpinned: true, totalPinned }`. 대상 없음: `{ success: true, unpinned: false, reason, totalPinned }` (재빌드 없음).
-- `refresh` — `{ success, refreshed: true, contextChars }`.
-- `list` — `{ success, pinnedNodes }`.
-
-`contextChars` 는 재빌드된 turn context 의 문자 수다 — 본문 대신 크기만 보고한다.
-
-### Pinned node shape (`PinnedNode`)
-
-`{ id, title, layer, pinnedAt }` — `pinnedAt` 은 ISO 문자열이고 상한 초과 시 축출 기준이 된다.
+핀 목록 변경은 즉시 turn context에 반영되어야 한다. 본문은 이미 매 턴 주입되므로 응답에 다시 싣지 않고 필요한 크기만 보고한다. 중복 pin·없는 unpin은 멱등 성공이며 불필요한 재빌드를 요구하지 않는다.
 
 ## Acceptance Criteria
 
@@ -65,10 +38,6 @@
 
 - 필수 필드 누락과 미지의 `action` 이 예외 대신 `success: false` + `error` 로 반환된다.
 
-### AC-no-context-echo — turn context 본문 비반환
-
-- 어느 액션의 응답에도 `turnContext` 본문 필드가 없다. 재빌드가 일어난 `pin`(신규)·`refresh` 는 `contextChars` 숫자만 보고한다.
-
 ## Last Updated
 
-2026-08-04 — 응답에서 turn context 본문 에코를 제거하고 `contextChars` 크기 보고로 대체했다.
+핀 멱등성·축출 기준, turn context 재빌드 또는 응답의 본문 비반환 계약이 바뀔 때 갱신한다.

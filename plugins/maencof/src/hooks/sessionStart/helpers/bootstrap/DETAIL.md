@@ -11,9 +11,7 @@
 
 ## API Contracts
 
-- `runSessionStart(input)` — `SessionStartResult`. 지침 초기화·볼트 검증·설정 프로비저닝·주입 블록 조립·세션 기록·changelog debt 권고를 한 번에 수행한다.
-- 입력 `SessionStartInput`, 출력 `SessionStartResult`(`hookSpecificOutput.additionalContext` 포함).
-- `metaSkillBody.md` 는 이 fractal 이 소유하는 주입 본문 자산이다.
+세션 한 번의 전체 identity·L1·meta-skill 주입과 매 턴 gist 주입의 책임을 혼합하지 않는다. meta-skill 본문은 이 모듈 소유 자산이며 예산 초과로 생략할 때에는 로그를 남긴다.
 
 ## Acceptance Criteria
 
@@ -28,19 +26,6 @@
 - Active maencof sessions receive a concise original-source-and-location rule within the existing meta-skill budget. Dialogue off-switch and non-vault sessions omit it.
 - Version-triggered project directive updates carry document maintenance rules while preserving all text outside owned markers.
 
-### AC-marker-scoped-write — 마커 범위 쓰기
-
-- 지침 파일에서 MAENCOF 마커 밖 내용이 변경되지 않는다.
-- host configuration registry가 보고한 effective instruction target과 실제 bootstrap target이 같다.
-
-### AC-session-once-injection — 세션 1회 주입
-
-- L1 전체 본문과 meta-skill 본문이 세션당 한 번만 실린다.
-
-### AC-concern-failure-isolated — 실패 격리
-
-- 한 관심사가 실패해도 나머지 주입과 세션 기록이 진행된다.
-
 ## Boundary Exemptions
 
 ### `bootstrap.ts` — Hook bundle direct import
@@ -51,4 +36,4 @@
 
 ## Last Updated
 
-2026-09-26 — Insight lifecycle routing and versioned policy delivery.
+호스트 지침의 소유 섹션, 세션 1회 주입 범위 또는 정책 전달 예산이 바뀔 때 갱신한다.

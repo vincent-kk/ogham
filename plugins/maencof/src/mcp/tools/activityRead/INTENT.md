@@ -4,14 +4,15 @@
 
 활동 로그 읽기 도구. 자연어 프롬프트("오늘 활동 보여줘" 등)에서 직접 호출되므로 LLM이 출력 렌더링까지 스스로 수행한다.
 
+## Conventions
+
+LLM이 날짜별 Time / Category / Activity / Path 표와 총수로 렌더하며 경로 부재는 —로 표시한다.
+
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증
-- core/ 모듈에 로직 위임 (activityLog)
-- 출력을 날짜별 테이블로 렌더링 (Time / Category / Activity / Path 컬럼)
-- 빈 결과는 "No activity recorded" 메시지로 처리
+- 빈 결과는 No activity recorded 안내로 처리
 
 ### Ask first
 
@@ -20,14 +21,4 @@
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
-- 슬래시 스킬 래퍼 재도입
-
-## Output Contract
-
-- 날짜별 `notes[]` 반환. LLM은 `## Activity — {date}` 헤더 + 테이블로 렌더.
-- 테이블 컬럼: `Time` / `Category` / `Activity` / `Path`.
-- 푸터: `> Total: N activities recorded.`
-- 카테고리 enum: `document` / `search` / `index` / `config` / `diagnostic`.
-- `total_entries === 0`: "No activity recorded for the given date."
-- 렌더 상세는 DETAIL.md 참조.
+- 활동 로그를 수정하거나 슬래시 스킬 래퍼를 재도입

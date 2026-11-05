@@ -9,8 +9,7 @@
 
 ## API Contracts
 
-- `detectWatchedChanges(cwd): Promise<string[]>` — registry-derived pathspec으로 porcelain 변경을 조회한다.
-- `runChangelogDebt({ cwd }): Promise<{ continue: true }>` — pending 상태를 갱신하고 실패를 error log로 격리한다.
+감지는 부팅 경계에 두고 SessionStart는 pending 권고만 표면화한다. 매 턴 git spawn과 종료 차단을 피하기 위한 분리이며 실제 큐레이션은 changelog 스킬이 소유한다.
 
 ## Acceptance Criteria
 
@@ -19,14 +18,6 @@
 - Claude instruction/rules/agents와 Codex AGENTS/agents 변경이 같은 registry에서 파생된 pathspec으로 조회된다.
 - Codex command approval rules는 행동 지침 감시 대상으로 추가하지 않는다.
 
-### AC-changelog-output-excluded — 출력 자기 감지 방지
-
-- changelog 문서 변경만 있으면 pending을 만들지 않는다.
-
-### AC-failure-isolated — 감지 실패 격리
-
-- git 또는 내부 상태 오류가 발생해도 `{ continue: true }`를 반환한다.
-
 ## Last Updated
 
-2026-08-23 — changelog 감시 경로를 host configuration registry 소비자로 계약화했다.
+호스트별 변경 감시 표면, pending 보존 범위 또는 부팅 감지와 큐레이션의 책임 분리가 바뀔 때 갱신한다.

@@ -2,68 +2,23 @@
 
 ## Requirements
 
-- `activity_read` MCP 도구는 `.maencof-meta/activity/events/YYYY-MM-DD.jsonl`(NDJSON)을 읽어 날짜별 엔트리 목록을 반환한다.
-- 입력: `date?` (YYYY-MM-DD) / `category?` (enum) / `last_days?` (1-30, 기본 1).
-- `date` 지정 시 해당 날짜만 조회; 미지정 시 오늘부터 N일 최신순.
-- 파일 부재 시 해당 날짜는 결과에서 제외(단일 date 조회는 빈 notes).
-- 카테고리 필터는 `entries.filter(e => e.category === category)`로 적용.
-- 응답 엔트리 총수는 `MAX_ACTIVITY_READ_ENTRIES`(constants/thresholds)를 넘지 않는다 — 활동 로그는 매 호출 append 되므로 상한 없는 조회는 LLM 컨텍스트를 범람시킨다. 최신 날짜부터 담고, 상한에 걸리는 날짜는 최근(뒤쪽) 엔트리를 남긴다. 잘리면 `truncated: true` 를 세우고 `total_entries` 는 절단 전 매칭 총합을 유지한다.
+- `diagnostic` 카테고리는 진단·오류 기록의 미래 확장을 위해 예약한다.
+- 자연어 호출의 결과를 LLM이 직접 렌더한다. 슬래시 스킬 래퍼를 다시 두지 않는다.
+- 파일 I/O는 activityLog에 위임하는 정책을 유지한다. 읽기 전용 도구이며 파일 부재와 손상된 한 줄이 전체 조회를 실패시키지 않아야 한다.
+- 대량 활동 기록이 컨텍스트를 압도하지 않도록 엔트리 상한을 적용하고 최근 기록을 남긴다. 절단 전 총수와 truncated를 함께 보고해 일부 결과를 전체로 오해하지 않게 한다.
 
 ## API Contracts
-
-### Input (`ActivityReadInput`)
-
-| Field       | Type               | Required | Notes                                             |
-| ----------- | ------------------ | -------- | ------------------------------------------------- |
-| `date`      | `string`           | no       | `^\d{4}-\d{2}-\d{2}$`, 기본 오늘                  |
-| `category`  | `ActivityCategory` | no       | `document`/`search`/`index`/`config`/`diagnostic` |
-| `last_days` | `number`           | no       | 정수 1-30, 기본 1                                 |
-
-### Output (`ActivityReadResult`)
-
-```ts
-{
-  notes: Array<{
-    date: string; // YYYY-MM-DD
-    entries: ActivityEntry[]; // 필터·상한 적용 후
-    entry_count: number; // 응답에 실린 수
-  }>;
-  total_entries: number; // 필터 적용 후 매칭 총합 (절단 전)
-  truncated?: boolean; // MAX_ACTIVITY_READ_ENTRIES 로 잘렸을 때만 true
-}
-```
-
-`ActivityEntry`: `{ time: "HH:MM", category, description, path? }`.
 
 ### LLM Rendering Convention
 
 자연어 프롬프트(예: "오늘 maencof 활동 보여줘")로 직접 호출되므로 LLM이 다음 형식으로 렌더한다.
 
-```markdown
-## Activity — 2026-06-21
-
-| Time  | Category | Activity              | Path           |
-| ----- | -------- | --------------------- | -------------- |
-| 09:16 | document | Document created (L2) | 02_Derived/... |
-| 10:30 | config   | CLAUDE.md merged      | —              |
-
-> Total: 2 activities recorded.
-```
+표의 컬럼 순서는 Time / Category / Activity / Path이며 푸터는 `> Total: N activities recorded.`다.
 
 - 날짜별로 `## Activity — {date}` 헤더를 반복.
 - `path` 미존재 시 `—` 표기.
 - 날짜 정렬: 최신(가장 최근) 먼저. 같은 날 엔트리는 append 순(시간순).
 - 전체 엔트리 수(`total_entries`)가 0이면 표 대신 `No activity recorded for the given date.` 문장만 출력.
-
-### Category Enum
-
-| Category     | 의미        | 대응 MCP 도구 예시                                         |
-| ------------ | ----------- | ---------------------------------------------------------- |
-| `document`   | 문서 CRUD   | `create`/`read`/`update`/`delete`/`move`/`capture_insight` |
-| `search`     | 검색/탐색   | `kg_search`/`kg_navigate`/`kg_context`/`kg_suggest_links`  |
-| `index`      | 인덱스 작업 | `kg_build`/`kg_status`                                     |
-| `config`     | 설정 변경   | `claudemd_merge`/`claudemd_read`/`claudemd_remove`         |
-| `diagnostic` | 진단/오류   | 예약됨, 미래 확장                                          |
 
 ### Error Handling
 
@@ -72,26 +27,8 @@
 
 ## Acceptance Criteria
 
-### AC-missing-file-empty-result — 파일 부재의 빈 결과
-
-- 조회 날짜의 `events/YYYY-MM-DD.jsonl` 이 없어도 throw 하지 않고, 단일 `date` 조회는 빈 `notes` 를, 범위 조회는 그 날짜를 제외한 결과를 반환한다.
-
-### AC-broken-line-skipped — 손상된 라인의 격리
-
-- NDJSON 한 줄이 파싱에 실패해도 그 줄만 버리고 같은 파일의 나머지 엔트리는 결과에 남는다.
-
-### AC-category-filter-applied — 카테고리 필터
-
-- `category` 가 주어지면 결과의 모든 엔트리가 그 카테고리이고, `entry_count` · `total_entries` 도 필터 적용 후 값이다.
-
-### AC-recent-first-window — 최신순 기간 조회
-
-- `date` 미지정 시 오늘부터 `last_days` 일을 최신 날짜 먼저 반환하며, 같은 날 엔트리는 append 순을 유지한다.
-
-### AC-entry-cap — 응답 엔트리 상한
-
-- 매칭 엔트리가 `MAX_ACTIVITY_READ_ENTRIES` 를 넘으면 응답에 실린 엔트리 합이 상한과 같고 `truncated` 가 true 이며, `total_entries` 는 절단 전 총합을 유지한다. 상한 이내면 `truncated` 는 실리지 않는다.
+행동별 결과와 경계값은 이 모듈을 검증하는 테스트가 고정한다.
 
 ## Last Updated
 
-2026-08-04 — 응답 엔트리 상한(`MAX_ACTIVITY_READ_ENTRIES`)과 `truncated` 신호를 계약에 추가했다.
+엔트리 상한·절단 신호 또는 LLM 렌더링 규약이 바뀔 때 갱신한다.

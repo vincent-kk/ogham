@@ -4,6 +4,10 @@
 
 vault 경로 해석 + in-memory KnowledgeGraph 캐시 보관. read-path freshness gating은 [`middlewares`](../middlewares/INTENT.md)의 `ensureFreshGraphNonBlocking`이 소유하며, 호출자는 그쪽을 직접 쓴다 — 여기서 감싸면 두 모듈이 서로를 참조해 순환이 된다.
 
+## Conventions
+
+vault 경로 결정과 in-memory `KnowledgeGraph` 보관, 이 두 가지만 소유한다. read-path freshness gating 은 형제 organ `middlewares` 의 `ensureFreshGraphNonBlocking` 이 소유하고 호출자가 그쪽을 직접 쓴다 — 여기서 감싸면 두 모듈이 서로를 참조해 순환이 된다.
+
 ## Boundaries
 
 ### Always do

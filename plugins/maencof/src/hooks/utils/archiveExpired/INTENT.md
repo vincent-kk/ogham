@@ -2,19 +2,13 @@
 
 ## Purpose
 
-MCP bootSweep 관심사. L4 `04_Action/` 의 아카이브 불변식을 매 부팅(직전 세션 마무리) 집행한다 — `expires < today` 만료본은 서고 `99_Archive/actions/` 로 옮기고(정방향), archive 에만 있고 원위치에 없는 문서는 경량 스텁(frontmatter + 요약 + [[링크]])을 소급 복구한다(역방향 — legacy `.maencof-meta/archive/04_Action/` 도 읽기 전용으로 순회). 어느 쪽이든 원위치에 스텁을 남겨 그래프 연결을 유지한다(고아 방지). 의미적 증류(L2 수확)는 `/archive-harvest` 스킬이 별도 수행.
-
-## Structure
-
-- `archiveExpired.ts` — `runArchiveExpired` 오케스트레이터 (정방향 → 역방향 백필 → 결과 병합)
-- `operations/` — `archiveExpiredForward`(만료 이동+스텁, 롤백)·`backfillMissingStubs`(누락 스텁 소급 복구) (organ)
-- `utils/` — frontmatter 파싱·스텁 생성·경로/YAML 헬퍼 (organ, 함수 1개/파일)
+MCP bootSweep이 L4 만료 정본을 서고로 옮기고 원위치의 스텁을 보장한다. legacy archive도 읽기 전용으로 백필해 inbound 링크의 고아화를 막는다. 의미적 증류(L2 수확)는 archive-harvest 스킬이 별도 소유한다.
 
 ## Conventions
 
-- 훅 번들 격리: Node builtin(`node:fs/promises`·`node:path`), tree-shake 가능한 `@ogham/cross-platform`(`normalize`), core 순수 함수 `documentParser/operations/extractLinks`(위키링크 파싱 정본)만 사용. zod·fast-glob 미의존 — 경량 자체 구현.
-- `operations/`·`utils/` concrete 파일 직접 import (배럴 없음)
-- 대상은 `04_Action` 구조만 — 쓰기는 서고 `99_Archive/actions/` 단일 목적지
+- 훅 도달 그래프의 격리를 위해 Node builtin·tree-shake 가능한 cross-platform·순수 documentParser 링크 파서만 사용한다. zod·fast-glob은 도입하지 않는다.
+- 내부 연산과 헬퍼는 concrete 파일로 직접 가져온다.
+- 대상은 L4 계열이며 쓰기 목적지는 단일 서고다. 정본 파서 재사용은 코드 예시 링크가 그래프에 다시 들어오는 것을 막는다.
 
 ## Boundaries
 

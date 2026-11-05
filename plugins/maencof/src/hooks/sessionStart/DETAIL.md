@@ -10,18 +10,9 @@
 
 ## API Contracts
 
-- `sessionStart.entry.ts` — 브리지 진입점. stdin → selfProbe → orchestrator → stdout. esbuild 가 `bridge/<host>/session-start.mjs` 로 번들한다.
-- `orchestrateSessionStart(input)` — bootstrap 과 lifecycle 결과를 단일 envelope 으로 병합한다.
+probe advisory는 필터를 통과한 오류만 additionalContext 한 채널에 합친다. bootstrap이 lifecycle보다 앞서야 하며 실패가 다른 관심사나 세션 시작을 막아서는 안 된다.
 
 ## Acceptance Criteria
-
-### AC-concern-isolation — 관심사 격리
-
-- 한 관심사가 throw 해도 나머지가 실행되고 envelope 이 반환된다.
-
-### AC-quiet-on-healthy — 정상 시 침묵
-
-- selfProbe 에 실제 실패가 없으면 advisory 가 붙지 않는다.
 
 ### AC-order-bootstrap-then-lifecycle — 실행 순서
 
@@ -29,4 +20,4 @@
 
 ## Last Updated
 
-2026-07-30 — 실행 순서·격리 계약을 유지하며 공유 패키지 root import와 출력 기반 번들 가드를 현행화했다.
+관심사 실행 순서·격리 방식 또는 entry의 import·번들 가드 조건이 바뀔 때 갱신한다.

@@ -2,35 +2,20 @@
 
 ## Requirements
 
-- 첫 prompt: session context (KG 요약, 동반자 identity, 지시문) + turn context를 `\n\n`으로 결합하여 emit.
-- 후속 prompt: turn context만 emit.
-- session context의 KG 요약에 L5 buffer 인박스 카운트를 포함한다 (`subLayer === 'buffer'` 노드 수). 0이면 라인을 생략한다 — 미분류 항목 triage(`/maencof:organize`)를 유도하는 세션 1회 넛지.
-- 인덱서 내부 상태(stale 카운트, freshness 비율, `<kg-stale-advisory>` 분기 등)는 컨텍스트에 절대 포함하지 않는다. 인덱스 신선도는 MCP server가 cache + partial reindex로 처리한다.
-- maencof vault가 아닌 디렉터리에서 호출되면 즉시 no-op (`isMaencofVault` 가드).
-- session context는 세션 1회만 빌드하고 캐시 (`writePromptContext` + `markSessionInjected`).
-- turn context는 매 prompt마다 캐시 hit 우선, miss 시 `core/turnContext` 에서 새로 빌드 후 `writeTurnContext` persist.
+- 세션 컨텍스트는 세션 한 번, turn 컨텍스트는 매 prompt에 주입한다. 첫 prompt의 KG·identity·지시문과 매 턴의 요약 책임을 혼합하지 않는다.
+- L5 buffer 인박스 카운트는 미분류 항목 triage를 유도하는 세션 1회 넛지다. 빈 인박스에는 안내를 생략한다.
+- stale 카운트·freshness·advisory 같은 인덱서 내부 상태는 주입하지 않는다. 신선도는 MCP의 cache·partial reindex가 소유한다.
+- turn 컨텍스트 빌더와 캐시는 MCP와 공유하는 core를 사용한다. 훅 안에 복제하면 두 소비 경로의 의미가 갈라진다.
 
 ## API Contracts
 
-- 독립 bridge 없음 — `userPromptSubmit` orchestrator 가 `injectContext` 를 호출한다.
-- export: `injectContext(input: UserPromptSubmitInput): HookOutput`.
-- turn 컨텍스트 빌드: `core/turnContext` (`buildTurnContext`, `readIndexMetadata`, `readCompanionIdentity`, `compressMarkdownBody`, `readL1Summary`, `buildCompanionIdentityTag`; mcp 와 공유).
-- 캐시 의존: `core/cacheManager` (`readTurnContext` / `writeTurnContext` / `writePromptContext` / `isFirstInSession` / `markSessionInjected`).
-- 실패 정책: 모든 I/O 실패는 `appendErrorLogSafe`로 silent 처리, 항상 `continue: true` 반환.
+독립 브리지 없이 UserPromptSubmit 관심사로 실행한다. turn 빌더와 캐시는 MCP와 같은 core 구현을 사용해 두 경로의 컨텍스트가 갈라지지 않게 한다. 모든 I/O 실패는 로그로 격리하며 턴을 막지 않는 것이 정책이다.
 
 ## Acceptance Criteria
-
-### AC-first-prompt-session-context — 첫 프롬프트만 session context
-
-- 첫 프롬프트에만 session context 가 실리고 이후 프롬프트는 turn context 만 싣는다.
 
 ### AC-no-indexer-state — 인덱서 상태 비노출
 
 - 주입 문자열에 stale 카운트·freshness 비율·advisory 분기가 없다.
-
-### AC-non-vault-noop — 비볼트 no-op
-
-- 볼트가 아닌 cwd 에서 부수효과 없이 `{ continue: true }` 를 반환한다.
 
 ## Boundary Exemptions
 
@@ -42,4 +27,4 @@
 
 ## Last Updated
 
-2026-07-30 — acceptance group 을 채우고 훅 직접 import 면책을 선언했다.
+세션·턴 컨텍스트의 주입 범위, L5 인박스 안내 또는 인덱서 상태 비노출 계약이 바뀔 때 갱신한다.

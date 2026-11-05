@@ -4,6 +4,10 @@
 
 SessionStart 의 실제 작업 헬퍼. 호스트 project 지침 초기화, 볼트 검증, 설정 프로비저닝. 이벤트 디스패처는 부모 [`sessionStart`](../../INTENT.md) 이고 여기가 아니다.
 
+## Conventions
+
+호스트 project 지침에서 MAENCOF 소유 섹션만 관리한다. 마커 밖 사용자 지침이나 다른 소유자 섹션은 건드리지 않는다.
+
 ## Boundaries
 
 ### Always do
@@ -26,7 +30,3 @@ SessionStart 의 실제 작업 헬퍼. 호스트 project 지침 초기화, 볼�
 
 - MAENCOF 마커 밖 사용자 지침 또는 다른 소유자 섹션 수정
 - SessionStart writer의 책임을 신규 자동 작성으로 확장
-
-## Dependencies
-
-- `@ogham/agent-artifacts`, 목적별 project instruction target, 기존 bootstrap 도메인 모듈.

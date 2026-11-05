@@ -4,7 +4,7 @@
 
 도구 등록 wrapper. 도메인별로 MCP 도구를 서버에 등록하는 함수만 소유하고, 오케스트레이션은 부모 [`server`](../INTENT.md)의 `server.ts` 가 한다. 핸들러 구현은 `mcp/tools/` 가 소유하며 여기서는 등록만 한다.
 
-## Structure
+## Conventions
 
 - 등록 함수는 `operations/` 아래에서 도구 도메인 단위로 갈린다 — 파일 하나가 `createServer()` 가 한 번에 호출하는 등록 단위이고, 도메인이 아니라 파일 크기로 쪼개면 그 호출 목록이 경계 의미를 잃는다. 그룹 경계 변경이 아래 `Ask first` 인 이유다.
 

@@ -4,6 +4,10 @@
 
 UserPromptSubmit 훅. 사용자 프롬프트에 지식 컨텍스트 주입.
 
+## Conventions
+
+인박스 카운트는 미분류 항목 정리를 유도하는 세션 1회 넛지다. 인덱서 신선도 진단을 이 메시지에 섞지 않는다.
+
 ## Boundaries
 
 ### Always do

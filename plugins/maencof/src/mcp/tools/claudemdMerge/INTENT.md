@@ -4,12 +4,15 @@
 
 CLAUDE.md maencof 섹션 병합 도구.
 
+## Conventions
+
+대상은 호스트 instruction manager가 결정한다. 읽지 않는 지침 파일에 쓰면 성공처럼 보이는 무효 변경이 된다.
+
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증
-- core/ 모듈에 로직 위임
+- maencof 마커 밖 내용 보존; dry_run은 적용·백업 없이 계획만 보고
 
 ### Ask first
 
@@ -17,4 +20,4 @@ CLAUDE.md maencof 섹션 병합 도구.
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
+- 호스트 지침 경로를 재조립하거나 입력 content를 응답에 에코

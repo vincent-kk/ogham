@@ -9,23 +9,15 @@
 
 ## API Contracts
 
-- `orchestratePostToolUse(input: DispatchInput): MergedHookOutput` — activity allowlist gate와 shared lifecycle dispatch를 실행해 병합한다.
+activity 기록과 lifecycle 판정은 서로 다른 게이트를 가진다. native tool 비기록 규칙이 lifecycle 실행까지 막지 않아야 한다.
 
 ## Acceptance Criteria
-
-### AC-native-not-recorded — native tool 비기록
-
-- `Edit`, `apply_patch`, `Bash` 같은 native tool은 activity log에 기록하지 않는다.
 
 ### AC-shared-lifecycle-matcher — Pre/Post 공통 matcher
 
 - Claude `Edit`와 Codex `apply_patch`가 같은 logical edit action을 각각 한 번 실행한다.
 - 같은 tool name은 response 형태와 무관하게 같은 action 집합을 실행한다.
 
-### AC-concern-isolated — concern 실패 격리
-
-- recorder 또는 lifecycle 하나가 실패해도 다른 concern의 결과가 보존된다.
-
 ## Last Updated
 
-2026-08-23 — raw physical tool을 공유 logical lifecycle matcher에 전달하는 Post 계약을 추가했다.
+activity 기록 게이트, lifecycle 실행 횟수 또는 Pre와 공유하는 matcher 입력이 바뀔 때 갱신한다.

@@ -4,6 +4,10 @@
 
 누락된 설정 파일 자동 생성. configRegistry 기반 기본값 프로비저닝.
 
+## Conventions
+
+기존 설정 파일을 덮어쓰지 않는다. 누락된 것만 만든다 — 사용자가 고친 값을 프로비저닝이 되돌리면 안 된다.
+
 ## Boundaries
 
 ### Always do

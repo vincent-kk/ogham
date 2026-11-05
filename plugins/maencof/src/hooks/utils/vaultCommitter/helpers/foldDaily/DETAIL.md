@@ -10,24 +10,13 @@
 
 ## API Contracts
 
-- `isAutoCommitSubject(subject)` — subject 가 자동 커밋 마커에 걸리는지. 마커는 `AUTO_COMMIT_SUBJECT_MARKERS` includes 매칭과 `message_template` 정적 접두부 startsWith 매칭.
-- `findFoldBase(...)` — HEAD 부터 걸어 접을 BASE 를 찾는다. 조건 미달이면 `null`.
-- `tryFoldCommit(...)` — BASE 로 soft reset 후 재커밋. 실패 시 복구하고 `false`.
-- `revParse` 는 배럴에 없다. 내부 공용 헬퍼다.
+자동 커밋 마커와 사용자 템플릿의 정적 접두부가 폴딩 대상을 결정한다. 수동 커밋은 경계이며 root·탐색 상한·HEAD 부재에는 일반 커밋으로 폴백한다. 재커밋 실패가 기존 HEAD를 잃게 해서는 안 된다.
 
 ## Acceptance Criteria
-
-### AC-manual-commit-boundary — 수동 커밋 경계
-
-- 수동 커밋을 만나면 그 지점에서 탐색이 멈추고 그 커밋은 접히지 않는다.
 
 ### AC-soft-reset-only — soft reset 전용
 
 - 이 fractal 이 실행하는 git 명령에 `reset --hard` 나 rebase 가 없다.
-
-### AC-recover-on-failure — 실패 복구
-
-- 재커밋 실패 시 HEAD 가 원래 커밋으로 돌아온다.
 
 ## Boundary Exemptions
 
@@ -39,4 +28,4 @@
 
 ## Last Updated
 
-2026-07-30 — 폴딩 경계·복구 계약과 훅 직접 import 면책을 문서화했다.
+자동 커밋 폴딩 경계, soft reset 제한 또는 재커밋 실패의 HEAD 복구 계약이 바뀔 때 갱신한다.

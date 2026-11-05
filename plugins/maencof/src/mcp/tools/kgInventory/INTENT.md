@@ -4,6 +4,10 @@
 
 Enumerate active vault documents independently of graph freshness, relevance and tags.
 
+## Conventions
+
+Keep disk enumeration independent of relevance and graph state so maintenance can see damaged or unindexed documents.
+
 ## Boundaries
 
 ### Always do
