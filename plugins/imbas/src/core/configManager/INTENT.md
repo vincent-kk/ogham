@@ -25,3 +25,4 @@ config 의 dot-path 기반 접근 및 관리. user(호스트 상태 루트)와 p
 
 - 직접 fs.writeFileSync 호출
 - 병합 결과를 어느 한 레이어에 되쓰기 — project 재정의가 user 기본값에 구워진다
+- 알려진 한계: 설정 페이지는 표시된 모든 값을 전송하여 project 저장 시 그 값을 project 파일에 고정한다. 이후 user 계층의 변경은 해당 project에 반영되지 않는다.
