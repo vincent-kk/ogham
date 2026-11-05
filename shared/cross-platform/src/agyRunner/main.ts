@@ -23,8 +23,6 @@ import type {
 import { runAgyHook } from "./runAgyHook.js";
 import { claimSessionStartOnce } from "./sessionOnce.js";
 
-const NOOP = { injectSteps: [] };
-
 const claudeEvent = process.argv[2] as ClaudeHookEvent;
 const target = process.argv[3] ? resolve(process.argv[3]) : "";
 
@@ -74,5 +72,7 @@ try {
   });
   process.stdout.write(JSON.stringify(response));
 } catch {
-  process.stdout.write(JSON.stringify(NOOP));
+  const noop =
+    claudeEvent === "PreToolUse" ? { decision: "allow" } : { injectSteps: [] };
+  process.stdout.write(JSON.stringify(noop));
 }
