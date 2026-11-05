@@ -14,7 +14,7 @@ Deterministic union of a `QueryRole` query set. Zero loss is its contract.
 
 ## mesh_lookup (readOnly, idempotent)
 
-Map terms to MeSH. **in**: `terms[]`, `includeScopeNote?`, `includeScr?`. **out**: `mappings[]{input, matched, descriptorName?, descriptorUi?, treeNumbers?, entryTerms?, scopeNote?, scrMappings?}`. Called by the agent's generation mode to inform explosion/synonym decisions.
+Map terms to MeSH. **in**: `terms[]`, `includeScopeNote?`, `includeScr?`. **out**: `mappings[]{input, matched, descriptorName?, descriptorUi?, treeNumbers?, entryTerms?, scopeNote?, scrMappings?, error?}`. Called by the agent's generation mode to inform explosion/synonym decisions. NCBI HTTP errors, network errors, and unparseable ESearch or ESummary responses return `matched: NONE` with `error: "MeSH lookup failed"` for that term; other terms continue resolving. Genuine unmatched terms return `matched: NONE` without `error`. The error is a fixed reason, never the raw exception or response.
 
 ## fetch_fulltext (write, idempotent)
 
