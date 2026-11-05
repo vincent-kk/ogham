@@ -130,11 +130,15 @@ export function loadConfig(env: Env = process.env): Config {
   const downloadsDir = expandHome(
     env.YTDLP_DOWNLOADS_DIR?.trim() || path.join(home, 'downloads'),
   );
-  const enableAll = boolEnv(env.YTDLP_ENABLE_ALL);
+  const enableAll = boolEnv('YTDLP_ENABLE_ALL', env.YTDLP_ENABLE_ALL);
   const enable = Object.fromEntries(
     (Object.keys(TOOL_DEFAULT_ENABLED) as EnableKey[]).map((key) => [
       key,
-      boolEnv(env[enableEnvName(key)], TOOL_DEFAULT_ENABLED[key]) || enableAll,
+      boolEnv(
+        enableEnvName(key),
+        env[enableEnvName(key)],
+        TOOL_DEFAULT_ENABLED[key],
+      ) || enableAll,
     ]),
   ) as Record<EnableKey, boolean>;
 

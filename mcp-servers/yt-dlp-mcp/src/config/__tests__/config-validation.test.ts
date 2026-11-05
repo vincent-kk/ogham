@@ -7,11 +7,17 @@ describe('loadConfig environment validation', () => {
     expect(() => loadConfig({ YTDLP_ENABLE_ALL: 'maybe' })).toThrow(
       /configuration/i,
     );
+    expect(() => loadConfig({ YTDLP_ENABLE_ALL: 'maybe' })).toThrow(
+      /YTDLP_ENABLE_ALL/,
+    );
   });
 
   it('rejects an unrecognized boolean for a default-on tool', () => {
     expect(() => loadConfig({ YTDLP_ENABLE_SEARCH: 'tru' })).toThrow(
       /configuration/i,
+    );
+    expect(() => loadConfig({ YTDLP_ENABLE_SEARCH: 'tru' })).toThrow(
+      /YTDLP_ENABLE_SEARCH/,
     );
   });
 
