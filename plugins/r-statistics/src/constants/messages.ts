@@ -8,6 +8,8 @@ export const ERROR_MESSAGES = {
   INVALID_TIMEOUT:
     "timeoutMs must be a positive number within the allowed ceiling.",
   EMPTY_SCRIPT: "scriptCode must be a non-empty R script.",
+  /** Stops the R wrapper before an empty contract path can read stdin. */
+  EMPTY_CONTRACT_PATH: "R_STATISTICS_CONTRACT is empty",
   JOB_NOT_FOUND: "No R job exists for the given jobId.",
   WORKSPACE_NOT_FOUND: "The referenced workspace does not exist.",
   COMMAND_BLOCKED: "The requested command is not on the approved whitelist.",

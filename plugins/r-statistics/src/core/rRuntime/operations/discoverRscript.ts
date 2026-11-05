@@ -5,7 +5,7 @@ import {
   readdirSync,
   statSync,
 } from "node:fs";
-import { delimiter, join } from "node:path";
+import { delimiter, isAbsolute, join, resolve } from "node:path";
 
 import { spawnCliSync } from "@ogham/cross-platform";
 
@@ -29,7 +29,7 @@ function isExecutableFile(candidate: string): boolean {
 function scanPath(binName: string): string | null {
   for (const dir of (process.env.PATH ?? "").split(delimiter)) {
     if (!dir) continue;
-    const candidate = join(dir, binName);
+    const candidate = resolve(dir, binName);
     if (isExecutableFile(candidate)) return candidate;
   }
   return null;
@@ -44,7 +44,7 @@ function queryWindowsRegistry(): string | null {
   if (result.code !== 0 || !result.stdout) return null;
   const match = result.stdout.match(/InstallPath\s+REG_SZ\s+(.+)/);
   if (!match) return null;
-  const candidate = join(match[1].trim(), "bin", "Rscript.exe");
+  const candidate = resolve(match[1].trim(), "bin", "Rscript.exe");
   return isExecutableFile(candidate) ? candidate : null;
 }
 
@@ -74,7 +74,10 @@ export function discoverRscript(): string | null {
   const platform = detectPlatform();
 
   const envOverride = process.env[RSCRIPT_ENV_VAR];
-  if (envOverride && isExecutableFile(envOverride)) return envOverride;
+  const overrideCandidate =
+    envOverride && !isAbsolute(envOverride) ? resolve(envOverride) : envOverride;
+  if (overrideCandidate && isExecutableFile(overrideCandidate))
+    return overrideCandidate;
 
   const fromPath = scanPath(
     platform === Platform.Windows ? "Rscript.exe" : "Rscript",
