@@ -7,12 +7,14 @@ import {
   mkdirSync,
   readFileSync,
   renameSync,
+  rmSync,
   rmdirSync,
 } from 'node:fs';
 import { dirname, join } from 'node:path';
 
 import type { MigrationOp, MigrationWAL } from '../../../types/setup.js';
 
+import { restoreMigrationBackup } from './helpers/restoreMigrationBackup.js';
 import { updateFrontmatterField } from './updateFrontmatterField.js';
 import { updateVersionFile } from './updateVersionFile.js';
 import { writeWAL } from './writeWAL.js';
@@ -33,9 +35,17 @@ export function rollbackMigration(vaultPath: string): {
     readFileSync(walPath, 'utf-8'),
   ) as MigrationWAL;
 
-  // 완료된 작업만 역순으로 롤백
+  const backupDir = join(
+    vaultPath,
+    '.maencof-meta',
+    'migration-backups',
+    wal.id,
+  );
+  const restoreBytes = wal.status === 'in_progress' && wal.backup !== undefined;
+
+  // 실행 중 실패한 연산의 부분 변경도 역실행 대상이다.
   const doneEntries = wal.operations
-    .filter((e) => e.status === 'done')
+    .filter((e) => e.status === 'done' || e.status === 'in_progress')
     .reverse();
 
   let rolledBack = 0;
@@ -44,8 +54,9 @@ export function rollbackMigration(vaultPath: string): {
       rollbackOp(entry.op, vaultPath);
       entry.status = 'rolled_back';
       rolledBack++;
+      writeWAL(walPath, wal);
     } catch (err) {
-      wal.status = 'rolled_back';
+      wal.status = 'in_progress';
       writeWAL(walPath, wal);
       return {
         success: false,
@@ -54,9 +65,20 @@ export function rollbackMigration(vaultPath: string): {
       };
     }
 
-  wal.status = 'rolled_back';
-  wal.completedAt = new Date().toISOString();
-  writeWAL(walPath, wal);
+  try {
+    if (restoreBytes && wal.backup)
+      restoreMigrationBackup(backupDir, wal.backup);
+    wal.status = 'rolled_back';
+    wal.completedAt = new Date().toISOString();
+    writeWAL(walPath, wal);
+    rmSync(backupDir, { recursive: true, force: true });
+  } catch (err) {
+    return {
+      success: false,
+      rolledBack,
+      error: err instanceof Error ? err.message : String(err),
+    };
+  }
 
   return { success: true, rolledBack };
 }

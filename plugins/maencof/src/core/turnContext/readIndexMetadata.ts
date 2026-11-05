@@ -1,6 +1,6 @@
 /**
  * @file readIndexMetadata.ts
- * @description Read .maencof/{nodes.json|index.json} metadata for turn-context assembly.
+ * @description Read committed generation metadata for turn-context assembly.
  */
 import { readCachedNodesArray } from './readCachedNodesArray.js';
 

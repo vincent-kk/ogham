@@ -3,6 +3,7 @@
  * @description kg_status 도구 핸들러 — 인덱스 상태 조회
  */
 import { MAX_LINK_ORPHAN_PATHS } from '../../../constants/thresholds.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
 import { MetadataStore } from '../../../core/indexer/metadataStore/index.js';
 import type { NodeId } from '../../../types/common.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
@@ -55,7 +56,13 @@ export async function handleKgStatus(
   graph: KnowledgeGraph | null,
   input: KgStatusInput,
 ): Promise<KgStatusResult> {
-  const store = new MetadataStore(vaultPath);
+  const store = new MetadataStore(vaultPath, (error) => {
+    appendErrorLogSafe(vaultPath, {
+      hook: 'kg-status-load',
+      error: String(error),
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   if (!graph)
     return {

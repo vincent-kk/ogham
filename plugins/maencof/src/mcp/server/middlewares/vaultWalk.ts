@@ -18,7 +18,13 @@ export async function walkVaultForExternalChanges(
   vaultPath: string,
 ): Promise<void> {
   try {
-    const store = new MetadataStore(vaultPath);
+    const store = new MetadataStore(vaultPath, (error) => {
+      appendErrorLogSafe(vaultPath, {
+        hook: 'vault-walk-load',
+        error: String(error),
+        timestamp: new Date().toISOString(),
+      });
+    });
     const snapshot = await store.loadSnapshot();
     if (!snapshot) return;
 

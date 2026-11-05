@@ -88,17 +88,15 @@ describe("GraphCache read-only loading", () => {
   });
 
   it("keeps a cached graph when the commit marker disappears", async () => {
-    await writeFile(join(indexDir, "nodes.json"), "[]");
-    await writeFile(join(indexDir, "edges.json"), "[]");
-    await writeFile(
-      join(indexDir, "graph-meta.json"),
-      JSON.stringify({
-        schemaVersion: 2,
-        builtAt: "2026-01-01T00:00:00Z",
-        nodeCount: 0,
-        edgeCount: 0,
-      }),
-    );
+    await new MetadataStore(vaultDir).saveGraph({
+      nodes: new Map(),
+      edges: [],
+      builtAt: "2026-01-01T00:00:00Z",
+      nodeCount: 0,
+      edgeCount: 0,
+    });
+    // saveGraph cleans legacy caches; seed these bytes afterward to test their preservation.
+    await writeFile(join(indexDir, "index.json"), legacyIndex);
     const cache = new GraphCache();
     const graph = await cache.getGraph(vaultDir);
     expect(graph).not.toBeNull();

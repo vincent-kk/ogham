@@ -7,7 +7,13 @@
  * 초과하면 저살리언스 turn 섹션을 session으로 자동 강등해 예산 이내로 맞춘다. 실패는
  * 격리(로그 후 원본 유지) — 마이그레이션 오류가 서버 기동을 막지 않는다.
  */
-import { copyFileSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  copyFileSync,
+  existsSync,
+  readFileSync,
+  renameSync,
+  writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 
 import { TURN_IDENTITY_CHAR_BUDGET } from '../../constants/companionIdentity.js';
@@ -122,11 +128,13 @@ export function runCompanionMigration(cwd: string): CompanionMigrationResult {
 
     const backupPath = backupPathFor(identityPath);
     copyFileSync(identityPath, backupPath);
+    const tempPath = `${identityPath}.temp`;
     writeFileSync(
-      identityPath,
+      tempPath,
       JSON.stringify(finalData, null, 2) + '\n',
       'utf-8',
     );
+    renameSync(tempPath, identityPath);
 
     return {
       migrated: true,

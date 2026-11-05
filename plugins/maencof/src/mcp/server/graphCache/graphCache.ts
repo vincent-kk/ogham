@@ -16,6 +16,7 @@ import {
   tryProjectRoot,
 } from '@ogham/cross-platform';
 
+import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
 import { invalidateQueryCache } from '../../../search/queryEngine/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
@@ -70,7 +71,13 @@ export async function loadGraphIfNeeded(
 ): Promise<KnowledgeGraph | null> {
   if (cachedGraph && cacheVaultPath === vaultPath) return cachedGraph;
 
-  const store = new MetadataStore(vaultPath);
+  const store = new MetadataStore(vaultPath, (error) => {
+    appendErrorLogSafe(vaultPath, {
+      hook: 'graph-cache-load',
+      error: String(error),
+      timestamp: new Date().toISOString(),
+    });
+  });
   const graph = await store.loadGraph();
   if (graph) {
     cachedGraph = graph;

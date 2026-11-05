@@ -132,7 +132,7 @@ export interface ActivationResult {
   collapsedMembers?: NodeId[];
 }
 
-/** 직렬화 가능한 그래프 (legacy 단일 index.json 저장용 — 자동 마이그레이션 경로에서만 사용) */
+/** 독립적인 그래프 JSON 직렬화 형식. 디스크 세대 캐시와 별개다. */
 export interface SerializedGraph {
   nodes: KnowledgeNode[];
   edges: KnowledgeEdge[];
@@ -155,6 +155,8 @@ export interface SerializedGraphMeta {
   builtAt: string;
   nodeCount: number;
   edgeCount: number;
-  /** 샤드 스키마 버전 (v1 = 단일 index.json, v2 = 3-파일 분리) */
-  schemaVersion: 2;
+  /** 불변 세대 샤드를 사용하는 저장 형식. */
+  schemaVersion: 3;
+  /** 모든 샤드가 공유하는 저장 세대 식별자. */
+  generation: string;
 }

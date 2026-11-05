@@ -48,7 +48,13 @@ export async function runMutateSideEffects(
   alsoAffectedPath?: string | null,
 ): Promise<void> {
   try {
-    const store = new MetadataStore(vaultPath);
+    const store = new MetadataStore(vaultPath, (error) => {
+      appendErrorLogSafe(vaultPath, {
+        hook: 'mutate-side-effects-load',
+        error: String(error),
+        timestamp: new Date().toISOString(),
+      });
+    });
     const entries = classifyEntries(toolName, affectedPath, alsoAffectedPath);
 
     if (entries.length > 0) await store.appendStaleEntries(entries);

@@ -33,15 +33,27 @@ function writeMinimalGraph(): void {
     accessed_count: 0,
   };
   const cacheDir = join(vaultDir, '.maencof');
-  writeFileSync(join(cacheDir, 'nodes.json'), JSON.stringify([node]), 'utf-8');
-  writeFileSync(join(cacheDir, 'edges.json'), JSON.stringify([]), 'utf-8');
+  const dir = join(cacheDir, 'generations', 'fixture');
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(
+    join(dir, 'nodes.json'),
+    JSON.stringify({ generation: 'fixture', data: [node] }),
+    'utf-8',
+  );
+  for (const file of ['edges.json', 'archive-members.json'])
+    writeFileSync(
+      join(dir, file),
+      JSON.stringify({ generation: 'fixture', data: [] }),
+      'utf-8',
+    );
   writeFileSync(
     join(cacheDir, 'graph-meta.json'),
     JSON.stringify({
       builtAt: '2026-01-01T00:00:00Z',
       nodeCount: 1,
       edgeCount: 0,
-      schemaVersion: 2,
+      schemaVersion: 3,
+      generation: 'fixture',
     }),
     'utf-8',
   );

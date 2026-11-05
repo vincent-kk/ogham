@@ -51,7 +51,7 @@ export type MigrationOp =
 /** WAL 항목 (작업 + 실행 상태) */
 export interface MigrationWALEntry {
   op: MigrationOp;
-  status: 'pending' | 'done' | 'rolled_back';
+  status: 'pending' | 'in_progress' | 'done' | 'rolled_back';
   executedAt?: string;
 }
 
@@ -62,6 +62,16 @@ export interface MigrationWAL {
   completedAt?: string;
   status: 'in_progress' | 'completed' | 'rolled_back';
   operations: MigrationWALEntry[];
+  /** 실행 전 파일 바이트와 부재 상태. 백업 복사가 완료된 뒤에만 기록한다. */
+  backup?: MigrationBackup;
+}
+
+/** 실행별 백업 사본의 복구 주소와 실행이 생성할 디렉터리. */
+export interface MigrationBackup {
+  /** 원래 경로와 사본 파일명. copy가 없으면 실행 전에는 파일이 없었다. */
+  files: Array<{ path: string; copy?: string }>;
+  /** 실행 전 존재하지 않은 부모/대상 디렉터리. */
+  createdDirectories: string[];
 }
 
 /** 마이그레이션 계획 (side-effect 없는 프리뷰) */

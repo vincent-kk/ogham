@@ -36,15 +36,19 @@ function writeIndex(
     gist?: string;
   }>,
 ): void {
+  mkdirSync(join(vaultDir, '.maencof', 'generations', 'fixture'), {
+    recursive: true,
+  });
   writeFileSync(
-    join(vaultDir, '.maencof', 'nodes.json'),
-    JSON.stringify(nodes),
+    join(vaultDir, '.maencof', 'generations', 'fixture', 'nodes.json'),
+    JSON.stringify({ generation: 'fixture', data: nodes }),
     'utf-8',
   );
   writeFileSync(
     join(vaultDir, '.maencof', 'graph-meta.json'),
     JSON.stringify({
-      schemaVersion: 2,
+      schemaVersion: 3,
+      generation: 'fixture',
       builtAt: 'x',
       nodeCount: nodes.length,
       edgeCount: 0,
