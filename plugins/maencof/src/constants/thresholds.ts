@@ -2,6 +2,18 @@ export const FULL_REBUILD_THRESHOLD = 0.1;
 
 export const MAX_CROSS_LAYER_EDGES_PER_NODE = 50;
 
+/** 시스템 생성 엣지의 초기 가중치 정본 — 빌더가 같은 정책을 리터럴로 복제하지 않는다. */
+export const GENERATED_EDGE_WEIGHTS = {
+  /** 디렉토리 부모·자식 관계의 초기 연결 강도. */
+  hierarchy: 1.0,
+  /** 허브와 태그가 겹치는 문서 사이의 초기 연결 강도. */
+  crossLayer: 1.0,
+  /** 같은 domain으로 묶인 문서 사이의 약한 연결 강도. */
+  domain: 0.3,
+  /** 인물 관계 엣지의 초기 연결 강도. */
+  relationship: 0.6,
+} as const;
+
 /** kg_status include_orphan_paths 응답의 경로 목록 상한 (정렬 후 절단; 01_Core 가 사전순 선두라 고신호 우선 보존) */
 export const MAX_LINK_ORPHAN_PATHS = 200;
 

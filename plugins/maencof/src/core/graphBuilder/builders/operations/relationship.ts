@@ -2,6 +2,7 @@
  * @file relationship.ts
  * @description Person frontmatter 기반 RELATIONSHIP 엣지 생성. 대칭 관계는 양방향, 비대칭은 단방향.
  */
+import { GENERATED_EDGE_WEIGHTS } from '../../../../constants/thresholds.js';
 import type { KnowledgeEdge, KnowledgeNode } from '../../../../types/graph.js';
 import { SYMMETRIC_RELATIONSHIPS } from '../../../../types/person.js';
 
@@ -26,7 +27,7 @@ export function buildRelationshipEdges(
       const a = personNodes[i];
       const b = personNodes[j];
       const relType = a.person?.relationship_type ?? '';
-      const weight = 0.6;
+      const weight = GENERATED_EDGE_WEIGHTS.relationship;
 
       if (isSymmetricRelationship(relType)) {
         edges.push({ from: a.id, to: b.id, type: 'RELATIONSHIP', weight });
