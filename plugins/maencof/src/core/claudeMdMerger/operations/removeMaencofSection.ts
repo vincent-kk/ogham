@@ -9,10 +9,13 @@ import {
   MAENCOF_START_MARKER,
 } from '../../../constants/markers.js';
 
+import { assertInstructionApplyComplete } from './assertInstructionApplyComplete.js';
+
 /**
  * @param filePath - 호출자가 이미 해석한 지침 파일의 절대 경로
  * @param options - 옵션
  * @returns 제거 성공 여부
+ * @throws 부분 적용 시 완료·실패·미시도·백업 내역을 보존한 오류
  */
 export function removeMaencofSection(
   filePath: string,
@@ -34,5 +37,7 @@ export function removeMaencofSection(
   });
   if (plan.outcomes[0]?.action !== 'remove') return false;
   if (dryRun) return true;
-  return manager.apply(plan).outcomes[0]?.action === 'remove';
+  const applied = manager.apply(plan);
+  assertInstructionApplyComplete(applied);
+  return applied.outcomes[0]?.action === 'remove';
 }

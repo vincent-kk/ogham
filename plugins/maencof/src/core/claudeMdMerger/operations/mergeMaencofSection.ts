@@ -19,11 +19,14 @@ import {
 } from '../../../constants/markers.js';
 import type { MergeResult } from '../types/types.js';
 
+import { assertInstructionApplyComplete } from './assertInstructionApplyComplete.js';
+
 /**
  * @param filePath - 호출자가 이미 해석한 지침 파일의 절대 경로
  * @param maencofContent - MAENCOF 마커 사이에 삽입할 내용 (마커 제외)
  * @param options - 옵션
  * @returns 머지 결과
+ * @throws 부분 적용 시 완료·실패·미시도·백업 내역을 보존한 오류
  */
 export function mergeMaencofSection(
   filePath: string,
@@ -75,6 +78,7 @@ export function mergeMaencofSection(
     };
 
   const applied = manager.apply(plan);
+  assertInstructionApplyComplete(applied);
   const appliedAction = applied.outcomes[0]?.action;
   const changed =
     appliedAction === 'copy' ||

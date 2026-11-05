@@ -9,6 +9,8 @@
 
 ## API Contracts
 
+부분 적용은 `changed: false`로 반환하지 않고 기존 MCP 오류 경로로 전달해 `isError: true`로 응답한다. 오류 메시지는 부분 적용 상태와 완료 경로, 실패 대상·오류, 미시도 경로, 실제 작성된 백업을 보존한다. 목적지 작성 후 원본 정리가 실패한 relocation을 성공이나 무변경으로 보고하면 복구 판단이 잘못된다.
+
 호스트별 실제 지침 대상은 호출마다 instruction manager로 해석해 stale 영향 경로를 보고한다. 호출자 입력 content는 응답에 에코하지 않는다. 이미 가진 본문의 반복은 정보 없이 컨텍스트 비용만 늘린다.
 
 ## Acceptance Criteria
