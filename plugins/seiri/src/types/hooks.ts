@@ -81,10 +81,9 @@ export interface SubagentStartInput extends HookBaseInput {
  * InstructionsLoaded hook input.
  *
  * The event fires when a CLAUDE.md or `.claude/rules/*.md` file is read
- * into context. Claude Code's public reference documents the common
- * fields and the load reasons but not the event-specific payload keys, so
- * the extra keys stay open and the observation record persists the raw
- * object — the first live run is what tells us the real shape.
+ * into context. The observation log retains only the declared common
+ * fields and instruction-load metadata; extra host keys are accepted
+ * as input and discarded before persistence.
  */
 export interface InstructionsLoadedInput extends HookBaseInput {
   hook_event_name: 'InstructionsLoaded';
@@ -94,6 +93,18 @@ export interface InstructionsLoadedInput extends HookBaseInput {
    * rather than through a matcher — this event has no matcher support.
    */
   reason?: string;
+  /** Path of the instruction file loaded into context. */
+  file_path?: string;
+  /** Host classification of the instruction's memory scope. */
+  memory_type?: string;
+  /** Native host reason for loading the instruction file. */
+  load_reason?: string;
+  /** Path patterns controlling when the instruction applies. */
+  globs?: string[];
+  /** File path whose access triggered the instruction load. */
+  trigger_file_path?: string;
+  /** Instruction file that includes the loaded instruction. */
+  parent_file_path?: string;
   [key: string]: unknown;
 }
 
