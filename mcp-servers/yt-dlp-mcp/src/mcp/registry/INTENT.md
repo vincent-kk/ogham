@@ -1,20 +1,12 @@
 ## Purpose
 
-알려진 모든 도구 목록(`TOOL_REGISTRY`)을 보관하고, enable 플래그 게이트(`isToolEnabled`)에 따라 서버에 등록한다(`registerEnabledTools`).
-
-## Structure
-
-| 파일/디렉터리 | 역할                                                                                  |
-| ------------- | ------------------------------------------------------------------------------------- |
-| `registry.ts` | `TOOL_REGISTRY` 배열 + `isToolEnabled` 게이트 + `registerEnabledTools` 등록 루프 구현 |
-| `index.ts`    | barrel: `TOOL_REGISTRY`·`isToolEnabled`·`registerEnabledTools` 재노출                 |
+MCP 도구의 노출 순서와 활성화 게이트를 소유한다. 도구 실행 로직은 각 도구가 소유한다.
 
 ## Conventions
 
-- `TOOL_REGISTRY` 배열 순서가 곧 `tools/list` 노출 순서이므로 임의로 재정렬하지 않는다
-- 모든 도구는 자기 `enabledBy` flag를 가지며('default' 특수값 없음), 기본 활성값은 `constants`의 `TOOL_DEFAULT_ENABLED`가 정한다
-- 활성화 판정은 `isToolEnabled` 단일 함수에 모으고 호출부에서 따로 분기하지 않는다
-- 서버 등록 루프는 `registerEnabledTools`만 담당하며 등록 결과를 로거로 남긴다
+- 배열 순서는 `tools/list` 노출 순서다. 소비자가 보는 순서를 임의로 바꾸지 않는다.
+- 모든 도구는 고유 `enabledBy` 플래그를 가지며 특수 default 값은 두지 않는다. 기본 활성값은 `TOOL_DEFAULT_ENABLED`에만 둔다.
+- 활성화 판정과 등록은 이 모듈에 모으고 결과를 로그로 남긴다. 호출부의 독립 분기가 설정을 우회하는 것을 막는다.
 
 ## Boundaries
 
@@ -30,9 +22,3 @@
 ### Never do
 
 - 비활성 도구를 등록한다
-
-## Dependencies
-
-- 내부: `../tools`(도구 정의 import), `config`의 `EnableFlags`(게이트 입력)
-- 외부: `@modelcontextprotocol/sdk`(`McpServer` 타입)
-- 소비처: `mcp`, root

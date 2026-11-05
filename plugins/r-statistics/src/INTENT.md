@@ -1,6 +1,6 @@
 ## Purpose
 
-`@ogham/r-statistics` MCP 서버 소스 루트. 도메인 무지 통계 실행 레이어: LLM 이 생성한 R 코드를 헤드리스 Rscript 로 안전 실행하고, 통계 hard gate(assert)를 결정론적으로 강제한다. 설계 명세는 [`.metadata/r-statistics/`](../../../.metadata/r-statistics/).
+`@ogham/r-statistics` MCP 서버 소스 루트. 도메인 무지 통계 실행 레이어: LLM 이 생성한 R 코드를 헤드리스 Rscript 로 안전 실행하고, 통계 hard gate(assert)를 결정론적으로 강제한다. 설계 의도는 저장소의 통계 설계 명세에서 확인한다.
 
 ## Conventions
 

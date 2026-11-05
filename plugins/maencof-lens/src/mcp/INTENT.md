@@ -2,11 +2,9 @@
 
 MCP 서버 설정 모듈. 서버 팩토리, stdio 진입점, 응답 헬퍼를 포함한다.
 
-## Structure
+## Conventions
 
-- `server/` — MCP 서버 팩토리 (5개 읽기 전용 툴 등록)
-- `serverEntry/` — esbuild 진입점 (stdio 트랜스포트)
-- `shared/` — 툴 응답 포맷터 (toolResult, toolError)
+- 프로토콜 연결과 응답 봉투를 소유하고 실제 조회는 핸들러에 위임한다. 예외는 공통 오류 포맷으로 바꾸어 프로토콜 밖으로 새지 않게 한다.
 
 ## Boundaries
 

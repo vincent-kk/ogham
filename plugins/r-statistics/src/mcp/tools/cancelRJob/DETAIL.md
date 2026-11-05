@@ -2,15 +2,12 @@
 
 ## Requirements
 
-- `cancel_r_job` 은 idempotent 하다 — 같은 잡을 두 번 취소해도 오류가 아니라 상태로 답한다.
-- 취소는 `jobStore.cancelJob` 에 위임한다. 이 도구는 프로세스를 직접 죽이지 않는다.
-- 이미 끝난 잡과 존재하지 않는 잡은 서로 다른 상태로 구분해 보고한다.
+- 취소는 jobStore에 위임하며 직접 프로세스를 죽이지 않는다. 상태 전이와 실제 종료 신호의 소유권을 한 곳에 유지한다.
+- 종료된 잡과 미등록 잡을 구분하며 반복 취소는 오류로 만들지 않는다.
 
 ## API Contracts
 
-- `handleCancelRJob(input: CancelRJobInput): Promise<CancelRJobOutput>` — 대상 잡을 취소하고 `CancelStatus` 를 담은 결과를 돌려준다.
-- `interface CancelRJobInput` — 취소 대상 잡 식별자.
-- `interface CancelRJobOutput` — 취소 결과 상태.
+- 반복 취소는 상태 응답이며 재실행을 유발하지 않는다. 종료된 잡과 미등록 잡은 구분하여 클라이언트가 재시도 결과를 해석할 수 있게 한다.
 
 ## Acceptance Criteria
 
@@ -21,4 +18,4 @@
 
 ## Last Updated
 
-2026-07-30 — 취소 도구의 idempotent 계약을 문서화했다.
+반복 취소·종료 신호·상태 응답 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

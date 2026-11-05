@@ -8,9 +8,7 @@
 
 ## API Contracts
 
-- `LensConfigSchema` · `VaultConfigSchema` — 설정 스키마.
-- `LensConfig` · `VaultConfig` — 대응 타입.
-- `guard/` — 런타임 형태 판정(organ).
+- 스키마는 파싱, 가드는 런타임 좁히기다. 외부 스키마 표면에 로더 전용 가드를 올리지 않는 이유는 아래 경계 예외에 기록한다.
 
 ## Acceptance Criteria
 
@@ -28,4 +26,4 @@
 
 ## Last Updated
 
-2026-07-30 — 스키마 단일 출처 계약과 guard 직접 참조 면책을 문서화했다.
+스키마·수동 가드의 책임과 동기화 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

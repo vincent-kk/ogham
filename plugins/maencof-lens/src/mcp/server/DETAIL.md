@@ -2,25 +2,17 @@
 
 ## Requirements
 
-- 읽기 전용 툴 5개(`search`·`context`·`navigate`·`read`·`status`)만 등록한다. 툴 이름의 정본은 `constants/mcpToolNames.ts` 의 `McpToolName` 이고, mutation 핸들러는 등록하지 않는다 — 재색인은 maencof 세션의 몫이다.
-- config 부재가 기동을 막지 않는다. `configRoot` 가 `null` 이거나 `loadConfig` 가 `null` 을 돌려주면 라우터 없이 서버를 만들고, 실패는 툴 호출 시점으로 미룬다.
-- 그 실패 메시지는 두 원인을 구분한다: 호스트가 워크스페이스를 노출하지 않아 config 를 찾아보지도 못한 경우와, `configRoot` 아래에 `.maencof-lens/config.json` 이 없는 경우. 둘 다 복구 수단(`MAENCOF_LENS_CONFIG_ROOT`, `/maencof-lens:setup`)을 문장에 담는다.
-- 볼트 해석의 단일 진입점은 `resolveVault` 다. 툴 콜백이 `VaultRouter` 를 직접 만지지 않는다.
-- `GraphCache` 는 서버 인스턴스당 하나다. 툴 콜백은 캐시를 새로 만들지 않고 `graphCache.getGraph(vault.path)` 로만 그래프를 얻는다.
-- 핸들러 예외가 MCP 밖으로 새지 않는다. 모든 툴 콜백이 `try`/`catch` 로 감싸 `toolError` 로 변환한다.
-- `layer_filter` 를 입력으로 받는 툴은 `search`·`context` 둘뿐이다. `navigate`·`read`·`status` 스키마에는 그 필드가 없고, 유효 레이어는 볼트 설정 상한(기본 L2–L5)이 된다.
-- `sub_layer` 스키마는 `@ogham/maencof` 의 `SubLayerSchema` 를 그대로 쓴다. 허용값을 여기서 열거하지 않는다 — 레이어 모델은 maencof 가 소유하고, 이 패키지가 목록을 베끼면 모델이 바뀔 때 폐기된 값을 계속 광고하게 된다.
-- 응답 조립은 `mcp/shared` 의 `toolResult`·`toolError` 만 쓴다. 콜백이 MCP content 배열을 손으로 만들지 않는다.
+- 등록 표면은 읽기 전용으로 유지한다. 재색인·mutation은 maencof 세션이 소유한다.
+- 설정 부재는 도구 호출 시점에 보고하여 복구 안내를 받을 서버까지 기동 불가가 되지 않게 한다. 워크스페이스 미노출과 설정 파일 부재를 구분하고 환경변수·setup 복구 수단을 알린다.
+- 볼트 해석과 그래프 캐시는 서버 인스턴스에서 공유한다. 콜백별 재구성으로 이름 해석이나 로드 상태가 갈라지지 않게 한다.
+- 콜백 예외와 응답 조립은 공통 오류·결과 봉투를 경유한다. MCP 밖으로 예외가 새거나 도구마다 봉투가 달라지는 것을 막는다.
+- 서브레이어 모델은 maencof가 소유한다. `SubLayerSchema`를 공유하여 폐기값이 통과한 뒤 빈 결과가 되는 실패를 막는다.
 
 ## API Contracts
 
-- `createLensServer(configRoot: string | null): McpServer` — 5개 툴이 등록된 서버 인스턴스. `configRoot` 는 `.maencof-lens/` 를 담은 디렉터리의 절대 경로이거나 `null`. config 를 못 찾아도 throw 하지 않는다.
-- 등록 툴과 필수 입력: `search(seed 또는 cluster 중 정확히 하나)` · `context(query: string)` · `navigate(path: string)` · `read(path: string)` · `status()`. 다섯 툴 모두 optional `vault`(볼트 이름)를 받는다.
-- `search` 의 `seed`(SA 검색)와 `cluster`(접힌 스레드 전체 열거 — SA 없이 updated 최신순)는 상호배타다. 검증과 오류 문구는 maencof 핸들러가 소유하고, cluster 모드 결과에도 볼트 레이어 상한이 적용된다.
-- `search`·`context` 의 `layer_filter` 는 볼트 상한과 교집합되며, 교집합이 비면 에러 없이 상한 전체로 되돌아간다.
-- `search`·`context` 의 `sub_layer` 는 optional `SubLayerSchema` 다. 두 툴이 같은 스키마 인스턴스를 공유하므로 허용값이 서로 갈라질 수 없다.
-- `read` 만 핸들러 결과의 `error` 필드를 `isError` 응답으로 승격한다. `search`·`context`·`navigate` 는 핸들러가 만든 `error` 페이로드를 정상 결과 본문으로 돌려준다.
-- 서버 이름은 `maencof-lens`, 버전은 `version.ts` 의 `VERSION` 이다.
+- search·context만 호출별 레이어 필터를 받으며 나머지 조회는 볼트 상한을 사용한다.
+- seed와 cluster의 상호배타 검증은 maencof가 소유한다. 열거 결과에도 볼트 상한을 유지한다.
+- read 결과의 오류 필드만 MCP `isError`로 승격한다. 다른 조회의 결과 오류는 본문으로 돌려주므로 소비자는 이 차이를 구분해야 한다.
 
 ## Acceptance Criteria
 
@@ -29,12 +21,6 @@
 - 등록되는 툴이 정확히 5개이고, 이름이 `McpToolName` 값과 일치한다.
 - mutation·재색인 계열 툴이 등록되지 않는다.
 
-### AC-missing-config-deferred — config 부재 지연 처리
-
-- `configRoot` 가 `null` 이어도 `createLensServer` 가 서버를 반환한다.
-- 그 상태에서 툴을 호출하면 워크스페이스 미노출 원인을 지목한 에러가 나온다.
-- `configRoot` 는 있으나 config 파일이 없으면 그 경로를 담은 다른 문장이 나온다.
-
 ### AC-error-envelope — 에러 봉투
 
 - 툴 콜백에서 던져진 예외가 `toolError` 응답으로 변환되어 서버 밖으로 전파되지 않는다.
@@ -42,7 +28,7 @@
 
 ### AC-single-graph-cache — 그래프 캐시 단일화
 
-- 다섯 툴이 같은 `GraphCache` 인스턴스를 통해 그래프를 얻는다.
+- 그래프를 사용하는 툴은 같은 `GraphCache` 인스턴스를 통해 그래프를 얻는다.
 - 볼트 경로가 같으면 툴 호출마다 그래프를 다시 로드하지 않는다.
 
 ### AC-sublayer-from-maencof — 서브레이어 값 위임
@@ -51,15 +37,6 @@
 - 폐기된 값(v2 의 L5 `buffer`·`boundary`)은 스키마 단계에서 거절된다 — 조용히 빈 결과로 흘러가지 않는다.
 - 이 패키지 소스 어디에도 서브레이어 값 리터럴이 없다.
 
-### AC-cluster-mode-layer-ceiling — cluster 모드 레이어 상한
-
-- `search { cluster }` 열거 결과에 볼트 레이어 상한 밖(기본 L1) 문서가 나타나지 않는다.
-- `seed` 와 `cluster` 를 함께 주거나 둘 다 생략한 호출은 maencof 검증 오류가 그대로 전파된다.
-
-## History
-
-- 2026-08-04 — `sub_layer` 허용값을 `SubLayerSchema` 위임으로 바꿨다. 이전에는 `context` 가 5종을 직접 열거하고 `search` 는 생 `z.string()` 이었다. v3 가 L5 서브레이어를 없앤 뒤 두 자리 모두 폐기값을 계속 받아들였고, 통과한 값은 노드 비교에서 아무것도 못 맞춰 에러 없이 빈 결과가 됐다.
-
 ## Last Updated
 
-2026-08-20 — `search` 의 `seed`/`cluster` 상호배타와 cluster 모드 레이어 상한을 계약에 추가했다.
+도구 등록·오류 표면·서버 수명주기 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

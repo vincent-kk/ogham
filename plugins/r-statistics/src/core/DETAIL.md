@@ -2,18 +2,12 @@
 
 ## Requirements
 
-- core 는 도메인 무지 실행 기반이다: 통계 의미·기법 적합성을 평가하지 않고, MCP 도구 계층을 알지 못한다.
-- 네 하위 fractal(`rRuntime`·`workspace`·`commandGate`·`jobStore`)은 서로의 내부 파일을 직접 import 하지 않고 각자의 배럴을 경유한다.
-- `index.ts` 는 네 fractal 의 공개 심볼만 이름으로 재노출한다 — 구현 파일을 노출하지 않는다.
+- 통계 의미·기법 적합성·MCP 프로토콜을 모르는 실행 기반이다. 실행 안전이 정책 판정에 결합되지 않게 한다.
+- 하위 실행 모듈은 서로의 배럴을 통과한다. 이 배럴은 공개 이름만 재노출하고 내부 구현을 노출하지 않는다.
 
 ## API Contracts
 
-- 실행: `discoverRscript`, `spawnRscript`, `decodeOutput` (+ `SpawnRscriptOptions`, `SpawnRscriptResult`)
-- 격리: `createWorkspace`, `collectArtifacts`, `readManifest`, `pruneExpired` (+ `WorkspaceHandle`)
-- 게이트: `validateCommand`, `resolveInstaller`, `validateRScript` (+ `InstallerCommand`, `RScriptValidation`)
-- 잡: `createJob`, `getJob`, `updateJob`, `cancelJob`, `cancelAllJobs`, `hasActiveWorkspaceJob` (+ `RJob`, `CreateJobInput`)
-
-각 심볼의 의미는 소유 fractal 의 DETAIL 계약을 따른다. 배럴은 의미를 더하지 않는다.
+- 배럴은 하위 실행 경계의 의미를 바꾸지 않고 조립만 한다. 실행·격리·게이트·잡의 구체 계약은 각 소유 모듈에서 읽는다.
 
 ## Acceptance Criteria
 
@@ -25,8 +19,8 @@
 ### AC-core-barrel-surface — 배럴 표면
 
 - `core/index.ts` 의 재노출은 전부 named export 이며 네 하위 배럴만을 원천으로 한다.
-- 하위 fractal 간 직접 import(다른 fractal 의 `operations/` 파일 참조)가 0건이다.
+- 하위 fractal 간 직접 import(다른 fractal의 내부 연산 파일 참조)가 0건이다.
 
 ## Last Updated
 
-2026-07-30 — 실행 기반 레이어의 경계와 배럴 표면을 문서화했다.
+실행 안전의 소유권과 하위 모듈 공개 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

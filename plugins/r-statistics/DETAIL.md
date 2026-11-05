@@ -6,16 +6,14 @@
 - 비결정 추론(에이전트)과 결정적 판정(MCP)을 분리한다: 에이전트는 방법을 **추천**하고, `assert_analysis_plan` 의 hard gate 가 실행 가능 여부를 **결정**한다.
 - 디스크 경로는 `~/.claude/plugins/r-statistics/` 하위로 한정한다.
 - `bridge/` 는 의도적으로 커밋하는 배포 산출물이고 배포용 중간 디렉터리는 커밋하지 않는다.
-- 버전은 `scripts/injectVersion.mjs` 만 갱신한다 — `version.ts` 와 `plugin.json` 의 version 을 손으로 고치지 않는다.
+- 버전은 `scripts/injectVersion.mjs` 만 갱신한다 — `src/version.ts` 와 `plugin.json` 의 version 을 손으로 고치지 않는다.
 - 에이전트는 `agents/` 에서 자동 발견된다. `plugin.json` 에 `agents` 필드를 두지 않는다.
 
 ## API Contracts
 
-- MCP 표면은 R job 수명주기와 분석 계획 hard gate를 분리하며, 서버 이름 `tools`와 전체 이름 `mcp__plugin_r-statistics_tools__<name>` 형식을 유지한다.
-- `analyze` Dispatcher는 초기 컨텍스트를 제한하기 위해 방법론 자료를 `skills/analyze/references/methods/`에서 lazy 로드한다.
-- 에이전트는 방법 추천, R 실행, 방법론 검증을 분리하고 실행 허용의 최종 판정은 맡지 않는다.
-- **R 실행계약**: `shared/contract.R` 이 init/finalize 와 아티팩트 헬퍼를 제공하며 모든 `run_r` 실행이 이를 먼저 로드한다.
-- **빌드 파이프라인**: `clean → version:sync → build:compile → build:mcp → build:compile-plugin`.
+- MCP 전체 이름 형식은 `mcp__plugin_r-statistics_tools__<name>`으로 유지하여 스킬·에이전트의 참조가 깨지지 않게 한다.
+- analyze는 초기 컨텍스트를 제한하려고 방법론 자료를 필요할 때 읽는다. 추천·실행·검증 에이전트는 실행 허용을 최종 판정하지 않는다.
+- 공통 R 실행계약은 init/finalize와 아티팩트 헬퍼의 단일 출처이며 사용자 코드보다 먼저 로드한다.
 
 ## Acceptance Criteria
 
@@ -37,8 +35,8 @@
 ### AC-generated-artifacts — 산출물 규약
 
 - `bridge/` 는 커밋되고 배포용 중간 디렉터리는 커밋되지 않는다.
-- `version.ts` 와 `plugin.json` 의 version 에 손편집 흔적이 없다.
+- `src/version.ts` 와 `plugin.json` 의 version 에 손편집 흔적이 없다.
 
 ## Last Updated
 
-2026-08-23 — 배포 디렉터리 규약과 분석 방법 reference 위치를 현재 구조에 맞췄다.
+도메인 중립·판정 권한·배포 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

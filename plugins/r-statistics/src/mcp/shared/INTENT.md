@@ -2,19 +2,10 @@
 
 도구 핸들러 응답 헬퍼 모듈. 평문 데이터를 MCP 결과로 직렬화하고, throw 를 에러 봉투로 변환하며, `extra`(signal) 를 핸들러에 전달한다.
 
-## Structure
-
-| File                     | Role                                                           |
-| ------------------------ | -------------------------------------------------------------- |
-| `helpers/toolResult.ts`  | 평문 데이터를 단일 JSON text content 블록으로 직렬화           |
-| `helpers/toolError.ts`   | thrown 값 → `isError: true` 에러 봉투 (`Error: <message>`)     |
-| `helpers/wrapHandler.ts` | throw 흡수 + `extra`/`signal` 전달; content 결과는 passthrough |
-| `index.ts`               | barrel                                                         |
-
 ## Conventions
 
-- 핸들러가 이미 `CallToolResult`(content 배열) 를 반환하면 그대로 통과; 그 외는 `toolResult`
-- 에러 메시지는 `Error` 면 `.message`, 아니면 `String(value)`
+- 이미 MCP content 형태인 결과는 변형 없이 통과시킨다. 이중 직렬화하면 호출자가 기대하는 응답 봉투가 깨진다.
+- throw는 공통 오류 봉투로 바꾸고 취소 신호는 핸들러에 전달한다. 응답 형식과 호출자 문맥이 각 도구에서 달라지지 않게 한다.
 
 ## Boundaries
 
@@ -30,7 +21,3 @@
 ### Never do
 
 - 핸들러 throw 를 그대로 전파 (서버 크래시)
-
-## Dependencies
-
-- `@modelcontextprotocol/sdk` (`CallToolResult`, `RequestHandlerExtra` 등 타입)

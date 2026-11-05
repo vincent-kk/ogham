@@ -2,15 +2,6 @@
 
 MCP `tools` 서버 lifecycle 모듈. 도구 4개를 등록하고 stdio 로 기동하며, 종료 시 실행 중 잡을 정리한다. 서버 이름은 `tools` (`.mcp.json` 과 일치).
 
-## Structure
-
-| File                            | Role                                                       |
-| ------------------------------- | ---------------------------------------------------------- |
-| `lifecycle/createServer.ts`     | `McpServer('tools')` + 도구 4개 `registerTool`(zod schema) |
-| `lifecycle/startServer.ts`      | 만료 워크스페이스 prune 후 stdio connect                   |
-| `lifecycle/registerShutdown.ts` | 종료 시 `cancelAllJobs` (1회 등록)                         |
-| `index.ts`                      | barrel — `createServer`, `startServer`                     |
-
 ## Conventions
 
 - 모든 `registerTool` 콜백은 `wrapHandler` 로 감쌈 (throw 흡수)
@@ -33,8 +24,3 @@ MCP `tools` 서버 lifecycle 모듈. 도구 4개를 등록하고 stdio 로 기�
 
 - stdout 직접 쓰기 (stdio transport 전용; 로그는 stderr)
 - 핸들러에서 `process.exit` 직접 호출
-
-## Dependencies
-
-- `@modelcontextprotocol/sdk`, `zod`
-- `../../core`, `../shared`, `../tools`, `../../constants`, `../../lib`, `../../types`, `../../version`

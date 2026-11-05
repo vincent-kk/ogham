@@ -11,43 +11,12 @@
 
 ## API Contracts
 
-### Skills
-
-| Command                   | Purpose                                 | Primary output                                 |
-| ------------------------- | --------------------------------------- | ---------------------------------------------- |
-| `/prawf:peer-review`      | 9인 team 평가 (P0 → R1 → R2 → R3 → ADJ) | `review-report.md` + `qa-sheet.md`             |
-| `/prawf:simulate-defense` | 심사위원 질문 → 저자 답변 → 코칭        | 모의 Q&A 세션 + 코칭 노트                      |
-| `/prawf:rebuttal`         | 외부 리뷰 코멘트 → 점대점 응답          | `rebuttal-letter.md` + `revision-checklist.md` |
-| `/prawf:auto-fix`         | 리뷰의 자동수정 가능 항목을 원고에 적용 | `applied-fixes.md` + `manual-fixes.md`         |
-
-`/prawf:peer-review` 옵션: `--solo`(단일 패스 `adjudicator`), `--profile <name>`(분야 프로파일 override), `--scope <abstract|full>`, `--gate <critical|major|minor>`(accept 를 차단할 수 있는 최저 severity; 기본 `major`, P0 에서 파싱해 `paper-profile.md` 에 기록), `--workdir <dir>`(산출물 루트 지정).
-
-### Persona roster (10)
-
-- Soundness 공격 (verdict-eligible): `argument-analyst`, `methodologist`, `statistical-auditor`, `causal-reviewer`, `bias-grader`, `integrity-auditor`.
-- 중요성 (advisory): `impact-assessor`.
-- 방어: `rebuttal-strategist`. 중재: `chair`. Solo 빠른 패스: `adjudicator`.
-
-### Enums
-
-- `verdict`: `accept | minor-revision | major-revision | reject`.
-- `gate`: `critical | major | minor` (`--gate`; 기본 `major`). verdict 를 차단할 수 있는 최저 severity — `review-report.md` frontmatter 에 `gate` 로 노출된다.
-- finding `severity`: `critical | major | minor` (루브릭: critical = 신규 데이터 없이 복구 불가; major = 기존 데이터 내 복구 가능; minor = 결론 불변). 모든 finding 은 `consequence`(이 finding 이 유지될 때 깨지는 논문의 구체적 주장/결론)를 필수로 기재하며, 구체적 consequence 를 명명할 수 없으면 severity 는 최대 `minor` — 즉 기본 게이트에서 advisory 다.
-- finding `status`: `raised → contested → defended | mitigated | unresolved | withdrawn`.
-- `impact`: `high | moderate | low | niche` (advisory).
-- `external_verification`: `complete | partial | unavailable`.
-
-### Output location
-
-산출물은 per-paper 디렉토리 `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/` 에 쌓이며, 커스텀 프로파일은 `<WORKDIR>/profiles/<name>.yaml` 에서 읽는다. 4개 스킬이 같은 REVIEW_DIR 을 공유한다 — 한 논문의 review·defense·rebuttal·auto-fix 산출물이 한곳에 모인다.
-
-### Deliverable filenames
-
-`paper-profile.md`, `paper-normalized.md`, `findings/round-1-<axis>.md`, `rebuttal.md`, `findings/round-3-<axis>.md`, `review-report.md`, `qa-sheet.md` (peer-review); `defense-session.md`(simulate-defense); `external-findings.md`(중간 산출물) + `rebuttal-letter.md`, `revision-checklist.md`(rebuttal); `applied-fixes.md`, `manual-fixes.md`(auto-fix). `rebuttal.md` 는 peer-review·rebuttal 이 같은 REVIEW_DIR 에서 재생성하는 스킬-런 중간 산출물이며 최종 산출물이 아니다. 모든 location 은 `paper-normalized.md` 좌표(`§<section>¶<paragraph>` + 줄)를 인용한다. Advisory Notes(게이트 미만 미해결 finding 목록)는 `review-report.md` 내부 섹션이며 새 산출물 파일이 아니다. 검증기 자체의 회귀(FP/FN) 캘리브레이션 fixture 는 저장소의 `skills/peer-review/calibration/` 에 동봉된다: `calibration.md`(프로토콜 + 회귀 ledger), `clean-paper.md`, `mutated-paper.md`, `seeded-defects.md`.
-
-### Versioning
-
-`version:sync` 는 `package.json` 버전을 `plugin.json` 에만 동기화한다(`src/version.ts` 없음). 루트 `scripts/injectVersion.mjs` 는 `src/` 부재 시 version 파일 생성을 건너뛴다. 버전 bump 후에는 `yarn prawf version:sync` 로 `plugin.json` 을 갱신한다.
+- 중요성과 게이트 미만 finding은 advisory이며 치명 결함 override는 게이트와 무관하다.
+- 구체적인 consequence를 명명할 수 없는 finding은 minor를 넘지 않는다. 심각도가 결론에 미치는 영향 없이 부풀려지는 것을 막는다. critical은 새 데이터 없이 복구 불가, major는 기존 데이터 내 복구 가능, minor는 결론 불변을 뜻한다.
+- advisory가 남은 accept는 본문에서 "accept (with notes)"로 표시하되 frontmatter와 터미널 enum은 accept를 유지한다. 표현을 늘리기 위해 기계 소비 계약을 바꾸지 않는다.
+- 스킬은 같은 논문 디렉터리와 정규화 원고의 좌표를 공유한다. review·defense·rebuttal·auto-fix가 서로 다른 원고 위치를 인용하지 않게 한다.
+- `rebuttal.md`는 peer-review와 rebuttal 두 스킬이 같은 논문 디렉터리에서 재생성하는 중간 산출물이므로 최종 산출물로 취급하지 않는다. Advisory Notes도 보고서 내부 섹션이며 별도 산출물이 아니다.
+- 버전 주입은 매니페스트만 갱신한다. 소스가 없는 플러그인에 버전 소스 파일을 생성하지 않는다. 배포 어댑터 재생성은 순수 마크다운 계약의 코드 빌드 금지에서 제외한다.
 
 ## Acceptance Criteria
 
@@ -59,7 +28,7 @@
 
 ### AC-identifier-consistency — 식별자 단일성
 
-- 페르소나 id 10개가 `agents/*.md` 파일명과 `skills/peer-review/orchestration.md`·`prompt-templates.md`·`templates.md`·각 `SKILL.md` 에서 동일하다.
+- 페르소나 id 10개가 `agents/*.md` 파일명과 peer-review 오케스트레이션·프롬프트·템플릿·각 스킬 진입 명세 에서 동일하다.
 - axis id, `verdict`·`gate`·`severity`·`status`·`impact`·`external_verification` enum 값이 위 문서 전체에서 동일하다.
 - 산출물 파일명이 4개 스킬의 명세와 일치한다.
 
@@ -75,10 +44,6 @@
 - WORKDIR 해석 우선순위가 `--workdir <dir>` > `PRAWF_WORKDIR` > `./.prawf` 이며, 해석 규칙의 정의는 `skills/.shared/operations/resolve_workdir.md` 한 곳에만 있다.
 - 4개 스킬이 같은 `REVIEW_DIR = <WORKDIR>/review/<paper-slug>/` 를 공유한다.
 
-## History
-
-- 2026-06-11 — peer-review 스킬 오케스트레이션·프롬프트·템플릿을 개선하고 calibration fixture 세트(`skills/peer-review/calibration/`)를 도입했다.
-
 ## Last Updated
 
-2026-07-30 — 계약을 검증 가능한 acceptance group 4개로 명시했다.
+판정 게이트·명세 식별자·산출물 공유 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

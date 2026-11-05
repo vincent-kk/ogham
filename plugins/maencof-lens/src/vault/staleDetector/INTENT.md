@@ -1,14 +1,19 @@
 ## Purpose
 
-볼트 인덱스 만료 감지. `CACHE_FILES.GRAPH_META`(우선) 또는 `CACHE_FILES.INDEX`(legacy v1 라벨 전용) 마커 파일의 mtime을 볼트 마크다운 최신 mtime과 비교한다. Hook 경로 격리를 위해 `node:fs`/`node:path` 빌트인과 본가 `@ogham/maencof`의 `CACHE_FILES` 상수만 의존한다. legacy 마커는 fresh로 보고하지 않고 명시 라벨로 분리해 v1 schema 오인을 차단한다.
+볼트 인덱스의 만료와 legacy 상태를 판정한다. 재색인이나 볼트 변경은 수행하지 않는다.
+
+## Conventions
+
+- legacy 마커를 fresh로 보고하면 v1 스키마를 최신으로 오인하므로 별도 라벨로 유지한다.
+- 훅 경로의 의존 격리를 위해 maencof에서는 `CACHE_FILES` 상수만 사용하고 파일시스템·경로 처리는 Node 내장 API로 한정한다.
 
 ## Boundaries
 
 ### Always do
 
-- 이 모듈의 단일 책임을 유지한다
-- 마커 탐색은 `findMarker.ts`의 `findIndexMarker`만 단일 진입점으로 사용한다
-- 변경 시 관련 테스트를 함께 업데이트한다
+- legacy 마커를 fresh로 보고하지 않아 구형 인덱스가 최신으로 오인되지 않게 한다
+- 마커 탐색은 `findIndexMarker`만 단일 진입점으로 사용한다
+- 이 경계의 계약 변경은 해당 검증과 함께 갱신하여 소비자와 구현이 어긋나지 않게 한다
 
 ### Ask first
 

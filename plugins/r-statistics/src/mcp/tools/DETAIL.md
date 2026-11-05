@@ -2,18 +2,13 @@
 
 ## Requirements
 
-- 각 도구는 독립 fractal 이며 공용 경계를 얇게 유지하고, 복잡한 실행 단계는 해당 fractal 내부에 캡슐화한다.
-- 핸들러는 stateless 하다 — 호출 간 상태는 `jobStore`(런타임)와 워크스페이스(디스크)에만 있다.
-- 실행 안전(`run_r`)과 통계 정책(`assert_analysis_plan`)은 서로의 책임을 침범하지 않는다.
-- `index.ts` 는 네 핸들러와 그 입출력 타입만 이름으로 재노출한다.
-- `run_r` 와 `get_r_job` 출력의 `managedLibraryPath` 는 setup 설치와 runtime `.libPaths` 를 연결하는 구조화 계약이다.
+- 각 도구는 독립 경계를 가지며 복잡한 실행 단계는 자기 내부에 둔다. 도구끼리 직접 호출하지 않는다.
+- 핸들러는 호출 간 상태를 소유하지 않는다. 런타임 상태는 jobStore, 디스크 상태는 워크스페이스가 소유한다.
+- 실행 안전과 통계 판정은 서로의 책임을 침범하지 않는다. 배럴은 공개 핸들러와 타입만 재노출한다.
 
 ## API Contracts
 
-- `handleRunR(input: RunRInput): Promise<RunROutput>` — R 코드를 격리 워크스페이스에서 실행하고 아티팩트를 수집한다.
-- `handleGetRJob(input: GetRJobInput): Promise<RunROutput>` — 비동기 잡 상태·결과 조회. 읽기 전용·idempotent 이며 `includeStdout=false` 면 스트림을 제거한다.
-- `handleCancelRJob(input: CancelRJobInput): Promise<CancelRJobOutput>` — 실행 중 잡을 취소한다. idempotent.
-- `handleAssertAnalysisPlan(...)` — 정규화된 분석 계획에 통계 hard gate 를 적용한다. 입력의 순수 함수.
+- 실행과 폴링의 관리형 library 경로는 동일한 구조화 계약이다. setup이 호스트 경로를 재계산하면 설치와 실행이 다른 라이브러리를 볼 수 있다.
 
 ## Acceptance Criteria
 
@@ -30,4 +25,4 @@
 
 ## Last Updated
 
-2026-08-23 — 관리형 R library 경로의 구조화 출력 계약을 추가했다.
+도구 책임 분리와 관리형 library 공유 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.
