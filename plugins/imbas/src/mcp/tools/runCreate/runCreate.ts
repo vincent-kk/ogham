@@ -18,22 +18,32 @@ import {
   saveRunState,
 } from '../../../core/stateManager/index.js';
 
+/** Transport arguments identifying the project and files to copy into a new run. */
 export interface RunCreateInput {
+  /** Project reference resolved to an isolated run directory. */
   project_ref: string;
+  /** Existing source document copied after the run ID is reserved. */
   source_file: string;
+  /** Additional source files copied under their basenames. */
   supplements?: string[];
+  /** Optional tracker reference retained in the initial state. */
   source_issue_ref?: string;
+  /** Absolute workspace root when the host is not running in the workspace. */
   project_root?: string;
 }
 
+/**
+ * Reserve a run, copy its input documents, and persist the initial state.
+ * @param input Project identity and existing source paths for the new run.
+ * @returns The reserved ID, directory, and saved initial state.
+ * @throws On path, reservation, copy, or state-write failure; a reservation can remain.
+ */
 export async function handleRunCreate(input: RunCreateInput) {
   const cwd = projectRoot(input.project_root);
   const runsDir = getRunsDir(cwd, input.project_ref);
 
   const run_id = generateRunId(runsDir);
   const run_dir = join(runsDir, run_id);
-
-  mkdirSync(run_dir, { recursive: true });
 
   // Copy source file
   const destSource = join(run_dir, SOURCE_FILENAME);

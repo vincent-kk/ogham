@@ -1,39 +1,50 @@
 /**
  * @file runIdGenerator.ts
- * @description Generate collision-safe run IDs in YYYYMMDD-NNN format
+ * @description Reserve run IDs using the local date and a minimum-width sequence
  */
 import { mkdirSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 
 /**
- * Generate a run ID in YYYYMMDD-NNN format.
- * Scans existing directories in runsDir to find max NNN for today, increments.
+ * Reserve an execution directory before exposing its run ID to a caller.
+ * The runtime clock supplies today's local date for each invocation.
+ * @param runsDir Parent directory of the project's runs; created if absent.
+ * @returns A reserved ID with a numeric sequence padded to at least three digits.
+ * @throws If the parent cannot be created/read or reservation fails except EEXIST.
  */
 export function generateRunId(runsDir: string): string {
   const now = new Date();
   const datePart = formatDate(now);
 
-  let entries: string[];
-  try {
-    mkdirSync(runsDir, { recursive: true });
-    entries = readdirSync(runsDir);
-  } catch {
-    entries = [];
-  }
+  mkdirSync(runsDir, { recursive: true });
+  const entries = readdirSync(runsDir);
 
   const prefix = `${datePart}-`;
-  let maxSeq = 0;
+  let maxSeq = 0n;
 
   for (const entry of entries)
-    if (entry.startsWith(prefix)) {
-      const seqStr = entry.slice(prefix.length);
-      const seq = parseInt(seqStr, 10);
-      if (!isNaN(seq) && seq > maxSeq) maxSeq = seq;
+    if (entry.startsWith(prefix) && /^\d{8}-\d{3,}$/.test(entry)) {
+      const seq = BigInt(entry.slice(prefix.length));
+      if (seq > maxSeq) maxSeq = seq;
     }
 
-  const nextSeq = String(maxSeq + 1).padStart(3, '0');
-  return `${datePart}-${nextSeq}`;
+  for (let seq = maxSeq + 1n; ; seq += 1n) {
+    const runId = `${datePart}-${String(seq).padStart(3, '0')}`;
+    try {
+      mkdirSync(join(runsDir, runId));
+      return runId;
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        !('code' in error) ||
+        error.code !== 'EEXIST'
+      )
+        throw error;
+    }
+  }
 }
 
+/** Format the supplied runtime date into its local calendar day for an ID prefix. */
 function formatDate(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, '0');
