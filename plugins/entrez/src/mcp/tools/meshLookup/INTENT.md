@@ -11,7 +11,7 @@
 
 ### Always do
 
-- 매칭 실패는 `matched: NONE`으로 표현(throw 금지).
+- 매칭 실패는 `matched: NONE`으로 표현(throw 금지). 조회 장애에만 선택 필드 `error`를 포함하고 다른 용어의 처리를 계속한다.
 
 ### Ask first
 

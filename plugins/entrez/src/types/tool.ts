@@ -155,6 +155,8 @@ export interface MeshMapping {
   entryTerms?: string[];
   scopeNote?: string;
   scrMappings?: ScrMapping[];
+  /** Fixed lookup-failure reason; absent for genuine unmatched terms. */
+  error?: string;
 }
 
 export interface MeshLookupOutput {
