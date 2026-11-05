@@ -2,7 +2,7 @@
 name: setup
 user-invocable: true
 disable-model-invocation: true
-description: 'Initialize Filid config and managed rule documents, inspect the FCA snapshot, and propose missing INTENT.md/DETAIL.md work.'
+description: 'Initialize Filid config and managed rule documents, inspect the FCA snapshot, and propose missing INTENT.md and evidence-required DETAIL.md work.'
 argument-hint: '[path] [--rules]'
 version: '2.1.1'
 complexity: medium
@@ -33,7 +33,7 @@ Load only the reference needed for the active phase:
 - initializing Filid in a new or existing repository
 - selecting adapters, output language, and project-relative `ignore` paths in config v3
 - reconciling managed FCA rule documents
-- discovering missing INTENT.md or DETAIL.md contracts
+- discovering missing INTENT.md and contract content that requires a DETAIL.md
 - rechecking initialization after a structural change
 
 Use `/filid:scan` for a complete FCA audit. Setup validates the initialization surface and prepares document proposals.
@@ -97,7 +97,7 @@ Non-OK status, diagnostics, or non-exact certainty remain visible and prevent a 
 Combine path detail with validation findings:
 
 - propose INTENT.md only for fractals that lack it
-- propose DETAIL.md only when a public boundary is evidenced and undocumented
+- propose DETAIL.md only for an explicit request or contract content required by another rule; absence alone is not a finding
 - never propose INTENT.md for organs
 - preserve existing documents without modification
 - mark uncertain public boundaries as unresolved

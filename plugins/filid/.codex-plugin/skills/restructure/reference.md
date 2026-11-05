@@ -61,7 +61,7 @@ Display each exact move and its:
 - Target path
 - target Type
 - placement Basis and LCA
-- required INTENT/DETAIL/entry-point artifacts
+- required INTENT/entry-point artifacts; DETAIL is optional
 - import requirements, including those without a suggestedSpecifier whose specifier you will write
 
 Also display the plan ID, snapshot hash, precondition result, and total affected files. `--dry-run` prints this material and ends without changes.
@@ -72,7 +72,7 @@ Without `--auto-approve`, require explicit approval of this exact plan. `--auto-
 
 Filid MCP never moves files and never rewrites imports. After approval, the calling environment performs ordinary file operations outside MCP:
 
-1. Update the affected fractal DETAIL.md contracts before code or moves.
+1. Update an affected DETAIL.md before code or moves when its recorded contract changes; add one when the change gives it contract content to record. A missing DETAIL.md alone is not a finding or a required artifact.
 2. Update INTENT.md before changing a public boundary.
 3. Create the `requiredArtifacts` of every `alreadyPlaced` entry.
 4. Run `moves` in listed order: move each exact `sourcePath` to its `targetPath`, then create that move's `requiredArtifacts` at their listed paths. Never reorder moves — a later move may carry earlier ones along or move into a path an earlier one vacated, and creating a target directory early makes a later directory move nest inside it.

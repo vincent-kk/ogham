@@ -9,6 +9,8 @@ rule and
 for what is mechanically checked. Where this file and those disagree, they win
 and this file is the defect.
 
+DETAIL.md is optional: create it only for contract content or another rule that requires it; its absence alone is not a finding.
+
 ## Skeleton
 
 ```markdown
@@ -24,9 +26,11 @@ and this file is the defect.
 
 ## Acceptance Criteria
 
+<when tests pin every criterion, say so in one sentence and declare no groups; otherwise declare each needed group as below>
+
 ### <group-id> — <title>
 
-- <checkable statement a verification file can bind to>
+- <a criterion bound by a verification file or not derivable from the tests>
 
 ## Last Updated
 
@@ -44,6 +48,8 @@ and this file is the defect.
   the contract sections.
 - Acceptance groups use `### <group-id> — <title>`, and their IDs are unique
   within the document. These IDs are the oracle a spec-document binds to.
+- A document may declare no acceptance groups. Keep `## Acceptance Criteria` and state that tests pin every criterion when that is the case.
+- `history-section` and `last-updated-trigger` are mechanical `error` checks: no level-2 History section outside fences, and a nonempty Last Updated body with no date. Cross-review `DOC-9` still judges dated notes and "previously" elsewhere.
 - No line cap.
 - No file lists or directory structure, or restatements of what a maintainer
   derives from the source and tests: signatures, the steps a function takes,
