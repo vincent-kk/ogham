@@ -21,7 +21,10 @@
 ### AC-target-isolation — 대상별 격리
 
 - claude·codex 는 목적별 사용자 MCP target 과 manager 를 쓰고, antigravity 는 글로벌 `~/.gemini/config/mcp_config.json` 을 관리한다.
-- 비활성 대상에서도 `yt-dlp-mcp` 키의 서버 등록은 해제한다 — 선택 해제가 이미 등록된 서버를 남겨서는 안 된다. 그 키 밖의 서버와 최상위 설정 키는 보존한다.
+- Claude·Codex는 대상이 활성에서 비활성으로 전환되거나 이전 설정이 없는 비활성 대상일 때 `yt-dlp-mcp` 등록을 해제한다.
+- Antigravity는 이전 저장 설정에서 대상이 활성이고 현재 비활성일 때만 `yt-dlp-mcp` 등록을 해제한다. 이전 설정이 없거나 대상이 계속 비활성이면 수동 등록을 보존한다.
+- Antigravity 등록 해제가 실패해도 비활성 설정은 저장되므로 이후 비활성 설정 저장에서는 삭제를 재시도하지 않는다. 대상 전환만으로 삭제를 판단하며 별도의 재시도 상태를 저장하지 않기 때문이다.
+- `yt-dlp-mcp` 키 밖의 서버와 최상위 설정 키는 보존한다.
 
 ### AC-language-passthrough — 언어 전달
 
