@@ -16,6 +16,7 @@
 - 필수 그래프 샤드와 선택적 archive-members 샤드는 읽기 호환성을 분리한다. 서고 멤버 캐시가 없거나 손상되어도 본 그래프를 읽을 수 있어야 하며, 선택적 기능 때문에 필수 캐시의 호환성을 깨지 않는다. commit marker 부재는 legacy 마이그레이션 또는 cache miss로 처리하며, marker가 있는 캐시의 버전·샤드 오류를 legacy fallback으로 숨기지 않는다.
 - legacy read와 새 저장 사이에는 잠금 공백이 있다. 동시 writer가 쓴 신규 데이터를 legacy가 덮을 수 있으나 잔존 v1의 1회 전환에 한정된 이론적 race로 수용한다.
 - atomic rename 재시도 소진은 throw하여 호출자가 다음 재시도 정책을 결정한다. load 실패는 빈 결과로 처리하고 unexpected error는 안전 오류 로그로 전달한다는 정책을 유지한다.
+- 선택적 생성자 오류 콜백은 `ENOENT` 이외의 load 예외를 호출자에게 전달한다. 로그 저장은 호출자가 소유하여 캐시 외 저장 금지를 지키고, 콜백 자체의 실패도 격리하여 읽기의 빈 결과 폴백을 보존한다.
 
 ## Acceptance Criteria
 

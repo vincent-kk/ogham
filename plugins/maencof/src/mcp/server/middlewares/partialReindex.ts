@@ -52,7 +52,13 @@ export async function mergeStaleNodesIntoGraph(
   let toProcess: StaleEntry[];
   if (entries) toProcess = entries;
   else {
-    const store = new MetadataStore(vaultPath);
+    const store = new MetadataStore(vaultPath, (error) => {
+      appendErrorLogSafe(vaultPath, {
+        hook: 'partial-reindex-load',
+        error: String(error),
+        timestamp: new Date().toISOString(),
+      });
+    });
     const stale = await store.loadStaleEntries();
     toProcess = stale.entries;
   }

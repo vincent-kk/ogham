@@ -55,7 +55,13 @@ export async function triggerBootRebuildIfStale(
   vaultPath: string,
 ): Promise<void> {
   try {
-    const store = new MetadataStore(vaultPath);
+    const store = new MetadataStore(vaultPath, (error) => {
+      appendErrorLogSafe(vaultPath, {
+        hook: 'boot-rebuild-load',
+        error: String(error),
+        timestamp: new Date().toISOString(),
+      });
+    });
     const stale = await store.loadStaleEntries();
     if (stale.entries.length > 0) triggerBackgroundRebuild(vaultPath);
   } catch (err) {

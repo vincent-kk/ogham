@@ -7,6 +7,7 @@ import {
   READ_REINDEX_CAP,
   STALE_REBUILD_THRESHOLD,
 } from '../../../constants/thresholds.js';
+import { appendErrorLogSafe } from '../../../core/errorLog/index.js';
 import { MetadataStore } from '../../../core/indexer/index.js';
 import type { KnowledgeGraph } from '../../../types/graph.js';
 import { loadGraphIfNeeded } from '../graphCache/index.js';
@@ -28,7 +29,13 @@ export async function ensureFreshGraphNonBlocking(
   const graph = await loadGraphIfNeeded(vaultPath);
   if (!graph) return null;
 
-  const store = new MetadataStore(vaultPath);
+  const store = new MetadataStore(vaultPath, (error) => {
+    appendErrorLogSafe(vaultPath, {
+      hook: 'freshness-guard-load',
+      error: String(error),
+      timestamp: new Date().toISOString(),
+    });
+  });
   const stale = await store.loadStaleEntries();
 
   if (stale.entries.length === 0) return graph;

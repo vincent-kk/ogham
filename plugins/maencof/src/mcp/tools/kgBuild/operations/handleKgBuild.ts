@@ -2,6 +2,7 @@
  * @file handleKgBuild.ts
  * @description kg_build 핸들러 — 인덱스 전체/증분 빌드 트리거.
  */
+import { appendErrorLogSafe } from '../../../../core/errorLog/index.js';
 import { createSnapshot } from '../../../../core/indexer/incrementalTracker/index.js';
 import { MetadataStore } from '../../../../core/indexer/metadataStore/index.js';
 import type { ScannedFile } from '../../../../core/vaultScanner/index.js';
@@ -23,7 +24,13 @@ export async function handleKgBuild(
   input: KgBuildInput,
 ): Promise<KgBuildResult> {
   const startTime = Date.now();
-  const store = new MetadataStore(vaultPath);
+  const store = new MetadataStore(vaultPath, (error) => {
+    appendErrorLogSafe(vaultPath, {
+      hook: 'kg-build-load',
+      error: String(error),
+      timestamp: new Date().toISOString(),
+    });
+  });
 
   try {
     let graph: KnowledgeGraph;

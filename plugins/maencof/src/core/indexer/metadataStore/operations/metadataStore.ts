@@ -58,10 +58,36 @@ interface LegacyStaleNodes {
 export class MetadataStore {
   private readonly vaultPath: string;
   private readonly cacheDir: string;
+  /** 저장소 밖 진단 기록은 호출자가 소유하며 동기 콜백 실패는 격리한다. */
+  private readonly onLoadError?: (error: unknown) => void;
 
-  constructor(vaultPath: string) {
+  /**
+   * @param vaultPath 캐시를 소유한 vault 루트.
+   * @param onLoadError ENOENT 이외 읽기 실패를 받는 선택적 동기 진단 통로.
+   */
+  constructor(vaultPath: string, onLoadError?: (error: unknown) => void) {
     this.vaultPath = vaultPath;
     this.cacheDir = join(vaultPath, '.maencof');
+    this.onLoadError = onLoadError;
+  }
+
+  /**
+   * @param error 읽기 경계가 잡은 오류. 파일 부재는 정상 cache miss로 취급한다.
+   * @returns 없음. 호출자 진단이 실패해도 읽기의 기존 폴백 결과를 유지한다.
+   */
+  private reportLoadError(error: unknown): void {
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      'code' in error &&
+      error.code === 'ENOENT'
+    )
+      return;
+    try {
+      this.onLoadError?.(error);
+    } catch {
+      // 진단 통로의 실패가 읽기의 cache miss를 예외로 바꾸지 않는다.
+    }
   }
 
   /**
@@ -148,8 +174,9 @@ export class MetadataStore {
         join(this.cacheDir, CACHE_FILES.GRAPH_META),
         'utf-8',
       );
-    } catch {
+    } catch (error) {
       // commit marker 부재 — legacy 마이그레이션 트리거 (legacy 도 없으면 null)
+      this.reportLoadError(error);
       return this.loadLegacyAndMigrate();
     }
 
@@ -173,8 +200,9 @@ export class MetadataStore {
       const archiveMembers = await this.loadArchiveMembers();
       if (archiveMembers) graph.archiveClusterMembers = archiveMembers;
       return graph;
-    } catch {
+    } catch (error) {
       // commit marker 는 있으나 부속 파일 read/parse 실패 — legacy 로 폴백하지 않고 cache miss
+      this.reportLoadError(error);
       return null;
     }
   }
@@ -202,7 +230,8 @@ export class MetadataStore {
         else map.set(member.clusterKey, [member]);
       }
       return map;
-    } catch {
+    } catch (error) {
+      this.reportLoadError(error);
       return undefined;
     }
   }
@@ -233,7 +262,8 @@ export class MetadataStore {
       await this.saveGraph(graph);
       // 반환 graph 도 런타임 맵을 재수화해 shard 경로와 동일한 servable 상태로 맞춘다.
       return hydrateRuntimeMaps(graph);
-    } catch {
+    } catch (error) {
+      this.reportLoadError(error);
       return null;
     }
   }
@@ -267,7 +297,8 @@ export class MetadataStore {
         'utf-8',
       );
       return JSON.parse(raw) as WeightsData;
-    } catch {
+    } catch (error) {
+      this.reportLoadError(error);
       return null;
     }
   }
@@ -292,7 +323,8 @@ export class MetadataStore {
         'utf-8',
       );
       return JSON.parse(raw) as FileSnapshot;
-    } catch {
+    } catch (error) {
+      this.reportLoadError(error);
       return null;
     }
   }
@@ -324,7 +356,8 @@ export class MetadataStore {
         };
       }
       return { entries: [], updatedAt: new Date().toISOString() };
-    } catch {
+    } catch (error) {
+      this.reportLoadError(error);
       return { entries: [], updatedAt: new Date().toISOString() };
     }
   }
