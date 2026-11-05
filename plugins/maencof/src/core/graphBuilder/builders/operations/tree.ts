@@ -4,6 +4,7 @@
  * SIBLING 은 물질화하지 않는다 — node.path 가 이미 보유한 폴더 멤버십의 O(k²) 전개이므로
  * 런타임 맵 구성 시점에 파생한다 (operations/deriveSiblingEdges.ts).
  */
+import { GENERATED_EDGE_WEIGHTS } from '../../../../constants/thresholds.js';
 import type { NodeId } from '../../../../types/common.js';
 import type { KnowledgeEdge, KnowledgeNode } from '../../../../types/graph.js';
 
@@ -42,13 +43,13 @@ export function buildHierarchyEdges(
       from: parentIndexId,
       to: node.id,
       type: 'PARENT_OF',
-      weight: 1.0,
+      weight: GENERATED_EDGE_WEIGHTS.hierarchy,
     });
     edges.push({
       from: node.id,
       to: parentIndexId,
       type: 'CHILD_OF',
-      weight: 1.0,
+      weight: GENERATED_EDGE_WEIGHTS.hierarchy,
     });
   }
   return edges;

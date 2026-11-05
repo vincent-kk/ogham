@@ -2,7 +2,10 @@
  * @file crossLayer.ts
  * @description 허브 노드(`hub: true`) → 태그 겹침 노드로 CROSS_LAYER 엣지 생성.
  */
-import { MAX_CROSS_LAYER_EDGES_PER_NODE } from '../../../../constants/thresholds.js';
+import {
+  GENERATED_EDGE_WEIGHTS,
+  MAX_CROSS_LAYER_EDGES_PER_NODE,
+} from '../../../../constants/thresholds.js';
 import type { KnowledgeEdge, KnowledgeNode } from '../../../../types/graph.js';
 
 /**
@@ -35,13 +38,13 @@ export function buildCrossLayerEdges(nodes: KnowledgeNode[]): KnowledgeEdge[] {
         from: hub.id,
         to: candidate.id,
         type: 'CROSS_LAYER',
-        weight: 1.0,
+        weight: GENERATED_EDGE_WEIGHTS.crossLayer,
       });
       edges.push({
         from: candidate.id,
         to: hub.id,
         type: 'CROSS_LAYER',
-        weight: 1.0,
+        weight: GENERATED_EDGE_WEIGHTS.crossLayer,
       });
       edgeCount++;
     }

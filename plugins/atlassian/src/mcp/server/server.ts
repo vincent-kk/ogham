@@ -5,13 +5,14 @@
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { PROJECT_ROOT_ARG_DESCRIPTION } from "@ogham/cross-platform";
-import { z } from "zod";
 
 import { McpToolName } from "../../constants/mcpToolNames.js";
 import { VERSION } from "../../version.js";
 import {
-  ConvertFormatSchema,
+  FetchInputSchema,
+  ConvertDirectionSchema,
+  AuthCheckInputSchema,
+  SetupInputSchema,
   CommentThreadInputSchema,
 } from "../../types/index.js";
 import { detectService } from "../../utils/index.js";
@@ -40,24 +41,7 @@ export function createServer(): McpServer {
     {
       description:
         "[Internal] Do not call directly. Used by atlassian skills only. HTTP request for Atlassian REST APIs.",
-      inputSchema: z.object({
-        method: z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]),
-        endpoint: z.string(),
-        service: z.enum(["jira", "confluence"]).optional(),
-        base_url: z.string().url().optional(),
-        body: z.unknown().optional(),
-        query_params: z.record(z.string()).optional(),
-        expand: z.array(z.string()).optional(),
-        headers: z.record(z.string()).optional(),
-        accept_format: z.enum(["json", "raw"]).optional(),
-        content_type: z.string().optional(),
-        content_format: z.enum(["json", "markdown"]).optional(),
-        save_to_path: z.string().optional(),
-        project_root: z
-          .string()
-          .optional()
-          .describe(PROJECT_ROOT_ARG_DESCRIPTION),
-      }),
+      inputSchema: FetchInputSchema,
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,
@@ -101,11 +85,7 @@ export function createServer(): McpServer {
     {
       description:
         "[Internal] Do not call directly. Used by atlassian skills only. Format conversion: ADF/Storage/Wiki ↔ Markdown.",
-      inputSchema: z.object({
-        from: ConvertFormatSchema,
-        to: ConvertFormatSchema,
-        content: z.string(),
-      }),
+      inputSchema: ConvertDirectionSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -121,9 +101,7 @@ export function createServer(): McpServer {
     {
       description:
         "[Internal] Do not call directly. Used by atlassian skills only. Check authentication status and test connectivity.",
-      inputSchema: z.object({
-        connection_test: z.boolean().optional(),
-      }),
+      inputSchema: AuthCheckInputSchema,
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -139,10 +117,7 @@ export function createServer(): McpServer {
     {
       description:
         "[Internal] Do not call directly. Used by atlassian skills only. Auth/connection setup wizard.",
-      inputSchema: z.object({
-        mode: z.enum(["new", "edit"]).optional(),
-        prefill: z.record(z.unknown()).optional(),
-      }),
+      inputSchema: SetupInputSchema,
       annotations: {
         readOnlyHint: false,
         destructiveHint: false,

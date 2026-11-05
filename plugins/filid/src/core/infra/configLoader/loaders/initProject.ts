@@ -19,14 +19,16 @@ const log = createLogger('config-loader');
 /**
  * Initialize FCA-AI project infrastructure — config only.
  *
- * Creates `.filid/config.json` at the git repository root if absent.
+ * Creates `.filid/config.json` at the git repository root if absent; an existing
+ * v1/v2 config is rewritten as v3 only when the conversion discards no key and
+ * passes the strict schema.
  * Rule doc deployment (`.claude/rules/*.md`) is NOT performed here; it is
  * handled exclusively by the `/filid:setup` skill via `syncRuleDocs`.
  *
  * @param projectRoot - Target project directory (git root will be resolved from this)
  * @param options - Output language name and adapter IDs. Both are recorded in
  *   the freshly created config and ignored when the config already exists
- *   (an existing config is never overwritten).
+ *   (an existing config is never replaced with new defaults).
  */
 export function initProject(
   projectRoot: string,

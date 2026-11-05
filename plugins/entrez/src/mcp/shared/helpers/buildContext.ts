@@ -34,7 +34,9 @@ export interface BuildContextOptions {
  * Load config + credentials and assemble the HTTP deps (DI). Throws
  * NOT_CONFIGURED when config is absent. The SSRF allowlist is derived from the
  * configured base URL host plus the PMC utils host (idconv/oa.fcgi); api_key is
- * injected into deps but never surfaced.
+ * injected into deps but omitted from the context's JSON representation.
+ * @param options Optional config paths and HTTP dependencies; config must exist.
+ * @returns A context with live credentials for HTTP and a secret-free JSON view.
  */
 export async function buildToolContext(
   options: BuildContextOptions = {},
@@ -53,11 +55,20 @@ export async function buildToolContext(
     signal: options.signal,
   };
 
-  return {
+  const context: ToolContext = {
     config,
     credentials,
     deps,
     baseUrl: config.base_url,
     db: config.default_db,
   };
+
+  Object.defineProperty(context, "toJSON", {
+    value: () => ({
+      ...context,
+      credentials: undefined,
+      deps: { ...context.deps, apiKey: undefined },
+    }),
+  });
+  return context;
 }

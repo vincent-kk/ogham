@@ -12,7 +12,7 @@ import { findForbiddenKeys } from "./findForbiddenKeys.js";
  *
  * 문서를 정화하지는 않는다. `FORBIDDEN_KEYS`는 경고만 남기고 원문에 그대로
  * 둔다 — UI가 파일 내용을 있는 그대로 보여줘야 하고, 걸러내는 지점은
- * `mergeConfigLayers` 한 곳이다.
+ * 병합(`mergeConfigLayers`)과 저장(`writeConfigLayer`)이다.
  */
 export function readLayer(
   path: string | null,
