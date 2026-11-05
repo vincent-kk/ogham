@@ -1,3 +1,4 @@
+import type { ArtifactPartialFailure } from '@ogham/agent-artifacts';
 import type { ConfigScope } from '@ogham/cross-platform';
 
 /** Single entry in templates/rules/manifest.json. */
@@ -31,6 +32,8 @@ export interface RuleDocsManifest {
 
 /** Owned documents withdrawn from the layer the caller did not choose. */
 export interface RetiredScopeReport {
+  /** Exact file progress when withdrawing the other scope stopped early. */
+  partialFailures?: readonly ArtifactPartialFailure[];
   /** The layer they were withdrawn from — never the one just written. */
   scope: ConfigScope;
   /** Channel the documents were removed from, shown to the user as-is. */
@@ -41,6 +44,17 @@ export interface RetiredScopeReport {
 
 /** Report returned by syncRuleDocs. */
 export interface RuleDocSyncResult {
+  /** Documents whose planned changes could not all be completed. */
+  partial?: Array<{
+    /** Manifest id, or the orphan filename. */
+    id: string;
+    /** Display filename associated with the id. */
+    filename: string;
+    /** File failure that interrupted the document's changes. */
+    reason: string;
+  }>;
+  /** Physical progress retained for recovery and settings reporting. */
+  partialFailures?: readonly ArtifactPartialFailure[];
   copied: string[];
   removed: string[];
   unchanged: string[];

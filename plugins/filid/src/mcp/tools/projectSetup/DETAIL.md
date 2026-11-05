@@ -11,6 +11,8 @@
 
 ## API Contracts
 
+- `rules-sync` 부분 적용은 `violations` 상태와 부분 문서 수를 보고하고 상세 파일 결과를 data에 보존한다.
+
 - 각 action은 기존 child 결과의 의미를 보존한다. settings에는 host abort signal을 전달해 종료된 호출의 대기가 남지 않게 한다.
 
 ## Acceptance Criteria

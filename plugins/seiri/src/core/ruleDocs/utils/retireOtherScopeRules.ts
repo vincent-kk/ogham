@@ -43,17 +43,23 @@ export function retireOtherScopeRules(
   const shipped = new Map(
     documents.map((document) => [document.id, document.filename] as const),
   );
-  const removed = manager
-    .apply(
-      manager.plan({
-        documents,
-        desired: new Set<string>(),
-        replaceDrift: new Set<string>(),
-      }),
-    )
-    .outcomes.filter((outcome) => outcome.action === 'remove')
+  const applied = manager.apply(
+    manager.plan({
+      documents,
+      desired: new Set<string>(),
+      replaceDrift: new Set<string>(),
+    }),
+  );
+  const removed = applied.outcomes
+    .filter((outcome) => outcome.action === 'remove')
     // An orphan's id is already its filename; a shipped rule's is not.
     .map((outcome) => shipped.get(outcome.id) ?? outcome.id);
 
-  return { ...report, filenames: removed };
+  return {
+    ...report,
+    filenames: removed,
+    ...(applied.partialFailures === undefined
+      ? {}
+      : { partialFailures: applied.partialFailures }),
+  };
 }

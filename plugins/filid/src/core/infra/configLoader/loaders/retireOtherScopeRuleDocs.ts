@@ -51,7 +51,14 @@ export function retireOtherScopeRuleDocs(
   );
 
   const filenames = mapRuleSyncResult(applied, manifest).removed;
-  if (filenames.length === 0) return null;
+  if (filenames.length === 0 && !applied.partialFailures?.length) return null;
 
-  return { scope, displayTarget: ruleChannelPath(target), filenames };
+  return {
+    scope,
+    displayTarget: ruleChannelPath(target),
+    filenames,
+    ...(applied.partialFailures === undefined
+      ? {}
+      : { partialFailures: applied.partialFailures }),
+  };
 }

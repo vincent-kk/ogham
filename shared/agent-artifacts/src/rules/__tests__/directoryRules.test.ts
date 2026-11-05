@@ -313,7 +313,7 @@ describe("directory rule documents", () => {
 
       expect(result.outcomes).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ id: broken.id, action: "skip" }),
+          expect.objectContaining({ id: broken.id, action: "partial" }),
           expect.objectContaining({ id: healthy.id, action: "copy" }),
         ]),
       );

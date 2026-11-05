@@ -45,6 +45,8 @@ export interface DirectoryRuleExecution {
 export interface SectionRuleExecution {
   readonly kind: "sections";
   readonly filePlan: FilePlan | null;
+  /** Required physical changes for each outcome, captured during planning. */
+  readonly outcomePaths: ReadonlyMap<number, readonly string[]>;
   readonly mutatingOutcomeIndexes: ReadonlySet<number>;
   readonly revisions: readonly RuleRevisionSpec[];
 }

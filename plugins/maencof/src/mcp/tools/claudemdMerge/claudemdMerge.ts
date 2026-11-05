@@ -2,7 +2,10 @@
  * @file claudemdMerge.ts
  * @description claudemd_merge 도구 핸들러 — CWD의 호스트 지침 문서에 maencof 섹션 삽입/업데이트
  */
-import { createProjectInstructionManager } from '../../../core/claudeMdMerger/index.js';
+import {
+  assertInstructionApplyComplete,
+  createProjectInstructionManager,
+} from '../../../core/claudeMdMerger/index.js';
 import type {
   ClaudeMdMergeInput,
   ClaudeMdMergeResult,
@@ -16,6 +19,8 @@ import type {
  *
  * @param cwd - CWD 절대 경로 (vault 경로)
  * @param input - 도구 입력
+ * @returns 병합 또는 dry-run 결과
+ * @throws 부분 적용 시 MCP 오류 응답으로 전달할 복구 내역 포함 오류
  */
 export function handleClaudeMdMerge(
   cwd: string,
@@ -29,6 +34,7 @@ export function handleClaudeMdMerge(
     backup: 'sibling',
   });
   const result = input.dry_run ? null : manager.apply(plan);
+  if (result) assertInstructionApplyComplete(result);
   const action = (result ?? plan).outcomes[0]?.action;
   const changed =
     action === 'copy' || action === 'update' || action === 'relocate';

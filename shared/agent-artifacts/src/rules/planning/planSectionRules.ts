@@ -12,6 +12,13 @@ import { markSectionPlanConflict } from "./markSectionPlanConflict.js";
 import { planSectionRuleDocument } from "./planSectionRuleDocument.js";
 import { removeOwnedSectionOrphans } from "./removeOwnedSectionOrphans.js";
 
+/**
+ * Builds a revision-bound combined plan with per-document physical dependencies.
+ * @param owner Validated namespace owner.
+ * @param target Host section placement and lock addresses.
+ * @param request Validated document selection and replacement policy.
+ * @returns The read-only public plan and its per-outcome physical execution paths.
+ */
 export function planSectionRules(
   owner: string,
   target: SectionArtifactTarget,
@@ -32,6 +39,7 @@ export function planSectionRules(
     changedPaths: new Set<string>(),
     outcomes: [],
     mutatingOutcomeIndexes: new Set<number>(),
+    outcomePaths: new Map(),
   };
   const inspections = inspectStoredSectionRuleDocuments(
     owner,
@@ -73,6 +81,7 @@ export function planSectionRules(
               changes,
             },
       mutatingOutcomeIndexes: state.mutatingOutcomeIndexes,
+      outcomePaths: state.outcomePaths,
       revisions: [{ target: target.effectivePath, revisionPaths: paths }],
     },
   };

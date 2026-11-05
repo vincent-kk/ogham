@@ -1,4 +1,8 @@
-import type { ArtifactOutcome, ArtifactPlan } from "./artifacts.js";
+import type {
+  ArtifactOutcome,
+  ArtifactPlan,
+  ArtifactApplyResult,
+} from "./artifacts.js";
 import type { CliMcpTarget, FileMcpTarget } from "../targets/index.js";
 
 export type McpServerDefinition =
@@ -56,7 +60,8 @@ export interface McpApplyOptions {
   readonly runner?: McpCliRunner;
 }
 
-export interface McpServerApplyResult {
+/** Registration outcome with physical progress for a failed file-backed apply. */
+export interface McpServerApplyResult extends ArtifactApplyResult {
   readonly ok: boolean;
   readonly outcomes: readonly ArtifactOutcome[];
   readonly revisions: McpServerPlan["revisions"];

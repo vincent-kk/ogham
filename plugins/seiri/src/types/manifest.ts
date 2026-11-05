@@ -1,3 +1,5 @@
+import type { ArtifactPartialFailure } from '@ogham/agent-artifacts';
+
 import type { SeiriConfigScope } from './config.js';
 
 /** Single entry in templates/rules/manifest.json. */
@@ -71,7 +73,7 @@ export interface RuleDocStatus {
 
 /** What a sync would do, or did do, to one rule doc. */
 export type RuleDocAction =
-  'copy' | 'remove' | 'update' | 'unchanged' | 'drift' | 'skip';
+  'copy' | 'remove' | 'update' | 'unchanged' | 'drift' | 'skip' | 'partial';
 
 /** One line of a sync plan or sync report. */
 export interface RuleDocOutcome {
@@ -89,6 +91,8 @@ export interface RuleDocOutcome {
  * field carrying it is named for the other scope rather than the chosen one.
  */
 export interface RuleDocScopeReport {
+  /** Physical progress when withdrawal from this layer stopped on a file error. */
+  partialFailures?: readonly ArtifactPartialFailure[];
   /** The layer these documents sit in. */
   scope: SeiriConfigScope;
   /**
@@ -103,10 +107,12 @@ export interface RuleDocScopeReport {
 }
 
 /**
- * Result of planning or applying a sync. `applied` distinguishes a
- * dry-run preview from a report of writes that actually happened.
+ * Result of planning or applying a sync. `applied` is true only after a
+ * complete apply; false also covers conflicts and partial file failures.
  */
 export interface RuleDocSyncResult {
+  /** Exact file progress of an interrupted apply, retained for settings and tools. */
+  partialFailures?: readonly ArtifactPartialFailure[];
   applied: boolean;
   outcomes: RuleDocOutcome[];
   /** Opaque target + intent revision returned by preview and successful apply. */

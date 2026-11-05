@@ -2,7 +2,10 @@
  * @file claudemdRemove.ts
  * @description claudemd_remove 도구 핸들러 — CWD의 호스트 지침 문서에서 maencof 섹션 제거
  */
-import { createProjectInstructionManager } from '../../../core/claudeMdMerger/index.js';
+import {
+  assertInstructionApplyComplete,
+  createProjectInstructionManager,
+} from '../../../core/claudeMdMerger/index.js';
 import type {
   ClaudeMdRemoveInput,
   ClaudeMdRemoveResult,
@@ -15,6 +18,8 @@ import type {
  *
  * @param cwd - CWD 절대 경로 (vault 경로)
  * @param input - 도구 입력
+ * @returns 제거 또는 dry-run 결과
+ * @throws 부분 적용 시 MCP 오류 응답으로 전달할 복구 내역 포함 오류
  */
 export function handleClaudeMdRemove(
   cwd: string,
@@ -27,6 +32,7 @@ export function handleClaudeMdRemove(
     backup: 'sibling',
   });
   const result = input.dry_run ? null : manager.apply(plan);
+  if (result) assertInstructionApplyComplete(result);
   const removed = (result ?? plan).outcomes[0]?.action === 'remove';
   const backupPath = result?.backupPaths[0];
 

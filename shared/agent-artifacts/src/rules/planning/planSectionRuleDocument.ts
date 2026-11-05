@@ -10,6 +10,14 @@ import { isMutatingRuleAction } from "./isMutatingRuleAction.js";
 import { removeSectionRuleDocument } from "./removeSectionRuleDocument.js";
 import { writeSectionRuleDocument } from "./writeSectionRuleDocument.js";
 
+/**
+ * Records one document outcome and its actual physical mutations.
+ * @param state Mutable planning contents and outcome-to-path map.
+ * @param request Desired selection and drift replacement policy.
+ * @param document Validated managed document.
+ * @param inspection Stored deployment facts used for placement.
+ * @returns The updated planning state is retained in the supplied state.
+ */
 export function planSectionRuleDocument(
   state: SectionRulePlanningState,
   request: RuleDocumentRequest,
@@ -37,8 +45,13 @@ export function planSectionRuleDocument(
         : { reason: placement.decision.reason }),
     }) - 1;
 
+  const before = new Map(state.contents);
   removeSectionRuleDocument(state, document, location, placement);
   writeSectionRuleDocument(state, document, placement);
+  state.outcomePaths.set(
+    outcomeIndex,
+    state.paths.filter((path) => before.get(path) !== state.contents.get(path)),
+  );
   if (isMutatingRuleAction(placement.decision.action))
     state.mutatingOutcomeIndexes.add(outcomeIndex);
 }
