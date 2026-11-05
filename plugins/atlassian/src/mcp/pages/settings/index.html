@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Atlassian · settings</title>
     <link href="./styles/styles.css" rel="stylesheet" />
+    <link href="./styles/interactions.css" rel="stylesheet" />
   </head>
   <body>
     <div class="container">
@@ -291,6 +292,18 @@
       window.__SETTINGS_STATE__ = "__SETTINGS_STATE__";
     </script>
     <script src="./__mocks__/mock-api.js"></script>
+    <script src="./scripts/helpers/registry.js"></script>
+    <script src="./scripts/helpers/createSiteEntry/elementFactory.js"></script>
+    <script src="./scripts/helpers/createSiteEntry/createRemoveIcon/svgElement.js"></script>
+    <script src="./scripts/helpers/createSiteEntry/createRemoveIcon.js"></script>
+    <script src="./scripts/helpers/createSiteEntry.js"></script>
+    <script src="./scripts/helpers/validateForm/requireField.js"></script>
+    <script src="./scripts/helpers/validateForm/requireUrl.js"></script>
+    <script src="./scripts/helpers/validateForm/requireCloudSite.js"></script>
+    <script src="./scripts/helpers/validateForm.js"></script>
+    <script src="./scripts/helpers/collectFormData.js"></script>
+    <script src="./scripts/helpers/onSubmit.js"></script>
+    <script src="./scripts/helpers/onTest.js"></script>
     <script src="./scripts/app.js"></script>
     <script src="./scripts/json-import.js"></script>
   </body>

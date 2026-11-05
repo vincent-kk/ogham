@@ -4,7 +4,13 @@ import { getAuthHeader } from "../../../core/authManager/index.js";
 import { getApiVersion } from "../../../core/index.js";
 import { resolveSiteConfig } from "../../../utils/index.js";
 
-/** Build FetchContext (HttpClientConfig + service + apiVersion) for a fetch call. */
+/**
+ * Assemble an API context with an auth header readable by HTTP but omitted by JSON/spread.
+ * @param service Configured Atlassian service to call.
+ * @param baseUrl Optional site selector when multiple sites are configured.
+ * @param endpoint Optional endpoint used to resolve the target site.
+ * @returns The context, or null when no sites exist; configuration and site-resolution errors propagate.
+ */
 export async function buildFetchContext(
   service: "jira" | "confluence",
   baseUrl?: string,
@@ -12,10 +18,11 @@ export async function buildFetchContext(
 ): Promise<FetchContext | null> {
   const config = await loadConfig();
   const sites = config[service];
-  if (!sites || sites.length === 0) return null;
+  // Validate storage before site-selection errors can hide the setup instruction.
+  await getAuthHeader(service);
+  if (!sites?.length) return null;
 
   const siteConfig = resolveSiteConfig(service, sites, baseUrl, endpoint);
-
   const authHeader = await getAuthHeader(service, siteConfig.username);
 
   const http: HttpClientConfig = {
@@ -25,6 +32,7 @@ export async function buildFetchContext(
     timeout: siteConfig.timeout,
     allow_private_ip: !siteConfig.is_cloud,
   };
+  Object.defineProperty(http, "auth_header", { enumerable: false });
 
   const apiVersion = getApiVersion(
     service,

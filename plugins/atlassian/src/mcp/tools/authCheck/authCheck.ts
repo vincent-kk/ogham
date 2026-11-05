@@ -18,7 +18,7 @@ export async function handleAuthCheck(params: {
   const serviceNames = ["jira", "confluence"] as const;
 
   let hasAnyService = false;
-  const credentials = connectionTest ? await loadCredentials() : undefined;
+  const credentials = await loadCredentials();
 
   for (const service of serviceNames) {
     const sites = config[service];

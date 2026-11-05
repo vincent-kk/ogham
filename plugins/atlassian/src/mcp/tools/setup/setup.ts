@@ -2,7 +2,6 @@ import {
   loadConfig,
   loadConfigByScope,
   loadConfigScope,
-  loadCredentials,
   saveConfig,
   saveCredentials,
 } from "../../../core/index.js";
@@ -11,6 +10,7 @@ import type {
   SetupParams,
   SetupResult,
 } from "../../../types/index.js";
+import { loadSetupCredentials } from "./utils/loadSetupCredentials.js";
 import { loadSettingsHtml } from "./utils/loadSettingsHtml.js";
 import { testConnection } from "../../../core/index.js";
 import { openBrowser } from "@ogham/cross-platform";
@@ -29,7 +29,7 @@ export async function handleSetup(params: SetupParams): Promise<SetupResult> {
         loadConfigByScope,
         loadConfigScope,
         saveConfig,
-        loadCredentials,
+        loadCredentials: loadSetupCredentials,
         saveCredentials,
         testConnection,
       },
