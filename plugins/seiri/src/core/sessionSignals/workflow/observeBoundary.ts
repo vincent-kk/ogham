@@ -22,8 +22,9 @@ export interface ObserveBoundaryOptions {
  * @param options `firstChild` and `suspend`, kept as one options object so a
  *   two-positional-boolean call cannot be reordered by mistake.
  * @returns The post-update binding snapshot from inside the same actor
- *   transaction, or `undefined` when there is no binding or the transaction
- *   did not run. Runs — and, on success, lifts a quarantine left by a prior
+ *   transaction, `undefined` when there is no binding (including absent,
+ *   corrupt or expired state), or `null` when the transaction throws.
+ *   Runs — and, on success, lifts a quarantine left by a prior
  *   failed transaction — even while the actor is quarantined, since this
  *   boundary's generation bump and invocations/seen reset discard anything
  *   recorded before that failure.
@@ -33,7 +34,7 @@ export function observeBoundary(
   enabled: boolean,
   now: number,
   options: ObserveBoundaryOptions = {},
-): WorkflowBinding | undefined {
+): WorkflowBinding | null | undefined {
   const { firstChild = false, suspend = false } = options;
   return withWorkflowState(
     identity,
@@ -47,6 +48,6 @@ export function observeBoundary(
           : undefined,
         suspend,
       ),
-    { revokeOnFailure: true, recover: { suspend } },
+    { revokeOnFailure: true, recover: { suspend }, failureResult: null },
   );
 }

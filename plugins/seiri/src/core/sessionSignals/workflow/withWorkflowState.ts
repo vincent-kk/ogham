@@ -19,7 +19,9 @@ import { readState } from './readState.js';
 const CALL_TTL = 24 * 60 * 60 * 1000;
 
 /** Options narrowing one actor transaction beyond identity, dial and time. */
-interface WithWorkflowStateOptions {
+interface WithWorkflowStateOptions<Failure> {
+  /** Result returned only when the transaction throws; omitted callers keep undefined. */
+  failureResult?: Failure;
   /** Persist a revocation marker if this transaction fails to commit. */
   revokeOnFailure?: boolean;
   /**
@@ -66,17 +68,17 @@ function deleteMarkerIfUnchanged(
  *   the actor lock when the actor state file is absent.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @param mutate Callback under the actor lock; ledger effects take their lock inside it.
- * @param options `revokeOnFailure` and `recover`, kept as one options object
- *   so a growing parameter list stays legible at the call site.
- * @returns Callback result only after state is persisted, or undefined on failure.
+ * @param options Quarantine policy and an optional result distinguishing exceptions from absent state.
+ * @returns Callback result only after state is persisted; undefined for absent state,
+ *   or the configured failure result (default undefined) when the transaction throws.
  */
-export function withWorkflowState<T>(
+export function withWorkflowState<T, Failure = undefined>(
   identity: WorkflowIdentity,
   create: false | ((root: string) => string | undefined),
   now: number,
   mutate: (state: WorkflowState) => T,
-  options: WithWorkflowStateOptions = {},
-): T | undefined {
+  options: WithWorkflowStateOptions<Failure> = {},
+): T | Failure | undefined {
   const { revokeOnFailure = false, recover } = options;
   const dir = portableJoin(
     findRepoRoot(identity.root),
@@ -156,7 +158,7 @@ export function withWorkflowState<T>(
         );
       }
     }
-    return undefined;
+    return options.failureResult;
   } finally {
     if (held) {
       try {

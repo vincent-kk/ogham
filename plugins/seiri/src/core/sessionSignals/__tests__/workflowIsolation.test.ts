@@ -228,7 +228,7 @@ it('keeps the quarantine marker when the recovering boundary also fails to acqui
   const snapshot = observeBoundary({ ...id, turn: 'still-blocked' }, true, NOW);
   rmSync(`${path}.lock`, { recursive: true });
 
-  expect(snapshot).toBeUndefined();
+  expect(snapshot).toBeNull();
   expect(existsSync(`${path}.revoked`)).toBe(true);
 });
 it('discards invocations recorded before the failure so they cannot complete after recovery', () => {

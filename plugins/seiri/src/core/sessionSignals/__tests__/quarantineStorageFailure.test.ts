@@ -52,6 +52,6 @@ it('never deletes the quarantine marker ahead of a successful commit — it surv
 
   const snapshot = observeBoundary({ ...id, turn: 'recovered' }, true, NOW);
 
-  expect(snapshot).toBeUndefined();
+  expect(snapshot).toBeNull();
   expect(existsSync(`${path}.revoked`)).toBe(true);
 });
