@@ -5,7 +5,7 @@
 - 하루 한 파일이고 세션은 `sessions[sessionId]` 로 직접 조회한다. 전수조사하지 않으며 sweep 도 최근 일자 창으로 고정한다.
 - 마감은 차분으로 한다: SessionStart 가 baseline 을 남기고, 매 턴 touch 가 `lastActivityAt`·`usageSnapshot` 을 갱신하고, sweep 이 `snapshot - baseline` 으로 마감한다.
 - sweep 마감은 잠정적이다. baseline 과 snapshot 을 보존하므로 오마감된 세션에 새 활동이 오면 touch 가 다시 열고 sweep 이 멱등하게 재차분한다.
-- 손상된 일자 파일은 빈 로그로 폴백한다 — 복구 가능한 데이터를 덮어쓰지 않는다.
+- 손상된 일자 파일은 빈 로그로 폴백한다 — 복구 가능한 데이터를 덮어쓰지 않는다. 기록을 계속할 때는 쓰기 경계에서 `backupPathFor` 명명 규칙으로 원본 바이트를 먼저 보존하며, 백업이 실패하면 원본을 교체하지 않는다.
 - 자정을 넘긴 세션은 직전 일자의 미마감 레코드를 찾아 마감한다.
 - usage 통계는 숫자 카운트만 쓴다. 레거시 비숫자 키는 무시한다.
 - `.maencof-meta/sessions/*.md` 는 읽지도 쓰지도 않는다 — 세션 기록은 이 저장소 전용이다.
@@ -27,6 +27,7 @@
 ### AC-corrupt-day-log-fallback — 손상 폴백
 
 - 파싱 불가 일자 파일에서 빈 로그를 반환하고 덮어쓰지 않는다.
+- 손상 파일에 새 세션을 기록하기 전 원본을 백업한다. 읽기만으로는 파일을 바꾸지 않으며 백업 실패 시 쓰기도 실패한다.
 
 ## Boundary Exemptions
 
