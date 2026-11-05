@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { readUtf8FileIfExistsSync } from "../../../../filesystem/read/readUtf8FileIfExistsSync.js";
-import { readConfigLayers } from "../readConfigLayers.js";
+import { readUtf8FileIfExistsSync } from "../../../filesystem/read/readUtf8FileIfExistsSync.js";
+import { readConfigLayers } from "../operations/readConfigLayers.js";
 
-vi.mock("../../../../filesystem/read/readUtf8FileIfExistsSync.js");
+vi.mock("../../../filesystem/read/readUtf8FileIfExistsSync.js");
 
 afterEach(() => vi.resetAllMocks());
 
