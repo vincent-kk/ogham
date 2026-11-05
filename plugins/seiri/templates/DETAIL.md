@@ -38,4 +38,4 @@
 
 ## Last Updated
 
-규칙 문서의 계약이나 배포 조건, acceptance criteria가 바뀔 때 갱신한다.
+규칙 템플릿·해시·opt-in·스캐폴드 소유 계약의 내용과 근거가 바뀔 때 갱신한다.

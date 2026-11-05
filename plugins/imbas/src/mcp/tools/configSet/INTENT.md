@@ -4,10 +4,6 @@
 
 `config_set` 도구 핸들러. 호출자가 지정한 한 계층(user 또는 project)의 원본 문서에 업데이트를 적용해 그 계층만 기록한다.
 
-## Structure
-
-- `configSet.ts` — `handleConfigSet` · `ConfigSetInput`
-
 ## Conventions
 
 - `scope` 는 기본값 없는 필수 입력이다. 두 계층 모두 유효한 대상이라, 조용한 기본값은 프로젝트 결정을 사용자 파일에 넣거나 그 반대를 만든다.
@@ -29,8 +25,3 @@
 
 - 핸들러에 비즈니스 로직 직접 구현
 - `scope` 에 기본값 부여
-
-## Dependencies
-
-- `../../../core/configManager` — `updateConfigLayer`
-- `@ogham/cross-platform` — `projectRoot`

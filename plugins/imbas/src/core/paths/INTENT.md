@@ -4,10 +4,9 @@
 
 .imbas/ 디렉토리 구조의 경로 해석. 프로젝트 루트 기반 경로 생성.
 
-## Structure
+## Conventions
 
-- `paths.ts` — 경로 해석 함수 (getImbasRoot / getProjectDir / getCacheDir / getRunsDir / getRunDir)
-- `utils/projectDirName.ts` — project_ref → 디렉토리 세그먼트 매핑 (GitHub `owner/repo` → `owner--repo`, 비정상 ref 거부)
+절대 경로 반환은 호출자가 절대 cwd를 제공한다는 전제에 의존한다. 입력 세그먼트는 경로 주입을 막는 신뢰 경계다.
 
 ## Boundaries
 

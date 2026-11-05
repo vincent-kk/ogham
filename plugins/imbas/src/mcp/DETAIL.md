@@ -9,13 +9,8 @@
 
 ## API Contracts
 
-- `mcp/index.ts` 배럴이 노출하는 심볼:
-  - `server/` 에서 `createServer` · `startServer`
-  - `shared/` 에서 `toolResult` · `toolError` · `mapReplacer` · `wrapHandler`
-  - `tools/` 에서 9개 핸들러 `handleRunCreate` · `handleRunGet` · `handleRunTransition` · `handleRunList` · `handleManifestSave` · `handleManifestValidate` · `handleConfigGet` · `handleConfigSet` · `handleOpenSettings`
-- `src/index.ts` 는 이 배럴을 재노출하지 않는다. `server/server.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → mcp/server → src` 순환이 된다.
-- 배송 진입점은 `serverEntry/` 이고 `pages/` 는 런타임 export 가 없는 정적 자산 루트다. 둘 다 이 배럴로 나가지 않는다.
-- 자식 fractal 역할: `server/`(생성·등록) · `serverEntry/`(stdio 전송) · `shared/`(응답 형식) · `tools/`(핸들러) · `pages/`(정적 자산).
+- 루트 공개 배럴은 MCP를 재노출하지 않는다. 서버의 버전 참조를 통해 루트로 돌아오는 의존 순환을 막기 위한 경계다.
+- 실행 진입점과 정적 자산은 심볼 재노출 대상이 아니다. 배포 빌드가 별도로 소비한다.
 
 ## Acceptance Criteria
 
@@ -40,4 +35,4 @@
 
 ## Last Updated
 
-2026-08-06 — MCP 도구를 17개에서 9개로 줄인 v2 표면과 배럴 경계를 최초 문서화했다.
+MCP 표면과 호스트 경계 계약의 내용과 근거가 바뀔 때 갱신한다.

@@ -19,4 +19,4 @@
 
 ## Last Updated
 
-2026-09-29
+호출 관측·native provenance·진입 seed 계약의 내용과 근거가 바뀔 때 갱신한다.

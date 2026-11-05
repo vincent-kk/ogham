@@ -2,14 +2,6 @@
 
 `open_settings` 가 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 공유 `@ogham/http-kit` 으로 loopback Host → one-time token → POST Origin → `application/json` 순 검증. 저장/닫기 이벤트를 settle waiter 로 노출해 도구의 bounded long-poll 을 해소한다.
 
-## Structure
-
-| Path                                | Role                                                                 |
-| ----------------------------------- | -------------------------------------------------------------------- |
-| `webServer.ts` (+`index.ts` barrel) | `startSettingsServer` — closure lifecycle + settle waiter 레지스트리 |
-| `routing/`                          | `routes.ts` (guard + 경로 디스패치), `routeContext.ts`               |
-| `handlers/`                         | GET `/` (상태 주입), POST `/save` (config 영속), `/close`            |
-
 ## Conventions
 
 - 응답 본문 형태: `{ success: bool, message?, errors?, ...data }`
@@ -36,8 +28,3 @@
 - CORS 와일드카드 활성화
 - 모듈 전역 mutable state — lifecycle 은 closure 반환값으로만 노출
 - token 값을 응답에 echo
-
-## Dependencies
-
-- `node:http` · `@ogham/http-kit` — `inspectRequest`, `generateToken`, `parseBody`, `escapeJsonForHtml`, `sendJson`
-- `src/types/settings.js` — `SettingsSaveBodySchema`, settle 타입

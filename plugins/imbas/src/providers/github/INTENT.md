@@ -4,12 +4,6 @@
 
 GitHub Issues 프로바이더 구현. `## Links` 섹션 파싱 및 이슈 바디 메타 블록 처리.
 
-## Structure
-
-| File            | Role                                                    |
-| --------------- | ------------------------------------------------------- |
-| `parseLinks.ts` | `## Links` 섹션 → `GithubLinks` 레코드 파서 (순수 함수) |
-
 ## Conventions
 
 - 모든 함수는 순수 함수 (string input → typed output, no I/O)
@@ -25,7 +19,7 @@ GitHub Issues 프로바이더 구현. `## Links` 섹션 파싱 및 이슈 바디
 
 ### Ask first
 
-- `## Links` 문법 확장 (SPEC-provider-github.md §link-handling 참조)
+- `## Links` 문법 확장 (provider의 링크 처리 계약과 함께 검토)
 - `console.warn` 외 로깅 라이브러리 도입
 
 ### Never do

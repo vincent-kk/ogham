@@ -11,9 +11,7 @@
 
 ## API Contracts
 
-| Export               | Contract                                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------------------- |
-| `handleGates(input)` | 원장 상태를 조회하거나 명시적 포기·수동 증거를 기록하고 action으로 구분되는 현재 상태를 반환한다. |
+실행 가능한 CHECK는 관측 출력의 EXPECT 일치로만 증명한다. 명시적 record는 CHECK 없는 수동 게이트에 한정하여 모델이 실행 증거를 대신 작성하지 못하게 한다.
 
 ## Acceptance Criteria
 
@@ -21,18 +19,6 @@
 
 - 어떤 action도 프로세스를 띄우지 않으며, CHECK가 있는 게이트의 `record` 를 거부한다.
 
-### AC-gates-abandon-visible — 포기는 상태에 남는다
-
-- 사유 없는 포기를 거부하고, 성공한 포기는 별도 `abandons` 목록과 해결된 `all_met` 계산에 보인다.
-
-### AC-gates-task-name — 작업 이름은 경로가 아니다
-
-- 소문자 kebab-case가 아닌 작업 이름은 원장을 읽거나 쓰기 전에 패턴을 밝힌 오류로 거부한다.
-
-### AC-gates-needs-expect — 실행 가능 게이트 수리 신호
-
-- CHECK가 있으나 EXPECT가 없는 미충족 항목에만 `needs_expect: true`가 나타난다.
-
 ## Last Updated
 
-2026-08-23 — EXPECT 없는 실행 가능 게이트의 수리 신호를 상태 계약에 추가했다.
+status 요약·수동 record·abandon 액션과 core 위임 경계의 계약이 바뀔 때 갱신한다.

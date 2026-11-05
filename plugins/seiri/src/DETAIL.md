@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 규칙 본문은 하니스가 로드합니다. 훅은 standard/strict SessionStart의 규칙 요약·다이얼·drift·선출·체인, UserPromptSubmit의 활성 바인딩 진행 줄 또는 무바인딩 턴의 다이얼별 진입 줄, 명시적 작업 참여의 ACK와 관측된 검증·실패 변화만 전달합니다.
+- 규칙 본문은 하니스가 로드합니다. 훅은 standard/strict SessionStart의 규칙 요약·다이얼·drift·선출·체인, UserPromptSubmit의 활성 바인딩 진행 줄 또는 무바인딩 턴의 다이얼별 진입 줄, 명시적 작업 참여의 ACK와 관측된 검증·실패 변화만 전달합니다. 작업 선택 시점에 변화 종류를 알리기 위해 사용자 턴 경계에서 진입 줄을 제공합니다. 편집 뒤에는 워크플로우 선택 시점을 놓칩니다.
 - 어떤 훅도 차단하지 않는다. 신호는 제안이고 판정은 모델이 한다.
 - off/advisory는 신규 관측과 주입을 하지 않습니다. 신뢰되는 경계는 기존 참여만 무효화할 수 있으며 무주입 결과의 wire stdout은 비어 있습니다.
 - 훅 도달 코드는 배럴을 거치지 않고 concrete 파일을 직접 import 한다. esbuild 가 배럴의 재노출 그래프 전체를 번들에 끌어오고 `build:hooks` 의 크기 가드가 이를 빌드 실패로 막기 때문이다 — typecheck 는 이 비대를 잡지 못한다.
@@ -11,11 +11,11 @@
 
 ## API Contracts
 
-- 배포 진입점은 esbuild 산출물이다: MCP 서버(원본 `mcp/serverEntry/`)와 훅 번들 6종을 호스트별로 각각 방출한다. 방출 경로와 호스트별로 나뉜 이유는 플러그인 루트 `DETAIL.md`의 Structure 절을 따른다.
+- 배포 진입점은 esbuild 산출물이다: MCP 서버(원본 `mcp/serverEntry/`)와 훅 번들 6종을 호스트별로 각각 방출한다. 방출 경로와 호스트별로 나뉜 이유는 플러그인 루트 `DETAIL.md`의 Requirements 절을 따른다.
 - `src/index.ts` 는 named re-export 만 담는 공개 배럴이다.
 - 배포 compile은 dist의 JavaScript와 선언 파일을 실제 생성하여 package exports를 충족합니다. 상위 typecheck용 noEmit 설정은 build에서 해제합니다.
-- 게이트의 `CHECK` 는 실제 결과 조건을 검사하는 명령이고 `EXPECT` 는 조건 충족 시에만 관측되는 리터럴 성공 문자열이다. 결과 조건의 값은 저장소와 계획이 소유한다.
-- 소유 상태는 넷이다: 개입 강도 다이얼(`core/infra/configLoader`), 호스트 규칙 배포 상태(`core/ruleDocs`), 세션 스코프 신호(`core/sessionSignals`), 작업 상태(`core/gates`).
+- 게이트의 `CHECK` 는 실제 결과 조건을 검사하는 명령이고 `EXPECT` 는 조건 충족 시에만 관측되는 리터럴 성공 문자열이다. 결과 조건의 값은 저장소와 계획이 소유한다. 결과 조건을 CHECK가 검사하게 하여 저장소 정규식을 훅에서 실행하지 않는다.
+- 다이얼·규칙 배포·actor 참여·작업 증거는 서로 다른 소유 상태이며 각 소유 모듈의 계약을 따른다.
 
 ## Acceptance Criteria
 
@@ -47,11 +47,6 @@
 - **Direct import**: allowed
 - **Reason**: `version.ts` 는 생성기가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 배럴을 경유시키면 `src → mcp → server → src` 순환이 생기므로, 이 참조는 경계를 넘는 대신 면책을 받는다.
 
-## History
-
-- 2026-09-29 — 무바인딩 턴의 다이얼별 진입 줄을 UserPromptSubmit에서 표시합니다. 작업 선택 시점에 변화 종류를 알리기 위해서입니다.
-- 2026-09-05 — 게이트 타입의 EXPECT를 리터럴 성공 문자열로 한정했다. 결과 조건은 CHECK가 검사하여 저장소 정규식을 훅에서 실행하지 않는다.
-
 ## Last Updated
 
-2026-09-29 — 무바인딩 턴의 다이얼별 진입 줄을 반영했습니다.
+배송 표면·소유 상태·경계 계약의 내용과 근거가 바뀔 때 갱신한다.

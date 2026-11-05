@@ -8,11 +8,7 @@
 
 ## API Contracts
 
-- `getImbasRoot(cwd)` — `<cwd>/.imbas`.
-- `getProjectDir(cwd, projectKey)` — `<root>/<segment>`. GitHub `owner/repo` 는 `owner--repo` 로 매핑된다.
-- `getCacheDir(cwd, projectKey)` · `getRunsDir(cwd, projectKey)` — 프로젝트 디렉터리 하위 `cache/` · `runs/`.
-- `getRunDir(cwd, projectKey, runId)` — `<runs>/<runId>`. 부적격 `runId` 는 throw.
-- 배럴은 위 다섯 함수만 노출한다. `projectDirName` 은 organ 내부 단위이며 공개 표면이 아니다.
+GitHub 참조는 단일 디렉터리 세그먼트로 매핑한다. 호출자는 경로 조립과 디렉터리 생성을 구분해야 하며, 이 모듈은 파일시스템을 변경하지 않는다.
 
 ## Acceptance Criteria
 
@@ -35,4 +31,4 @@
 
 ## Last Updated
 
-2026-07-30 — 세그먼트 거부 계약과 훅 직접 import 면책을 문서화했다.
+경로 세그먼트·프로젝트 매핑·직접 import 면책의 내용과 근거가 바뀔 때 갱신한다.

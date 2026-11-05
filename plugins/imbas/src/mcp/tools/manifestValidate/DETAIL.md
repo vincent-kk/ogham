@@ -9,30 +9,8 @@
 
 ## API Contracts
 
-```typescript
-export function handleManifestValidate(
-  input: ManifestValidateInput,
-): Promise<ValidationResult>;
-
-interface ManifestValidateInput {
-  project_ref: string;
-  run_id: string;
-  type: 'stories' | 'estimation';
-  project_root?: string;
-}
-
-interface ValidationResult {
-  valid: boolean; // errors.length === 0
-  errors: string[];
-  warnings: string[];
-}
-```
-
-- MCP `inputSchema` 의 세 필드는 모두 필수이고 `type` 은 두 값의 enum 이다.
-- 반환값은 `validateManifest(run_dir, type)` 의 결과 그대로다 — 필드 이름·의미가 `core/manifestValidator` 의 계약이며, 타입별 error/warning 분류는 그 구현이 정본이다.
-- `warnings` 만 있는 매니페스트는 `valid: true` 다. 호출자가 경고를 차단 사유로 쓰려면 스스로 판단해야 한다.
-- 실패 — 이 도구가 실제로 throw 하는 경로는 경로 조립뿐이다. `run_id` 나 `project_ref` 가 단일 안전 세그먼트를 만들지 못하면 검증 전에 거부된다.
-- 배럴은 `handleManifestValidate` 만 노출한다.
+- core의 검증 결과를 가공하지 않는다. 경고를 차단 사유로 삼을지는 호출자의 판단이다.
+- 안전한 세그먼트를 만들지 못한 입력은 검증 전에 거부한다.
 
 ## Acceptance Criteria
 
@@ -50,4 +28,4 @@ interface ValidationResult {
 
 ## Last Updated
 
-2026-08-05 — v2: 타입을 stories·estimation 2종으로 재정의.
+검증 결과·오류 전달 계약의 내용과 근거가 바뀔 때 갱신한다.

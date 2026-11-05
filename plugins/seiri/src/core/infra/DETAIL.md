@@ -7,7 +7,7 @@
 
 ## API Contracts
 
-- `configLoader` — 다이얼 2계층(`config.json` 기준선 + `runtime.json` 밸브)의 로드·기록·설명.
+설정 계층의 읽기·쓰기 계약은 configLoader가 소유한다. 규칙 배포 상태나 세션 신호를 이 설정 계약에 추가하지 않는다.
 
 ## Acceptance Criteria
 
@@ -17,4 +17,4 @@
 
 ## Last Updated
 
-2026-07-30 — 설정 계층의 범위를 문서화했다.
+설정 소유 범위와 저장 책임의 내용과 근거가 바뀔 때 갱신한다.

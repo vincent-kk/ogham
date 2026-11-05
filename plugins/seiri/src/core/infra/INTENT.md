@@ -4,11 +4,6 @@
 
 프로젝트 로컬 설정의 읽기·쓰기. 현재 담는 것은 skills-only `off`와 세 개의 개입 강도를 가진 다이얼 하나뿐이다.
 
-## Structure
-
-- `configLoader/` — 다이얼 3계층 (user `config.json` + 프로젝트 `.seiri/config.json` + `runtime.json` 밸브)
-- `index.ts` — barrel
-
 ## Conventions
 
 - 설정 키를 늘리기 전에 **"이 값의 진실을 누가 소유하는가"** 를 먼저 답한다. 저장소가 소유해야 할 값(검증 명령·임계치)은 여기 두지 않는다. 사본은 드리프트하고, 드리프트한 사본은 없느니만 못하다.

@@ -6,13 +6,7 @@
 
 ## Structure
 
-```
-index.ts    barrel (외부 소비자 전용 — 훅은 loaders/·utils/ 를 직접 import)
-loaders/    organ — loadConfig · loadConfigScope · loadIntervention · writeConfig
-                    · writeRuntime · clearRuntime · createDefaultConfig
-utils/      organ — readDialFile · configLayers · resolveConfigPath · resolveRuntimePath · isInterventionLevel
-                    · describeDial · renderPostureLines · renderElectionLine
-```
+배럴은 외부 소비자 전용이다. 훅은 번들 크기 가드 때문에 필요한 내부 파일에 직접 닿는다.
 
 ## Conventions
 
@@ -41,7 +35,3 @@ utils/      organ — readDialFile · configLayers · resolveConfigPath · resol
 - 언어 설정 보유 — 출력 언어는 세션이 소유한다.
 - 세션 훅에서 다이얼 **쓰기** (읽기만 허용).
 - 한 계층의 값을 다른 계층에 되쓰기 — 프로젝트 결정이 개인 기본값에 구워진다.
-
-## Dependencies
-
-- `../../utils/`, `../../../constants/`, `@ogham/cross-platform`

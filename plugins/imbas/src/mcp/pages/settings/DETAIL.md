@@ -13,16 +13,10 @@
 
 ## API Contracts
 
-| Path             | 역할                                                          |
-| ---------------- | ------------------------------------------------------------- |
-| `index.html`     | 폼 마크업 + 상태 주입 슬롯 `__IMBAS_STATE__`                  |
-| `scripts/app.js` | 상태 prefill · provider 조건부 렌더 · 검증 · `/save`·`/close` |
-| `styles/`        | `styles.css` — 다크 OLED 단색 토큰                            |
-
 - 서버와의 계약은 두 엔드포인트뿐이다: `POST /save`, `POST /close`. 두 요청 모두 `location.search` 에서 읽은 서버 발급 토큰을 `?token=` 으로 부착한다.
 - `/save` 페이로드는 `scope` 와 config 본문, 그리고 config 가 아닌 부수 의사(`options.provision_labels`)를 함께 싣는다. 스키마 정본은 `src/types/settings.ts` 다.
 - project 옵션은 `scope.paths.project`가 없을 때만 disabled이다. 설정 파일 부재는 프로젝트 설정 생성을 막지 않는다.
-- 저장 성공 시 복귀 안내 후 탭을 자동으로 닫아 도구의 long-poll 을 해소한다. dirty 상태 이탈은 `beforeunload` 로 확인한다.
+- 저장 성공은 탭 종료와 무관하게 도구의 long-poll을 해소한다. 탭 종료는 Save & Close를 선택했을 때만 수행하여 Save 뒤의 추가 편집을 막지 않는다. dirty 상태 이탈은 `beforeunload` 로 확인한다.
 
 ## Acceptance Criteria
 
@@ -57,4 +51,4 @@
 
 ## Last Updated
 
-2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.
+설정 범위·미리보기·저장 계약의 내용과 근거가 바뀔 때 갱신한다.

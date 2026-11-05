@@ -9,27 +9,16 @@
 
 ## API Contracts
 
-`index.ts` 배럴이 노출하는 공개 심볼은 다음과 같다.
-
-| 심볼                                                                            | 출처                 |
-| ------------------------------------------------------------------------------- | -------------------- |
-| `createRunState` · `loadRunState` · `saveRunState` · `applyTransition`          | `stateManager/`      |
-| `loadConfig` · `saveConfig` · `updateConfigLayer` · `getConfigValue`            | `configManager/`     |
-| `loadManifest` · `getManifestSummary` · `getEstimationSummary` · `ManifestType` | `manifestParser/`    |
-| `validateManifest`                                                              | `manifestValidator/` |
-| `getImbasRoot` · `getProjectDir` · `getCacheDir` · `getRunsDir` · `getRunDir`   | `paths/`             |
-| `generateRunId`                                                                 | `runIdGenerator/`    |
-
-- 배럴은 이름을 하나씩 적는다. 와일드카드 재노출은 하위 fractal 의 내부 심볼을 조용히 공개 계약으로 승격시킨다.
-- `configManager` 의 계층 전용 심볼(`loadConfigByScope` · `loadConfigScope` · `ConfigByScope`)은 이 배럴에 없다. 계층을 다루는 소비자는 `core/configManager` 진입점을 직접 지목한다.
-- `utils/` 는 organ 이다 — `advancePhase` · `handleCompletePhase` · `validateStartPhase` 는 `stateManager` 전용이며 배럴로 나가지 않는다.
+- 배럴은 이름을 하나씩 적는다. 와일드카드는 하위 모듈의 추가를 조용히 공개 계약으로 승격시킨다.
+- 계층별 설정을 다루는 소비자는 configManager의 진입점에 직접 닿는다. 부모의 일반 설정 표면으로 계층 편집 계약을 넓히지 않는다.
+- 상태 전이 헬퍼는 stateManager 전용이며 공개 배럴로 나가지 않는다.
 
 ## Acceptance Criteria
 
 ### AC-core-barrel-named — 배럴 명시 재노출
 
 - `core/index.ts` 에 `export *` 형태가 없다.
-- 배럴이 노출하는 심볼이 위 표와 정확히 일치한다.
+- 배럴은 하위 모듈의 의도된 공개 표면만 노출한다.
 
 ### AC-core-atomic-write — 원자적 파일 쓰기
 
@@ -46,4 +35,4 @@
 
 ## Last Updated
 
-2026-08-06 — v2 재편으로 `cacheManager` · `executionPlanner` · `implementPlanner` 가 제거된 뒤의 core 공개 표면을 계약화했다.
+상태 소유권과 공통 경계 계약의 내용과 근거가 바뀔 때 갱신한다.

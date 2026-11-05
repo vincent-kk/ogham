@@ -28,4 +28,4 @@
 
 ## Last Updated
 
-2026-09-27
+Update when the child isolation, parent handoff, or resumption contracts change.

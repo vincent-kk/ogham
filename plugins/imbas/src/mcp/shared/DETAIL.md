@@ -10,47 +10,9 @@
 
 ## API Contracts
 
-```typescript
-export function mapReplacer(_key: string, value: unknown): unknown;
-export function toolResult(result: unknown): {
-  content: [{ type: 'text'; text: string }];
-};
-export function toolError(error: unknown): {
-  content: [{ type: 'text'; text: string }];
-  isError: true;
-};
-
-export interface HandlerExtra {
-  signal?: AbortSignal;
-}
-
-export function wrapHandler<T>(
-  fn: (args: T, extra?: HandlerExtra) => unknown | Promise<unknown>,
-  options?: { checkErrorField?: boolean },
-): (args: T, extra?: HandlerExtra) => Promise<unknown>;
-```
-
-- `toolResult` 는 `JSON.stringify(result, mapReplacer, 2)` 로 직렬화한 단일 text content 를 반환한다.
-- `toolError` 는 `Error` 면 `message` 를, 아니면 `String(error)` 를 써서 `Error: <message>` text 와 `isError: true` 를 반환한다.
-- `wrapHandler` 는 throw 를 `toolError` 로, 정상 반환을 `toolResult` 로 변환한다.
-- `options.checkErrorField` 가 켜진 경우, 반환값이 객체이고 `error` 키를 가지면 `isError` 없이 그 값만 text 로 돌려준다 — 도구가 스스로 판정한 실패를 프로토콜 오류와 구분하기 위한 경로다.
+checkErrorField를 선택한 핸들러의 error 필드는 프로토콜 예외와 구분하여 text로 돌려준다. 정상 직렬화와 throw 변환의 구체 형태는 공통 구현·테스트에서 확인한다.
 
 ## Acceptance Criteria
-
-### AC-shared-map-set-serialization — Map/Set 직렬화
-
-- `toolResult(new Map([['a', 1]]))` 의 text 를 파싱하면 `{ a: 1 }` 이다.
-- `toolResult(new Set([1, 2]))` 의 text 를 파싱하면 `[1, 2]` 다.
-
-### AC-shared-error-shape — 오류 응답 형태
-
-- `wrapHandler` 로 감싼 핸들러가 throw 하면 결과의 `isError` 가 `true` 이고 text 가 `Error: ` 로 시작한다.
-- `Error` 가 아닌 값을 throw 해도 형태가 같다.
-
-### AC-shared-error-field — checkErrorField 경로
-
-- `checkErrorField: true` 이고 핸들러가 `{ error: 'x' }` 를 반환하면 결과 text 가 `'x'` 이고 `isError` 가 없다.
-- `checkErrorField` 가 꺼져 있으면 같은 반환값이 `toolResult` 로 직렬화된다.
 
 ### AC-shared-extra-forwarded — extra 전달
 
@@ -62,4 +24,4 @@ export function wrapHandler<T>(
 
 ## Last Updated
 
-2026-08-06 — 응답 형식·오류 변환·AbortSignal 전달 계약을 최초 문서화했다.
+응답 직렬화·오류 구분·취소 전달 계약의 내용과 근거가 바뀔 때 갱신한다.

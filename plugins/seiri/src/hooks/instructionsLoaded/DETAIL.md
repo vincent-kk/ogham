@@ -14,8 +14,7 @@
 
 ## API Contracts
 
-- `processInstructionsLoaded(...)` — off가 아니면 관측 레코드를 append 하고 `{ continue: true }` 를 반환한다. `hookSpecificOutput` 은 없고 entry stdout도 비어 있다.
-- `utils/appendObservation.ts` — JSONL 추가와 크기 상한 적용.
+관측 레코드를 남기는 것 외의 출력은 없다. 반환 형태와 크기 상한 적용은 구현에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -35,4 +34,4 @@
 
 ## Last Updated
 
-2026-09-03 — `off`에서 관측 파일과 wire 응답을 모두 skip하는 계약을 추가했다.
+관측 내용·미등록 상태·보존 정책의 내용과 근거가 바뀔 때 갱신한다.

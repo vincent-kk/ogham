@@ -9,10 +9,7 @@
 
 ## API Contracts
 
-- `server/` — MCP 서버 조립과 도구 등록.
-- `serverEntry/` — stdio 진입점(`bridge/mcp-server.cjs` 번들 대상).
-- settings는 설정 표면, gates는 작업 증거, runtime은 명시적 참여·단계·다이얼 요청을 소유합니다. accepted 응답은 hook ACK를 대신하지 않습니다.
-- `pages/` — 설정 UI 정적 자산. 빌드가 `public/settings.html` 로 인라인한다.
+settings는 설정, gates는 작업 증거, runtime은 참여·단계·밸브를 소유한다. accepted는 입력 수락이며 hook ACK를 대신하지 않는다.
 
 ## Acceptance Criteria
 
@@ -26,4 +23,4 @@
 
 ## Last Updated
 
-2026-09-26 — 명시적 조건부 참여와 비차단 호스트 계약을 반영했습니다.
+MCP 표면과 호스트 경계 계약의 내용과 근거가 바뀔 때 갱신한다.

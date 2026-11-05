@@ -9,36 +9,14 @@
 
 ## API Contracts
 
-```typescript
-export function handleConfigGet(
-  input: ConfigGetInput,
-): Promise<ImbasConfig | { field: string; value: unknown }>;
-
-interface ConfigGetInput {
-  field?: string; // dot-path, 예: "defaults.project_ref"
-  project_root?: string;
-}
-```
-
-- MCP `inputSchema` 는 `{ field?: string, project_root?: string }` 다.
-- `field` 없음 — 유효 설정 객체 전체를 그대로 반환한다.
-- `field` 있음 — `{ field, value }` 를 반환한다. `value` 는 `getConfigValue` 의 dot-path 조회 결과이며, 경로 중간이 객체가 아니거나 키가 없으면 `undefined` 다. `undefined` 는 MCP 응답 JSON 직렬화에서 `value` 키 자체가 빠지는 형태로 나타난다.
-- dot-path 는 세그먼트 문자열 분해만 한다 — 배열 인덱스 표기나 와일드카드를 해석하지 않는다.
-- 실패 — 두 계층을 병합한 문서가 `ImbasConfigSchema` 를 벗어나면 `loadConfig` 의 파싱 오류가 그대로 올라온다. 손편집되거나 `config_set` 이 검증 없이 남긴 값이 여기서 드러난다.
-- 배럴은 `handleConfigGet` 만 노출한다.
+- 누락한 dot-path 값은 undefined이며 MCP JSON에서는 value 키가 빠진다. 부재를 명시적 null로 오인하지 않는다.
+- dot-path는 문자열 세그먼트 조회이며 와일드카드나 배열 인덱스 표기를 해석하지 않는다.
+- 병합 설정이 스키마를 벗어나면 조회가 실패한다.
 
 ## Acceptance Criteria
 
-### AC-effective-config — 유효 설정 반환
-
-- `field` 없이 호출하면 두 계층을 병합한 설정 전체가 반환된다.
-- 설정 파일이 하나도 없는 워크스페이스에서도 스키마 기본값으로 채운 설정이 반환된다 — throw 하지 않는다.
-
-### AC-dot-path-lookup — dot-path 조회
-
-- `field` 가 존재하는 경로면 `{ field, value }` 로 그 값을 반환한다.
-- 존재하지 않는 경로면 `value` 가 `undefined` 다 — throw 하지 않는다.
+구체 판정과 입력별 결과는 이 모듈의 테스트가 고정한다.
 
 ## Last Updated
 
-2026-07-30 — 유효 설정 조회 계약과 dot-path 규약을 문서화했다.
+유효 설정 조회·부재·오류 계약의 내용과 근거가 바뀔 때 갱신한다.

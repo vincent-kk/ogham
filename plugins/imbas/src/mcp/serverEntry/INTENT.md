@@ -4,6 +4,10 @@
 
 MCP 서버 stdio 전송 진입점. esbuild 번들 엔트리.
 
+## Conventions
+
+기동 실패는 stderr와 실패 종료로 드러낸다. stdout 진단은 MCP 프레임을 깨뜨린다.
+
 ## Boundaries
 
 ### Always do

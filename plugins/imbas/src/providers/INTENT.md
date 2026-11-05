@@ -4,12 +4,6 @@
 
 이슈 트래커 프로바이더 추상화 레이어. 각 프로바이더별 파싱·변환 로직을 캡슐화.
 
-## Structure
-
-| Directory | Role                                                  |
-| --------- | ----------------------------------------------------- |
-| `github/` | GitHub Issues 프로바이더 — Links 파싱, 메타 블록 처리 |
-
 ## Conventions
 
 - 각 프로바이더는 독립 fractal 노드 (`INTENT.md` + `index.ts` 배럴 필수)

@@ -10,57 +10,16 @@
 
 ## API Contracts
 
-```typescript
-export function handleRunList(input: RunListInput): Promise<{
-  runs: Array<
-    | {
-        run_id: string;
-        run_dir: string;
-        current_phase: PhaseName;
-        status: PhaseStatus | 'blocked';
-        created_at: string;
-        updated_at: string;
-      }
-    | { run_id: string; run_dir: string; error: 'failed to load state' }
-  >;
-}>;
-
-interface RunListInput {
-  project_ref?: string; // 생략 시 defaults.project_ref
-  project_root?: string;
-}
-```
-
-- MCP `inputSchema` 는 `{ project_ref?: string, project_root?: string }` 다.
-- `status` 는 실행의 `current_phase` 가 가리키는 phase 의 `status` 다 — 실행 전체의 상태가 아니라 지금 서 있는 단계의 상태다. 단, 그 phase 가 `result: "BLOCKED"` 로 완료되어 실행이 전진하지 못한 경우에는 `'blocked'` 로 보고한다 — 막힌 실행이 목록에서 완료로 읽히는 오독을 막는다.
-- 항목 순서는 `readdirSync(runsDir).sort()` 의 사전순이다. `run_id` 가 `YYYYMMDD-NNN` 고정폭이라 사전순이 곧 생성순이다.
-- 손상 항목은 `{ run_id, run_dir, error: 'failed to load state' }` 형태이며 정상 항목의 필드를 갖지 않는다. 소비자는 두 형태를 구분해 읽어야 한다.
-- 실패 — 이 도구가 throw 하는 경로는 `project_ref` 부재(`project_ref is required (or set defaults.project_ref in config)`)와 경로 세그먼트 거부뿐이다.
-- 배럴은 `handleRunList` 만 노출한다.
+- status는 실행 전체가 아닌 현재 phase의 상태다. BLOCKED 완료는 blocked로 보고하여 정상 완료라는 오독을 막는다.
+- 목록의 사전순은 실행 ID의 고정폭이 생성순과 같다는 전제에 의존한다.
+- 손상 항목은 정상 상태 필드 대신 오류를 담는다. 소비자는 그 항목을 정상 실행으로 해석하지 않는다.
 
 ## Acceptance Criteria
-
-### AC-empty-when-absent — 부재는 빈 목록
-
-- runs 디렉터리가 없으면 `{ runs: [] }` 를 반환한다 — throw 하지 않는다.
 
 ### AC-per-run-degradation — 항목 단위 degrade
 
 - `state.json` 이 없거나 스키마를 벗어난 실행은 `error: 'failed to load state'` 항목으로 나타나고, 같은 응답의 정상 실행 항목은 온전히 유지된다.
 
-### AC-current-phase-status — 현재 단계 상태
-
-- 정상 항목의 `status` 는 그 실행의 `current_phase` 에 해당하는 phase 상태와 일치한다.
-- 예외: `current_phase` 의 phase 가 `result: "BLOCKED"` 로 완료된 실행은 `status: 'blocked'` 로 나타난다 — `completed` 가 아니다.
-
-### AC-project-ref-fallback — project_ref 승계
-
-- `project_ref` 없이 호출하면 설정의 `defaults.project_ref` 로 조회하고, 설정에도 없으면 설정 키를 지목하는 문장으로 거부한다.
-
-## History
-
-- 2026-08-06 — 동작 테스트 관찰: BLOCKED 로 끝난 refine 실행이 목록에서 `completed` 로 보였다. phase status 를 그대로 옮기는 규칙에 BLOCKED 완료 예외를 더해 `'blocked'` 로 표기한다.
-
 ## Last Updated
 
-2026-08-06 — BLOCKED 완료 실행의 `'blocked'` 표기 예외를 추가했다.
+목록 부재·손상 항목·현재 단계 표시 계약의 내용과 근거가 바뀔 때 갱신한다.

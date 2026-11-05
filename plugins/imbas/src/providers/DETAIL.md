@@ -9,13 +9,9 @@
 
 ## API Contracts
 
-```typescript
-export { parseLinks, type GithubLinks } from './github/index.js';
-```
-
-- 이 배럴은 각 provider 배럴의 심볼을 이름으로 재노출한다. 와일드카드를 쓰지 않는다 — provider 내부에 심볼이 추가되면 조용히 계층 계약이 넓어진다.
-- 공개 타입은 `types/index.ts` 가 아니라 각 provider 배럴에서 나온다. provider 별 형태를 전역 타입 배럴에 올리면 provider 경계가 사라진다.
-- 새 provider 를 더할 때 `INTENT.md` 의 Structure 표와 이 배럴을 같은 변경에서 갱신한다.
+- provider 공개 타입은 해당 provider의 진입점이 소유한다. 전역 타입 배럴로 올리면 provider 경계가 사라진다.
+- 이름별 재노출로 공개 계약을 고정한다. 내부 추가가 상위 공개 표면을 조용히 넓히지 않아야 한다.
+- 새 provider를 더할 때 INTENT의 Structure 표와 배럴을 함께 갱신한다.
 
 ## Acceptance Criteria
 
@@ -39,4 +35,4 @@ export { parseLinks, type GithubLinks } from './github/index.js';
 
 ## Last Updated
 
-2026-08-06 — provider 추상화 계층의 재노출 규칙과 I/O 금지 경계를 최초 문서화했다.
+provider 간 격리·공개 타입·I/O 경계의 내용과 근거가 바뀔 때 갱신한다.

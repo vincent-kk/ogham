@@ -4,14 +4,6 @@
 
 config 의 dot-path 기반 접근 및 관리. user(호스트 상태 루트)와 project(`<cwd>/.imbas/config.json`) 두 레이어이며 project 가 user 를 재정의한다.
 
-## Structure
-
-| File                    | Role                                                                           |
-| ----------------------- | ------------------------------------------------------------------------------ |
-| `configManager.ts`      | load(병합) · loadConfigByScope(레이어별) · loadConfigScope · save(단일 레이어) |
-| `utils/configLayers.ts` | 두 레이어 좌표 해석                                                            |
-| `index.ts`              | barrel                                                                         |
-
 ## Conventions
 
 - 검증은 병합 결과에만 건다. project 레이어는 재정의한 키만 담아 단독으로 스키마를 통과할 수 없다.

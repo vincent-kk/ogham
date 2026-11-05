@@ -11,10 +11,8 @@
 
 ## API Contracts
 
-- npm 배송 표면은 `package.json` 의 `files` 가 정의한다: `dist` · `agents` · `bridge` · `skills` · `public` · `.claude-plugin` · `plugin.json` · `.codex-plugin` · `.mcp.json` · `mcp_config.json` · `README.md`.
-- 호스트 진입점은 매니페스트다 — `.claude-plugin/plugin.json` 이 Claude Code 표면을, `.mcp.json` 이 MCP 서버 등록을 선언한다. 두 파일이 이 fractal 의 entry point 이며 TypeScript 배럴은 아니다.
-- MCP 런타임 산출물은 `bridge/mcp-server.cjs` 하나이고 원본은 `src/mcp/serverEntry/serverEntry.ts` 다.
-- 빌드 순서는 `clean → version:sync → build:pages → build:compile → build:mcp → build:compile-plugin` 이다. `src/version.ts` 는 `version:sync` 의 산출물이다.
+- 호스트는 매니페스트를 진입점으로 사용한다. TypeScript 배럴만 고쳐서는 배송 표면을 바꿀 수 없다.
+- MCP 실행 파일과 설정 HTML은 정본 소스에서 생성한다. 버전 상수도 version:sync의 산출물이므로 손편집하지 않는다.
 
 ## Acceptance Criteria
 
@@ -39,4 +37,4 @@
 
 ## Last Updated
 
-2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.
+provider 격리·진행 정본·배송 계약의 내용과 근거가 바뀔 때 갱신한다.

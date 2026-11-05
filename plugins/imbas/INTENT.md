@@ -4,7 +4,7 @@
 
 ## Structure
 
-- `bridge/` · `public/` 는 빌드 산출물(MCP 번들 · settings UI)이며 커밋한다.
+`bridge/`와 `public/`는 편집 원본이 아닌 커밋 대상 빌드 산출물이다. 공식 빌드로 생성한다.
 
 ## Conventions
 
@@ -31,9 +31,3 @@
 - `bridge/` 손편집 / `src/version.ts` 손편집
 - 다른 provider 의 references 디렉토리 참조 (cross-provider leakage)
 - `.imbas/runs/<id>/` 외 임의 위치에 state 저장
-
-## Dependencies
-
-- **런타임**: `@modelcontextprotocol/sdk ~1.22`, `zod ^3.23`
-- **개발**: `esbuild ^0.24`, `typescript ^5.7`, `vitest ^4.1`
-- **환경**: Node.js ≥ 20, Yarn 4.12 workspaces
