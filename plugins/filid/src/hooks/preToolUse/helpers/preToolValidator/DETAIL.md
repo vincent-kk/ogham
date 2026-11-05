@@ -16,7 +16,7 @@
 - `validatePreToolUse(input, oldContent?): HookOutput` — 문서 대상이 아니면 통과하고 위반 시 현재 도구 호출만 deny한다.
 - `projectMoveContent(move, safeCwd): MoveProjectionResult` — source 부재는 `missing-source`, bodyless Move는 source 전체 `exact`, hunk Move는 shared 순수 투영의 `exact`·`stale-source`·`ambiguous`와 0-based hunk index를 반환한다.
 - Delete 입력은 host가 canonicalize한 기존 대상 또는 원래 입력 경로가 INTENT.md/DETAIL.md인지 판정하며 Write/Edit용 content 검증을 실행하지 않는다.
-- 강등 허용은 `permissionDecision: 'allow'`와 부모 DETAIL.md에 강등을 기록하라는 `additionalContext`를 반환한다. 거부 reason은 entry point를 먼저 제거하고 두 문서를 삭제한 뒤 부모 DETAIL.md에 기록하는 절차를 포함한다.
+- 강등 허용은 `permissionDecision: 'allow'`와 부모 DETAIL.md에 부모가 현재 소유하는 것과 해당 디렉터리가 fractal이 아닌 이유를 현재 결정으로 명시하라는 `additionalContext`를 반환한다. 거부 reason은 entry point를 먼저 제거하고 두 문서를 삭제한 뒤 부모 DETAIL.md에 그 소유권과 이유를 현재 결정으로 명시하는 절차를 포함한다.
 - Write/Edit는 마지막 symlink도 따라가며, Edit의 현재 내용 읽기는 그 물리 target을 사용한다. Delete는 마지막 symlink entry를 보존하므로 일반 이름의 링크만 제거하는 작업을 referent 문서 삭제로 간주하지 않는다.
 - Edit의 `replace_all`이 true면 모든 정확 일치 문자열을, 그 외에는 첫 일치만 투영한다.
 - 투영할 수 없는 INTENT.md Edit이 20줄을 넘으면 차단하지 않고 명시적 경고를 제공한다.
@@ -60,4 +60,4 @@
 
 ## Last Updated
 
-2026-10-14 — entry point가 없는 디렉터리의 문서 삭제를 강등으로 허용한다.
+문서 쓰기·삭제 검증 계약이나 안내 문구의 정책이 바뀔 때 갱신한다.

@@ -23,11 +23,6 @@
 
 - 규칙 문서 4개가 모두 `required`이며 optional 엔트리가 없다.
 
-## History
-
-- 2026-09-05 — managed rule 배포 호출을 `project_setup`의 `rules-sync` action으로 갱신했다.
-- 2026-08-30 — 작성 시점의 규칙 편입 근거를 manifest로 옮겨 배포 본문과 분리했다.
-
 ## Last Updated
 
-2026-09-05
+규칙 문서의 계약이나 배포 조건, acceptance criteria가 바뀔 때 갱신한다.

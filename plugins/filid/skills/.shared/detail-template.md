@@ -30,7 +30,7 @@ and this file is the defect.
 
 ## Last Updated
 
-<ISO date> — <what changed in this contract>
+<what triggers an update of this document, for example "with every change to the acceptance criteria" — never a date>
 ```
 
 ## Rules
@@ -39,35 +39,21 @@ and this file is the defect.
 - The contract sections are current state, not an append-only ledger.
   Restructure them to the currently intended behavior on every update; a
   superseded clause is removed rather than left beside its replacement.
-- History belongs in the conditional `## History` section below — never mixed
-  into the contract sections, and never in `INTENT.md`.
+- History lives in version control. Neither document carries a history section,
+  dated note or "previously"; a decision and its reason are present facts in
+  the contract sections.
 - Acceptance groups use `### <group-id> — <title>`, and their IDs are unique
   within the document. These IDs are the oracle a spec-document binds to.
 - No line cap.
-- No file lists or directory structure. A path token appears only where the
+- No file lists or directory structure, or restatements of what a maintainer
+  derives from the source and tests: signatures, the steps a function takes,
+  values a test already pins. Reasons and change permissions stay even when
+  the behavior is visible in the code. A path token appears only where the
   contract needs it — an exemption target, an acceptance path — and the
   snapshot flags one that resolves to nothing.
 - Headings stay in English; descriptive content follows `[filid:lang]`,
   defaulting to English. Identifiers, paths, and rule IDs keep their original
   form.
-
-## Conditional section — History
-
-Present only when a change is worth remembering. It is the one place a module's
-documents record the past; `INTENT.md` and the code never do.
-
-```markdown
-## History
-
-- <ISO date> — <what the contract decided or reversed, and why>
-```
-
-Newest entry first, below the contract sections and above `## Last Updated`.
-`## Last Updated` names the most recent change; this section keeps the earlier
-ones still worth carrying, and an entry that no longer informs a present
-decision is dropped rather than archived deeper. An entry accompanies the
-contract change that produced it — an edit that only appends one is the
-append-only pattern the validator rejects.
 
 ## Conditional section — Boundary Exemptions
 

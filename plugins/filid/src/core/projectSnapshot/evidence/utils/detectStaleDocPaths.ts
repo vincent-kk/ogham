@@ -16,8 +16,8 @@ import {
 } from '../../../rules/documentValidator/index.js';
 
 /**
- * Sections whose path tokens are not live file claims: contract targets,
- * removed-path narration, and coupling addresses such as compiled specifiers.
+ * Contract targets, update triggers and coupling addresses are not live paths.
+ * History remains skipped for unmigrated documents and repository overrides.
  */
 const EXEMPT_SECTIONS = new Set([
   'Boundary Exemptions',

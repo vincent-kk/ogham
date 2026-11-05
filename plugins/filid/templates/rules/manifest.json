@@ -9,16 +9,16 @@
       "title": "Fractal Boundaries",
       "description": "Node classification, fractal ownership, entry-point surfaces, level legibility, organ access, exemptions, and the acyclic dependency graph.",
       "grounding": "This rule rests on properties every codebase has: directories contain files, and files reference one another.",
-      "templateHash": "30b39669fb872e3a37891751f47a229a07f2d65bc9dfafd401631e9c7fa12678"
+      "templateHash": "1e95ea83fe81e5a2da3e4cd73a798d1de825f077bb4d2bb76cb876af30f67487"
     },
     {
       "id": "filid_module-documents",
       "filename": "filid_module-documents.md",
       "required": true,
       "title": "Module Documents",
-      "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, the derivable-content ban, the current-state contract ledger, the single history section, and organ exemption entries.",
+      "description": "INTENT and DETAIL document contracts: the 50-line boundary doc, reader-relative content, the current-state contract ledger, history kept in version control, and organ exemption entries.",
       "grounding": "This rule rests on a property every FCA project has: a module's contract is written down in a file next to the code it governs.",
-      "templateHash": "d3a3fd8a4135d5f6740e744fda1a04b5201330b7c2e389bab2063d1fad982d04"
+      "templateHash": "e70168b860e9e55c7f219bce9b20e4dcdb82bc077e446cb3b9065370374e336f"
     },
     {
       "id": "filid_verification-records",

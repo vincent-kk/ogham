@@ -78,14 +78,14 @@ export function validatePreToolUse(
         continue: true,
         hookSpecificOutput: {
           permissionDecision: 'allow',
-          additionalContext: `Demotion: ${directory} has no entry point, so deleting ${basename(documentPath)} drops its fractal claim. Record the demotion in the parent DETAIL.md.`,
+          additionalContext: `Demotion: ${directory} has no entry point, so deleting ${basename(documentPath)} drops its fractal claim. State in the parent DETAIL.md, as the parent's present decision, what the parent now owns and why that directory is not a fractal.`,
         },
       };
     return {
       continue: true,
       hookSpecificOutput: {
         permissionDecision: 'deny',
-        permissionDecisionReason: `Delete rejected: ${filePath} is an FCA contract document. Revise the contract instead of deleting it. To demote this fractal to an organ, remove its entry point (index or main file, framework entry, manifest, or entryPointOverrides entry) first, then delete INTENT.md and DETAIL.md and record the demotion in the parent DETAIL.md. ${DENY_RETRY_GUIDANCE}`,
+        permissionDecisionReason: `Delete rejected: ${filePath} is an FCA contract document. Revise the contract instead of deleting it. To demote this fractal to an organ, remove its entry point (index or main file, framework entry, manifest, or entryPointOverrides entry) first, then delete INTENT.md and DETAIL.md and state in the parent DETAIL.md, as the parent's present decision, what the parent now owns and why that directory is not a fractal. ${DENY_RETRY_GUIDANCE}`,
       },
     };
   }

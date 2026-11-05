@@ -291,7 +291,7 @@ describe('protected document demotion', () => {
       expect(result.continue).toBe(true);
       expect(result.hookSpecificOutput?.permissionDecision).toBe('allow');
       expect(result.hookSpecificOutput?.additionalContext).toBe(
-        `Demotion: ${directory} has no entry point, so deleting ${file} drops its fractal claim. Record the demotion in the parent DETAIL.md.`,
+        `Demotion: ${directory} has no entry point, so deleting ${file} drops its fractal claim. State in the parent DETAIL.md, as the parent's present decision, what the parent now owns and why that directory is not a fractal.`,
       );
     },
   );
