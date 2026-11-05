@@ -4,6 +4,8 @@
  * run the user slot, then finalize (manifest.json + sessionInfo). Paths, seed,
  * and the contract location arrive via environment variables, keeping the
  * generated wrapper minimal and the contract centralized.
+ * @param userCode R code that has passed the execution command gate.
+ * @returns R source that stops before user code if the contract cannot load.
  */
 export function buildWrapperScript(userCode: string): string {
   return [
@@ -13,9 +15,7 @@ export function buildWrapperScript(userCode: string): string {
     'invisible(Sys.setlocale("LC_ALL", ""))',
     'options(encoding = "UTF-8", warn = 1)',
     '.rstat_contract <- Sys.getenv("R_STATISTICS_CONTRACT")',
-    "if (nzchar(.rstat_contract) && file.exists(.rstat_contract)) {",
-    "  source(.rstat_contract)",
-    "}",
+    "source(.rstat_contract)",
     'if (exists(".rstat_init")) .rstat_init()',
     "# --- user code begins ---",
     userCode,
