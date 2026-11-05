@@ -15,7 +15,7 @@
 
 ### AC-budget-selection — 예산 내 선택
 
-- 선택 항목의 `itemToMarkdown` 토큰 합계(헤더 포함)가 `tokenBudget` 을 넘지 않고, 제외 수가 `truncatedCount` 로 보고된다.
+- 고정 헤더보다 작은 예산이면 빈 markdown과 0 토큰을 반환한다. 헤더·문서 수·제외 수 안내문을 포함한 전체 markdown의 `estimateTokens` 값이 `tokenBudget`을 넘지 않으며 이 값을 `estimatedTokens`로 반환한다. 안내문까지 담을 수 없는 예산에서도 빈 컨텍스트를 반환하고 제외 수는 `truncatedCount`로 보고한다.
 
 ### AC-reference-lines-only — 참조 라인 직렬화
 

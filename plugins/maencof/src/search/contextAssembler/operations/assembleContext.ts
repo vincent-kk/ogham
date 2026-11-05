@@ -5,7 +5,6 @@
 import type { ActivationResult, KnowledgeGraph } from '../../../types/graph.js';
 import type { AssembleOptions, AssembledContext } from '../types/types.js';
 
-import { buildMarkdown } from './buildMarkdown.js';
 import { selectItemsWithinBudget } from './selectItemsWithinBudget.js';
 import { toContextItems } from './toContextItems.js';
 
@@ -23,10 +22,8 @@ export function assembleContext(
   const { tokenBudget = 2000 } = options;
 
   const allItems = toContextItems(results, graph);
-  const { selectedItems, totalTokens, truncatedCount } =
+  const { selectedItems, totalTokens, truncatedCount, markdown } =
     selectItemsWithinBudget(allItems, tokenBudget);
-
-  const markdown = buildMarkdown(selectedItems, truncatedCount);
 
   return {
     markdown,
