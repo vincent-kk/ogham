@@ -13,7 +13,7 @@ MCP 서버 계층. 결정론·계약 실행 레이어로, core/adapters를 얇�
 ### Always do
 
 - 도구 핸들러를 `wrapHandler`로 감싸 표준 에러 처리 보장.
-- 문자열 리터럴은 `constants/`·`types/enums.ts`에서 import.
+- 공유 문자열은 공통 constants·enums를 재사용하고, 도구 전용 코드·메시지는 지역 상수로 소유해 공통 표면을 불필요하게 넓히지 않는다.
 
 ### Ask first
 

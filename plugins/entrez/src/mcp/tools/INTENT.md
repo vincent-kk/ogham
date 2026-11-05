@@ -4,7 +4,7 @@ MCP 도구 컨테이너(1도구 1디렉토리). core/adapters를 얇게 오케�
 
 ## Conventions
 
-- 핸들러는 `buildToolContext()`로 ctx 조립 후 run 함수 호출. `wrapHandler` 래핑.
+- 설정이 필요한 조회 핸들러는 buildToolContext로 컨텍스트를 조립한다. 진단·설정 복구와 저장된 job 조회는 이를 전제하지 않아 복구 경로를 유지한다. 모든 핸들러는 wrapHandler로 감싼다.
 - 입력 검증은 `types/tool.ts`의 zod 스키마(registerTool inputSchema 재사용).
 
 ## Boundaries

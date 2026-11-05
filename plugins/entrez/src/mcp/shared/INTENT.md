@@ -11,7 +11,7 @@ MCP 계층 공유 유틸: 응답 포맷 표준화(toolResult/toolError/wrapHandl
 
 ### Always do
 
-- 미설정 시 `Messages.NOT_CONFIGURED` throw. api_key는 deps 주입만(노출 금지).
+- 설정이 필요한 실행 컨텍스트는 미설정 시 NOT_CONFIGURED로 중단한다. 진단·설정 복구는 이 컨텍스트를 전제하지 않는다. api_key는 deps 주입만(노출 금지)이며 컨텍스트의 JSON 표현에서도 제외한다.
 
 ### Ask first
 

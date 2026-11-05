@@ -5,7 +5,7 @@
 ## Conventions
 
 - 어댑터는 `core/httpClient`만으로 네트워크 수행. 응답 파서는 순수 함수로 분리·export.
-- 단일 호스트 범위(eutils + PMC utils)만 다룬다.
+- NCBI API와 설정된 E-utilities mirror를 대상으로 하며, 목적지 호스트는 HTTP allowlist로 제한해 임의 호스트 호출을 막는다.
 
 ## Boundaries
 

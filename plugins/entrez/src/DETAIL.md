@@ -2,10 +2,10 @@
 
 ## Requirements
 
-- 이 소스 트리의 유일한 닻은 검색 **누락 방지(recall)** 다. 편의를 위해 결과를 줄이는 결정은 어디에도 두지 않는다.
+- 이 소스 트리의 유일한 닻은 검색 **누락 방지(recall)** 다. LLM의 편의에 따른 결과 제거는 금지하며, 호출자가 지정한 수집 한도와 상한 전략은 제한 사실을 드러내어 불완전한 결과를 전수로 오인하지 않게 한다.
 - 의존 방향은 `mcp → adapters → core → httpClient → NCBI` 한 방향이다. 역방향 edge 는 0이다.
 - 검색 하드 규칙(10k 상한 분할·auto-POST·rate·dedup)은 `core` 가 소유한다. LLM 도, MCP 계층도 아니다.
-- 문자열 값집합은 `types/enums.ts`, 메시지·경로·기본값은 `constants/*` 가 단일 출처다.
+- 여러 모듈이 공유하는 문자열 값집합·메시지·경로·기본값은 공통 enums와 constants가 소유한다. 단일 모듈 전용 코드·메시지는 지역 상수로 소유해 무관한 모듈의 결합을 늘리지 않는다.
 - `api_key` 는 MCP 응답·로그·manifest 어디에도 값으로 나타나지 않는다.
 - `version.ts` 는 `version:sync` 로만 갱신한다.
 
@@ -24,7 +24,7 @@
 
 ### AC-src-single-source — 값 단일 출처
 
-- 인라인 문자열 리터럴 대신 `types/enums.ts`·`constants/*` 의 심볼이 쓰인다.
+- 공유 문자열의 의미를 지역에서 다시 정의하지 않는다. 모듈 전용 코드·메시지의 지역 상수는 허용한다.
 
 ### AC-src-secrecy — 자격증명 비노출
 

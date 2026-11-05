@@ -5,7 +5,7 @@
 - 검색 도메인의 하드 규칙은 LLM 이 아니라 이 계층이 소유한다 — 누락 방지(recall) 보장은 코드의 책임이다.
 - 각 하위 fractal 은 자기 배럴로만 건넌다. 외부 소비자는 `core/index.ts` 를 경계로 쓴다.
 - core 는 상위 레이어(`mcp`·`adapters`)를 import 하지 않는다. 의존은 `mcp → adapters → core` 한 방향이다.
-- 네트워크를 쓰는 모듈은 `httpClient` 뿐이다. 나머지는 함수 주입으로 순수성을 지킨다.
+- 외부 HTTP는 `httpClient`를 통하고 검색 계산에 필요한 네트워크는 함수로 주입한다. config와 searchJob의 파일 I/O는 설정 보호와 작업 재개를 위한 영속화 책임이므로 이 순수 계산 경계와 구분한다.
 
 ## API Contracts
 

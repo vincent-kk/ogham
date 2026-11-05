@@ -5,7 +5,7 @@
 - 도구 하나에 디렉터리 하나다. 각 도구는 `core`/`adapters` 를 얇게 오케스트레이션할 뿐 검색 규칙을 스스로 갖지 않는다.
 - 도구끼리 직접 import 하지 않는다.
 - 모든 외부 HTTP 는 `core/httpClient` 를 거친다 — 핸들러가 `fetch` 를 직접 부르지 않는다.
-- 미설정 상태는 실패가 아니라 `NOT_CONFIGURED` 신호다. 스킬이 이를 받아 `setup` 으로 유도한다.
+- 설정이 필요한 조회의 미설정 상태는 NOT_CONFIGURED로 알려 setup으로 유도한다. auth_check·setup과 저장된 job의 상태·결과 조회는 설정을 전제하지 않아 진단·복구·기존 결과 접근을 막지 않는다.
 
 ## API Contracts
 
@@ -20,7 +20,7 @@
 
 ### AC-tools-unconfigured-signal — 미설정 신호
 
-- 설정이 없을 때 도구가 `NOT_CONFIGURED` 를 돌려주고, 조용히 기본값으로 진행하지 않는다.
+- 설정이 필요한 조회는 미설정 상태에서 NOT_CONFIGURED를 반환하고 조용히 기본값으로 진행하지 않는다. auth_check는 configured:false로 진단하며 setup과 저장된 job 조회는 이 설정 게이트의 예외다.
 
 ## Last Updated
 

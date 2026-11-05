@@ -15,7 +15,7 @@
 
 ### AC-adapter-single-host-scope — 단일 호스트 범위
 
-- 어댑터가 NCBI eutils 와 PMC utils 밖의 호스트를 호출하지 않는다.
+- NCBI E-utilities·PMC 서비스와 설정된 E-utilities mirror를 허용하되 HTTP allowlist 검증을 통과해야 한다. mirror 지원이 임의 호스트 호출 허용으로 확대되지 않게 한다.
 
 ### AC-adapter-surface-enumerated — 열거된 표면
 

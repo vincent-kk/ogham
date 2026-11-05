@@ -4,7 +4,7 @@
 
 - 이 fractal 은 esbuild 번들 진입점 하나다. `startServer()` 호출과 치명적 오류 처리 외에는 아무 로직도 갖지 않는다.
 - 기동 실패는 stderr 에 사유를 남기고 `process.exit(1)` 로 끝낸다 — 프로세스 종료를 다루는 유일한 자리다.
-- 형제 fractal 은 배럴로만 건넌다. `../server/index.js` 를 쓰고 `../server/lifecycle/*` 를 직접 참조하지 않는다.
+- 형제 fractal 은 배럴로만 건넌다. `../server/index.ts` 를 쓰고 `../server/lifecycle/*` 를 직접 참조하지 않는다.
 
 ## API Contracts
 
