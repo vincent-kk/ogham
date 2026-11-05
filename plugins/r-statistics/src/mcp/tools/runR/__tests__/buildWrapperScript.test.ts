@@ -17,6 +17,7 @@ describe("run_r wrapper contract", () => {
     const wrapped = buildWrapperScript('cat("user code ran")');
     expect(wrapped).toContain(
       '.rstat_contract <- Sys.getenv("R_STATISTICS_CONTRACT")\n' +
+        'if (!nzchar(.rstat_contract)) stop("R_STATISTICS_CONTRACT is empty")\n' +
         "source(.rstat_contract)\n",
     );
   });

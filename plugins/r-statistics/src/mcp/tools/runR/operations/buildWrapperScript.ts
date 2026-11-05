@@ -1,3 +1,5 @@
+import { ERROR_MESSAGES } from "../../../../constants/messages.js";
+
 /**
  * Wrap user R code with the execution contract: force UTF-8, source the shipped
  * contract.R (defining the artifact helpers + `.rstat_init`/`.rstat_finalize`),
@@ -15,6 +17,7 @@ export function buildWrapperScript(userCode: string): string {
     'invisible(Sys.setlocale("LC_ALL", ""))',
     'options(encoding = "UTF-8", warn = 1)',
     '.rstat_contract <- Sys.getenv("R_STATISTICS_CONTRACT")',
+    `if (!nzchar(.rstat_contract)) stop("${ERROR_MESSAGES.EMPTY_CONTRACT_PATH}")`,
     "source(.rstat_contract)",
     'if (exists(".rstat_init")) .rstat_init()',
     "# --- user code begins ---",
