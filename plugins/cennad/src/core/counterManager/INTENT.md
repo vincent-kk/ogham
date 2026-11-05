@@ -16,7 +16,6 @@
 
 - 식별된 세션의 기록만 재사용하고, 다른 세션 기록은 다음 write에서 새 식별자로 교체
 - 호스트 세션을 식별할 수 없으면 `incrementCounter`는 카운터 파일을 쓰지 않음
-- `incrementCounter` 는 `loadCounter` → 수정 → `atomicWrite` 순서로 실행
 
 ### Ask first
 

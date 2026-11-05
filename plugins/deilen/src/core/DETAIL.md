@@ -8,31 +8,9 @@
 
 ## API Contracts
 
-### configManager
-
-- `loadConfig(): Promise<Config>` — 부재/손상 시 `DEFAULT_CONFIG` (Zod 기본값 채움).
-- `saveConfig(config: Config): Promise<void>` — `ConfigSchema` 검증 후 atomicWrite.
-
-### sessionStore
-
-- `createSession({ sessionId, projectHash, title, url, markdown, createdAt, options? }): Promise<SessionMeta>` — viewer.md + meta.json.
-- `getSession(sessionId, projectHash): Promise<SessionMeta | null>` — 스코프 불일치/부재 시 null.
-- `readViewerMarkdown(sessionId): Promise<string | null>`.
-- `closeSession(sessionId): Promise<boolean>` — meta.status='closed'.
-- `clearCollectedFeedback(sessionId): Promise<void>` — feedback.json + 수집 이미지 정리, viewer.md/meta.json 보존(best-effort).
-- `removeSession(sessionId): Promise<void>` — 세션 디렉터리 전체 삭제(TTL/관리용).
-- `pruneExpired(ttlHours): Promise<number>` — 만료 디렉터리 제거 수.
-- resolver: `awaitFeedback(sessionId, waitSeconds, signal?): Promise<SettleValue>`, `deliverComplete(sessionId, feedback)`, `closeResolver(sessionId)`, `settleAllResolvers()`. `SettleValue.kind ∈ {complete, pending, superseded, closing, aborted}`.
-
-### feedbackStore
-
-- `saveFeedback(sessionId, payload, images): Promise<StoredFeedback>` — feedback.json.
-- `readFeedback(sessionId): Promise<StoredFeedback | null>`.
-
-### projectHash
-
-- `getProjectHash(cwd): string` (sha256 12-hex).
-- 세션 토큰(`generateToken`/`verifyToken`)은 공유 `@ogham/http-kit` 으로 이관.
+- long-poll은 세션마다 한 waiter만 소유한다. 해소를 단일 멱등 경로로 모아 timeout과 abort가 경쟁해도 타이머·리스너가 남지 않게 한다.
+- 피드백 수거는 문서와 세션 메타를 보존하고 피드백·첨부만 정리한다. 전체 세션 제거는 TTL·관리 경로의 책임이다.
+- 세션 토큰은 공유 `@ogham/http-kit`이 소유한다. core에서 재구현하지 않는다.
 
 ## Acceptance Criteria
 
@@ -51,4 +29,4 @@
 
 ## Last Updated
 
-2026-07-30 — acceptance 항목을 acceptance group 형식으로 정리했다(내용 변경 없음).
+영속 상태 소유권·프로젝트 격리·resolver 해소 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

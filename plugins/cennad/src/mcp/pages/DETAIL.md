@@ -8,8 +8,7 @@
 
 ## API Contracts
 
-- 빌드 산출: `settings/` → `public/settings.html`.
-- 서버 주입 슬롯: `__CENNAD_STATE__`.
+산출 경로와 주입 슬롯 이름은 빌드 스크립트와 서빙 핸들러를 읽는다. 페이지와 서버가 공유하는 이름이므로 한쪽만 바꾸지 않는다.
 
 ## Acceptance Criteria
 
@@ -23,4 +22,4 @@
 
 ## Last Updated
 
-2026-07-30 — 설정 UI 빌드 입력 계약을 문서화했다.
+설정 페이지 빌드와 런타임 서빙의 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

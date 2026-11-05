@@ -2,17 +2,6 @@
 
 codex-cli (`codex exec` / `codex exec resume`) 어댑터. JSONL 이벤트 스트림에서 thread UUID 와 최종 agent 메시지를 추출해 `DispatchResult` 로 정규화.
 
-## Structure
-
-| File / Path          | Role                                                                                        |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| `resolveTier.ts`     | tier → `{model?, effort?}` (`config.model_map.codex` + env override)                        |
-| `jsonlParser/`       | JSONL 라인 단위 파싱 → `{ threadId, response, resolvedModel }` (utils/constants organ 포함) |
-| `spawn.ts`           | `spawnCli('codex', ...)` — ENOENT 캐치, `signal` 취소·`detached` 그룹킬, `cancelled` 판정   |
-| `codexDispatcher.ts` | `Dispatcher<CodexFlags, CodexModelMap>` 구현 + `supportedOptions = new Set()`               |
-| `utils/`             | `buildStartArgs`, `buildResumeArgs`, `dispatch` (`DispatchInternal`)                        |
-| `index.ts`           | `export { codexDispatcher }` barrel                                                         |
-
 ## Conventions
 
 - `start`: `codex exec --skip-git-repo-check --json [--yolo | --sandbox <mode>] [-m <model>] [-c model_reasoning_effort=<v>] <prompt>`
@@ -42,8 +31,3 @@ codex-cli (`codex exec` / `codex exec resume`) 어댑터. JSONL 이벤트 스트
 - 모델이 광고하지 않은 effort 전송 — codex 는 다운그레이드가 아니라 API 에러로 실패
 - `$CODEX_HOME/sessions/` 등 codex 자체 세션 파일 조작
 - stdin 으로 prompt 입력 (v1 은 argv 만)
-
-## Dependencies
-
-- `node:child_process` (spawn), `../envelope.ts`, `../errorMap.ts`
-- `../../types/index.ts` (`CodexModelMap`, `CodexEffort`)

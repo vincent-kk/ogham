@@ -9,9 +9,8 @@
 
 ## API Contracts
 
-- `getProjectHash(cwd: string): string` — cwd 를 12자리 hex 스코프 해시로 바꾼다.
-
-세션 토큰(`generateToken`/`verifyToken`)은 이 모듈이 아니라 공유 패키지 `@ogham/http-kit` 이 소유한다.
+- 해시 알고리즘과 자릿수 변경은 기존 세션 스코프를 무효화하므로 사전 승인이 필요하다.
+- 세션 토큰은 공유 `@ogham/http-kit`이 소유하며 프로젝트 해시와 혼용하지 않는다.
 
 ## Acceptance Criteria
 
@@ -22,4 +21,4 @@
 
 ## Last Updated
 
-2026-07-30 — 스코프 해시 계약을 문서화했다.
+스코프 해시 호환성·입력 정규화 책임의 내용이나 적용 범위가 바뀔 때 갱신한다.

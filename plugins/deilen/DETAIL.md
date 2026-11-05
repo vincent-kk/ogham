@@ -12,9 +12,7 @@
 
 ## API Contracts
 
-- **MCP 도구 4종** (서버 이름 `tools`): `render_viewer`, `collect_feedback`, `close_viewer`, `open_settings`. 계약 상세는 [src/mcp/DETAIL.md](./src/mcp/DETAIL.md).
-- **스킬 2종**: `preview`(문서를 페이지로 띄우고 코멘트를 수거), `setup`(설정 UI).
-- **빌드 파이프라인**: `clean → version:sync → pages(viewer+settings+renderers) → compile → mcp → compile-plugin`.
+- 사용자 피드백을 대화에 되돌리는 책임은 유지하며, 별도 agent나 hook 표면을 도입하지 않는다. 도구와 스킬 등록 목록·빌드 순서는 매니페스트를 읽는다.
 
 ## Acceptance Criteria
 
@@ -44,4 +42,4 @@
 
 ## Last Updated
 
-2026-08-25 — 미전송 초안 보존 acceptance group 을 추가했다.
+뷰어와 초안 보존·렌더러 격리·플러그인 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

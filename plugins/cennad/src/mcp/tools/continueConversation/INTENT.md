@@ -2,13 +2,6 @@
 
 기존 외부 LLM 세션을 이어 호출한다. cennad `session_id` 로 `SessionMeta` 를 찾고, dispatcher 의 `resume` 을 호출, `turn_count` 와 `last_used_at` 을 갱신.
 
-## Structure
-
-| File                      | Role                                                                      |
-| ------------------------- | ------------------------------------------------------------------------- |
-| `continueConversation.ts` | `handleContinueConversation` — project_hash 검증 → resume → 메타 업데이트 |
-| `index.ts`                | barrel                                                                    |
-
 ## Conventions
 
 - 입력 키 `snake_case`. `project_root` optional (절대경로) — Claude 는 생략 시 `process.cwd()`, 그 외 호스트는 생략하면 해석 실패로 거부
@@ -36,14 +29,3 @@
 
 - 다른 project_hash 의 세션을 탐색하거나 정정
 - 세션 미발견 시 throw — 항상 envelope 로 정규화
-
-## Dependencies
-
-- `../../../core/sessionStore` — `getSession`, `updateSession`
-- `../../../core/counterManager` — `incrementCounter`
-- `../../../core/projectHash` — `getProjectHash`
-- `@ogham/cross-platform` — `projectRoot` (세션 조회용 프로젝트 루트 해석)
-- `../../../dispatcher` — `dispatchers`, `buildResponse` (`envelope.js`)
-- `../../../types` — `ConversationResponse`
-- `../../../utils/isoNow.ts` — `isoNow`
-- `node:perf_hooks` — `performance` (경과 시간 측정)

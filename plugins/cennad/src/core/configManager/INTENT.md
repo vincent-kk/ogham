@@ -2,20 +2,6 @@
 
 Owns config loading and persistence across user and project layers; project overrides user, and saving targets only the selected layer. `CENNAD_CONFIG_PATH` selects the active user home. Missing or unreadable active config may use the default home as a read-only fallback; fallback never creates or copies files. Invalid config degrades to defaults, while readable legacy shapes normalize in memory, including integer ratios and model maps. Opening setup never rewrites user config; `pruneConfigFile` remains an explicit maintenance API.
 
-## Structure
-
-| 파일                                       | 역할                                                                                                                                                                                                                |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `operations/loadConfig.ts`·`saveConfig.ts` | load: active read + optional read-only fallback + mergeWithDefaults + Zod (`loadConfigByScope` 는 project 좌표를 끈 채 같은 로더를 다시 태워 레이어별 뷰를 만든다) · save: ConfigSchema.parse 재검증 후 atomicWrite |
-| `utils/mergeWithDefaults.ts`               | raw 객체와 DEFAULT_CONFIG deep merge (전 pipeline 조율)                                                                                                                                                             |
-| `utils/mergeModelMap.ts`                   | raw model_map + defaults 병합 (codex·claude tier `{model,effort}`, antigravity tier 모델명)                                                                                                                         |
-| `utils/mergeDefaultTier.ts`                | raw default_tier + DEFAULT_CONFIG.default_tier provider별 병합                                                                                                                                                      |
-| `utils/mergePreamble.ts`                   | raw → PreambleConfig (provider별 문자열, 기본값 fallback)                                                                                                                                                           |
-| `utils/mergeRecencyFactor.ts`              | raw → RecencyFactorConfig (off/auto/strict 검증)                                                                                                                                                                    |
-| `utils/normalizeRatio.ts`                  | legacy 정수 비율 → enabled boolean 정규화                                                                                                                                                                           |
-| `utils/isPlainObject.ts`                   | plain-object guard (deep merge 전처리)                                                                                                                                                                              |
-| `index.ts`                                 | barrel: loadConfig, saveConfig                                                                                                                                                                                      |
-
 ## Conventions
 
 - 디스크 JSON 키 snake_case; 함수·변수 camelCase
@@ -42,9 +28,3 @@ Owns config loading and persistence across user and project layers; project over
 - 검증 실패 config 를 throw 하거나 상위로 전파
 - DEFAULT_CONFIG 이외의 하드코딩 기본값 사용
 - 병합 결과를 어느 한 레이어에 되쓰기 — project 재정의가 user 기본값에 구워진다
-
-## Dependencies
-
-- `node:fs/promises`, `../../lib/atomicWrite`, `../../lib/logger`
-- `../../constants/paths`, `../../constants/defaults`
-- `../../types` (Config, ConfigSchema), `../../utils/isFileNotFound`

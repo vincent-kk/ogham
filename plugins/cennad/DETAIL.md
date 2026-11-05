@@ -14,14 +14,14 @@
 - `bridge/`·`public/` 은 커밋하는 빌드 산출물이며 손편집하지 않는다.
 - README 는 영어, 한국어는 `README-ko_kr.md` 로 분리한다. 설정 UI 문구도 영어를 유지한다.
 - provider 스킬의 Claude 정본은 background completion notification으로 재개하고, plugin compiler가 만드는 Codex skill variant는 child target을 보관해 최종 응답 전에 `wait_agent`로 mailbox update를 기다리고 sender를 대조한다.
+- 공개 위임 절차를 보존한 prompt budget은 매 호출 context 비용과 문서 drift를 제한한다.
+- Claude의 completion notification과 Codex의 explicit child join을 host-marked lifecycle로 분리한다. Codex parent turn이 먼저 끝나 courier 결과 relay가 유실되는 것을 막으면서 Claude의 대기 계약을 보존하기 위함이다.
+- crosscheck는 참여자당 정교화 없는 1콜만 쓰므로 courier가 더할 판단이 없다. 호스트가 2분을 넘긴 MCP 호출을 background task로 옮기므로 courier 없이도 비블로킹 위임이 성립한다.
 
 ## API Contracts
 
-- **MCP 도구 4종**(서버 이름 `tools`): `start_conversation`, `continue_conversation`, `stop_conversation`, `open_settings`.
-- **훅 2종**: SessionStart 정적 정책, UserPromptSubmit 라이브 상태.
-- **스킬 5종**: `codex`, `antigravity`, `claude`, `crosscheck`, `setup`.
-- **에이전트 1종**: `courier` — provider 스킬 3종이 spawn 하는 백그라운드 위임 러너. crosscheck 는 미경유.
-- **호스트 lifecycle**: provider 스킬 3종의 marker 내부 Claude 문단은 원본에서 그대로 보이고, Codex 생성본에서는 `spawn_agent` + `wait_agent` 문단으로 교체된다. Codex는 courier와 병행 가능한 독립 작업을 허용하되 final 전에 mailbox update를 기다리고 결과 sender가 기록한 target인지 확인한다.
+- provider 스킬의 host-marked lifecycle은 호스트별 대기 계약을 분리한다. Claude 원본은 notification으로 재개하고 Codex 생성본은 보관한 child target의 mailbox 결과를 확인한 뒤 final을 보낸다.
+- courier는 provider 스킬의 정교화·실패 remedy·tier 의미론을 맡으며 crosscheck는 이를 경유하지 않는다.
 
 ## Acceptance Criteria
 
@@ -58,12 +58,6 @@
 - Codex 생성 provider prompt는 각각 480단어 이하를 유지한다.
 - budget 축약은 공개 skill/argument surface, provider lifecycle, resume·tier·relay·stop, crosscheck participant·failure·convergence 계약을 제거하지 않는다.
 
-## History
-
-- 2026-09-04 — 반복 rationale를 규범형 상태 계약으로 압축하고 source/generated prompt budget을 추가했다. 공개 위임 절차는 유지하면서 매 호출 context 비용과 문서 drift를 줄이기 위함이다.
-- 2026-09-04 — Claude의 completion notification과 Codex의 explicit child join을 한 source의 host-marked lifecycle로 분리했다. Codex에서 parent turn이 먼저 끝나 courier 결과 relay가 유실되는 문제를 막으면서 Claude 동작은 유지하기 위함이다.
-- 2026-08-04 — crosscheck 를 courier 미경유로 바꿨다. crosscheck 는 정교화 없이 참여자당 1콜만 쓰므로 courier 가 더할 판단이 없고, 호스트가 2분을 넘긴 MCP 호출을 background task 로 옮기므로 비블로킹도 courier 없이 성립한다.
-
 ## Last Updated
 
-2026-09-04 — 행동 보존형 skill prompt budget과 축약 계약을 추가했다.
+위임 라우팅 소유권·호스트별 courier 회수·prompt budget 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

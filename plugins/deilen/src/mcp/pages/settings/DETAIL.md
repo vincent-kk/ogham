@@ -3,7 +3,6 @@
 ## Requirements
 
 - 서버가 공통 `resolveInitialConfigScope`로 계산한 `initialScope`를 초기 선택으로 사용한다. project 설정이 있으면 project, user 설정만 있으면 user, 둘 다 없으면 project다. 페이지는 이 조건을 재판단하지 않는다.
-
 - 설정 페이지는 `user`·`project` 두 레이어의 원문과 병합 결과를 함께 보여준다 — 지금 고치는 값이 어느 레이어의 것인지 보이지 않으면 저장이 반대편 파일을 덮는다.
 - 저장 요청은 대상 레이어를 `scope` 로 명시한다. 기본값을 두지 않는다.
 - 저장 문서는 고른 레이어에서 출발한다 — 병합 결과에서 출발하면 project 재정의가 user 기준선에 구워진다.
@@ -15,8 +14,7 @@
 
 ## API Contracts
 
-- 소비 라우트: `GET /api/config` → `{ ok: true, state: ConfigScopeState }`, `POST /api/config` ← `{ scope: "user" | "project", config: object }`.
-- `state.layers.{user,project}` 는 각 레이어 원문(부재·손상 모두 `null`), `state.effective` 는 병합 결과, `state.paths` 는 두 레이어의 절대 경로다.
+입출력 형태는 `httpServer`의 config 핸들러와 검증 코드를 읽는다. 레이어 원문은 부재와 손상을 구분하지 않고 `null`이다.
 
 ## Acceptance Criteria
 
@@ -38,4 +36,4 @@
 
 ## Last Updated
 
-2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.
+설정 레이어 가시성·선택 범위 저장·상속 해제 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

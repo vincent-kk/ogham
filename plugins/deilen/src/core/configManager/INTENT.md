@@ -2,18 +2,6 @@
 
 `config.json` 로드/저장 모듈. user(전역)와 project(워크스페이스) 두 레이어를 병합해 읽고, 한 번에 한 레이어만 쓴다. Zod 검증은 병합 결과에만 걸고, 부재·손상 시 기본값으로 degrade 한다.
 
-## Structure
-
-| File                             | Role                                                      |
-| -------------------------------- | --------------------------------------------------------- |
-| `operations/loadConfig.ts`       | 두 레이어 읽기 → 마이그레이션 → 병합 → 검증               |
-| `operations/loadConfigState.ts`  | 설정 페이지용 레이어별 원문 + 병합 + 재정의 목록          |
-| `operations/saveConfig.ts`       | 한 레이어 원자적 영속 (user 에만 `CONFIG_VERSION` 스탬프) |
-| `operations/migrateUserLayer.ts` | 레거시 user 레이어 승격과 best-effort 재기록              |
-| `operations/migrateConfig.ts`    | 버전별 마이그레이션 스텝 테이블                           |
-| `utils/configLayers.ts`          | 두 레이어 파일 좌표 해석 (organ)                          |
-| `index.ts`                       | barrel                                                    |
-
 ## Conventions
 
 - 레이어 좌표는 `@ogham/cross-platform` 의 `resolveConfigLayers` 가 정한다. user 는 `pluginCache('deilen')`, project 는 `<workspace>/.deilen/`.
@@ -40,8 +28,3 @@
 - 병합 결과를 어느 한 레이어에 되쓰기. project 재정의가 user 기준선에 구워진다
 - 비원자적 쓰기 (직접 `writeFile`)
 - 마이그레이션 스텝에서 live default 참조 (스텝은 리터럴로 동결)
-
-## Dependencies
-
-- `@ogham/cross-platform`
-- `../../types/config` (`Config`, `ConfigSchema`), `../../constants`, `../../lib`

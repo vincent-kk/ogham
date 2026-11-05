@@ -2,15 +2,6 @@
 
 MCP 도구 핸들러가 공유하는 응답 envelope 직렬화 함수와 try/catch 래퍼. organ-like 헬퍼 모음.
 
-## Structure
-
-| File             | Role                                             |
-| ---------------- | ------------------------------------------------ |
-| `toolResult.ts`  | 성공 응답을 compact JSON `content` 배열로 직렬화 |
-| `toolError.ts`   | 실패 envelope (`isError: true`) 생성             |
-| `wrapHandler.ts` | 핸들러 try/catch + 요청 취소 신호 전달           |
-| `index.ts`       | barrel                                           |
-
 ## Conventions
 
 - `CENNAD_PRETTY_JSON=1` 환경 변수로 pretty-print 활성화 (디버그용)
@@ -33,9 +24,3 @@ MCP 도구 핸들러가 공유하는 응답 envelope 직렬화 함수와 try/cat
 
 - `process.exit` 호출
 - stdout 직접 출력
-
-## Dependencies
-
-- `@modelcontextprotocol/sdk` — `CallToolResult` 반환 타입
-- `../../types` — `ConversationResponse`
-- `../../utils/mapReplacer` — `Map` 직렬화 (`toolResult` 내부)

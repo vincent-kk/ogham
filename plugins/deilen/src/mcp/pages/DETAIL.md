@@ -9,8 +9,8 @@
 
 ## API Contracts
 
-- 빌드 산출: `buildViewerHtml` → `public/viewer.html`, `buildSettingsHtml` → `public/settings.html`, `buildRenderers` → `public/assets/*.js`(+ `katex.css`, woff2).
-- 뷰어 페이지는 서버가 주입한 `__DEILEN_STATE__` 로 세션 상태를 받는다.
+- 브라우저 자산은 빌드 결과로만 서빙한다. 런타임 모듈 export를 추가하거나 서버 번들로 가져오지 않는다.
+- 뷰어 상태는 서버의 HTML 주입 슬롯으로 전달한다. 산출물의 구체 목록은 빌드 스크립트를 읽는다.
 
 ## Acceptance Criteria
 
@@ -25,4 +25,4 @@
 
 ## Last Updated
 
-2026-07-30 — FE 빌드 입력 계약을 문서화했다.
+FE 빌드 입력·디자인 정본·런타임 서빙 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

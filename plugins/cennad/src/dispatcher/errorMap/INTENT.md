@@ -2,15 +2,6 @@
 
 외부 CLI exit code / stderr 패턴 / CLI 가 구조화 출력으로 보고한 실패 메시지(`cliMessage`) / Node 에러 코드를 `ErrorCode` 값 (`auth`, `rate_limit`, `network`, `timeout`, `cli_error`, `cancelled`, `budget_exhausted`, `disabled`, `unknown`) 으로 정규화하는 단일 매핑 계층. dispatcher 내 어떤 곳에서도 `ErrorCode` 를 독자 결정하지 않도록 중앙화.
 
-## Structure
-
-| 파일                    | 역할                                                                           |
-| ----------------------- | ------------------------------------------------------------------------------ |
-| `errorMap.ts`           | 단일 진입점 — `DispatchFailure` → `ErrorCode` 결정                             |
-| `constants/codeMaps.ts` | exit code → `ErrorCode` 테이블, stderr 정규식 패턴 목록                        |
-| `utils/classify.ts`     | Node 에러 코드 분류 (`ENOENT` → `cli_error`, spawn `ETIMEDOUT` → `timeout` 등) |
-| `index.ts`              | barrel: `mapError`                                                             |
-
 ## Conventions
 
 - 모든 `ErrorCode` 결정은 이 모듈의 `mapError` 경유 — dispatcher 내 다른 위치에서 직접 결정 금지
@@ -36,7 +27,3 @@
 - `ErrorCode` 열거형 외의 값 반환
 - `mapError` 내부에서 throw — 에러는 반드시 `ErrorCode` envelope 로만 표현
 - `dispatcher/` 외부 모듈에서 `codeMaps.ts` 직접 import
-
-## Dependencies
-
-- `../../types` (`ErrorCode`, `DispatchFailure`)

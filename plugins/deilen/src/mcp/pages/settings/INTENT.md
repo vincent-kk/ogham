@@ -4,16 +4,6 @@
 
 **이 페이지가 스코프 UI 의 정본 구현이다.** 공유 UI 패키지는 없고, 계약은 `@ogham/cross-platform` 의 `DETAIL.md` "설정 페이지 계약" 절에 있다. 다른 플러그인 설정 페이지는 이 구조를 따른다.
 
-## Structure
-
-| Path                       | Role                                         |
-| -------------------------- | -------------------------------------------- |
-| `index.html`               | 단일 페이지 마크업, `__DEILEN_STATE__` 슬롯  |
-| `styles/styles.css`        | 테마(light/dark/auto) 토큰·타이포            |
-| `scripts/app.js`           | state hydrate·폼 populate·`/api/config` POST |
-| `scripts/scopeDocument.js` | 재정의된 dot path 만 담은 project 문서 조립  |
-| `index.ts`                 | 빌드 입력 표식 (`export {}`)                 |
-
 ## Conventions
 
 - 사용자 입력은 빌드 후 inlined `__DEILEN_STATE__` 만 신뢰 (escape 는 백엔드 책임)
@@ -41,8 +31,3 @@
 - `eval`·inline 핸들러·외부 origin fetch
 - 빌드 산출물(`public/settings.html`) 직접 수정
 - `@ogham/*` 패키지 import — 배럴이 Node 전용 모듈을 재노출해 esbuild 가 브라우저 번들에서 그 그래프까지 파싱한다
-
-## Dependencies
-
-- **빌드 시점**: `scripts/buildSettingsHtml.mjs` (`esbuild`)
-- **런타임 의존성 없음**: 브라우저 native API 만

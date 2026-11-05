@@ -10,12 +10,7 @@
 
 ## API Contracts
 
-- `handleRenderViewer(...)` — 문서 렌더 세션을 만들고 URL 을 돌려준다(논블로킹).
-- `handleCollectFeedback(...)` — bounded long-poll 로 피드백을 기다린다.
-- `handleCloseViewer(...)` — 세션을 닫고 resolver 를 정리한다.
-- `handleOpenSettings(...)` — 설정 UI 를 기동하고 URL 을 돌려준다.
-
-각 도구의 입출력 계약은 소유 fractal 의 DETAIL 을 따른다. 이 배럴은 의미를 더하지 않는다.
+- 각 도구의 의미는 소유 fractal이 정한다. 컨테이너 배럴은 핸들러·입출력 타입을 연결할 뿐 새 의미를 더하지 않는다.
 
 ## Acceptance Criteria
 
@@ -30,4 +25,4 @@
 
 ## Last Updated
 
-2026-07-30 — 도구 컨테이너의 스코프 해석 순서와 격리 계약을 문서화했다.
+프로젝트 스코프 해석 순서·도구 간 격리 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

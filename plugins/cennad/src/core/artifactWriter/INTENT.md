@@ -2,15 +2,6 @@
 
 성공한 `ConversationResponse` 를 사람-친화 마크다운으로 디스크에 미러링하는 선택적 artifact 작성기. PR 첨부·세션 회상 용도이며, 호출자가 명시적으로 opt-in 한 경우에만 동작한다.
 
-## Structure
-
-| Path                           | Role                                                   |
-| ------------------------------ | ------------------------------------------------------ |
-| `operations/writeArtifact.ts`  | 경로 결정 → 마크다운 렌더 → atomicWrite 오케스트레이션 |
-| `utils/resolveArtifactPath.ts` | project / user 분기 경로 해석                          |
-| `utils/renderMarkdown.ts`      | YAML front-matter + 본문 렌더러                        |
-| `index.ts`                     | barrel — `writeArtifact`                               |
-
 ## Conventions
 
 - 모든 쓰기는 `lib/atomicWrite` 경유 (파일 0o600, 디렉토리 0o700)
@@ -38,10 +29,3 @@
 - 세션 파일을 읽거나 수정
 - 설정된 artifact 루트 밖에 쓰기
 - `core/configManager` 를 import (작성기는 호출자가 주입한 설정만 사용)
-
-## Dependencies
-
-- `node:path` (via `constants/paths`)
-- `lib/atomicWrite`, `lib/logger`
-- `constants/paths` (`artifactPath` 헬퍼)
-- `types` (`ArtifactsConfig`, `Provider`)

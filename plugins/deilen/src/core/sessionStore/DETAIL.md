@@ -10,15 +10,10 @@
 
 ## API Contracts
 
-- `createSession({ sessionId, projectHash, title, url, markdown, createdAt, options? }): Promise<SessionMeta>` — `viewer.md` 와 `meta.json` 을 만든다.
-- `getSession(sessionId, projectHash): Promise<SessionMeta | null>` — 스코프 불일치·부재 시 `null`.
-- `readViewerMarkdown(sessionId): Promise<string | null>`
-- `closeSession(sessionId): Promise<boolean>` — `meta.status` 를 `closed` 로 전이.
-- `clearCollectedFeedback(sessionId): Promise<void>` — `feedback.json` 과 수집 이미지를 정리하고 `viewer.md`·`meta.json` 은 보존(best-effort).
-- `removeSession(sessionId): Promise<void>` — 세션 디렉터리 전체 삭제(TTL·관리용).
-- `pruneExpired(ttlHours): Promise<number>` — 만료 디렉터리 제거 수.
-- registry: `registerServing(sessionId)`, `unregisterServing(sessionId)`, `hasServingSessions(): boolean`. `createSession` 이 영속 직후 등록하고, `closeSession` 은 status 쓰기가 성공했거나 세션이 부재·무효일 때만 해제하며(쓰기 실패 시 등록 유지 — 리스너가 먼저 죽는 쪽이 더 나쁘다), `removeSession`·`pruneExpired` 는 삭제 뒤 해제한다. 다른 프로세스가 만든 세션은 포함하지 않는다.
-- resolver: `awaitFeedback(sessionId, waitSeconds, signal?): Promise<SettleValue>`, `deliverComplete(sessionId, feedback)`, `closeResolver(sessionId)`, `settleAllResolvers()`. `SettleValue.kind ∈ {complete, pending, superseded, closing, aborted}`.
+- 수거한 피드백과 이미지만 정리하고 문서 원본과 메타는 보존한다. 전체 디렉터리 삭제는 TTL·관리 경로에 한정한다.
+- serving 레지스트리는 이 프로세스가 만든 세션만 담는 리스너 수명의 근거다. 다른 프로세스의 세션까지 복원하는 영속 상태로 취급하지 않는다.
+- close는 상태 쓰기에 성공하거나 세션이 부재·무효일 때만 serving 등록을 해제한다. 쓰기에 실패했는데 리스너가 먼저 죽으면 제출 경로를 잃으므로 등록을 유지한다.
+- resolver의 모든 해소는 멱등 `settle()`을 경유하며 타이머와 abort 리스너를 함께 해제한다.
 
 ## Acceptance Criteria
 
@@ -27,15 +22,6 @@
 - 다른 `project_hash` 로 조회하면 `null` 이다.
 - 부재 세션 조회도 `null` 이며 throw 하지 않는다.
 
-### AC-resolver-single-settle — 해소 단일화
-
-- 완료·대기·교체·종료·중단 다섯 경로가 모두 `settle()` 을 한 번만 통과한다.
-- 해소 시 타이머와 abort 리스너가 함께 해제된다.
-
-### AC-session-ttl — 만료 정리
-
-- `pruneExpired` 가 만료된 세션 디렉터리만 제거하고 제거 수를 돌려준다.
-
 ### AC-serving-registry — serving 레지스트리
 
 - 생성 직후 `hasServingSessions()` 가 true, 닫힘·제거·만료 정리 뒤 false 다.
@@ -43,4 +29,4 @@
 
 ## Last Updated
 
-2026-08-25 — serving 레지스트리(리스너 수명 근거)를 추가했다.
+문서 불변성·resolver 해소·serving 레지스트리 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

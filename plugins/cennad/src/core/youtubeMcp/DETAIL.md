@@ -18,11 +18,6 @@
 
 ## Acceptance Criteria
 
-### AC-idempotent-provisioning — 멱등 등록
-
-- 이미 등록된 대상에 다시 등록해도 중복 항목이 생기지 않는다.
-- 해제 후 재등록이 처음 등록과 같은 결과를 낸다.
-
 ### AC-target-isolation — 대상별 격리
 
 - claude·codex 는 목적별 사용자 MCP target 과 manager 를 쓰고, antigravity 는 글로벌 `~/.gemini/config/mcp_config.json` 을 관리한다.
@@ -35,4 +30,4 @@
 
 ## Last Updated
 
-2026-09-09 — antigravity 글로벌 MCP 설정 경로를 ~/.gemini/config/mcp_config.json 으로 명시했다.
+addon 등록 대상·설정 소유권·실패 격리 정책의 내용이나 적용 범위가 바뀔 때 갱신한다.

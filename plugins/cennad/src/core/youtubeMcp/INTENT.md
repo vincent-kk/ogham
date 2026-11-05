@@ -2,14 +2,6 @@
 
 `@ogham/yt-dlp-mcp`(키 `yt-dlp-mcp`) MCP 서버를 LLM과 분리된 독립 addon으로 대상 CLI(claude·codex·antigravity)에 멱등 등록·해제한다. claude·codex는 목적별 사용자 MCP target과 manager를 사용하고, antigravity는 글로벌 `~/.gemini/config/mcp_config.json`을 관리한다. 공통 `language` (en/ko)는 서버 env `YTDLP_LANG`로 전달하며 `/setup` 저장 시점에만 실행한다.
 
-## Structure
-
-| 경로                             | 역할                                               |
-| -------------------------------- | -------------------------------------------------- |
-| `operations/`                    | 세 대상 orchestration·적용·결과 매핑               |
-| `operations/provisionUserMcp.ts` | Claude·Codex 사용자 MCP manager와 Cennad 정책 연결 |
-| `utils/`, `constants/`           | 상태 결정·Antigravity JSON read·서버 정식 정의     |
-
 ## Conventions
 
 - 효과적 대상 활성 = `enabled && targets.<cli>`; 언어 변경 시 enabled 대상에 재적용
@@ -36,8 +28,3 @@
 - CLI 세션·로그·대화 파일 수정 (mcp_config.json / 사용자 CLI `mcp` 명령 외)
 - codex·claude 사용자 MCP 파일 직접 편집 (반드시 각 CLI `mcp` 서브커맨드 경유)
 - mcpServers 외 키 임의 삭제·정규화
-
-## Dependencies
-
-- `node:fs/promises`, `node:path`, `@ogham/agent-artifacts`
-- `../../lib`, `../../constants`, `../../types`, `../../utils/isFileNotFound`

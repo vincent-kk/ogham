@@ -9,15 +9,11 @@
 - 출력은 매치 없으면 2줄, 매치되면 3줄. 새 정보는 줄을 늘리지 말고 압축한다
 - 자동 지목은 `electableProviders` 결과만 대상 — self host·`crosscheck_only` 제외
 - ASCII 키워드는 단어 경계, 비-ASCII 포함 키워드는 부분 문자열 (한국어 조사 흡수)
-- 식별된 현재 세션의 호출이 실제 0건이면 `[cennad] No delegations yet this session.` (점유율 조각 생략)
-- provider 전부 disabled → `[cennad] No provider enabled — run /cennad:setup.`
-- electable 0개 → nudge 대신 crosscheck-only 안내 한 줄
 
 ## Boundaries
 
 ### Always do
 
-- 출력 envelope: `{ continue: true, hookSpecificOutput: { hookEventName: 'UserPromptSubmit', additionalContext } }`
 - counter 파일은 read-only
 - stdin 실패 시 빈 문자열로 진행 — 프롬프트를 못 읽어도 주입은 계속된다
 

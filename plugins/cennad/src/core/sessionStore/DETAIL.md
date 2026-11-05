@@ -8,19 +8,12 @@
 
 ## API Contracts
 
-- 세션 CRUD — 생성·조회·갱신·삭제.
-- TTL 기반 prune — 만료 세션 정리.
+입출력 이름과 형태는 진입점과 검증 코드를 읽는다. 세션 제거는 TTL prune만 수행한다.
 
 ## Acceptance Criteria
 
-### AC-session-isolation — 프로젝트 격리
-
-- 다른 `projectHash` 의 세션이 조회되지 않는다.
-
-### AC-session-ttl — 만료 정리
-
-- TTL 초과 세션만 prune 되고 유효 세션은 남는다.
+검증 코드가 수용 기준을 고정하므로 별도 acceptance group을 선언하지 않는다.
 
 ## Last Updated
 
-2026-07-30 — 세션 저장·격리 계약을 문서화했다.
+프로젝트 격리·세션 보존·만료 정책의 내용이나 적용 범위가 바뀔 때 갱신한다.

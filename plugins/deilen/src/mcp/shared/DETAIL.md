@@ -9,10 +9,8 @@
 
 ## API Contracts
 
-- `toolResult(result: unknown): CallToolResult` — 평문 데이터를 단일 JSON text content 블록으로 직렬화한다.
-- `toolError(error: unknown): CallToolResult` — 던져진 값을 `isError: true` 인 `Error: <message>` 봉투로 변환한다. `Error` 인스턴스면 `.message`, 아니면 `String(value)` 를 쓴다.
-- `wrapHandler(...)` — throw 를 흡수하고 `extra`(`ToolExtra`)와 `signal` 을 전달한다. content 결과는 passthrough.
-- `type ToolExtra` — MCP SDK 의 요청 부가 정보 타입.
+- 이미 content를 담은 MCP 결과는 그대로 통과시킨다. 이미지 등을 포함한 결과를 JSON text로 다시 감싸서는 안 된다.
+- 반환 타입과 오류 문자열 형식은 구현과 테스트를 읽는다.
 
 ## Acceptance Criteria
 
@@ -28,4 +26,4 @@
 
 ## Last Updated
 
-2026-07-30 — 응답 직렬화·에러 봉투·신호 전달 계약을 문서화했다.
+MCP 직렬화·content 통과·취소 신호 전달 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

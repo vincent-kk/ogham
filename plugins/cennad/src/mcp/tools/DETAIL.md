@@ -9,10 +9,7 @@
 
 ## API Contracts
 
-- `startConversation/` — 새 외부 LLM 세션 시작. `session_id`(UUIDv4)를 발급한다.
-- `continueConversation/` — 기존 세션 이어 호출. `project_hash` 검증을 거친다.
-- `stopConversation/` — 실행 중인 provider CLI 강제 종료. `{ stopped, count, message }` 반환.
-- `openSettings/` — 설정 웹 UI 기동. `{ url, message, reused }` 반환.
+- 대화의 성공·실패는 대화 envelope로 표현하고, 중단·설정 열기는 조작 결과로 표현한다. 무의미한 세션·턴 필드를 만들지 않는다.
 
 ## Acceptance Criteria
 
@@ -27,4 +24,4 @@
 
 ## Last Updated
 
-2026-07-31 — `stopConversation` 을 더해 도구 넷으로 갱신하고, 응답 표준을 대화 도구와 조작 도구로 나눴다. `openSettings` 는 처음부터 자체 shape 이었으므로 이 구분은 기존 동작을 기술한 것이다.
+대화와 조작 응답의 구분·도구 간 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

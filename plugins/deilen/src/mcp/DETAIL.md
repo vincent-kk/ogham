@@ -5,30 +5,15 @@
 - MCP 서버 이름 `tools`, stdio transport. 도구 4개 등록.
 - 모든 핸들러는 `wrapHandler` 로 감싸 throw 흡수 + `extra`(signal) 전달.
 - 장수 HTTP 서버를 호스팅하되, 무거운 렌더러는 `public/assets/` 자산으로만 서빙(번들 미포함).
+- HTTP 라우트는 loopback 전용이며 공개 렌더러 자산 외에는 token으로 보호한다. JSON·multipart POST는 CSRF 검증을 거친다.
 
 ## API Contracts
 
-| Tool               | Input                                                   | Output                                                       |
-| ------------------ | ------------------------------------------------------- | ------------------------------------------------------------ |
-| `render_viewer`    | `content`/`path`, `title?`, `options?`, `project_root?` | `{ session_id, url, status: "serving" }` (논블로킹)          |
-| `collect_feedback` | `session_id`, `wait_seconds?`, `project_root?`          | content(text+image) 또는 `{ status:"pending", draft_count }` |
-| `close_viewer`     | `session_id`, `project_root?`                           | `{ status: "closed" }`                                       |
-| `open_settings`    | `project_root?`                                         | `{ url }`                                                    |
-
-- `render_viewer`: content/path 정확히 하나(아니면 `invalid_input`), `max_viewer_mb` 캡(`read_error`). 상대 `path` 는 워크스페이스 기준 해석, 절대 `path` 는 그대로.
-- `collect_feedback`: bounded long-poll, `wait_seconds ≤ 600`(기본 600 — 리뷰 1회를 한 호출로 덮는다; 상한 근거는 stdio idle window 30분). `unknown`/`closed` 세션은 throw. `extra.signal` abort 시 정리.
-- `project_root`(절대경로)는 모든 도구에서 선택 — Claude 는 생략(`process.cwd()`), 플러그인 설치 디렉터리에서 기동되는 호스트는 필수(부재 시 actionable throw). 핸들러는 `ensureHttpServer` 보다 먼저 해석해 세션 해시와 서버 스코프를 일치시킨다.
-- 도구 등록명은 snake_case, 심볼·파일은 camelCase.
-
-## HTTP routes
-
-[httpServer/DETAIL.md](./httpServer/DETAIL.md) 참조. token 보호(+`/assets` 면제), CSRF(json/multipart), 127.0.0.1 전용, idle 종료.
-
-## Build outputs
-
-- `bridge/mcp-server.cjs` — esbuild(node, cjs). mermaid/katex/highlight 미포함(가드 강제).
-- `public/viewer.html`, `public/settings.html` — esbuild inline(런타임 로드).
-- `public/assets/{highlight,mermaid,katex}.js` + `katex.css` + woff2 — lazy 렌더러 자산.
+- 문서 입력은 content와 path 중 정확히 하나이며 크기 상한을 지킨다. 상대경로는 워크스페이스 기준이다.
+- 피드백은 bounded long-poll이다. 기본 대기는 리뷰 1회를 한 호출로 덮도록 정하며, 대기 상한은 호스트의 stdio idle window 안에 둔다.
+- `unknown`·`closed` 세션은 throw하고 요청 취소 신호는 대기 정리까지 전달한다.
+- `project_root`는 Claude에서는 생략 가능하지만 설치 디렉터리에서 기동하는 호스트에서는 필요하다. 조용한 cwd fallback을 하지 않으며 서버 기동 전에 해석해 세션 해시와 서버 스코프를 일치시킨다.
+- 외부 도구 키는 snake_case로 유지한다. 상세 입출력은 등록 스키마와 도구 구현을 읽는다.
 
 ## Acceptance Criteria
 
@@ -47,4 +32,4 @@
 
 ## Last Updated
 
-2026-07-30 — `Tools` 표를 `API Contracts` 로, acceptance 항목을 acceptance group 으로 정리했다(내용 변경 없음).
+도구 스코프·유계 대기·서버와 브라우저 자산 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

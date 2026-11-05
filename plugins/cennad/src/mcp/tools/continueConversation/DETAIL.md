@@ -8,7 +8,7 @@
 
 ## API Contracts
 
-- `handleContinueConversation(...)` — 기존 세션을 이어 호출하고 `ConversationResponse` 를 돌려준다.
+입출력 이름과 형태는 진입점과 검증 코드를 읽는다. 이 문서의 요구사항은 그 표면을 바꿀 때 보존할 정책을 정한다.
 
 ## Acceptance Criteria
 
@@ -18,7 +18,7 @@
 
 ### AC-turn-accounting — 턴 회계
 
-- 성공 호출마다 `turn_count` 가 증가하고 `last_used_at` 이 갱신된다.
+- dispatcher를 호출한 모든 시도에서(실패 포함) `turn_count`가 증가하고 `last_used_at`이 갱신된다.
 
 ### AC-tier-restoration — tier 복원
 
@@ -26,4 +26,4 @@
 
 ## Last Updated
 
-2026-07-30 — 세션 이어가기 도구 계약을 문서화했다.
+프로젝트 격리·tier 복원·재개 시도 회계 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

@@ -18,15 +18,8 @@
 
 ## Acceptance Criteria
 
-### AC-config-degradation — 손상 내성
-
-- 파일이 없으면 기본 설정을 돌려준다.
-- 파싱 불가능한 파일도 throw 없이 기본 설정으로 degrade 한다.
-
-### AC-config-layer-isolation — 레이어 격리
-
-- 한 레이어 저장이 다른 레이어의 값을 자기 파일에 복사하지 않는다.
+검증 코드가 수용 기준을 고정하므로 별도 acceptance group을 선언하지 않는다.
 
 ## Last Updated
 
-2026-07-30 — 설정 로드·저장 계약을 문서화했다.
+레이어별 저장·검증·user 마이그레이션 정책의 내용이나 적용 범위가 바뀔 때 갱신한다.
