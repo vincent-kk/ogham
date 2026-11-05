@@ -11,14 +11,14 @@
 ## API Contracts
 
 - status는 실행 전체가 아닌 현재 phase의 상태다. BLOCKED 완료는 blocked로 보고하여 정상 완료라는 오독을 막는다.
-- 목록의 사전순은 실행 ID의 고정폭이 생성순과 같다는 전제에 의존한다.
+- 목록은 `runIdGenerator`의 공통 비교로 날짜, 숫자 순번 순으로 오름차순 정렬한다. 같은 날짜의 `-999`는 `-1000`보다 먼저 나오며 ID 형식에 맞지 않는 항목은 무시한다.
 - 손상 항목은 정상 상태 필드 대신 오류를 담는다. 소비자는 그 항목을 정상 실행으로 해석하지 않는다.
 
 ## Acceptance Criteria
 
 ### AC-per-run-degradation — 항목 단위 degrade
 
-- `state.json` 이 없거나 스키마를 벗어난 실행은 `error: 'failed to load state'` 항목으로 나타나고, 같은 응답의 정상 실행 항목은 온전히 유지된다.
+- 유효 ID를 가진 실행의 `state.json` 이 없거나 스키마를 벗어나면 `error: 'failed to load state'` 항목으로 나타나고, 같은 응답의 정상 실행 항목은 온전히 유지된다. ID 형식에 맞지 않는 항목은 목록에 포함하지 않는다.
 
 ## Last Updated
 

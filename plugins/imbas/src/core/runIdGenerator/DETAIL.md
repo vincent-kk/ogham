@@ -12,6 +12,15 @@
 
 - 반환값은 항상 `/^\d{8}-\d{3,}$/`를 만족하며 해당 실행 디렉터리는 이미 예약되어 있다.
 - provider와 프로젝트 타입을 알지 못한다. 실행 디렉터리의 해석은 호출자가 담당한다.
+- `sortRunIds`는 ID 형식에 맞지 않는 이름을 제외하고 날짜, 숫자 순번 순으로 오름차순 정렬한다. 조회 도구들은 이 비교를 공유하여 최신 실행과 목록 순서가 일치해야 한다.
+
+## Boundary Exemptions
+
+### `utils/sortRunIds.ts` — 조회 도구의 ID 정렬
+
+- **Consumers**: `entry-point`
+- **Direct import**: `not allowed`
+- **Reason**: 실행 ID 형식과 순번 의미를 발급 모듈에서 함께 소유하여 생성·조회 규칙의 분산을 막는다. 조회 도구는 공개 표면으로 호출한다.
 
 ## Acceptance Criteria
 

@@ -10,14 +10,25 @@ import { projectRoot } from '@ogham/cross-platform';
 import { MANIFEST_FILE_MAP } from '../../../constants/index.js';
 import { loadConfig } from '../../../core/configManager/index.js';
 import { getRunDir, getRunsDir } from '../../../core/paths/index.js';
+import { sortRunIds } from '../../../core/runIdGenerator/index.js';
 import { loadRunState } from '../../../core/stateManager/index.js';
 
+/** Optional selectors for one run, defaulting to the project's latest ID. */
 export interface RunGetInput {
+  /** Project reference, or the configured default when omitted. */
   project_ref?: string;
+  /** Explicit run ID; omission selects the greatest date and numeric sequence. */
   run_id?: string;
+  /** Absolute workspace root when the host is not running in the workspace. */
   project_root?: string;
 }
 
+/**
+ * Read a selected run and report which manifest files exist beside its state.
+ * @param input Optional workspace, project, and run selectors.
+ * @returns Validated state, its directory, and available manifest names.
+ * @throws If no run can be selected or its state is unreadable; never falls back.
+ */
 export async function handleRunGet(input: RunGetInput) {
   const cwd = projectRoot(input.project_root);
 
@@ -37,7 +48,7 @@ export async function handleRunGet(input: RunGetInput) {
     if (!existsSync(runsDir))
       throw new Error(`No runs directory found for project: ${project_ref}`);
 
-    const entries = readdirSync(runsDir).sort();
+    const entries = sortRunIds(readdirSync(runsDir));
     if (entries.length === 0)
       throw new Error(`No runs found for project: ${project_ref}`);
 

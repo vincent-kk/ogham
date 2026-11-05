@@ -5,6 +5,8 @@
 import { mkdirSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { isRunId } from './utils/isRunId.js';
+
 /**
  * Reserve an execution directory before exposing its run ID to a caller.
  * The runtime clock supplies today's local date for each invocation.
@@ -23,7 +25,7 @@ export function generateRunId(runsDir: string): string {
   let maxSeq = 0n;
 
   for (const entry of entries)
-    if (entry.startsWith(prefix) && /^\d{8}-\d{3,}$/.test(entry)) {
+    if (entry.startsWith(prefix) && isRunId(entry)) {
       const seq = BigInt(entry.slice(prefix.length));
       if (seq > maxSeq) maxSeq = seq;
     }
