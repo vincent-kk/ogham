@@ -390,6 +390,7 @@
     remove: '−',
     drift: '!',
     skip: '!',
+    partial: '!',
     unchanged: '·',
   };
 
@@ -399,8 +400,8 @@
    * emptied may be the user one — shared by every project — so the removal is
    * stated before it happens rather than reported after.
    *
-   * @param {{scope: string, displayTarget: string, filenames: string[]}} report
-   *   The other layer's deployment, as `/plan` reported it.
+   * @param {{scope: string, displayTarget: string, filenames: string[], partialFailures?: object[]}} report
+   *   The other layer's planned deployment or partially completed withdrawal.
    * @returns {HTMLElement} The block, not yet attached to the document.
    */
   function renderScopeMove(report) {
@@ -410,13 +411,20 @@
       element(
         'p',
         'scope-move-head',
-        count +
-          (count === 1 ? ' rule is' : ' rules are') +
-          ' still deployed at the ' +
-          report.scope +
-          ' layer. Saving removes ' +
-          (count === 1 ? 'it' : 'them') +
-          ' there.',
+        report.partialFailures && report.partialFailures.length
+          ? count +
+              (count === 1
+                ? ' rule removed from the '
+                : ' rules removed from the ') +
+              report.scope +
+              ' layer. Remaining cleanup is incomplete.'
+          : count +
+              (count === 1 ? ' rule is' : ' rules are') +
+              ' still deployed at the ' +
+              report.scope +
+              ' layer. Saving removes ' +
+              (count === 1 ? 'it' : 'them') +
+              ' there.',
       ),
     );
     block.appendChild(element('p', 'scope-move-path', report.displayTarget));
@@ -525,6 +533,35 @@
             ? data.ruleDocs.revision
             : null;
         renderPreview(data.ruleDocs);
+        var failures = (data.ruleDocs.partialFailures || []).concat(
+          (data.ruleDocs.otherScope &&
+            data.ruleDocs.otherScope.partialFailures) ||
+            [],
+        );
+        if (failures.length) {
+          previewRevision = null;
+          var details = failures.map(function (failure) {
+            return (
+              'applied: ' +
+              failure.applied.join(', ') +
+              '; failed: ' +
+              failure.failed.target +
+              ' (' +
+              failure.failed.error +
+              ')' +
+              '; not attempted: ' +
+              failure.notAttempted.join(', ') +
+              '; backups: ' +
+              failure.backupPaths.join(', ')
+            );
+          });
+          setStatus(
+            'error',
+            'Partial rule application — ' + details.join('; '),
+          );
+          setBusy(false);
+          return;
+        }
         if (data.ruleDocs.applied === false) {
           previewRevision = null;
           setStatus('error', 'The preview changed. Review it and save again.');

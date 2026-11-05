@@ -21,9 +21,8 @@ import { retireOtherScopeRules } from '../utils/retireOtherScopeRules.js';
  * do: every change to a project's rule files is the result of an explicit
  * user action.
  *
- * A per-entry failure is recorded as `skip` with its reason and the loop
- * continues, so a partial failure reports exactly what did and did not
- * land rather than aborting halfway with no account of it.
+ * File failures retain `partial` outcomes and physical progress. A failed
+ * target deployment never triggers retirement of the other scope.
  */
 export function applyRuleDocs(
   projectRoot: string,
@@ -76,6 +75,13 @@ export function applyRuleDocs(
   }
 
   const applied = manager.apply(plan);
+  if (applied.partialFailures?.length)
+    return mapRuleSyncResult({
+      applied: false,
+      outcomes: applied.outcomes,
+      partialFailures: applied.partialFailures,
+      manifest,
+    });
   const applyConflicted = applied.outcomes.some(
     (outcome) => outcome.action === 'conflict',
   );
@@ -92,5 +98,7 @@ export function applyRuleDocs(
   // at neither layer.
   if (applyConflicted) return result;
   const otherScope = retireOtherScopeRules(projectRoot, documents, scope);
-  return otherScope === null ? result : { ...result, otherScope };
+  return otherScope === null
+    ? result
+    : { ...result, applied: !otherScope.partialFailures?.length, otherScope };
 }

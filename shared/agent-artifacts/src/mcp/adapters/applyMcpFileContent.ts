@@ -2,6 +2,11 @@ import { applyFilePlan } from "../../transactions/index.js";
 import type { McpServerApplyResult, McpServerPlan } from "../../types/mcp.js";
 import type { FileMcpAdapterContext } from "./adapterTypes.js";
 
+/**
+ * Applies one MCP file under its planned revision without hiding physical failures.
+ * @param options Validated adapter context, plan, rendered content and mutation intent.
+ * @returns Registration success or a conflict/partial result retaining the physical failure.
+ */
 export function applyMcpFileContent(options: {
   readonly context: FileMcpAdapterContext;
   readonly plan: McpServerPlan;
@@ -37,6 +42,18 @@ export function applyMcpFileContent(options: {
         ]
       : [],
   });
+  if (applied.status === "partial")
+    return {
+      ok: false,
+      outcomes: options.plan.outcomes.map((outcome) => ({
+        ...outcome,
+        action: "partial",
+        reason: applied.failed.error,
+      })),
+      revisions: options.plan.revisions,
+      partialFailures: [applied],
+    };
+
   if (applied.status === "conflict")
     return {
       ok: false,

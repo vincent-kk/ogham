@@ -376,7 +376,8 @@
     Object.keys(state.ruleDefaults).forEach(function (id) {
       var override = rules[id] || {};
       if (typeof override === 'string')
-        override = override === 'off' ? { enabled: false } : { severity: override };
+        override =
+          override === 'off' ? { enabled: false } : { severity: override };
       list.appendChild(ruleItem(id, override));
     });
   }
@@ -400,8 +401,7 @@
     if (!entry.paths) return entry.basename;
     if (entry.paths.length === 0 || entry.paths[0] === '')
       return JSON.stringify(entry);
-    if (entry.paths.length === 1)
-      return entry.paths[0] + '/' + entry.basename;
+    if (entry.paths.length === 1) return entry.paths[0] + '/' + entry.basename;
     return JSON.stringify(entry);
   }
 
@@ -426,9 +426,7 @@
     $('additional-entry-points').value = (
       entryPointOverrides[adapterId()] || []
     ).join('\n');
-    $('additional-organ-names').value = (
-      structure.organNames || []
-    ).join('\n');
+    $('additional-organ-names').value = (structure.organNames || []).join('\n');
   }
 
   /**
@@ -744,6 +742,32 @@
                 docs.otherScope.displayTarget +
                 ')',
             );
+          var failures = (docs.partialFailures || []).concat(
+            (docs.otherScope && docs.otherScope.partialFailures) || [],
+          );
+          if (failures.length) {
+            failures.forEach(function (failure) {
+              parts.push(
+                'applied: ' +
+                  failure.applied.join(', ') +
+                  '; failed: ' +
+                  failure.failed.target +
+                  ' (' +
+                  failure.failed.error +
+                  ')' +
+                  '; not attempted: ' +
+                  failure.notAttempted.join(', ') +
+                  '; backups: ' +
+                  failure.backupPaths.join(', '),
+              );
+            });
+            busy(btn, false);
+            setStatus(
+              'error',
+              'Partial rule application — ' + parts.join('; '),
+            );
+            return;
+          }
           var summary =
             'Saved' + (parts.length ? ' — ' + parts.join('; ') : '') + '.';
           busy(btn, false);

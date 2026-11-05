@@ -116,7 +116,11 @@ export function syncRuleDocs(
     case RULE_DOC_ACTIONS.SYNC:
       return {
         projectRoot: root,
-        status: TOOL_STATUSES.OK,
+        status:
+          output.result.partialFailures?.length ||
+          output.result.otherScope?.partialFailures?.length
+            ? TOOL_STATUSES.VIOLATIONS
+            : TOOL_STATUSES.OK,
         summary: {
           action: output.action,
           created: output.result.copied.length,
@@ -124,6 +128,9 @@ export function syncRuleDocs(
           removed: output.result.removed.length,
           skipped: output.result.skipped.length,
           drift: output.result.drift.length,
+          ...(output.result.partial?.length
+            ? { partial: output.result.partial.length }
+            : {}),
         },
         data: output,
         diagnostics: copyDiagnostics(EMPTY_DIAGNOSTICS),

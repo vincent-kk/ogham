@@ -104,6 +104,7 @@ export function syncRuleDocs(
     );
     const plan = manager.plan({ documents, desired, replaceDrift });
     const synced = mapRuleSyncResult(manager.apply(plan), manifest);
+    if (synced.partialFailures?.length) return synced;
 
     // Retirement runs after the write, never before: reversed, a failure
     // between the two steps leaves the rules deployed in neither layer.

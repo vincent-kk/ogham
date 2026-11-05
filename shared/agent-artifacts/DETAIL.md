@@ -49,6 +49,13 @@ resolver의 결과를 조합만 한다.
 revision의 직렬화 가능한 preview만 전달하고, 저장 시 원래 요청으로 다시
 계획한다.
 
+파일 적용은 첫 파일 오류에서 중단하고 `partial` 결과에 `applied`,
+`failed`(대상 경로와 오류 문자열), `notAttempted`, `backupPaths`를 담는다.
+백업은 성공적으로 쓴 직후 기록하므로 실패 대상의 선행 백업도 보존한다.
+manager는 이 정보를 `partialFailures`로 전달하고 미완료 문서는 `partial`로
+보고한다. 필요한 파일 변경이 모두 완료된 문서는 계획한 action을 유지하며,
+실패 뒤 미시도 문서를 완료·skip으로 축소하지 않는다.
+
 ### Rules
 
 `content: null`은 템플릿 누락을 뜻하며 inspect는 배포

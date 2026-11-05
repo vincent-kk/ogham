@@ -14,6 +14,8 @@
 
 ## API Contracts
 
+- 부분 적용은 완료된 변경과 구분해 오류로 표시하고 실패 대상·미시도·실제 백업 정보를 보여준다. 부분 적용 응답에서 저장 후 자동 닫기를 실행하지 않는다.
+
 - Injected state uses normalized config objects and includes built-in rule defaults; submitted `SaveBody.config` is a raw v3 file document that may contain shorthand.
 - Existing field IDs remain stable: `#ignore-paths` ("Ignore (all operations)"), `#exclude-from-scan` ("Exclude from structure scan (still reviewed)"), and `#generated-paths` ("Generated paths (review)") each hold one project-relative pattern per line.
 - Every state-changing request includes the server-issued token query parameter.

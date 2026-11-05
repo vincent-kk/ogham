@@ -10,6 +10,8 @@ export interface SectionRulePlanningState {
   readonly contents: Map<string, string>;
   readonly changedPaths: Set<string>;
   readonly outcomes: ArtifactOutcome[];
+  /** Physical paths changed by each logical outcome, including relocation cleanup. */
+  readonly outcomePaths: Map<number, readonly string[]>;
   readonly mutatingOutcomeIndexes: Set<number>;
 }
 

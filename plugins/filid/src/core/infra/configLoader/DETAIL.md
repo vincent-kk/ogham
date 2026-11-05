@@ -34,6 +34,8 @@
 
 ## API Contracts
 
+- 파일 적용이 중단되면 `partial` 문서와 `partialFailures`의 완료·실패·미시도·백업 내역을 보존한다. 선택한 레이어의 부분 실패 후 반대편 문서를 회수하지 않으며, 회수 중 부분 실패도 `otherScope`로 전달한다.
+
 
 - `loadConfig(projectRoot)` — normalized v3 config from v1/v2/v3 layers, warnings(`{ message, key }`), and diagnostics. Raw file validation permits rule and allowed-peer string shorthand; consumers receive object forms.
 - `review`의 숫자 필드는 integer·positive, effort는 `auto | low | medium | high`, lockfile은 비어 있지 않은 basename 문자열 목록이다. 위반은 기존 config validation error 경로를 따르고, 생략한 값은 review constants에서 채운다.

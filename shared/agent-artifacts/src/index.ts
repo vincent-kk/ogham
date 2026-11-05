@@ -47,6 +47,7 @@ export type {
 export type {
   ArtifactAction,
   ArtifactApplyResult,
+  ArtifactPartialFailure,
   ArtifactHost,
   ArtifactKind,
   ArtifactOutcome,
