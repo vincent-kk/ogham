@@ -11,7 +11,7 @@
 
 - provider 공개 타입은 해당 provider의 진입점이 소유한다. 전역 타입 배럴로 올리면 provider 경계가 사라진다.
 - 이름별 재노출로 공개 계약을 고정한다. 내부 추가가 상위 공개 표면을 조용히 넓히지 않아야 한다.
-- 새 provider를 더할 때 INTENT의 Structure 표와 배럴을 함께 갱신한다.
+- 새 provider의 소유권과 공개 경계를 문서·배럴에 함께 반영한다. 구현 추가가 공개 계약을 조용히 넓히지 않게 하기 위해서다.
 
 ## Acceptance Criteria
 
@@ -29,9 +29,9 @@
 - `providers/` 바깥의 파일이 `providers/<name>/` 내부 파일을 직접 import 하지 않는다.
 - provider 하나가 다른 provider 디렉터리를 import 하지 않는다.
 
-### AC-providers-structure-current — Structure 표 최신성
+### AC-providers-structure-current — 소유권과 공개 경계 일치
 
-- `INTENT.md` 의 Structure 표에 나열된 디렉터리 집합이 실제 provider 디렉터리 집합과 같다.
+- 새 provider는 자신의 경계 문서와 진입점을 갖추고, 상위 배럴은 그 provider의 공개 심볼만 이름으로 재노출한다.
 
 ## Last Updated
 

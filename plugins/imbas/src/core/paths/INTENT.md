@@ -12,8 +12,8 @@
 
 ### Always do
 
-- 모든 경로는 절대 경로로 반환
-- project_ref 는 `projectDirName()` 경유로만 디렉토리 세그먼트로 변환 (훅도 concrete 경로로 동일 함수 사용)
+- 호출자는 절대 cwd를 제공하여 반환 경로가 프로세스의 현재 작업 디렉터리에 따라 달라지지 않게 한다.
+- project_ref 는 `projectDirName()` 경유로만 디렉토리 세그먼트로 변환
 
 ### Ask first
 

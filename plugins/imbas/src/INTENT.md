@@ -16,7 +16,7 @@ imbas 플러그인 소스 코드 루트. 기획문서 재구조화·검증 → m
 ### Always do
 
 - 새 모듈 추가 시 types/index.ts 배럴에 타입 re-export 추가
-- 파일 쓰기는 반드시 lib/fileIo.ts의 atomic write 사용
+- 상태·매니페스트 JSON은 lib/fileIo의 원자적 쓰기를, 설정 계층은 cross-platform의 원자적 계층 쓰기를 사용 — 중단된 쓰기로 저장 문서가 손상되지 않아야 한다.
 
 ### Ask first
 
@@ -25,6 +25,6 @@ imbas 플러그인 소스 코드 루트. 기획문서 재구조화·검증 → m
 
 ### Never do
 
-- types/ 외부에서 Zod 스키마 직접 정의
+- 영속 도메인 스키마를 types 밖에서 중복 정의 — 검증 규칙이 갈라지는 것을 막는다. MCP 등록 계층은 SDK에 광고할 전송 스키마를 정의하되 도메인 검증을 대체하지 않는다.
 - 전역 상태(global mutable state) 사용
 - 계층 경로 해석·병합 규칙 재구현 — `@ogham/cross-platform` 가 소유

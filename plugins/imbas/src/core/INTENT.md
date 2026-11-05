@@ -12,7 +12,7 @@ provider 실행은 스킬 계층이 소유한다. core가 트래커 I/O를 도�
 
 ### Always do
 
-- 모든 파일 I/O는 lib/fileIo.ts 경유
+- 상태·매니페스트 JSON은 lib/fileIo, 설정 계층 I/O는 cross-platform을 경유하여 원자적 쓰기와 계층 해석을 각각 한 곳에서 보장한다. 실행 ID 발급에 필요한 디렉터리 생성·조회는 직접 수행할 수 있다.
 - 상태 전이는 skills/\*/references/state-transitions.md 규칙 준수
 
 ### Ask first

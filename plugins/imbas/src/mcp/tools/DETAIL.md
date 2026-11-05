@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 도구 핸들러 9개를 보유한다. 각 핸들러는 `core/` 에 위임하는 thin wrapper 이고 비즈니스 로직을 직접 구현하지 않는다.
+- 핸들러는 전송 입력 해독·공유 스키마 검증·저장을 조립할 수 있지만 상태 전이·요약 계산·실행 경로 정책은 core에 위임한다. 도구별로 도메인 규칙을 다시 정의하면 같은 문서를 저장하고 조회하는 판단이 갈라진다.
 - 도구 9개 전부(`run*` · `manifest*` · `config*` · `open_settings`)가 선택 인자 `project_root`(절대경로)를 받아 `projectRoot(input.project_root)` 로 워크스페이스를 해석한다. `process.cwd()` 직접 호출은 플러그인 설치 디렉터리에서 서버를 띄우는 호스트에서 엉뚱한 경로를 가리킨다.
 - Claude Code 에서는 `project_root` 를 생략한다 — 서버가 워크스페이스에서 실행되므로 `process.cwd()` 와 같다. 설치 디렉터리에서 띄우는 호스트에서는 필수이며, 없으면 해석 실패로 throw 한다.
 - 핸들러는 `toolResult` · `toolError` 를 직접 부르지 않는다. `wrapHandler` 가 처리한다.
@@ -26,7 +26,7 @@
 
 ### AC-tools-thin-wrapper — 위임 유지
 
-- 각 핸들러 파일이 `core/` 또는 자신의 자식 fractal 에 위임하며 상태 전이·스키마 검증을 자체 구현하지 않는다.
+- 각 핸들러는 core 또는 자신의 자식 fractal에 도메인 판단을 위임한다. 공유 스키마를 호출할 수 있으나 상태 전이·스키마 규칙을 자체 재구현하지 않는다.
 
 ### AC-tools-no-direct-response — 응답 형식 위임
 

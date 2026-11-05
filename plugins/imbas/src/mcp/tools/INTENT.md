@@ -2,7 +2,7 @@
 
 ## Purpose
 
-MCP 도구 핸들러 모음. 각 핸들러는 core 모듈에 위임하는 thin wrapper.
+MCP 도구 핸들러 모음. 전송 입력 해독·공유 스키마 검증·저장을 조립하며 도메인 판단은 core 모듈이 소유한다.
 
 ## Conventions
 
@@ -13,7 +13,7 @@ MCP 도구 핸들러 모음. 각 핸들러는 core 모듈에 위임하는 thin w
 ### Always do
 
 - 핸들러는 단일 async 함수로 export
-- 비즈니스 로직은 core/ 모듈에 위임
+- 도메인 판단은 core에 위임한다. 핸들러는 전송 입력 해독·공유 스키마 검증·저장을 조립하되 도메인 규칙의 소유자가 되지 않는다.
 - 프로젝트 경로는 `process.cwd()` 직접 호출 대신 `projectRoot(input.project_root)` 로 해석
 
 ### Ask first
@@ -22,5 +22,5 @@ MCP 도구 핸들러 모음. 각 핸들러는 core 모듈에 위임하는 thin w
 
 ### Never do
 
-- 핸들러에 비즈니스 로직 직접 구현
+- 상태 전이·요약 계산·실행 경로 정책을 핸들러에서 재구현 — 도구별로 도메인 판단이 갈라지는 것을 막는다.
 - toolResult/toolError 직접 호출 (wrapHandler가 처리)

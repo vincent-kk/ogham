@@ -4,7 +4,7 @@
 
 - 서버가 공통 `resolveInitialConfigScope`로 계산한 `initialScope`를 초기 선택으로 사용한다. project 설정이 있으면 project, user 설정만 있으면 user, 둘 다 없으면 project다. 페이지는 이 조건을 재판단하지 않는다.
 
-- `open_settings` 가 여는 설정 페이지 프런트엔드다. `.imbas/config.json` 전체(provider, project 참조, 라이프사이클 라벨 6종, 언어 4종, LLM 모델, estimation 계수, provider별 고급 섹션)를 한 폼에서 편집한다.
+- `open_settings` 가 여는 설정 페이지 프런트엔드다. imbas 설정 전체(provider, project 참조, 라이프사이클 라벨 6종, 언어 4종, LLM 모델, estimation 계수, provider별 고급 섹션)를 한 폼에서 편집한다.
 - 세션만 아는 데이터(가용 provider, 감지된 repo, Jira 프로젝트 목록)는 페이지가 조회하지 않는다. LLM 이 `bootstrap` 인자로 주입한다.
 - 편집 대상 계층은 `#config_scope` 라디오(user/project)가 정한다. 폼은 `configByScope[scope]` 로 다시 앉고, `/save` 는 `scope` 를 실어 그 계층만 덮어쓴다.
 - 폼에 노출하지 않는 값(`version`, `defaults.codebase`, 비활성 provider 섹션)은 주입된 상태 그대로 보존해 재전송한다 — 드롭하면 저장이 조용한 삭제가 된다.

@@ -21,14 +21,6 @@ GitHub 참조는 단일 디렉터리 세그먼트로 매핑한다. 호출자는 
 
 - `owner/repo` 형태의 `project_ref` 가 `owner--repo` 단일 세그먼트로 매핑된다.
 
-## Boundary Exemptions
-
-### utils — Hook bundle direct import
-
-- **Consumers**: `**/src/hooks/**`
-- **Direct import**: allowed
-- **Reason**: `contextInjector` 훅은 esbuild 번들로 배송되고 17KB 크기 가드를 받는다. 배럴을 거치면 재노출 그래프 전체가 번들에 끌려 들어와 가드를 넘긴다 — 배럴 경유는 선택지가 아니라 빌드 실패다. 훅이 세그먼트 매핑을 자체 구현하는 대신 같은 함수를 직접 쓰는 편이 `.imbas/` 레이아웃을 한 곳에 묶어 둔다.
-
 ## Last Updated
 
-경로 세그먼트·프로젝트 매핑·직접 import 면책의 내용과 근거가 바뀔 때 갱신한다.
+경로 세그먼트·프로젝트 매핑의 내용과 근거가 바뀔 때 갱신한다.
