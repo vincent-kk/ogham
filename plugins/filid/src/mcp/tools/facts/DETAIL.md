@@ -82,7 +82,7 @@
 
 ### AC-facts-tool-status — 상태 보고
 
-- 범위 선언이 없으면 `unsupported`와 `facts-uninitialized`이고 목록은 비어 있다.
+- 범위를 생략하면 adapter 소스 확장자의 기본 범위를 사용한다. 설정을 자동으로 쓰지 않고도 분석을 시작할 수 있게 하기 위해서다. 명시한 `covers: []`는 분석하지 않겠다는 선택이므로 `unsupported`와 `facts-uninitialized`로 보고하고 목록을 비운다.
 - 제출이 없는 프로젝트의 모든 범위 내 파일은 `missing`이며, 목록은 상한까지만 싣고 나머지는 `truncated`로 센다.
 
 ### AC-facts-tool-submit — 제출

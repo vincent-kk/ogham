@@ -20,7 +20,7 @@
 - 레코드는 `FileFacts` 형식이다(스펙 §2.1).
   - `path`는 프로젝트 상대 POSIX다.
   - `contentHash`는 `sha256:<hex>`다.
-  - 모든 파일에 `references`, `entrySurface`, `verification`을 싣는다. role이 `unsupported`인 파일의 `verification`도 싣는다.
+  - 정상 판독 레코드는 `references`, `entrySurface`, `verification`을 모두 싣고 `unsupported` role도 생략하지 않는다. 판독 실패의 `toolError` 레코드는 빈 `references`만 두고 다른 축은 생략한다. 실패를 축의 부재나 정상적인 빈 판독과 혼동하지 않기 위해서다.
   - `verification.contractGroupIds`는 주석 안의 `filid:contract <group-id>` marker를 중복 없이, marker 순서로 싣는다. marker가 없으면 빈 배열이다 — 필드의 부재는 "모름"이고 빈 배열은 "없음"이라, 서버가 그 둘을 가른다.
   - id 문법의 정본은 이 스캐너다: `[A-Za-z][A-Za-z0-9._-]*`. 서버 스키마가 같은 모양과 길이 상한으로 조기 거부하므로, 스캐너가 낼 수 없는 id는 줄을 읽기 전에 걸린다.
   - `sourceText`는 adapter가 specifier의 원문(구분자 포함)을 보고할 때만 싣는다. escape 때문에 `specifier`가 파일 byte에 없을 때다.
@@ -97,7 +97,7 @@
 ### AC-facts-equivalence — 한 번 scan해도 값이 같다
 
 - 한 번 scan한 결과를 나눠 쓴 레코드가 판독마다 따로 scan한 레코드와 byte 단위로 같다.
-- 레코드는 모든 파일에 references·entrySurface·verification을 싣고, `indeterminate` 참조와 검증 case 수를 그대로 보존한다.
+- 정상 판독 레코드는 references·entrySurface·verification을 싣고, `indeterminate` 참조와 검증 case 수를 그대로 보존한다. `toolError` 레코드는 실패한 판독의 축 값을 주장하지 않는다.
 
 ### AC-facts-source-reading — 텍스트가 말하는 것만
 
@@ -129,7 +129,7 @@
 
 - **Consumers**: `src/__tests__/integration/escalation/helpers/utils/sourceLiteralSentences.ts`
 - **Direct import**: `allowed`
-- **Reason**: 허용 목록 검사가 소스 문자열에서 문장을 뽑으려면 같은 토큰 경계를 봐야 한다. 그 헬퍼는 검증 파일이 아니라 검증 파일을 돕는 조직이라 `filid_fractal-boundaries` §5의 면제 대상이 아니고, 진입점으로 돌리려면 추출 프로그램의 공개 표면에 lexer를 테스트 하나를 위해 얹어야 한다 — 같은 조항이 더 나쁜 쪽이라고 말하는 선택이다. 그래서 선언하고 직접 가져간다.
+- **Reason**: 허용 목록 검사가 소스 문자열에서 문장을 뽑으려면 같은 토큰 경계를 봐야 한다. 그 헬퍼는 검증 organ 아래의 검증 코드라 `filid_fractal-boundaries` 5절에 따라 검증 대상을 직접 가져올 수 있고, 진입점으로 돌리려면 추출 프로그램의 공개 표면에 lexer를 테스트 하나를 위해 얹어야 한다.
 
 ## Last Updated
 

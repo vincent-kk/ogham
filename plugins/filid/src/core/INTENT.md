@@ -8,7 +8,7 @@
 
 - 판단 우선순위: 1. 확실한 증거 2. 경계 보존 3. 자동화 범위
 - sibling fractal은 각 entry point로 import하고 local barrel은 내부 routing에 쓰지 않는다.
-- filesystem write는 config 승인 저장, cache와 artifact edge에만 둔다.
+- filesystem write는 config 초기화·명시적 저장, cache·artifact와 facts 저장 경계에만 둔다. 판정이 저장을 겸하지 않게 하여 재사용과 CAS 계약을 보존한다.
 
 ## Boundaries
 

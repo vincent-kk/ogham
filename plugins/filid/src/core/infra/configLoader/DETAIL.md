@@ -40,7 +40,7 @@
 - review 기본값은 effort `auto`, auto low group threshold 16, maxGroups 64, group churn 1024, plan churn 50, concurrency 8이다. auto는 reviewable group이 threshold 이상이면 low, 미만이면 medium을 선택한다. `groupFileLimit` 생략은 변경 밀도에 따른 10~32 자동 상한이고 명시한 값은 고정 상한이다. prepare는 액터 배정 전에 reviewable 그룹 수를 검사하며 명시 `maxGroups`는 기본 상한을 덮어쓴다. lockfile 기본값은 npm·Yarn·pnpm·Bun·Cargo·Poetry·Pipenv·Composer·Bundler·Go·Gradle·Nix·Mix의 canonical lockfile basename이다.
 - `migrateConfigV1(input)` — source를 쓰지 않고 대응 필드와 discarded key 목록을 반환한다. 반환하는 각 `ConfigDiagnostic`은 `nextAction`을 담는다: `config-migration-required`는 설정 페이지에서 저장하라고, `config-key-discarded`는 그 키에 의존했을 때만 할 일이 있다고 알린다.
 - `createDefaultConfig(language?, adapterIds?)` — creates v3 with auto adapter mode and empty rule overrides; the built-in rule roster supplies defaults.
-- `initProject(projectRoot, options)` — 부재한 config만 생성하며 기존 파일을 덮어쓰지 않는다.
+- 초기화는 부재한 config를 생성하거나, 버리는 key 없이 strict v3 검증을 통과하는 v1/v2 변환만 기록한다. 현재 설정과 손실·검증 실패가 있는 파일은 byte를 보존한다. 새 기본값으로 사용자 선택을 덮거나 폐기된 정책을 조용히 확정하지 않기 위해서다.
 - `syncRuleDocs(projectRoot, selection, options)` — `options.scope`가 정한 레이어의 managed rule channel을 동기화하고, 회수한 반대편 문서를 `result.otherScope`로 보고한다.
 - `getRuleDocsStatus(projectRoot, pluginRoot?, scope?)` — mutation 없이 지정한 레이어의 active host target 상태를 반환한다. 기본값은 `project`.
 - `getRuleDocsChannel(projectRoot, scope?)` — 그 레이어가 쓰는 채널의 절대 경로. 항목별 `displayTarget`은 레이어 루트 기준 상대 주소라 표시 문자열만으로는 어느 루트인지 말하지 못한다.

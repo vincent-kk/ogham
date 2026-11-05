@@ -6,7 +6,7 @@ Validate project path, output language, and optional adapter IDs; create only ab
 
 ## Conventions
 
-- 기존 config는 덮어쓰지 않고 생성 경로 요약만 반환한다.
+- 기존 config를 새 기본값으로 대체하지 않는다. v1/v2는 key 손실 없이 v3 검증을 통과할 때만 변환 저장하여 사용자 선택이 초기화 과정에서 사라지지 않게 한다.
 
 ## Boundaries
 

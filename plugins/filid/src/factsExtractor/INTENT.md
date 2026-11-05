@@ -8,7 +8,7 @@
 
 - 소스 판독(`analysis/`)을 소유한다: lexer, 참조 추출, entry surface 판독, case 계수, contract marker. 생태계의 이름 규칙은 소유하지 않고 adapter에서 가져온다.
 - 한 파일의 텍스트는 한 번 scan하고 모든 판독이 그 결과를 나눠 쓴다. `indeterminate`는 그대로 싣는다.
-- `factsExtractor.entry.ts`만 부작용(argv, stdin, 출력 파일, 종료 코드)을 가진다. 나머지는 반환값으로 말한다.
+- CLI entry가 프로세스 입출력과 종료를 소유하고 읽기·원자적 출력 helper를 호출한다. 추출 helper는 파일을 읽되 결과와 실패를 반환하여 한 파일의 실패가 프로세스를 종료하지 않게 한다.
 - 판단 우선순위: 1. 밖을 읽거나 쓰지 않음 2. adapter와 같은 값 3. 결정적 출력 4. 속도.
 
 ## Boundaries
@@ -16,7 +16,7 @@
 ### Always do
 
 - 입력 경로가 문자열로나 실제 위치로나 프로젝트 밖이면 그 항목을 거부하고 요약에 센다.
-- 파일 하나의 실패는 그 파일의 `toolError` 레코드로 남기고 계속한다.
+- 읽은 byte의 판독 실패는 hash에 결속된 `toolError`로 남긴다. 읽기 실패는 hash를 만들 수 없으므로 레코드 없이 unreadable 목록에 남기고 계속한다.
 - 출력은 임시 이름에 쓴 뒤 rename한다.
 
 ### Ask first
