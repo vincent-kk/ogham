@@ -8,13 +8,9 @@ KnowledgeNode 배열에서 KnowledgeGraph 구축. adjacency list, 엣지, 고아
 
 SIBLING 은 물질화하지 않는다 — node.path 폴더 멤버십의 O(k²) 전개이므로 graph.edges/직렬화에서 제외하고, 재수화 시점에 `deriveSiblingEdges` 가 파생해 런타임 맵에만 싣는다 (LINK 등 상위 multiplier 타입이 pair 맵 선점 유지).
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: buildGraph/buildAdjacencyList/deriveSiblingEdges/detectOrphans/hydrateRuntimeMaps/rebuildEdgeDerivedMaps + invertedIndex 4함수 + 타입)
-- `types/` organ — 공개 타입 (GraphBuilderOptions/GraphBuildResult)
-- `operations/` organ — 그래프 조립·런타임 맵 (buildGraph/buildAdjacencyList/deriveSiblingEdges/detectOrphans/hydrateRuntimeMaps/rebuildEdgeDerivedMaps + private buildEdgePairMaps, 함수 1개/파일)
-- `invertedIndex/` organ — 역 인덱스 (tokenizeForInvertedIndex 단일 출처 + add/remove/build, 함수 1개/파일)
-- `builders/` 하위 fractal — 엣지 타입별 빌더 (tree=계층/relationship/domain/crossLayer)
+빌드 직후와 디스크 리로드가 재수화 경로를 공유해야 SA와 시드 해석이 일치한다. 역 인덱스의 전체·증분 갱신도 같은 토크나이저를 사용한다.
 
 ## Boundaries
 

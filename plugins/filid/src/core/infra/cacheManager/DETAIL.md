@@ -12,15 +12,8 @@
 
 ## API Contracts
 
-- `getCacheDir(cwd): string` — project identity로 격리된 plugin cache 경로를 반환한다.
-- `isFirstInSession`, `markSessionInjected`, `removeSessionFiles` — session epoch 상태를 관리한다.
-- `readPromptContext`, `writePromptContext`, `hasPromptContext` — prompt context cache를 관리한다.
-- `readBoundary`, `writeBoundary`, `readFractalMap`, `removeFractalMap` — 구조 탐색 cache를 관리한다.
-- `commitVisit(cwd, scope, input): VisitDecision` — 허용되는 모든 방문의 delivery freshness, map change와 guide 필요 여부를 원자적으로 결정한다.
-- `readTurn`, `incrementTurn`, `hasGuideInjected`, `markGuideInjected` — turn과 guide delivery를 관리한다.
-- `pruneOldSessions`, `pruneStaleCacheDirs` — cache lifecycle cleanup을 best-effort로 수행한다.
-- 공개 함수는 cache miss 또는 I/O 실패 시 안전한 빈 값으로 저하하며 project source를 변경하지 않는다.
-- mode audit 또는 branch lifecycle audit API를 노출하지 않는다.
+- cache miss와 I/O 실패는 안전한 빈 값으로 저하하며 project source를 변경하지 않는다.
+- mode audit와 branch lifecycle audit은 이 cache의 공개 책임이 아니다.
 
 ## Acceptance Criteria
 
@@ -49,4 +42,4 @@
 
 ## Last Updated
 
-2026-08-28 — `commitVisit`에서 mutation gate 입력을 제거하고 첫 delivery를 포함한 모든 허용 방문을 map에 기록하도록 계약을 단순화했다.
+cache가 소유하는 상태 범위, scope 격리나 `commitVisit`의 원자성 계약이 바뀔 때 갱신한다.

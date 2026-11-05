@@ -12,7 +12,7 @@
 ## API Contracts
 
 - `injectStatic/` — SessionStart 정적 정책 블록.
-- `injectDynamic/` — UserPromptSubmit 2–3줄 라이브 상태.
+- 동적 주입은 UserPromptSubmit당 최대 3줄로 제한한다. 모든 provider가 비활성이면 설정 안내 한 줄만, 그 외 식별 불가 상태에서는 무정보 payload를 생략하여 매 턴 토큰 비용을 줄인다.
 - `shared/` — 두 훅이 공유하는 config 로드·provider 순서·electable 판정 organ.
 
 ## Acceptance Criteria
@@ -39,4 +39,4 @@
 
 ## Last Updated
 
-2026-08-23 — 읽기 전용 수용 기준을 실제 런타임 파일 소유권에 맞게 표현했다.
+훅 비차단·읽기 전용·번들 및 컨텍스트 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

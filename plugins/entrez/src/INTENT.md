@@ -1,12 +1,12 @@
 ## Purpose
 
-entrez 플러그인의 TypeScript 소스 루트(프랙탈 루트). NCBI E-utilities 결정론 검색 엔진과 MCP 도구 5종을 담는다. 유일한 닻은 검색 **누락 방지(recall)**.
+entrez 플러그인의 TypeScript 소스 루트(프랙탈 루트). NCBI E-utilities 결정론 검색 엔진과 MCP 도구를 담는다. 유일한 닻은 검색 **누락 방지(recall)**.
 
 ## Conventions
 
 - 모든 export는 각 프랙탈 배럴 `index.ts`를 통해 노출, ESM `.js` 확장자 import.
 - 의존성 단방향: mcp → adapters → core → httpClient → NCBI. 역방향 금지.
-- 문자열 리터럴은 `types/enums.ts`·`constants/*`에서만(인라인 금지).
+- 공유 문자열은 공통 enums·constants에서 가져오고, 모듈 전용 코드·메시지는 지역 상수로 소유해 불필요한 결합을 피한다.
 
 ## Boundaries
 

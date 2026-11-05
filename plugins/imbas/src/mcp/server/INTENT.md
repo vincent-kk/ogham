@@ -4,10 +4,6 @@
 
 MCP 서버 생성 및 9개 도구 등록. registerTool 패턴 사용.
 
-## Structure
-
-- `server.ts` — 서버 인스턴스 생성과 도구 등록표
-
 ## Conventions
 
 - 도구 스키마의 `description` 이 계약 정본이다 — 호출자는 이 문장만 보고 인자를 고른다.
@@ -28,9 +24,3 @@ MCP 서버 생성 및 9개 도구 등록. registerTool 패턴 사용.
 
 - server.tool() 4-arg 패턴으로 도구 등록
 - 핸들러 시그니처를 우회하는 도구별 특수 등록 경로 추가
-
-## Dependencies
-
-- `@modelcontextprotocol/sdk` — `McpServer`
-- `zod` — 도구 inputSchema
-- `../tools/` — 각 도구 핸들러

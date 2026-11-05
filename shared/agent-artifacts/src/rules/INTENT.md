@@ -2,17 +2,6 @@
 
 규칙 문서의 상태를 검사하고 원하는 집합으로의 변경을 계획·적용하며, Claude 소유 파일과 Codex 소유 마커 구간에 같은 논리 결과를 낸다.
 
-## Structure
-
-| Path        | Role                                       |
-| ----------- | ------------------------------------------ |
-| `index.ts`  | 내부 호환 barrel·패키지 루트 재노출 source |
-| `rules.ts`  | target별 manager 조립                      |
-| `planning/` | 공통 사실표 판정과 변경 계획               |
-| `status/`   | 전체 상태와 단일 문서 presence 판독        |
-| `adapters/` | 부분 파일 적용·단일 section 파일 적용      |
-| `helpers/`  | 검증·경로·hash·소유 section 보조 함수      |
-
 ## Conventions
 
 - 제품의 required/optional 정책은 받지 않고 `desired`/`replaceDrift`만 받는다.
@@ -42,7 +31,3 @@
 ### Never do
 
 - 첫 manifest 항목에서 owner를 추론하거나 사용자 drift를 자동 교체하고, 파일 시스템 함수를 직접 호출.
-
-## Dependencies
-
-- 내부 `targets`·`transactions`·`validation`, 외부 `@ogham/cross-platform` 루트.

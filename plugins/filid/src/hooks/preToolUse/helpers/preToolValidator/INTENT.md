@@ -6,12 +6,10 @@ Write/Edit가 INTENT.md 또는 DETAIL.md를 수정할 때 현재 문서 계약�
 
 ## Conventions
 
-- INTENT line limit은 canonical validation constant에서 import한다 (모듈 재선언 금지 — 단일 원천).
-- Write/Edit는 host filesystem의 물리 target으로 문서 여부를 판정하고 마지막 symlink도 따라간다.
-- INTENT.md — Write: `validateIntentMd` (`error` 블록, `warning` continue + 메시지). Edit: `old_string`→`new_string` 교체 시뮬레이션 후 projected > 50줄이면 블록; 시뮬레이션 불가 시 `new_string` 20줄 초과만 경고
-- DETAIL.md — Write: 빈 내용과 첫 쓰기도 전체 검증하며 `oldContent`가 있으면 append-only 검사
-- Delete — parent는 host filesystem 기준으로 canonicalize하되 terminal entry를 보존하고, 그 basename이 INTENT.md이면 content 투영 없이 강등 조건 확인
-- 차단 시 `permissionDecision: 'deny'` + `permissionDecisionReason`에 사유 설정
+- INTENT cap은 canonical 상수 하나를 사용한다. 지역 숫자가 갈라지면 Write와 Edit의 문서 계약이 달라진다.
+- Write/Edit는 symlink를 따라 실제 보호 문서를 판정하고 Delete는 마지막 entry를 보존한다. 링크 이름과 referent 삭제를 혼동하지 않기 위해서다.
+- Write는 전체 문서를 검사하지만 Edit는 투영 가능한 INTENT 줄 수만 본다. DETAIL Edit와 투영 불가 Edit에는 전체 계약 검증을 주장하지 않는다.
+- warning은 안내로 남기고 error만 해당 도구 호출을 deny한다. 빈 첫 Write도 문서 계약을 우회하지 않는다.
 
 ## Boundaries
 

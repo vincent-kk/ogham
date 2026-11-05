@@ -34,7 +34,3 @@ Own validation, non-destructive v1/v2 migration, explicit saving of config v3, a
 - programming-language 의미를 config core에서 해석
 - 레이어를 지정하지 않은 sync가 반대편 레이어를 건드리기 — headless 호출이 전역 규칙을 지운다
 - loaders/ 또는 utils/에 INTENT.md 추가
-
-## Dependencies
-
-- Zod, adapter registry IDs, agent-artifacts와 host path utilities

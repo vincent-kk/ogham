@@ -1,16 +1,6 @@
 ## Purpose
 
-r-statistics 의 MCP 서버(stdio) 프랙탈. 도메인 무지·stateless 결정적 실행 레이어. 도구 4종 등록·실행을 담당하며 서버 이름은 `tools`.
-
-## Structure
-
-| Path           | Role                                                   |
-| -------------- | ------------------------------------------------------ |
-| `server/`      | createServer(도구 등록) + startServer(stdio) (fractal) |
-| `serverEntry/` | esbuild 진입점 → `bridge/mcp-server.cjs` (organ)       |
-| `shared/`      | toolResult·toolError·wrapHandler (fractal)             |
-| `tools/`       | run_r·get_r_job·cancel_r_job·assert_analysis_plan      |
-| `index.ts`     | barrel                                                 |
+r-statistics의 MCP host 경계를 소유한다. 도구 등록·전송·응답을 조립하고 실행 안전과 통계 판정은 각각의 소유자에게 위임한다.
 
 ## Conventions
 
@@ -31,10 +21,5 @@ r-statistics 의 MCP 서버(stdio) 프랙탈. 도메인 무지·stateless 결정
 
 ### Never do
 
-- 핸들러에서 `process.exit` 직접 호출(serverEntry 제외)
+- 도구 핸들러에서 `process.exit` 직접 호출 — 개별 요청 실패로 서버 수명이 끝나지 않게 한다.
 - 통계 정책·도메인 어휘를 실행 레이어에 도입
-
-## Dependencies
-
-- `@modelcontextprotocol/sdk`, `zod`
-- `../core`, `../constants`, `../types`, `../lib`, `../utils`, `../version`

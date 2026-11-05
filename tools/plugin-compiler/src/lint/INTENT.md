@@ -11,7 +11,7 @@ Report host capability warnings and explicit MCP opt-in validation errors withou
 
 ### Always do
 
-- 진단 코드(`code`)는 안정 문자열로 유지 — DETAIL.md 진단 표와 1:1.
+- 진단 코드(`code`)는 안정 문자열로 유지하고 패키지 루트 DETAIL 의 진단 표와 1:1 로 맞춘다 — 코드·수준 변경은 소비자의 필터와 CI 판정을 바꾸므로 표 갱신과 함께 계약 변경으로 검토한다.
 - 판단 근거가 호스트 동작이면 근거 데이터를 `constants/hosts.ts` 상수로 둔다.
 - `Read` fallback과 지원하지 않는 `Skill` exact matcher 진단은 adapter와 같은 capability 정책을 소비한다.
 

@@ -11,37 +11,12 @@
 
 ## API Contracts
 
-- `handleAssertAnalysisPlan(...)` — 정규화된 분석 계획을 받아 hard → soft 순으로 평가하고 `severity` 와 `allowed` 를 산출한다.
-- `operations/evaluateHardRules.ts` — `OUTCOME_METHOD_MISMATCH`, `SAMPLE_TOO_SMALL`, `EXPECTED_COUNT_LOW` 등 결정적 차단 규칙.
-- `operations/evaluateSoftRules.ts` — 가정 아티팩트 대조(violated / unverified)와 대안 권고 수집.
-- `operations/ruleset.ts` — 기법별 family·outcomeTypes·soft 가정 정의.
+interactive에서 soft 위반을 허용하는 것은 개선 기회를 주기 위함이다.
 
 ## Acceptance Criteria
 
-### AC-hard-gate — 결정적 차단
-
-- 가정이 충족된 정상 parametric 계획은 통과한다.
-- outcome 과 기법이 어긋나면 두 모드 모두에서 차단한다.
-- 그룹당 표본이 2 미만이면 차단한다.
-- EPV 가 심각하게 낮은 Cox·로지스틱 모형은 차단한다.
-- 기대빈도가 낮은 카이제곱은 차단한다.
-
-### AC-soft-gate-mode — 모드별 soft 처리
-
-- 같은 soft 위반이 interactive 에서는 경고와 함께 허용되고 auto 에서는 차단된다.
-- 가정 아티팩트 부재는 `unverified` soft 경고로 처리된다.
-- 미등록 기법은 두 모드 모두에서 soft 경고다.
-- 가정이 위반된 등록 기법(gam 등)은 조용히 통과하지 않는다.
-
-### AC-ruleset-meta-sync — 룰셋 동기화
-
-- 룰셋의 모든 기법에 대응하는 읽을 수 있는 `meta.yaml` 이 존재한다.
-
-### AC-domain-neutrality — 도메인 중립
-
-- 공개 예시와 표본 변수명이 특정 응용 분야를 암시하지 않는다.
-- 생존분석 외 비임상 use-case 번들이 최소 하나 함께 노출된다.
+구체적인 동작과 수치 기준은 소유 모듈의 테스트가 고정하며, 이 문서는 그 선택의 이유와 변경 경계를 기록한다.
 
 ## Last Updated
 
-2026-07-30 — hard/soft 게이트와 도메인 중립 계약을 문서화했다.
+hard/soft 판정·카탈로그 동기화·도메인 중립 정책의 내용이나 적용 범위가 바뀔 때 갱신한다.

@@ -31,14 +31,8 @@
 
 ## API Contracts
 
-- `buildDependencyGraph(nodePaths, evidence, certainty, options): DependencyGraph` — 정렬된 edge, cycle, `unknownFiles`와 파생 certainty를 반환한다. `options.projectRoot`는 `unknownFiles` 경로의 기준이다. `options.unknownFiles`는 수집기가 찾은 항목이다. `options.organPaths`를 주면 owner subtree 안의 owned-organ 참조를, `options.verificationPaths`를 주면 검증 파일이 만든 참조를 cycle adjacency에서 제외한다.
-- `partitionUnknownFiles(unknownFiles, targets, readText, extraRelevantPaths?): { relevant, other }` — 관련성 거름망. `targets`(`{ path, kind }`)와 `extraRelevantPaths`는 프로젝트 상대 경로다. `readText`는 파일 텍스트를 돌려주거나, 읽을 수 없으면 `null`을 돌려준다. 순서는 입력 순서를 지킨다. 경로 토큰 판정(`containsPathToken`)은 내부 파일이고 공개하지 않는다.
-- `classifyRelevanceTarget(tree, absolutePath, isDirectory): 'file' | 'module-index' | 'directory'` — 대상 종류. 파일이 그 디렉터리 노드의 `kind: 'module'` entry point이면 `module-index`다. restructure와 review가 대상을 만들 때 쓴다.
-- `resolveOwningOrganPath(organPathsDeepestFirst, ownerPath, filePath): string | null` — `filePath`를 직접 담고 있으면서 `ownerPath` 안에 있는 가장 깊은 organ 경로. boundary rule이 organ 대상 여부와 면책 조회 키를 같은 규칙으로 얻는다. 첫 인자는 `sortPathsDeepestFirst`로 정렬해 넘긴다 — 정렬되지 않은 목록을 주면 가장 깊은 organ 대신 먼저 만난 organ을 반환한다.
-- `sortPathsDeepestFirst(paths): string[]` — 후보를 길이 내림차순으로 한 번 정렬한다. owner·organ 조회의 전제를 만드는 유일한 지점이다.
-- `detectCycles(graph): string[][]` — cyclic component마다 실제 edge로 연결되고 시작 owner로 닫히는 안정된 대표 경로 배열을 반환한다.
-- `findUnownedReferences(nodePaths, references, options?): UnownedReference[]` — `buildDependencyGraph`와 같은 순서·면제로 owner 없는 참조를 `{ reference, unownedPath }`로 돌려준다. 판정만 하고, 진단은 `projectSnapshot`이 만든다.
-- legacy `buildDAG`, `topologicalSort`, `getDirectDependencies`는 작업 8 정리 전 characterization 호환만 유지한다.
+- `resolveOwningOrganPath` — 첫 인자는 `sortPathsDeepestFirst`로 정렬해 넘긴다 — 정렬되지 않은 목록을 주면 가장 깊은 organ 대신 먼저 만난 organ을 반환한다.
+- legacy `buildDAG`, `topologicalSort`, `getDirectDependencies`는 characterization 호환만 유지한다.
 
 ## Acceptance Criteria
 
@@ -64,7 +58,7 @@
 
 ### AC-dag-certainty — 모르는 것은 원인 파일에 귀속한다
 
-- unresolved production dependency 또는 production 참조의 source/target owner 누락이 있으면 그 source가 `unknownFiles`에 들어가고 graph는 indeterminate다.
+- unresolved production dependency이 있으면 그 source가 `unknownFiles`에 들어가고 graph는 indeterminate다.
 - adapter가 indeterminate로 표시한 참조는 production이든 verification이든 edge가 되지 않는다. 그 source가 `unknownFiles`에 들어간다.
 - verification 참조만 미해소이거나 owner를 찾지 못하는 경우 `unknownFiles`는 비고 exact DAG를 유지한다. 해석 가능한 verification edge evidence는 보존한다.
 - 같은 owner pair에 verification과 production 참조가 함께 있으면 production 참조가 만드는 순환을 감추지 않는다.
@@ -86,4 +80,4 @@
 
 ## Last Updated
 
-2026-09-20
+cycle adjacency 제외 규칙, `unknownFiles` 귀속 원인이나 관련성 거름망 규칙이 바뀔 때 갱신한다.

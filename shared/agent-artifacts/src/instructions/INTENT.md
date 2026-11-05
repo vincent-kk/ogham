@@ -3,16 +3,6 @@
 호스트가 읽는 지침 파일에서 한 소유자의 마커 구간을 검사하고 계획·적용한다.
 파일 전체가 아니라 주소가 지정된 구간만 관리한다.
 
-## Structure
-
-| Path              | Role                                 |
-| ----------------- | ------------------------------------ |
-| `index.ts`        | 지침 manager·request 타입 공개 배럴  |
-| `instructions.ts` | 범용 manager 조립                    |
-| `hook/`           | 훅 전용 경량 inspect/apply 내부 표면 |
-| `planning/`       | revision 기반 범용 구간 변경 계획    |
-| `status/`         | 범용 manager용 구간 상태 판독        |
-
 ## Conventions
 
 - 기본 marker는 owner 대문자 namespace와 선택적 section id로 만든다.
@@ -36,8 +26,3 @@
 - 파일 전체를 소유한 것으로 간주하거나 drift를 묵시적으로 교체.
 - cross-platform의 순수 marker 연산을 중복 구현.
 - hook 구현에서 범용 manager, transaction, lock 모듈 import.
-
-## Dependencies
-
-- 범용: `targets`, `transactions`, `@ogham/cross-platform`.
-- 훅: 목적별 target과 `@ogham/cross-platform`.

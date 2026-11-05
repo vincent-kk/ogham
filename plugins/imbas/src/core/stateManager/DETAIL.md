@@ -10,37 +10,7 @@
 
 ## API Contracts
 
-```typescript
-export function createRunState(params: {
-  run_id: string;
-  project_ref: string;
-  source_file: string;
-  source_issue_ref?: string | null;
-}): RunState;
-
-export async function loadRunState(runDir: string): Promise<RunState>;
-export async function saveRunState(
-  runDir: string,
-  state: RunState,
-): Promise<void>;
-export function applyTransition(
-  state: RunState,
-  action: RunTransition,
-): RunState;
-```
-
-- `createRunState` 의 초기 상태: `current_phase` 는 `refine`, 세 phase 모두 `status: 'pending'`, `epic_ref` 는 `null`, `split.pending_review` 는 `true`.
-- `applyTransition` 이 받는 `action.action` 은 넷이다.
-
-| action           | 조건                                                     | 결과                                                                   |
-| ---------------- | -------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `start_phase`    | `validateStartPhase` 통과                                | 해당 phase `in_progress`, `started_at` 기록, `current_phase` 이동      |
-| `complete_phase` | `handleCompletePhase` 위임                               | phase 완료 필드 기록                                                   |
-| `escape_phase`   | 대상(`split`)이 `in_progress`                            | `split.status = 'escaped'`, `escape_code` 기록                         |
-| `skip_phases`    | refine 이 `completed` + `PASS` 또는 `PASS_WITH_WARNINGS` | `pending`·`in_progress` 인 phase 만 `skipped`, 마지막 것 다음으로 전진 |
-
-- `skip_phases` 는 이미 `completed`·`skipped` 인 phase 를 건너뛰어도 그 데이터를 보존하는 멱등 no-op 이다.
-- `RunTransition` 은 판별 union 이며 `default` 분기가 `never` 로 소진 검사한다.
+이미 완료되거나 건너뛴 phase를 다시 skip해도 완료 데이터는 보존한다. 적용된 phase가 없으면 현재 phase를 전진시키지 않는다. action별 입력과 초기값은 스키마·구현·테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -75,4 +45,4 @@ export function applyTransition(
 
 ## Last Updated
 
-2026-08-06 — phase 체계를 `refine/estimate/split` 로 전환한 v2 전이 규칙을 최초 문서화했다.
+phase 전이·불변성·영속 계약의 내용과 근거가 바뀔 때 갱신한다.

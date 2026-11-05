@@ -3,7 +3,7 @@
 ## Requirements
 
 - 훅은 비차단이며 규칙 본문은 주입하지 않습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift를 주입합니다(선출·posture·규칙 요약은 `hooks/setup/render/`; SessionStart의 체인 한 줄은 `WORKFLOW_CHAIN_LINE`(`constants/workflowChain.ts`)를 `renderPostureLines`로 얻고, 진행 줄·진행-줄 형식 ACK·subagent 줄은 `hooks/shared/progressLine/`의 concrete 파일에서 가져옵니다). 진입 `step`이나 `start`로 바인딩이 생기면 PostToolUse는 `created`·`switched`에서, UserPromptSubmit은 활성 바인딩이 있는 매 턴에, SubagentStart는 부모 main의 활성 바인딩이 있을 때 1회 진행 줄을 주입합니다. UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) standard/strict에 맞는 진입 줄을 주입합니다. off/advisory와 주입 대상이 없는 이벤트는 wire stdout까지 비웁니다.
-- 예외는 fail-open으로 처리하고 logHookFailure로 진단합니다. stdin deadline은 외부 timeout보다 짧습니다.
+- 예외는 fail-open으로 처리하고 logHookFailure로 진단합니다. stdin deadline은 외부 timeout보다 짧습니다. 타이머가 입력을 놓은 뒤 파싱·출력을 마치기 전에 호스트가 프로세스를 죽이지 않을 여유가 필요합니다.
 - off/advisory는 신규 관측·주입을 금지하지만 기존 참여의 신뢰되는 턴·세션 경계 철회는 허용합니다.
 - 훅은 concrete 내부 파일만 import하고 검증 런타임·MCP SDK·glob 엔진을 포함하지 않습니다. 공유 패키지는 공개 진입점으로 사용합니다.
 - 호스트는 build 시 선택하고 compiler가 Codex 전용 runtime 경로를 가리킵니다. main actor의 turn은 Claude prompt_id 또는 Codex turn_id를 해시하고, native agent_id가 있는 자식의 turn은 두 호스트 모두 `JSON.stringify(['agent', agent_id])`를 해시해 부모 turn 변경과 독립적으로 유지합니다. 공통 tool_use_id 및 host/session/agent identity도 경계에서 정규화합니다. 누락한 identity나 vendor를 모델 인자·프롬프트·runtime 추론으로 보충하지 않습니다.
@@ -55,10 +55,6 @@
 
 - stdin fail-open deadline은 이를 사용하는 모든 활성 훅의 외부 timeout보다 짧다.
 
-## History
-
-- 2026-09-05 — stdin fail-open과 외부 훅 timeout 사이에 종료 여유를 추가했다. 같은 deadline이면 타이머가 입력을 놓은 뒤에도 호스트가 파싱·출력 전에 프로세스를 죽일 수 있기 때문이다.
-
 ## Last Updated
 
-2026-09-29
+호스트 관측·주입·번들·실패 처리 계약의 내용과 근거가 바뀔 때 갱신한다.

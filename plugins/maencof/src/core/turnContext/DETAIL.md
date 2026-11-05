@@ -11,12 +11,7 @@
 
 ## API Contracts
 
-- `buildTurnContext(...)` — 압축 XML turn 컨텍스트 조립 진입점.
-- `buildL1CoreBlock(...)` — SessionStart 1회용 `<l1-core-full>` 전체 본문 블록.
-- `buildSessionIdentityBlock(...)` · `buildCompanionIdentityTag(...)` — 세션·동반자 identity 블록.
-- `renderIdentitySection(...)` · `selectSections(...)` · `resolveSectionText(value)` — identity 섹션 렌더와 섹션 텍스트 정규화.
-- `readIndexMetadata(...)` · `readCachedNodesArray(...)` · `readCompanionIdentity(...)` · `readL1NodesSummary(...)` — 캐시·소스 read.
-- `compressMarkdownBody(...)` · `capGist(...)` · `extractGist(...)` — 직렬화·압축.
+identity 배열의 join은 렌더 경계에서만 수행한다. 정규화 단계가 배열 원형을 유지하므로 세션과 턴 렌더가 같은 정본을 각 채널에 맞게 사용할 수 있다.
 
 ## Acceptance Criteria
 
@@ -78,4 +73,4 @@
 
 ## Last Updated
 
-2026-07-30 — L1 전체/gist 계약과 훅 직접 import 면책 7건을 문서화했다.
+L1 전체와 gist의 구분·identity 렌더·공유 조립 경계가 바뀔 때 갱신한다.

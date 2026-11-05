@@ -2,34 +2,23 @@
 
 ## Requirements
 
-- `.imbas/` 아래의 상태·설정·매니페스트를 소유하는 비즈니스 로직 계층이다. MCP 도구 핸들러는 이 계층에 위임만 하고 스스로 판단하지 않는다.
-- 파일 쓰기는 `lib/fileIo.ts` 의 atomic write 를 경유한다. `fs.writeFileSync` 직접 호출은 원자성을 잃어 중단된 실행이 반쯤 쓰인 `state.json` 을 남긴다.
+- 프로젝트의 imbas 작업 디렉터리 아래의 상태·설정·매니페스트를 소유하는 비즈니스 로직 계층이다. MCP 도구 핸들러는 전송 입력 해독·공유 스키마 검증·저장을 조립할 수 있지만, 상태 전이·요약 계산·실행 경로 정책을 재구현하지 않아 도메인 판단이 갈라지는 것을 막는다.
+- 상태·매니페스트 JSON은 lib/fileIo의 원자적 쓰기를, 설정 계층은 cross-platform의 원자적 계층 쓰기를 경유한다. 직접 파일 덮어쓰기는 중단 시 반쯤 쓰인 문서를 남기므로 금지한다. 실행 ID 발급을 위한 디렉터리 생성·조회는 이 파일 쓰기 규칙의 대상이 아니다.
 - provider API(Jira·GitHub) 호출은 이 계층의 몫이 아니다. core 는 파일과 스키마만 다루고, 트래커 실행은 스킬 계층이 수행한다.
 - Zod 스키마는 `types/` 가 단독 소유한다. core 는 스키마를 정의하지 않고 참조만 한다.
 
 ## API Contracts
 
-`index.ts` 배럴이 노출하는 공개 심볼은 다음과 같다.
-
-| 심볼                                                                            | 출처                 |
-| ------------------------------------------------------------------------------- | -------------------- |
-| `createRunState` · `loadRunState` · `saveRunState` · `applyTransition`          | `stateManager/`      |
-| `loadConfig` · `saveConfig` · `updateConfigLayer` · `getConfigValue`            | `configManager/`     |
-| `loadManifest` · `getManifestSummary` · `getEstimationSummary` · `ManifestType` | `manifestParser/`    |
-| `validateManifest`                                                              | `manifestValidator/` |
-| `getImbasRoot` · `getProjectDir` · `getCacheDir` · `getRunsDir` · `getRunDir`   | `paths/`             |
-| `generateRunId`                                                                 | `runIdGenerator/`    |
-
-- 배럴은 이름을 하나씩 적는다. 와일드카드 재노출은 하위 fractal 의 내부 심볼을 조용히 공개 계약으로 승격시킨다.
-- `configManager` 의 계층 전용 심볼(`loadConfigByScope` · `loadConfigScope` · `ConfigByScope`)은 이 배럴에 없다. 계층을 다루는 소비자는 `core/configManager` 진입점을 직접 지목한다.
-- `utils/` 는 organ 이다 — `advancePhase` · `handleCompletePhase` · `validateStartPhase` 는 `stateManager` 전용이며 배럴로 나가지 않는다.
+- 배럴은 이름을 하나씩 적는다. 와일드카드는 하위 모듈의 추가를 조용히 공개 계약으로 승격시킨다.
+- 계층별 설정을 다루는 소비자는 configManager의 진입점에 직접 닿는다. 부모의 일반 설정 표면으로 계층 편집 계약을 넓히지 않는다.
+- 상태 전이 헬퍼는 stateManager 전용이며 공개 배럴로 나가지 않는다.
 
 ## Acceptance Criteria
 
 ### AC-core-barrel-named — 배럴 명시 재노출
 
 - `core/index.ts` 에 `export *` 형태가 없다.
-- 배럴이 노출하는 심볼이 위 표와 정확히 일치한다.
+- 배럴은 하위 모듈의 의도된 공개 표면만 노출한다.
 
 ### AC-core-atomic-write — 원자적 파일 쓰기
 
@@ -46,4 +35,4 @@
 
 ## Last Updated
 
-2026-08-06 — v2 재편으로 `cacheManager` · `executionPlanner` · `implementPlanner` 가 제거된 뒤의 core 공개 표면을 계약화했다.
+상태 소유권과 공통 경계 계약의 내용과 근거가 바뀔 때 갱신한다.

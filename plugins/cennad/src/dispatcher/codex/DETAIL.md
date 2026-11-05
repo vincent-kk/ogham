@@ -24,4 +24,4 @@
 
 ## Last Updated
 
-2026-07-30 — codex 어댑터 계약을 문서화했다.
+Codex thread 연속성·모델과 effort·실패 진단 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

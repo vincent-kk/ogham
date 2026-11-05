@@ -2,13 +2,6 @@
 
 실행 중인 provider CLI 를 강제 종료하는 진입점. `dispatcher` 원장이 들고 있는 in-flight 실행을 필터로 골라 abort 시키고, 무엇을 죽였는지 보고. 취소 신호가 닿지 않는 경우(호스트가 `notifications/cancelled` 를 보내지 않거나, 위임을 띄운 쪽이 이미 사라진 경우)의 유일한 수동 탈출구.
 
-## Structure
-
-| Path                  | Role                                                     |
-| --------------------- | -------------------------------------------------------- |
-| `stopConversation.ts` | `handleStopConversation` — 필터 → `stopRuns` → 결과 요약 |
-| `index.ts`            | barrel                                                   |
-
 ## Conventions
 
 - 입력 키 `snake_case`, 둘 다 optional: `session_id`(특정 세션), `provider`(해당 provider). 함께 주면 AND, 둘 다 생략하면 이 서버 프로세스의 실행 전부
@@ -33,8 +26,3 @@
 
 - 세션 메타·카운터 변경 — 이 도구는 프로세스만 건드린다
 - 중단 대상이 없다고 throw — 항상 `count: 0` envelope 로 정규화
-
-## Dependencies
-
-- `../../../dispatcher` — `stopRuns`, `StoppedRun` (실행 원장 조작)
-- `../../../types` — `Provider`

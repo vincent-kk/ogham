@@ -2,12 +2,11 @@
 
 ## Purpose
 
-Layer 간 문서 전이(TransitionDirective) 이력을 영속화하고 조회하는 모듈. `.maencof-meta/transition-history.json`에 최대 500건 저장.
+Layer 간 문서 전이(TransitionDirective) 이력을 영속화하고 조회하는 모듈. 볼트의 전이 이력 파일에 최대 500건 저장.
 
-## Structure
+## Conventions
 
-- `index.ts` — barrel (공개 API: readTransitionHistory/appendTransition/getRejectCount)
-- `operations/` organ — IO·조회 (historyPath 사설 헬퍼 + read/append/getRejectCount, 함수 1개/파일)
+전이 기록은 상한이 있는 FIFO 진단 자료다. 보존 건수와 포맷은 별도 결정하여 이력 소비자의 판단 기준을 유지한다.
 
 ## Boundaries
 

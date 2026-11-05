@@ -4,14 +4,9 @@
 
 Markdown 텍스트를 Confluence Storage Format XHTML 문자열로 변환하는 순수 함수 모듈. 코드 블록은 `ac:structured-macro`, 이미지는 `ac:image` 태그로 출력한다.
 
-## Structure
+## Conventions
 
-| 파일                         | 역할                                                      |
-| ---------------------------- | --------------------------------------------------------- |
-| `markdownToStorage.ts`       | 진입점 — 빈 입력 처리 후 렌더러에 위임                    |
-| `operations/renderBlocks.ts` | MarkdownBlock 배열을 Storage Format XML 문자열로 변환     |
-| `operations/renderInline.ts` | 인라인 토큰을 XML 이스케이프된 Storage Format 태그로 변환 |
-| `index.ts`                   | 배럴 — `markdownToStorage` 단일 재수출                    |
+Confluence가 저장 후 렌더할 수 있는 매크로 형태와 XML 이스케이프를 함께 유지한다.
 
 ## Boundaries
 
@@ -28,11 +23,6 @@ Markdown 텍스트를 Confluence Storage Format XHTML 문자열로 변환하는 
 
 ### Never do
 
-- `core/`, `mcp/` 디렉터리에서 임포트하지 않는다
+- 인증·설정 기반 계층이나 MCP 계층에서 임포트하지 않는다
 - HTTP 호출, 파일 I/O, 인증 로직을 포함하지 않는다
 - XML 이스케이프를 생략하거나 우회하지 않는다
-
-## Dependencies
-
-- `../markdownParsing/parseBlocks.ts` — 블록 파싱 (sibling fractal)
-- `../markdownParsing/tokenizeInline.ts` — 인라인 토큰화 (sibling fractal)

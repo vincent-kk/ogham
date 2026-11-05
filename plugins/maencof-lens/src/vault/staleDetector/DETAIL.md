@@ -2,16 +2,14 @@
 
 ## Requirements
 
-- 볼트 인덱스가 원본보다 뒤처졌는지 판정한다. 판정만 하고 재색인을 실행하지 않는다 — 이 패키지는 읽기 전용이다.
-- 판정은 마커 파일의 mtime 을 볼트 마크다운의 최신 mtime 과 비교하는 것이다.
-- 마커 우선순위는 `CACHE_FILES.GRAPH_META` 가 먼저이고 `CACHE_FILES.INDEX` 는 **legacy v1 라벨 전용**이다. **legacy 마커를 fresh 로 보고하지 않는다** — 그러면 v1 스키마를 최신으로 오인한다.
-- 마커 탐색의 단일 진입점은 `findMarker.ts` 의 `findIndexMarker` 다.
-- 훅 경로에서 쓰이므로 의존을 좁게 유지한다: `node:fs`·`node:path` 빌트인과 `@ogham/maencof` 의 **상수 `CACHE_FILES` 만** 쓴다. 그 패키지의 함수·클래스를 import 하지 않고 외부 npm 패키지도 쓰지 않는다.
+- 인덱스가 원본보다 뒤처졌는지 판정만 하며 재색인은 수행하지 않는다. 읽기 전용 렌즈에서 볼트 상태를 변경하지 않기 위함이다.
+- graph-meta 마커를 우선하고 구형 index는 legacy 라벨에만 사용한다. 이를 fresh로 보고하면 v1 스키마를 최신으로 오인한다.
+- 마커 탐색은 `findIndexMarker` 한 경로에 모아 훅과 상태 도구가 서로 다른 기준을 쓰지 않게 한다.
+- 훅 경로의 의존을 좁히기 위해 maencof에서는 `CACHE_FILES` 상수만 사용한다. 함수·클래스와 외부 npm 패키지는 들이지 않고 Node 파일시스템·경로 API로 한정한다.
 
 ## API Contracts
 
-- `detectStale(...): StaleInfo` — 인덱스 신선도 판정 결과.
-- `findIndexMarker(...)` — 마커 탐색의 단일 진입점(내부).
+- 신선도는 마커와 마크다운의 mtime에 근거한다. 마커 부재와 legacy 상태를 최신으로 단정하지 않는다.
 
 ## Acceptance Criteria
 
@@ -37,4 +35,4 @@
 
 ## Last Updated
 
-2026-07-30 — 신선도 판정 계약과 훅 직접 import 면책을 문서화했다.
+마커 우선순위·신선도 판정·훅 의존 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

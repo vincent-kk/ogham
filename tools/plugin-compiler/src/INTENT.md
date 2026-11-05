@@ -8,7 +8,7 @@
 
 - ESM, import 확장자 `.js`; 디렉터리·파일은 camelCase.
 - fractal 소비는 배럴(`index.ts`) 경유, organ 소비는 concrete 파일 직접 import.
-- 부수효과는 `pipeline/`(디스크)과 `main.ts`(스트림·exit) 두 곳뿐 — 나머지는 순수 함수.
+- 정본 읽기는 facts, 대상 탐색·비교·쓰기는 pipeline, 스트림·exit는 `main.ts`가 소유한다. 변환·진단·인자 해석은 순수하게 유지해 같은 입력의 결과가 디스크 상태에 좌우되지 않게 한다.
 - 스펙은 대상 fractal 의 `__tests__/` 에 둔다 (organ 하위에 새로 만들지 않는다).
 
 ## Boundaries

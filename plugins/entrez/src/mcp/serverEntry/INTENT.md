@@ -2,13 +2,6 @@
 
 esbuild CJS 번들 진입점. `node bridge/mcp-server.cjs` 실행 시 MCP 서버를 stdio 모드로 기동하는 단일 책임 파일.
 
-## Structure
-
-| 파일             | 역할                                     |
-| ---------------- | ---------------------------------------- |
-| `serverEntry.ts` | `startServer()` 호출 및 치명적 오류 처리 |
-| `index.ts`       | 배럴(빈 re-export)                       |
-
 ## Conventions
 
 - `startServer()` 호출만 수행하고 다른 로직은 추가하지 않는다.
@@ -28,7 +21,3 @@ esbuild CJS 번들 진입점. `node bridge/mcp-server.cjs` 실행 시 MCP 서버
 
 - 도구 등록·설정 로드 등 초기화 로직을 이 파일에 구현.
 - `../server` 이외 모듈을 직접 import.
-
-## Dependencies
-
-- `../server/index.js` — `startServer` (형제 fractal 은 배럴로만 건넌다)

@@ -2,18 +2,10 @@
 
 도구가 결선되는 빈 `McpServer` 인스턴스를 생성한다(서버 이름·버전 메타 포함).
 
-## Structure
-
-| 파일/디렉터리 | 역할                                                                        |
-| ------------- | --------------------------------------------------------------------------- |
-| `server.ts`   | `createServer`: `SERVER_NAME`·`VERSION` 메타를 단 `McpServer` 인스턴스 생성 |
-| `index.ts`    | barrel: `createServer` 재노출                                               |
-
 ## Conventions
 
-- name·version 메타는 `version.ts`의 `SERVER_NAME`/`VERSION` 단일 출처에서만 가져온다
-- 빈 `McpServer`(capabilities tools만)만 생성하고 도구는 여기서 등록하지 않는다
-- stdio 등 전송 계층 연결은 이 모듈이 아닌 호출자(root) 책임으로 남긴다
+- 서버 이름·버전은 단일 출처에서 가져와 패키지 메타와 어긋나지 않게 한다.
+- 이 모듈은 빈 서버 생성만 소유한다. 도구 등록은 레지스트리, 전송 연결은 루트 호출자에게 남겨 생성과 실행 책임을 분리한다.
 
 ## Boundaries
 
@@ -28,9 +20,3 @@
 ### Never do
 
 - 여기서 도구를 직접 등록한다(등록은 registry 책임)
-
-## Dependencies
-
-- 내부: `version`(서버 이름·버전 메타 단일 출처)
-- 외부: `@modelcontextprotocol/sdk`(`McpServer`)
-- 소비처: `mcp`, root

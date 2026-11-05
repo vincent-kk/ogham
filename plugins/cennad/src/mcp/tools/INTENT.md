@@ -2,15 +2,6 @@
 
 MCP 도구 4개(`start_conversation`, `continue_conversation`, `stop_conversation`, `open_settings`)를 묶는 컨테이너 fractal. 각 도구는 독립 서브-fractal로 분리된다.
 
-## Structure
-
-| Directory               | Role                                    |
-| ----------------------- | --------------------------------------- |
-| `startConversation/`    | 새 외부 LLM 세션 시작                   |
-| `continueConversation/` | 기존 세션 이어 호출 (project_hash 검증) |
-| `stopConversation/`     | 실행 중인 provider CLI 강제 종료        |
-| `openSettings/`         | 설정 웹 UI 기동 (일회용 토큰 인증)      |
-
 ## Conventions
 
 - 도구마다 `INTENT.md` + `index.ts` 보유 (독립 서브-fractal)
@@ -22,7 +13,7 @@ MCP 도구 4개(`start_conversation`, `continue_conversation`, `stop_conversatio
 
 ### Always do
 
-- 새 도구 추가 시 `server/createServer.ts` 와 플러그인 매니페스트 동시 갱신
+- 새 도구 추가 시 서버 등록부와 플러그인 매니페스트 동시 갱신
 - 각 도구 서브-fractal 에 `INTENT.md` 보유 유지
 
 ### Ask first
@@ -34,7 +25,3 @@ MCP 도구 4개(`start_conversation`, `continue_conversation`, `stop_conversatio
 
 - 도구 서브-fractal 간 직접 import (`server/lifecycle/createServer.ts` 가 단독 등록)
 - 이 컨테이너에 peer 파일 추가 (index.ts 제외)
-
-## Dependencies
-
-없음 — 자식 fractal이 각각 의존성을 보유한다.

@@ -4,11 +4,9 @@
 
 MCP 도구 공통 유틸리티. toolResult/toolError, backlink 관리.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel
-- `backlinks/` organ — removeBacklinks / getBacklinks (backlink-index.json I/O)
-- `response/` organ — mapReplacer / toolResult / toolError (MCP 응답 포맷)
+응답 포맷과 backlink 유틸을 공동 소유하며 도구 특화 로직을 두지 않는다.
 
 ## Boundaries
 

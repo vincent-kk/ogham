@@ -12,8 +12,6 @@ Claude Code 훅 이벤트를 처리하는 fractal. 3개 provider(codex, antigrav
 - config 는 core 와 같은 2계층(user < project)을 package root의 `mergeConfigLayers` 로 합친다. project 루트는 호스트가 훅을 띄운 `process.cwd()` 를 쓴다
 - 공유 package root의 미사용 export는 `sideEffects: false`와 tree-shaking으로 제거하고, hook builder의 emitted-byte cap과 `FORBIDDEN_PATTERNS`로 실제 출력 회귀를 막는다
 - 세션 동일성은 공유 `hostSessionIdentity` resolver로 판정한다. non-blank `CENNAD_HOST_SESSION_ID`를 우선하고 유효한 `CLAUDE_PID`를 fallback하며 `process.ppid`는 세션 식별에 쓰지 않는다
-- 엔트리는 try/catch → 항상 `{ continue: true }` 출력 후 `process.exit(0)`
-- 응답 JSON: `{ continue: true, hookSpecificOutput: { hookEventName, additionalContext } }`
 - 수정 후 `yarn cennad build` 로 `bridge/<host>/*.mjs` 재생성
 
 ## Boundaries

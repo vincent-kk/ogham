@@ -2,14 +2,6 @@
 
 MCP 서버 인스턴스 생성, 4개 도구 등록, stdio transport 연결을 담당하는 fractal.
 
-## Structure
-
-| File                        | Role                                                     |
-| --------------------------- | -------------------------------------------------------- |
-| `lifecycle/createServer.ts` | `McpServer` 인스턴스 생성 + 4개 도구 `registerTool` 등록 |
-| `lifecycle/startServer.ts`  | shutdown sweep 등록 + 만료 세션 prune + transport 연결   |
-| `index.ts`                  | barrel                                                   |
-
 ## Conventions
 
 - 모든 `registerTool` 콜백은 `wrapHandler` 로 감쌈 (비정상 throw 흡수)
@@ -34,13 +26,3 @@ MCP 서버 인스턴스 생성, 4개 도구 등록, stdio transport 연결을 �
 
 - `process.exit` 를 핸들러에서 직접 호출
 - stdout 직접 쓰기 (transport 외 경로 사용)
-
-## Dependencies
-
-- `@modelcontextprotocol/sdk` — `McpServer`, `StdioServerTransport`
-- `../tools/startConversation` — `handleStartConversation`
-- `../tools/continueConversation` — `handleContinueConversation`
-- `../tools/stopConversation` — `handleStopConversation`
-- `../tools/openSettings` — `handleOpenSettings`
-- `../../dispatcher` — `stopRuns` (종료 sweep), `@ogham/session-finalizer` — `registerShutdownFinalizer`
-- `../shared/wrapHandler` — 핸들러 try/catch 래퍼

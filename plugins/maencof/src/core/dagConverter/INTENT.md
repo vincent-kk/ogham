@@ -2,20 +2,18 @@
 
 ## Purpose
 
-지식 그래프를 DAG(방향성 비순환 그래프)로 변환. 레이어 방향성 적용.
+지식 그래프의 순환과 레이어 역방향 연결이 확산에 주는 영향을 가중치로 제한한다. 연결 자체는 지식 관계이므로 보존하며, 비순환 그래프를 보장하지 않는다.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: convertToDAG/applyLayerDirectionality + 타입)
-- `types/` organ — 공개 타입 (DAGConvertResult)
-- `operations/` organ — DAG 변환 (convertToDAG/applyLayerDirectionality, 함수 1개/파일; detectCycleEdges·edgeKey private 인라인)
+레이어 우선순위 규칙은 그래프 의미를 바꾸므로 별도 결정을 거친다. 원본 보존은 호출자의 그래프를 손상시키지 않기 위한 경계다.
 
 ## Boundaries
 
 ### Always do
 
 - Layer enum 기반 방향성 결정
-- 순환 참조 제거
+- 순환 엣지는 삭제하지 않고 약화 — 사용자 지식 관계를 보존하면서 반복 전파의 영향을 줄인다
 
 ### Ask first
 

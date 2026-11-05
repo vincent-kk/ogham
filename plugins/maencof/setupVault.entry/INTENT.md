@@ -4,6 +4,10 @@
 
 Provide the standalone project vault connection command consumed by the package build.
 
+## Conventions
+
+The command translates input and outcomes; the project connection module owns writes so CLI handling cannot bypass its ownership and conflict checks.
+
 ## Boundaries
 
 ### Always do

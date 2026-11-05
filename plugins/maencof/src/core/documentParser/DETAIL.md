@@ -10,12 +10,8 @@
 
 ## API Contracts
 
-- `extractFrontmatter(source)` — frontmatter 블록과 본문 분리.
-- `extractLinks(source)` — `MarkdownLink[]`. wikilink·markdown link 모두.
-- `parseDocument(source)` · `parseDocumentFromFile(path)` — `ParsedDocument`. 후자만 파일을 읽는다.
-- `buildKnowledgeNode(doc, options?)` — `NodeBuildResult`. `options.allowNonLayerPath: true` 는 경로 게이트를 우회한다(그래프 비삽입 검증 전용). 제목 추출은 내부 private.
-- `inferSubLayerFromPath(path)` — 경로에서 L3 sublayer 추론.
-- `parseScalarValue` · `parseYamlFrontmatter` — `yamlParser` 재노출.
+- 비레이어 경로 옵트아웃은 그래프 비삽입 검증에만 허용한다. 유효한 frontmatter가 그래프 편입 권한을 대신하지 않는다.
+- YAML 해석은 공통 파서를 재사용하고 두 링크 표기를 함께 지원하여 vault가 섞어 쓰는 표기 중 하나를 잃지 않는다.
 
 ## Acceptance Criteria
 
@@ -23,19 +19,10 @@
 
 - 파싱 경로에서 파일 쓰기 호출이 0건이다.
 
-### AC-both-link-forms — 두 링크 표기
-
-- wikilink 와 markdown link 가 같은 결과 형태로 추출된다.
-
 ### AC-frontmatter-extraction — frontmatter 분리
 
 - frontmatter 블록과 본문이 분리되어 반환된다.
 - frontmatter 가 없거나 닫히지 않은 문서에서 throw 없이 본문 전체를 본문으로 돌려준다.
-
-### AC-layer-path-gate — 노드 경로 게이트
-
-- 유효 frontmatter 라도 정규화된 첫 세그먼트가 레이어 디렉토리가 아니면 — vault 서고(99_Archive) 하위, vault 루트 문서, 상향 탈출 traversal 경로 — `buildKnowledgeNode` 가 `success: false` 를 반환한다.
-- `allowNonLayerPath: true` 옵션은 같은 문서를 `success: true` 로 구축한다 (그래프 비삽입 검증 전용).
 
 ## Boundary Exemptions
 
@@ -47,4 +34,4 @@
 
 ## Last Updated
 
-2026-07-30 — 읽기 전용·yamlParser 재사용 계약과 훅 직접 import 면책을 문서화했다.
+그래프 편입 경계·YAML 소유권·frontmatter 수용 기준이 바뀔 때 갱신한다.

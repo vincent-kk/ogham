@@ -9,14 +9,7 @@
 
 ## API Contracts
 
-```typescript
-export { createServer, startServer } from './server.js';
-```
-
-- `createServer` 는 도구가 모두 등록된 `McpServer` 인스턴스를 반환한다.
-- `startServer` 는 전송 계층을 붙여 서버를 기동한다. 전송 선택 자체는 `serverEntry/` 가 결정한다.
-- 등록되는 도구 이름은 `constants/mcpToolNames.ts` 의 `MCP_TOOL_NAMES` 와 정확히 일치한다.
-- 각 도구의 핸들러는 `../tools/` 배럴에서 온다. `server.ts` 는 핸들러 구현을 알지 못한다.
+- 등록표가 도구 표면의 정본이다. 도구 이름 상수와 등록을 함께 유지하고 핸들러 구현은 도구 계층에 맡긴다.
 
 ## Acceptance Criteria
 
@@ -40,4 +33,4 @@ export { createServer, startServer } from './server.js';
 
 ## Last Updated
 
-2026-08-06 — 도구 9개 등록표와 `scope` 필수 노출 규칙을 최초 문서화했다.
+도구 등록·전송·서버 수명 계약의 내용과 근거가 바뀔 때 갱신한다.

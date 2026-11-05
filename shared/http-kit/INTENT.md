@@ -2,17 +2,6 @@
 
 `@ogham/http-kit` 는 모노레포 내부 전용 워크스페이스로, 로컬 HTTP 서버(127.0.0.1)의 요청 방어와 런타임 도구를 한 곳에 모은다. loopback Host·POST Origin/Content-Type 검사, timing-safe 세션 토큰, 크기 상한 JSON 파싱, `<script>` 안전 JSON, Content-Length 명시 응답이 단일 진실 소스다. 여러 플러그인이 esbuild inline 으로 소비한다.
 
-## Structure
-
-| Path            | Role                                                         |
-| --------------- | ------------------------------------------------------------ |
-| `src/index.ts`  | barrel export                                                |
-| `src/guard/`    | `inspectRequest` — host·token·Origin·Content-Type verdict    |
-| `src/token/`    | `generateToken` / `verifyToken` — 세션 토큰 발급·검증        |
-| `src/body/`     | `parseBody` + `describeBodyError` — 상한 파싱·거부 상태 매핑 |
-| `src/html/`     | `escapeJsonForHtml` — inline `<script>` 안전 JSON 직렬화     |
-| `src/response/` | `sendJson` — status + charset + Content-Length JSON 응답     |
-
 ## Conventions
 
 - npm publish 금지 (`private: true`); 소비자 `devDependencies` 에 `workspace:^` 로만.
@@ -41,8 +30,3 @@
 - `inspectRequest` 안에서 응답 전송, CORS 와일드카드, 평문 토큰 비교.
 - 상한 없는 본문 버퍼링.
 - `dist/` 커밋, npm 게시.
-
-## Dependencies
-
-- `node:http`, `node:crypto`, `node:buffer`.
-- **개발**: `typescript ^5.7`, `vitest 4.1`, `@types/node` — Node.js ≥ 20, Yarn 4.12 workspaces.

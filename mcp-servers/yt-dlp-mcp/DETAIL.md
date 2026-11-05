@@ -7,12 +7,11 @@
 - 실행과 라이브러리 진입이 같은 대상이다. `bin`과 `exports['.'].import`가 서로 다른 파일을 가리키면 npx 실행과 import가 다른 코드를 돌린다.
 - 런타임 의존성은 공개 npm 패키지로 한정한다. private 워크스페이스 패키지를 넣으면 배포본이 설치 불가가 되므로, 크로스 플랫폼 처리는 `execa`와 Node 표준 API로 해결한다.
 - `src/version.ts`가 `package.json`을 읽어 버전을 단일 출처로 삼는다. 이 참조가 패키지 루트를 넘지 않도록 루트가 이 fractal의 경계다.
+- 패키지 루트가 버전 매니페스트 참조를 소유한다. 소유 경계 밖으로 해석되어 전체 의존 그래프가 indeterminate가 되는 것을 막는다.
 
 ## API Contracts
 
-- `exports['.']` — `dist/index.d.ts` 타입과 `dist/index.js` 런타임. 이 패키지의 유일한 공개 진입이다.
-- `bin` — 같은 `dist/index.js`. `npx @ogham/yt-dlp-mcp`로 stdio MCP 서버가 뜬다.
-- `package.json` 자체가 이 노드의 adapter-reported entry point다. 배럴이 아니라 이 선언이 표면을 열거한다.
+- 패키지 매니페스트 자체가 공개 경계다. 별도 배럴을 만들어 표면을 넓히지 않으며 실행과 import 대상이 갈라지지 않게 한다.
 
 ## Acceptance Criteria
 
@@ -35,4 +34,4 @@
 
 ## Last Updated
 
-2026-07-30 — 패키지 루트를 fractal로 선언했다. `src/version.ts`의 `../package.json` 참조가 소유 fractal 없는 경로로 나가 저장소 전체 dependency graph를 indeterminate로 만들고 있었다.
+공개 패키지 표면·배송 범위·버전 매니페스트 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

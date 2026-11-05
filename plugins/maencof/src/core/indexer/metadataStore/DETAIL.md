@@ -2,33 +2,20 @@
 
 ## Requirements
 
-- 5 함수(`appendStaleEntries` / `clearStaleEntries` / `saveSnapshot` / `saveGraph` / `saveWeights`)는 atomic write+rename + per-vault mutex로 직렬화한다.
-- `saveGraph` 는 단일 `withVaultLock` 안에서 `nodes.json` + `edges.json` 병렬 atomic write → `graph-meta.json` (commit marker) 직렬 atomic write → legacy `index.json` best-effort unlink 순으로 처리한다. 부분 실패 시 graph-meta가 미완 상태이면 `loadGraph` 가 cache miss 로 처리한다.
-- 단일 프로세스: vault path별 `withVaultLock`이 중첩 호출을 직렬 chain으로 묶어 race를 차단한다.
-- 다중 프로세스: tmp 파일(`${path}.tmp.${pid}.${rand}`) 작성 후 `fs.rename`으로 partial write 0. rename 충돌 시 retry 3회 × 50ms backoff.
-- `appendStaleEntries` retry 시: load → merge (집합 합집합 보존) → atomic write를 다시 시도.
-- `usageStats` increment는 commutative이며 윈도우가 5ms 이하라 극단 contention에서 +1 손실을 허용한다 (통계 SLA 영향 없음, 명시 문서화).
-- `snapshot` / `graph` / `weights`는 마지막 writer 우선이며 항상 일관 상태를 보장한다.
-- `deserializeGraph` / `deserializeShards` 는 `isLayerDirPath` 를 통과하는 경로의 노드만 편입하고, 탈락 노드를 참조하는 edge 를 함께 제거하며 node/edge count 를 재계산한다 — 직렬화 이후 규칙이 바뀌었거나 오염된 캐시가 레이어 밖 문서를 그래프로 되살리는 것을 막는 역직렬화 방어선이다.
-- 모든 함수 시그니처는 불변 — 호출부(MCP middlewares, kgBuild 등) 영향 0.
+- 캐시 변경은 atomic write와 vault별 프로세스 내 mutex를 사용한다. 부분 JSON 노출과 같은 프로세스의 쓰기 경합을 막기 위한 계약이다.
+- 그래프 메타데이터는 여러 샤드의 commit marker다. 마지막에 쓰고 먼저 읽어 미완 샤드를 정상 그래프로 취급하지 않는다.
+- snapshot·graph·weights는 마지막 writer 우선이며 항상 일관 상태를 보장한다는 정책을 유지한다.
+- stale entry의 재시도는 디스크를 다시 읽어 합집합을 병합한다. 같은 실패한 payload만 재전송해 다른 갱신을 잃지 않게 한다.
+- usageStats의 손실 허용과 재시도는 소비자인 MCP middleware가 소유한다. 이 저장소의 잠금·원자 쓰기를 재사용하되 측정되지 않은 실행 시간 상한을 저장 계약으로 삼지 않는다.
+- 역직렬화는 레이어 경로 게이트 밖 노드와 그 참조 엣지를 제거한다. 규칙 변경이나 오염된 캐시가 비레이어 문서를 그래프로 되살리지 않게 하는 방어선이다.
+- 공개 함수 시그니처는 유지한다. 저장 구현 변경이 MCP 소비자 계약을 바꾸지 않게 한다.
 
 ## API Contracts
 
-- `new MetadataStore(vaultPath)` — `${vaultPath}/.maencof/`에 캐시 파일 R/W.
-- `loadGraph()` / `saveGraph(graph)` — 3-shard layout: `nodes.json` + `edges.json` + `graph-meta.json`. `graph-meta.json`이 cross-file commit marker (write LAST, read FIRST). 단일 `withVaultLock` 안에서 nodes/edges 병렬 → graph-meta 직렬로 commit, 성공 후 legacy `index.json`은 best-effort unlink.
-- `loadGraph()` 는 디스크에 보존되지 않는 런타임 조회 맵(`adjacencyList` / `edgeWeightMap` / `edgeTypeMap` / `invertedIndex`)을 `graphBuilder.hydrateRuntimeMaps` 로 재수화해 반환한다. 이는 kgBuild 빌드 직후 그래프와 동일한 로직을 공유하므로, 빌드직후/리로드 간 SA·시드 해석 동작이 일치한다. 캐시 파일 구조(3-shard)는 불변 — 맵은 in-memory 파생물이다.
-- `loadGraph()` 분기: graph-meta.json 부재 → legacy 마이그레이션 경로 (partial-shard / fresh / legacy-only 포괄). graph-meta.json 존재 + schemaVersion === 2 → fast path. schemaVersion ≠ 2 또는 nodes/edges read 실패 → null (legacy 로 폴백 없음).
-- `loadGraph()` legacy fallback — 샤드 commit marker 가 없고 `index.json`만 존재할 경우 1회 자동 마이그레이션 (read → saveGraph → unlink). legacy read 와 saveGraph 사이 잠금이 끊긴 윈도우가 있어 동시 writer 와의 이론적 race 존재 (legacy v1 잔존 1회 한정이라 실측 영향 무시). 이후 호출은 fast path.
-- `cacheExists()` — `graph-meta.json` 우선, 없으면 legacy `index.json` 검사.
-- `loadWeights()` / `saveWeights(data)` — `weights.json`.
-- `loadSnapshot()` / `saveSnapshot(snapshot)` — `snapshot.json`.
-- `loadStaleEntries()` / `appendStaleEntries(entries)` / `clearStaleEntries()` — `stale-nodes.json`.
-- 헬퍼: `operations/atomicWriteJson.ts::atomicWriteJson(absPath, data)`, `operations/withVaultLock.ts::withVaultLock(vaultPath, fn)`.
-
-## Failure policy
-
-- atomic rename 3회 retry 모두 실패 시 throw — 호출자가 retry 정책 결정.
-- load 실패는 silent (빈/기본 결과 반환), 모든 unexpected error는 `appendErrorLogSafe`로 흘림.
+- 런타임 조회 맵은 메모리 파생물이며 빌드 직후와 리로드가 같은 재수화 경로를 사용한다. 서로 다른 구성으로 SA·시드 해석이 달라지지 않게 한다.
+- 필수 그래프 샤드와 선택적 archive-members 샤드는 읽기 호환성을 분리한다. 서고 멤버 캐시가 없거나 손상되어도 본 그래프를 읽을 수 있어야 하며, 선택적 기능 때문에 필수 캐시의 호환성을 깨지 않는다. commit marker 부재는 legacy 마이그레이션 또는 cache miss로 처리하며, marker가 있는 캐시의 버전·샤드 오류를 legacy fallback으로 숨기지 않는다.
+- legacy read와 새 저장 사이에는 잠금 공백이 있다. 동시 writer가 쓴 신규 데이터를 legacy가 덮을 수 있으나 잔존 v1의 1회 전환에 한정된 이론적 race로 수용한다.
+- atomic rename 재시도 소진은 throw하여 호출자가 다음 재시도 정책을 결정한다. load 실패는 빈 결과로 처리하고 unexpected error는 안전 오류 로그로 전달한다는 정책을 유지한다.
 
 ## Acceptance Criteria
 
@@ -42,4 +29,4 @@
 
 ## Last Updated
 
-2026-08-20 — 역직렬화 레이어 게이트(캐시 재수화의 방어선)를 계약에 추가하고 필수 섹션(Acceptance Criteria · Last Updated)을 보강했다.
+캐시 commit·동시성 허용 범위·역직렬화 경계가 바뀔 때 갱신한다.

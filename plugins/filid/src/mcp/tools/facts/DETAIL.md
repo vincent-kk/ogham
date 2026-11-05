@@ -60,9 +60,15 @@
 - `discard-pending { sourcePaths }`는 그 파일들의 pending만 지운다. **저장된 레코드와 부속 표는 건드리지 않으므로 "레코드를 지우는 action"이 아니다.** 두 actor가 영원히 다른 답을 내는 파일의 유일한 출구이고, 그래서 편의가 아니라 **P5의 구성 요소**다. pending이 없는 경로는 거부가 아니라 "이미 그 상태"로 보고한다.
 - `status`는 attested가 필요한 파일에 대해 **언제·무엇을·어떤 모양으로** 내야 하는지를 응답만으로 말한다. `attestationRequirement`의 첫 문장이 그 시점을 이름으로 든다 — 도구가 읽지 못한 파일(`tool-error`), 재추출이 같은 거부를 재생산하는 파일(`rejected[]`), 항목을 다 판정하고도 남은 `uncertain`. 이어서: `attestationRequirement`(필수 필드, `nonReferences` 요구, 두 번째 actor)와, pending이 있는 파일마다 그 actor·`contentHash`·다음 행동을 싣는 `pendingAttestations[]`. 에이전트가 skill 문서 없이도 막히지 않아야 한다.
 
+### Design Decisions
+
+- **서버는 출력 디렉터리를 권하지 않는다.** 측정: 서버의 `os.tmpdir()`는 샌드박스 에이전트가 쓸 수 없다 — 서버는 에이전트의 샌드박스 밖에서 돈다. 경로를 권하면 에이전트가 못 쓰는 곳을 가리키게 된다. `outputRequirement`는 조건을 말하는 고정 문장이고, 판정은 에이전트가 준 경로에 한다.
+- **CAS 단위는 shard다.** 레코드 단위 CAS는 레코드마다 파일을 열어야 하고, 그 열기가 저장소 읽기 비용의 72%였다. 충돌은 그 shard를 함께 쓰려던 레코드들에 걸리고, 복구는 어느 단위든 같은 "status 뒤 재제출"이다. 한 배치는 touch한 shard마다 정확히 한 번 쓴다.
+- **epoch 검사는 제출 파일을 연 뒤에 한다.** 순서를 뒤집으면 경로 가드를 통과하지 못하는 인자가 epoch 메시지 뒤에 숨어, 호출자가 epoch를 맞춘 뒤에야 진짜 문제를 보게 된다.
+- **CAS 실패는 던지지 않고 진단으로 싣는다.** 이미 저장된 레코드가 있는 채로 예외를 던지면 응답이 실제로 일어난 일을 말하지 못한다. 교체 의미론에서 재제출은 안전하므로 다음 행동은 `status` 뒤 재제출이다.
+
 ## API Contracts
 
-- `handleFacts(input): Promise<FactsResult>` — `action`이 handler를 고른다.
 - `status`는 추출이 필요한 파일(범위 안의 `missing` ∪ `needs-resolution`)의 목록을 서버 cache 디렉터리에 줄 단위로 쓰고 `extractionList: { path, count, unrepresentable }`로 알린다. 에이전트는 그 경로를 추출기의 `--files-from`에 그대로 넘긴다 — 범위를 서버가 정하므로 추출기는 스캔·ignore·scope를 다시 구현하지 않는다.
 - `status` 요약은 상태별 개수를, `data`는 상태별 경로 목록과 생략된 개수(`truncated`)를 싣는다. 한 번도 제출하지 않은 저장소는 스캔된 모든 파일이 `missing`이므로 상한이 곧 응답 크기의 상한이다.
 - `submit` 요약은 `accepted`·`removed`·`rejectedRecords`·`rejectedClaims`·`epochMoved`·`openedItems`·`closedItems`·`removedAdjudicatedItems`·`attestationsPending`·`attestationsConfirmed`를, `data`는 거부 목록과 epoch 차이, 그리고 attested 레코드마다의 결과(`attested[]`: 결과 종류, 다른 쪽에만 있는 간선, 다음 행동)를 싣는다. 개수는 모두 **실제로 저장된 shard·페이지만** 센다.
@@ -72,18 +78,11 @@
 - 부속 표 페이지를 빼앗기면 `facts-side-table-changed`이고, 이것도 `indeterminate`다 — 레코드는 들어갔는데 항목이 안 들어간 제출은 항목 없이 좁아진 그래프다. 다음 행동은 **진 action의 일**이다: `submit`은 재제출, `compare`는 같은 후보로 재비교, `adjudicate`는 `status`로 현재 항목을 다시 받아 재판정.
 - `submit`의 쓰기는 **실패 방향으로 안전한 순서**를 따른다. 항목을 **여는** 쓰기가 먼저다 — 레코드가 뒤이어 들어가지 못해도 남는 것은 "아직 판정되지 않은 간선"이라 파일이 `uncertain`으로 읽힐 뿐이고, 이는 보수적이다. 여는 페이지가 CAS에 지면 **그 경로의 레코드는 쓰지 않는다**: 좁아진 레코드만 들어가면 재시도가 그 레코드를 자기 자신과 비교해 열 항목이 사라지고 파일이 `exact`로 읽힌다. 그다음이 레코드이고, **닫는** 쓰기(`closed-by-record`, attestation dismissal, 트리를 떠난 파일의 페이지 제거, pending 정리)는 레코드가 실제로 들어간 경로에 대해서만 마지막에 한다 — 없는 레코드가 닫은 항목은 아무도 판정하지 않은 채 사라진 간선이다. 두 쓰기가 같은 shard를 건드리면 두 번째가 첫 번째의 새 token을 이어받는다.
 
-## Design Decisions
-
-- **서버는 출력 디렉터리를 권하지 않는다.** 측정: 서버의 `os.tmpdir()`는 샌드박스 에이전트가 쓸 수 없다 — 서버는 에이전트의 샌드박스 밖에서 돈다. 경로를 권하면 에이전트가 못 쓰는 곳을 가리키게 된다. `outputRequirement`는 조건을 말하는 고정 문장이고, 판정은 에이전트가 준 경로에 한다.
-- **CAS 단위는 shard다.** 레코드 단위 CAS는 레코드마다 파일을 열어야 하고, 그 열기가 저장소 읽기 비용의 72%였다. 충돌은 그 shard를 함께 쓰려던 레코드들에 걸리고, 복구는 어느 단위든 같은 "status 뒤 재제출"이다. 한 배치는 touch한 shard마다 정확히 한 번 쓴다.
-- **epoch 검사는 제출 파일을 연 뒤에 한다.** 순서를 뒤집으면 경로 가드를 통과하지 못하는 인자가 epoch 메시지 뒤에 숨어, 호출자가 epoch를 맞춘 뒤에야 진짜 문제를 보게 된다.
-- **CAS 실패는 던지지 않고 진단으로 싣는다.** 이미 저장된 레코드가 있는 채로 예외를 던지면 응답이 실제로 일어난 일을 말하지 못한다. 교체 의미론에서 재제출은 안전하므로 다음 행동은 `status` 뒤 재제출이다.
-
 ## Acceptance Criteria
 
 ### AC-facts-tool-status — 상태 보고
 
-- 범위 선언이 없으면 `unsupported`와 `facts-uninitialized`이고 목록은 비어 있다.
+- 범위를 생략하면 adapter 소스 확장자의 기본 범위를 사용한다. 설정을 자동으로 쓰지 않고도 분석을 시작할 수 있게 하기 위해서다. 명시한 `covers: []`는 분석하지 않겠다는 선택이므로 `unsupported`와 `facts-uninitialized`로 보고하고 목록을 비운다.
 - 제출이 없는 프로젝트의 모든 범위 내 파일은 `missing`이며, 목록은 상한까지만 싣고 나머지는 `truncated`로 센다.
 
 ### AC-facts-tool-submit — 제출
@@ -110,4 +109,4 @@
 
 ## Last Updated
 
-2026-09-20 — `facts` 도구의 `status`·`submit` 최초 계약. 독립 검토를 반영해 제출 경로를 먼저 정규화하고, 권장 디렉터리를 요구 문장으로 바꾸고, CAS를 shard 단위로 옮겼다.
+사실 제출·비교·판정의 신뢰 경계, epoch 거부나 상태별 복구 계약이 바뀔 때 갱신한다.

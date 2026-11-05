@@ -1,20 +1,10 @@
 ## Purpose
 
-MCP 도구 5종(1도구 1디렉토리). core/adapters를 얇게 오케스트레이션하는 결정론 계약 레이어. setup은 Phase 6(web UI)에서 추가.
-
-## Structure
-
-| 디렉토리         | 도구                                          |
-| ---------------- | --------------------------------------------- |
-| `paperSearch/`   | `paper_search` (+ async start/status/results) |
-| `meshLookup/`    | `mesh_lookup`                                 |
-| `fetchFulltext/` | `fetch_fulltext`                              |
-| `authCheck/`     | `auth_check`                                  |
-| `setup/`         | `setup`                                       |
+MCP 도구 컨테이너(1도구 1디렉토리). core/adapters를 얇게 오케스트레이션하는 결정론 계약 레이어.
 
 ## Conventions
 
-- 핸들러는 `buildToolContext()`로 ctx 조립 후 run 함수 호출. `wrapHandler` 래핑.
+- 설정이 필요한 조회 핸들러는 buildToolContext로 컨텍스트를 조립한다. 진단·설정 복구와 저장된 job 조회는 이를 전제하지 않아 복구 경로를 유지한다. 모든 핸들러는 wrapHandler로 감싼다.
 - 입력 검증은 `types/tool.ts`의 zod 스키마(registerTool inputSchema 재사용).
 
 ## Boundaries
@@ -31,8 +21,3 @@ MCP 도구 5종(1도구 1디렉토리). core/adapters를 얇게 오케스트레�
 ### Never do
 
 - 핸들러에서 `fetch` 직접 호출. api_key 노출.
-
-## Dependencies
-
-- `../shared` (buildToolContext·wrapHandler) · `../../core` · `../../adapters/eutils`
-- `../../types/tool` · `../../constants`

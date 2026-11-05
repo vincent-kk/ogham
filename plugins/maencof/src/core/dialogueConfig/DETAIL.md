@@ -10,9 +10,7 @@
 
 ## API Contracts
 
-- `readDialogueConfig(cwd)` — 정규화된 설정. 부재·손상 시 기본값.
-- `writeDialogueConfig(cwd, config)` — 설정 기록.
-- `isDialogueInjectionDisabled(cwd)` — env 우선 OR config 로 판정한 off-switch.
+환경변수 off-switch는 파일을 수정하지 않고 한 세션만 주입을 끄는 경로다. 설정 손상은 기본값으로 폴백하며 meta-skill 본문의 소유권은 호출자에게 남긴다.
 
 ## Acceptance Criteria
 
@@ -38,4 +36,4 @@
 
 ## Last Updated
 
-2026-07-30 — off-switch 우선순위·가드 동기 계약과 훅 직접 import 면책을 문서화했다.
+off-switch 우선순위·가드 동기화·설정 폴백 정책이 바뀔 때 갱신한다.

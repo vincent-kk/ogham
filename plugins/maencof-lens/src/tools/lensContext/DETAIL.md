@@ -2,28 +2,17 @@
 
 ## Requirements
 
-- `@ogham/maencof` 의 `handleKgContext` 를 감싸는 얇은 어댑터다. 토큰 예산 산정·문서 조합 로직을 여기서 다시 만들지 않는다.
-- 호출자가 준 `layer_filter` 를 그대로 넘기지 않는다. `computeEffectiveLayers(vaultLayers, input.layer_filter)` 결과만 maencof 핸들러에 전달해 볼트 설정 상한(기본 L2–L5)을 넘는 요청을 차단한다.
-- 교집합이 비어도 에러로 만들지 않는다 — layerGuard 계약대로 볼트 상한 전체로 되돌아간다. 필터 오타가 조회 자체를 막는 것보다 낫다.
-- 인덱스 부재는 예외가 아니라 결과 필드다. `error` 를 담은 객체를 돌려주고 재색인 방법(`kg_build` in a maencof session)을 문장으로 알린다.
-- 재색인을 실행하지 않는다. 이 패키지는 읽기 전용이라 인덱스가 없으면 없다고 보고할 뿐이다.
-- 볼트 파일시스템에 쓰지 않는다 — 의존은 `handleKgContext` 와 `computeEffectiveLayers` 둘뿐이다.
-- `sub_layer`·`scope` 는 maencof 타입(`SubLayer`, `KgContextScope`)을 그대로 받아 통과시킨다. 값 검증은 서버 스키마와 maencof 핸들러가 소유한다.
-- `include_content` 는 그대로 통과시킨다 — false 면 maencof 가 조립 markdown 없이 선택 문서 목록(`documents`)만 돌려주고, 호출자는 lens `read` 로 선별 조회한다.
+- 토큰 예산·문서 조합은 maencof가 소유한다. 이 어댑터에서 재구현하면 조합 의미가 본가와 갈라진다.
+- 호출별 필터가 볼트 상한을 넓히지 못하게 한다. 빈 교집합은 상한 전체로 폴백하여 필터 오타가 조회 자체를 막지 않게 한다.
+- 인덱스 부재는 예외 대신 결과 오류와 maencof 재색인 안내로 보고한다. 렌즈는 읽기 전용이므로 인덱스를 생성하지 않는다.
+- 서브레이어·탐색 범위의 타입과 검증은 maencof 및 서버 스키마가 소유한다.
+- 본문 없는 문서 선택 모드는 호출자가 필요한 문서만 lens read로 조회하기 위한 계약이다.
 
 ## API Contracts
 
-- `handleLensContext(graph: KnowledgeGraph | null, input: LensContextInput, vaultPath: string, vaultLayers: number[]): Promise<Record<string, unknown>>` — 조합된 컨텍스트 블록. `vaultLayers` 는 해석된 볼트의 layer 상한, `vaultPath` 는 문서 본문을 읽을 볼트 루트.
-- `LensContextInput` — `query`(필수), `vault`·`token_budget`·`include_full`·`layer_filter`·`sub_layer`·`scope`·`include_content`(선택).
-- `graph` 가 `null` 이거나 maencof 결과에 `error` 가 있으면 `{ error: "Vault index not available. Run kg_build in a maencof session." }` 를 돌려준다 — 원본 에러 문자열은 이 문장으로 대체된다.
+- maencof의 결과 오류는 렌즈의 인덱스 재구축 안내로 치환한다. 원인별 원문을 보존하는 계약은 아니다.
 
 ## Acceptance Criteria
-
-### AC-layer-ceiling — 레이어 상한 적용
-
-- `layer_filter` 가 볼트 상한 밖 레이어를 포함하면 상한 안 레이어만 maencof 핸들러에 전달된다.
-- `layer_filter` 를 생략하면 볼트 상한 전체가 전달된다.
-- 교집합이 비면 throw 없이 볼트 상한 전체로 되돌아간다.
 
 ### AC-index-absent — 인덱스 부재 보고
 
@@ -37,4 +26,4 @@
 
 ## Last Updated
 
-2026-08-05 — `include_content`(경로-만 모드) 통과를 계약에 추가했다.
+문서 조합 위임·레이어 상한·오류 전달 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

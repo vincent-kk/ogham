@@ -20,7 +20,7 @@
 - 레코드는 `FileFacts` 형식이다(스펙 §2.1).
   - `path`는 프로젝트 상대 POSIX다.
   - `contentHash`는 `sha256:<hex>`다.
-  - 모든 파일에 `references`, `entrySurface`, `verification`을 싣는다. role이 `unsupported`인 파일의 `verification`도 싣는다.
+  - 정상 판독 레코드는 `references`, `entrySurface`, `verification`을 모두 싣고 `unsupported` role도 생략하지 않는다. 판독 실패의 `toolError` 레코드는 빈 `references`만 두고 다른 축은 생략한다. 실패를 축의 부재나 정상적인 빈 판독과 혼동하지 않기 위해서다.
   - `verification.contractGroupIds`는 주석 안의 `filid:contract <group-id>` marker를 중복 없이, marker 순서로 싣는다. marker가 없으면 빈 배열이다 — 필드의 부재는 "모름"이고 빈 배열은 "없음"이라, 서버가 그 둘을 가른다.
   - id 문법의 정본은 이 스캐너다: `[A-Za-z][A-Za-z0-9._-]*`. 서버 스키마가 같은 모양과 길이 상한으로 조기 거부하므로, 스캐너가 낼 수 없는 id는 줄을 읽기 전에 걸린다.
   - `sourceText`는 adapter가 specifier의 원문(구분자 포함)을 보고할 때만 싣는다. escape 때문에 `specifier`가 파일 byte에 없을 때다.
@@ -44,7 +44,7 @@
 - 코어는 루트 밖으로 풀린 같은 참조에 `unowned-local-dependency` 진단을 내되 graph certainty는 내리지 않는다 — 소유 fractal이 없는 끝에는 노드가 없어 간선이 서지 않기 때문이다. S3c의 비교는 adapter 쪽의 루트 밖 resolved 경로도 `external`로 정규화하므로, 두 경로의 결론은 이 참조에서 갈리지 않는다.
 - stdout에는 요약 JSON 한 줄만 쓴다: 파일 수, `toolError` 수, 거부 수, 출력 경로, 걸린 시간.
 
-### 소스 판독 (`analysis/`)
+### Source Reading
 
 - 한 파일의 텍스트는 **한 번** scan한다. 참조, entry surface, verification role과 case 수가 같은 토큰을 묻기 때문이다 — 판독마다 scan하면 파일 하나가 네 번 토큰화된다. `scanSource(source)`가 토큰과 신뢰할 수 없는 구간까지 한 번에 만들고, 각 판독은 그것을 받는다. 경로만 받는 판독기는 스스로 읽고 scan한다.
 - role과 case 수는 **같은 계수 하나**에서 나온다. role을 확정하는 것이 곧 계수이기 때문이다.
@@ -78,19 +78,13 @@
 - entry point inspection은 경계 상실이나 숨은 `export`가 있으면 certainty를 indeterminate로 보고한다.
 - contract group id는 주석 안의 `filid:contract <group-id>` marker를 중복 없이, marker 순서로 싣는다. 15/32 cap 판정은 `core/verification`이 레코드의 값으로 한다.
 - verification role은 **파일명 접미사가 후보를 고르고 파일 내용이 확정한다.** `.spec`/`.test` stem은 후보일 뿐이며, 인식 가능한 case/suite 호출이 하나도 없는 파일은 `unsupported`다. 접미사만으로 역할을 주면 프로덕션 파일을 `x.spec.ts`로 개명하는 것만으로 boundary와 DAG 면제를 얻는다 — 개명은 증거가 아니다. 경계 상실만으로 생긴 indeterminate는 검증 구문을 봤다는 증거가 아니므로 role을 주지 않는다. 그런 literal은 JSX 텍스트의 아포스트로피처럼 프로덕션 코드에도 흔하다. 신뢰할 수 없는 텍스트에서 보인 case 호출 텍스트도 계수를 indeterminate로 만들 뿐 role의 증거는 아니다. JSX 텍스트의 `Don't touch it (please)`처럼 영어 문장이 case 호출로 읽히기 때문이다. 그 텍스트 안에서 제목을 가진 호출(`it('…'`, `test("…"`)만 role의 증거로 인정한다. 문자열이든 template이든 같다.
+- indeterminate 참조와 case 계수 사유는 1-based 줄 번호를 보고한다. LLM 호출자가 해당 줄을 직접 읽어 판단할 수 있어야 하기 때문이다.
+- 신뢰할 수 없는 텍스트는 다시 lex하지 않고 원문 패턴으로만 본다. 재lex는 정규식·주석·URL·잘못 짝지어진 따옴표에서 틀린 exact와 3차 비용을 만들므로 과보고를 수용한다.
 
 ## API Contracts
 
-- `extractFileFacts(projectRoot, requestedPaths, command): Promise<FileFactsExtraction>` — 레코드(경로 순), 거부 목록, 읽지 못한 파일 목록을 돌려준다. 출력 파일은 쓰지 않는다.
-- `parseExtractorArguments(argv): ExtractorArguments | ExtractorUsageError` — CLI 인자 해석.
-- `FileFacts`, `Reference`, `ExportedName`, `FactsCertainty` — 레코드 타입(스펙 §2.1).
-- `scanSource(source)` — 한 파일의 텍스트, 토큰, 신뢰할 수 없는 구간. 판독기들이 공유한다.
-- `scanLexicalTokens(source)` — comment/string/template/regex와 delimiter nesting을 보존한 token stream. 첫 줄 shebang은 건너뛰고, 닫히지 않은 문자열·template 토큰은 `unterminated: true`를 가진다.
-- `extractDependencyReferences(filePath, scanned?)` — adapter 중립 `DependencyReference[]`. 숨었거나 경계 상실 뒤에 있는 참조는 `certainty: 'indeterminate'`를 가진다.
-- `inspectEntrySurface(entryPointPath, scanned?)` — manifest면 JSON 선언, 소스면 텍스트에서 읽은 표면.
-- `verificationFromSource(filePath, scanned)` — role과 case 수를 한 계수에서.
-- `countSemanticCases(source, scanned?)` — 일반/skip/todo/property와 정적 parameterized rows를 의미론적 case 수로 계산하고 동적 구조를 indeterminate로 반환.
-- `extractContractGroupIds(source)` — comment의 `filid:contract` marker 추출.
+- CLI 형식과 레코드 타입은 진입점·인자 parser에서 확인한다.
+- 참조·entry surface·verification은 같은 scan 결과를 공유하고 non-exact certainty를 그대로 전달한다. 서로 다른 토큰 경계로 판정하면 같은 파일에 대한 축별 결론이 갈라진다.
 
 ## Acceptance Criteria
 
@@ -103,7 +97,7 @@
 ### AC-facts-equivalence — 한 번 scan해도 값이 같다
 
 - 한 번 scan한 결과를 나눠 쓴 레코드가 판독마다 따로 scan한 레코드와 byte 단위로 같다.
-- 레코드는 모든 파일에 references·entrySurface·verification을 싣고, `indeterminate` 참조와 검증 case 수를 그대로 보존한다.
+- 정상 판독 레코드는 references·entrySurface·verification을 싣고, `indeterminate` 참조와 검증 case 수를 그대로 보존한다. `toolError` 레코드는 실패한 판독의 축 값을 주장하지 않는다.
 
 ### AC-facts-source-reading — 텍스트가 말하는 것만
 
@@ -135,20 +129,8 @@
 
 - **Consumers**: `src/__tests__/integration/escalation/helpers/utils/sourceLiteralSentences.ts`
 - **Direct import**: `allowed`
-- **Reason**: 허용 목록 검사가 소스 문자열에서 문장을 뽑으려면 같은 토큰 경계를 봐야 한다. 그 헬퍼는 검증 파일이 아니라 검증 파일을 돕는 조직이라 `filid_fractal-boundaries` §5의 면제 대상이 아니고, 진입점으로 돌리려면 추출 프로그램의 공개 표면에 lexer를 테스트 하나를 위해 얹어야 한다 — 같은 조항이 더 나쁜 쪽이라고 말하는 선택이다. 그래서 선언하고 직접 가져간다.
-
-## History
-
-- 2026-09-20 — 파일 내용을 읽는 모듈의 소유를 adapter에서 넘겨받고, 파일당 토큰화를 한 번으로 합쳤다. 서버가 소스를 해석하지 않는 것이 이 단계의 계약이고(스펙 §11-8), 네 판독이 같은 텍스트를 각각 scan하고 있었다.
-- 2026-09-19 — indeterminate 참조와 semantic case 계수 사유가 byte offset 대신 1-based 줄 번호를 보고한다. LLM 호출자가 해당 줄을 직접 읽고 판단하게 하려면 offset보다 줄 번호가 필요하다.
-- 2026-09-19 — 닫히지 않은 literal 신호를 경계 상실과 숨은 구문으로 나누고, 의존성 추출과 entry surface까지 넓혔다. unterminated 토큰을 모두 불확정으로 보면 JSX 텍스트 아포스트로피 하나가 cap 판정과 DAG를 흐린다. 처음에는 삼킨 구간을 코드로 다시 lex했다. 그런데 그 텍스트 안의 정규식·주석·URL과 같은 줄의 잘못 짝지어진 따옴표가 반례를 계속 만들었고, 틀린 exact와 3차 비용이 나왔다. 그래서 신뢰할 수 없는 텍스트를 원문 패턴으로만 본다. 과보고는 받아들이고 틀린 exact는 만들지 않는다. template 표현식을 같은 scanner로 건너뛰게 해서 중첩 template의 경계 상실도 없앴다.
-- 2026-09-19 — lexer에 정규식 리터럴 상태를 추가하고 `'`·`"` 문자열을 줄바꿈에서 끝냈다. `/["']/` 같은 정규식의 따옴표가 여러 줄짜리 가짜 문자열을 열어 case와 import를 삼키면서도 exact로 보고되고 있었다. 정규식 판정이 틀리는 드문 문맥에 대비해, 닫히지 않은 literal은 case 계수를 indeterminate로 만든다. 다만 그것만으로 role을 주면 개명 면제가 다시 열리므로 role 판정에서는 제외했다.
-- 2026-09-06 — 최상위 const 배열 참조의 제한적 해석을 추가했다. 공급자 목록을 여러 테스트에서 공유하는 정적 table을 계수하되, 선언의 길이만 믿지 않고 허용한 사용 형태를 확인한다.
-- 2026-09-06 — spread를 바깥 배열 table의 행 확장 위치에서만 미확정으로 취급한다. 배열 원문 전체의 `...`를 찾는 방식은 행 내부 객체 속성 확장까지 동적 행으로 오인했다.
-- 2026-08-23 — `.each`와 호출 괄호 사이의 TypeScript 타입 인자 목록을 건너뛰도록 정적 table 판정을 고쳤다. 타입 인자는 row 수를 바꾸지 않는데도 table을 못 읽게 만들어 파일 전체를 indeterminate로 떨어뜨리고 있었다.
-- 2026-08-18 — re-export 탐지를 export 절 형태로 한정했다. `from`은 위치가 키워드를 만든다 — 절 경계 밖의 `from` 식별자는 재export가 아니다.
-- 2026-07-28 — verification role 판정을 접미사 후보 + 내용 확정으로 좁혔다. 개명만으로 boundary·DAG 면제를 얻지 못하게 하려면 내용이 역할을 확정해야 한다.
+- **Reason**: 허용 목록 검사가 소스 문자열에서 문장을 뽑으려면 같은 토큰 경계를 봐야 한다. 그 헬퍼는 검증 organ 아래의 검증 코드라 `filid_fractal-boundaries` 5절에 따라 검증 대상을 직접 가져올 수 있고, 진입점으로 돌리려면 추출 프로그램의 공개 표면에 lexer를 테스트 하나를 위해 얹어야 한다.
 
 ## Last Updated
 
-2026-09-20 — 소스 판독의 소유와 단일 scan 규칙을 싣는다.
+추출 입력 경계, 소스 판독 정책이나 certainty의 선언된 한계가 바뀔 때 갱신한다.

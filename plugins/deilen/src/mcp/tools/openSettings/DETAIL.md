@@ -9,8 +9,7 @@
 
 ## API Contracts
 
-- `handleOpenSettings(...)` — `ensureHttpServer(workspace).settingsUrl()` 로 만든 토큰 포함 URL 을 `{ url }` 로 돌려준다.
-- 입력: `project_root?`.
+입출력 이름과 형태는 진입점과 검증 코드를 읽는다. 이 문서의 요구사항은 그 표면을 바꿀 때 보존할 정책을 정한다.
 
 ## Acceptance Criteria
 
@@ -22,4 +21,4 @@
 
 ## Last Updated
 
-2026-07-30 — 설정 진입 계약을 문서화했다.
+설정 진입 스코프·브라우저 열기 실패 정책의 내용이나 적용 범위가 바뀔 때 갱신한다.

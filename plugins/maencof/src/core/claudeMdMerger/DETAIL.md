@@ -11,29 +11,8 @@
 
 ## API Contracts
 
-### Entry point (`index.ts`)
-
-- `MAENCOF_START_MARKER` · `MAENCOF_END_MARKER` — `constants/markers.ts` 재노출. 마커 정본은 상수 모듈이고 이 배럴은 경로일 뿐이다.
-- `mergeMaencofSection(filePath, maencofContent, options?): MergeResult`
-- `readMaencofSection(filePath): string | null`
-- `removeMaencofSection(filePath, options?): boolean`
-- `ClaudeMdMerger` — 위 세 함수의 filePath 보관 래퍼 (`merge` · `read` · `remove` · `hasSection`)
-- `createProjectInstructionManager(projectRoot): InstructionSectionManager`
-- `MergeResult` (type)
-
-### `mergeMaencofSection(filePath, maencofContent, options)`
-
-- `options.dryRun` (기본 false) — 계획만 세우고 쓰지 않는다. `changed` 는 "쓰면 바뀌는가"를 뜻한다.
-- `options.createIfMissing` (기본 true) — false 이고 파일이 없으면 아무것도 만들지 않고 `changed: false` 로 끝낸다.
-- 계획은 `replaceDrift: true`, `backup: 'sibling'`. `changed` 는 outcome action 이 `copy` · `update` · `relocate` 일 때 true.
-
-### `MergeResult`
-
-`{ changed, hadExistingSection, backupPath?, content }` — `hadExistingSection` 은 계획 이전 `inspect()` 기준이고, `content` 는 병합 후 파일 전체 내용이다(섹션만이 아니다).
-
-### `removeMaencofSection(filePath, options)`
-
-계획 outcome 이 `remove` 가 아니면 적용 없이 `false`. `options.dryRun` 이면 계획 성공만으로 `true` 를 반환하고 쓰지 않는다.
+- dry-run의 `changed`와 제거 성공값은 실제 쓰기가 아니라 계획상 변경 가능성을 뜻한다. 반환 `content`는 섹션만이 아니라 병합 후 파일 전체다.
+- 마커 정본은 상수 모듈에 있다.
 
 ## Acceptance Criteria
 
@@ -55,4 +34,4 @@
 
 ## Last Updated
 
-2026-07-30 — 마커 구간 한정·raw/project 두 계층 API·쓰기 시 백업·호스트 판정 계약을 문서화했다.
+마커 소유권·raw 경로 호환성·호스트 채널 및 백업 정책이 바뀔 때 갱신한다.

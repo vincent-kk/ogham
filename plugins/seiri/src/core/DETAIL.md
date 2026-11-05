@@ -9,11 +9,7 @@
 
 ## API Contracts
 
-- `infra/configLoader` — user/project 기준선과 런타임 밸브의 읽기·쓰기·설명.
-- `ruleDocs` — 매니페스트, 배포 상태, plan/apply, 드리프트 판정.
-- sessionSignals는 host/session/agent별 참여·turn anchor(main은 native turn, 자식은 agent-stable turn)·호출 대응·실패 카운터를 비추적 상태로 관리합니다.
-- `gates` — 작업 게이트의 파싱, 증거 기록, 포기와 상태 집계(작업 스코프, 비추적).
-- `utils/` — `findRepoRoot`, `computeFileSha256`, `writeAtomically`, `ensureSeiriDir`, `acquireLockDir`, `hashCommand`.
+다이얼·배포·actor 참여·작업 증거는 각각 소유 저장소를 가지며 서로의 상태를 미러링하지 않는다. 공개 함수 목록은 진입점에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -37,4 +33,4 @@
 
 ## Last Updated
 
-2026-09-26 — 명시적 조건부 참여와 비차단 호스트 계약을 반영했습니다.
+상태 소유권과 공통 경계 계약의 내용과 근거가 바뀔 때 갱신한다.

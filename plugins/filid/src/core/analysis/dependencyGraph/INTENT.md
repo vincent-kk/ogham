@@ -4,17 +4,11 @@
 
 Adapter dependency reference를 owner-level evidence edge로 집계하고 실제 cycle을 계산한다. 참조를 확정하지 못한 파일은 `unknownFiles`에 귀속하고, 그 파일이 주어진 대상과 관련되는지 가린다.
 
-## Structure
-
-- `buildDag.ts`와 query helper — 작업 8 전 legacy characterization 경계
-- `detectCycles.ts` — legacy/target graph를 cycle algorithm에 연결
-- `index.ts` — named-export public entry point
-- legacy query helper는 작업 8 제거 전까지만 유지한다.
-
 ## Conventions
 
 - tradeoff 우선순위: 1. 증거 정확성 2. 결정론 3. query 편의
 - same-owner evidence는 boundary 검사에 남기되 cycle adjacency에서 제외한다.
+- legacy graph query는 작업 8 제거 전까지 characterization 호환 경계로 유지한다.
 
 ## Boundaries
 
@@ -36,7 +30,3 @@ Adapter dependency reference를 owner-level evidence edge로 집계하고 실제
 - hierarchy children/organs를 import dependency로 사용
 - path 대소문자 또는 adapter evidence를 임의 정규화
 - 파일 I/O 또는 생태계 specifier 해석
-
-## Dependencies
-
-- `../../../types/fractal.js`의 언어 중립 graph DTO

@@ -4,11 +4,9 @@
 
 SessionStart 관심사 — L5 buffer 문서 중 TTL(`expires`)이 지난 것을 감지해 정리를 촉구하는 알림을 `additionalContext` 로 주입한다. 아무것도 삭제하지 않는다. L4 의 `archiveExpired`(이동·가역·자동)와 대칭으로, L5 의 비가역 처리는 사용자 판단에 남긴다.
 
-## Structure
+## Conventions
 
-- `remindExpiredBuffer.ts` — `runRemindExpiredBuffer` (스캔 + 알림 조립)
-- `index.ts` — barrel
-- `__tests__/` organ — 검증
+목록은 `MAX_LISTED_PATHS` 까지만 싣고 나머지는 개수로 접는다 — 알림이 세션 컨텍스트를 잠식하지 않게.
 
 ## Boundaries
 

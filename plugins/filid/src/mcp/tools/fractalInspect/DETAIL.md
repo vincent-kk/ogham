@@ -11,19 +11,9 @@
 
 ## API Contracts
 
-| Action         | Input                                         | Delegation               | Payload                                  |
-| -------------- | --------------------------------------------- | ------------------------ | ---------------------------------------- |
-| `scan`         | `path`, `maxDepth?`, `detail?`, `nameFilter?` | tree-scan child          | tree summary + requested projection      |
-| `validate`     | `path`, `scopes?`                             | project validation child | project-mode summary + validation report |
-| `verification` | `path`, `filePaths?`, `detail?`               | verification child       | role summary + optional file evidence    |
-| `resolve`      | `path`, `requests`                            | context-resolution child | bounded batch summary + ordered results  |
+- dispatcher는 action별 child의 payload 의미를 그대로 보존한다. action 하나가 child 하나를 선택한다.
 
 ## Acceptance Criteria
-
-### AC-fractal-inspect-dispatch — action별 단일 위임
-
-- 각 action은 정확히 한 child entry point를 호출한다.
-- validate는 plan mode 필드 없이 project validation만 수행한다.
 
 ### AC-fractal-inspect-payload — 기존 payload 보존
 
@@ -38,4 +28,4 @@
 
 ## Last Updated
 
-2026-10-14
+action별 위임·읽기 전용 범위, config 면제 판정이나 facts 범위 밖 파일 보고가 바뀔 때 갱신한다.

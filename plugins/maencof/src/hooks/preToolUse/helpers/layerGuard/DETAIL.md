@@ -8,19 +8,9 @@
 
 ## API Contracts
 
-- `runLayerGuard(input)` — `PreToolUseResult`. Write/Edit의 host target 또는 Delete의 canonical-parent terminal entry가 L1이면 차단 신호를, 아니면 통과를 반환한다.
-- 입력 `PreToolUseInput`, 출력 `PreToolUseResult`. 최종 stdout 번역은 `denyEnvelope` 가 한다.
+관심사는 차단 신호만 반환하고 최종 stdout 번역은 상위 디스패처가 소유한다. Delete는 대상 내용이 아니라 unlink할 terminal entry를 보호하므로 symlink를 따라가지 않는다.
 
 ## Acceptance Criteria
-
-### AC-vault-gate-first — 볼트 게이트 우선
-
-- 볼트가 아닌 cwd 에서 차단 판정이 일어나지 않는다.
-
-### AC-layer1-mutation-blocked — L1 mutation 차단
-
-- L1 경로의 `Write`·`Edit`·`Delete` 시도가 모두 같은 차단 신호를 받는다.
-- case alias나 symlink ancestor를 거친 L1 target과 L1 안의 terminal symlink Delete도 lexical 경로와 같은 차단 신호를 받는다.
 
 ### AC-no-bypass — 우회 부재
 
@@ -36,4 +26,4 @@
 
 ## Last Updated
 
-2026-08-23 — L1 보호를 host-canonical mutation target과 Delete terminal entry로 현행화했다.
+L1 mutation 보호, Delete의 terminal entry 판정 또는 우회 금지 경계가 바뀔 때 갱신한다.

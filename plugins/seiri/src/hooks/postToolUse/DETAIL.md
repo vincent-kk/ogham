@@ -26,4 +26,4 @@
 
 ## Last Updated
 
-2026-09-29
+Update when the paired invocation, acknowledgment, or task evidence contracts change.

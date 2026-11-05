@@ -2,13 +2,6 @@
 
 새로운 외부 LLM 대화를 시작한다. cennad `session_id` (UUIDv4) 를 발급하고, dispatcher 를 통해 codex / antigravity / claude CLI 를 호출, 결과를 `ConversationResponse` 로 직조.
 
-## Structure
-
-| File                   | Role                                                               |
-| ---------------------- | ------------------------------------------------------------------ |
-| `startConversation.ts` | `handleStartConversation` — 입력 → dispatch → 세션 기록 → envelope |
-| `index.ts`             | barrel                                                             |
-
 ## Conventions
 
 - 입력 키는 `snake_case` 그대로 (외부 LLM 인터페이스). `project_root` optional (절대경로) — 외부 CLI 의 spawn cwd 이자 `projectHash` 입력; Claude 는 생략 시 `process.cwd()`, 그 외 호스트는 생략하면 해석 실패로 거부
@@ -36,14 +29,3 @@
 
 - 다른 cwd 의 세션 조회 (이 도구는 항상 새 세션)
 - dispatcher 결과를 직접 가공해 `error.code` 변경 — envelope 정규화는 dispatcher 책임
-
-## Dependencies
-
-- `../../../core/sessionStore` — `createSession` (세션 메타 영속화)
-- `../../../core/counterManager` — `incrementCounter` (제공자별 호출 횟수 증가)
-- `../../../core/projectHash` — cwd 기반 프로젝트 식별자 (cwd 는 `@ogham/cross-platform` 의 `projectRoot(input.project_root)` 로 해석)
-- `../../../core/configManager` — `loadConfig` (ratio/preamble/recency_factor/option_flags/default_tier/artifacts 등 조회; tier 생략 시 `default_tier[provider]` fallback, `options` 는 항상 `{}`)
-- `../../../dispatcher` — `dispatchers` (공급자별 CLI 호출), `buildResponse` (envelope 생성)
-- `../../../types` — `ConversationResponse`, `Provider`, `Tier`, `ConversationOptions`
-- `../../../utils/isoNow.ts` — ISO 8601 타임스탬프 생성
-- `zod` — 입력 스키마 검증 (MCP SDK 통해 적용)

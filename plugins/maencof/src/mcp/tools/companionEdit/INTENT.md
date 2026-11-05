@@ -4,12 +4,15 @@
 
 companion_edit 도구 핸들러. companion-identity.json 정본 편집(section add/update/remove, core 조정)의 유일한 허가 채널. preview/commit 2단계.
 
+## Conventions
+
+companion identity 변경은 이 도구의 preview/commit 두 단계만 통과한다.
+
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증(registration에서)
-- core/companionEdit에 로직 위임
+- core companionEdit에 위임하며 preview 순수성 유지
 
 ### Ask first
 
@@ -17,4 +20,4 @@ companion_edit 도구 핸들러. companion-identity.json 정본 편집(section a
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
+- 직접 파일 I/O로 core의 편집 경계를 우회

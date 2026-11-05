@@ -7,58 +7,11 @@
 
 ## API Contracts
 
-### `writeArtifact(args: WriteArtifactArgs): Promise<string | undefined>`
-
-입력:
-
-- `artifacts: ArtifactsConfig` — `{ enabled, location }`. 호출자가 반드시 `enabled === true` 를 사전 확인하고 호출한다 (작성기는 호출되면 항상 쓰기를 시도).
-- `cwd: string` — 해석된 프로젝트 루트 (start) 또는 `session.cwd` (continue).
-- `projectHash: string` — `core/projectHash` 의 `sha256(cwd).slice(0,12)`.
-- `sessionId: string` — `randomUUID()` 가 발급한 UUIDv4.
-- `turn: number` — `start` 는 1, `continue` 는 `nextTurn`.
-- `provider: 'codex' | 'antigravity' | 'claude'`.
-- `model: string` — 해석된 모델 id (`result.resolvedModel` 우선, 없으면 alias).
-- `createdAt: string` — `utils/isoNow` 의 ISO 8601 타임스탬프.
-- `elapsedMs: number` — dispatcher 시작 후 경과한 정수 밀리초.
-- `prompt: string` — 사용자 프롬프트 원문 (raw).
-- `composedPrompt?: string` — recency_policy + preamble prefix 가 합성된 실제 CLI 전송 프롬프트. 호출자가 `composePrompt` 결과를 전달. 생략 또는 raw 와 동일하면 본문에서 별도 섹션 생략.
-- `response: string` — non-null 응답 텍스트. 호출자는 반드시 `result.status === 'success' && result.response !== null` 을 사전 확인.
-
-출력:
-
-- 성공 → 작성된 artifact 의 절대 파일 경로.
-- 실패 (경로 해석·렌더·atomicWrite 중 어떤 예외라도) → `undefined` + `logger.warn('artifact write failed', message)`.
-
-### 파일명 규칙
-
-`<sessionId>-<turn>.md` — `sessionId` 는 UUIDv4 (세션 수명 내 충돌 없음); `turn` 은 호출마다 증가하는 양의 정수.
-
-### 경로 레이아웃
-
-- `project` → `<cwd>/.cennad/artifacts/<sessionId>-<turn>.md`
-- `user` → `~/.claude/plugins/cennad/artifacts/<projectHash>/<sessionId>-<turn>.md` (`CENNAD_CONFIG_PATH` 설정 시 해당 디렉터리 하위)
-
-`atomicWrite` 가 부모 디렉토리를 `0o700` 으로 생성하고 파일을 `0o600` 으로 쓴다 (`lib/atomicWrite` 기본값 상속).
-
-### Front-matter
-
-최상위 키: `session_id`, `provider`, `model`, `turn`, `created_at`, `elapsed_ms`, `status: success`. 문자열 값은 YAML 안전을 위해 `JSON.stringify` 로 직렬화한다.
-
-### 본문
-
-```
-## Prompt
-
-<prompt (raw)>
-
-## Composed Prompt (sent to CLI)   ← composedPrompt 가 raw 와 다를 때만
-
-<composedPrompt>
-
-## Response
-
-<response>
-```
+- opt-in과 성공 응답 여부는 호출자가 검사한다. 작성기는 호출되면 항상 쓰기를 시도하므로 이 전제를 내부 설정 조회로 대체하지 않는다.
+- 호출자는 raw prompt와 실제 CLI 전송용 composed prompt를 구분해 전달한다. 둘이 다르면 함께 남겨 실제 전송 내용을 조사할 수 있어야 한다.
+- 경로 해석·렌더·원자 쓰기의 실패는 경고와 `undefined`로 흡수한다. 선택적 미러링 실패가 대화 응답을 막아서는 안 된다.
+- front-matter 문자열은 YAML 안전을 위해 JSON 문자열 직렬화를 사용한다. 파일명은 소비자가 스크랩할 수 있으므로 변경 전에 승인을 받는다.
+- 파일 권한은 원자 쓰기 헬퍼의 기본값을 상속한다. 파일 레이아웃과 본문 형태는 구현과 테스트를 읽는다.
 
 ## Acceptance Criteria
 
@@ -70,10 +23,6 @@
 
 - 실패한 `ConversationResponse` 는 artifact 로 남지 않는다.
 
-### AC-raw-prompt-preserved — 원본 프롬프트 보존
-
-- 합성된 프롬프트가 raw 와 다를 때 둘 다 기록되어, 무엇이 실제로 CLI 에 갔는지 확인할 수 있다.
-
 ## Last Updated
 
-2026-07-30 — 기존 계약을 acceptance group 으로 명시했다(내용 변경 없음).
+artifact 호출 전제·기록 실패 격리·원문 보존 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

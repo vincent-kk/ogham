@@ -4,7 +4,6 @@
 
 ## Conventions
 
-- 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → hooks → compile-plugin`
 - 플러그인 prefix 없는 스킬 이름 (`setup`, `codex`, `antigravity`, `claude`, `crosscheck`)
 - Agent 는 `courier` 1개 (`cennad:courier`) — provider 스킬 3종이 off-thread spawn 한다. Claude 정본은 completion notification으로 재개하고, Codex 생성본은 최종 응답 전에 `wait_agent`로 mailbox update를 기다린 뒤 sender를 기록한 child target과 대조한다. 관점(정교화 ≤3콜 · 실패 remedy · tier 의미론)은 courier, 스킬은 행동(파싱→spawn→릴레이)만. crosscheck 는 정교화가 없어 courier 를 거치지 않고 MCP 도구를 직접 병렬 호출한다
 - E2E 는 이중 레이어 (Layer A in-process + Layer B 번들 stdio); `CENNAD_E2E_REAL_CLI=1` 일 때만 real CLI

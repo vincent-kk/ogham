@@ -1,13 +1,8 @@
+
+
 ## Purpose
 
-MCP 서버가 로컬 HTTP 로 서빙하는 브라우저 페이지의 프런트엔드 소스 루트. 현재 `settings/` (설정 페이지) 단일 페이지를 보유한다.
-
-## Structure
-
-| Path        | Role                                                                           |
-| ----------- | ------------------------------------------------------------------------------ |
-| `settings/` | `.filid/config.json` + rule docs 편집 폼 (`project_setup`의 `settings` action) |
-| `index.ts`  | barrel (`export {}` — 정적 자산 모음, 런타임 export 없음)                      |
+로컬 설정 서버가 서빙하는 독립 브라우저 자산의 정본을 소유한다. 서버 동작은 이 계층에서 구현하지 않는다.
 
 ## Conventions
 
@@ -29,7 +24,3 @@ MCP 서버가 로컬 HTTP 로 서빙하는 브라우저 페이지의 프런트�
 
 - 페이지에서 npm import 또는 빌드 스텝 의존 코드 작성
 - 서버 측 로직을 pages 하위에 배치
-
-## Dependencies
-
-없음 (순수 정적 파일)

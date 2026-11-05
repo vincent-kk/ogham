@@ -8,8 +8,7 @@
 
 ## API Contracts
 
-- `handleCloseViewer(...)` — `{ status: "closed" }` 를 돌려준다.
-- 입력: `session_id`, `project_root?`.
+입출력 이름과 형태는 진입점과 검증 코드를 읽는다. 이 문서의 요구사항은 그 표면을 바꿀 때 보존할 정책을 정한다.
 
 ## Acceptance Criteria
 
@@ -23,4 +22,4 @@
 
 ## Last Updated
 
-2026-07-30 — 세션 종료와 페이지 보존 계약을 문서화했다.
+세션 종료·대기 resolver 정리·페이지 보존 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

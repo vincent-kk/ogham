@@ -2,15 +2,7 @@
 
 ## Purpose
 
-UserPromptSubmit 이벤트 디스패처. `helpers/contextInjector`·`helpers/insightInjector`와 공유 `lifecycleDispatcher`·`vaultCommitter`를 순차·격리 실행하고 단일 envelope로 병합한다.
-
-## Structure
-
-- `userPromptSubmit.entry.ts` — 브리지 진입점
-- `userPromptSubmit.ts` — `orchestrateUserPromptSubmit` (조립 + 병합)
-- `helpers/contextInjector/` — KG/turn 컨텍스트 주입
-- `helpers/insightInjector/` — insight 캡처 상태 배너
-- `helpers/sessionTouch/` — 매 턴 lastActivityAt/usageSnapshot 갱신
+UserPromptSubmit 이벤트 디스패처. 컨텍스트·인사이트 주입 헬퍼와 공유 수명주기·볼트 커밋 관심사를 순차·격리 실행하고 단일 envelope로 병합한다.
 
 ## Conventions
 

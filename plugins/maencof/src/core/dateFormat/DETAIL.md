@@ -8,9 +8,7 @@
 
 ## API Contracts
 
-- `formatDate(date)` — 로컬 기준 `YYYY-MM-DD`.
-- `formatTime(date)` — 로컬 기준 `HH:MM`.
-- `isDateInWindow(date, since?, until?)` — `YYYY-MM-DD` 문자열이 `[since, until]` 에 드는지. 양 끝 포함이고, 빈 bound 는 그 방향 무제한이다. `Date` 파싱 없이 사전식 비교로 판정한다 — 이 포맷에서는 사전식 순서가 시간순이다.
+파일명과 로그가 같은 날짜를 가리키도록 로컬 시간대와 포맷을 함께 유지한다. 날짜 구간 비교는 이 고정 포맷의 사전식 순서가 시간순이라는 전제를 사용한다.
 
 ## Acceptance Criteria
 
@@ -32,4 +30,4 @@
 
 ## Last Updated
 
-2026-07-30 — 로컬 시간대·포맷 계약과 훅 직접 import 면책을 문서화했다.
+로컬 날짜 포맷·기간 비교 전제·훅 소비 경계가 바뀔 때 갱신한다.

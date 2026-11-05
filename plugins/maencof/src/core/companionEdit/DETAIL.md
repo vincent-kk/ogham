@@ -2,8 +2,7 @@
 
 ## Requirements
 
-- `.maencof-meta/companion-identity.json` 을 바꾸는 유일한 허가 채널이다. 파일 직접 편집 금지 규칙의 예외는 이 경로 하나뿐이고, `companion_edit` MCP 도구가 여기로 위임한다.
-- 흐름은 고정이다: 로드 → (레거시면) 정본 정규화 → 연산 적용(메모리) → 검증 → `commit !== true` 면 diff 만, `commit === true` 면 백업 후 저장.
+- 볼트의 companion 정체성 파일을 바꾸는 유일한 허가 채널이다. 파일 직접 편집 금지 규칙의 예외는 이 경로 하나뿐이고, `companion_edit` MCP 도구가 여기로 위임한다.
 - preview 경로는 파일을 절대 쓰지 않는다. `commit` 이 참이 아닌 모든 호출에서 디스크는 불변이고, 반환되는 `identity_preview` 는 메모리상의 후보다.
 - 로드는 항상 `companionNormalize` 를 거친다. 레거시 v1 파일도 같은 편집 연산을 받을 수 있어야 하고, 매핑을 여기서 다시 구현하면 렌더·마이그레이션과 어긋난다.
 - 저장 전 검증은 세 겹이다 — 정본 `CompanionIdentitySchema` Zod 파싱, 매 턴 예산 단조-개선 게이트, brief 길이 역전 검사. 앞의 두 개 중 하나라도 error 를 만들면 커밋을 거부한다.
@@ -16,68 +15,16 @@
 
 ## API Contracts
 
-### Entry point (`index.ts`)
-
-`applyCompanionEdit(vaultPath: string, input: CompanionEditInput): CompanionEditResult` — 동기.
-
-### Operations
-
-| Operation        | Required input                         | Behavior                                                       |
-| ---------------- | -------------------------------------- | -------------------------------------------------------------- |
-| `add_section`    | `section.{key,inject,salience,detail}` | 새 축 추가. 같은 key 가 있으면 `update_section` 을 쓰라고 거부 |
-| `update_section` | `key`, `section`                       | 제공된 필드만 병합. `key` 는 불변                              |
-| `remove_section` | `key`                                  | 섹션 삭제. 마지막 하나는 거부                                  |
-| `update_core`    | `core`                                 | `name` · `greeting` 만 패치                                    |
-
-### `CompanionEditResult`
-
-- `success` — 검증 통과 여부. preview 에서도 의미가 있다(에러 없으면 true).
-- `committed` — 실제로 파일을 썼는지. preview 는 언제나 false.
-- `operation` · `changed` — 요청 연산과 그 요약 문자열(`add_section "key"` 형태).
-- `errors` — 커밋을 막는 사유(Zod 이슈, 예산 악화, brief 길이 역전).
-- `warnings` — 막지 않는 사유(예산 초과 상태이나 개선 중, 세션 예산 초과).
-- `turn_budget` — `{ total, budget, ok, offenders }`. 편집 **후** 후보 기준이다.
-- `identity_preview` — 후보 identity. preview 와 커밋 거부 경로에서만 실리고, 커밋 성공 응답에서는 null 이다 — 방금 저장한 내용의 전체 에코는 컨텍스트 낭비다.
-- `backup_path` — 커밋에서만 존재하는 선택 필드.
-
-### 저장 형식
-
-`schema_version: 2`, `created_at` 은 기존 값을 ISO 로 보정해 유지, `updated_at` 은 매 편집마다 현재 시각. 들여쓰기 2 + 끝 개행.
+- 정본 저장에는 스키마를 통과한 값을 사용한다. key는 섹션의 정체성이므로 패치로 변경하지 않는다.
+- 성공한 커밋은 전체 identity를 에코하지 않는다 — 방금 저장한 내용을 다시 싣는 컨텍스트 낭비를 막는다. preview와 검증 거부는 후보를 보여준다.
+- 매 턴 예산의 단조 개선과 세션 예산의 soft 경고를 구별한다. 오류·경고와 커밋 여부는 결과로 돌려주어 저작 도구가 다음 행동을 결정한다.
 
 ## Acceptance Criteria
-
-### AC-preview-never-writes — preview 무변경
-
-- `commit` 이 true 가 아닌 모든 호출에서 identity 파일이 변경되지 않는다.
-
-### AC-turn-budget-monotone — 매 턴 예산 단조 기준
-
-- 초과 상태에서 총합을 줄이는 편집은 warning 과 함께 통과하고, 초과를 키우는 편집만 error 로 거부된다.
-
-### AC-session-budget-soft — 세션 예산 soft
-
-- 세션 예산 초과가 warning 에만 나타나고 커밋을 막지 않는다.
-
-### AC-last-section-retained — 마지막 섹션 보존
-
-- 섹션이 하나뿐일 때 `remove_section` 이 거부된다.
 
 ### AC-section-key-immutable — 섹션 key 불변
 
 - `update_section` 패치에 `key` 가 있어도 기존 key 가 유지된다.
 
-### AC-commit-backs-up — 커밋 백업
-
-- 커밋 경로가 쓰기 전에 백업 파일을 남기고 그 경로를 `backup_path` 로 보고한다.
-
-### AC-commit-no-echo — 커밋 성공 무에코
-
-- `commit: true` 로 저장에 성공한 응답의 `identity_preview` 는 null 이다. preview 와 커밋 거부 응답은 후보 identity 를 유지한다.
-
-### AC-failure-as-result — 실패의 결과화
-
-- 파일 부재·파싱 실패·필수 필드 누락이 예외 대신 `success: false` + `errors` 로 반환된다.
-
 ## Last Updated
 
-2026-08-04 — 커밋 성공 응답의 `identity_preview` 전체 에코를 제거했다(null 반환).
+정본 편집 권한·preview 불변성·단조 예산 게이트가 바뀔 때 갱신한다.

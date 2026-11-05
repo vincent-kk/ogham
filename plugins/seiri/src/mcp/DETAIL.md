@@ -9,16 +9,13 @@
 
 ## API Contracts
 
-- `server/` — MCP 서버 조립과 도구 등록.
-- `serverEntry/` — stdio 진입점(`bridge/mcp-server.cjs` 번들 대상).
-- settings는 설정 표면, gates는 작업 증거, runtime은 명시적 참여·단계·다이얼 요청을 소유합니다. accepted 응답은 hook ACK를 대신하지 않습니다.
-- `pages/` — 설정 UI 정적 자산. 빌드가 `public/settings.html` 로 인라인한다.
+settings는 설정, gates는 작업 증거, runtime은 참여·단계·밸브를 소유한다. accepted는 입력 수락이며 hook ACK를 대신하지 않는다.
 
 ## Acceptance Criteria
 
 ### AC-tool-surface-fixed — 고정된 표면
 
-- 등록 도구가 정확히 3개다. 참여 액션은 입력만 검증하며 호스트 세션을 추측하거나 상태를 직접 활성화하지 않는다. `dial`은 gitignore된 런타임 밸브 파일(`RUNTIME_FILE`)만 쓴다.
+- 등록 도구가 정확히 3개다. 참여 액션은 입력만 검증하며 호스트 세션을 추측하거나 상태를 직접 활성화하지 않는다. `dial`의 쓰기는 런타임 밸브와 그 비추적성을 유지하는 설정 디렉터리의 ignore 파일로 제한한다. ignore 파일은 없으면 생성하고 seiri 소유일 때만 누락 항목을 보충하며, 사용자·프로젝트 기준선과 참여 상태는 바꾸지 않는다.
 
 ### AC-mcp-no-code-tools — 코드 도구 부재
 
@@ -26,4 +23,4 @@
 
 ## Last Updated
 
-2026-09-26 — 명시적 조건부 참여와 비차단 호스트 계약을 반영했습니다.
+MCP 표면과 호스트 경계 계약의 내용과 근거가 바뀔 때 갱신한다.

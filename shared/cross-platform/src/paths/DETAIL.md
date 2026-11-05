@@ -12,17 +12,9 @@
 
 ## API Contracts
 
-- `index.ts` — package root가 이름으로 재노출하는 내부 fractal 배럴.
-- `paths.ts` — home·tmp·config·cache 함수를 묶는 객체 facade.
-- `state/` organ — 호스트 상태 루트와 plugin cache 좌표 소유.
-- `operations/` organ — normalize·containment 연산 소유.
-- `compat/` 하위 fractal — portable 경로 연산.
+경로 함수의 공개 형태는 진입점에서 확인한다. 객체형 facade를 통한 내부 사용과 외부 패키지 루트 계약을 혼동하지 않는다.
 
 ## Acceptance Criteria
-
-### AC-containment-rejects-escape — 탈출 거부
-
-- 절대 세그먼트나 `..` 를 담은 입력이 거부되고, 결과가 루트 밖이면 반환되지 않는다.
 
 ### AC-root-output-isolation — 루트 공개 주소와 출력 격리
 
@@ -44,4 +36,4 @@
 
 ## Last Updated
 
-2026-07-30 — package root 단일 공개 주소와 내부 path 소유권 계약을 정리했다.
+호스트 상태 좌표·containment 또는 내부 재사용 예외의 범위가 바뀔 때 갱신한다.

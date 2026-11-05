@@ -5,46 +5,18 @@
 - 격리 플래그 `--strict-mcp-config` + `--safe-mode` 를 start/resume 모두 항상 부착한다. cennad 는 Claude 세션 안에서 claude 를 호출하므로, 격리하지 않으면 자식이 부모의 MCP(특히 cennad `tools` 서버)·훅·CLAUDE.md·스킬을 상속한다.
 - tier 는 `config.model_map.claude` 의 `{model, effort}` 로 해석한다. env override `CENNAD_CLAUDE_<TIER>_MODEL`/`_EFFORT` 가 우선한다. effort 가 없으면(haiku 등) `--effort` 를 부착하지 않는다.
 - sandbox 개념이 없다(claude-code 에 `--sandbox` 없음). 격리는 권한 기반이며 `permission_mode` 단일 노브(6종)로 제어한다.
-- 빈 stdout·비JSON·비정상 종료코드는 `../errorMap` 로 정규화하며, 손상된 출력을 성공으로 위장하지 않는다.
+- 빈 stdout·비JSON·비정상 종료코드는 `../errorMap` 로 정규화하며, 손상된 출력을 성공으로 위장하지 않는다. CLI 가 구조화 출력으로 보고한 실패 사유도 종료 코드와 무관하게 이 경로로 정규화한다.
 
 ## API Contracts
 
-### `resolveClaudeTier(tier, map): { model, effort? }`
-
-- `map` = `config.model_map.claude` (없으면 env, 둘 다 없으면 `opus`).
-- env override 가 map 보다 우선. effort 미해결 시 `effort` 키를 생략한다.
-
-### `buildStartArgs(args, resolved) / buildResumeArgs(args, resolved)`
-
-- start argv: `-p <prompt> --output-format stream-json --verbose --session-id <id> --permission-mode <m> --model <model> [--effort <e>] [--fallback-model <chain>] --strict-mcp-config --safe-mode`.
-- resume argv: `--session-id` 대신 `--resume <ref>`, `--fallback-model` 미부착.
-
-### `findResultEvent(stdout) / parseResult(stdout): { response, error }`
-
-- JSONL 을 줄 단위로 훑어 마지막 `type: 'result'` 객체를 취하고, 그 `result` 를 응답 텍스트로 추출한다. 파싱 불가한 줄은 건너뛴다.
-- `is_error === true` 또는 `subtype !== 'success'` 면 실패. 빈 출력, result 이벤트 부재도 실패.
-
-### Acceptance
-
-- start 는 `-p`/`--output-format stream-json`/`--verbose`/`--session-id`/`--model`/`--effort`/`--permission-mode` + `--strict-mcp-config`/`--safe-mode` 를 보내고 `--resume` 는 보내지 않는다. `externalSessionRef` = 주입한 sessionId.
-- effort 미지원 tier(haiku)는 `--effort` 를 보내지 않는다.
-- resume 은 `--resume <ref>` 를 보내고 `externalSessionRef` 를 보존한다.
+- env override가 tier map보다 우선하며, effort를 결정하지 못하면 CLI에 맡긴다. 지원하지 않는 effort를 임의로 보충하지 않는다.
+- 재개에도 설정된 fallback model을 유지하여 사용자의 모델 대체 정책이 새 호출과 이어지는 호출에 동일하게 적용되게 한다.
+- JSONL의 마지막 result가 호출의 판정이며 깨진 출력은 성공으로 위장하지 않는다. 인자 배열과 파싱 결과의 세부 형태는 구현과 테스트를 읽는다.
 
 ## Acceptance Criteria
 
-### AC-session-isolation — 부모 세션 격리
-
-- 모든 호출에 `--strict-mcp-config` 와 `--safe-mode` 가 붙어 부모 Claude 세션의 MCP·훅·CLAUDE.md 가 상속되지 않는다.
-
-### AC-session-ref — 세션 참조
-
-- start 가 주입한 `--session-id` 가 그대로 `externalSessionRef` 가 된다.
-- resume 이 `--resume <ref>` 로 같은 대화를 이어가고 ref 를 보존한다.
-
-### AC-effort-support — effort 전달
-
-- effort 를 지원하지 않는 tier 에는 `--effort` 를 보내지 않는다.
+검증 코드가 수용 기준을 고정하므로 별도 acceptance group을 선언하지 않는다.
 
 ## Last Updated
 
-2026-07-30 — 기존 계약을 acceptance group 으로 명시했다(내용 변경 없음).
+Claude 부모 세션 격리·스트리밍·재개 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

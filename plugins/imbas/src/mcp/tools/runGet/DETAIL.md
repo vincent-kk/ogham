@@ -10,25 +10,9 @@
 
 ## API Contracts
 
-```typescript
-export function handleRunGet(input: RunGetInput): Promise<{
-  state: RunState;
-  run_dir: string;
-  manifests_available: string[];
-}>;
-
-interface RunGetInput {
-  project_ref?: string; // 생략 시 defaults.project_ref
-  run_id?: string; // 생략 시 runs 디렉터리의 사전순 마지막
-  project_root?: string;
-}
-```
-
-- MCP `inputSchema` 의 세 필드가 모두 optional 이다 — 인자 없는 호출이 정상 경로다.
-- 최신 실행 선택은 `readdirSync(runsDir).sort()` 의 마지막 항목이다. `run_id` 가 `YYYYMMDD-NNN` 고정폭이라 사전순이 곧 생성순이며, 이 등가는 ID 형식에 의존한다.
-- `manifests_available` — `MANIFEST_FILE_MAP` 의 키(`stories`·`estimation`) 중 해당 파일이 실행 디렉터리에 실재하는 것들이다. 파일 내용은 읽지 않으므로 존재 여부만 말한다.
-- 실패 — `project_ref` 를 인자로도 설정으로도 얻지 못하면 `project_ref is required (or set defaults.project_ref in config)`; runs 디렉터리가 없으면 `No runs directory found for project: <ref>`; 비어 있으면 `No runs found for project: <ref>`; `state.json` 부재·스키마 불일치는 `loadRunState` 오류로 올라온다.
-- 배럴은 `handleRunGet` 만 노출한다.
+- 최신 실행의 사전순 선택은 실행 ID의 고정폭이 생성순과 같다는 전제에 의존한다.
+- 사용 가능한 매니페스트는 파일 존재만 뜻하며 내용의 유효성을 보증하지 않는다.
+- 기본 project_ref도 없거나 실행 디렉터리가 없거나 비면 각각 거부한다. 상태 파일의 부재·검증 실패는 상태 로더가 보고한다.
 
 ## Acceptance Criteria
 
@@ -37,15 +21,6 @@ interface RunGetInput {
 - `run_id` 없이 호출하면 runs 디렉터리의 사전순 마지막 실행 상태를 반환한다.
 - runs 디렉터리가 없거나 비면 각각을 구분하는 문장으로 오류 응답이 된다.
 
-### AC-project-ref-fallback — project_ref 승계
-
-- `project_ref` 없이 호출하면 설정의 `defaults.project_ref` 로 조회하고, 설정에도 없으면 설정 키를 지목하는 문장으로 거부한다.
-
-### AC-manifest-presence — 매니페스트 존재 보고
-
-- 매니페스트가 하나도 없는 실행은 `manifests_available: []` 를 준다 — 오류가 아니다.
-- 파일이 생기면 해당 키가 목록에 나타난다.
-
 ## Last Updated
 
-2026-07-30 — 실행 상태 조회 계약과 기본값 승계·실패 문장을 문서화했다.
+최신 실행 선택·부재·매니페스트 조회 계약의 내용과 근거가 바뀔 때 갱신한다.

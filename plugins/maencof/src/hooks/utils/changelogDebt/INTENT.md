@@ -4,6 +4,10 @@
 
 MCP bootSweep 관심사. host configuration registry에서 파생한 감시 경로의 미기록 git 변경을 부팅당 1회 스캔해 `changelogState` 의 `pending` 에 기록한다. SessionStart 가 pending 을 1줄 권고로 표면화하고, `/maencof:changelog` 가 큐레이션 후 비운다. 감지를 세션 경계(부팅)에 두는 이유: 매 턴 git spawn 을 피한다.
 
+## Conventions
+
+changelog 출력 디렉터리 자체는 감지 결과에서 제외하고, git 실패나 내부 오류는 세션을 막지 않는다.
+
 ## Boundaries
 
 ### Always do

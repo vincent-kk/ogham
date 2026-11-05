@@ -4,9 +4,9 @@
 
 companion-identity.json 레거시→정본 파일 마이그레이션(MCP 서버 기동 1회). hook은 얇게 유지하고 무거운 1회성 변환을 여기서 수행한다. 레거시 필드 매핑은 [`companionNormalize`](../companionNormalize/INTENT.md)를 재사용한다. v1→v2 필드 매핑만 수행하며 CLAUDE.md는 건드리지 않는다. 매 턴 예산(`TURN_IDENTITY_CHAR_BUDGET`) 초과 시 저살리언스 turn 섹션을 session으로 자동 강등해 예산 이내로 맞춘다.
 
-## Structure
+## Conventions
 
-- `companionMigration.ts` — `runCompanionMigration` 오케스트레이터(멱등) + 매 턴 예산 자동 강등
+무거운 파일 변환은 서버 기동에서 맡아 훅 번들 크기를 지킨다. 자동 강등은 레거시 매핑의 합성 기본값에만 적용한다.
 
 ## Boundaries
 

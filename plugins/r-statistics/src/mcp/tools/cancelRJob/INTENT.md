@@ -2,17 +2,10 @@
 
 `cancel_r_job` 도구 핸들러. 실행 중 R 잡을 AbortController 로 SIGKILL 종료하고 상태를 Cancelled 로 전이한다. idempotent.
 
-## Structure
-
-| File            | Role                                         |
-| --------------- | -------------------------------------------- |
-| `cancelRJob.ts` | 핸들러 — `cancelJob` 위임, CancelStatus 반환 |
-| `index.ts`      | barrel                                       |
-
 ## Conventions
 
-- 반환: `cancelled` | `already_finished` | `not_found`
-- 종료 상태 잡 취소는 `already_finished` (재호출 안전)
+- 취소는 jobStore에 위임한다. 프로세스 제어를 이 도구에서 중복 구현하면 잡 상태와 실제 종료가 어긋날 수 있다.
+- 종료된 잡의 반복 취소는 오류가 아니라 상태로 답한다. 클라이언트가 재시도해도 안전해야 한다.
 
 ## Boundaries
 
@@ -27,7 +20,3 @@
 ### Never do
 
 - 결과 조회·재실행 (get_r_job / run_r 소관)
-
-## Dependencies
-
-- `../../../core` (jobStore), `../../../types/enums`

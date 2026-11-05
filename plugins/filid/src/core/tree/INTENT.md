@@ -4,14 +4,6 @@
 
 파일시스템 계층과 StructureAdapter 증거를 결합해 FCA node ownership, classification과 tree 관계를 만든다.
 
-## Structure
-
-| Module             | Role                                                      |
-| ------------------ | --------------------------------------------------------- |
-| `fractalTree`      | Node 20 directory discovery, adapter metadata와 tree 조립 |
-| `organClassifier`  | 문서·organ·entry-point·leaf·purity 우선순위 분류          |
-| `boundaryDetector` | target에서 project root까지 문서 경계 탐색                |
-
 ## Conventions
 
 - 분류 입력은 adapter가 보고한 entry descriptor를 받고 filename을 해석하지 않는다.
@@ -35,7 +27,3 @@
 - filesystem mutate 또는 source rewrite 수행
 - entry filename, extension이나 framework package 추측
 - `mcp/`, `hooks/` 역방향 import
-
-## Dependencies
-
-- `../../types/`, `../../constants/organNames.js`, adapter contracts, Node filesystem/path

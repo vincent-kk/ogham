@@ -2,14 +2,6 @@
 
 `collect_feedback` 도구 핸들러. bounded long-poll 로 라인 단위 피드백을 수집해 MCP content 로 반환한다. 기본 대기(600초)는 리뷰 1회를 한 호출로 덮으며, 그 안에 제출이 없을 때만 pending 마커를 반환한다.
 
-## Structure
-
-| File                                 | Role                                                         |
-| ------------------------------------ | ------------------------------------------------------------ |
-| `collectFeedback.ts`                 | 핸들러 — 세션 검증 → `awaitFeedback` → complete/pending 분기 |
-| `operations/buildFeedbackContent.ts` | intent 지시 첫 줄 + 코멘트 요약 text + 첨부 이미지 base64    |
-| `index.ts`                           | barrel — `handleCollectFeedback`, 입력·pending 타입          |
-
 ## Conventions
 
 - 세션은 `getSession` 으로 프로젝트 스코프 검증(`projectRoot(input.project_root)` → `getProjectHash`, `ensureHttpServer` 보다 먼저); 부재는 `unknown`. 닫힌 세션은 buffer 또는 디스크(`feedback.json` status=complete)에서 complete 회수, 둘 다 없으면 `closed` throw
@@ -33,8 +25,3 @@
 
 - 상한 없는 무한 대기
 - 닫힌 세션에서 새 피드백 long-poll 대기 (미전달 complete 회수는 허용)
-
-## Dependencies
-
-- `../../../core` (config·feedbackStore·projectHash·sessionStore), `../../httpServer`, `../../shared`, `../../../constants`
-- `node:fs/promises`, `@modelcontextprotocol/sdk` (타입), `@ogham/cross-platform` (projectRoot)

@@ -23,11 +23,8 @@
 
 ## API Contracts
 
-| Action          | Input              | Delegation              | Payload                                   |
-| --------------- | ------------------ | ----------------------- | ----------------------------------------- |
-| `plan`          | `path`, `requests` | placement-plan handler  | plan summary + `persistence: always` data |
-| `precondition`  | `path`, `planPath` | plan-validation handler | precondition summary + validation result  |
-| `postcondition` | `path`, `planPath` | plan-validation handler | postcondition summary + validation result |
+- plan은 항상 artifact를 남기며 precondition과 postcondition은 같은 plan schema를 읽는다.
+- project tree 이동과 import rewrite는 외부 actor의 책임이며 handler가 실행하지 않는다.
 
 ## Acceptance Criteria
 
@@ -36,10 +33,10 @@
 - plan은 planner를 한 번 호출하고 validation action은 대응 core validator를 한 번 호출한다.
 - validation action은 missing, relative 또는 invalid artifact를 코드와 `nextAction`을 가진 trust-boundary error로 거부한다. schema 3 artifact도 `plan-artifact-invalid`다.
 
-### AC-restructure-payload — 기존 payload 보존
+### AC-restructure-payload — payload 구성
 
-- plan의 summary, data, diagnostics와 always-persist 의미를 유지한다.
-- validation의 mode, snapshot hash, finding count와 result를 유지한다.
+- plan은 summary, data, diagnostics를 싣고 항상 artifact로 저장한다.
+- validation은 mode, snapshot hash, finding count와 result를 싣는다.
 
 ### AC-restructure-next-action — summary 다음 단계
 
@@ -51,7 +48,6 @@
 - precondition과 postcondition summary의 `scopes`는 입력 echo가 아니라 canonical 여섯 scope 전체다.
 - plan validation input은 `scopes`를 받지 않는다.
 
-
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+plan artifact 신뢰 조건과 schema version이나 status·nextAction 결정 규칙이 바뀔 때 갱신한다.

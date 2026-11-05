@@ -6,6 +6,7 @@
 - active config 를 JSON/object 로 읽을 수 없으면 기본 home 의 config 를 읽기 전용 fallback 으로 시도하고, 그마저 실패하면 defaults 로 진행한다.
 - **세션을 절대 차단하지 않는다.** 어떤 실패에도 계속 진행한다.
 - 진입점은 `injectStatic.entry.ts` 이며 esbuild 가 `bridge/<host>/*.mjs` 로 번들한다.
+- `+2` 예외의 자기지명은 명시적 지명으로, 전달 불가능한 상태는 workspace 파일을 제외한 상태로 제한한다. 모든 프롬프트에 성립하는 "asked this session"이나 세션이 길수록 자동 성립하는 "files, state, or tools"는 예외 목록을 무력화하므로 사용하지 않는다. 위임 산출물을 조언으로 오인하지 않도록 workspace 직접 편집 사실도 명시한다.
 
 ## API Contracts
 
@@ -38,10 +39,6 @@
 - **Direct import**: allowed
 - **Reason**: e2e Layer A 는 훅을 번들 대신 in-process 로 실행해 payload 를 검사한다. 이 훅에는 배럴이 없고 있어서도 안 된다 — 번들 진입점이 배럴을 거치면 esbuild 가 재노출 그래프를 끌어와 크기 캡을 넘긴다.
 
-## History
-
-- 2026-08-16 — `+2` 예외 (1)·(2) 를 좁히고 분할 지시를 추가했다. (1) "asked this session" 은 모든 프롬프트에 성립해 예외 목록을 무력화했고, (2) "files, state, or tools" 는 세션이 길수록 자동 성립했다. 위임 산출물이 조언 텍스트로 인식되는 것을 막기 위해 workspace 직접 편집 사실을 명문화했다.
-
 ## Last Updated
 
-2026-08-16 — +2 stance 분할 지시·닫힌 예외 정밀화를 계약에 반영했다.
+정적 정책 명단 의미·stance 예외·비차단 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

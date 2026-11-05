@@ -4,6 +4,10 @@
 
 selfProbe 진단 결과를 세션 시작 경고로 번역. 정상 동작에서도 발생하는 신호(`CLAUDE_PLUGIN_ROOT not set` — env 미전파가 기본)를 걸러 실제 행동 가능한 실패(node/git/PATH)만 로그·경고 대상으로 남긴다.
 
+## Conventions
+
+필터 결과가 비면 advisory 는 `null` 이다. 로그도 경고도 남기지 않는다 — 잡음은 실제 실패를 묻는다.
+
 ## Boundaries
 
 ### Always do

@@ -3,16 +3,14 @@
 ## Requirements
 
 - 서버 이름은 `'tools'` 로 고정한다 — `.mcp.json` 등록명과 일치해야 도구 이름이 해석된다.
-- 도구 4종(`run_r`·`get_r_job`·`cancel_r_job`·`assert_analysis_plan`)을 zod 스키마와 함께 등록하며, 모든 콜백은 `wrapHandler` 로 감싼다.
+- 등록하는 모든 콜백은 `wrapHandler` 로 감싼다.
 - 기동은 stdio transport 만 사용한다. stdout 은 프로토콜 채널이므로 로그는 stderr 로만 쓴다.
-- 기동 전 만료 워크스페이스를 정리하고, 종료 시 실행 중 잡을 모두 취소한다. 종료 훅은 한 번만 등록한다.
-- 핸들러에서 `process.exit` 를 직접 호출하지 않는다 — 프로세스 종료는 진입점 소관이다.
+- 기동 전 만료 워크스페이스를 정리하고, 종료 시 실행 중 잡을 모두 취소한다. 종료 훅은 한 번만 등록한다. 서버 종료 뒤 R 자식이 남는 것을 막는다.
+- 도구 핸들러에서 `process.exit` 를 직접 호출하지 않는다. 기동 실패의 종료는 실행 진입점이, 종료 신호의 잡 취소와 종료는 서버 수명주기가 소유하여 요청 실패가 서버 종료로 번지지 않게 한다.
 
 ## API Contracts
 
-- `createServer(): McpServer` — 이름 `'tools'` 인 서버를 만들고 도구 4개를 등록해 돌려준다.
-- `startServer(): Promise<void>` — 만료 워크스페이스 prune 후 stdio 로 연결한다.
-- `registerShutdown(): void` — 종료 시 `cancelAllJobs` 를 부르는 훅을 1회 등록한다(모듈 내부 소비).
+- 만료 정리 실패는 경고로 남기고 기동을 계속한다. 정리 작업이 MCP 접근까지 차단해서는 안 된다.
 
 ## Acceptance Criteria
 
@@ -28,4 +26,4 @@
 
 ## Last Updated
 
-2026-07-30 — 서버 등록·수명주기 계약을 문서화했다.
+도구 등록·오류 표면·서버 수명주기 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

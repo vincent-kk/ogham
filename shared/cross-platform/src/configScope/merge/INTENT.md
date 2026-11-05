@@ -3,18 +3,6 @@
 두 config 레이어를 합치고, 재정의를 세고 지우고, 쓰기 전 위험 키를 턴다. 값의
 의미는 모른다 — plain object와 그 밖만 구분하는 순수 문서 연산이다.
 
-## Structure
-
-| File                                | Role                                |
-| ----------------------------------- | ----------------------------------- |
-| `operations/mergeConfigLayers.ts`   | user 위에 project를 재귀 병합       |
-| `operations/listOverriddenPaths.ts` | project 리프의 dot path 열거        |
-| `operations/clearConfigPaths.ts`    | dot path 목록 삭제                  |
-| `operations/stripForbiddenKeys.ts`  | 쓰기 전 위험 키 제거                |
-| `utils/isPlainObject.ts`            | 순수 객체 판정 3단                  |
-| `utils/forbiddenKeys.ts`            | 프로토타입을 건드리는 키 목록       |
-| `utils/removePath.ts`               | segment 열 하나 삭제와 빈 상위 정리 |
-
 ## Conventions
 
 - 모든 함수는 순수하고 입력을 변형하지 않는다.
@@ -43,7 +31,3 @@
   `__tests__/pureImports.test.ts`가 이를 강제한다.
 - `stripForbiddenKeys`와 `mergeConfigLayers`의 재귀 범위를 다르게 두기 — 쓰기와
   병합이 "위험한 키"를 서로 다르게 정의하게 된다.
-
-## Dependencies
-
-- 내부·외부 모두 없음.

@@ -2,7 +2,6 @@
 
 ## Requirements
 
-- 경로는 PMID/PMCID → idconv → oa.fcgi → PMC OA 본문(PDF/XML/TAR) 이다.
 - 정책은 하나다: **OA 면 저장하고, 비OA 이거나 license 를 확인할 수 없으면 링크만 돌려준다.** 접근 권한을 추정해 내려받지 않는다.
 - 포맷별 실패는 격리한다 — PDF 를 못 받아도 XML 은 받는다.
 - id 하나의 실패가 나머지 id 처리를 멈추지 않는다.
@@ -12,9 +11,7 @@
 
 ## API Contracts
 
-- `runFetchFulltext(...)` — id 목록을 받아 id 별 처리 결과를 돌려주는 진입점.
-- `operations/resolvePmcid.ts` — PMID→PMCID(idconv), doi 폴백.
-- `operations/downloadFulltext.ts` — OA 판별·license 게이트·다운로드·sha256.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -35,4 +32,4 @@
 
 ## Last Updated
 
-2026-07-30 — OA 본문 확보 정책과 실패 격리 계약을 문서화했다.
+OA·license 게이트와 저장·실패 격리 정책이 바뀔 때 갱신한다.

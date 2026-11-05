@@ -4,11 +4,9 @@
 
 사전 계산된 그래프/가중치 메타데이터 JSON 영속화 및 역직렬화.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: MetadataStore/serializeGraph/deserializeGraph/deserializeShards/atomicWriteJson/withVaultLock/CACHE_FILES + 타입)
-- `types/` organ — 공개 타입 (SnapshotEntry/FileSnapshot/WeightsData/StaleEntry/StaleEntries)
-- `operations/` organ — 직렬화(serializeGraph/deserializeGraph/deserializeShards) + MetadataStore 클래스(.maencof/ R/W) + I/O 프리미티브(atomicWriteJson/withVaultLock), 함수 1개/파일
+런타임 조회 맵은 디스크 정본이 아니다. 빌드와 리로드가 같은 재수화 경로를 사용해야 검색 의미가 갈라지지 않는다.
 
 ## Boundaries
 

@@ -8,21 +8,12 @@
 
 ## API Contracts
 
-- `isFcaProject(cwd): boolean` — git root까지 `.filid/` 또는 INTENT.md marker를 탐색한다.
-- `isIntentMd(path): boolean` — portable basename이 정확히 INTENT.md인지 판정한다.
-- `isDetailMd(path): boolean` — portable basename이 정확히 DETAIL.md인지 판정한다.
+- 파일명 predicate는 portable basename의 정확 비교다. 유사한 이름을 보호 문서로 추측하지 않는다.
+- FCA 탐색은 git root를 넘지 않는다.
 
 ## Acceptance Criteria
 
-### AC-shared-portable-path — portable document names
-
-- POSIX와 Windows 형식의 동일 문서 경로는 같은 결과를 반환한다.
-- 대소문자나 확장자가 다른 lookalike는 일치하지 않는다.
-
-### AC-shared-minimal-surface — 최소 공통 표면
-
-- public surface는 FCA 프로젝트, INTENT.md와 DETAIL.md predicate만 열거한다.
-- legacy acceptance ledger 전용 predicate를 노출하지 않는다.
+구체적인 동작과 경계값은 이 모듈의 테스트가 고정하므로 별도 수락 그룹을 중복 선언하지 않는다.
 
 ## Boundary Exemptions
 
@@ -34,4 +25,4 @@
 
 ## Last Updated
 
-2026-07-27 — criteria predicate를 제거한 1.0 공통 hook 계약으로 재구성했다.
+FCA 감지의 탐색 경계, portable 문서명 판별이나 공통 훅 표면이 바뀔 때 갱신한다.

@@ -4,13 +4,15 @@
 
 지식 문서 읽기 도구. frontmatter 파싱 포함.
 
+## Conventions
+
+읽을 수 있는 문서의 범위와 그래프 편입 자격은 다르므로 레이어 밖 경로도 검증해서 읽는다.
+
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증
-- core/ 모듈에 로직 위임
-- 응답은 `content`(전문) + `node` 메타만 — SA 관련 문서 확장은 `kg_search`/`kg_context` 소관이라 read 는 `depth`/`include_related` 를 받지 않는다
+- 원문과 노드 메타 반환; 파싱 실패에도 원문 보존
 
 ### Ask first
 
@@ -18,4 +20,4 @@
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
+- 경로 봉쇄를 우회하거나 SA 관련 문서 확장을 읽기에 추가

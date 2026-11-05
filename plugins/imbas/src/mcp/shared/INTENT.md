@@ -4,6 +4,10 @@
 
 MCP 도구 공통 유틸리티. toolResult, toolError, wrapHandler 제공.
 
+## Conventions
+
+Map과 Set을 기본 JSON 직렬화에 맡기면 내용이 사라지므로 공통 응답 경계에서 변환한다.
+
 ## Boundaries
 
 ### Always do

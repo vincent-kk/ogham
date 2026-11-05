@@ -3,58 +3,24 @@
 ## Requirements
 
 - `@ogham/http-kit`은 로컬 HTTP 서버의 요청 검사, 세션 토큰, 제한된 JSON 본문 파싱, HTML-safe JSON 직렬화, JSON 응답 전송을 단일 workspace에서 제공한다.
-- 공개 주소는 `@ogham/http-kit` 루트 하나이며 12개 공개 심볼을 이름으로 재수출한다.
+- 공개 주소는 `@ogham/http-kit` 루트 하나이며 공개 심볼을 이름으로 재수출한다.
 - `guard`는 loopback host → token → POST origin → POST content-type 순서로 검사하고 응답을 직접 보내지 않는다.
-- `token`은 16바이트 난수의 32자 hex 토큰을 발급하고 같은 길이의 UTF-8 버퍼를 timing-safe 방식으로 비교한다.
-- `body`는 기본 1MB 상한을 선언 길이와 실제 수신 바이트 모두에 적용하고, 초과 요청을 배수한 뒤 거부한다.
-- `html`은 `<`, `>`, `&`, U+2028, U+2029를 이스케이프하며 `response`는 UTF-8 JSON의 정확한 byte length를 전송한다.
-- 제거된 이전 workspace의 호환 경로는 제공하지 않는다.
+- 세션 토큰의 비교는 timing-safe 연산으로 통일해 소비자별 비교 방식이 갈라지지 않게 한다.
+- 본문은 선언 길이와 실제 수신량 모두를 제한하고 초과 요청을 끝까지 배수해 호출자가 거부 응답을 전송할 수 있게 한다.
+- HTML 상태 주입과 UTF-8 응답 길이는 공유 연산을 사용해 script 탈출과 멀티바이트 길이 오류를 막는다.
+- 다른 workspace 이름의 호환 경로는 제공하지 않는다.
 
 ## API Contracts
 
-### Request guard
+거부 verdict와 본문 오류는 호출자가 자신의 응답 envelope로 전송한다. 요청 검사와 응답 전송의 책임을 섞지 않는다.
 
-```ts
-inspectRequest(options: GuardOptions): GuardVerdict;
-type GuardOptions;
-type GuardVerdict;
-type GuardRejectionCode;
-```
-
-거부 verdict는 `ok: false`, HTTP `status`, machine-readable `code`, `message`를 함께 제공한다.
-
-### Token
-
-```ts
-generateToken(): string;
-verifyToken(expected: string, provided: string): boolean;
-```
-
-### Body
-
-```ts
-parseBody(req: IncomingMessage, maxBytes?: number): Promise<unknown>;
-describeBodyError(error: unknown): { status: number; message: string };
-const MAX_BODY_BYTES: number;
-class RequestTooLargeError extends Error;
-```
-
-### HTML and response
-
-```ts
-escapeJsonForHtml(value: unknown): string;
-sendJson(res: ServerResponse, status: number, body: unknown): void;
-```
-
-루트 entry point는 위 공개 심볼을 구체 소유 파일에서 이름으로 재수출하며,
+루트 entry point는 공개 심볼을 구체 소유 파일에서 이름으로 재수출하며,
 `sideEffects: false`를 유지해 소비자 번들에서 비기여 모듈을 제거한다.
 
-## History
+## Acceptance Criteria
 
-2026-07-26 — `http-guard`의 guard/token 계약을 동작 변경 없이
-`http-kit`으로 통합했다.
+동작별 결과는 각 모듈의 테스트에서 확인한다.
 
 ## Last Updated
 
-2026-07-30 — 공개 주소를 패키지 루트 하나로 통합하고 이름 있는 심볼 집합을
-유지했다.
+로컬 요청 방어·본문 제한 또는 공개 패키지 정책의 범위가 바뀔 때 갱신한다.

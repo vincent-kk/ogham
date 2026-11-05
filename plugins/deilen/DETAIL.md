@@ -4,7 +4,7 @@
 
 - Claude 가 만든 markdown 을 로컬 브라우저 페이지로 보여주고, 사용자가 라인에 남긴 코멘트를 대화로 되돌리는 것이 이 플러그인의 전부다.
 - 서버는 `127.0.0.1` 에만 바인딩한다. 외부에서 접근할 수 있는 표면을 만들지 않는다.
-- 디스크 경로는 `~/.claude/plugins/deilen/` 하위로 한정한다.
+- 영속 상태는 호스트별 deilen 캐시 루트에 한정하되 프로젝트 설정은 해당 워크스페이스의 .deilen 디렉터리에 둔다. 호스트 상태를 섞지 않고 프로젝트 재정의가 사용자 설정을 덮어쓰지 않게 한다.
 - 무거운 렌더러(mermaid·katex·highlight)는 브라우저 자산으로만 서빙하고 MCP 서버 번들에 넣지 않는다. 외부 CDN 과 동봉 폰트를 쓰지 않는다.
 - `bridge/` 와 `public/` 은 커밋하는 빌드 산출물이며 손편집하지 않는다.
 - Agent 와 hook 이 없다 — 표면은 MCP 도구 4개와 스킬 2개뿐이다.
@@ -12,9 +12,7 @@
 
 ## API Contracts
 
-- **MCP 도구 4종** (서버 이름 `tools`): `render_viewer`, `collect_feedback`, `close_viewer`, `open_settings`. 계약 상세는 [src/mcp/DETAIL.md](./src/mcp/DETAIL.md).
-- **스킬 2종**: `preview`(문서를 페이지로 띄우고 코멘트를 수거), `setup`(설정 UI).
-- **빌드 파이프라인**: `clean → version:sync → pages(viewer+settings+renderers) → compile → mcp → compile-plugin`.
+- 사용자 피드백을 대화에 되돌리는 책임은 유지하며, 별도 agent나 hook 표면을 도입하지 않는다. 도구와 스킬 등록 목록·빌드 순서는 매니페스트를 읽는다.
 
 ## Acceptance Criteria
 
@@ -44,4 +42,4 @@
 
 ## Last Updated
 
-2026-08-25 — 미전송 초안 보존 acceptance group 을 추가했다.
+뷰어와 초안 보존·렌더러 격리·플러그인 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

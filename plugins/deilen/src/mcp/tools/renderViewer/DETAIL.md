@@ -10,8 +10,7 @@
 
 ## API Contracts
 
-- `handleRenderViewer(...)` — `{ session_id, url, status: "serving" }` 를 돌려준다.
-- 입력: `content` 또는 `path`(택일), `title?`, `options?`, `project_root?`.
+입출력 이름과 형태는 진입점과 검증 코드를 읽는다. 이 문서의 요구사항은 그 표면을 바꿀 때 보존할 정책을 정한다.
 
 ## Acceptance Criteria
 
@@ -38,4 +37,4 @@
 
 ## Last Updated
 
-2026-07-30 — 입력 택일·크기 상한 계약과 개발 스크립트 면책을 문서화했다.
+입력 택일·크기 상한·논블로킹 반환·개발 면책 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

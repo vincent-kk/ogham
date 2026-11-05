@@ -35,11 +35,10 @@
 - **digest 입력의 정렬은 locale에 기대지 않는다.** 동결 항목과 그 안의 참조·판정은 raw UTF-8 byte 순으로
   정렬한다(`lib/compareByBytes.ts`). `localeCompare`는 ICU collation을 읽어 기계마다 다를 수 있고, 같은
   byte를 담은 저장소가 두 기계에서 다른 digest를 내면 `review-inputs-stale`이 이유 없이 뜬다.
-- **이 버전으로 올린 뒤의 첫 prepare는 새 generation을 만든다.** 동결 항목의 모양(상태 필드)과 정렬이
-  바뀌어 `facts.json`이 `scope.factsDigest`와 어긋나고, `hasCompletePreparedArtifacts`가 그 generation을
-  불완전으로 본다. 검증된 의견 1회를 버리는 **의도된 일회성 전환 비용**이다. 진행 중이던 validate·seal의
-  안전은 `preserved-s0` fixture가 지킨다 — 동결 이전 generation은 `factsDigest`가 없어 이 판정에
-  걸리지 않는다.
+- **동결 항목의 상태 필드나 정렬이 현재 digest와 호환되지 않는 generation은 prepare에서 재사용하지 않는다.**
+  `facts.json`이 `scope.factsDigest`와 어긋나면 `hasCompletePreparedArtifacts`가 불완전으로 본다.
+  검증된 의견을 다시 얻는 비용은 digest 계약을 지키기 위한 의도된 전환 비용이다.
+  `factsDigest`가 없는 generation은 이 판정에 걸리지 않으며, `preserved-s0` fixture가 그 validate·seal 호환성을 지킨다.
 - **관문은 사실을 읽는 자리에만 둔다.** `checkpoint`는 참조 기반 증거를 전혀 읽지 않는다 — 비교하는 것은
   커밋된 소스 동일성(`sourceHash`)과 artifact 존재·freshness뿐이다. 그래서 checkpoint에 facts 관문을 두면
   쓰지도 않는 증거를 검사하게 된다. 리뷰 도중의 fix 커밋은 이 사슬로 막힌다: checkpoint가
@@ -47,7 +46,7 @@
   prepare가 **facts 관문**에 걸려 `facts-incomplete`로 바뀐 파일의 사실을 요구한다. 부트스트랩 뒤 prepare →
   seal이 통과한다. 조용한 pass가 없다는 것을 end-to-end 테스트가 고정한다.
 - **사실 동결(스펙 §9).** prepare는 리뷰 범위(변경 파일 + 그래프 이웃) 파일의 정규화된 유효 참조와 적용된 판정을 generation의 `facts.json`에 쓰고, 그 digest를 `scope.factsDigest`에, 파일별 참조 목록의 digest를 `scope.files[].factsHash`에 적는다. 유효 참조는 레코드의 참조와 `adopt`된 항목의 합이고, 프로젝트 안으로 해석된 것만 싣는다 — `external`·`unresolved` 표기 차이로 리뷰가 무효화되지 않게 한다. **facts 범위 안 파일은 간선이 없어도 빈 목록으로 실린다**: "동결하지 않았다"와 "동결했는데 간선이 0이었다"는 다른 사실이고, 구별하지 못하면 나중에 `adopt`로 간선이 생긴 파일이 seal의 대조를 조용히 지나간다. lockfile처럼 facts 범위 밖인 파일은 참조 사실의 대상이 아니므로 항목도 `factsHash`도 없다 — `facts.json`에 없다는 것은 **리뷰 범위 밖이거나 facts 범위 밖**이고, 뒤쪽은 그 파일의 상태 `unsupported`가 가른다.
-  - `facts.json`은 prepare가 소유하는 artifact이고 **generation 디렉터리에 산다** — `evidence.md`와 같은 수명이다. generation 하나는 "한 번의 prepare가 본 모든 것"이고, branch에 하나뿐이면 새 prepare가 이전 동결본을 덮어써 옛 generation의 brief로 들어온 `compare`·validate가 남의 동결본을 읽는다. 경로는 `resolveReviewGenerationPaths`가 정하고 쓰는 쪽(`collectChangedScopeEvidence`)과 읽는 쪽(`readFrozenFacts`·`hasCompletePreparedArtifacts`·seal·`readGenerationFrozenFacts`)이 모두 그 값을 받는다. 디렉터리 규칙은 `resolveGenerationDirectory` 한 곳에 있다 — 경로를 직접 조립하는 자리가 이 결함을 만들었다.
+  - `facts.json`은 prepare가 소유하는 artifact이고 **generation 디렉터리에 산다** — `evidence.md`와 같은 수명이다. generation 하나는 "한 번의 prepare가 본 모든 것"이고, branch에 하나뿐이면 새 prepare가 이전 동결본을 덮어써 옛 generation의 brief로 들어온 `compare`·validate가 남의 동결본을 읽는다. 경로는 `resolveReviewGenerationPaths`가 정하고 쓰는 쪽(`collectChangedScopeEvidence`)과 읽는 쪽(`readFrozenFacts`·`hasCompletePreparedArtifacts`·seal·`readGenerationFrozenFacts`)이 모두 그 값을 받는다. 디렉터리 규칙은 `resolveGenerationDirectory` 한 곳에 있다 — 경로를 직접 조립하면 generation 간 동결본이 뒤섞인다.
   - 없거나 digest와 어긋나면 `hasCompletePreparedArtifacts`가 거짓이 되어 generation을 다시 만든다. `evidence.md`만 보고 재개하던 지름길도 같은 판정을 거친다 — 그러지 않으면 seal이 거부하는 generation을 prepare가 그대로 돌려주어 "prepare 한 번"이 상태를 바꾸지 못한다(P5).
   - `evidenceHash` 튜플에는 **그 파일에 `factsHash`가 있을 때만** 투영이 들어간다. 동결 이전에 prepare된 generation은 `[candidates, claims]` 그대로여서 stale이 되지 않는다(G10이 지킨다).
   - 두 새 필드는 모두 선택 필드이고, 영속 스키마에서도 optional이다.
@@ -59,7 +58,7 @@
   - 이 읽기는 `evidenceHash`에 들어가지 않으므로 `review-inputs-stale`을 만들지 않는다. checkpoint에는 이 거부를 두지 않는다 — 호출자가 resolve·revalidate뿐이고 둘 다 봉인 뒤의 흐름이다.
   - seal은 자기가 읽은 항목(key·상태·`lineDigest`)과 그 digest를 sealed state의 선택 필드 `factsAdjudications`·`factsAdjudicationsDigest`에 적는다. 봉인 뒤의 흐름은 live 표를 다시 읽지 않는다 — 다른 흐름이 같은 파일에 올린 항목이 끝난 리뷰를 다시 열지 않는다.
 - **변경 파일의 `tool-error`는 막지 않고 finding이 된다.** 추출기가 읽지 못한 변경 파일은 리뷰가 다뤄야 할 대상이지 준비를 막을 이유가 아니다. 후보의 `rule`은 `facts-tool-error`이고 rule roster에는 들어가지 않는다 — 규칙 엔진이 평가하는 규칙이 아니라 사실 상태의 보고다.
-- **리뷰 범위에 facts 범위 밖 파일이 있으면 그 사실을 싣는다.** 선언된 `facts.covers`가 기본 범위(어댑터 소스 확장자)의 파일을 빼면 참조 기반 규칙은 그 파일을 건너뛰는데, 지금까지 리뷰는 그 사실을 어디에도 적지 않고 APPROVED가 됐다 — `unsupported`가 조용히 pass로 읽히는 자리다(스펙 §3: 건너뛰되 보고한다). 그런 파일이 리뷰 범위에 하나라도 있으면 `review-files-outside-facts-scope`를 **`affects: []`**로 싣는다: 개수와 상한 있는 경로 목록, 다음 행동은 `facts.covers`에 넣고 부트스트랩한 뒤 prepare. 범위는 프로젝트의 선언이므로 **막지 않는다** — verdict도 blocker도 바뀌지 않는다. 0개면 아무것도 싣지 않는다(상시 문장 금지).
+- **리뷰 범위에 facts 범위 밖 파일이 있으면 그 사실을 싣는다.** 선언된 `facts.covers`가 기본 범위(어댑터 소스 확장자)의 파일을 빼면 참조 기반 규칙은 그 파일을 건너뛴다. 이를 적지 않은 APPROVED는 `unsupported`가 조용히 pass로 읽히는 자리다(스펙 §3: 건너뛰되 보고한다). 그런 파일이 리뷰 범위에 하나라도 있으면 `review-files-outside-facts-scope`를 **`affects: []`**로 싣는다: 개수와 상한 있는 경로 목록, 다음 행동은 `facts.covers`에 넣고 부트스트랩한 뒤 prepare. 범위는 프로젝트의 선언이므로 **막지 않는다** — verdict도 blocker도 바뀌지 않는다. 0개면 아무것도 싣지 않는다(상시 문장 금지).
 - **변경 집합 밖의 verification 파일에 귀속된 진단도 같은 자리로 간다.** 아무도 건드리지 않은 테스트 파일의 풀리지 않는 import 하나가 의존성 축을 indeterminate로 만들면, 그 파일에 책임이 없는 리뷰가 전부 INCONCLUSIVE가 된다 — 고칠 수도 없고 넘어갈 수도 없다. 예외는 **그 참조가 변경된 파일의 이름을 적는 경우**다. 그때는 리뷰 중인 변경이 그것을 깨뜨린 것이므로 진단이 범위 안에 남는다. 이름 판정은 관련성 거름망과 같은 규칙(`collectTargetNames`·`containsPathToken`)이라, 이름을 적지 않는 참조는 거기서와 똑같이 빠져나간다.
   - **선언된 한계 둘.** (i) 참조가 변경 파일의 이름을 **적지 않는** 철자 — 해석 표(`paths`·`baseUrl`)가 펼치는 alias, 이름을 싣지 않는 star 재export — 는 범위 밖으로 간다. 이름 판정은 문자열이 무엇을 적었는지만 보고 해석을 흉내 내지 않기 때문이다(P1). (ii) 변경 파일의 이름이 흔하면(`utils`, `types`, `index`가 아닌 디렉터리 이름) 같은 이름을 적은 무관한 테스트의 진단이 범위 **안**에 남는다. 두 방향 중 실패는 "더 남긴다" 쪽으로만 나게 두었다 — 남는 진단은 리뷰어가 한 번 보고 넘기지만, 빠뜨린 진단은 그 위에 봉인된다.
 - 범위 밖 `unknownFiles`에 귀속된 진단(경로와 코드가 그 파일의 원인과 맞는 것)은 구조 상태와 `scope.diagnostics`(blocker 원천)에서 빠진다. 대신 `scope.outOfScopeDiagnostics`(선택 필드)에 싣고 evidence.md의 Out-of-scope Diagnostics에 적는다. 이 필드가 없는 옛 state는 모든 진단이 `scope.diagnostics`에 있으므로 판정이 바뀌지 않는다. - 그래프 certainty 때문에 나오는 "분석이 indeterminate" 부류의 규칙 결과(`circular-dependency`, `external-import-boundary`, `pure-function-isolation`에서 `certainty`가 `exact`가 아닌 것)는 리뷰 범위의 기준으로 후보를 만든다. 범위 안 `unknownFiles`가 비어 있으면 후보가 되지 않는다. 비어 있지 않으면 message 끝에 범위 안 파일의 상대 경로 목록(정렬)을 붙여 후보로 만든다. validate·scan의 프로젝트 전체 보고는 그대로다.
@@ -102,6 +101,8 @@
 - `observeReviewGroupInputs`의 hash 입력(후보, 기록된 handoff, group 단위, `fileInputs`)은 persisted state의 순서를 따른다. 이 순서나 직렬화를 바꾸면 진행 중인 generation이 전부 `review-inputs-stale`이 되므로 불변식으로 유지한다.
 - prepare가 공유 snapshot 진단을 실을 때는 리뷰 문맥 문장을 앞에 두고 원래 `nextAction`을 `Outside this review:` 뒤로 보낸다. 리뷰 도중 소스나 입력을 고치면 리뷰가 stale이 되기 때문이다. config 진단은 축에 영향을 선언하면 리뷰를 완료로 보고하지 말라는 문장을, `affects: []`면 남은 설정으로 진행했다는 문장을 받는다.
 - evidence.md는 진단의 영향을 `impact:`로 적는다: 축 목록, `affects: []`는 `none`, `affects`가 없는 옛 진단은 `unknown`.
+- Git 프로세스 생성 비용이 파일·그룹 수에 비례하지 않도록 읽기 전용 질의와 roster diff·base ref 검증을 묶는다. 관측 의미를 보존하기 위해 결과가 변하지 않는 한 action 안에서만 공유한다.
+- 대형 brief 비용은 동일한 644개 TypeScript unit과 정본 default·fca·ecmascript 규칙을 입력으로 비교한다. 고정 overhead 기준은 451,628 bytes이며 규칙 본문을 뺀 rules: [] 렌더 결과로 15% 절감 조건을 유지한다. 규칙 본문은 리뷰 내용이므로 구조 비용 기준에 섞으면 규칙 편집만으로 기준이 움직이고 서로 다른 payload로는 절감률을 증명할 수 없다.
 
 ## API Contracts
 
@@ -110,33 +111,24 @@
 - 모든 action의 projectRoot는 저장소 안의 절대 경로이며 Git toplevel로 정규화한다. branchName은 선택 입력으로, 문자열이면 기존 branch 검증을 적용하고 생략하면 Git 현재 branch를 해석한다. branchName 없이 detached HEAD이면 action 범위에서 캐시되는 `rev-parse HEAD`의 앞 12자로 `detached-<sha12>`를 branch key로 쓴다(CI의 기본 상태). 같은 HEAD면 같은 key다. directory key는 원래 branch 문자열을 정규화하고 응답 branchName은 원래 문자열을 보존한다.
 - 한 action이 실행되는 동안 commit graph와 ref는 바뀌지 않으므로, `executeReviewGit`은 action 범위 안에서 같은 projectRoot·인자의 읽기 전용 Git 질의를 한 번만 실행하고 결과를 공유한다. 실패한 질의는 캐시하지 않고, working tree를 읽는 `status`는 action이 artifact를 쓰는 사이에 달라질 수 있어 매번 실행한다. action 범위 밖에서는 캐시가 없어 단위별 helper의 동작이 그대로다.
 - Git 프로세스 수는 검토 파일 수에 비례하지 않는다. 검토 가능한 roster 전체의 committed diff는 한 번의 `diff`로 읽어 `diff --git` 헤더가 경로와 정확히 일치하는 구간으로 나누고, Git이 헤더를 인용한 경로만 파일별 `diff`로 다시 읽는다. base ref 후보는 `cat-file --batch-check` 한 번으로 검증하며, 출력 줄 수가 후보 수와 다르면 후보별 `rev-parse --verify`로 되돌아간다. pathspec 와일드카드가 없는 경로에 대해 파일별 호출과 같은 결과를 내고, base ref 검증은 이름 해석이 같되 객체 존재까지 요구한다.
-- prepare input은 `{ action: "prepare", projectRoot, branchName?, baseRef?, force?, effort?, changeContext?, changeContextPath?, userInstructions? }`이다. 생략한 사용자 검토 기준은 빈 문자열이다. 호환되지 않는 과거 입력 계약은 explicit force로 원본을 보존한 채 다시 시작한다.
-- handoff input은 `{ action: "handoff", projectRoot, branchName?, baseRef?, documentSync, repaired, entries? }`이다. 활성 state에 generation이 있으면 generation 디렉터리, 없으면 branch 디렉터리의 `handoff.md`를 쓰며 caller는 응답의 `data.handoffPath`만 사용한다.
 - changeContext 또는 changeContextPath(절대 경로, 1 MiB 이하, 둘 다 주면 오류) → handoff 추출 → `REVIEW_CHANGE_CONTEXT_SECTIONS` 헤딩 발췌(없으면 앞부분과 `review-change-context-untemplated`) → 제어문자 제거 → 3000자 절단(`review-change-context-truncated`) 순서로 처리한다. 둘 다 생략하면 baseCommit..HEAD의 non-merge commit hash·subject 최대 30줄과 numstat 합계 한 줄로 생성한다. session·brief는 이를 untrusted 저장소 데이터로 표시한다.
 - handoff writer(`handoff`)와 reader(`prepare`)는 `scope/reviewHandoffSeedSchema.ts`의 스키마, 상수, 분류 표와 changed-scope 후보 선택 함수를 공유하며 `skills/pull-request/reference.md` §7은 같은 계약을 서술한다. 상한은 항목 40, note 120자, path 400자, ruleId 80자, scope 200개, snapshotHash 128자 또는 null이다. 잘못된 marker block은 진단 `review-handoff-invalid` 하나와 모든 review group에 속하는 project-wide `indeterminate` 행으로 보고되며, marker가 없으면 handoff와 진단이 모두 없다. 판단에 쓰이는 handoff 행이 바뀌면 해당 파일만 새 generation의 brief에 재배정한다. snapshotHash와 생성 통계만의 변화는 재리뷰 사유가 아니다.
 - legacy cached 및 artifact가 완전한 legacy resumable 분기는 기존 session·brief를 재사용하므로 changeContext를 읽지 않고 diagnostics를 빈 배열로 반환한다. 증분 prepare는 같은 source에서도 actor context, 규칙, 근거와 실행 정책을 다시 관측한 뒤에만 현재 generation을 재사용한다.
 - validate input은 `{ action: "validate", projectRoot, branchName?, kind, group, round?, generationId? }`이다. `generationId`를 주고 활성 generation과 다르면 opinion을 병합하지 않고 `review-generation-superseded`로 거부한다. review kind는 범위 안의 round가 필수이고 verify kind는 round를 금지한다. group은 `^\d{2,}$`이며 state에 존재해야 한다.
-- seal input은 `{ action: "seal", projectRoot, branchName?, baseRef? }`이고, state·matching hash·session을 요구한다.
 - state v2는 root·branch·base, source/file hash, phase와 timestamp 외에 `effort`, `groups`, prepare의 전체 `scope` snapshot, 전체 dirty path 집합 hash, nullable `verdict`와 optional 양의 정수 `validationPolicyVersion`을 가진다. 증분 state는 같은 v2의 additive 필드로 generation ID, committed HEAD·명시적 사용자 기준·environment·decision summary, 파일별 input manifest·원본 opinion의 경로 투영·origin·이전 미해결 finding를 기록한다. fresh state의 정책 버전은 2이며, 누락 또는 미지원 버전의 같은-identity 재사용은 artifact 변경 전 stable diagnostic으로 차단한다. group은 unit·churn·dependency·candidate·artifact path·round와 review/verify validation hash를 보존한다. opinion schema 7과 원본 bytes는 generation 사이에서 다시 쓰지 않는다.
-- scope file은 path·change·insertions·deletions·binary에 role·owner·nullable skip reason·rule ID·repository rule path를 더한다. unit은 nullable chunk index/total, churn, old/new hunk range와 review-directory-relative diff path를 가진다.
-- group의 review validation은 nullable `{ round, sha256, complete }`, verify validation은 nullable `{ sha256, reviewSha256 }`다. state verdict는 `APPROVED | REQUEST_CHANGES | INCONCLUSIVE | null`이다.
 - state 파일이 없으면 `missing`, schema version이 2가 아니면 schema mismatch, v2 구조가 malformed이거나 group ID에서 유도한 canonical artifact path와 다르면 `STATE_INVALID` error다. prepare는 이 판정들을 error로 올리지 않고 state를 보관 후 교체하며, 경로 해석도 state를 읽기 전에 branch 경로로 시작해 malformed state에서도 진행한다. 교체 사실은 새 레코드의 `replacedFrom`(사유, 보관 경로, 이전 generation·verdict, 폐기한 그룹, 사슬)에 남고 sealed 보고서·PR comment·seal 응답이 그것을 싣는다. state 파일이 없는데 generation이나 봉인 보고서가 남아 있으면 사유 `review-state-missing`으로 같은 기록을 남긴다. **선언된 한계**: 이 선택 필드가 든 state를 이전 버전 filid가 읽으면 schema가 `.strict()`라 `review-state-invalid`가 된다(다운그레이드는 지원하지 않는다).
 - 모든 review artifact path는 중앙 resolver가 review directory 안으로 제한하고 traversal과 descendant symlink를 거부한다. group artifact 이름은 검증된 group ID로만 조합한다.
 - prepare summary는 action·disposition·source/snapshot hash·file/unit/group/candidate count·evidence completeness·worktree·effort·concurrency를, cached일 때 verdict도 싣는다. 증분 summary는 generation ID와 reused/rerun/new/removed/bookkeeping group 수, 남은 최대 reviewer handoff 수를 더한다. data는 정규화된 projectRoot, 원래 branchName, 해석된 baseRef, review/state/evidence/session path와 optional reuse decision path, file·group·candidate snapshot, count·dirty path·status, next·sealReady를 싣는다.
 - `ReviewHandoff`는 kind(review·verify), group, review 전용 round, 절대 briefPath·outputPath, nullable priorOpinionPath, modelTier(efficient·strong), riskReasons를 가진다. review round 2 이상만 병합 opinion을 priorOpinionPath로 넘긴다. `ReviewHandoffPlan`은 next 배열과 sealReady다. 일반 첫 review와 verifier는 efficient, 모든 후속 review와 low의 위험 그룹 첫 review는 strong이다. host가 해당 티어를 지원할 때 스킬이 이를 선택하고, 지원하지 않으면 fallback을 알리며 모델 변경을 주장하지 않는다.
 - `ReviewGroupArtifactStatus`는 group, review·verify의 missing/invalid/trusted, 존재하는 roundFiles, trusted review의 assignedCount(그 외 null), briefPresent·verifyBriefPresent를 기록한다. review validation 부재는 missing, 파일 부재·hash 불일치는 invalid이며 verify는 reviewSha256 결합도 확인한다. 기존 artifact presence boolean은 유지한다.
-- prepare는 resumable 복구 → state 저장 → `readReviewGroupArtifactStatus` → `planNextHandoffs` → payload 순서다. fresh/cached도 artifact 기록을 끝낸 뒤 read → plan을 거친다. 증분 prepare는 새 generation에 전체 정본 산출물을 staging하고 재사용 artifact를 복사한 뒤 활성 state를 마지막에 교체한다. context submit은 capability를 재검사하고 opinion bytes를 쓴 뒤 기존 validate 경로를 호출한다. validate는 opinion 검증·병합·auto-verify·validation 기록 → state 저장 → 모든 group read → plan → payload이며 복구하지 않는다. checkpoint는 read → plan → payload만 수행하고 저장·복구하지 않는다.
+- prepare는 resumable 복구 → state 저장 → `readReviewGroupArtifactStatus` → `planNextHandoffs` → payload 순서다. fresh/cached도 artifact 기록을 끝낸 뒤 read → plan을 거친다. 증분 prepare는 새 generation에 전체 정본 산출물을 staging하고 재사용 artifact를 복사한 뒤 활성 state를 마지막에 교체한다. validate는 opinion 검증·병합·auto-verify·validation 기록 → state 저장 → 모든 group read → plan → payload이며 복구하지 않는다. checkpoint는 read → plan → payload만 수행하고 저장·복구하지 않는다.
 - 순수 handoff 계획은 state·paths·statuses만 입력받는다. review missing/invalid는 필요한 review round, trusted 미완료 review는 다음 round, trusted 완료 review와 missing/invalid verify는 assignedCount가 양수일 때 verify를 반환한다. dependsOn이 끝나지 않은 group은 제외한다. sealReady는 모든 group의 complete review·verify가 trusted일 때 true이며 documents-only/source-dirty는 항상 `{ next: [], sealReady: true }`다. 이미 sealed인 세션도 같은 값을 반환하므로 cached prepare는 액터를 다시 배정하지 않는다. cross-review는 prepare·validate의 next를 실행하고 다른 merge-track 스킬은 checkpoint의 next를 재개 관측에만 쓴다.
-- built-in rule map은 schema version 1과 `{ id, always?, match?, when?, file }` entry를 가진다. repository override는 `{ rules: [{ id, match?, always?, file, replaces? }] }`이고 override file은 project-relative path다.
 - group diff는 `diffs/<group>/<ordinal>-<basename>[.<k>-of-<n>].diff`로 materialize한다. review brief frontmatter는 group·rounds·plan-required·dependency·source hash·base ref·output을, 본문은 reviewer method verbatim(호스트별 도구 이름을 담지 않는다), Change Context, FCA Handoff(유효한 블록이 있을 때만), Files, Diffs, Prior Opinions, Other Changed Files(group 밖 파일 개수와 session checklist 참조만, 없으면 none), FCA Candidates, Repository Rules, Rules, Output Contract 순서다.
 - review brief의 Prior Opinions는 dependsOn group만 열거한다. 현재 group의 이전 병합 opinion 경로는 handoff의 priorOpinionPath가 전달한다.
 - reviewer Output Contract는 handoff output path에 미리 쓴 JSON skeleton의 key·배정 unit을 정본으로 사용하고 완전한 예시를 반복하지 않되 `checked`의 nonempty string array와 `gaps[].resolution`의 optional 중첩 shape·스키마 길이·enum 제약은 문자 그대로 싣는다. verifier는 미리 쓴 skeleton이 없으므로 brief 안의 최소 JSON shape와 배정 finding ID를 사용한다. method·rule·diff·source 추적과 JSON validation은 축소하지 않는다.
 - 새 reviewer skeleton은 trailing newline이 있는 compact JSON이다. 필수 skeleton 읽기도 brief와 합산해 입력 비용을 측정하며 들여쓰기로 반복되는 바이트를 줄인다. 기존 opinion 바이트는 재개에서 다시 포맷하지 않는다.
 - actor method는 pluginRoot의 cross-review skill 아래 reviewer·verifier 문서를 rule map과 같은 containment·symlink 검사로 읽고 부재 시 `review-actor-method-missing` error를 반환한다. review·verify의 Diffs는 group diff 합계가 16384바이트 이하면 unit path별 fenced diff를 인라인하고, 초과하면 `see Diff Path column`만 쓴다. 이 예산은 diff에만 적용하며 전체 brief 크기 상한이 아니다.
-- session frontmatter는 schema·branch·base ref·source hash·review directory·changed-file count·effort·created-at을 가진다. prepare가 채운 Change Context와 모든 roster path의 status·reason·group checklist를 함께 쓴다.
 - prepare summary와 session은 effort mode·reason·threshold, reviewableGroups와 maxReviewerHandoffs(모든 group rounds의 합)를 함께 노출한다. 이 호출 상한은 provider token 예산이나 실제 실행 횟수가 아니다.
-- review opinion은 schema 7, group, round, state, sourceHash, 배정 file 결과, finding, checked, gap, nullable risk plan을 가진 JSON이다. `chunk`는 `"k/n"` 또는 null이고 file result는 `reviewed | skipped`, state는 `COMPLETE | INDETERMINATE`다. skipped result는 reason이 필수이고 indeterminate state는 gap이 하나 이상이어야 한다.
-- review finding ID는 group별 `R<group>-<NNN>`이고 severity는 `error | warning`, category는 `bug | security | performance | maintainability | test | documentation | contract | structure | verification`이다. path는 배정 unit이어야 하며 `existingCode`, rule, message, evidence, consequence, recommendedAction은 비어 있지 않아야 한다.
 - review validation problem code는 `parse-error`, `schema-mismatch`, `source-hash-mismatch`, `file-missing`, `file-unassigned`, `result-invalid`, `finding-id-invalid`, `enum-invalid`, `field-empty`, `path-unassigned`, `gap-required`다. missing file은 `indeterminate`와 `review-opinion-invalid` 진단이고, 내용 문제는 `ok: false`인 정상 payload다.
 - finding line은 먼저 배정 unit의 hunk에서, 다음으로 HEAD file 전체에서 trim 단위로 `existingCode`를 찾는다. 유일한 위치만 `start-end`와 `inDiff`를 기록하고 나머지는 `unknown`, false다. 삭제된 배정 파일은 HEAD를 조회하지 않고 삭제 diff의 발췌를 보존한 채 `unknown`, false로 독립 verifier에게 전달한다.
 - round 1은 merged opinion을 만들고 이후 round는 `(path, lines, rule, existingCode)`로 deduplicate한 뒤 ID를 다시 순번화한다. files·checked·gaps는 합집합, state는 어느 입력이든 indeterminate이면 indeterminate, round는 최대값이다. 위험 신호와 첫 round의 불확실성은 finding과 독립적으로 한 번의 후속 review를 요구할 수 있다.
@@ -153,7 +145,7 @@
 - Fold first excludes source-mismatched or untrusted group artifacts. Dirty worktree remains INCONCLUSIVE. Otherwise trusted confirmed defects produce REQUEST_CHANGES regardless of completeness. `reviewComplete` independently requires conclusive evidence, trusted artifacts, complete coverage and decisions, and no gaps. Without confirmed defects, incomplete review is INCONCLUSIVE and only a complete review is APPROVED.
 - Deterministic FCA confirmation and out-of-diff refutation retain snapshot/hunk evidence. Decision sets must exactly match assignments. Invalid sets cannot contribute confirmed findings; reviewComplete remains false and exact-set recovery is retained.
 - `review-report.md` 형식은 스킬이 독립적으로 실행할 수 있도록 `skills/cross-review/report-formats.md`에서 정의한다. 구현은 schema 7 frontmatter 뒤 Scope, Evidence Status, optional Incremental Reuse, Coverage, Verification Log, Confirmed Findings, Refuted Candidates, Unresolved Evidence, Final Verdict를 순서대로 렌더링하고 confirmed path에 확정 line을 붙인다.
-- 이 계약 이전에 기록된 verify opinion은 재검증해야 한다(결정론 대상 ID 거부).
+- 결정론 대상 ID를 포함한 verify opinion은 거부하며 재검증해야 한다.
 - `fix-requests.md`는 `REQUEST_CHANGES`일 때만 seal이 렌더링한다. 항목은 `FIX-001`부터이며 canonical 여덟 필드 `Severity`, `Category`, `Path`, `Rule`, `Claim`, `Evidence`, `Consequence`, `Recommended Action`의 세부 블록은 `skills/cross-review/templates.md`의 fix-request 절을 정본으로 참조한다.
 - `pr-comment.md` 형식은 스킬이 독립적으로 실행할 수 있도록 `skills/cross-review/report-formats.md`에서 정의한다. 구현은 `## Code Review Governance — <verdict>` 표, 세 개의 details block과 report pointer를 렌더링한다. report pointer는 host와 입력 path flavor에 관계없이 `/` separator로 표시하고 Windows drive·UNC root는 보존한다.
 - seal summary는 verdict·file coverage·decision count와 optional 증분 재사용 수치를, data는 report path, nullable fix-request path, PR comment path, session path와 nullable blockersPath를 싣는다. session checklist block도 같은 fold 결과와 optional Incremental Reuse 표로 통째로 교체한다.
@@ -162,8 +154,6 @@
 - checkpoint는 state의 effort·groups와 top-level 및 group별 diff·brief·opinion·verify 존재, next·sealReady 및 optional 증분 재사용 수치를 반환한다. checkpoint·validate·seal은 현재 committed source와 파일별 판단 입력 및 규칙 발견 환경을 다시 확인한다.
 - `assess` summary는 `entryStage`, `worktreeDisposition`, `baseRef`, `unpushedCommits`, `dirtyPathCount`를 싣고 data의 assessment가 경로 목록을 담는다. 값은 관측 사실이며 중단 지시가 아니다.
 - `assess`의 완료 근거는 report template의 평평한 `key: scalar` frontmatter 안의 단일 `head_sha`와 `verdict`다. 전체 Git SHA-1 또는 SHA-256의 소문자 hex와 `PASS | FAIL | INCONCLUSIVE` 중 하나인 판정을 요구한다. 본문, 누락, 중복·모호한 키, 불완전한 frontmatter나 축약 SHA는 근거가 아니다. HEAD를 관측할 수 없거나 값이 다르거나 유효한 판정이 없으면 justifications → fix requests → PR → pr-create 순서로 재개한다.
-- phase는 `prepared | sealed`이고 lifecycle disposition은 `fresh | resumable | cached | stale | missing | validated | sealed | cleaned`이다.
-- payload 생성 시 diagnostic 생략은 module-scope readonly empty collection을 재사용한다.
 
 ## Acceptance Criteria
 
@@ -189,7 +179,7 @@
 
 - 같은 committed content와 effort에서 새 배정의 roster·snapshot hash·group 구성이 결정적이며 generation별 artifact path는 분리되고 state는 모든 prepare artifact 뒤 마지막에 한 번만 나타난다.
 - 현재 검증 정책의 prepared state는 같은 source hash와 effective effort에서 누락 artifact를 복구하고 기존 opinion을 보존한다. effective effort 변경은 최초 validate 이전도 거부한다. 현재 정책의 sealed state는 matching hash와 report가 있어야 cached다.
-- state가 없으면 새 generation을 준비한다. schema v1·파일별 provenance가 없는 legacy·malformed state는 명시 force 전까지 기존 bytes를 보존하며 진단한다.
+- state가 없으면 새 generation을 준비한다. 재개할 수 없는 schema·legacy·malformed·구형 검증 정책의 state는 force 없이 원본 byte를 보관한 뒤 교체하고 사유와 보관 위치를 진단한다. 완료할 수 없는 state가 재개를 영구 차단하지 않도록 하되 조사 근거는 잃지 않는다.
 - evidence와 session frontmatter는 review schema 7을 선언하고 session checklist에 모든 `(path, change)`를 한 번씩 보존한다.
 
 ### AC-review-handoff — handoff 블록 파싱
@@ -344,11 +334,6 @@
 - **Direct import**: `allowed`
 - **Reason**: These exact test fixture builders construct and inspect internal review artifacts across integration and unit suites. The runtime entry point cannot expose these implementation types, parsers and state-path helpers without enlarging its public contract solely for verification. Keeping the fixtures with their verification consumers avoids moving production review internals into the source root; only the listed consumers may import this organ directly.
 
-## History
-
-- 2026-09-08 — action 범위 Git 질의 memoization, roster 단위 diff 일괄 읽기, base ref 후보 일괄 검증. 한 action이 같은 `ls-tree`·`merge-base`·`diff`·`log`를 group마다 다시 실행해 Windows CI에서 filid 테스트 시간의 대부분을 Git 프로세스 생성이 차지했다. 결과가 바뀔 수 없는 범위(하나의 action)에서만 공유하므로 관측 의미는 유지된다.
-- 2026-09-06 — 대형 brief 비용 기준은 동일한 644개 `.ts` 단위와 정본 default·fca·ecmascript 규칙으로 비교한다. 과거 renderer `8ed691301a894de3734391e2dbc4dd60c4f75f78`에 같은 입력을 넣어 얻은 981,364 bytes에서 그 시점 규칙 본문 기여분 529,736 bytes를 뺀 451,628 bytes를 기준으로 고정했다. 규칙 본문은 리뷰 내용이지 brief 구조가 아니어서 규칙 문서를 고칠 때마다 기준이 움직였기 때문이다. 측정 대상은 `rules: []`로 렌더한 brief overhead이고, 서로 다른 규칙 payload를 비교하면 절감률을 증명할 수 없으므로 입력을 일치시키며, 정본 reviewer method와 중복되는 안내를 줄여 15% 절감 조건을 유지한다.
-
 ## Last Updated
 
-2026-09-10 — Separate diagnostic impact, review completeness and evidence recovery from defect disposition.
+리뷰 재사용 신원, 사실 동결, 판정 봉인이나 증거 복구 정책이 바뀔 때 갱신한다.

@@ -4,12 +4,15 @@
 
 CLAUDE.md maencof 섹션 읽기 도구.
 
+## Conventions
+
+파일 부재와 소유 섹션 부재를 구별해 미설치와 병합 실패를 혼동하지 않게 한다.
+
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증
-- core/ 모듈에 로직 위임
+- 병합과 같은 instruction manager의 호스트 대상을 조회
 
 ### Ask first
 
@@ -17,4 +20,4 @@ CLAUDE.md maencof 섹션 읽기 도구.
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
+- 읽기에서 파일이나 그래프 캐시를 변경

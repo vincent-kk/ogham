@@ -7,11 +7,11 @@
 - Delete를 포함한 모든 방문은 owner delivery 상태와 방문 map을 갱신한다. 미전달 소유 fractal의 첫 mutation도 차단하지 않고 owner INTENT.md 경로와 읽기 지시를 additional context로 전달하며, 문구는 읽었다는 증명을 주장하지 않는다.
 - INTENT.md를 대상으로 한 Read/Write/Edit/Delete는 그 모듈의 조용한 전달이다: delivery를 stamp하고 ctx·guide를 내지 않으며, 같은 턴에 이미 방문한 디렉터리에서도 fast path를 우회해 stamp한다. `[filid:map]`은 방문 집합이 바뀌면 그대로 방출한다. DETAIL.md 문서 위생·삭제 보호는 별도 validator가 실행한다.
 - branch, spike 상태, criteria ledger 또는 agent 역할은 방문 판정 입력이 아니다.
+- 첫 mutation도 포인터를 전달하고 즉시 진행한다. 포인터가 읽기 지침을 이미 전달하므로 재시도 강제보다 에이전트 자율성과 도구 호출 연속성을 우선한다.
+- 문서 본문은 inline하지 않고 cwd 기준 경로와 읽기 지시만 전달한다. 넓은 작업 턴·stale 재전달·서브에이전트마다 본문이 누적되는 컨텍스트 비용을 피하고 읽기는 에이전트가 선택하게 한다. 같은 이유로 INTENT 대상 호출은 조용한 전달이며 TTL 기본값은 3턴이다.
 
 ## API Contracts
 
-- `processVisit(input): HookOutput` — 단일 방문 입력을 전달/cache 결정으로 변환한다.
-- `resolveDeliveryContext(...)` — owner, delivery key와 self-delivery를 계산한다.
 - `[filid:ctx]` 블록은 `[filid:ctx] <cwd 기준 파일>` / `intent: <cwd 기준 owner>/INTENT.md` / `action: …`(`HOOK_CTX_READ_DIRECTIVE`) / `chain: …`(부모 INTENT가 있을 때) / `detail: …`(owner DETAIL이 있을 때) 줄로만 구성된다. cwd 밖의 경로는 절대경로로 쓴다.
 - machine path 비교와 상대경로 표현은 `@ogham/cross-platform` portable API를 사용한다.
 
@@ -44,11 +44,6 @@
 - **Direct import**: `allowed`
 - **Reason**: 훅 번들은 배럴을 import할 수 없다 — esbuild 가 배럴이 재노출하는 모듈 전체를 번들로 끌어오고, `scripts/buildHooks.mjs` 의 바이트 캡이 이를 빌드 실패로 막는다.
 
-## History
-
-- 2026-08-28 — 첫 mutation의 일회성 deny를 제거하고 일반 첫 방문처럼 포인터 context를 주입한 뒤 즉시 진행하도록 바꿨다. 포인터가 이미 읽기 지침을 전달하므로 재시도 강제의 마찰보다 에이전트 자율성과 도구 호출 연속성을 우선했다.
-- 2026-08-23 — `[filid:ctx]`와 gate deny에서 INTENT.md 본문 inline을 제거하고 cwd 기준 경로 + 읽기 지시로 바꿨다. 넓은 작업 턴·stale 재전달·서브에이전트마다 본문이 누적돼 컨텍스트를 잠식했고 읽기 강제의 필요는 줄었으므로, 읽기를 에이전트의 선택으로 돌렸다. 같은 이유로 INTENT.md 대상 호출을 조용한 전달로 바꾸고(settled 디렉터리 포함) TTL 기본값을 5턴에서 3턴으로 줄였다.
-
 ## Last Updated
 
-2026-08-28 — 미전달 mutation도 차단 없이 포인터 context를 주입하고 방문으로 기록하도록 계약을 완화했다.
+owner 포인터의 전달·TTL·조용한 방문 처리나 본문 비주입 정책이 바뀔 때 갱신한다.

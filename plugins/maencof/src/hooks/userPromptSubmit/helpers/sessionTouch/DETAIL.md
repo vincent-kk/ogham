@@ -9,14 +9,9 @@
 
 ## API Contracts
 
-- `runSessionTouch(input)` — `SessionTouchResult`. `lastActivityAt`·`usageSnapshot` 을 갱신하고, sweep 이 오마감한 세션이면 다시 연다.
-- 입력 `SessionTouchInput`, 출력 `SessionTouchResult`.
+레코드 변경은 sessionStore가 소유한다. 이 관심사는 매 턴 활동 재료만 기록하고 세션 마감과 사용자 알림은 수행하지 않는다.
 
 ## Acceptance Criteria
-
-### AC-gate-vault-and-session — 게이트
-
-- 볼트가 아니거나 `session_id` 가 없으면 레코드가 변경되지 않는다.
 
 ### AC-never-closes — 마감 금지
 
@@ -36,4 +31,4 @@
 
 ## Last Updated
 
-2026-07-30 — 게이트·위임 계약과 훅 직접 import 면책을 문서화했다.
+활동 기록의 sessionStore 위임, 세션 마감 금지 또는 사용자 무출력 경계가 바뀔 때 갱신한다.

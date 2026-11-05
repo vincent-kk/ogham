@@ -12,12 +12,7 @@
 
 ## API Contracts
 
-- `getSessionsDir(cwd)` · `getSessionDayPath(cwd, date)` — 경로 파생.
-- `recordSessionStart(cwd, ...)` — baseline 스냅샷 기록.
-- `readSessionDayLog(cwd, date)` — 일자 로그. 부재·손상 시 빈 로그.
-- `getRecentSessionSummary(cwd)` — 직전 세션 요약.
-- `sweepStaleSessions(cwd, ...)` — 미마감 레코드 마감. 멱등.
-- `touchSessionActivity` 는 배럴에 없다. 매 턴 훅이 concrete 경로로 소비하는 내부 단위다.
+세션 마감은 재개방 가능한 잠정 상태다. baseline과 snapshot을 보존하여 오마감 뒤 touch가 오면 멱등하게 재차분한다. 내부 touch를 배럴에 노출하지 않는 훅 소비 경계는 아래 면책을 따른다.
 
 ## Acceptance Criteria
 
@@ -43,4 +38,4 @@
 
 ## Last Updated
 
-2026-07-30 — 차분 마감·멱등 sweep 계약과 훅 직접 import 면책을 문서화했다.
+차분 마감·재개방·손상 일자 로그 보존 정책이 바뀔 때 갱신한다.

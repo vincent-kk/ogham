@@ -7,7 +7,6 @@ Codex의 공식 hook 입력을 Claude 계열 guard가 이해하는 host-neutral 
 - `tool_name="apply_patch"`와 문자열 `tool_input.command` 조합만 V4A patch로 해석한다.
 - Begin 직후의 선택적 non-empty `*** Environment ID:` preamble은 metadata로 소비하고 file operation에는 포함하지 않는다.
 - 성공한 patch는 입력 순서의 non-empty 연산 목록이며 add/update/delete는 각각 `Write`/`Edit`/`Delete`가 된다.
-- hunk header는 현재 cursor 이후에서 header 문자열을 포함하는 첫 line으로 탐색 범위를 좁힌다.
 - 단순 Bash 파일 읽기만 `Read`로 바꾸고, 그 밖의 도구 호출은 같은 객체로 통과시킨다.
 - 정규화된 연산은 원래 호출의 command와 sibling 필드를 보존한다.
 

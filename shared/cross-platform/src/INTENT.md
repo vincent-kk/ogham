@@ -9,7 +9,9 @@ OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
 
 - 패키지 외부 소비자는 `@ogham/cross-platform` 루트만 import한다.
 - 루트 배럴은 구체 소유 파일에서 공개 심볼을 이름으로 재노출한다.
-- 하위 fractal은 상대의 entry point만 소비하며 의존성 그래프를 DAG로 유지한다.
+- 하위 fractal은 상대의 entry point를 소비하며 의존성 그래프를 DAG로 유지한다.
+  제한 훅에 실리는 경로·파일 시스템 연산은 루트가 이름으로 재노출하는 concrete
+  source를 직접 소비할 수 있다 — aggregate 유입 없이 번들 크기를 지키기 위해서다.
 - `hostRegistry`는 내부 의존이 없는 leaf다.
 
 ## Boundaries
@@ -28,8 +30,3 @@ OS·호스트 호환 기능을 순수 루트 배럴로 통합한다.
 
 - 루트 `index.ts`에 선언 구현.
 - 패키지 외부 소비자가 하위 파일을 deep import.
-
-## Dependencies
-
-- 내부: 하위 fractal과 공개 심볼의 구체 소유 파일.
-- 외부: 각 하위 fractal이 자체 소유.

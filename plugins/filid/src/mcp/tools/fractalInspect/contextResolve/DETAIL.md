@@ -12,16 +12,14 @@
 - diagnostics는 각 owner chain 범위로 한정하며 top-level에는 first-seen 순서로 중복 제거해 모은다.
 - `comparePaths`가 주어지면 해당 request 경로들의 lowest common fractal을 shared snapshot에서 해석한다.
 - top-level summary는 batch 크기에 비례하는 경로나 diagnostics를 담지 않는다.
+- 대규모 변경에서 snapshot 재생성과 도구 호출 수를 줄이기 위해 단일 target도 배열로 받는 batch 계약을 유지한다.
 
 ## API Contracts
 
-- Input: `{ path, requests: [{ targetPath, comparePaths? }, ...] }`; `requests`는 최소 1개다.
 - 개별 request 타입은 `ContextResolveInput`의 구성 요소로 유지하며 별도의 barrel export로 노출하지 않는다.
-- Summary: project root와 request, resolved, failed, indeterminate 건수.
-- Data: 입력 순서의 `results`; 각 result는 index, normalized target path, status, diagnostics와 success discriminator를 가진다.
-- 성공 result는 item summary와 core `ContextResolution`을 가진다. 실패 result는 target diagnostic만 가지며 다른 request 결과를 보존한다.
-- item summary는 target, owner, chain length와 owner-to-root chain 경로, nearest DETAIL path, output language, 범위 밖 diagnostic 수, optional lowest common fractal path를 가진다.
-- 단일 target도 `requests`에 한 item으로 전달하고 `results[0]`에서 읽는다.
+
+- 단일 target도 배열로 받고 입력 순서와 cardinality를 보존한다. 한 target의 실패가 다른 target의 결과를 지우지 않는다.
+- top-level summary는 bounded count만 담고 chain은 item 결과에 남긴다. batch가 커져도 top-level summary가 batch 크기에 비례해 커지지 않게 한다.
 
 ## Acceptance Criteria
 
@@ -31,13 +29,6 @@
 - owner가 없는 target 또는 project 밖 target은 해당 item의 실패로 반환하며, 그 `context-target-unresolved` diagnostic은 `nextAction`으로 project 안의 경로를 다시 넣고 재호출하라고 안내한다.
 - An ignored target is unresolved with `context-target-ignored` and does not acquire an owner from the snapshot.
 - Exclusion is deterministic, but the existing item statuses have no deterministic non-resolution value: `ok` means a resolved chain and `violations` means a violated rule. The unresolved item and batch therefore remain `indeterminate` while the diagnostic names the config decision.
-
-### AC-context-batch — Shared snapshot과 독립 결과
-
-- 100개 request도 snapshot을 한 번만 생성한다.
-- 결과 순서와 cardinality는 requests와 같다.
-- 일부 target이 실패해도 해석 가능한 target의 결과는 유지한다.
-- 하나 이상의 item이 성공하지 못하면 top-level status는 `indeterminate`다.
 
 ### AC-context-inline-chain — chain은 result에 남는다
 
@@ -56,12 +47,6 @@
 - `comparePaths`의 모든 경로를 소유하는 가장 낮은 공통 fractal 경로를 반환한다.
 - 공통 fractal을 확정할 수 없으면 `null`이며 이를 실패로 바꾸지 않는다.
 
-## History
-
-- 2026-09-19 — `context-target-unresolved` diagnostic이 `nextAction`을 담는다.
-- 2026-09-05 — batch payload와 strict scalar-field 거부를 유지한 채 `fractal_inspect`의 `resolve` action으로 이동했다.
-- 2026-08-28 — 대규모 변경에서 snapshot 재생성과 tool 호출 수를 줄이기 위해 array-first batch 계약으로 전환했다.
-
 ## Last Updated
 
-2026-09-19
+batch 계약, chain과 진단의 범위 한정이나 ignore 대상 처리 정책이 바뀔 때 갱신한다.

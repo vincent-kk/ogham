@@ -9,9 +9,8 @@
 
 ## API Contracts
 
-- Input: `{ path, scopes? }`.
-- scopes는 documents, nodes, entry-points, boundaries, dag, verification이다.
-- Output은 `project` mode, snapshot hash, 검사/finding 수의 summary와 `ValidationReport` data를 가진 공통 tool envelope다.
+- scope는 같은 snapshot의 canonical rule을 고른다. project validation은 plan 실행 검증을 소유하지 않는다.
+- exact finding과 non-exact 증거는 서로 다른 status 의미로 유지한다.
 
 ## Acceptance Criteria
 
@@ -21,11 +20,6 @@
 - violation 또는 indeterminate evidence는 `ok`가 아니다.
 - `intent-document-contract`와 `detail-document-contract` diagnostic만 있고 finding이 있으면 `violations`이며 `indeterminate`가 아니다.
 
-## History
-
-- 2026-09-05 — plan 검증을 `restructure`로 분리하고 project 검증을 `fractal_inspect`의 `validate` action으로 이동했다.
-- 2026-08-20 — 문서 계약 finding diagnostic과 불완전 evidence를 구분했다.
-
 ## Last Updated
 
-2026-09-05
+scope 선택, 문서 finding과 불확실성의 구별이나 project validation 범위가 바뀔 때 갱신한다.

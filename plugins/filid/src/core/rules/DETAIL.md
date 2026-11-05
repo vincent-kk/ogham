@@ -9,9 +9,7 @@
 
 ## API Contracts
 
-- `loadBuiltinRules`, `evaluateRule`, `evaluateRules`, `getActiveRules`, `applyOverrides` — 규칙 평가.
-- `validateIntentMd`, `validateDetailMd`, `validateDetailAcceptanceGroups`, `parseBoundaryExemptions`, `countLines` — 문서 계약.
-- `validateStructure`, `validateNode`, `validateDependencies` — 노드 검증.
+공개 함수는 진입점에서 확인한다. 규칙 평가와 문서 검증은 판단 결과를 반환하며 project file을 수정하지 않는다.
 
 ## Acceptance Criteria
 
@@ -25,4 +23,4 @@
 
 ## Last Updated
 
-2026-07-28 — 중간 계층 fractal 계약을 문서화했다.
+규칙 평가의 소유권, 불확실성 finding이나 필수 suggestion 계약이 바뀔 때 갱신한다.

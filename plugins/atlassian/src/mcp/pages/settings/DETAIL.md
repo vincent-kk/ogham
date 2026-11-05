@@ -12,23 +12,13 @@
 
 ## API Contracts
 
-- 소비 라우트: 설정 폼 조회, 연결 테스트, 저장.
-- 서버가 주입한 상태로 현재 설정을 prefill 한다.
+서버가 주입한 상태가 prefill과 초기 scope의 근거다. 페이지가 초기 범위를 다시 판단하거나 상태 재수신으로 사용자의 명시적 범위 선택을 덮어쓰지 않는다.
 
 ## Acceptance Criteria
-
-### AC-settings-project-default — 프로젝트 기본 범위
-
-- 서버의 `initialScope`가 user와 project 어느 값이든 페이지가 그대로 선택한다.
-- 사용자가 범위를 바꾸면 해당 계층을 편집·저장하며, 상태 재수신은 이 선택을 덮어쓰지 않는다.
 
 ### AC-secret-masking — 비밀 마스킹
 
 - 저장된 자격증명이 화면에 평문으로 나타나지 않는다.
-
-### AC-dev-code-excluded — 개발 코드 제외
-
-- 배포된 `public/settings.html` 에 mock-api 코드가 없다.
 
 ### AC-no-external-assets — 외부 자산 없음
 
@@ -36,4 +26,4 @@
 
 ## Last Updated
 
-2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.
+초기 scope·마스킹·오프라인 UI와 배포 코드 제외 정책이 바뀔 때 갱신한다.

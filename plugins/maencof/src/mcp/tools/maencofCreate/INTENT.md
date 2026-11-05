@@ -4,13 +4,15 @@
 
 지식 문서 생성 도구. 레이어/서브레이어 기반 경로 결정.
 
+## Conventions
+
+평면 레이어·서브레이어 경로의 정본은 아키텍처 상수이며 쓰기도 같은 규칙을 따라야 한다.
+
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증
-- core/ 모듈에 로직 위임
-- 파일명 슬러그 생성은 `sanitizeSegment` (core/filenameSlug)에 위임
+- 파일명 슬러그는 sanitizeSegment에 위임; 읽기와 같은 frontmatter 게이트로 쓰기 전 검증
 
 ### Ask first
 
@@ -18,4 +20,4 @@
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
+- 경로 봉쇄와 frontmatter 검증을 거치지 않고 문서를 생성 — 파일 쓰기의 경계에서 vault 밖 쓰기와 무효 문서 저장을 막는다

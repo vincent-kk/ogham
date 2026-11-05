@@ -15,7 +15,7 @@
 ### Always do
 
 - 새 공개 모듈은 패키지 진입점에 명시적으로 export 추가
-- 훅 계층은 `node:*` 빌트인만 사용 (zod / MCP SDK 금지)
+- 훅의 외부 의존성은 `node:*`와 `@ogham/cross-platform`의 named export로 제한하고 번들 가드를 통과시킨다 — 호스트 경로·설정 병합은 공유하되 zod / MCP SDK 유입은 막는다
 
 ### Ask first
 

@@ -2,16 +2,16 @@
 
 Claude Code 훅 구현 모듈. SessionStart 시 설정 감지 및 스킬 가이드를 주입한다.
 
-## Structure
+## Conventions
 
-- `sessionStart/` — SessionStart 훅 로직 및 esbuild 진입점
+- 훅의 실행 진입은 번들로 배송된다. 진입점은 concrete 구현을 직접 참조하여 배럴 재노출 그래프가 훅 크기 가드를 넘기지 않게 한다.
 
 ## Boundaries
 
 ### Always do
 
 - 훅 출력은 JSON 형식으로 stdout에 기록한다
-- 설정 미발견 시 조용히 종료한다
+- 설정 미발견 시 환경 진단 경고만 허용한다. 불필요한 볼트 안내는 주입하지 않되 훅 실행 환경의 문제는 숨기지 않는다
 
 ### Ask first
 

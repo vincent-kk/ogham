@@ -3,7 +3,7 @@
 ## Requirements
 
 - 데이터 흐름은 단방향이다. Claude 정본 → `facts/`(읽기) → `adapters/`(순수 변환) → `pipeline/` 계획 → 디스크 반영 순으로만 흐르고 역방향 참조를 두지 않는다.
-- 부수효과는 두 지점뿐이다. 디스크 쓰기는 `pipeline/`, 스트림 출력과 exit 코드는 `main.ts` 가 독점한다. `adapters/`·`lint/`·`cli/` 는 순수 함수만 갖고 디스크에 닿지 않는다.
+- 정본 읽기는 facts가 소유하고 pipeline은 대상 탐색·비교·쓰기를 조율한다. 디스크 쓰기는 pipeline, 스트림 출력과 exit 코드는 `main.ts`가 독점한다. 변환·진단·인자 해석은 순수하게 유지해 입력 사실이 같을 때 주변 파일 상태가 결과를 바꾸지 않게 한다.
 - JSON 방출은 `utils/stableJson`(2-space 들여쓰기 + 끝 개행) 단일 경로를 거친다. 같은 정본이면 재실행이 바이트 동일한 산출을 낸다.
 - Claude 가 소비하는 파일은 읽기 전용이다. 쓰기 대상 경로는 `constants/adapterPaths.ts` 가 선언한 상수로만 만들어진다.
 - Codex hook matcher 해석은 `constants/hosts.ts` 의 단일 capability 정책을 따른다. 같은 정책이 지원하지 않는 exact tool 제거, Pre read fallback, 그리고 lint 진단을 함께 결정한다.
@@ -25,40 +25,10 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 - 스트림 분리: 진단(`✗`/`⚠`)은 stderr, 파일별 액션과 `✓ sync:` 요약은 stdout. 진단이 없으면 stderr 에 아무것도 쓰지 않는다. 액션 경로는 어느 OS 에서나 저장소 상대 forward-slash 한 형식이고 `unchanged` 는 줄로 출력하지 않는다.
 - exit 코드: error 수준 진단이 하나라도 있으면 1. `--check` 실행에서 `stale`·`missing` 이 있으면 1. 그 밖에는 0 이며, `--check` 없는 실행의 차이는 쓰기로 해소되므로 종료 코드에 반영되지 않는다.
 - 쓰기 실패: `applyFiles` 가 도중에 실패하면 `ApplyFilesError` 를 잡아 이미 반영된 outcome 을 stdout 으로 보고하고 `apply-io-error` 진단을 stderr 로 쓴 뒤 exit 1 한다. raw stacktrace 는 사용자에게 도달하지 않는다.
-- 자식 fractal 표면: `cli/`(`parseCommand`·`formatDiagnostics`·`formatOutcomes`·`SyncCommand`), `facts/`(`readPluginFacts`·`readMarketplaceFacts`), `adapters/`(빌더 7종, `emitsCodexSkillVariant`, lifecycle validation error), `lint/`(`lintHookEvents`·`lintHookMatchers`), `pipeline/`(`listPluginDirectories`·`planPluginAdapters`·`planRootAdapters`·`applyFiles`·`ApplyFilesError`).
-- organ 표면: `types/` 는 정본(source)·facts·계획(plan) 타입, `constants/` 는 Claude 산출물 경로·어댑터 경로·호스트 마커와 이벤트, `utils/` 는 `stableJson`.
-- 어댑터별 생성 규칙과 진단 코드 목록은 패키지 루트 `DETAIL.md` 가 소유한다. 여기서 되풀이하지 않는다.
+- 어댑터별 생성 규칙과 진단 코드 목록은 패키지 루트 `../DETAIL.md`가 소유한다. 여기서 되풀이하지 않는다.
 - Explicit MCP adaptation shares one pure validator between builders and lint. Invalid opt-in content produces its typed diagnostic before any adapter file is planned.
 
 ## Acceptance Criteria
-
-### AC-entry-arguments — 진입 인자 규약
-
-- `sync` 가 아닌 명령과 빈 인자 목록이 계획 없이 거부된다.
-- `--check` 가 디렉터리 앞이든 뒤든 인식되고 디렉터리 목록에 섞이지 않으며, 디렉터리는 준 순서를 유지한 절대 경로가 된다.
-
-### AC-check-no-write — check 모드 무쓰기
-
-- `--check` 실행이 어떤 파일도 쓰지 않는다.
-- 내용이 어긋난 파일은 `stale`, 없는 파일은 `missing` 으로 보고되고, 같은 파일은 두 모드 모두 `unchanged` 다.
-- 계획한 파일마다 outcome 이 하나씩 순서대로 나온다.
-
-### AC-exit-code — 종료 코드 판정
-
-- error 수준 진단이 있으면 exit 1 이다.
-- `--check` 에서 `stale` 또는 `missing` 이 있으면 exit 1 이고, `--check` 없는 같은 상태는 쓰기로 해소돼 0 이다.
-
-### AC-stream-split — 스트림 분리
-
-- 진단은 stderr 로만, 액션과 요약은 stdout 으로만 나간다.
-
-### AC-apply-failure-report — 쓰기 실패 보고
-
-- 중간 쓰기 실패에서 이미 반영된 outcome 이 stdout 에 남고, `apply-io-error` 진단이 stderr 로 나간 뒤 exit 1 한다.
-
-### AC-deterministic-json — 결정적 JSON 방출
-
-- 모든 JSON 산출이 `stableJson` 을 거쳐 2-space + 끝 개행 형식이며, 같은 정본에 대한 재실행이 바이트 동일하다.
 
 ### AC-write-target-confinement — 쓰기 대상 한정
 
@@ -81,4 +51,4 @@ node --import tsx tools/plugin-compiler/src/main.ts sync [--check] [pluginDir ..
 
 ## Last Updated
 
-2026-09-26 — Added shared MCP adaptation validation before adapter planning.
+CLI 실패 보고·단방향 처리 또는 보호된 수용 계약의 범위가 바뀔 때 갱신한다.

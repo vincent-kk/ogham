@@ -8,11 +8,7 @@
 
 ## API Contracts
 
-- `getImbasRoot(cwd)` — `<cwd>/.imbas`.
-- `getProjectDir(cwd, projectKey)` — `<root>/<segment>`. GitHub `owner/repo` 는 `owner--repo` 로 매핑된다.
-- `getCacheDir(cwd, projectKey)` · `getRunsDir(cwd, projectKey)` — 프로젝트 디렉터리 하위 `cache/` · `runs/`.
-- `getRunDir(cwd, projectKey, runId)` — `<runs>/<runId>`. 부적격 `runId` 는 throw.
-- 배럴은 위 다섯 함수만 노출한다. `projectDirName` 은 organ 내부 단위이며 공개 표면이 아니다.
+GitHub 참조는 단일 디렉터리 세그먼트로 매핑한다. 호출자는 경로 조립과 디렉터리 생성을 구분해야 하며, 이 모듈은 파일시스템을 변경하지 않는다.
 
 ## Acceptance Criteria
 
@@ -25,14 +21,6 @@
 
 - `owner/repo` 형태의 `project_ref` 가 `owner--repo` 단일 세그먼트로 매핑된다.
 
-## Boundary Exemptions
-
-### utils — Hook bundle direct import
-
-- **Consumers**: `**/src/hooks/**`
-- **Direct import**: allowed
-- **Reason**: `contextInjector` 훅은 esbuild 번들로 배송되고 17KB 크기 가드를 받는다. 배럴을 거치면 재노출 그래프 전체가 번들에 끌려 들어와 가드를 넘긴다 — 배럴 경유는 선택지가 아니라 빌드 실패다. 훅이 세그먼트 매핑을 자체 구현하는 대신 같은 함수를 직접 쓰는 편이 `.imbas/` 레이아웃을 한 곳에 묶어 둔다.
-
 ## Last Updated
 
-2026-07-30 — 세그먼트 거부 계약과 훅 직접 import 면책을 문서화했다.
+경로 세그먼트·프로젝트 매핑의 내용과 근거가 바뀔 때 갱신한다.

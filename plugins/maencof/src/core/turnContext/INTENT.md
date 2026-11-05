@@ -4,15 +4,9 @@
 
 KG 스냅샷·동반자 identity 로부터 압축 XML turn 컨텍스트(`buildTurnContext`)를 빌드하는 도메인 모듈. UserPromptSubmit 훅(`contextInjector`)과 MCP `contextCacheManage` 도구가 공유하므로 hooks 가 아니라 core 에 둔다. 훅 계약 타입에 의존하지 않는다.
 
-## Structure
+## Conventions
 
-- `build.ts` — `buildTurnContext` (조립 진입점)
-- `buildL1CoreBlock.ts` — SessionStart 1회용 `<l1-core-full>` 전체 본문 블록 (매 턴은 gist 만)
-- `buildSessionIdentityBlock.ts` — 세션 identity 블록
-- `renderIdentitySection.ts` — identity 섹션 렌더와 섹션 텍스트 정규화(`resolveSectionText`)
-- `readIndexMetadata.ts` · `readCachedNodesArray.ts` · `readCompanionIdentity.ts` · `readL1Summary.ts` — 캐시/소스 read
-- `buildCompanionIdentityTag.ts` · `compressMarkdown.ts` · `extractGist.ts` — 직렬화/압축
-- `index.ts` — 배럴
+세션 시작은 L1 전체 본문을, 매 턴은 gist만 싣는다. 매 턴 전체 본문을 넣으면 턴 예산을 소진한다.
 
 ## Boundaries
 

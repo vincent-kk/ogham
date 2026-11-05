@@ -2,22 +2,18 @@
 
 ## Requirements
 
-- 매 사용자 프롬프트마다 stdin의 prompt, 세션 카운터 저장소, 구성 저장소를 읽어 **2–3줄**을 출력한다: 호출 카운트와 점유율 미달 provider 한 줄, 강도별 nudge 한 줄, 키워드가 매치된 턴에만 소유자 지목 한 줄.
+- provider가 활성이고 세션이 식별된 프롬프트의 라이브 상태는 기본 2줄, 자동 지목 대상 키워드가 매치될 때만 3줄로 제한한다.
+- 모든 provider가 비활성이면 설정 안내 한 줄만 출력한다. 그 외 식별 불가 상태에서는 유효한 측정 정보가 없으므로 payload를 생략한다.
 - **매 턴 주입이므로 토큰 점유 최소화가 제1 제약이다.** 줄 수를 늘리지 않는다.
-- 호스트 세션 식별 불가, counter 파일 부재, 세션 불일치·잘못된 counter, 식별된 실제 0회를 서로 다른 상태로 표시한다.
+- 식별 불가는 payload 생략으로, counter 파일 부재·세션 불일치·잘못된 counter는 상태줄로 구분하여 측정 불가를 실제 0회로 보고하지 않는다.
 - counter 는 **읽기 전용**이다 — 리셋은 `counterManager` 의 책임이다.
 - 세션을 차단하지 않는다.
 
 ## API Contracts
 
-- UserPromptSubmit 처리 — 2–3줄의 `additionalContext` 를 주입한다.
+- UserPromptSubmit의 `additionalContext`는 상태별 생략·축약 규칙을 지켜 무정보 문구가 매 턴 토큰을 차지하지 않게 한다.
 
 ## Acceptance Criteria
-
-### AC-line-budget — 줄 수 예산
-
-- 주입이 3줄을 넘지 않는다.
-- 키워드 미매치 턴에는 소유자 지목 줄이 나오지 않는다.
 
 ### AC-counter-readonly — 카운터 읽기 전용
 
@@ -49,4 +45,4 @@
 
 ## Last Updated
 
-2026-08-23 — 세션 식별·파일 부재·실제 0회를 구분하고 unidentified 반복 payload를 생략하는 계약을 추가했다.
+측정 상태 구분·주입 예산·카운터 읽기 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

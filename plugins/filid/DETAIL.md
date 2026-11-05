@@ -1,11 +1,17 @@
 # Filid 1.0 Product Contract
 
-## Structure
+## Requirements
+
+- cross-review는 변경 범위 코드 품질 판정을 소유하며 전역 규칙 엔진은 소유하지 않는다.
+
+- revalidate는 owner에서 root까지 증거 범위를 넓힌다. 좁은 소비자 범위는 형제 프랙탈 증거를 보지 못해 false-INCONCLUSIVE를 만들 수 있기 때문이다.
+- 삭제 경로를 자동 제외하지 않는다. document drift를 숨기지 않기 위해서다.
+- context resolve는 100개 이상의 변경 경로도 한 snapshot으로 해석하도록 batch 계약을 사용한다.
+- resolve는 자잘한 correction이 논쟁적인 결정을 가리지 않도록 전체 decision sheet와 batch 입력을 사용한다.
+- repository-level 관리 파일 때문에 FCA owner가 있는 변경까지 PR이 막히지 않도록 config-declared와 existing ownerless 경로를 non-FCA 문서 범위로 분리한다.
 
 - `bridge/claude`는 Claude 런타임이며 Antigravity도 runner를 거쳐 이 번들을 실행한다. `bridge/codex`는 compiler 설정 `codexHookRuntime`이 선택하는 Codex 런타임이다. bridge 루트의 MCP 서버·facts 추출기·Antigravity runner·Windows shim은 모든 호스트가 공유한다.
 - 두 호스트 모두 플러그인 디렉터리 전체를 설치한다 — 이 분리는 설치 범위가 아니라 실행 경로를 나눈다.
-
-## Requirements
 
 - 리뷰 그룹과 공통 checklist는 큰 PR의 액터·입력 비용을 억제하기 위해 사용한다. 문서 동기화가 검증의 indeterminate 상태 때문에 게시 전체를 막지 않도록, 해결하지 못한 finding은 handoff로 review에 전달한다.
 - 같은 lifecycle의 MCP 기능은 상시 schema 비용과 도구 이름의 불일치를 줄이기 위해 action으로 묶는다. cross-review의 증거 준비·opinion 검증·봉인은 review_state가 소유하여 orchestrator가 대형 본문을 읽지 않고 재개하고, 검증 뒤 변조된 판단을 신뢰하지 않게 한다.
@@ -32,10 +38,9 @@
 ## API Contracts
 
 - cross-review 정본 스킬은 Claude의 완료 알림 수명주기를 유지한다. 명시적 handoffs 표식은 Codex 전용 문단을 선택하며, 자식 완료·검증·후속 review/verify 전달과 기존 봉인·전달 또는 진단 중단 조건까지 부모 turn을 유지한다.
-- 공개 MCP 도구는 `project_setup`, `fractal_inspect`, `restructure`, `review_state`의 4개다.
 - `fractal_inspect`의 `resolve` action은 하나 이상의 target request를 한 snapshot에서 순서대로 해석하며, 단일 target도 길이 1의 `requests` 배열로 전달한다.
 - 사용자 스킬은 12개다. 상시 7개는 `setup`, `scan`, `context-query`, `guide`, `enrich-docs`, `restructure`, `migrate`이고, merge-track 5개는 `pull-request`, `cross-review`, `resolve`, `revalidate`, `pipeline`이다.
-- 참조 기반 판정을 하는 skill(`scan`, `guide`, `restructure`, `cross-review`, `revalidate`, `pull-request`)은 첫 참조 기반 분석 호출 앞에서 facts 부트스트랩 정본 `skills/.shared/facts-bootstrap.md`를 가리키는 단계 하나만 둔다. 부트스트랩의 순서·도구 호출·다음 행동은 정본 한 곳에만 쓰고, skill은 그것을 복제하지 않는다. 정본의 "If the bootstrap cannot finish" 절 하나가 부트스트랩 실패의 효과를 정한다 — 지금은 분석이 사실을 읽지 않으므로 한 줄을 기록하고 같은 turn에서 본 흐름을 잇는다.
+- 참조 기반 판정을 하는 skill(`scan`, `guide`, `restructure`, `cross-review`, `revalidate`, `pull-request`)은 첫 참조 기반 분석 호출 앞에서 facts 부트스트랩 정본 `skills/.shared/facts-bootstrap.md`를 가리키는 단계 하나만 둔다. 부트스트랩의 순서·도구 호출·다음 행동은 정본 한 곳에만 쓰고, skill은 그것을 복제하지 않는다. 정본의 "If the bootstrap cannot finish" 절 하나가 부트스트랩 실패의 효과를 정한다.
 - merge-track 각 단계의 **출력 형식**이 계약이다. PR 본문은 `skills/pull-request/reference.md` §3과 handoff 블록 §7, review report와 PR comment는 `skills/cross-review/report-formats.md`, fix request의 여덟 필드 블록은 `skills/cross-review/templates.md`, 수용/거부 기록은 `skills/resolve/reference.md` §1, 재검증 결과는 `skills/revalidate/reference.md` §3이 정의한다. 스킬 실행에 필요한 형식은 스킬 폴더 안에 두며 플러그인 내부 INTENT/DETAIL을 색인하지 않는다. 이 경로들은 단계 간 입력 형식의 정본이므로 실제 위치를 가리켜야 하며, 형식이 깨지면 다음 단계가 입력을 읽지 못한다.
 - cross-review는 `review_schema` 7, state schema 2, `validationPolicyVersion` 2를 유지한다. 선택 필드 diagnostics·analysisAxes·reviewComplete는 오래된 상태 읽기를 보존하지만 오래된 정책은 새 prepare를 명시적으로 요구한다. REQUEST_CHANGES를 포함한 불완전 봉인은 신원에 결속된 review-blockers.md를 유지하며, 표시된 sidecar가 없거나 맞지 않으면 cache를 재사용하지 않는다.
 - fix request는 검증 가능한 원 claim을 포함하며, resolve가 만든 accepted FIX ID는 revalidate에서 해당 canonical request의 Severity, Category, Path, Rule, Claim, Evidence, Consequence, Recommended Action과 정확히 결합된다.
@@ -51,7 +56,7 @@
 
 ### AC-root-surface — 1.0 공개 표면
 
-- MCP 도구는 정확히 4개, 사용자 스킬은 정확히 12개이며 각각 독립 oracle이 고정한다.
+- 사용자 스킬은 정확히 12개이며 독립 oracle이 고정한다.
 - 제거된 AST·메트릭 도구와 스킬 7개(`ast-fallback`, `config-wizard`, `harvest`, `promote`, `structure-review`, `sync`, `update`)는 등록되거나 배포되지 않는다.
 
 ### AC-root-independence — 독립 실행
@@ -135,7 +140,6 @@
 - 추출 출력은 실행마다 `mktemp`로 만든 고유 파일(`${TMPDIR:-/tmp}` 아래, 프로젝트 트리 밖)에 쓴다. `dismiss`의 확인은 항목을 올리지 않은 별도 subagent가 한다.
 - 부트스트랩 절에는 사람을 부르는 문장이 없고, 실패의 효과는 한 절에만 있다.
 
-
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+제품 소유권, merge-track 전달 형식이나 리뷰 판정 정책이 바뀔 때 갱신한다.

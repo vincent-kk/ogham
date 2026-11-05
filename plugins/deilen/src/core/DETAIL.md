@@ -2,37 +2,16 @@
 
 ## Requirements
 
-- 모든 영속 상태(config, 세션 meta/viewer/feedback, 이미지)는 `~/.claude/plugins/deilen/` 하위에 atomicWrite 로 기록.
+- 세션·이미지·사용자 설정은 호스트별 deilen 캐시 루트에, 프로젝트 설정은 해당 워크스페이스의 .deilen 디렉터리에 보관하여 호스트 상태와 설정 스코프를 분리한다.
+- 영속 쓰기는 원자적으로 교체하여 부분 파일이 남지 않게 한다. 설정 레이어는 공유 `writeConfigLayer`, 세션·피드백·이미지는 로컬 `atomicWrite`를 경유한다.
 - 세션은 `project_hash`(cwd sha256 12-hex) 스코프 — 다른 cwd 의 세션 조회는 차단.
 - long-poll resolver 는 프로세스 전역 단일 슬롯/세션 + 멱등 `settle()`.
 
 ## API Contracts
 
-### configManager
-
-- `loadConfig(): Promise<Config>` — 부재/손상 시 `DEFAULT_CONFIG` (Zod 기본값 채움).
-- `saveConfig(config: Config): Promise<void>` — `ConfigSchema` 검증 후 atomicWrite.
-
-### sessionStore
-
-- `createSession({ sessionId, projectHash, title, url, markdown, createdAt, options? }): Promise<SessionMeta>` — viewer.md + meta.json.
-- `getSession(sessionId, projectHash): Promise<SessionMeta | null>` — 스코프 불일치/부재 시 null.
-- `readViewerMarkdown(sessionId): Promise<string | null>`.
-- `closeSession(sessionId): Promise<boolean>` — meta.status='closed'.
-- `clearCollectedFeedback(sessionId): Promise<void>` — feedback.json + 수집 이미지 정리, viewer.md/meta.json 보존(best-effort).
-- `removeSession(sessionId): Promise<void>` — 세션 디렉터리 전체 삭제(TTL/관리용).
-- `pruneExpired(ttlHours): Promise<number>` — 만료 디렉터리 제거 수.
-- resolver: `awaitFeedback(sessionId, waitSeconds, signal?): Promise<SettleValue>`, `deliverComplete(sessionId, feedback)`, `closeResolver(sessionId)`, `settleAllResolvers()`. `SettleValue.kind ∈ {complete, pending, superseded, closing, aborted}`.
-
-### feedbackStore
-
-- `saveFeedback(sessionId, payload, images): Promise<StoredFeedback>` — feedback.json.
-- `readFeedback(sessionId): Promise<StoredFeedback | null>`.
-
-### projectHash
-
-- `getProjectHash(cwd): string` (sha256 12-hex).
-- 세션 토큰(`generateToken`/`verifyToken`)은 공유 `@ogham/http-kit` 으로 이관.
+- long-poll은 세션마다 한 waiter만 소유한다. 해소를 단일 멱등 경로로 모아 timeout과 abort가 경쟁해도 타이머·리스너가 남지 않게 한다.
+- 피드백 수거는 문서와 세션 메타를 보존하고 피드백·첨부만 정리한다. 전체 세션 제거는 TTL·관리 경로의 책임이다.
+- 세션 토큰은 공유 `@ogham/http-kit`이 소유한다. core에서 재구현하지 않는다.
 
 ## Acceptance Criteria
 
@@ -51,4 +30,4 @@
 
 ## Last Updated
 
-2026-07-30 — acceptance 항목을 acceptance group 형식으로 정리했다(내용 변경 없음).
+영속 상태 소유권·프로젝트 격리·resolver 해소 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

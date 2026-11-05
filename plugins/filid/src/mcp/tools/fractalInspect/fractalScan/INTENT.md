@@ -25,7 +25,3 @@
 - 별도 scan-specific overflow file 작성
 - project source/config 수정
 - 언어 확장자나 entry filename 추측
-
-## Dependencies
-
-- core projectSnapshot, adapters와 common tool envelope

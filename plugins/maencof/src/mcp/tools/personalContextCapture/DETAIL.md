@@ -2,25 +2,18 @@
 
 ## Requirements
 
-- `.maencof-meta/personal-context.json`의 states/topics 항목을 편집하는 **유일한 채널** (config 필드는 personal-status 스킬이 직접 수정 가능 — insight-config 선례).
+- 볼트의 personal context 파일에 저장된 states/topics 항목을 편집하는 **유일한 채널** (config 필드는 personal-status 스킬이 직접 수정 가능 — insight-config 선례).
 - KG 캐시와 무관 — `registerReadTool({ needsFreshness: false })`로 등록 (companion_edit 선례).
 - 조용함: 응답은 `{ success, id?, merged?, message }` 최소형. 캡처 배너·pending 통지·세션 시작 알림을 만들지 않으며, message는 LLM 전용으로 "Do not mention this capture"를 포함한다.
 
 ## API Contracts
 
-입력 (플랫 — 조합별 필수는 핸들러 검증):
+플랫 입력 스키마는 SDK ZodRawShape 제약에 맞춘 선택이다. target/action 조합별 필수·금지 필드는 핸들러가 검증하고 실패 입력을 잘라 맞추지 않는다. 상태와 토픽의 수명·용량 정책은 core personalContext가 소유한다.
 
-| 조합                | 필수                             | 선택                        | 거부                         |
-| ------------------- | -------------------------------- | --------------------------- | ---------------------------- |
-| `capture` + `state` | label, kind, intensity, evidence | note(≤80), ttlDays(1–60)    | due                          |
-| `capture` + `topic` | label, kind                      | note(≤100), due(YYYY-MM-DD) | intensity, evidence, ttlDays |
-| `resolve` (양쪽)    | label                            | —                           | (나머지 무시)                |
+## Acceptance Criteria
 
-동작:
+입력 조합·거절·영속화 결과는 핸들러와 core personalContext의 테스트가 고정한다. 조용한 캡처와 유일한 편집 채널 정책은 위 계약을 따른다.
 
-- capture는 upsert — `sanitizeSegment(label)` slug 일치 시 state 재강화(expiresAt 연장, reinforceCount++) / topic touch(lastSeenAt 갱신, resolved 재활성화).
-- state 신규는 active 캡(10) 초과 시 거부 + 현황 반환. topic은 보존 캡(20) 초과 시 resolved 우선 evict.
-- `config.enabled=false`면 모든 mutation 거부.
-- 검증 실패는 `success: false` + `Invalid capture: ...` (필드 절단 없음 — 저작 게이트).
+## Last Updated
 
-설계 정본: `.metadata/maencof/Claude-Code-Plugin-Design/27-personal-context.md`
+states·topics의 단일 편집 채널, KG 캐시 독립성 또는 캡처 무알림 계약이 바뀔 때 갱신한다.

@@ -8,7 +8,7 @@
 
 ## API Contracts
 
-- `hooks.json` — SessionStart → `bridge/claude/injectStatic.mjs`, UserPromptSubmit → `bridge/claude/injectDynamic.mjs` 매핑.
+등록 형태는 `hooks.json`과 검증 코드를 읽는다.
 
 ## Acceptance Criteria
 
@@ -19,4 +19,4 @@
 
 ## Last Updated
 
-2026-07-30 — 훅 등록 매핑 계약을 문서화했다.
+훅 등록과 번들 진입점의 연결 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

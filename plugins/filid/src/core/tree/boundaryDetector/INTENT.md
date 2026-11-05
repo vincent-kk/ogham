@@ -4,17 +4,12 @@
 
 임의 파일 경로에서 출발해 가장 가까운 `package.json`을 "boundary"로 찾고, boundary까지의 디렉토리 체인 + 각 디렉토리의 `INTENT.md`/`DETAIL.md` 유무를 수집한다. `hooks/preToolUse/helpers/intentInjector`가 컨텍스트 체인 주입에 사용한다.
 
-## Structure
-
-- `boundaryDetector.ts` — `findBoundary`, `buildChain`, `ChainResult` 인터페이스
-
 ## Conventions
 
-- 경계 = `package.json` 존재 디렉토리 (monorepo 지원: 가장 가까운 것)
-- 상향 탐색은 반드시 `dirname(dir) === dir` 조건으로 루트 도달 감지
-- `ChainResult`는 leaf → root 순서의 `chain` 배열과 `intents`/`details` Map 쌍으로 반환
-- 경계가 없으면 `buildChain`은 null 반환 — 예외 금지
-- 모든 경로는 `path.resolve`로 절대 경로로 정규화
+- 경계는 가장 가까운 package 선언이다. 모노레포 전체를 하나의 owner로 추정하지 않는다.
+- chain은 leaf-first로 유지한다. 소비자가 역순으로 지침을 전달하므로 방향 변경은 계약 변경이다.
+- 경계 부재는 예외나 추정 fallback이 아닌 null이다.
+- 파일 내용은 읽지 않고 존재만 확인한다. 문서 전달을 위한 경계 탐색에 구문 해석을 끌어들이지 않는다.
 
 ## Boundaries
 
@@ -33,8 +28,3 @@
 - 경계보다 위(상위 모노레포 루트) 디렉토리를 체인에 포함
 - 파일 내용 읽기 (존재 여부만 검사)
 - `rules/`, `analysis/` 등 상위 계층 import
-
-## Dependencies
-
-- `node:fs` (`existsSync`), `node:path` (`dirname`, `join`, `resolve`)
-- `../../../constants/documentFiles.js` (`INTENT_MD`, `DETAIL_MD`)

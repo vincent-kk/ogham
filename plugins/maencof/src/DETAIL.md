@@ -4,7 +4,7 @@
 
 - `index.ts` 가 `@ogham/maencof` 의 유일한 라이브러리 표면이다. 모든 export 를 이름으로 열거하며, 여기 없는 심볼은 계약이 아니다.
 - `createServer` · `startServer` 는 이 표면에 없다. 실행 진입점은 esbuild 가 `mcp/serverEntry/serverEntry.ts` 에서 만드는 `bridge/mcp-server.cjs` 이고, 배럴이 `mcp/server` 를 끌어오면 `server.ts → version.ts` 참조와 맞물려 `src → mcp → mcp/server → src` 순환이 된다.
-- 의존 방향은 한쪽이다. `core/` 는 `mcp/` · `hooks/` 에 의존하지 않고, `types/` 는 zod 외 외부 의존성을 갖지 않는다.
+- 의존 방향은 한쪽이다. `core/` 는 `mcp/` · `hooks/` 에 의존하지 않고, `types/` 의 외부 의존은 스키마 검증용 zod와 호스트 간 경로 해석을 통일하는 @ogham/cross-platform으로 한정한다. 호스트별 경로 정규화를 다시 구현하지 않는다.
 - 서브레이어 허용값은 `types/frontmatter.ts` 의 `SubLayerSchema` 하나가 소유한다. frontmatter 검증도 MCP 도구 스키마도 이 스키마에서 파생하며, 값 목록을 리터럴로 다시 적지 않는다 — `SubLayer` 타입만 좁히고 어딘가의 리터럴을 놓치면 그 자리는 폐기된 값을 계속 광고한다.
 - `version.ts` 는 빌드 시 생성한다. 직접 수정하지 않는다.
 - `bridge/` 산출물은 esbuild 가 만든다. 소스는 `src/hooks/<event>/<event>.entry.ts` 와 `src/mcp/serverEntry/serverEntry.ts` 이며 산출물을 손대지 않는다.
@@ -15,31 +15,9 @@
 
 ## API Contracts
 
-### Entry point (`index.ts`)
-
-- **Types** — `types/index.ts` 의 런타임 값과 타입을 이름으로 재노출한다. 스키마(`CompanionIdentitySchema` · `DialogueConfigSchema` · `FrontmatterSchema` · `PersonSchema` · `SubLayerSchema` 등), 레이어 좌표(`Layer` · `LAYER_DIR` · `L3_SUBDIR` · `dirFromLayer` · `layerFromDir` · `isLayer1Path`), `EDGE_TYPE`, `EXPECTED_ARCHITECTURE_VERSION`, 그리고 도구·훅 입출력 타입 전체.
-- **Sub-layer 값 목록** — `SubLayerSchema` 는 `SubLayer` 타입의 런타임 짝으로 공개된다. 다른 패키지의 MCP 도구가 `sub_layer` 입력 스키마를 세울 때 이것을 쓰라고 내놓은 것이며, `.options` 로 값 배열을 얻는다.
-- **Version** — `VERSION` (생성 상수).
-- **Core** — `vaultScanner`(`scanVault` · `buildSnapshot` · `computeChangeSet` · `scanIncrementalChanges` · `readVaultFile`), `documentParser`(`parseYamlFrontmatter` · `extractFrontmatter` · `extractLinks` · `parseDocument` · `buildKnowledgeNode` · `parseDocumentFromFile`), `graphBuilder`(`buildGraph` · `buildAdjacencyList` · `detectOrphans`), `dagConverter`(`convertToDAG` · `applyLayerDirectionality`), `weightCalculator`(`calculateWeights` · `computePageRank` · `normalizeWeights` · `getLayerDecay` · `LAYER_DECAY_FACTORS`), `spreadingActivation`(`runAccumulativeActivation`), `communityDetector`(`CommunityDetector` · `detectCommunities`), `claudeMdMerger`(`mergeMaencofSection` · `readMaencofSection` · `removeMaencofSection` · `ClaudeMdMerger` · 마커 2종), `contentDedup`(`deduplicateContent`).
-- **Search** — `queryEngine`(`query` · `resolveSeedNodes` · `deriveContextSeeds` · `QueryEngine` · `invalidateQueryCache`), `contextAssembler`(`assembleContext` · `extractBestSnippet` · `estimateTokens` · `ContextAssembler`).
-- **Index** — `metadataStore`(`serializeGraph` · `deserializeGraph` · `MetadataStore` · `CACHE_FILES`), `incrementalTracker`(`computeIncrementalChangeSet` · `computeOneHopNeighbors` · `computeIncrementalScope` · `createIncrementalSnapshot` · `IncrementalTracker`).
-- **MCP** — `shared` 헬퍼(`toolResult` · `toolError` · `mapReplacer` · `getBacklinks` · `removeBacklinks`)와 도구 핸들러 일부(`handleMaencofCreate` · `handleMaencofRead` · `handleMaencofUpdate` · `handleMaencofDelete` · `handleMaencofMove` · `handleKgSearch` · `handleKgNavigate` · `handleKgContext` · `handleKgStatus` · `handleKgBuild`), 그리고 `mcp/server/middlewares` 의 `mergeStaleNodesIntoGraph`. 마지막 항목은 `mcp/index.ts` 가 `mcp/server` 를 재노출하지 않으므로 그 하위 fractal 의 entry point 를 직접 가져간다.
-- **Policy constant** — `READ_REINDEX_CAP`.
-
-`mcp/index.ts` 가 노출하는 도구 핸들러 전체 집합보다 이 배럴의 MCP 묶음이 작다. 라이브러리 소비자가 실제로 쓰는 것만 승격하는 것이 현재 계약이다.
-
-### Architecture version
-
-`EXPECTED_ARCHITECTURE_VERSION` 은 `constants/architecture.ts` 가 소유한다. `core/architectureMigrator` 의 `checkArchitectureVersion` 이 vault 의 현재 값과 비교해 마이그레이션 필요 여부를 판정하고, `planMigration` 이 이 상수를 목표 버전으로 삼는다.
-
-### 생성·번들 산출물
-
-| 산출물                                 | 생성기                                      | 소스                                  |
-| -------------------------------------- | ------------------------------------------- | ------------------------------------- |
-| `src/version.ts`                       | `version:sync` 빌드 단계                    | `package.json` 버전                   |
-| `bridge/<host>/<event>.mjs`            | `scripts/buildHooks.mjs`                    | `src/hooks/<event>/<event>.entry.ts`  |
-| `bridge/mcp-server.cjs`                | `scripts/buildMcpServer.mjs`                | `src/mcp/serverEntry/serverEntry.ts`  |
-| `skills/.shared/host-configuration.md` | `scripts/syncHostConfigurationReference.ts` | `src/core/hostConfigurationSurfaces/` |
+- `mergeStaleNodesIntoGraph`는 `mcp/server/middlewares`의 entry point에서 직접 재노출한다. `mcp/index.ts`가 `mcp/server`를 재노출하지 않기 때문이며, 서버 생성 함수를 끌어오지 않으므로 배럴의 순환 금지와 충돌하지 않는다.
+- 라이브러리 표면은 실제 외부 소비자가 필요한 심볼만 승격한다. MCP의 전체 도구 집합을 그대로 공개하지 않는다.
+- `SubLayerSchema`는 다른 패키지의 입력 스키마도 같은 허용값에서 파생하도록 공개한다. 타입만 좁히고 값 리터럴을 남겨 폐기된 값을 광고하는 드리프트를 막는다.
 
 ## Acceptance Criteria
 
@@ -57,7 +35,7 @@
 
 ### AC-types-dependency-free — types 무의존
 
-- `types/` 가 zod 외 외부 의존성을 갖지 않는다.
+- `types/` 의 외부 의존은 zod와 @ogham/cross-platform으로 한정하고, MCP·훅 수명주기를 끌어오지 않는다.
 
 ### AC-sublayer-single-source — 서브레이어 값 단일 소유
 
@@ -88,10 +66,6 @@
 - **Direct import**: `allowed`
 - **Reason**: 빌드가 만드는 단일 상수 파일이고 아무것도 import 하지 않는다. 소비자를 `src/index.ts` 로 돌리면 하위 fractal 이 조상 배럴의 공개 표면 전체에 의존하게 되고, SessionStart 훅 소비자는 배럴 경유가 번들 크기 가드에 걸려 아예 불가능하다.
 
-## History
-
-- 2026-08-04 — `SubLayerSchema` 를 배럴에 올렸다. v3 로 `SubLayer` 를 L3 3종으로 좁혔을 때 이 패키지 안 리터럴은 전부 따라갔지만 `@ogham/maencof-lens` 의 도구 스키마는 남아 `buffer`·`boundary` 를 계속 광고했고, 타입이 좁아진 뒤에야 컴파일이 막혔다. 값 목록을 재기술할 수 있는 한 같은 드리프트가 다시 생기므로 파생 가능한 형태로 공개한다.
-
 ## Last Updated
 
-2026-08-23 — host configuration registry와 생성 skill reference를 생성물 계약에 추가했다.
+공개 표면의 승격 정책·생성물 소유권·세션 수명주기 경계가 바뀔 때 갱신한다.

@@ -2,18 +2,16 @@
 
 ## Requirements
 
-- Resolve the requested project root and create `.filid/config.json` only when it does not exist.
-- Create config version 2 with automatic adapter selection by default.
+- Initialize only an absent project config or a losslessly convertible v1/v2 config; initialization must not replace user choices with new defaults.
+- Create config version 3 with automatic adapter selection by default.
 - When adapter IDs are supplied, create explicit adapter selection preserving their order.
 - Keep rule-document synchronization outside this action.
 - Initialization explicitly records the built-in `verification.organNames` list in the default configuration.
 
 ## API Contracts
 
-- Input: `{ path: string, language?: string, adapterIds?: string[] }`.
-- The parent `project_setup` init action owns optional-path resolution; this child requires the resolved root.
-- Output uses the common envelope; summary reports whether the config was created and its absolute path.
-- Existing configuration is never overwritten.
+- The parent dispatcher resolves an optional project path; this child requires the resolved root.
+- Persist a v1/v2 migration only when no key is discarded and the result passes the strict v3 schema. Preserve other existing files byte for byte so initialization cannot silently settle a policy-loss decision.
 
 ## Acceptance Criteria
 
@@ -25,13 +23,8 @@
 
 ### AC-project-init-preserve — Existing config
 
-- Repeated initialization leaves the existing config byte content unchanged.
-
-## History
-
-- 2026-09-05 — Moved the unchanged initialization payload behind `project_setup` action `init`.
-- 2026-07-26 — Added config v2 adapter selection input.
+- Existing v3 files and v1/v2 files that discard keys or fail validation retain their original bytes. A lossless validated v1/v2 migration may change serialization once; subsequent initialization preserves the v3 bytes.
 
 ## Last Updated
 
-2026-09-05
+Update when initialization ownership, config preservation, or adapter-selection policy changes.

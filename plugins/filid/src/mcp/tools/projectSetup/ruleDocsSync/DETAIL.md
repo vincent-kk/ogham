@@ -11,11 +11,9 @@
 
 ## API Contracts
 
-- Input: `{ action, path, selections?, resync? }`.
 - defensive string/null 입력 정규화는 기존 setup 호환을 위해 유지한다.
 - manifest data는 `pluginRootResolved`를 명시해 일반 skipped 항목과 host resolution 실패를 구분한다.
 - status/manifest 상세는 envelope data이며 예산 초과 시 artifact로 이동한다.
-- sync summary는 created/updated/removed/skipped/drift 수를 노출한다.
 - action discriminant와 diagnostic code/message는 constants의 canonical 값을 사용한다.
 
 ## Acceptance Criteria
@@ -30,11 +28,6 @@
 - action과 핵심 count는 artifact 유무와 관계없이 summary에 남는다.
 - plugin root 미해석 status/manifest는 empty diagnostics의 `ok`가 아니다.
 
-## History
-
-- 2026-09-05 — 기존 payload를 유지한 채 `project_setup`의 세 rules action 뒤 child 계약으로 이동했다.
-- 2026-07-27 — plugin root 미해석 상태의 unsupported envelope 계약을 추가.
-
 ## Last Updated
 
-2026-09-05
+규칙 문서의 required·resync 정책, project 배포 레이어나 plugin-root 미해석 처리가 바뀔 때 갱신한다.

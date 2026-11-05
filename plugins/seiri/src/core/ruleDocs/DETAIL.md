@@ -17,10 +17,7 @@
 
 ## API Contracts
 
-- `loaders/` — `loadManifest`(매니페스트 파싱·검증).
-- `status/` — 한 레이어 채널의 배포 상태와 채널 경로 스냅샷(`getRuleDocsStatus`).
-- `sync/` — 동일 계획을 쓰는 dry-run 및 실행 어댑터.
-- `utils/` — 매니페스트·host·레이어 대상·공유 결과 매핑.
+미리보기와 적용은 같은 호스트 대상·revision에 묶인다. 다른 계층에서 잃을 것은 미리보기에, 실제 제거한 것은 적용 결과에 실어 레이어 이동을 숨기지 않는다.
 
 ## Acceptance Criteria
 
@@ -70,4 +67,4 @@
 
 ## Last Updated
 
-2026-09-26 — 훅의 `utils` 직접 import 면책을 선언했다.
+호스트 채널·revision·드리프트·레이어 이동 계약의 내용과 근거가 바뀔 때 갱신한다.

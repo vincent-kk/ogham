@@ -4,12 +4,15 @@
 
 지식 문서 삭제 도구. backlink 정리 포함.
 
+## Conventions
+
+정체성 문서 보호와 참조 손상 판단이 삭제의 경계다.
+
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증
-- core/ 모듈에 로직 위임
+- L1 삭제 거부; backlink가 있으면 force를 요구하고 경고를 상한 내 요약
 
 ### Ask first
 
@@ -17,4 +20,4 @@
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
+- 경로 봉쇄·L1 보호를 우회하거나 명시적 force 없이 참조 문서 삭제

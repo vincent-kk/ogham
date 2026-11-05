@@ -4,13 +4,6 @@
 
 MCP payload를 16 KiB inline budget에 맞추고 overflow 또는 always-persist payload를 plugin cache의 content-addressed JSON artifact로 atomic 저장한다.
 
-## Structure
-
-- `artifactStore.ts` — payload byte budget, hash와 envelope materialization
-- `serialization/` — artifact와 MCP transport가 공유하는 compact JSON serializer
-- `operations/` — atomic host filesystem write/rename leaf organ
-- `index.ts` — 세 public function의 named barrel
-
 ## Conventions
 
 - compact UTF-8 JSON bytes를 예산과 SHA-256의 단일 입력으로 사용한다.
@@ -35,7 +28,3 @@ MCP payload를 16 KiB inline budget에 맞추고 overflow 또는 always-persist 
 - project source 아래 artifact 저장
 - pretty JSON, mutable global cache 또는 장기 보존 보장
 - payload data를 overflow envelope에 중복 inline
-
-## Dependencies
-
-- `../../../types/toolEnvelope.js`, `../../../constants/`, `@ogham/cross-platform`

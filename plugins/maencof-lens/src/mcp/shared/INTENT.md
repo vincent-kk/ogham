@@ -2,12 +2,15 @@
 
 MCP 툴 응답 헬퍼. `toolResult`와 `toolError` 포맷터를 제공한다.
 
+## Conventions
+
+콜백마다 MCP content를 따로 조립하면 오류 표시가 갈라진다.
+
 ## Boundaries
 
 ### Always do
 
-- 이 모듈의 단일 책임을 유지한다
-- 변경 시 관련 테스트를 함께 업데이트한다
+- 일반 결과와 오류 봉투의 구분을 이 모듈에서 통일한다.
 
 ### Ask first
 

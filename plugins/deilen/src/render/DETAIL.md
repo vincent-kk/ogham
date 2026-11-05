@@ -18,54 +18,18 @@
   - 승인 태그로 재구성되지 않은 잔여 `<` 는 전부 `&lt;` 로 이스케이프 — 미완성 태그(`<div onclick=x` + 무 `>`)가 브라우저에서 attribute-soup 로 재해석되는 경로 차단.
   - 속성값은 엔티티 **decode → 검증 → re-encode**. `href`/`src` 는 decode 후 제어 문자를 제거한 값으로 스킴 검사 — `java&#115;cript:`·`java&colon;script:` 류 난독화 우회 차단.
 - `file://` 이미지 src 는 `/api/image/<sid>/<i>` 라우트로 치환해 뷰어가 로컬 이미지를 표시할 수 있게 한다(http/https/data/상대 스킴은 불변).
+- GitHub HTML 패리티는 허용 태그 정책의 기준이다. 구식 tt·strike, srcset 파싱이 필요한 picture·source와 bdo는 제외한다.
 
 ## API Contracts
 
-- `renderMarkdown(markdown: string, options?: { imageRewrite?: { sessionId, token } }): RenderMeta`
-  - `html`: sanitize 된 base HTML
-  - `lineCount`: 원본 markdown 라인 수 (빈 문자열은 0)
-  - `sourceLineIndex`: `Array<{ startLine, endLine }>` — 앵커 가능한 블록 범위 목록
-  - `options.imageRewrite` 지정 시 `file://` 이미지 src 를 `/api/image/<sid>/<i>`(문서 순서 인덱스)로 치환; 그 외 스킴은 불변
-- `walkLocalImages(markdown, visit): void`
-  - `file://` 이미지 src 를 문서 순서로 방문 — 렌더 치환과 동일 인덱스. `/api/image` 서빙이 "이 문서가 참조한 경로" 멤버십을 복원하는 단일 소스
-- `sanitizeHtml(html: string, profile?: "rendered" | "raw"): string`
-  - `rendered`(기본): markdown-it 산출 HTML 용 — 내부 예약 속성 허용
-  - `raw`: 작성자 raw HTML 용 — 내부 예약 속성 불허 (markdownIt 렌더러 규칙에서 사용)
-  - 두 프로파일 공통: 주석/선언/PI/CDATA 제거, script/style 내용째 삭제, allowlist 외 태그 제거(텍스트 보존), 잔여 `<` 이스케이프, 속성 decode→검증→re-encode
-  - `href`/`src` 위험 스킴(`javascript:` 등) 제거, `img` 만 `data:image/` 허용
-  - `th`/`td` 의 `style` 은 `text-align:(left|right|center)` 만 허용
-- `sourceLinePlugin(markdownIt: MarkdownIt): void` — core ruler 등록 (블록 토큰 `data-source-line`/`-end`)
-
-## Allowlist (GitHub 패리티)
-
-- 기존 33개 태그 + `details summary b i ins dl dt dd q cite abbr dfn samp var small time wbr figure figcaption caption tfoot ruby rt rp` (GitHub html-pipeline 허용 집합 기준; `tt`/`strike`(구식), `picture`/`source`(srcset 파싱 필요), `bdo` 는 제외)
-- 콘텐츠 속성: `details[open]`, `time[datetime]`, `abbr[title]`, `ol[start]` (`<ol start>` 는 markdown-it 자체 산출물이기도 한 기존 결함 수정)
-
-## Markers (클라이언트 계약)
-
-- 코드: `<pre data-source-line><code class="language-X" data-lang="X">…원문…</code></pre>`
-- mermaid: `<div class="deilen-mermaid" data-source-line><pre class="deilen-mermaid-src">…원문…</pre></div>`
-- 수식: `<span class="deilen-math" data-display="0|1">…원문…</span>` (display 는 `<p class="deilen-math-block">` 로 감쌈)
-- task list: `<li class="deilen-task-item[ checked]" data-source-line><span class="deilen-task-checkbox[ checked]"></span>…</li>` (체크 시각화는 CSS)
-- raw HTML 블록: 첫 여는 태그에 `data-source-line`/`data-source-end` 주입 — 뷰어 anchorTargets(직계 자식 수집)가 그대로 인식. 내부 예약 class/data-\* 는 raw 유래 에서 등장 불가.
+- 로컬 이미지 열거와 렌더 치환은 같은 문서 순서 인덱스를 공유한다. HTTP 이미지 서빙의 문서 멤버십 판정이 렌더 결과와 어긋나지 않게 하는 단일 소스다.
+- raw와 rendered 정제 프로파일을 구분한다. 작성자가 넣은 HTML은 내부 예약 속성을 사용할 수 없고, 렌더러가 생성한 표식만 클라이언트가 신뢰할 수 있다.
+- 라인 앵커와 렌더 표식의 형태는 렌더 규칙 및 검증 코드를 읽는다. 클라이언트와 공유하는 계약이므로 한쪽만 바꾸지 않는다.
 
 ## Acceptance Criteria
 
-### AC-render-markers — 클라이언트 표식 생성
-
-- 표/코드/mermaid/inline·display 수식/task list 표식이 각각 정확히 생성된다.
-- `<details><summary>` 블록이 구조 그대로 렌더되고 `open` 속성이 보존된다.
-
-### AC-source-anchors — 원본 라인 앵커
-
-- 모든 markdown 블록에 `data-source-line` 이 부여되고, raw HTML 블록은 첫 여는 태그에 부여된다.
-
-### AC-sanitize-xss — 유일 방어층으로서의 정제
-
-- `<script>`(내용 포함), `onload=` 류 핸들러, `javascript:` URL(엔티티 난독화 포함), HTML 주석이 출력에서 제거된다.
-- raw 유래 `class="deilen-*"`/`data-source-line` 위조가 제거된다.
-- 미완성 태그의 잔여 `<` 가 이스케이프되어 후속 마크업을 삼키지 못한다.
+검증 코드가 수용 기준을 고정하므로 별도 acceptance group을 선언하지 않는다.
 
 ## Last Updated
 
-2026-07-30 — acceptance 항목을 acceptance group 형식으로 정리했다(내용 변경 없음).
+raw HTML 정제·원본 라인 앵커·클라이언트 표식 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

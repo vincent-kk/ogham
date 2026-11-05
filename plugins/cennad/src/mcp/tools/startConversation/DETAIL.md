@@ -9,7 +9,7 @@
 
 ## API Contracts
 
-- `handleStartConversation(...)` — 새 세션을 만들고 `ConversationResponse` 를 돌려준다.
+입출력 이름과 형태는 진입점과 검증 코드를 읽는다. 이 문서의 요구사항은 그 표면을 바꿀 때 보존할 정책을 정한다.
 
 ## Acceptance Criteria
 
@@ -23,4 +23,4 @@
 
 ## Last Updated
 
-2026-07-30 — 세션 시작 도구 계약을 문서화했다.
+실패 시 세션 보존·권한 채널·프롬프트 합성 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

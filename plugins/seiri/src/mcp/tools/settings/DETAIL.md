@@ -16,11 +16,7 @@
 
 ## API Contracts
 
-- `handleSettings(input, extra?)` — 입력의 `action` 에 따라 브라우저 또는 헤드리스 핸들러를 호출하고 `Promise<SettingsOutput>` 을 반환한다.
-- `open` — `{ action: 'open', status: 'saved' | 'closed' | 'pending', url, summary?, message }`; `pending` 재호출은 같은 서버 세션을 이어 기다린다.
-- `status` — `{ action: 'status', entries }`; 현재 레이어 채널의 배포 상태와 드리프트.
-- `manifest` — `{ action: 'manifest', manifest }`; 관리 대상 규칙 목록.
-- `plan`·`sync` — `{ action, result, selected }`; 같은 계획을 각각 미적용·적용 상태로 반환한다.
+pending 재호출은 같은 서버 세션의 대기를 잇는다. 브라우저와 헤드리스는 동일한 계획·적용 계약을 사용하고, 결과는 입력 action과 적용 여부를 구분한다. 구체 필드는 타입과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -50,4 +46,4 @@
 
 ## Last Updated
 
-2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.
+설정 범위·미리보기·저장 계약의 내용과 근거가 바뀔 때 갱신한다.

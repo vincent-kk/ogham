@@ -2,13 +2,12 @@
 
 ## Purpose
 
-언어 중립 core를 4개의 action-dispatched MCP 도구로 노출한다. 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다.
+언어 중립 core를 action-dispatched MCP 도구로 노출한다. 이 계층은 입력 검증, artifact envelope와 host lifecycle만 소유한다.
 
 ## Structure
 
-- 4개 도구 fractal은 `tools/` 아래로 모이고, 등록·envelope 직렬화·process lifecycle은 그 위 계층이 소유한다.
-- 이름 함정: MCP executable entry는 서버 조립 디렉터리가 아니라 별도의 serverEntry child다.
-- 브라우저에 서빙되는 정적 페이지도 이 계층 안에 살지만 TypeScript 소스를 import 하지 않는다.
+- MCP executable entry는 서버 조립 디렉터리와 구분되는 serverEntry child다. 서버 조립을 import하는 것과 프로세스를 시작하는 것을 혼동하지 않도록 분리한다.
+- 브라우저 자산도 이 계층에 있으나 TypeScript 런타임을 import하지 않는 독립 빌드 입력이다.
 
 ## Conventions
 
@@ -26,7 +25,7 @@
 
 ### Ask first
 
-- 4개 도구 목록, action/input schema 또는 envelope budget 변경
+- 공개 도구 목록, action/input schema 또는 envelope budget 변경
 - 프로젝트 파일을 쓰는 새 동작 추가
 
 ### Never do
@@ -34,7 +33,3 @@
 - 범용 search/replace, AST 편집, 파일 이동, import rewrite 제공
 - commit, push, PR 생성 또는 review fix 실행
 - 언어 확장자·entry filename·test syntax를 MCP DTO에 추가
-
-## Dependencies
-
-- MCP SDK, Zod, `../core/`, `../adapters/`, host utility packages

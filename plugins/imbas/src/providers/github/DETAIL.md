@@ -2,75 +2,13 @@
 
 ## Requirements
 
-`parseLinks(body: string): GithubLinks` 함수는 GitHub 이슈 바디에서 `## Links` 섹션을 파싱하여 링크 타입별 이슈 참조 배열을 반환한다.
-
-- `## Links` 섹션이 없으면 `{}` 반환
-- 섹션이 있지만 항목이 없으면 `{}` 반환
-- 각 줄 형식: `- <linkType>: <refList>` (공백 허용)
-- `linkType` ∈ `{blocks, blocked-by, split-from, split-into, relates}`
-- `refList`: 쉼표로 구분된 `#N` 또는 `owner/repo#N` 목록
-- 중복 `linkType` 키: refs 합집합으로 병합
-- 알 수 없는 `linkType`: `console.warn` 후 skip
+GitHub 이슈 본문의 Links 문법을 해석한다. 알 수 없는 링크 타입은 경고 후 건너뛰고 부분 결과를 반환하여 전방 호환성을 유지한다. 진단 경고 외 파일·네트워크·프로세스 I/O나 검증 라이브러리를 도입하지 않는 문자열 파서 경계를 지킨다.
 
 ## API Contracts
 
-```typescript
-export type GithubLinks = Partial<
-  Record<
-    'blocks' | 'blocked-by' | 'split-from' | 'split-into' | 'relates',
-    string[]
-  >
->;
-
-export function parseLinks(body: string): GithubLinks;
-```
-
-### Input examples
-
-```markdown
-## Links
-
-- blocks: #10, #11
-- blocked-by: owner/repo#5
-- relates: #99
-```
-
-### Output example
-
-```json
-{
-  "blocks": ["#10", "#11"],
-  "blocked-by": ["owner/repo#5"],
-  "relates": ["#99"]
-}
-```
-
-### Edge cases
-
-| Input                    | Output               |
-| ------------------------ | -------------------- |
-| No `## Links` section    | `{}`                 |
-| Empty `## Links` section | `{}`                 |
-| Duplicate `linkType`     | merged array (union) |
-| Unknown `linkType`       | warn + skip          |
-| Extra whitespace         | trimmed              |
+알 수 없는 링크 타입은 경고하고 건너뛰어 전방 호환성을 유지한다. 오류 하나로 나머지 파싱 결과를 버리지 않으며, 문법과 구체 입출력 사례는 파서·테스트에서 확인한다.
 
 ## Acceptance Criteria
-
-### AC-github-links-absent — 섹션 부재 처리
-
-- `## Links` 섹션이 없는 바디에 대해 `parseLinks` 가 `{}` 를 반환한다.
-- `## Links` 섹션이 있지만 항목이 없으면 `{}` 를 반환한다.
-
-### AC-github-links-parse — 항목 파싱
-
-- `- blocks: #10, #11` 이 `{ blocks: ['#10', '#11'] }` 로 파싱된다.
-- `owner/repo#5` 형태의 교차 저장소 참조가 그대로 보존된다.
-- 콜론·쉼표 주변의 여분 공백이 제거된다.
-
-### AC-github-links-merge — 중복 키 병합
-
-- 같은 `linkType` 이 여러 줄에 나오면 refs 가 합집합으로 병합된다.
 
 ### AC-github-links-forward-compat — 전방 호환
 
@@ -84,4 +22,4 @@ export function parseLinks(body: string): GithubLinks;
 
 ## Last Updated
 
-2026-08-06 — 필수 `## Acceptance Criteria` 섹션을 추가해 문서 계약 위반을 해소했다.
+Links 문법·전방 호환·부분 결과 계약의 내용과 근거가 바뀔 때 갱신한다.

@@ -10,10 +10,7 @@
 
 ## API Contracts
 
-- `GET /` — 설정 폼(토큰 필요).
-- `POST /plan` — dry-run. 대상·revision 을 돌려준다.
-- `POST /save` — revision 이 유효할 때만 적용하고 settle 한다.
-- 라우트·가드·핸들러는 각각 `routing/`·`handlers/` organ 이 소유한다.
+미리보기는 아무것도 적용하지 않는다. 저장은 유효한 revision과 실제 rule apply 성공 후에만 saved로 settle하며, stale은 pending으로 남겨 다시 검토하게 한다.
 
 ## Acceptance Criteria
 
@@ -32,4 +29,4 @@
 
 ## Last Updated
 
-2026-07-30 — 설정 서버의 가드와 revision 계약을 문서화했다.
+루프백 바인딩·요청 가드·revision 검사·core 경유 저장 계약이 바뀔 때 갱신한다.

@@ -17,8 +17,6 @@
 
 ## API Contracts
 
-- `validatePreToolUse(input, oldContent?): HookOutput` — 문서 대상이 아니면 통과하고 위반 시 현재 도구 호출만 deny한다.
-- `projectMoveContent(move, safeCwd): MoveProjectionResult` — source 부재는 `missing-source`, bodyless Move는 source 전체 `exact`, hunk Move는 shared 순수 투영의 `exact`·`stale-source`·`ambiguous`와 0-based hunk index를 반환한다.
 - Delete 입력은 host가 canonicalize한 기존 대상 또는 원래 입력 경로가 INTENT.md/DETAIL.md인지 판정하며 Write/Edit용 content 검증을 실행하지 않는다.
 - 강등 허용은 `permissionDecision: 'allow'`와 부모 DETAIL.md에 부모가 현재 소유하는 것과 해당 디렉터리가 fractal이 아닌 이유를 현재 결정으로 명시하라는 `additionalContext`를 반환한다. 거부 reason은 부모 DETAIL.md에 소유권과 이유를 현재 결정으로 먼저 명시한 뒤 entry point와 INTENT.md 및 존재하는 DETAIL.md를 삭제하는 절차를 포함한다.
 - Write/Edit는 마지막 symlink도 따라가며, Edit의 현재 내용 읽기는 그 물리 target을 사용한다. Delete는 마지막 symlink entry를 보존하므로 일반 이름의 링크만 제거하는 작업을 referent 문서 삭제로 간주하지 않는다.

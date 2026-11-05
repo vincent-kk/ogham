@@ -7,14 +7,12 @@
 - **저장 전에 연결을 테스트한다** — 통과하지 못한 설정을 기록하지 않는다.
 - 설정 HTML 은 런타임에 `public/settings.html` 에서 읽는다(번들 미포함).
 - 도구 이름은 `setup` 으로 고정한다. 페이지·자산 계층만 `settings` 로 부르며, 도구 이름을 바꾸는 것은 공개 인터페이스 변경이다.
-- 외부 HTTP 프레임워크를 쓰지 않고 `node:http` 로만 구성한다. 모듈 전역 가변 상태를 두지 않는다.
+- 외부 HTTP 프레임워크를 쓰지 않고 `node:http`로만 구성한다. 요청·자격증명·서버 수명주기는 인스턴스에 격리하고, 배포 중 불변인 설정 HTML만 반복 디스크 읽기를 피하도록 캐시한다.
 - MCP 성공은 서버 기동이 아니라 브라우저에서 선택한 scope의 config와 credentials 저장 완료를 뜻한다. 잘못된 제출은 수정 후 재시도할 수 있고 completion을 끝내지 않는다.
 
 ## API Contracts
 
-- `handleSetup(...)` — 서버를 기동하고 브라우저를 연 뒤 저장 completion을 기다린다. 성공 결과는 `config_path`를 포함하며 시작 실패·명시적 종료·유휴 timeout·서버 오류는 경로 없는 실패다.
-- `utils/loadSettingsHtml` — 런타임에 `public/settings.html` 을 읽는다.
-- `webServer/` — 라우팅과 가드.
+MCP 성공은 선택 scope의 설정과 자격증명이 모두 저장된 뒤에만 성립한다. 반환 경로는 저장기가 확정한 경로이며 기동·종료·유휴 timeout·서버 오류만으로 성공 경로를 만들지 않는다.
 
 ## Acceptance Criteria
 
@@ -42,4 +40,4 @@
 
 ## Last Updated
 
-2026-08-23 — 실제 scope 저장 completion과 resolver-owned config_path 계약을 추가했다.
+설정 성공의 저장 완료 의미와 반환 경로 계약이 바뀔 때 갱신한다.

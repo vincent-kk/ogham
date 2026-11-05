@@ -12,10 +12,8 @@
 
 ## API Contracts
 
-- 모듈 진입점: `serverEntry.ts` 의 top-level `main()` 실행. export 는 없고 import 하면 서버 기동이 side effect 로 일어난다.
-- 환경변수 `MAENCOF_LENS_CONFIG_ROOT` — `.maencof-lens/` 를 담은 디렉터리의 절대 경로. 설정되면 `tryProjectRoot()` 보다 우선한다.
-- 트랜스포트는 `StdioServerTransport` 고정이다.
-- 실패 출력: stderr 에 `maencof-lens MCP server error: <원인>` 한 줄, 종료 코드 1.
+- 심볼 제공용 라이브러리가 아니라 import 시 기동하는 실행 표면이다. config 루트 미해석은 기동 실패로 바꾸지 않고 호출 시점의 안내에 맡긴다.
+- 환경변수는 설정 디렉터리를 담은 절대 루트를 가리킨다. 전송은 stdio로 한정하고 실패는 stderr 진단과 비정상 종료로 알린다.
 
 ## Acceptance Criteria
 
@@ -37,4 +35,4 @@
 
 ## Last Updated
 
-2026-07-30 — config 루트 해석 순서와 기동 실패 계약을 문서화했다.
+config 루트 해석·전송·기동 실패 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

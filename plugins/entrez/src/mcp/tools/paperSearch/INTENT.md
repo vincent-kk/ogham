@@ -1,17 +1,6 @@
 ## Purpose
 
-`paper_search` 도구. agent의 `QueryRole` 다중 검색식을 받아 **결정론 union**을 만든다(누락 0). 대량은 async job(start/status/results).
-
-## Structure
-
-| 파일                                       | 역할                                         |
-| ------------------------------------------ | -------------------------------------------- |
-| `paperSearch.ts`                           | `runPaperSearch` — 동기 오케스트레이션(메인) |
-| `operations/executeQuery.ts`               | lint→count→segment→id 수집(쿼리별)           |
-| `operations/fetchMetadata.ts`              | union pmid 배치 메타 수집·부분복구           |
-| `operations/writeManifest.ts`              | SearchManifest 생성·영속                     |
-| `operations/{startJob,pollJob,readJob}.ts` | async job 트리오                             |
-| `operations/jobLocation.ts`                | 잡 경로 해석                                 |
+paper_search 도구. agent의 QueryRole 다중 검색식을 받아 결정론 union을 만든다(기본 전략에서 누락 0). 대량 검색은 호출자가 명시적으로 비동기 job을 선택한다.
 
 ## Conventions
 
@@ -22,7 +11,7 @@
 
 ### Always do
 
-- 10k 초과는 segmenter로 전수 확보. 부분 실패는 격리(partial). manifest 기록.
+- 기본 날짜 분할로 UID 상한을 우회하되 분할 한계와 호출자가 선택한 상한 전략·예산을 명시해 전수 수집을 과장하지 않는다. 메타데이터 부분 실패는 격리하고 manifest를 남긴다.
 
 ### Ask first
 
@@ -31,8 +20,3 @@
 ### Never do
 
 - LLM이 레코드를 제거하도록 위임. api_key를 출력/manifest에 노출.
-
-## Dependencies
-
-- `../../../core/{queryLint,segmenter,union,searchJob}` · `../../../adapters/eutils`
-- `../shared` (ToolContext) · `../../../types/{tool,record,search}` · `../../../constants`

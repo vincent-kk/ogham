@@ -4,10 +4,9 @@
 
 날짜/시간 포맷 순수 헬퍼. YYYY-MM-DD / HH:MM 문자열 생성.
 
-## Structure
+## Conventions
 
-- `index.ts` — barrel (공개 API: formatDate/formatTime/isDateInWindow)
-- `operations/` organ — 포맷·구간 판정 순수 함수 (formatDate/formatTime/isDateInWindow, 함수 1개/파일)
+활동 로그와 사용자가 보는 날짜를 맞추기 위해 로컬 시간대를 쓴다. UTC로 바꾸면 자정 근처 기록이 다른 날에 놓인다.
 
 ## Boundaries
 

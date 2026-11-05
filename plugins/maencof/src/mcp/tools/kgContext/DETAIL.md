@@ -2,52 +2,21 @@
 
 ## Requirements
 
-- `kg_context` 는 쿼리로 후보를 고르고(`helpers/selectContextCandidates`, 상한 20 — 후보와 함께 query 파생 단어별 매칭 계수 `wordSeedCounts` 를 돌려준다) 토큰 예산 안에서 컨텍스트를 조립한다. 조립은 `search/contextAssembler` 의 `assembleContext` 에 위임한다.
-- 두 모드를 갖는다: 기본(content) 모드는 조립 markdown(`context`)을, `include_content: false` 는 조립 없이 선택 문서 목록(`documents: { path, title, score, clusterKey?, collapsedCount? }[]`)만 돌려준다 — 파일을 직접 읽을 수 있는 호출자가 선별 조회하는 경로다.
-- collapse 표기 전파: 쿼리 엔진이 접은 후보의 `clusterKey`/`collapsedCount` 는 두 모드 모두에 나타난다 — documents 항목 필드로, 조립 markdown 에는 `(+N collapsed · cluster: <key>)` 로. markdown 모드에서도 열기 키가 노출되어야 호출자가 `kg_search { cluster }` 를 만들 수 있다. collapse 의미론의 정본은 `search/queryEngine/DETAIL.md` 다.
-- `include_full: true` 면 상위 최대 3개 문서의 쿼리-매칭 스니펫(`extractBestSnippet`)을 덧붙인다. 스니펫 문자 상한은 잔여 예산(`token_budget` − 목록 markdown 추정치)에 연동해 300~1200자로 클램프하고, 잔여 예산이 0 이하면 스니펫 단계를 건너뛴다. 스니펫도 예산의 일부다 — `estimateTokens` 합계가 `token_budget` 을 넘으면 뒤 스니펫부터 덜어내고, `estimatedTokens` 는 스니펫 포함 최종 컨텍스트 기준으로 보고한다.
-- `layer_filter`·`sub_layer`·`scope` 는 예산 소비 전에 후보 선정 단계에서 적용된다.
-- seed 해석 상태는 두 모드 모두에서 응답 `seedResolution` 이 항상 보고한다 — 대상은 query 파생 **단어**뿐이고 인접 2-gram phrase 파생은 resolved·unresolved 어느 쪽에도 싣지 않는다(투기 파생). `resolved` 는 단어→어휘 매칭 노드 수, `unresolved` 는 미해석 단어 원문(미해석 존재 시에만 키 존재).
-- `graph` 가 null 이면 재색인 안내를 담은 `{ error }` 를 돌려준다.
+- 후보 선정은 평가 하네스와 같은 경로를 쓰고 본문 조립은 contextAssembler가 소유한다.
+- 파일을 직접 읽을 수 있는 호출자를 위해 경로 전용 모드를 둔다. 선택 목록만 필요한 호출에 조립 본문 비용을 강제하지 않는다.
+- 접힘의 의미는 query 엔진이 소유하고 두 응답 모드 모두 열기 키를 전달한다. 본문 모드에서도 호출자가 cluster 재조회 인자를 만들 수 있어야 한다.
+- include_full 스니펫도 token_budget의 일부다. 잔여 예산에 맞춰 크기를 정하고 부족하면 뒤 스니펫부터 제외하며 최종 추정량은 스니펫까지 포함한다.
+- 레이어·서브레이어·scope 필터는 예산 소비 전에 적용한다. 제외할 문서가 예산을 먼저 차지해서는 안 된다.
+- seed 해석은 query의 실제 단어만 보고한다. 투기적으로 만든 bigram을 미해석 사용자 단어로 제시하지 않는다.
 
 ## API Contracts
 
-- `handleKgContext(graph: KnowledgeGraph | null, input: KgContextInput, vaultRoot?: string): Promise<KgContextResult | { error: string }>`
-- `KgContextInput` — `query`(필수) · `token_budget`(기본 2000) · `include_full`(기본 false) · `since`/`until` · `layer_filter` · `sub_layer` · `scope` · `include_content`(기본 true).
-- `KgContextResult` — content 모드: `{ context, documentCount, estimatedTokens, truncatedCount, seedResolution }` / paths 모드: `{ documents, documentCount, seedResolution }`. 형태의 정본은 `types/mcpKg.ts`.
+본문 모드와 경로 전용 모드를 구별한다. 파일을 직접 읽는 호출자에게는 조립 본문이 불필요하며, 본문 모드의 스니펫도 같은 토큰 예산에 포함한다. seed 해석은 실제 query 단어만 보고하고 투기적으로 만든 bigram은 보고하지 않는다.
 
 ## Acceptance Criteria
 
-### AC-paths-mode — 경로-만 모드
-
-- `include_content: false` 응답은 `context` 없이 `documents` 목록을 담고, `documentCount` 는 그 길이와 같다.
-
-### AC-snippet-budget — 스니펫 예산 계상
-
-- `include_full` 스니펫을 붙인 최종 `context` 의 `estimateTokens` 추정치가 `token_budget` 을 넘지 않고, `estimatedTokens` 가 그 값을 보고한다.
-
-### AC-prefilter — 선정 전 필터
-
-- `layer_filter` 로 제외된 레이어 문서는 예산을 소비하지 않고 `context` 에도 나타나지 않는다.
-
-### AC-snippet-sizing — 잔여 예산 연동
-
-- 잔여 예산이 넉넉하면 스니펫이 종전 고정 300자를 넘어 자라고(상한 1200자), 잔여 예산이 0 이하면 `include_full` 이어도 스니펫이 붙지 않는다.
-
-### AC-seed-resolution-always — 단어 해석 상시 가시화
-
-- content·paths 두 모드 모두 `seedResolution` 을 담는다. query 파생 단어 중 미해석분만 `unresolved` 에 실리고, 인접 2-gram phrase 파생은 resolved·unresolved 어디에도 나타나지 않는다.
-
-### AC-collapse-marking — 접힘 표기 전파
-
-- 같은 `clusterKey` 후보가 접힌 경우, documents 모드 항목에 `clusterKey`/`collapsedCount` 가 실리고 content 모드 markdown 에 `(+N collapsed · cluster: <key>)` 표기가 나타난다.
-
-## History
-
-- 2026-08-20 — collapse 표기 전파(documents 필드 + markdown 표기)를 추가했다 (R4). `sub_layer` 는 쿼리 엔진 `subLayerFilter` 로 이동.
-- 2026-08-05 — include_full 스니펫 상한을 잔여 예산 연동(300~1200자 클램프)으로 바꾸고, 잔여 예산 소진 시 스니펫 생략을 계약에 추가했다.
-- 2026-08-05 — content/paths 모드와 include_full 스니펫 예산 계상 계약을 문서화했다 (cross-review FIX-012).
+행동별 결과와 경계값은 이 모듈을 검증하는 테스트가 고정한다.
 
 ## Last Updated
 
-2026-08-10 — seed 해석 가시화: 단어 단위 `seedResolution` 상시 보고와 `selectContextCandidates` 의 `wordSeedCounts` 반환 계약을 추가했다 (seed-resolution 개발요청서 + 사용자 리뷰 확정).
+경로·본문 모드, 필터의 예산 적용 순서 또는 스니펫의 토큰 예산 계약이 바뀔 때 갱신한다.

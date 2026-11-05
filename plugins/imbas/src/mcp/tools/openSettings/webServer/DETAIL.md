@@ -12,18 +12,8 @@
 
 ## API Contracts
 
-```typescript
-export const SETTINGS_SERVER_IDLE_MS: number;
-export function startSettingsServer(
-  options: StartSettingsServerOptions,
-): Promise<SettingsServerInstance>;
-export type { SettingsServerInstance, StartSettingsServerOptions };
-```
-
-- 라우트는 셋이다: `GET /`(상태 주입 HTML), `POST /save`(config 영속), `POST /close`.
-- 응답 본문 형태는 `{ success: boolean, message?, errors?, ...data }` 로 통일한다.
-- `GET /` 은 `__IMBAS_STATE__` 슬롯에 `escapeJsonForHtml` 로 직렬화한 상태를 주입한다.
-- `routing/` 은 guard 와 경로 디스패치를, `handlers/` 는 라우트별 처리를 담당하는 organ 이며 배럴로 나가지 않는다.
+- 응답은 success와 오류 설명을 공통 외피로 쓴다. 저장·닫힘과 타임아웃을 구분하여 호출자가 대기를 재개할 수 있게 한다.
+- HTML 상태 주입은 escapeJsonForHtml을 거친다. 브라우저 데이터가 script 경계를 닫지 않아야 한다.
 
 ## Acceptance Criteria
 
@@ -63,4 +53,4 @@ export type { SettingsServerInstance, StartSettingsServerOptions };
 
 ## Last Updated
 
-2026-08-06 — 루프백 바인딩·guard 순서·settle waiter·idle 종료 계약을 최초 문서화했다.
+요청 가드·저장·settle·서버 수명 계약의 내용과 근거가 바뀔 때 갱신한다.

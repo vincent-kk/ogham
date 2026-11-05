@@ -8,8 +8,7 @@
 
 ## API Contracts
 
-- `serverEntry.ts` — shebang 실행 진입점. `startServer()` 호출과 부팅 실패 처리.
-- `index.ts` — `export {}` 배럴. 노출 심볼 없음.
+런타임 심볼을 제공하지 않는 실행 표면이다. 시작 실패는 stderr와 비-0 종료 코드로 드러내며 서버 조립을 이곳으로 옮기지 않는다.
 
 ## Acceptance Criteria
 
@@ -23,4 +22,4 @@
 
 ## Last Updated
 
-2026-07-30 — 번들 진입점 계약을 문서화했다.
+실행 진입점·기동 실패 계약의 내용과 근거가 바뀔 때 갱신한다.

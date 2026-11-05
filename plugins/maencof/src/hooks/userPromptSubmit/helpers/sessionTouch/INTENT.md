@@ -4,6 +4,10 @@
 
 Per-turn session activity recorder. Updates `lastActivityAt`/`usageSnapshot` on the day-log record and reopens sweep-mis-closed sessions, so session finalization can move off the SessionEnd hook onto the MCP server sweep.
 
+## Conventions
+
+Session finalization belongs to MCP sweep/shutdown; this hook only supplies per-turn activity.
+
 ## Boundaries
 
 ### Always do

@@ -6,7 +6,11 @@
 
 현행 엔진은 QGA-SA(`accumulativeActivation.ts`) 단독 — 합산-누적·차수 정규화·lexical 게이트. 설계: `.metadata/maencof/TOOL/Query-Gated-Accumulative-Spreading-Activation/`
 
-은퇴한 v1(BFS max-전파)은 코드베이스에서 이탈해 `.metadata/maencof/TOOL/Spreading-Activation-Engine-Archive/v1-bfs-max-propagation/` 에 격리 보존된다 — 격리본 단독으로 벤치마크 실행 가능(`node runtime/run.mjs`), 동결 지표와의 세대 간 비교는 아카이브 INDEX 참조.
+비교용 v1(BFS max-전파)은 실행 코드와 분리하여 `.metadata/maencof/TOOL/Spreading-Activation-Engine-Archive/v1-bfs-max-propagation/` 에 격리 보존한다 — 격리본 단독으로 벤치마크 실행 가능(`node runtime/run.mjs`), 동결 지표와의 세대 간 비교는 아카이브 INDEX 참조.
+
+## Conventions
+
+허브의 확산 억제는 출차수 정규화에 맡기고 감쇠 인자는 최대로 준다. 레이어 감쇠 규칙을 복제하면 이 역할 구분이 어긋난다.
 
 ## Boundaries
 

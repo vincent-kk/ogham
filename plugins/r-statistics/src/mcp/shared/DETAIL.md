@@ -2,17 +2,13 @@
 
 ## Requirements
 
-- 도구 핸들러는 평문 데이터를 반환하고, MCP 결과 직렬화는 이 모듈이 전담한다.
-- 핸들러에서 던져진 값은 프로세스를 죽이지 않고 에러 봉투로 변환된다.
-- 호출자의 취소 신호(`extra.signal`)는 핸들러까지 그대로 전달된다.
-- 이미 MCP content 형태인 결과는 다시 감싸지 않고 그대로 통과시킨다.
+- MCP 직렬화는 이 경계에서 전담하고 핸들러는 평문 데이터를 반환한다.
+- 핸들러 throw를 오류 봉투로 바꾸어 개별 도구 실패가 서버 전체를 끝내지 않게 한다.
 
 ## API Contracts
 
-- `toolResult(result: unknown): CallToolResult` — 평문 데이터를 단일 JSON text content 블록으로 직렬화한다.
-- `toolError(error: unknown): CallToolResult` — 던져진 값을 `isError: true` 인 `Error: <message>` 봉투로 변환한다.
-- `wrapHandler<T>(...)` — 핸들러를 감싸 throw 를 흡수하고 `extra`(`ToolExtra`)와 `signal` 을 전달한다. content 결과는 passthrough.
-- `type ToolExtra = RequestHandlerExtra<ServerRequest, ServerNotification>`
+- 평문 데이터는 JSON content로, throw는 오류 봉투로 변환한다. 이미 MCP content인 결과는 다시 포장하지 않는다.
+- 호출 문맥과 취소 신호를 핸들러까지 보존한다. 래퍼가 호출자의 취소 의사를 제거하지 않게 한다.
 
 ## Acceptance Criteria
 
@@ -24,4 +20,4 @@
 
 ## Last Updated
 
-2026-07-30 — 응답 직렬화·에러 봉투 계약을 문서화했다.
+응답 직렬화·오류 봉투·호출 문맥 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

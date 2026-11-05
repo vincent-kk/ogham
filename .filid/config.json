@@ -8,7 +8,6 @@
     ]
   },
   "rules": {
-    "detail-document-contract": "warning",
     "module-entry-point": {
       "exempt": [
         "**/shared/agent-artifacts",

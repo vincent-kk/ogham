@@ -2,13 +2,11 @@
 
 ## Purpose
 
-AutonomyLevel 런타임 게이트. `.maencof-meta/autonomy-config.json`에서 현재 레벨을 관리하고, 에이전트 실행 전 권한 검사를 제공.
+AutonomyLevel 런타임 게이트. 볼트의 자율성 설정 파일에서 현재 레벨을 관리하고, 에이전트 실행 전 권한 검사를 제공.
 
-## Structure
+## Conventions
 
-- `index.ts` — barrel (공개 API: readAutonomyLevel/setAutonomyLevel/canAutoExecute)
-- `types/` organ — 내부 타입 (AutonomyConfig)
-- `operations/` organ — 레벨 IO·게이트 (configPath 사설 헬퍼 + read/set/canAutoExecute, 함수 1개/파일)
+권한 판정과 레벨 저장을 분리한다. 승격은 제안까지만 하고 자동으로 적용하지 않는다.
 
 ## Boundaries
 

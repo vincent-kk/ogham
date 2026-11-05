@@ -10,18 +10,9 @@
 
 ## API Contracts
 
-- `runRemindExpiredBuffer(currentWorkingDirectory)` — `RemindExpiredBufferResult`. 만료 문서가 없으면 `{ continue: true }` 만, 있으면 `hookSpecificOutput.additionalContext` 에 정리 촉구 문구를 담는다.
-- `RemindExpiredBufferResult` — `continue` 와 선택적 `hookSpecificOutput`.
+만료 알림만 제공하며 정리 판단은 사용자와 organize·cleanup 스킬에 남긴다. 반환 형태와 무대상 동작은 구현과 테스트에서 확인한다.
 
 ## Acceptance Criteria
-
-### AC-never-deletes — 삭제 금지
-
-- 이 fractal 이 파일 삭제·이동을 호출하지 않는다.
-
-### AC-noop-without-buffer — buffer 부재 no-op
-
-- 볼트가 아니거나 buffer 디렉터리가 없으면 부수효과 없이 통과한다.
 
 ### AC-listing-capped — 목록 상한
 
@@ -37,4 +28,4 @@
 
 ## Last Updated
 
-2026-07-30 — 비삭제 경계·경량 추출 계약과 훅 직접 import 면책을 문서화했다.
+비삭제 경계, 목록 상한 또는 훅 직접 import 면책이 바뀔 때 갱신한다.

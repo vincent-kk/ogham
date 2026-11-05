@@ -2,8 +2,8 @@
 
 ## Requirements
 
-- MCP BootSweep(직전 세션 마무리) 또는 UserPromptSubmit 트리거에서 opt-in 설정 (`.maencof-meta/vault-commit.json::enabled=true`) 이 있을 때만 vault 변경사항을 자동 커밋한다.
-- 커밋 범위는 `scope` 필드로 제어한다. 필드 부재 시 기본 scope 는 5-Layer 문서 트리 + `.maencof-meta/` (`DEFAULT_COMMIT_SCOPE`). `.maencof/` 그래프 캐시는 재생성 가능하므로 기본 scope 에 포함하지 않는다.
+- MCP BootSweep(직전 세션 마무리) 또는 UserPromptSubmit 트리거에서 볼트 자동 커밋의 opt-in 설정 (`enabled=true`) 이 있을 때만 vault 변경사항을 자동 커밋한다.
+- 커밋 범위는 `scope` 필드로 제어한다. 필드 부재 시 기본 scope 는 5-Layer 문서 트리 + 볼트 메타데이터 디렉터리 (`DEFAULT_COMMIT_SCOPE`). 볼트의 그래프 캐시는 재생성 가능하므로 기본 scope 에 포함하지 않는다.
 - 민감 파일 2차 방어: 모든 staging 은 `SENSITIVE_EXCLUDE_PATH_SPECS` (credential/secret/token/apikey 류 `.json`, `.pem`, `.key`, `.env*`) 를 exclude pathspec 으로 동반한다. 1차 방어는 vault 의 `.gitignore`. 지식 문서(`.md`) 는 이름과 무관하게 exclude 대상이 아니다.
 - 하루 1커밋 정책: `fold_daily`(기본 true) 가 켜져 있으면 당일의 연속된 자동 커밋을 `git reset --soft` 로 하나로 접은 뒤 재커밋한다 (`helpers/foldDaily`). 수동 커밋은 폴딩 경계로 작동하며 절대 접지 않는다.
 - UserPromptSubmit 은 사용자의 프롬프트가 설정된 `skip_patterns` 중 하나와 매칭될 때만 트리거된다. 미설정 시 기본 패턴은 `/clear`.
@@ -13,17 +13,7 @@
 
 ## API Contracts
 
-### Config schema (`.maencof-meta/vault-commit.json`)
-
-```jsonc
-{
-  "enabled": true,
-  "scope": ["01_Core/", "02_Derived/", ".maencof-meta/"],
-  "fold_daily": true,
-  "message_template": "chore(maencof): session wrap [{dirs}] ({date} {time})",
-  "skip_patterns": ["^\\s*/clear\\s*$"],
-}
-```
+### Config schema (`VAULT_COMMIT_CONFIG_FILE`)
 
 - `enabled` (필수, boolean): true 가 아니면 훅은 즉시 반환.
 - `scope` (선택, string[]): vault 루트 상대 디렉터리/파일 목록 (`/` 구분자, 디렉터리는 trailing slash 권장). **루트 전체 모드 `["."]`** 를 지원한다 — vault 루트 전체가 커밋 대상이 되며, 제외는 전적으로 `.gitignore` 계층(로컬·하위·전역)이 담당한다. vault 고유 자산 디렉터리(dashboard/, web/ 등 이름이 vault 마다 다른 것)까지 설정 갱신 없이 포함하려면 이 모드를 쓴다. 절대 경로·`..`·`:` 포함·`.git` 은 항목 단위로 거부된다. 유효 항목이 하나도 없으면 `DEFAULT_COMMIT_SCOPE` 로 fallback.
@@ -32,34 +22,13 @@
 - `skip_patterns` (선택, string[]): regex source 배열. case-insensitive 매칭. 유효하지 않은 regex 는 silently 무시. 필드 부재/빈 배열 → `DEFAULT_SKIP_PATTERN_SOURCE` (`^\\s*/clear\\s*$`) fallback. 이름은 트리거 semantics 와 다르지만 기존 사용자 config 호환을 위해 유지.
 - 위 5개 외 필드는 무시된다 (과거 수기 config 의 잔여 필드 호환).
 
-### Functions
-
-- `readVaultCommitConfig(cwd)` — config 파싱. `enabled` boolean 필수, `scope`/`fold_daily`/`skip_patterns` 는 타입 불일치 시 항목 단위 drop.
-- `shouldCommitOnPrompt(prompt, config)` — UserPromptSubmit 게이트.
-- `runVaultCommitter(input, event?)` — main handler. 플로우: vault → config → prompt gate → repo → index.lock → 변경 확인 → stage → fold(옵션) → commit.
-
 ### Commit behavior
 
-- staging: 존재하는 scope 항목만 모아 단일 `git add -- <scope...> <sensitive excludes...>` 실행.
-- staged 파일이 0개면 커밋하지 않는다.
 - 커밋 메시지: `message_template` 렌더 결과. 기본 `chore(maencof): session wrap [<top-level dirs>] (<YYYY-MM-DD HH:MM>)`. 디렉터리 목록은 커밋에 실제 포함되는 staged 파일에서 도출 (폴딩 시 접힌 변경 포함).
-- `git commit --no-verify` 로 커밋.
-- `.git/index.lock` 존재 시: mtime 이 `INDEX_LOCK_STALE_MS`(30분) 미만이면 live 로 존중해 skip, 초과면 stale(SIGKILL 절단 잔존)로 판정해 로그 기록 후 회수(unlink)하고 진행 — 절단 사고가 커밋 게이트를 영구 차단하지 못하게 한다. 회수 경합(동시 unlink)은 ENOENT 무시로 멱등, 이후 git 자체 lock 이 쓰기를 재직렬화. 실행 중 lock 충돌 (`index.lock` stderr) 은 `runGit` 이 backoff 재시도. 잔여 리스크: 30분 초과 장기 수동 git 작업(중단된 rebase 등)은 오판 가능 — 로그로 추적.
+- Git 인덱스 잠금 파일 존재 시: mtime 이 `INDEX_LOCK_STALE_MS`(30분) 미만이면 live 로 존중해 skip, 초과면 stale(SIGKILL 절단 잔존)로 판정해 로그 기록 후 회수(unlink)하고 진행 — 절단 사고가 커밋 게이트를 영구 차단하지 못하게 한다. 회수 경합(동시 unlink)은 ENOENT 무시로 멱등, 이후 git 자체 lock 이 쓰기를 재직렬화. 실행 중 lock 충돌 (`index.lock` stderr) 은 `runGit` 이 backoff 재시도. 잔여 리스크: 30분 초과 장기 수동 git 작업(중단된 rebase 등)은 오판 가능 — 로그로 추적.
 - 폴딩: HEAD 부터 당일+자동 커밋을 걷어 BASE 를 찾고, `git reset --soft BASE` → re-stage → commit. 자동 커밋 판정은 `AUTO_COMMIT_SUBJECT_MARKERS` includes 매칭(레거시 `*_session_wrap` 및 은퇴한 vault 로컬 스크립트의 subject 포함) + `message_template` 정적 접두부 startsWith 매칭. 재커밋 실패 시 `git reset --soft ORIG_HEAD` 로 복구. root 도달·탐색 상한(`FOLD_SCAN_MAX_COMMITS`) 초과 시 폴딩을 포기하고 일반 커밋한다.
 
 ## Acceptance Criteria
-
-### AC-opt-in-only — opt-in 전용
-
-- `enabled` 가 true 가 아니면 커밋이 일어나지 않는다.
-
-### AC-never-blocks — 비차단
-
-- 어떤 실패 경로에서도 `{ continue: true }` 를 반환한다.
-
-### AC-sensitive-exclude — 민감 경로 제외
-
-- 모든 staging 호출에 민감 exclude pathspec 이 동반된다.
 
 ### AC-manual-commit-not-folded — 수동 커밋 보존
 
@@ -73,10 +42,6 @@
 - **Direct import**: `allowed`
 - **Reason**: 훅은 esbuild 번들로 배송되고 이벤트별 크기 가드를 받는다. 배럴을 거치면 config 파싱·프롬프트 판별·커밋 오케스트레이션과 폴딩까지 전부 번들에 끌려 들어와 가드를 넘긴다 — UserPromptSubmit 은 43008 바이트 안에서 컨텍스트 주입까지 해야 한다.
 
-## History
-
-- 2026-04-16 — repo 소유자가 `--no-verify` 유지(Y1 Option A)를 승인했다. 대안은 사용자 pre-commit 훅을 그대로 태우는 것이었으나, vault 를 건드리는 훅이 재귀를 만들고 대화형 훅이 부팅 경로를 막는다는 점이 결정적이었다. 예외 범위는 opt-in 기능 안으로 한정하는 조건이 붙었다.
-
 ## Last Updated
 
-2026-07-30 — 계약 절에 `--no-verify` 근거와 해제 조건을 두고, 승인 사실은 `## History` 로 옮겼다.
+자동 커밋 opt-in 범위, 수동 커밋 보호, lock 회수 또는 --no-verify 예외의 근거·해제 조건이 바뀔 때 갱신한다.

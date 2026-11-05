@@ -3,7 +3,7 @@
 ## Requirements
 
 - 도메인별 등록 함수만 소유한다. 도구 핸들러 구현은 `mcp/tools/` 가, 등록 순서 오케스트레이션은 부모 `server` 의 `server.ts` 가 갖는다.
-- 핸들러는 `mcp/tools/` 의 도구 배럴에서 가져온다. 등록부에 로직을 인라인하지 않는다 — 인라인하면 도구 계약이 두 곳에 흩어지고 핸들러 단위 검증이 불가능해진다.
+- 핸들러는 각 도구 fractal의 진입점에서 가져온다. 상위 tools 배럴로 실제 소유 경계를 가리지 않고 등록부에 로직을 인라인하지 않는다 — 인라인하면 도구 계약이 두 곳에 흩어지고 핸들러 단위 검증이 불가능해진다.
 - 모든 등록은 `middlewares` 의 wrapper 를 경유한다. mutate 는 `registerMutateTool`, read 는 `registerReadTool({ needsFreshness })` 다. 직접 `server.tool(...)` 을 부르면 vault 경로 해석·사용량 통계·stale 기록·에러 처리를 전부 잃는다.
 - 도구 이름은 `constants/mcpToolNames.ts` 의 `McpToolName` 에서 가져온다. 문자열 리터럴을 등록부에 적으면 이름이 상수·문서·권한 목록과 갈라진다.
 - `needsFreshness` 는 그래프 의존성으로 결정한다. SA·이웃 탐색처럼 그래프를 읽는 도구만 `true` 이고, 그래프와 무관한 도구는 `false` 다 — 무관한 도구에 freshness 를 걸면 매 호출이 인덱스 상태에 묶인다.
@@ -13,23 +13,6 @@
 - 도메인 모델이 소유한 값 집합은 등록부에서 리터럴로 열거하지 않고 그 모델의 스키마에서 파생한다. `sub_layer` 가 그 경우이며 `types/frontmatter.ts` 의 `SubLayerSchema` 가 정본이다 — 열거를 복제하면 모델이 좁아져도 이 자리는 폐기된 값을 계속 받는다.
 
 ## API Contracts
-
-### Entry point (`index.ts`)
-
-여덟 개 등록 함수를 이름으로 재노출한다. 모두 `(server: McpServer): void` 시그니처다.
-
-| Export                         | 등록 도구                                                                                                                                |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `registerCrudTools`            | mutate 5 (`create` · `capture_insight` · `update` · `delete` · `move`) + plain read 1 (`read`)                                           |
-| `registerKgTools`              | fresh read 5 (`kg_search` · `kg_navigate` · `kg_context` · `kg_suggest_links` · `kg_timeline`) + plain read 2 (`kg_status` · `kg_build`) |
-| `registerClaudeMdTools`        | mutate 2 (`claudemd_merge` · `claudemd_remove`) + plain read 1 (`claudemd_read`)                                                         |
-| `registerCompanionTools`       | plain read 1 (`companion_edit`)                                                                                                          |
-| `registerPersonalContextTools` | plain read 1 (`capture_personal_context`)                                                                                                |
-| `registerActivityReadTools`    | plain read 1 (`activity_read`)                                                                                                           |
-| `registerCacheTools`           | plain read 1 (`context_cache_manage`)                                                                                                    |
-| `registerWorkHistoryTools`     | plain read 1 (`work_history`)                                                                                                            |
-
-합계 21개. 이 표가 서버의 도구 표면 목록이다.
 
 ### Affected-path 보고 (mutate 전용)
 
@@ -45,18 +28,13 @@
 
 `operations/kg.ts` 의 `timeWindowFields`(`since` / `until`, `YYYY-MM-DD`, 양 끝 포함)는 `kg_search` · `kg_context` · `kg_timeline` 세 도구가 공유한다. 시간창 의미를 한 곳에서 정의해 세 도구 설명이 갈라지지 않게 한다.
 
-`sub_layer` 를 받는 여섯 도구(`create` · `update` · `move` · `kg_search` · `kg_context` · `kg_timeline`)는 `types/frontmatter.ts` 의 `SubLayerSchema` 를 `.optional().describe(...)` 로 파생해 쓴다. 같은 원칙이 update 의 frontmatter 하위 스키마 전체로 확장된다 — enum·날짜 값 집합(`HubKindSchema` · `DomainTypeSchema` · `OrgTypeSchema` · `MembershipStatusSchema` · `MaturitySchema` · `BufferTypeSchema` · `PromotionTargetSchema` · `IsoDateSchema`)은 전부 `types/frontmatter.ts` 파생이고, 등록부는 값을 열거하지 않는다. update 의 frontmatter 하위 스키마는 `updateFrontmatterInputSchema` 로 분리되어 있으며, 키 집합이 핸들러 직렬화 테이블과 일치함은 spec(`updateSchemaSurfaceSync.test.ts`)이 고정한다.
+sub_layer와 update frontmatter의 값 집합은 FrontmatterSchema의 개별 스키마에서 파생한다. 모델 변경이 등록부의 복제 enum을 남기지 않게 하며, 등록된 키는 핸들러 직렬화 키와 일치해야 입력이 조용히 사라지지 않는다.
 
 ### 클러스터 파라미터
 
 `kg_search` 는 `seed` 와 `cluster` 를 상호배타로 받는다(정확히 하나 — 검증은 핸들러 몫이고 스키마는 둘 다 optional 로 노출한다). `cluster` 는 접힌 클러스터의 전체 열거 모드로, 설명 문구가 SA 미적용·updated 최신순·페이지 크기(기본 50·최대 100)·`offset` 페이징·`clusterSize`/`truncated` 계약을 호출자에게 알린다. `MAX_CLUSTER_ENUMERATION`(200)은 핸들러 내부 방어선이고 `max_results` 스키마 캡(100)에 막혀 어떤 입력으로도 도달할 수 없으므로 설명 문구에 상한으로 적지 않는다 — 도달 불가능한 수를 안내하면 호출자가 실행 불가능한 페이지 크기를 계획한다. `cluster_key` 는 `create` 와 `update` 의 frontmatter 스키마 두 곳에 있으며 제거 경로는 `frontmatter.unset` 이다.
 
 ## Acceptance Criteria
-
-### AC-inventory-disk-read — Complete active inventory
-
-- kg_inventory uses the read wrapper with needsFreshness:false and accepts path_prefix, layer_filter, cursor and a 1–200 limit. Graph state never determines which disk documents are enumerated.
-- Move describes explicit empty target_subdirectory as root relocation and same-path success as a no-op; existing protection rules remain in force.
 
 ### AC-handlers-not-inlined — 핸들러 비인라인
 
@@ -66,32 +44,14 @@
 
 - 모든 도구가 `registerMutateTool` 또는 `registerReadTool` 을 통해 등록된다.
 
-### AC-tool-names-from-constants — 이름 상수 사용
-
-- 등록명이 `McpToolName` 값이고 리터럴 문자열이 아니다.
-
 ### AC-graph-free-writes-stay-read — 그래프 무관 쓰기의 read 등록
 
 - `companion_edit` · `capture_personal_context` 가 plain read 로 등록되어 그래프 캐시를 무효화하지 않는다.
-
-### AC-move-reports-both-paths — move 양쪽 경로
-
-- `move` 의 영향 경로가 원본과 대상을 모두 포함한다.
-
-### AC-instruction-target-resolved-per-call — 지침 대상 호출별 해석
-
-- `claudemd_merge` · `claudemd_remove` 의 영향 경로가 호출 시점 호스트 해석 결과에서 나온다.
 
 ### AC-handler-fields-reach-schema — 핸들러 필드의 스키마 도달
 
 - 핸들러가 읽는 입력 필드가 등록된 `inputSchema` 를 통과해 핸들러까지 전달된다. `update` 의 `frontmatter.unset` 이 대표 사례다.
 
-## History
-
-- 2026-08-20 — update 의 frontmatter 스키마를 표면 전체(편집 가능 16필드 추가)로 넓히며 `updateFrontmatterInputSchema` 로 분리했다. update·move 에 남아 있던 `sub_layer` 리터럴 열거 2곳과 create·update 의 `hub_kind` 리터럴 2곳을 정본 파생으로 교체했다 — 2026-08-04 에 네 자리를 고칠 때 남은 잔여다.
-- 2026-08-04 — `sub_layer` 열거를 네 자리에서 지우고 `SubLayerSchema` 파생으로 바꿨다. v3 가 L5 서브레이어를 없앴을 때 이 복제본들은 함께 고쳤지만 같은 복제를 한 `@ogham/maencof-lens` 는 빠졌다. 복제가 가능한 한 다음 모델 변경에서도 같은 자리가 남는다.
-- 2026-08-03 — `update` 의 `frontmatter.unset` 이 타입·핸들러·에러 메시지에는 있으나 `inputSchema` 에만 없어, 손상된 frontmatter 의 유일한 복구 경로가 호출 불가 상태였다. 스키마에 필드를 올리고 `AC-handler-fields-reach-schema` 로 고정했다.
-
 ## Last Updated
 
-2026-08-20 — update frontmatter 스키마의 정본 파생과 직렬화기 키 동기 계약을 현행화했다.
+등록 wrapper와 read·mutate 분류, 입력 스키마의 도메인 정본 또는 영향 경로 보고 계약이 바뀔 때 갱신한다.

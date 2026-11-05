@@ -4,18 +4,15 @@
 
 지식 그래프 빌드 도구. 전체/증분 빌드 지원.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (handleKgBuild + @internal buildStemIndex/resolveAndAttachLinks + 타입)
-- `types/` organ — KgBuildInput / KgBuildResult / KgBuildParseFailure / BuildOutput
-- `operations/` organ — handleKgBuild(오케스트레이터) / fullBuild / incrementalBuild / resolveAndAttachLinks / buildStemIndex / toCurrentFileInfos
+서고는 그래프 스냅샷 밖이므로 무변경 빌드에도 열거 인덱스를 다시 스캔한다. 빌드가 문서 읽기를 조립하고 파싱·그래프 계산은 core에 위임해 알고리즘을 디스크와 결합하지 않는다.
 
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증
-- core/ 모듈에 로직 위임
+- 개별 파싱 실패는 격리하고 응답 실패 목록에 상한 적용
 
 ### Ask first
 
@@ -23,4 +20,4 @@
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
+- core의 파싱·그래프 계산을 도구에 복제

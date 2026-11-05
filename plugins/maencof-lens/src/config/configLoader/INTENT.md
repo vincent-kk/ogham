@@ -2,14 +2,6 @@
 
 config 파일의 읽기, 쓰기, 기본값 생성을 담당하는 설정 로더. user(호스트 상태 루트)와 project(`<projectRoot>/.maencof-lens/config.json`) 두 레이어이며 project 가 user 를 재정의한다 — 저장소 하나가 자기 vault 를 가리킬 수 있게 하기 위함이다.
 
-## Structure
-
-| File                    | Role                                       |
-| ----------------------- | ------------------------------------------ |
-| `configLoader.ts`       | load(병합) · loadConfigScope · write(단일) |
-| `utils/configLayers.ts` | 두 레이어 좌표 해석                        |
-| `index.ts`              | barrel                                     |
-
 ## Conventions
 
 - 검증은 병합 결과에만 건다. project 레이어는 재정의한 키만 담을 수 있다.
@@ -20,8 +12,8 @@ config 파일의 읽기, 쓰기, 기본값 생성을 담당하는 설정 로더.
 
 ### Always do
 
-- 이 모듈의 단일 책임을 유지한다
-- 변경 시 관련 테스트를 함께 업데이트한다
+- 설정 병합과 단일 계층 저장을 구분하여 프로젝트 재정의가 개인 설정에 저장되지 않게 한다
+- 이 경계의 계약 변경은 해당 검증과 함께 갱신하여 소비자와 구현이 어긋나지 않게 한다
 
 ### Ask first
 

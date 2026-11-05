@@ -8,7 +8,7 @@
 
 ## API Contracts
 
-- `settings/` — 인증 설정 UI. `public/settings.html` 로 빌드되어 `setup` 도구가 서빙한다.
+설정 UI는 정적 산출물로 제공하며 런타임 서버가 디스크에서 읽는다. 빈 TypeScript 배럴은 빌드 입력 표식이며 런타임 UI export가 아니다.
 
 ## Acceptance Criteria
 
@@ -22,4 +22,4 @@
 
 ## Last Updated
 
-2026-07-30 — 브라우저 UI 컨테이너 계약을 문서화했다.
+브라우저 UI의 정적 빌드·런타임 서빙 경계가 바뀔 때 갱신한다.

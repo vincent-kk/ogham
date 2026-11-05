@@ -4,12 +4,6 @@
 
 생태계별 파일과 entry point를 이름·경로·manifest로 발견해 언어 중립 core 계약으로 변환한다. 파일 내용에서 오는 사실(의존 참조, entry surface, verification role과 case 수)은 여기서 만들지 않는다.
 
-## Structure
-
-- `registry/` organ — adapter 등록, project claim과 file ownership 해석
-- `ecmascript/` — 초기 JavaScript/TypeScript 생태계 adapter
-- `index.ts` — 공통 계약과 등록된 adapter의 named public surface
-
 ## Conventions
 
 - 판단 우선순위: 1. 오탐 방지 2. 정확한 증거 3. 생태계 coverage
@@ -39,7 +33,3 @@
 - native parser, 전역 npm module 또는 `fast-glob` 요구
 - 소스 파일의 내용을 구문으로 해석 (manifest JSON 판독은 예외)
 - unsupported 증거를 PASS로 변환
-
-## Dependencies
-
-- `../types/`, Node filesystem/path APIs

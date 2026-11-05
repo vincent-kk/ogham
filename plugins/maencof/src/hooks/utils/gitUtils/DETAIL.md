@@ -9,24 +9,13 @@
 
 ## API Contracts
 
-- `runGit(args, options)` — git 실행. lock 충돌 시 backoff 재시도.
-- `isGitRepo(dir)` · `getGitRoot(dir)` · `isIndexLocked(dir)` — repo 판별.
-- `hasVaultChanges(...)` · `stageVaultChanges(...)` · `listStagedFiles(...)` · `commitStaged(...)` — scope 기반 staging 과 커밋.
-- `stagedTopLevels(...)` · `templateStaticPrefix(...)` · `generateCommitMessage(...)` · `MESSAGE_TEMPLATE_REPLACERS` — 커밋 메시지 생성.
+staging 범위와 민감 경로 제외를 함께 전달한다. index.lock은 정상적인 동시 작업 경합으로 취급하고 이식 가능한 실행 래퍼의 backoff 정책을 유지한다.
 
 ## Acceptance Criteria
 
 ### AC-spawn-cli-only — spawnCli 경유
 
 - 이 fractal 의 어떤 파일도 `child_process` 를 직접 import 하지 않는다.
-
-### AC-sensitive-exclude — 민감 경로 제외
-
-- staging pathspec 에 민감 exclude 가 함께 전달된다.
-
-### AC-lock-retry — lock 재시도
-
-- `index.lock` 충돌에서 즉시 실패하지 않고 backoff 재시도한다.
 
 ## Boundary Exemptions
 
@@ -56,4 +45,4 @@
 
 ## Last Updated
 
-2026-07-30 — spawnCli 경유·민감 exclude 계약과 훅 직접 import 면책 4건을 문서화했다.
+git 실행 래퍼, index.lock 재시도 또는 staging 범위·민감 경로 제외 계약이 바뀔 때 갱신한다.

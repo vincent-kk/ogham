@@ -4,10 +4,6 @@
 
 `config_set` 도구 핸들러. 호출자가 지정한 한 계층(user 또는 project)의 원본 문서에 업데이트를 적용해 그 계층만 기록한다.
 
-## Structure
-
-- `configSet.ts` — `handleConfigSet` · `ConfigSetInput`
-
 ## Conventions
 
 - `scope` 는 기본값 없는 필수 입력이다. 두 계층 모두 유효한 대상이라, 조용한 기본값은 프로젝트 결정을 사용자 파일에 넣거나 그 반대를 만든다.
@@ -18,7 +14,7 @@
 
 ### Always do
 
-- 비즈니스 로직은 core/ 모듈에 위임
+- 도메인 판단은 core에 위임한다. 핸들러는 전송 입력 해독·공유 스키마 검증·저장을 조립하되 도메인 규칙의 소유자가 되지 않는다.
 - 쓰기 대상 계층을 호출자에게 받아 그대로 전달
 
 ### Ask first
@@ -27,10 +23,5 @@
 
 ### Never do
 
-- 핸들러에 비즈니스 로직 직접 구현
+- 상태 전이·요약 계산·실행 경로 정책을 핸들러에서 재구현 — 도구별로 도메인 판단이 갈라지는 것을 막는다.
 - `scope` 에 기본값 부여
-
-## Dependencies
-
-- `../../../core/configManager` — `updateConfigLayer`
-- `@ogham/cross-platform` — `projectRoot`

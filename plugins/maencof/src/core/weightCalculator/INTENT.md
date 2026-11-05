@@ -4,11 +4,9 @@
 
 노드/엣지 가중치 계산. PageRank, 레이어 감쇠, 정규화.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: calculateWeights/computePageRank/normalizeWeights/getLayerDecay + HUB_DECAY_FACTOR/LAYER_DECAY_FACTORS/SUBLAYER_DECAY_FACTORS 재노출 + 타입)
-- `types/` organ — 공개 타입 (WeightCalcResult)
-- `operations/` organ — 가중치 연산 (calculateWeights/computePageRank/normalizeWeights/getLayerDecay, 함수 1개/파일; edge-weight·pagerank private 헬퍼는 각 파일 인라인)
+감쇠 인자는 이웃으로 내보내는 활성량에 곱하는 값이다. 값이 클수록 넓게 퍼지며, 허브가 다리 역할을 막지 않도록 허브 우선순위를 유지한다.
 
 ## Boundaries
 

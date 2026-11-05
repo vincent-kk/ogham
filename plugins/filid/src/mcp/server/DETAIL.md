@@ -2,7 +2,6 @@
 
 ## Requirements
 
-- MCP server는 정확히 4개의 Filid 1.0 도구만 등록한다.
 - 모든 handler 입력을 Zod로 검증하고 성공·위반·불확실·미지원 상태를 공통 envelope로 반환한다.
 - SDK 등록 스키마는 MCP object형 JSON Schema로 필드·enum/literal·minimum 의미를 광고하면서 validation 오류를 handler 경계로 전달하고, handler 경계가 조건부 제약을 포함한 원본 Zod 스키마로 다시 검증한다.
 - inline JSON은 UTF-8 16 KiB 이하의 compact JSON이다.
@@ -10,6 +9,7 @@
 - `restructure`의 `plan` payload는 크기와 무관하게 artifact를 남긴다.
 - tool artifact의 절대 경로, media type, SHA-256, bytes와 ephemeral 표시는 실제 파일과 일치한다.
 - boot sweep와 shutdown cache cleanup은 best-effort이고 project root 미해석 시 project-scoped 작업을 건너뛴다.
+- 진단에는 필수 nextAction을 둔다. 코드와 원문 메시지만으로는 호출자가 인자 수정·재시도·사용자 결정 중 다음 행동을 고를 수 없기 때문이다.
 
 ## API Contracts
 
@@ -29,7 +29,7 @@
 
 ### AC-server-surface — 도구 집합
 
-- server tool list는 4개 이름과 set-equality를 이루고 제거된 도구를 포함하지 않는다.
+- server tool list는 제거된 도구를 포함하지 않는다.
 
 ### AC-server-envelope — 크기 제한
 
@@ -50,12 +50,6 @@
 
 - root 또는 session env가 없어도 server boot와 shutdown이 실패하지 않는다.
 
-## History
-
-- 2026-09-19 — 진단마다 필수 `nextAction`을 두었다. 오류 envelope가 코드와 원문 메시지만 돌려줘, LLM 호출자가 인자를 고칠지, 재시도할지, 사용자에게 물을지 알 수 없었다.
-- 2026-09-05 — 같은 lifecycle의 기능을 action union으로 묶어 server registry를 9개에서 4개로 줄였다.
-- 2026-08-28 — `context_resolve`의 공개 입력을 shared-snapshot `requests[]` batch로 전환했다.
-
 ## Last Updated
 
-2026-09-19
+도구 등록·입력 검증, artifact envelope나 서버 cache lifecycle 계약이 바뀔 때 갱신한다.

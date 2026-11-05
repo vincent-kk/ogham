@@ -4,10 +4,8 @@
 
 ## Conventions
 
-- 빌드(도메인 스크립트 조합): `clean → version:sync → compile → mcp → compile-plugin`
-- 스킬 이름 prefix 없음 (plugin namespace 자동); MCP 도구는 `mcp__plugin_r-statistics_tools__*`
-- 에이전트는 `agents/` 자동 발견 (plugin.json 에 agents 필드 없음 — filid 동일)
-- Hook 없음
+- 스킬은 플러그인 네임스페이스를 사용하고 MCP 이름 형식은 `mcp__plugin_r-statistics_tools__*`를 유지한다. 참조하는 스킬·에이전트와 도구 식별자가 갈라지지 않게 한다.
+- 에이전트는 자동 발견하므로 매니페스트에 agents 필드를 두지 않는다. 훅은 제공하지 않는다.
 
 ## Boundaries
 

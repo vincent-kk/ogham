@@ -1,15 +1,6 @@
 ## Purpose
 
-`open_settings` 도구 진입점. `127.0.0.1` 전용 설정 서버를 기동해 브라우저 폼 (`.imbas/config.json`)을 열고, **bounded long-poll** 로 사용자의 저장/닫기를 기다렸다가 결과를 반환한다 — setup init 워크플로가 같은 턴에서 캐시 채우기로 이어간다. 세션만 아는 데이터(가용 provider, 감지 repo, Jira 프로젝트 목록)는 `bootstrap` 인자로 주입받아 페이지 상태에 포함한다.
-
-## Structure
-
-| Path              | Role                                                            |
-| ----------------- | --------------------------------------------------------------- |
-| `openSettings.ts` | `handleOpenSettings` — 서버 재사용/기동 + bootstrap 갱신 + 대기 |
-| `utils/`          | `loadSettingsHtml`, `buildSettingsState`, `persistSave`         |
-| `webServer/`      | HTTP 서버, 라우트, 핸들러, token/CSRF 가드, settle waiter       |
-| `index.ts`        | barrel                                                          |
+`open_settings` 도구 진입점. `127.0.0.1` 전용 설정 서버를 기동해 imbas 설정 편집용 브라우저 폼을 열고, **bounded long-poll** 로 사용자의 저장/닫기를 기다렸다가 결과를 반환한다 — setup init 워크플로가 같은 턴에서 캐시 채우기로 이어간다. 세션만 아는 데이터(가용 provider, 감지 repo, Jira 프로젝트 목록)는 `bootstrap` 인자로 주입받아 페이지 상태에 포함한다.
 
 ## Conventions
 
@@ -35,8 +26,3 @@
 - `127.0.0.1` 외 주소로 바인딩
 - token 발급/검증을 `@ogham/http-kit` 밖에서 재구현
 - 상한 없는 무한 대기
-
-## Dependencies
-
-- `../../../core/configManager` — `loadConfig`, `saveConfig`; `../../../types/settings.js` — 페이지 계약 스키마/타입 (Zod 는 types/ 에만 — imbas src 규약)
-- `@ogham/cross-platform`, `@ogham/http-kit`

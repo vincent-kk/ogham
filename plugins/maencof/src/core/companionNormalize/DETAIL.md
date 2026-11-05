@@ -10,22 +10,13 @@
 
 ## API Contracts
 
-- `normalizeCompanionIdentity(raw)` — 레거시·정본·부분 JSON → `CompanionIdentityMinimal`, 또는 `null`.
-- `toIsoDatetime(value, fallback)` — 날짜 값을 ISO 문자열로. 해석 불가면 `fallback`.
+부분 파일은 정규화 실패로 취급한다. 문자열 배열의 형태를 보존하고 join은 렌더 시점에 맡겨 렌더·편집·마이그레이션이 같은 매핑을 사용하게 한다.
 
 ## Acceptance Criteria
 
 ### AC-zod-free-kernel — Zod 없는 커널
 
 - 이 fractal 의 어떤 파일도 zod 를 import 하지 않는다.
-
-### AC-legacy-v1-mapping — 레거시 매핑
-
-- v1 고정 필드가 section 으로 매핑되고, 과도기 정본의 `role` 이 중복 없이 승격된다.
-
-### AC-array-detail-preserved — 배열 원형 보존
-
-- 배열 `detail`·`brief` 가 배열로 남는다.
 
 ## Boundary Exemptions
 
@@ -37,4 +28,4 @@
 
 ## Last Updated
 
-2026-07-30 — Zod-free 커널·레거시 매핑 계약과 훅 직접 import 면책을 문서화했다.
+공유 레거시 매핑·배열 보존·훅 번들 제약이 바뀔 때 갱신한다.

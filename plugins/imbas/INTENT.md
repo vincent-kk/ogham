@@ -4,13 +4,13 @@
 
 ## Structure
 
-- `bridge/` · `public/` 는 빌드 산출물(MCP 번들 · settings UI)이며 커밋한다.
+`bridge/`와 `public/`는 편집 원본이 아닌 커밋 대상 빌드 산출물이다. 공식 빌드로 생성한다.
 
 ## Conventions
 
 - 빌드(도메인 스크립트 조합): `clean → version:sync → pages → compile → mcp → compile-plugin`
 - 파이프라인: refine → estimate(skip 가능) → split. phase 진행은 `state.json`(MCP 상태머신), 이슈 생성 진행은 stories 매니페스트의 `issue_ref`/`status`
-- provider 추상화 (`jira` / `github` / `local`); 실행 state 는 `.imbas/<KEY>/runs/<id>/` (GitHub ref 는 `owner--repo` 디렉토리로 매핑); Jira 실행은 `[OP:]` 시맨틱 오퍼레이션을 세션의 Atlassian 도구가 결의
+- provider 추상화 (`jira` / `github` / `local`); 실행 state는 프로젝트의 imbas 작업 디렉터리 안에서 프로젝트 참조별 runs 하위에 격리한다. GitHub 참조는 단일 디렉터리 세그먼트로 매핑하며, Jira 실행은 `[OP:]` 시맨틱 오퍼레이션을 세션의 Atlassian 도구가 결의한다.
 
 ## Boundaries
 
@@ -30,10 +30,4 @@
 
 - `bridge/` 손편집 / `src/version.ts` 손편집
 - 다른 provider 의 references 디렉토리 참조 (cross-provider leakage)
-- `.imbas/runs/<id>/` 외 임의 위치에 state 저장
-
-## Dependencies
-
-- **런타임**: `@modelcontextprotocol/sdk ~1.22`, `zod ^3.23`
-- **개발**: `esbuild ^0.24`, `typescript ^5.7`, `vitest ^4.1`
-- **환경**: Node.js ≥ 20, Yarn 4.12 workspaces
+- 프로젝트 참조별 runs 아래의 실행 디렉터리 밖에 state 저장 — 프로젝트 간 상태 혼입과 재개 경로 불일치를 막는다.

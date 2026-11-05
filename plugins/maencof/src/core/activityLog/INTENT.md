@@ -2,12 +2,7 @@
 
 ## Purpose
 
-활동 이벤트 로그. 일자별 NDJSON(`activity/events/YYYY-MM-DD.jsonl`)에 한 줄 1이벤트로 append 하고, 도구 호출을 사람이 읽기 좋은 설명으로 변환한다.
-
-## Structure
-
-- `index.ts` — 순수 barrel (공개 API: getActivityEventsDir/getActivityEventPath/appendActivityEvent/readActivityEvents/buildToolDescription)
-- `operations/` organ — 경로 헬퍼·append·라인 단위 read, 도구명+입력 → 활동 설명, 함수 1개/파일
+활동 이벤트 로그. 일자별 NDJSON 파일에 한 줄 1이벤트로 append 하고, 도구 호출을 사람이 읽기 좋은 설명으로 변환한다.
 
 ## Conventions
 

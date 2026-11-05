@@ -14,10 +14,6 @@
 
 ## API Contracts
 
-- `discoverDirectories(rootPath, options, isIgnored?): Promise<string[]>` — root를 포함한 정렬된 절대 directory paths. `isIgnored` 생략은 ignore 없는 탐색이다.
-- `collectNodeMetadata(paths, root, options, adapters, isIgnored?): Promise<NodeEntry[]>` — adapter-aware metadata.
-- `correctNodeTypes(entries, children, names): NodeEntry[]` — deepest-first classification correction.
-- `scanProject(rootPath, options?): Promise<FractalTree>` — complete read-only tree.
 - `scanFileSetOptions(config?): ScanOptions` — supplies full traversal, config `ignore`, and config `structure.excludeFromScan` patterns as the single file-set policy for tree scanning and adapter discovery. `structure.maxDepth` is a rule threshold, not a traversal cap.
 - `listScannedFilePaths(rootPath, options?): Promise<string[]>` — the same file set `scanProject` collects as `peerFiles`, flattened to project-relative POSIX paths sorted by raw bytes. It runs the same discovery and the same ignore filter, so the two sets cannot drift; it returns raw entry names without `pathForCompare`, because a rename that changes only case must read as a different path list.
 
@@ -58,4 +54,4 @@
 
 ## Last Updated
 
-2026-07-30 — config가 공급하는 제외 디렉터리 이름을 exclusion 판정에 더하는 계약을 추가했다.
+scan 제외·ownership 필터, manifest 취급이나 tree 관계 조립 계약이 바뀔 때 갱신한다.

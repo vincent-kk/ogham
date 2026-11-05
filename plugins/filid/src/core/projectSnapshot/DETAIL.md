@@ -86,7 +86,7 @@
 - 존재 주장 형태의 상대 경로 토큰은 node 디렉터리에서 project root까지 조상 디렉터리 체인으로 해석한 뒤 전부 실패하면 `stale-path` warning finding이 되고, finding 메시지에 섹션명이 들어간다. 존재를 주장하지 않는 토큰(`application/json` 같은 무점 basename·무말미슬래시)과 저장소에서 해석 불가한 위치(`~` 접두 home 표기, `$` 포함 변수 표기)는 검사하지 않는다.
 - `..` 포함 토큰은 저자 상대 표기이므로 node 디렉터리 기준으로만 해석한다 — 조상 기준 재적용은 우연한 충족을 만든다.
 - 말미 `/` 토큰은 같은 이름의 파일로 충족되지 않는다 — 디렉터리 주장은 디렉터리만 충족한다.
-- `## Boundary Exemptions`/`## Organ Exemptions`/`## History`/`## Last Updated`/`## Dependencies` 섹션은 건너뛴다. Last Updated는 파일 존재 주장이 아닌 문서 갱신 조건을 담는다. History는 아직 이행하지 않은 문서와 상위 저장소 지침에 따라 해당 섹션을 유지하는 문서를 허용하기 위해 건너뛰는 legacy 섹션이며, 새 문서에 허용하는 섹션이 아니다. Dependencies는 파일 존재 주장이 아닌 결합 주소(컴파일 지정자 포함)를 담는다.
+- `## Boundary Exemptions`/`## Organ Exemptions`/`## Last Updated`/`## Dependencies` 섹션은 건너뛴다. Last Updated는 파일 존재 주장이 아닌 문서 갱신 조건을 담는다. 금지된 `## History` 섹션도 경로 검사를 받는다. Dependencies는 파일 존재 주장이 아닌 결합 주소(컴파일 지정자 포함)를 담는다.
 - 섹션 판정은 제목 문자열 단위다 — 같은 제목의 중복 섹션은 하나의 섹션으로 취급된다.
 - INTENT 한 섹션이 직계 children(childFractalPaths+organPaths 기준 4개 이상) 절반 이상 basename을 나열하면 `derivable-structure` warning finding이 된다.
 - 같은 섹션에서 `derivable-structure`가 발화하면 그 섹션의 `derivable-content`는 내지 않는다 — 다른 섹션의 `derivable-content`는 유지된다.

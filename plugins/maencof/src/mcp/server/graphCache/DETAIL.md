@@ -12,34 +12,9 @@
 
 ## API Contracts
 
-### Entry point (`index.ts`)
-
-- `getVaultPath(): string` — 해석 + canonical boundary 차단 검사. 결과는 canonical 절대 경로다. 해석 불가, canonicalization 불가, 차단 root exact/descendant면 throw.
-- `loadGraphIfNeeded(vaultPath): Promise<KnowledgeGraph | null>` — 같은 vault 경로의 캐시가 있으면 그것을, 없으면 디스크에서 적재해 캐시한 뒤 반환. 인덱스가 없으면 `null`.
-- `invalidateCache(): void` — 그래프 캐시 + query 캐시 무효화.
-
-### 차단 루트
-
-지원 host의 상태 루트는 `HOSTS`와 `hostStateRoot`에서 파생하고 `~/.config`를 추가한다. 문자열 prefix가 아니라 `relative()` 결과로 exact/descendant만 차단한다.
-
-### 단일 vault 가정
-
-캐시는 vault 경로 하나를 키로 잡는 단일 슬롯이다. multi-vault 를 도입하면 이 슬롯과 `middlewares` 의 background rebuild mutex 를 함께 재설계해야 한다.
+캐시는 단일 vault 슬롯이다. multi-vault를 도입하면 캐시 키와 background rebuild mutex를 함께 재설계해야 한다. freshness gating을 여기서 래핑하면 상호 참조 순환이 생기므로 호출자가 해당 미들웨어를 직접 쓴다.
 
 ## Acceptance Criteria
-
-### AC-vault-path-single-source — vault 경로 단일 출처
-
-- 경로 결정이 환경변수와 호스트 워크스페이스 루트 두 곳에서만 오고, 둘 다 없으면 throw 한다.
-
-### AC-blocked-prefixes — 전역 설정 차단
-
-- `~/.claude`, `~/.codex`, `~/.config` exact/descendant와 이들을 가리키는 symlink·상대경로·`..` 입력은 그래프를 적재하기 전에 throw 한다.
-- 이름만 비슷한 sibling과 relocated host root 밖의 정상 프로젝트는 통과한다.
-
-### AC-cache-keyed-by-vault — vault 별 캐시
-
-- 캐시된 경로와 다른 vault 로 호출하면 캐시를 재사용하지 않고 다시 적재한다.
 
 ### AC-null-not-cached — 부재 미캐시
 
@@ -51,4 +26,4 @@
 
 ## Last Updated
 
-2026-08-23 — 모든 host 상태 루트를 registry에서 파생하고 canonical directory boundary 차단을 계약화했다.
+vault 경로의 안전 경계, 캐시 슬롯 소유권 또는 queryCache 동반 무효화 계약이 바뀔 때 갱신한다.

@@ -2,19 +2,15 @@
 
 5개 MCP 읽기 전용 툴 핸들러 모듈. maencof 핸들러를 래핑하여 레이어 필터링을 적용한다.
 
-## Structure
+## Conventions
 
-- `lensContext/` — 토큰 예산 기반 컨텍스트 조합
-- `lensNavigate/` — 그래프 이웃 탐색
-- `lensRead/` — 단일 문서 읽기
-- `lensSearch/` — Spreading Activation 검색
-- `lensStatus/` — 인덱스 상태 확인
+- maencof의 검색·조합 의미를 재구현하지 않고 어댑터가 볼트 상한과 오류 표면을 맡는다. 두 구현의 의미가 갈라지는 것을 막는다.
 
 ## Boundaries
 
 ### Always do
 
-- 모든 핸들러에 레이어 필터링을 적용한다
+- 문서 조회 핸들러에 레이어 필터링을 적용한다. status 집계는 문서의 경로·제목·본문 없이 볼트 전체 인덱스의 개수·시각만 보고하므로 필터 대상에서 제외한다
 - maencof 핸들러를 직접 래핑한다
 
 ### Ask first

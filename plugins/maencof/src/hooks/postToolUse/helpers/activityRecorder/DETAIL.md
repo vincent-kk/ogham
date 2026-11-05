@@ -2,51 +2,17 @@
 
 ## Requirements
 
-- PostToolUse 이벤트에서 `TOOL_CATEGORY_MAP` 에 매핑된 도구 호출에 한해 오늘자 활동 로그 (`.maencof-meta/activity/events/<YYYY-MM-DD>.jsonl`) 에 한 줄(JSON)을 append 한다.
-- `tool_input` 또는 `tool_response` 에서 영향 경로를 추출해 `path` 필드에 기록한다.
-- **Exclusion (P4)**: 아래 prefix 로 시작하는 경로는 기록을 skip 한다. 이 경로들의 write 는 maencof 자체 관리 작업이므로 기록하면 append 가 또 다른 write 이벤트를 유발해 무한 복제 / self-reference 가 발생한다.
+- 활동 로그는 append-only 기록이다. 기존 라인을 수정하거나 덮어쓰지 않는다.
+- 자체 관리 경로의 write는 기록하지 않는다. 로그 append가 다시 write를 유발해 자기참조 기록이 무한히 늘어나는 것을 막는 제외 정책이다.
+- 비볼트·미매핑 도구·오류는 세션 진행을 막지 않으며 오류는 로그로 격리한다.
 
 ## API Contracts
 
-### Input / Output
+자기참조 제외 prefix는 `ACTIVITY_RECORDER_EXCLUSION_PREFIXES`가 정의하는 볼트의 변경 기록·일일 노트·그래프 캐시·메타데이터 영역이다. 모두 maencof 자체 관리 write이므로 활동 이벤트로 다시 기록하지 않는다.
 
-```ts
-interface ActivityRecorderInput {
-  tool_name?: string;
-  tool_input?: Record<string, unknown>;
-  tool_response?: Record<string, unknown>;
-  cwd?: string;
-  session_id?: string;
-}
+kg_build는 내부 유지보수라 기록하면 실제 지식 활동 대비 잡음이 커진다. context_cache_manage의 pin·unpin·refresh는 휘발성 캐시 작업이므로 기록하지 않는다. kg_build의 카테고리 매핑은 향후 opt-in 대비이며 기록 허가는 아니다.
 
-interface ActivityRecorderResult {
-  continue: boolean; // 항상 true (graceful degradation)
-}
-```
-
-### Exclusion path prefixes
-
-path 가 다음 prefix 중 하나로 시작하면 skip 한다:
-
-- `02_Derived/changelog/` — changelog 문서
-- `02_Derived/dailynotes/` — 볼트 측 파생 노트
-- `.maencof/` — 그래프 인덱스, stale-nodes 등
-- `.maencof-meta/` — 운영 메타데이터 (활동 로그·세션·digest·config 등)
-
-### Graceful degradation
-
-- vault 가 아니면 즉시 `{ continue: true }` 반환.
-- `tool_name` 이 `TOOL_CATEGORY_MAP` 에 없으면 skip.
-- 어떤 오류도 errorLog 에 기록 후 `{ continue: true }` 로 회복.
-
-### Intentional tool omissions (documented, not a bug)
-
-다음 MCP 도구들은 `hooks.json` 의 PostToolUse matcher 에 포함되지 않는다 (의도적 설계):
-
-- **`kg_build`**: 내부 유지보수 연산. 매 실행마다 기록하면 실제 지식 이벤트 대비 노이즈가 커지므로 matcher 에서 제외. (`TOOL_CATEGORY_MAP` 에는 향후 opt-in 대비 등록만 돼 있음.)
-- **`context_cache_manage`**: pin/unpin/refresh 는 휘발성 캐시 작업으로 볼트 상태 변화가 아니므로 제외.
-
-추가하려면 (a) `TOOL_CATEGORY_MAP` 에 카테고리 추가, (b) `hooks.json` matcher 에 도구명 추가, (c) 이 섹션 갱신.
+기록 도구를 넓힐 때는 카테고리 매핑과 PostToolUse의 도구 allowlist를 함께 맞춘다. 매핑만 추가해도 기록이 허용되는 것은 아니다. 오류는 errorLog에 남기고 항상 continue:true로 회복한다.
 
 ## Acceptance Criteria
 
@@ -72,4 +38,4 @@ path 가 다음 prefix 중 하나로 시작하면 skip 한다:
 
 ## Last Updated
 
-2026-07-30 — acceptance group 을 채우고 훅 직접 import 면책을 선언했다.
+append-only 기록, 자기참조 제외 경로 또는 기록 도구의 허용 범위가 바뀔 때 갱신한다.

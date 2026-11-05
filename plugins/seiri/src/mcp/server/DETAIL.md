@@ -11,8 +11,7 @@
 
 ## API Contracts
 
-- `lifecycle/` — `createServer`(서버 생성 + 도구 3개 등록), `startServer`(stdio 연결 후 `bootSweep` 예약), `bootSweep`(유휴 seiri 상태 정리).
-- `serialization/` — `toolResult`(compact JSON), `wrapHandler`(throw → 오류 결과).
+공개 함수는 진입점에서, 기동·정리·직렬화 계약은 Requirements와 Acceptance Criteria에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -32,4 +31,4 @@
 
 ## Last Updated
 
-2026-09-27
+도구 등록·전송·서버 수명 계약의 내용과 근거가 바뀔 때 갱신한다.

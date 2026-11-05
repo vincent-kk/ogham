@@ -19,7 +19,7 @@
 - 제출 파일을 열기 전에 절대성·프로젝트 밖·symlink·일반 파일·크기를 검사
 - epoch 불일치는 호출 전체를 거부하고 새 epoch와 경로 차이를 함께 반환
 - 모든 action 응답에 다음 단계 `nextAction`을 싣기
-- 범위가 선언되지 않은 프로젝트에는 통과가 아니라 `facts-uninitialized`를 반환
+- 범위 생략에는 adapter 기본 범위를 적용하여 설정 쓰기 없이 분석을 시작하게 하고, 명시적 빈 범위는 분석 거부 선택으로 존중하여 `facts-uninitialized`를 반환
 
 ### Ask first
 

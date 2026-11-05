@@ -3,16 +3,6 @@
 프로젝트 또는 사용자 범위의 MCP 서버 등록을 검사하고 계획·적용한다.
 계획·결과 모델은 공유하지만 호스트별 JSON, TOML, CLI 어댑터는 분리한다.
 
-## Structure
-
-| Path        | Role                                  |
-| ----------- | ------------------------------------- |
-| `index.ts`  | MCP manager·definition 타입 공개 배럴 |
-| `mcp.ts`    | 대상 종류에 맞는 manager 조립         |
-| `planning/` | MCP 상태 판단과 입력 검증             |
-| `adapters/` | Claude/Codex × project/user 연산      |
-| `encoding/` | 호스트 정의와 소유 TOML block 인코딩  |
-
 ## Conventions
 
 - CLI 어댑터는 argv를 구성하고 실행은 cross-platform spawn에 맡긴다.
@@ -35,7 +25,3 @@
 
 - `~/.claude.json` 직접 수정 또는 전체 TOML 직렬화.
 - CLI 부재/실패를 성공으로 보고.
-
-## Dependencies
-
-- `targets`, `transactions`, `@ogham/cross-platform`, `smol-toml`.

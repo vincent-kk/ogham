@@ -6,29 +6,18 @@
 - 필드 길이·형식 검증은 MCP 입력 스키마(`capture_personal_context`)가 소유한다. 여기서는 구조 정규화와 수명주기 규칙만 다룬다.
 - `id` 는 `sanitizeSegment(label)` 로만 만든다 — dedup 키가 결정적이어야 재강화가 같은 항목을 찾는다.
 - 수치 정책(캡·TTL·보존 기간)은 `constants/personalContext.ts` 에서만 가져온다.
-- 렌더에 런타임 컷을 두지 않는다. 예산은 저작 게이트가 통제한다.
+- 렌더는 저작 텍스트를 길이 예산에 맞춰 자르지 않는다. 필드 길이는 저작 게이트가 통제하고, 최신 활성 topic의 주입 개수는 별도 정책으로 제한한다 — 보관된 모든 주제가 매 세션 컨텍스트를 차지하지 않게 한다.
 - 캡처·해소를 표면화하는 배너나 통지를 만들지 않는다 — 은닉이 이 층의 계약이다.
 
 ## API Contracts
 
-- `personalContextPath(cwd)` — envelope 파일 경로.
-- `readPersonalContext(cwd)` · `writePersonalContext(cwd, envelope)` — envelope IO.
-- `defaultPersonalContext()` — 빈 envelope.
-- `normalizePersonalContext(raw)` — zod-free graceful 정규화.
-- `renderPersonalContextBlock(envelope)` — SessionStart `<personal-context>` 블록. 만료 항목은 렌더 시점 lazy-filter 로 빠진다.
-- `prunePersonalContext(envelope)` — 세션 경계 정리(만료 제거·due 자동 resolve·보존 캡). `PersonalContextPruneResult`.
-- `evictTopicsOverCap(envelope)` — topics 보존 캡 집행. resolved 우선. `TopicEvictionResult`.
-- `applyPersonalContextMutation(...)` — MCP 캡처/재강화/해소 upsert. 훅 번들에 들어가지 않는 유일한 공개 함수다.
+만료 필터는 렌더 때 파일을 고치지 않는다. 구조 정규화와 수명주기를 훅에서 재사용하되 캡처 mutation 경로는 훅 번들에 넣지 않아 크기 제약을 유지한다.
 
 ## Acceptance Criteria
 
 ### AC-hook-path-zod-free — 훅 경로 zod-free
 
 - 훅이 도달하는 파일에서 zod import 가 0건이다.
-
-### AC-lazy-expiry-render — 만료 lazy-filter
-
-- 만료된 항목이 렌더 결과에 나타나지 않는다(파일은 그대로).
 
 ### AC-deterministic-id — 결정적 id
 
@@ -50,4 +39,4 @@
 
 ## Last Updated
 
-2026-07-30 — zod-free 훅 경로·수명주기 계약과 훅 직접 import 면책을 문서화했다.
+은닉·수명주기·검증 소유권 및 훅 번들 제약이 바뀔 때 갱신한다.

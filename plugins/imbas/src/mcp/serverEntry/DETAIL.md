@@ -9,17 +9,7 @@
 
 ## API Contracts
 
-```typescript
-// serverEntry.ts — no exports; top-level effect
-startServer().catch((err: unknown) => {
-  process.stderr.write(`imbas MCP server error: ${String(err)}\n`);
-  process.exit(1);
-});
-```
-
-- 의존은 `../server/index.js` 의 `startServer` 단 하나다. `startServer` 는 `createServer()` 로 서버를 만들고 `StdioServerTransport` 로 연결한다.
-- `index.ts` 는 주석 한 줄만 담는 빈 배럴이다 — 재노출할 심볼이 없다는 사실 자체가 계약이다.
-- 실패 계약: `startServer()` 의 rejection → stderr `imbas MCP server error: <원인>` + exit code 1. 정상 기동 시 이 파일은 아무것도 출력하지 않는다.
+공개 심볼이 없다. 기동과 실패 계약은 Requirements와 Acceptance Criteria에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -35,4 +25,4 @@ startServer().catch((err: unknown) => {
 
 ## Last Updated
 
-2026-07-30 — 번들 진입점 계약과 실패 시 종료 규약을 문서화했다.
+실행 진입점·기동 실패 계약의 내용과 근거가 바뀔 때 갱신한다.

@@ -11,14 +11,9 @@
 
 ## API Contracts
 
-- `buildProbeAdvisory(errors)` — 무시 목록(`IGNORED_PROBE_ERRORS`)을 적용한 뒤 `ProbeAdvisory` 를 만든다.
-- `ProbeAdvisory` — `actionable`(걸러 남은 오류 목록)과 `advisory`(Claude 에게 보일 문구, 남는 것이 없으면 `null`). 호출자는 `advisory === null` 로 침묵 여부를 판정한다.
+호출자는 advisory가 null이면 로그와 경고 모두 생략한다. 정상 환경의 무시 신호를 실패로 승격하면 실제 조치가 필요한 오류가 잡음에 묻힌다.
 
 ## Acceptance Criteria
-
-### AC-ignored-signals-filtered — 무시 신호 제거
-
-- 무시 목록에 있는 신호만 담긴 결과에서 advisory 가 `null` 이다.
 
 ### AC-single-channel — 단일 채널
 
@@ -34,4 +29,4 @@
 
 ## Last Updated
 
-2026-07-30 — 필터·단일 채널 계약과 훅 직접 import 면책을 문서화했다.
+정상 probe 신호의 제외 기준, 조치 가능한 경고 범위 또는 단일 전달 채널이 바뀔 때 갱신한다.

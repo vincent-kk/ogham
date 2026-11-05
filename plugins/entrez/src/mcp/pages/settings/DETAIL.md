@@ -12,16 +12,9 @@
 
 ## API Contracts
 
-- `index.html` — 폼 마크업과 상태 주입 자리.
-- `styles/styles.css` — `prefers-color-scheme` 기반 토큰 스타일.
-- `scripts/app.js` — prefill·검증·rate badge·`/test`·`/submit`.
+서버의 초기 scope와 계층별 prefill을 따른다. 상태 재수신은 사용자가 선택한 편집 범위를 바꾸지 않으며 모든 POST는 JSON으로 전달한다.
 
 ## Acceptance Criteria
-
-### AC-settings-project-default — 프로젝트 기본 범위
-
-- 서버의 `initialScope`가 user와 project 어느 값이든 페이지가 그대로 선택한다.
-- 사용자가 범위를 바꾸면 해당 계층을 편집·저장하며, 상태 재수신은 이 선택을 덮어쓰지 않는다.
 
 ### AC-settings-minimal-required — 최소 필수 입력
 
@@ -37,4 +30,4 @@
 
 ## Last Updated
 
-2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.
+초기 scope·필수 입력과 비밀 보호·오프라인 UI 계약이 바뀔 때 갱신한다.

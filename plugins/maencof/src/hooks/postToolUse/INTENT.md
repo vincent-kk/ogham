@@ -7,7 +7,6 @@ PostToolUse 이벤트 디스패처. matcher 가 `*` 로 통합되므로 `helpers
 ## Conventions
 
 - 헬퍼·공유 관심사 는 concrete 경로로 import (배럴 `index.js` 금지)
-- activityRecorder 는 `MAENCOF_MCP_TOOLS.has(tool_name)` 일 때만 실행
 
 ## Boundaries
 

@@ -4,13 +4,9 @@
 
 SessionStart 이벤트 디스패처. `helpers/bootstrap`(볼트 init·CLAUDE.md 머지·dialogue meta-skill·세션 기록)와 공유 `lifecycleDispatcher`를 순차·격리 실행하고 단일 envelope로 병합한다.
 
-## Structure
-
-- `sessionStart.entry.ts` — 브리지 진입점 (stdin → selfProbe → orchestrator → stdout)
-- `sessionStart.ts` — `orchestrateSessionStart` (조립 + 병합)
-- L5 buffer TTL 만료 helper 는 알리기만 하고 삭제하지 않는다
-
 ## Conventions
+
+- L5 buffer TTL 만료 helper는 알리기만 하고 삭제하지 않는다.
 
 - 헬퍼·공유 관심사·core 는 concrete 경로로 import (배럴 `index.js` 금지)
 - entry는 `@ogham/cross-platform` package root에서 `selfProbeHook`만 named import한다. `sideEffects: false` tree-shaking 뒤 emitted-byte cap과 `FORBIDDEN_PATTERNS`가 출력을 검증하며, probeAdvisory가 필터한 오류만 additionalContext 끝에 덧붙인다

@@ -4,10 +4,6 @@
 
 언어 중립 directory metadata를 FCA node type으로 분류하는 순수 우선순위 함수다.
 
-## Structure
-
-- `organClassifier.ts` — `classifyNode`, infra pattern 판정과 `ClassifyInput`
-
 ## Conventions
 
 - 순서: documents → infra pattern → known organ → module index → leaf → proven purity → organ.
@@ -30,7 +26,3 @@
 
 - filesystem I/O 또는 entry filename 해석
 - unsupported purity를 pure-function으로 판정
-
-## Dependencies
-
-- `../../../types/fractal.js`, `../../../constants/organNames.js`

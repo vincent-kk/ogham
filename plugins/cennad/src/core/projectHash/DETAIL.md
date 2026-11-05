@@ -7,7 +7,7 @@
 
 ## API Contracts
 
-- `getProjectHash(cwd: string): string` — 12자리 hex 스코프 해시.
+- 해시 형식 변경은 기존 세션 스코프를 바꾸므로 변경 전에 승인을 받는다.
 
 ## Acceptance Criteria
 
@@ -18,4 +18,4 @@
 
 ## Last Updated
 
-2026-07-30 — 프로젝트 스코프 해시 계약을 문서화했다.
+프로젝트 스코프 해시의 호환성 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

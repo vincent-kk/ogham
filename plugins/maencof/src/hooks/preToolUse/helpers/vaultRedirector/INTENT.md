@@ -2,13 +2,11 @@
 
 ## Purpose
 
-볼트 경로 리디렉션. .maencof 디렉토리 접근 차단 및 경로 보정.
+볼트 문서를 읽는 도구에 MCP 대안을 안내하는 비차단 관심사.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: isVaultInternalPath/isVaultDocDirectory/runVaultRedirector + 타입)
-- `types/` organ — 훅 I/O 타입 (VaultRedirectorInput/VaultRedirectorResult)
-- `operations/` organ — 경로 판별·리디렉트 (함수 1개/파일: isVaultInternalPath/isVaultDocDirectory/runVaultRedirector; INTERNAL_DIRS 공용 상수)
+내부 캐시·메타데이터는 지식 문서가 아니므로 문서 도구로 안내하지 않는다. 이 관심사는 읽기 안내만 소유하며 쓰기 권한을 집행하지 않는다.
 
 ## Boundaries
 
@@ -19,8 +17,8 @@
 
 ### Ask first
 
-- 차단 경로 패턴 변경
+- 안내 대상 경로 또는 비차단 정책 변경
 
 ### Never do
 
-- 리디렉션 우회
+- 안내 실패를 도구 실행 차단으로 바꾸거나 내부 상태를 지식 문서로 안내

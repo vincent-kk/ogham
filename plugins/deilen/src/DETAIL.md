@@ -12,8 +12,8 @@
 ## API Contracts
 
 - 배포 진입점은 esbuild 가 `mcp/serverEntry/` 로부터 만드는 `bridge/mcp-server.cjs` 와 `public/` FE 산출물이다. `package.json:files` 에 `src`·`dist` 가 없으므로 npm 라이브러리 표면은 없다.
-- `src/index.ts` 는 버전 상수, `render` 공개 API(`renderMarkdown`, `sanitizeHtml`, `RenderMeta`), `types/` 공개 타입을 이름으로 노출한다. `mcp/` 를 재노출하지 않는다 — `mcp/server/lifecycle/createServer.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
-- 서버 수명주기(`createServer`, `startServer`)와 HTTP 싱글톤(`ensureHttpServer`, `getHttpServer`)은 `mcp/` 배럴이 소유한다.
+- `src/index.ts`는 `mcp/`를 재노출하지 않는다 — `mcp/server/lifecycle/createServer.ts`가 `version.ts`를 참조하므로 재노출은 `src → mcp → server → src` 순환이 된다.
+- 서버 수명주기와 HTTP 싱글톤은 `mcp/` 배럴이 소유한다.
 
 ## Acceptance Criteria
 
@@ -37,8 +37,8 @@
 
 - **Consumers**: `**/src/**`
 - **Direct import**: allowed
-- **Reason**: `version.ts` 는 `scripts/injectVersion.mjs` 가 생성하는 단일 상수 파일이고 아무것도 import 하지 않는다. `src/index.ts` 배럴을 경유시키면 `src → mcp → server → src` 순환이 생기는데, 상수 하나 때문에 사이클을 사는 거래는 성립하지 않는다.
+- **Reason**: `version.ts`는 의존성 없는 생성 상수이며 독립 모듈 진입점이 없다. 내부 소비자는 이 파일을 직접 참조하여 조상 배럴을 통한 형제 모듈의 간접 접근과 버전 조회에 불필요한 결합을 피한다.
 
 ## Last Updated
 
-2026-07-30 — 레이어 계약을 문서화하고 생성된 `version.ts` 참조 면책을 선언했다.
+단방향 계층·공개 표면·생성 버전 면책 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

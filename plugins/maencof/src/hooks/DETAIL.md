@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 이벤트마다 디렉터리 하나가 그 이벤트의 브리지 entry(`<event>/<event>.entry.ts`) + 얇은 orchestrator(`<event>/<event>.ts`) + `helpers/<concern>/` 를 소유한다. 여러 이벤트가 공유하는 관심사와 디스패치 헬퍼는 `utils/` 아래에, 경로·stdin·vault 판별은 `shared/` 에 둔다.
+- 이벤트는 자기 실행 진입점과 얇은 조립만 소유하고, 관심사의 구현은 헬퍼로 분리한다. 여러 이벤트가 쓰는 관심사와 경로·입출력 공통 경계는 공유해 이벤트마다 정책이 갈라지지 않게 한다.
 - 사용하는 이벤트는 넷뿐이다 — SessionStart · UserPromptSubmit · PreToolUse · PostToolUse. Stop 은 매 턴 spawn 비용이라, SessionEnd 는 Claude 전용이라 3-호스트 이식이 불가능해서 두지 않는다. 세션 종료 관심사는 MCP 서버 수명주기(`../mcp/server/lifecycle/`)가 소유하고, 훅은 매 턴 `session-touch` 로 그 재료만 기록한다.
 - 훅은 얇은 스크립트로 남는다. 각 브리지는 Node 빌트인만으로 돌아야 하고 zod · fast-glob · MCP SDK · AST 도구 같은 외부 런타임을 번들에 끌어들이지 않는다. 이 격리는 `scripts/buildHooks.mjs` 의 금지 패턴 가드가 빌드 타임에 강제한다.
 - 헬퍼·공유 관심사·core 는 플러그인 내부 concrete 경로로 가져와 이벤트별 도달 범위를 명시한다. 공유 패키지는 package root에서 named import하며, 미사용 export는 `sideEffects: false`와 tree-shaking으로 제거한다. 실제 격리는 `scripts/buildHooks.mjs`가 emitted bytes와 `FORBIDDEN_PATTERNS`를 검사해 보장한다.
@@ -13,35 +13,11 @@
 
 ## API Contracts
 
-### Entry point (`index.ts`)
+배럴은 라이브러리 소비용이며 실행 경로가 아니다. 브리지 basename은 호스트 매니페스트가 참조하므로 안정적으로 유지한다. agy는 Claude 번들을 러너로 호출한다.
 
-이벤트별 orchestrator 넷을 이름으로 재노출한다.
+이벤트별 emitted-byte 상한·금지 패턴·meta-skill 길이의 정본은 `scripts/buildHooks.mjs`다. 값을 복제하지 않으며 생성 브리지 검사는 canonical 파일을 덮어쓰지 않고 바이트 단위 차이를 거부한다.
 
-- `orchestrateSessionStart` · `orchestrateUserPromptSubmit` · `orchestratePreToolUse` · `orchestratePostToolUse`
-
-각각 `DispatchInput` 을 받아 `MergedHookOutput` 을 돌려준다. 이 배럴은 라이브러리 소비용이며, 실행 경로는 여기를 거치지 않는다.
-
-### 실행 표면 (bridge)
-
-| Event            | 소스 entry                                   | 번들 산출물                            |
-| ---------------- | -------------------------------------------- | -------------------------------------- |
-| SessionStart     | `sessionStart/sessionStart.entry.ts`         | `bridge/<host>/session-start.mjs`      |
-| UserPromptSubmit | `userPromptSubmit/userPromptSubmit.entry.ts` | `bridge/<host>/user-prompt-submit.mjs` |
-| PreToolUse       | `preToolUse/preToolUse.entry.ts`             | `bridge/<host>/pre-tool-use.mjs`       |
-| PostToolUse      | `postToolUse/postToolUse.entry.ts`           | `bridge/<host>/post-tool-use.mjs`      |
-
-각 번들은 호스트 런타임 디렉터리(`claude`, `codex`)마다 같은 basename 으로 방출되고, basename 은 `hooks.json` 이 참조하므로 안정적으로 유지한다. agy 호스트는 Claude 번들을 `bridge/run-agy.mjs` 러너를 통해 호출한다.
-
-### 빌드 가드
-
-이벤트별 emitted-byte 상한, 출력의 `FORBIDDEN_PATTERNS`(SessionStart 전용 패턴 포함), 메타 스킬 본문 길이 상한의 정본은 모두 `scripts/buildHooks.mjs` 다. 값을 이 문서에 복제하지 않는다. 어느 하나라도 걸리면 빌드가 실패한다.
-
-### 관심사 실행 순서
-
-- SessionStart — bootstrap → lifecycle
-- UserPromptSubmit — contextInjector → lifecycle → insightInjector → session-touch → vaultCommitter(마지막, 부수효과)
-- PreToolUse — 물리 입력을 순서 있는 논리 호출로 정규화해 `Write|Edit|Delete`→layerGuard, `Read|Grep|Glob`→vaultRedirector 로 모두 라우팅한다. guard 결과는 deny-wins 로 병합하고 lifecycle 은 성공·malformed 모두 원래 물리 입력으로 정확히 한 번 실행한다. malformed 는 실제 vault 안에서 deny, 밖에서 pass 한다
-- PostToolUse — `MAENCOF_MCP_TOOLS` allowlist 게이트를 통과한 activityRecorder + lifecycle
+PreToolUse는 논리 operation 전체를 deny-wins로 판정하고, lifecycle은 성공·malformed 모두 원래 물리 입력으로 정확히 한 번 실행한다. UserPromptSubmit의 커밋은 컨텍스트 관심사 뒤에 둬 그 산출물을 포함한다.
 
 ## Acceptance Criteria
 
@@ -114,4 +90,4 @@
 
 ## Last Updated
 
-2026-08-23 — PreToolUse lifecycle의 physical input 경계와 생성 브리지 동기화 검사를 계약화했다.
+이벤트 소유권·실패 격리·번들 배포 경계가 바뀔 때 갱신한다.

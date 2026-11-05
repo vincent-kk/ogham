@@ -2,13 +2,6 @@
 
 `@ogham/session-finalizer` — MCP 서버 수명주기의 세션종료 완결을 위한 모노레포 내부 공유 런타임. maencof 레퍼런스(detached finalizer + boot-sweep 폴백)를 일반화한다. 두 형태 지원: Type C(동기 cleanup 만 — filid/imbas), Type P(동기 + detached 비동기 완결 — maencof). 소비처는 shutdown 등록·finalizer 디스패치를 재구현하지 않고 이 런타임을 경유한다.
 
-## Structure
-
-- `src/index.ts` — barrel (operations 재노출)
-- `src/operations/registerShutdownFinalizer.ts` — exit/SIGINT/SIGTERM 1회 등록; exit→onShutdown(동기), signal→onShutdown+(detached면)spawnDetached+exit(0); onShutdown 은 프로세스당 최대 1회(시그널 경로 exit(0) 의 'exit' 재발화 흡수)
-- `src/operations/runFinalizer.ts` — 서버 엔트리 디스패치; argv `<flag> <ctx>` 매치 시 task(ctx) 1회 후 exit(0), true 반환 (task 동기 throw 에도 exit(0) 보장)
-- `src/constants/finalizeFlag.ts` — DEFAULT_FINALIZE_FLAG('--finalize'); 스폰측·디스패치측 공유 계약
-
 ## Conventions
 
 - 소비자는 `@ogham/session-finalizer` 패키지 루트만 import한다.
@@ -34,7 +27,3 @@
 - onShutdown 핸들러에서 async·git·모델 호출 (detached finalizer 스폰은 예외 — 자식이 off-grace 처리)
 - child_process 직접 사용 (spawnDetached 경유)
 - dist/ 커밋 (미추적, 로컬 재빌드만)
-
-## Dependencies
-
-- 내부: `@ogham/cross-platform` (spawnDetached).

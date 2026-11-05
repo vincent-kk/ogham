@@ -2,19 +2,11 @@
 
 ## Purpose
 
-Personal Context 층(사용자 상태 `states` + 최근 동향 `topics`)의 IO·정규화·렌더·수명주기 커널. `.maencof-meta/personal-context.json` 단일 envelope을 다룬다. 설계 정본: `.metadata/maencof/Claude-Code-Plugin-Design/27-personal-context.md`.
+Personal Context 층(사용자 상태 `states` + 최근 동향 `topics`)의 IO·정규화·렌더·수명주기 커널. 볼트의 personal context 파일에 저장된 단일 envelope을 다룬다. 설계 정본: `.metadata/maencof/Claude-Code-Plugin-Design/27-personal-context.md`.
 
-## Structure
+## Conventions
 
-- `normalizePersonalContext.ts` — zod-free graceful 정규화
-- `defaultPersonalContext.ts` — 빈 envelope 기본값 생성
-- `readPersonalContext.ts` — 파일 로드
-- `personalContextPath.ts` — envelope 파일 경로 해석
-- `writePersonalContext.ts` — 직렬화 저장
-- `renderPersonalContextBlock.ts` — SessionStart `<personal-context>` 블록 렌더 (캡처 지침 내장, 만료 lazy-filter)
-- `prunePersonalContext.ts` — 세션 경계(bootSweep) 수명주기 정리 (만료 제거·due 자동 resolve·보존 캡)
-- `evictTopicsOverCap.ts` — topics 보존 캡 집행 (resolved 우선)
-- `applyPersonalContextMutation.ts` — MCP 캡처/재강화/해소 upsert (훅 번들 미진입)
+구조 정규화와 수명주기는 여기서, 필드 길이·형식 검증은 MCP 입력 경계에서 소유한다. 훅 경로에 무거운 스키마 런타임을 넣지 않는다.
 
 ## Boundaries
 
@@ -32,6 +24,6 @@ Personal Context 층(사용자 상태 `states` + 최근 동향 `topics`)의 IO·
 
 ### Never do
 
-- 렌더에 런타임 컷 도입 (예산은 저작 게이트가 통제 — companion 철학)
+- 렌더 시 저작 텍스트를 길이 예산에 맞춰 자르기 — 필드 길이는 저작 게이트가 통제하고, 최신 topic의 주입 개수 제한은 별도 수명주기 정책으로 유지한다
 - 캡처/해소를 표면화하는 배너·통지 추가 (은닉 계약)
 - mcp/ 또는 hooks/ 직접 의존 (core 경계)

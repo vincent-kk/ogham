@@ -10,9 +10,8 @@
 
 ## API Contracts
 
-- `createServer(): McpServer` — 이름 `'tools'` 인 서버에 도구 4개를 등록해 돌려준다.
-- `startServer(): Promise<void>` — 만료 세션 prune 후 stdio 로 연결한다.
-- `registerShutdown(input = process.stdin): void` — `settleAllResolvers` 와 HTTP 서버 close 를 신호·`exit`·stdin EOF 시점에 1회 등록한다(모듈 내부 소비; `input` 은 테스트가 스트림을 주입하기 위한 매개변수).
+- 종료 핸들러는 signal뿐 아니라 stdin EOF도 처리한다. 호스트가 파이프만 닫았는데 리스너가 프로세스를 붙드는 것을 막기 위해서다.
+- 종료 입력 스트림의 주입은 테스트 격리를 위한 내부 seam이며 공개 서버 표면을 늘리는 이유가 아니다. 서버 등록과 시작 인자는 진입점을 읽는다.
 
 ## Acceptance Criteria
 
@@ -33,4 +32,4 @@
 
 ## Last Updated
 
-2026-08-25 — stdin EOF 를 종료 경로에 추가했다.
+서버 기동 복원력·stdin EOF 및 종료 정리 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

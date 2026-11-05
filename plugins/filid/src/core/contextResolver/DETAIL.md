@@ -11,9 +11,8 @@
 
 ## API Contracts
 
-- `resolveContext(snapshot, targetPath): ContextResolution` — owner, chain, nearest DETAIL과 output language를 반환한다.
-- `isPathWithin(rootPath, targetPath): boolean` — portable containment 판정. chain 범위로 증거를 좁히는 MCP 계층이 소비한다.
-- project 밖 target 또는 소유 node를 결정할 수 없는 target은 throw한다.
+- project 밖 target이나 owner chain 미결정은 명시적 오류다. root fallback은 잘못된 경계 지침을 전달하므로 허용하지 않는다.
+- 문서 본문 대신 경로와 상태만 전달하여 같은 문서 내용이 컨텍스트에 중복되지 않게 한다.
 
 ## Acceptance Criteria
 
@@ -29,4 +28,4 @@
 
 ## Last Updated
 
-기록된 계약, 정책, 경계 또는 수락 기준이 바뀔 때 갱신한다.
+owner chain의 범위, 문서 참조 상태나 DETAIL 부재 처리가 바뀔 때 갱신한다.

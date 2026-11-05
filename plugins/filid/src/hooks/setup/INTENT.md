@@ -2,23 +2,15 @@
 
 ## Purpose
 
-세션 시작 시 4단계 초기화를 수행한다: (1) 캐시 디렉토리 생성 + 로거 경로 설정, (2) `source ∈ {compact, clear}`면 세션 epoch 리셋(`removeSessionFiles` + delivered/turn — 컨텍스트 소실에 맞춰 전달 기록·guide·fmap·포인터 마커를 재무장; `resume`/`startup`은 비대상), (3) INTENT.md 자동 탐지로 `.filid/` 마커 생성, (4) 만료 세션·stale 캐시 정리. `.claude/rules/`는 절대 건드리지 않음 — 규칙 배포는 filid setup 스킬 전담.
-
-## Structure
-
-- `setup.ts` — `processSetup`, `hasIntentMdInTree` (internal)
-- `setup.entry.ts` — esbuild 번들 진입점
+SessionStart에서 FCA opt-in 탐지와 cache·전달 epoch의 수명을 관리한다. 규칙 배포와 config 생성은 setup 스킬에 맡긴다.
 
 ## Conventions
 
-- Bootstrap 진단은 `selfProbeHook`을 사용해 Node builtin spawn만 번들한다.
-- Phase 1 (Init): `getCacheDir(cwd)` → `setLogDir` → `mkdirSync` (없으면)
-- Phase 2 (Epoch reset): compact/clear에서만; boundary 캐시 재계산 비용은 수용 (fs 사실이라 정합성 무해)
-- Phase 3 (Auto-detect): `!isFcaProject && hasIntentMdInTree(cwd)`면 `.filid/` 생성 후 FCA로 승격
-- Phase 4 (Maintenance): `isSessionPruneDue(cwd)` 통과 시 `pruneOldSessions` + `markSessionPruneRun`, `isPruneDue()` 통과 시 `pruneStaleCacheDirs` + `markPruneRun` (독립 게이트)
-- `hasIntentMdInTree`: BFS, `maxDepth=4`, `SCAN_SKIP_DIRS` + `.`으로 시작하는 디렉토리 제외
-- FCA 프로젝트만 `[filid] Session initialized...` `additionalContext` 주입
-- 최상위 try/catch로 모든 예외 포획 → `{ continue: true }` fallthrough
+- Bootstrap 진단은 Node builtin spawn만 번들하는 selfProbeHook을 사용한다. 범용 프로세스 도구를 가져오면 hook 번들 예산을 넘는다.
+- compact/clear는 컨텍스트를 잃으므로 전달 기록을 재무장하고, resume/startup은 기존 컨텍스트가 살아 있으므로 보존한다. boundary 재계산 비용은 filesystem 사실의 정합성을 위해 수용한다.
+- 자동 탐지는 INTENT 존재만으로 opt-in하며 config 생성과 규칙 배포는 setup 스킬의 책임이다.
+- session prune과 전체 cache prune은 독립 throttle을 사용한다. 한 작업의 실행 여부가 다른 정리를 막지 않게 한다.
+- 초기화 진단은 FCA 프로젝트에만 전달하고 실패는 세션 시작을 막지 않는다.
 
 ## Boundaries
 

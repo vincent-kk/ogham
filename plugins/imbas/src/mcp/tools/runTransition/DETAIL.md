@@ -2,13 +2,10 @@
 
 ## Requirements
 
-`run_transition` 도구는 run state의 phase 전이를 수행한다. phase 는 `refine → estimate(skip 가능) → split` 이며 4가지 action을 지원한다.
-
-- `start_phase`: 필수 필드 `phase` ("refine" | "estimate" | "split"). `estimate` 는 refine 이 PASS 계열로 완료되어야, `split` 은 추가로 estimate 가 completed 또는 skipped 여야 시작된다.
-- `complete_phase`: 필수 필드 `phase`. `refine` 완료는 `result` ("PASS" | "PASS_WITH_WARNINGS" | "BLOCKED") 필수, `estimate` 완료는 `estimated_manday`(음이 아닌 수) 필수 — 둘 다 핸들러 계층(`handleCompletePhase`)이 강제한다. 선택: `blocking_issues`, `warning_issues` (refine), `pending_review`, `stories_created` (split). `result="BLOCKED"`면 `current_phase`를 전진시키지 않는다.
-- `escape_phase`: 필수 필드 `phase="split"`, `escape_code` ("E2-1" | "E2-2" | "E2-3" | "EC-1" | "EC-2").
-- `skip_phases`: 필수 필드 `phases` — `"estimate"` 만 허용 (min 1). refine 이 PASS 계열로 완료된 뒤에만 허용된다 — skip 도 phase 순서상의 전진이므로 start 와 같은 refine 게이트를 받는다. skip 된 phase 는 `status: 'skipped'` 로 기록되고 `current_phase` 는 다음 phase 로 전진한다.
-- 4개 action 공통 선택 필드 `project_root`: 워크스페이스 절대경로. Claude Code 에서는 생략하고, 플러그인 설치 디렉토리에서 서버를 띄우는 호스트에서는 전달한다.
+- phase 순서는 refine → estimate → split이며 estimate만 건너뛸 수 있다.
+- skip도 전진이므로 start와 같은 refine 통과 게이트를 거친다. BLOCKED 완료는 현재 phase를 전진시키지 않는다.
+- estimate 완료 통계는 필수다. action별 필드·허용값은 전이 스키마와 테스트가 고정한다.
+- project_root는 워크스페이스에서 서버를 띄우는 호스트에서는 생략할 수 있고, 설치 디렉터리에서 띄우는 호스트에서는 전달한다.
 
 ## API Contracts
 
@@ -41,4 +38,4 @@ MCP `inputSchema`는 flat leaf-primitive only `z.object`다 — 모든 비-core 
 
 ## Last Updated
 
-2026-08-05 — v2: phase 집합 refine/estimate/split, skip 대상 estimate 단일화, estimated_manday 계약 추가.
+전이 입력·스키마 분리·phase 게이트 계약의 내용과 근거가 바뀔 때 갱신한다.

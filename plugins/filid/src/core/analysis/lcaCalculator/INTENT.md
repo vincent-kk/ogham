@@ -4,14 +4,6 @@
 
 파일·디렉터리 소비자를 소유 프랙탈로 올린 뒤 모든 owner가 공유하는 가장 깊은 fractal을 계산한다.
 
-## Structure
-
-| Path                         | Role                               |
-| ---------------------------- | ---------------------------------- |
-| `index.ts`                   | named public entry point           |
-| `resolveOwningFractal.ts`    | portable file/directory owner 해석 |
-| `findLowestCommonFractal.ts` | 모든 owner ancestor 교집합 계산    |
-
 ## Conventions
 
 - 판단 우선순위: 1. portable path identity 2. 모든 소비자 교집합 3. 깊이.
@@ -36,7 +28,3 @@
 - 문자열 prefix나 host-native path만으로 containment 판정
 - organ, pure-function 또는 hybrid를 lowest common fractal로 반환
 - 존재하지 않는 consumer를 root가 소유한다고 추측
-
-## Dependencies
-
-- `../../../types/fractal.js`, `../../../constants/`, `@ogham/cross-platform`

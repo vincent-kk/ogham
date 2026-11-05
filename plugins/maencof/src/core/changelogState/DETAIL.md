@@ -9,19 +9,13 @@
 
 ## API Contracts
 
-- `changelogStatePath(cwd)` — `.maencof-meta/changelog-state.json` 경로. 파일시스템을 건드리지 않는다.
-- `readChangelogState(cwd)` — 정규화된 상태. 부재·손상 시 빈 상태.
-- `writeChangelogState(cwd, state)` — 상태 기록. 기록 주체는 MCP bootSweep 의 changelogDebt 관심사와 `/maencof:changelog` 스킬이다.
+상태 기록 주체는 MCP bootSweep의 changelogDebt와 changelog 스킬이다. 감지와 보관을 분리하며 손상 상태로 세션 시작을 막지 않는다.
 
 ## Acceptance Criteria
 
 ### AC-zod-free-normalize — Zod 없는 정규화
 
 - 이 fractal 의 어떤 파일도 zod 를 import 하지 않는다.
-
-### AC-corrupt-state-fallback — 손상 폴백
-
-- 파싱 불가 상태 파일에서 `readChangelogState` 가 빈 상태를 반환한다.
 
 ## Boundary Exemptions
 
@@ -33,4 +27,4 @@
 
 ## Last Updated
 
-2026-07-30 — Zod-free 정규화·폴백 계약과 훅 직접 import 면책을 문서화했다.
+기록 부채 보관·수동 정규화·감지와의 소유권이 바뀔 때 갱신한다.

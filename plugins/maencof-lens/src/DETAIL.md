@@ -10,9 +10,7 @@
 
 ## API Contracts
 
-- 실행 진입점은 esbuild 산출물이다: MCP 서버(원본 `mcp/serverEntry/`)와 훅 번들.
-- `src/index.ts` 는 설정·볼트·필터의 공개 심볼을 노출한다. `mcp/` 를 재노출하지 않는다 — `mcp/server/server.ts` 가 `version.ts` 를 참조하므로 재노출은 `src → mcp/server → src` 순환이 된다.
-- MCP 도구 5종은 모두 읽기 전용이다.
+- 실행 표면은 생성 번들이며 소스 배럴은 라이브러리 심볼만 노출한다. MCP를 루트에서 재노출하면 서버의 생성 버전 참조가 루트로 돌아오는 순환이 된다.
 
 ## Acceptance Criteria
 
@@ -20,10 +18,6 @@
 
 - 볼트 경로에 대한 쓰기 호출이 0건이다.
 - maencof 의 mutation 핸들러를 import 하지 않는다.
-
-### AC-layer-intersection — 레이어 교집합
-
-- 요청 레이어가 설정 레이어를 넘어서면 교집합으로 좁혀진다.
 
 ### AC-no-barrel-cycle — 배럴 순환 부재
 
@@ -39,4 +33,4 @@
 
 ## Last Updated
 
-2026-07-30 — 읽기 전용 계약과 생성된 `version.ts` 참조 면책을 문서화했다.
+소스 계층·생성 버전·공개 배럴 경계의 내용이나 적용 범위가 바뀔 때 갱신한다.

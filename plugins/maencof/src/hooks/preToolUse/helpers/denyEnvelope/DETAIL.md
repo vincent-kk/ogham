@@ -9,21 +9,11 @@
 
 ## API Contracts
 
-- `toPreToolUseEnvelope(...)` — 병합된 관심사 결과를 Claude Code PreToolUse stdout 계약으로 번역한다.
+도구 하나의 거부를 턴 전체 중단으로 바꾸지 않는다. stdout envelope의 구체적인 필드 보존은 구현과 테스트가 고정한다.
 
 ## Acceptance Criteria
 
-### AC-deny-keeps-continue — 차단 시 continue 유지
-
-- 차단 결과에도 `continue: true` 가 남고 `permissionDecision: "deny"` 로 신호한다.
-
-### AC-no-top-level-continue-false — top-level 중단 부재
-
-- 어떤 입력에서도 top-level `continue: false` 나 `reason` 을 방출하지 않는다.
-
-### AC-context-preserved — 컨텍스트 보존
-
-- 관심사가 채운 `additionalContext`·`systemMessage` 가 결과에 남는다.
+행동별 결과와 경계값은 이 모듈을 검증하는 테스트가 고정한다.
 
 ## Boundary Exemptions
 
@@ -35,4 +25,4 @@
 
 ## Last Updated
 
-2026-07-30 — deny 신호 계약과 훅 직접 import 면책을 문서화했다.
+차단 신호 방식 또는 훅 직접 import 면책이 바뀔 때 갱신한다.

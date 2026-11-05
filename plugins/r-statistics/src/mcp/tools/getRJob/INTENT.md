@@ -4,9 +4,8 @@
 
 ## Conventions
 
-- 미존재 jobId → `JOB_NOT_FOUND` throw
-- `includeStdout` 기본 true; false 면 stdout/stderr 텍스트 비움(인코딩만 유지)
-- 결과 유무와 관계없이 `managedLibraryPath` 유지
+- 폴링은 jobStore의 현재 관측을 반환하며 실행·취소를 일으키지 않는다.
+- 스트림 생략 옵션은 큰 출력의 반복 전송을 막기 위한 것이다. 결과가 없거나 스트림을 숨겨도 실행과 같은 관리형 library 경로는 유지한다.
 
 ## Boundaries
 

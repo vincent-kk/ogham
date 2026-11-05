@@ -1,11 +1,12 @@
+
+
 ## Purpose
 
 `project_setup`의 `settings` action이 기동하는 로컬 HTTP 서버. `127.0.0.1` 전용 바인딩, 공유 `@ogham/http-kit` 으로 loopback Host → one-time token → POST Origin → `application/json` 순 검증. 저장/닫기 이벤트를 settle waiter 로 노출해 action의 bounded long-poll 을 해소한다.
 
 ## Structure
 
-- `webServer.ts` 와 그 배럴은 closure lifecycle과 settle waiter 레지스트리만 소유한다 — 모듈 전역 상태를 두지 않기 위한 형태다.
-- 요청 가드와 경로 디스패치는 `routing/` 이, 상태 주입·저장·닫기 처리는 handlers organ이 맡는다.
+- 서버 수명과 waiter 레지스트리는 closure가 소유한다. 모듈 전역 상태가 별도 서버의 종료·대기를 섞지 않게 하기 위한 형태다.
 
 ## Conventions
 

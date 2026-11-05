@@ -4,6 +4,10 @@
 
 esbuild 번들 진입점. `--finalize <vaultPath>` 로 스폰되면 shared `@ogham/session-finalizer` 의 `runFinalizer` 가 finalizeSession(bootSweep 완결 + 인덱스 재빌드 1회)을 실행 후 종료(서버 미기동); 정상 부팅 시 companion 레거시→정본 마이그레이션 1회 후 MCP 서버를 stdio 모드로 시작.
 
+## Conventions
+
+실행 번들은 라이브러리 import 표면이 아니다. finalizer 모드와 정상 서버 기동을 분리해 종료 작업에서 새 서버를 띄우지 않는다.
+
 ## Boundaries
 
 ### Always do

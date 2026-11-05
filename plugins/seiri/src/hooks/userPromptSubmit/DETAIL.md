@@ -27,4 +27,4 @@
 
 ## Last Updated
 
-2026-09-27
+Update when the native turn, binding retention, or entry-line contracts change.

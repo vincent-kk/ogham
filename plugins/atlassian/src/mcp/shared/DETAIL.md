@@ -9,8 +9,7 @@
 
 ## API Contracts
 
-- `helpers/toolResponse` — `toolResult`·`toolError`·`mapReplacer`·`wrapHandler`.
-- `helpers/buildFetchContext` — `buildFetchContext(...)`: 설정·인증·환경을 합쳐 `FetchContext` 를 만든다.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
 
@@ -21,9 +20,9 @@
 
 ### AC-context-single-assembly — 컨텍스트 단일 조립
 
-- 도구가 설정·인증을 각자 읽지 않고 `buildFetchContext` 를 통해 받는다.
+- 사이트별 API 실행 컨텍스트는 `buildFetchContext`로 조립한다. 설정 편집과 전체 사이트 인증 점검은 실행할 단일 사이트가 없으므로 core 로더를 직접 사용하며, 별도 API 실행 컨텍스트를 만들지 않는다.
 - 조립 결과를 직렬화해도 자격증명 원문이 나타나지 않는다.
 
 ## Last Updated
 
-2026-08-28 — 다섯 번째 도구도 공통 응답 봉투를 사용함을 반영했다.
+응답 봉투와 컨텍스트 조립·비밀 격리 계약이 바뀔 때 갱신한다.

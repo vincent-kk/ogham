@@ -2,29 +2,11 @@
 
 yt-dlp 바이너리를 안전하게 획득·실행하여 자막·트랜스크립트·메타데이터·댓글·썸네일·다운로드를 MCP 도구로 노출하는 서버.
 
-## Structure
-
-| 파일/디렉터리                 | 역할                                                                 |
-| ----------------------------- | -------------------------------------------------------------------- |
-| `index.ts`                    | 런타임 결선 진입점(`main`)·stdio 연결·종료 처리                      |
-| `version.ts`                  | 서버 버전·이름 단일 출처(`VERSION`/`SERVER_NAME`)                    |
-| `config/`                     | 환경변수 → 검증된 `Config`                                           |
-| `paths/`                      | `~/.yt-dlp` 경로 트리 해석·생성                                      |
-| `ytdlp/`                      | 바이너리 획득·실행·도메인 연산                                       |
-| `mcp/`                        | 도구 정의·레지스트리·서버                                            |
-| `features/`                   | 기능별 수직 슬라이스(현재 `subtitle/`)                               |
-| `core/` (organ)               | 캐시·요청 페이싱(throttle)·동시성 결합 실행 Service(`createService`) |
-| `domain/` (organ)             | 도메인 타입·에러 분류                                                |
-| `postprocess/` (organ)        | 자막/텍스트 후처리                                                   |
-| `cache/` `obs/` (organ)       | TtlLruCache·pino 로거                                                |
-| `constants/` `utils/` (organ) | 상수·coerce 헬퍼                                                     |
-
 ## Conventions
 
-- 모든 모듈 인스턴스화는 `createX(deps)` 팩토리로 의존성을 주입받으며, 결선은 오직 `index.ts`의 `main()`에서만 수행한다.
-- 서버 버전·이름은 `version.ts` 한 곳에서만 읽고, 다른 모듈은 이를 import해 재선언하지 않는다.
-- 부팅 순서는 config → logger → paths → versionResolver → binaryManager → runner → service → server를 따르며 paths는 `ensureBaseDirs()`로 선행 보장한다.
-- 전송은 `StdioServerTransport` 한 종류만 쓰고 SIGINT/SIGTERM에서 `server.close()`로 정상 종료한다.
+- 인스턴스는 의존성을 받는 `createX(deps)` 팩토리로 만들고 결선은 루트 `main()`에만 둔다.
+- 서버 이름·버전은 `version.ts`를 단일 출처로 삼아 패키지와 서버 식별자가 어긋나지 않게 한다.
+- 경로를 사용하는 구성요소보다 기본 디렉터리를 먼저 보장한다. 전송은 stdio로 한정하고 종료 신호에서는 서버를 정상 종료한다.
 
 ## Boundaries
 
@@ -42,8 +24,3 @@ yt-dlp 바이너리를 안전하게 획득·실행하여 자막·트랜스크립
 
 - 무음 `|| ''` fallback으로 에러를 숨긴다
 - 체크섬 검증 없이 바이너리를 설치한다
-
-## Dependencies
-
-- 내부: `config`, `paths`, `mcp/registry`, `mcp/server`, `obs/logger`, `ytdlp/binary`, `ytdlp/runner`, `version`
-- 외부: `@modelcontextprotocol/sdk`(stdio transport) | 소비처(downstream): `core/service`

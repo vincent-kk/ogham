@@ -6,24 +6,16 @@
 
 - `127.0.0.1` 임의 포트에만 바인딩한다. 기동마다 토큰을 새로 발급한다.
 - 모든 라우트는 가드를 통과한다: loopback Host → `?token=` → POST 의 loopback Origin 과 `application/json`.
-- 라우트는 넷뿐이다: `/`(폼), `/status`, `/test`(도달성 probe), `/submit`(저장 후 종료).
+- 라우트는 넷뿐이다: `/`(폼), `/status`, `/test`(도달성 probe), `/submit`(저장).
 - 요청마다 유휴 타이머를 리셋하고, 시간이 다하면 스스로 닫는다.
 - 모듈 전역 가변 상태를 두지 않는다 — 서버 인스턴스 상태는 closure 안에 산다.
 - `api_key` 는 응답에서 마스킹만 한다.
 
 ## API Contracts
 
-- `startSetupServer(...)` — 서버를 기동하고 토큰을 발급하며 `resetTimer`·`closeServer` 를 결선한다.
-- `routing/routes.ts` — 가드와 라우트 디스패치.
-- `routing/routeContext.ts` — `RouteContext`: config·credentials 로드/저장, 연결 테스트, 타이머·종료 콜백.
-- `handlers/` — `/`·`/status`·`/test`·`/submit` 핸들러.
-- `utils/` — `maskApiKey`·`buildStatus`·`buildPathSuggestions`.
+호출 형태와 구체적인 반환 값은 공개 진입점과 테스트에서 확인한다.
 
 ## Acceptance Criteria
-
-### AC-submit-project-default — 제출 기본 범위
-
-- scope 생략과 명시적 project는 프로젝트 설정에 저장하고, 명시적 user만 전역 설정에 저장한다.
 
 ### AC-loopback-only — 바인딩 격리
 
@@ -47,4 +39,4 @@
 
 ## Last Updated
 
-2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.
+제출 scope·토큰 가드·유휴 종료와 키 복원 계약이 바뀔 때 갱신한다.

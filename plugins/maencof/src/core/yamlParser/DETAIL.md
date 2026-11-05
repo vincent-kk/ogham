@@ -10,16 +10,14 @@
 
 ## API Contracts
 
-- `parseYamlFrontmatter(source)` — frontmatter 블록을 키-값 맵으로. 인라인 배열(`[a, b]`)과 블록 배열을 모두 인식하고, 값은 `parseScalarValue` 로 해석한다.
-- `parseScalarValue(raw)` — 스칼라 문자열을 문자열·숫자·불리언으로 해석한다.
-- `quoteYamlValue(value)` — 직렬화 안전 인용. 특수문자를 담은 값에 인용을 씌운다.
+배열 항목도 스칼라와 같은 인용 해제 경로를 사용한다. 호출자가 따로 인용을 제거하면 escape 처리가 갈라져 저장 후 되읽기의 스키마 검증이 실패한다.
 
 ## Acceptance Criteria
 
 ### AC-frontmatter-parsing — frontmatter 파싱
 
 - 인라인 배열과 블록 배열이 같은 배열 값으로 파싱된다.
-- frontmatter 가 없거나 닫히지 않은 입력에서 빈 맵을 반환하고 throw 하지 않는다.
+- 입력은 구분자를 제거한 YAML 블록이다. Markdown 구분자의 존재·닫힘 검증은 documentParser가 소유하여 raw YAML을 받는 소비자까지 Markdown 형식에 결합하지 않는다. 빈 블록이나 키-값 줄이 없는 입력에서는 빈 맵을 반환하고 throw 하지 않는다 — frontmatter 부재를 빈 문자열로 넘기는 소비자가 예외 처리를 따로 두지 않게 한다.
 
 ### AC-yaml-serialization — 직렬화 안전성
 
@@ -32,10 +30,6 @@
 - 인라인 배열과 블록 배열이 이 규칙에서 동일하게 동작한다.
 - 인용 항목의 escape 해제가 스칼라 경로와 같은 결과를 낸다.
 
-## History
-
-- 2026-08-03 — 배열 항목이 `parseScalarValue` 를 건너뛰고 `quoteYamlValue` 가 숫자꼴 문자열을 인용하지 않아 왕복이 양방향으로 깨져 있었다. 쓰기는 성공하고 되읽기부터 스키마 검증이 막히는 형태였다. 두 경로를 모두 고치고 불변식을 `AC-yaml-round-trip` 으로 고정했다.
-
 ## Last Updated
 
-2026-08-03 — 왕복 불변식을 요구사항과 acceptance group 으로 명시했다.
+스칼라와 배열의 해석·문자열 왕복·훅 번들 제약이 바뀔 때 갱신한다.

@@ -6,8 +6,8 @@ MCP 서버와 도구 핸들러를 소유하며 stdio 전송으로 Claude Code와
 
 ## Conventions
 
-- 서버 실행 진입점은 companion migration을 한 번 수행한 뒤 `startServer`에 위임한다.
-- 도구 핸들러는 입력 검증 뒤 core operation에 위임하고 공통 result envelope를 반환한다.
+- 서버 실행 진입점은 정상 부팅과 detached finalizer를 배선한다. 종료 정리가 새 서버를 띄우지 않도록 두 경로를 분리한다.
+- 문서 CRUD·빌드는 파일 I/O를 조립하고 파싱·그래프 계산·전용 저장소 정책은 core에 위임한다. 도구가 저장소 정책을 복제하면 호출 경로마다 검증이 갈라진다.
 
 ## Boundaries
 
@@ -26,7 +26,7 @@ MCP 서버와 도구 핸들러를 소유하며 stdio 전송으로 Claude Code와
 
 ### Never do
 
-- 도구 핸들러에서 파일 I/O 직접 수행 (core 경계에 위임)
+- 직접 I/O로 core가 소유한 전용 저장소의 검증·영속화 경계를 우회
 - 서버 실행 진입점을 라이브러리 API로 재노출 (버전 참조를 거슬러 순환이 된다)
-- esbuild 진입점에 서버 로직 추가 (`startServer` 전 `runCompanionMigration` 1회만 허용)
+- esbuild 진입점에 서버·마이그레이션·finalizer 구현을 인라인
 - getVaultPath() 우회 또는 vault 경로 하드코딩

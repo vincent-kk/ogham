@@ -11,12 +11,7 @@
 
 ## API Contracts
 
-- `sectionMarkers(namespace, id?)` — `<!-- NS:START:id -->` 마커 쌍. id 생략형은 maencof 기존 규약이다.
-- `readSection(source, markers)` — 구간 본문. 부재 시 `null`.
-- `mergeSection(source, markers, body)` — 구간 삽입·치환. idempotent.
-- `removeSection(source, markers)` — 구간 제거. 부재 시 `null`.
-- `INSTRUCTIONS_FILES` · `CLAUDE.md`·`AGENTS.md` 상수 — 지침 파일 이름 합집합.
-- `read/`·`write/` 하위 fractal — 조회와 변경 연산을 묶는 내부 조직 경계.
+- id를 생략한 marker 형식은 배포된 maencof 지침을 계속 읽기 위한 호환 계약이다.
 - 외부 소비자는 모든 공개 심볼을 `@ogham/cross-platform` 패키지 루트에서
   가져온다. 하위 fractal은 소유한 concrete operation을 직접 조립한다.
 
@@ -26,14 +21,6 @@
 
 - 이 fractal 의 어떤 파일도 `node:fs` 나 `process.env` 를 읽지 않는다.
 
-### AC-merge-idempotent — 병합 멱등
-
-- 같은 본문을 두 번 병합해도 구간이 하나만 남는다.
-
-### AC-outside-bytes-preserved — 구간 밖 보존
-
-- 제거·병합 뒤 마커 span 밖 바이트가 공백까지 동일하다.
-
 ### AC-root-output-isolation — 루트 공개 주소와 출력 격리
 
 - 외부 import 주소는 `@ogham/cross-platform` 하나다.
@@ -42,4 +29,4 @@
 
 ## Last Updated
 
-2026-07-30 — package root 단일 공개 주소와 내부 read/write 조립 계약을 정리했다.
+지침 채널·소유 marker 또는 구간 밖 바이트 보존 정책의 범위가 바뀔 때 갱신한다.

@@ -2,17 +2,10 @@
 
 외부 API 어댑터 계층. 현재는 NCBI E-utilities 어댑터(`eutils/`) 단일 프랙탈. mcp 도구가 이 배럴로 어댑터를 사용한다.
 
-## Structure
-
-| 디렉토리   | 역할                                                                           |
-| ---------- | ------------------------------------------------------------------------------ |
-| `eutils/`  | E-utility 함수별 어댑터(esearch·efetch·esummary·espell·elink·idconv·oaService) |
-| `index.ts` | 배럴(외부 경계)                                                                |
-
 ## Conventions
 
 - 어댑터는 `core/httpClient`만으로 네트워크 수행. 응답 파서는 순수 함수로 분리·export.
-- 단일 호스트 범위(eutils + PMC utils)만 다룬다.
+- NCBI API와 설정된 E-utilities mirror를 대상으로 하며, 목적지 호스트는 HTTP allowlist로 제한해 임의 호스트 호출을 막는다.
 
 ## Boundaries
 
@@ -27,7 +20,3 @@
 ### Never do
 
 - core/types/constants 외 상위 레이어 import.
-
-## Dependencies
-
-- `./eutils` — E-utilities 어댑터 프랙탈

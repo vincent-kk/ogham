@@ -3,23 +3,15 @@
 `(scope, host, artifact kind)`를 실제 파일 후보 또는 CLI 대상으로 해석한다.
 모든 상위 엔진이 공유하는 호스트 대상 매트릭스의 단일 진실 소스다.
 
-## Structure
-
-| Path         | Role                                       |
-| ------------ | ------------------------------------------ |
-| `index.ts`   | 내부 호환 barrel·패키지 루트 재노출 source |
-| `targets.ts` | target 타입과 aggregate 호환 facade        |
-| `maps/`      | scope × artifact 목적별 단일 resolver      |
-| `types/`     | facade 순환을 막는 target 계약 organ       |
-
 ## Conventions
 
+- `targets.ts`는 target 타입과 aggregate resolver의 호환 facade이고, 형제 모듈은 `index.ts`를 진입점으로 사용한다.
 - Codex의 비어 있지 않은 `AGENTS.override.md`가 `AGENTS.md`보다 우선한다.
 - project root는 절대 경로, user root는 host state root로만 해석한다.
 - 외부 hook은 `@ogham/agent-artifacts` 루트에서 목적별 resolver만 고른다.
 - `sideEffects: false` tree-shaking과 emitted byte·output forbidden-pattern
   guard가 선택하지 않은 artifact graph의 hook 번들 기여를 막는다.
-- `maps/`는 facade가 아니라 `types/`의 내부 계약을 직접 사용한다.
+- 목적별 resolver는 aggregate facade가 아니라 내부 target 타입을 직접 사용해 facade 역참조 순환을 막는다.
 
 ## Boundaries
 
@@ -38,7 +30,3 @@
 - 파일 시스템 변경 또는 아티팩트 본문 편집.
 - 알 수 없는 host의 target을 추측.
 - 목적별 resolver에서 다른 artifact manager를 import.
-
-## Dependencies
-
-- 외부 `@ogham/cross-platform` 루트의 path·read 심볼.

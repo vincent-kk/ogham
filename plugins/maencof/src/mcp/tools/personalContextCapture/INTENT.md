@@ -4,12 +4,15 @@
 
 `capture_personal_context` 도구 — 사용자 상태(states)·최근 동향(topics)의 조용한 upsert/해소. target/action 조합별 필수 필드 검증 후 `core/personalContext`에 위임한다.
 
+## Conventions
+
+SDK의 플랫 스키마 제약 때문에 target/action 조합의 필수·금지는 핸들러가 검증한다.
+
 ## Boundaries
 
 ### Always do
 
-- 입력 Zod 스키마 검증 + 조합별 필수 필드는 핸들러에서 검증 (플랫 스키마 — SDK ZodRawShape 제약)
-- core/personalContext `applyPersonalContextMutation`에 로직 위임
+- core personalContext에 위임하고 실패 입력을 잘라 통과시키지 않음
 
 ### Ask first
 
@@ -17,5 +20,4 @@
 
 ### Never do
 
-- 파일 I/O 직접 수행 (core/ 위임)
-- 캡처를 표면화하는 배너·통지 메시지 (은닉 계약 — 27-personal-context.md)
+- 직접 파일 I/O 또는 캡처를 표면화하는 배너·통지

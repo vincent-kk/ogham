@@ -6,8 +6,7 @@ adapter가 분석한 실행 가능 검증 문서를 spec-document와 test-record
 
 ## Structure
 
-- PASS/FAIL 판정은 `policy/`만 소유한다 — 다른 organ은 adapter 결과 조합과 owner DETAIL group 해석까지만 하고 판정을 만들지 않는다.
-- 공개 경계는 `index.ts` 하나이며, cap과 certainty 상수는 그 밖으로 나가지 않는다.
+- PASS/FAIL 판정은 `policy/`만 소유한다. 다른 organ이 판정을 만들면 certainty와 cap 정책이 여러 곳에서 갈라지므로 결과 조합과 owner DETAIL 해석에 한정한다.
 
 ## Conventions
 
@@ -34,8 +33,5 @@ adapter가 분석한 실행 가능 검증 문서를 spec-document와 test-record
 - 3+12 분할이나 test-to-spec promotion 복원
 - project 전체 test-record 총수 제한
 - discovery 실패나 경합을 빈 exact 분석으로 축소
+- cap과 certainty 상수를 공개 표면으로 내보내기
 - 생태계 syntax를 core policy에 추가
-
-## Dependencies
-
-- `../../types/verification.ts`, VerificationAdapter와 documentValidator group parser

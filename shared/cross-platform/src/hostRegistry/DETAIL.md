@@ -10,22 +10,9 @@
 
 ## API Contracts
 
-- `HOSTS` — 호스트 행과 marker env 의 순수 데이터.
-- `Host` · `KnownHost` · descriptor 타입.
-- `hostFromMarker(env)` — MCP marker 판별.
-- `runtime/` organ — marker·훅 신호에서 명시적 host ID 를 판별한다.
-- `resolveHostDescriptor(...)` — 기존 상태 경로 호환용 descriptor 판별.
-- 외부 소비자는 위 심볼을 `@ogham/cross-platform` 패키지 루트에서 가져온다.
+외부 소비자는 패키지 루트를 사용한다. 내부 재사용을 허용하는 범위와 이유는 아래 Boundary Exemptions가 정한다. 구체적인 공개 심볼과 타입은 진입점에서 확인한다.
 
 ## Acceptance Criteria
-
-### AC-marker-precedence — marker 우선
-
-- marker 가 있으면 훅 신호와 무관하게 marker 결과가 이긴다.
-
-### AC-unknown-not-claude — unknown 보존
-
-- 미인식 marker 나 겹치는 훅 신호가 `unknown` 으로 남고 Claude 로 낮춰지지 않는다.
 
 ### AC-leaf-no-internal-deps — leaf 유지
 
@@ -45,4 +32,4 @@
 
 ## Last Updated
 
-2026-07-30 — package root 단일 공개 주소와 내부 host 표 재사용 계약을 정리했다.
+호스트 판별·상태 채널 또는 내부 재사용 예외의 범위가 바뀔 때 갱신한다.

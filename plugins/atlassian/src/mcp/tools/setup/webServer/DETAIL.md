@@ -14,14 +14,9 @@
 
 ## API Contracts
 
-- 서버 기동 — 토큰 발급, 라우트 등록, idle 타이머 결선 후 `{ url, close, completion }` 반환.
-- 라우트 — 설정 폼 조회, 연결 테스트, 저장. 성공 저장 응답은 선택 scope의 resolver-owned `config_path`를 포함한다.
+HTTP 제출 오류와 서버 completion은 별개의 수명주기다. 수정 가능한 제출 실패는 재시도를 허용하고 실제 저장 성공만 resolver가 확정한 경로로 completion을 끝낸다.
 
 ## Acceptance Criteria
-
-### AC-submit-project-default — 제출 기본 범위
-
-- scope 생략과 명시적 project는 프로젝트 설정에 저장하고, 명시적 user만 전역 설정에 저장한다.
 
 ### AC-guard-order — 가드 순서
 
@@ -35,11 +30,6 @@
 
 - 서버 상태가 모듈 전역이 아니라 closure 안에 있어, 두 번 기동해도 서로 간섭하지 않는다.
 
-### AC-retryable-completion — 재시도 가능한 완료
-
-- 실패 제출 뒤 같은 서버에서 수정 제출이 성공하면 completion은 그 성공 경로로 한 번만 끝난다.
-- 저장 성공 전 close·idle timeout·server error는 경로 없는 terminal 실패로 끝난다.
-
 ## Last Updated
 
-2026-09-13 — 프로젝트 기본 범위와 명시적 전역 저장 선택 계약을 반영했다.
+제출 scope·보안 가드와 completion 수명주기가 바뀔 때 갱신한다.

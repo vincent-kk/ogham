@@ -4,13 +4,9 @@
 
 vault 커밋용 git 프리미티브 — repo 판별, scope 기반 staging(민감 파일 exclude 동반), staged 조회, 커밋, 커밋 메시지 생성. 모든 git 실행은 `runGit`(spawnCli 래퍼)을 경유하며 index.lock 충돌 시 backoff 재시도한다.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel
-- `runner/` organ — runGit (spawnCli + index.lock backoff 재시도)
-- `repo/` organ — isGitRepo / getGitRoot / isIndexLocked
-- `staging/` organ — hasVaultChanges / stageVaultChanges / listStagedFiles / commitStaged
-- `message/` organ — stagedTopLevels / templateStaticPrefix / generateCommitMessage(+MESSAGE_TEMPLATE_REPLACERS)
+모든 git 실행은 `runGit` 을 경유한다. `runGit` 은 `@ogham/cross-platform` 의 `spawnCli` 래퍼이고 `child_process` 를 직접 쓰지 않는다 — Windows 에서 셸 해석이 달라지기 때문이다.
 
 ## Boundaries
 

@@ -8,8 +8,7 @@
 
 ## API Contracts
 
-- `saveFeedback(sessionId, payload, images): Promise<StoredFeedback>` — 본문과 이미지를 세션 디렉터리에 기록하고 저장된 형태를 돌려준다.
-- `readFeedback(sessionId): Promise<StoredFeedback | null>` — 저장분이 없으면 `null`.
+- 이미지 바이트는 별도 파일이고 이 저장소에는 이미지 메타만 넣는다. 피드백 JSON에 바이너리를 인라인하지 않는다.
 
 ## Acceptance Criteria
 
@@ -20,4 +19,4 @@
 
 ## Last Updated
 
-2026-07-30 — 피드백 영속 계약을 문서화했다.
+피드백 저장 범위·원자성·이미지 분리 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

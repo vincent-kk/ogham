@@ -4,11 +4,9 @@
 
 mtime 기반 변경 감지 및 부분 재인덱싱 범위 계산.
 
-## Structure
+## Conventions
 
-- `index.ts` — 순수 barrel (공개 API: computeChangeSet/computeOneHopNeighbors/computeIncrementalScope/createSnapshot/IncrementalTracker + 타입)
-- `types/` organ — 공개 타입 (ChangeSet/IncrementalScope/CurrentFileInfo)
-- `operations/` organ — 변경 계산 (computeChangeSet/computeOneHopNeighbors/computeIncrementalScope/createSnapshot + IncrementalTracker 래퍼 클래스, 함수 1개/파일)
+전체 재빌드 실행은 이 모듈의 권한이 아니다. 변경 영향 범위를 계산하여 호출자가 재빌드 여부를 결정하게 한다.
 
 ## Boundaries
 

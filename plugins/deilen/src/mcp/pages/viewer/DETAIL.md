@@ -12,9 +12,8 @@
 
 ## API Contracts
 
-- 서버 주입 상태: `__DEILEN_STATE__`(세션 id, 토큰, 설정, `last_intent`, `draft` — 서버 in_progress 초안 또는 null, `session_ttl_hours`).
-- 소비 라우트: `GET /api/viewer`, `GET /api/image/<sid>/<index>`, `GET /assets/<chunk>`, `POST /api/ping`, `POST /api/feedback`, `POST /api/close`.
-- lazy 렌더러 진입점: `renderers/highlight.entry.ts`, `renderers/mermaid.entry.ts`, `renderers/katex.entry.ts`.
+- 서버가 만든 라인 앵커와 세션 상태를 소비한다. 클라이언트가 번호나 세션 수명을 재추정하지 않는다.
+- 무거운 렌더러는 독립 asset chunk로 유지하고 실패 시 읽을 수 있는 원문 fallback을 남긴다. 라우트와 state 필드는 구현과 테스트를 읽는다.
 
 ## Acceptance Criteria
 
@@ -27,28 +26,10 @@
 - 코멘트가 서버가 부여한 원본 라인 범위에 정확히 매핑된다.
 - 표의 한 행에 코멘트를 달면 그 행의 셀들이 하이라이트된다.
 
-### AC-viewer-draft-persistence — 초안 영속
-
-- 새로고침 후 미전송 코멘트·overall 노트·첨부 썸네일이 그대로 보인다.
-- localStorage 가 비어 있고 서버 in_progress 초안이 있으면 그 코멘트가 보인다.
-- 제출·dismiss 뒤 같은 세션 키가 남지 않으며, 그 뒤에 끝나는 저장도 키를 되살리지 않는다.
-- 복원 뒤 새로 추가한 코멘트 id 는 기존 id 와 충돌하지 않는다.
-
-### AC-viewer-heartbeat-tolerance — 하트비트 내성
-
-- 일시적 실패 1–2회로는 제출이 비활성화되지 않는다.
-- 3회 연속 실패 뒤 `offline`, 이후 성공하면 다시 `alive` 다.
-- 404 뒤에는 ping 이 더 나가지 않는다.
-- 401 은 즉시 `offline` 이며 그 뒤에는 ping 이 더 나가지 않는다.
-
-### AC-viewer-links-new-tab — 링크 새 탭
-
-- `http(s)`·상대 경로 링크는 새 탭 속성을 갖고, `#` 링크는 갖지 않는다.
-
 ### AC-viewer-post-submit-state — 제출 후 상태
 
 - 수거·종료 후에도 페이지가 읽히고, 새로고침하면 제출이 비활성화된다.
 
 ## Last Updated
 
-2026-08-25 — 초안 영속·heartbeat 내성·링크 새 탭 계약을 추가했다.
+초안 복원·heartbeat 판정·원본 라인 앵커 계약의 내용이나 적용 범위가 바뀔 때 갱신한다.

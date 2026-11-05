@@ -1,10 +1,5 @@
 # Maencof Public Contract
 
-## Structure
-
-- `bridge/claude`는 Claude 런타임이며 Antigravity도 runner를 거쳐 이 번들을 실행한다. `bridge/codex`는 compiler 설정 `codexHookRuntime`이 선택하는 Codex 런타임이다. bridge 루트의 MCP 서버·vault setup CLI·Antigravity runner·Windows shim은 모든 호스트가 공유한다.
-- 두 호스트 모두 플러그인 디렉터리 전체를 설치한다 — 이 분리는 설치 범위가 아니라 실행 경로를 나눈다.
-
 ## Requirements
 
 - Maencof 지침은 프로젝트에서 호스트가 실제로 읽는 Claude/Codex 지침 후보의 `<!-- MAENCOF:START -->` / `<!-- MAENCOF:END -->` 구간만 소유한다.
@@ -16,6 +11,12 @@
 - article 옆 sidecar JSON이 metadata 정본이다. index가 읽는 catalog는 모든 HTML/sidecar pair와 schema가 유효할 때만 결정적으로 다시 만들며, 사용자 소유 style과 asset은 갱신하지 않는다.
 - 외부 HTML은 실행하거나 LLM 문맥에 원문 전체를 싣지 않는다. metadata가 빠졌을 때만 title, meta, heading의 크기 제한 digest를 만들고 그 데이터로 보완한다.
 - library 내부 검색은 name, tags, search terms만 사용한다. dashboard 통합은 새 탭 navigation entry만 추가하며 graph, data domain, search config를 바꾸지 않는다.
+- `bridge/claude`는 Claude 런타임이며 Antigravity도 runner를 거쳐 이 번들을 실행한다. `bridge/codex`는 compiler 설정 `codexHookRuntime`이 선택하는 Codex 런타임이다. bridge 루트의 MCP 서버·vault setup CLI·Antigravity runner·Windows shim은 모든 호스트가 공유한다.
+- 두 호스트 모두 플러그인 디렉터리 전체를 설치한다 — 이 분리는 설치 범위가 아니라 실행 경로를 나눈다.
+- HTML library와 Knowledge Graph는 열람물과 검색 지식의 역할을 분리한다. sidecar 정본과 결정적 catalog로 HTML 원문 전체를 읽지 않고 metadata 검색·링크 관리를 수행한다.
+- explain은 하나의 중심 원리를 연역·공격하는 방식 대신 연결 근거와 개념-관계 지도로 설명한다 — 하나의 원리 방어보다 대상의 관계를 드러내는 설명을 우선한다. 편집 스타일은 동봉 reference가 소유한다.
+- 렌더링 검증 범위는 표시 안정성을 확인할 정도로 제한하여 설명 생성보다 검증에 과도한 시간을 쓰지 않는다. 기본 브라우저 열기는 산출물 인계와 실제 열람 사이의 수동 단계를 없애기 위한 종료 계약이다.
+- vault 문맥은 질문에 필요한 때만 조회한다. 자동 주입이 설명 대상의 범위를 결정하지 않게 한다.
 
 ## API Contracts
 
@@ -93,14 +94,6 @@ SessionStart의 기존 지침 작성은 현재 vault 초기화·버전 갱신 �
 - HTML inspect 출력에는 고정 크기 상한이 있으며 원문 body 전체가 포함되지 않는다. library 검색은 metadata만 사용하고 HTML body를 색인하지 않는다.
 - dashboard 연결은 새 탭 navigation만 제공하고 Maencof graph와 dashboard 검색 결과에는 library entry가 나타나지 않는다. Markdown 수정은 특정 문서 연결을 요청받은 경우에만 한다.
 
-## History
-
-- 2026-09-02 — 검색용 Knowledge Graph와 긴 HTML 열람물을 분리하기 위해 `craft-library` 최초 구성과 vault-local `manage-library` 반복 관리를 나눴다. sidecar 정본과 결정적 catalog 생성으로 LLM이 HTML 원문을 읽지 않고도 목록·metadata 검색·링크 관리를 수행하게 했다.
-- 2026-09-01 — mental-model 스킬을 explain 으로 개명하고, 중심 원리를 세워 연역·공격하는 방법을 제거했다. 연결된 근거를 따라가 정확히 이해한 뒤 개념-관계 지도를 뼈대로 가르치는 방식이 하나의 원리 방어보다 설명력을 높인다는 판단에서다. 편집 스타일은 seiri explain 과 같은 형태의 동봉 `reference.md` 가 소유한다.
-- 2026-08-28 — mental-model의 렌더링 검증을 대표 데스크톱·모바일 뷰포트와 인터랙션 유형별 한 번의 스모크 체크로 제한했다. 표시 안정성을 유지하면서 설명 생성보다 검증에 과도한 시간을 쓰지 않도록 하기 위해서다.
-- 2026-08-28 — HTML 산출물을 작성한 뒤 시스템 기본 브라우저로 여는 종료 동작을 추가했다. 산출물 인계와 실제 열람 사이의 수동 단계를 없애기 위해서다.
-- 2026-08-28 — mental-model을 vault 중심의 기록 재구성에서 질문이 정한 모든 대상을 다루는 예측형 시각 설명으로 교체했다. vault 문맥은 필요할 때만 조회해 자동 주입이 범위를 결정하지 않게 했다.
-
 ## Last Updated
 
-2026-09-26 — Insight capture, reviewed consolidation and context reuse contracts.
+호스트 지침 소유권·지식 캡처와 통합·설명 및 HTML library 운영 계약이 바뀔 때 갱신한다.

@@ -11,32 +11,12 @@
 
 ## API Contracts
 
-- `orchestratePreToolUse(input: DispatchInput): MergedHookOutput` — 단일 논리 호출을 batch 계약으로 위임하는 호환 wrapper 다.
-- `orchestratePreToolUseBatch(result: NormalizeCodexToolUsesResult<DispatchInput>): MergedHookOutput` — 성공 결과의 `toolUses` 를 순서대로 guard에 라우팅하고 `original` 로 lifecycle 을 한 번 실행한다. 실패 결과도 `original` 로 lifecycle 을 한 번 실행한 뒤 vault 범위에 따라 deny 또는 pass 한다.
-- batch 라우팅은 각 concern 을 `safeConcern` 으로 격리하고 최종 결과를 `mergeHookOutput` 으로 합친다.
+단일 호출 진입점은 batch 계약으로 위임하는 호환 경계다. 정규화 실패에도 원래 물리 입력의 lifecycle 실행을 보존하고, 최종 차단 표현은 deny envelope 번역기에 맡긴다.
 
 ## Acceptance Criteria
 
-### AC-ordered-deny-wins — 순서 보존과 deny 우선
-
-- 첫 operation 이 허용되어도 뒤의 L1 operation 이 거부되면 전체 호출이 deny 되고 뒤 경로의 사유가 남는다.
-- 첫 operation 이 이미 거부돼도 후속 operation을 계속 판정하며, 뒤 L1 경로의 사유도 최종 결과에 남는다.
-- Move의 source `Delete`와 destination `Write`도 같은 순서로 판정해 일반 경로 rename은 허용하고 L1 source rename은 거부한다.
-
-### AC-delete-layer1 — Delete L1 보호
-
-- Layer 1 문서의 `Delete` 는 `Write`·`Edit` 과 같은 layerGuard 판정을 받아 deny 된다.
-- host가 Layer 1으로 해석하는 case alias·symlink ancestor와 Layer 1 terminal symlink entry Delete도 deny 된다.
-
-### AC-lifecycle-once — 물리 호출당 lifecycle 한 번
-
-- 여러 논리 operation 이 있어도 lifecycle 은 `original` 물리 입력을 matcher 입력으로 정확히 한 번 실행된다.
-- malformed 결과도 vault 안·밖 모두 lifecycle 을 같은 `original` 입력으로 정확히 한 번 실행한다.
-
-### AC-malformed-scope — malformed 범위 판정
-
-- malformed 호출은 실제 maencof vault 안에서 유효한 V4A 재발행 안내와 함께 deny 되고 vault 밖에서 pass 된다.
+행동별 결과와 경계값은 이 모듈을 검증하는 테스트가 고정한다.
 
 ## Last Updated
 
-2026-08-23 — guard의 ordered Move batch, malformed V4A 안내와 original physical lifecycle 경계를 계약화했다.
+논리 호출의 deny-wins 병합, 정규화 실패 처리 또는 물리 입력의 lifecycle 실행 보장이 바뀔 때 갱신한다.

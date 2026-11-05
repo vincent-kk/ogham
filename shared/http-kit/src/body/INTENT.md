@@ -2,14 +2,6 @@
 
 로컬 HTTP 서버가 받는 요청 본문을 크기 상한 안에서 읽어 JSON 으로 파싱한다. 헤더(Content-Length)는 발신자가 조작할 수 있으므로 선언값과 실제 수신 바이트를 모두 검사하고, 초과분은 버리면서 요청을 끝까지 배수해 호출자가 413 을 실제로 전송할 수 있게 한다.
 
-## Structure
-
-| File                   | Role                                                                    |
-| ---------------------- | ----------------------------------------------------------------------- |
-| `parseBody.ts`         | `parseBody(req, maxBytes?)` + `MAX_BODY_BYTES` + `RequestTooLargeError` |
-| `describeBodyError.ts` | 거부 사유 → `{status, message}` (413 · 400 · 500)                       |
-| `index.ts`             | barrel                                                                  |
-
 ## Conventions
 
 - 이중 방어: Content-Length 선검사 → 수신 바이트 누적 검사.
@@ -34,7 +26,3 @@
 - 상한 없는 무제한 버퍼링.
 - 응답 전 소켓 destroy.
 - 함수 내부에서 응답 전송 (거부는 reject 로만, 응답은 호출자 책임).
-
-## Dependencies
-
-- `node:http` (`IncomingMessage`).
