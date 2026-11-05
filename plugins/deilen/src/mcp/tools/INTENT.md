@@ -6,7 +6,7 @@ deilen 의 MCP 도구 4개를 담는 fractal 컨테이너. 각 도구는 자체 
 
 - 각 도구는 `handle<Tool>` 핸들러 1개를 자체 `index.ts` 로 노출
 - 핸들러는 평문 객체 또는 `CallToolResult` 반환 — 직렬화·throw 흡수는 `shared/wrapHandler`
-- 도구 간 직접 import 금지 — 공유 로직은 `core`/`httpServer` 경유
+- 도구 간 import 금지 — 수명주기·입출력 계약의 결합을 막기 위해 공유 상태·서버 기능은 core/httpServer의 진입점 경유
 - 4개 도구 모두 선택 인자 `project_root`(절대경로) 수용 — Claude 는 생략(cwd), 플러그인 설치 디렉터리에서 기동되는 호스트는 필수
 
 ## Boundaries
@@ -23,5 +23,5 @@ deilen 의 MCP 도구 4개를 담는 fractal 컨테이너. 각 도구는 자체 
 
 ### Never do
 
-- 형제 도구 내부 파일 직접 import (barrel 만 경유)
+- 형제 도구 import (형제 또는 컨테이너 배럴을 통한 간접 접근도 금지)
 - 핸들러에서 `process.exit`

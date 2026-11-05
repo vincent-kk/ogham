@@ -25,7 +25,7 @@
 ### AC-serving-registry — serving 레지스트리
 
 - 생성 직후 `hasServingSessions()` 가 true, 닫힘·제거·만료 정리 뒤 false 다.
-- 부재 세션의 close 는 false 를 돌려주고 레지스트리를 바꾸지 않는다.
+- 부재·무효 세션의 close는 false를 돌려주고 해당 ID의 serving 등록만 해제한다. 다른 세션의 등록은 보존하며, 제출할 수 없는 세션이 리스너를 계속 붙잡지 않게 한다.
 
 ## Last Updated
 

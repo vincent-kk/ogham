@@ -2,7 +2,8 @@
 
 ## Requirements
 
-- 모든 영속 상태(config, 세션 meta/viewer/feedback, 이미지)는 `~/.claude/plugins/deilen/` 하위에 atomicWrite 로 기록.
+- 세션·이미지·사용자 설정은 호스트별 deilen 캐시 루트에, 프로젝트 설정은 해당 워크스페이스의 .deilen 디렉터리에 보관하여 호스트 상태와 설정 스코프를 분리한다.
+- 영속 쓰기는 원자적으로 교체하여 부분 파일이 남지 않게 한다. 설정 레이어는 공유 `writeConfigLayer`, 세션·피드백·이미지는 로컬 `atomicWrite`를 경유한다.
 - 세션은 `project_hash`(cwd sha256 12-hex) 스코프 — 다른 cwd 의 세션 조회는 차단.
 - long-poll resolver 는 프로세스 전역 단일 슬롯/세션 + 멱등 `settle()`.
 

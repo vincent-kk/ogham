@@ -37,7 +37,7 @@
 
 - **Consumers**: `**/src/**`
 - **Direct import**: allowed
-- **Reason**: `version.ts` 는 `scripts/injectVersion.mjs` 가 생성하는 단일 상수 파일이고 아무것도 import 하지 않는다. `src/index.ts` 배럴을 경유시키면 `src → mcp → server → src` 순환이 생기는데, 상수 하나 때문에 사이클을 사는 거래는 성립하지 않는다.
+- **Reason**: `version.ts`는 의존성 없는 생성 상수이며 독립 모듈 진입점이 없다. 내부 소비자는 이 파일을 직접 참조하여 조상 배럴을 통한 형제 모듈의 간접 접근과 버전 조회에 불필요한 결합을 피한다.
 
 ## Last Updated
 

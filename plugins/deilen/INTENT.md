@@ -12,7 +12,7 @@
 
 ### Always do
 
-- 디스크 경로는 `~/.claude/plugins/deilen/` 하위
+- 영속 상태는 호스트별 deilen 캐시 루트, 프로젝트 설정은 해당 워크스페이스의 .deilen 디렉터리에 한정하여 호스트·설정 스코프 혼합 방지
 - 개발 착수 전 `.metadata/deilen/` 확인
 
 ### Ask first
