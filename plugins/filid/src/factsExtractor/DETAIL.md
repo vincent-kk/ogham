@@ -40,6 +40,7 @@
 - `provenance.resolutionInputs` remains empty; project substitutions are bound by the resolution epoch. The extractor reads only filid's own config JSON for aliases, never compiler or bundler configuration.
 - `resolution.aliases` accepts non-empty `{ from, to }` pairs with at most one trailing `*` on both sides or neither, and unique `from` values. Exact matches win first, then the longest wildcard prefix; order has no meaning. Substituted paths resolve relative to the project root with the existing extension/index lookup. Missing, malformed, or invalid config supplies no aliases.
 - Matched non-local references carry a resolved path or null (unresolved); unmatched non-local references carry `external`. Local reference behavior is unchanged. Compiler paths and package exports apply only when explicitly recorded as substitutions; non-literal `import(x)` is still not reported.
+- 저장된 facts는 추출 프로그램의 후보 규칙 변경만으로 자동 갱신하지 않는다. 스키마 버전이나 epoch 무효화 장치를 늘리지 않고, 미해석 참조를 가진 파일을 명시적으로 재추출해 같은 epoch의 `facts submit`으로 교체한다. `facts status`의 extractionList는 missing·needs-resolution만 담으므로 이미 exact인 미해석 레코드는 자동 목록에 나타나지 않을 수 있다. 프로젝트는 scan의 unresolved 진단 경로를 추출기에 위치 인자로 넘기고, 출력은 프로젝트 밖에 둔 뒤 `facts { action: submit, path, file, resolutionEpoch }`로 제출한다.
 - 선언된 한계: 문법이 틀린 텍스트는 parse되지 않고 scan된다. 그 파일의 facts는 scanner가 읽어 낸 값이고 syntax error 신호를 싣지 않는다.
 - 코어는 루트 밖으로 풀린 같은 참조에 `unowned-local-dependency` 진단을 내되 graph certainty는 내리지 않는다 — 소유 fractal이 없는 끝에는 노드가 없어 간선이 서지 않기 때문이다. S3c의 비교는 adapter 쪽의 루트 밖 resolved 경로도 `external`로 정규화하므로, 두 경로의 결론은 이 참조에서 갈리지 않는다.
 - stdout에는 요약 JSON 한 줄만 쓴다: 파일 수, `toolError` 수, 거부 수, 출력 경로, 걸린 시간.
@@ -51,6 +52,7 @@
 - entry point의 named exports, direct declarations와 certainty를 lexical scan으로 판정한다.
 - static/dynamic import와 re-export 중 project-internal dependency를 추출하고 local specifier를 정규화한다.
 - package-level external dependency는 project DAG 후보에서 제외하고, 해석할 수 없는 local dependency는 `resolvedPath: null`로 보존한다.
+- 해석 후보는 리터럴 경로, 기존 source 파일, 기존 source index, 선언 파일, 선언 index 순서다. 별칭으로 치환한 경로도 같은 순서를 쓰며 선언 확장자는 ECMAScript adapter 규약에서만 가져온다. source 후보를 앞에 두어 선언이 실제 구현을 가리지 않게 한다.
 - local specifier의 마지막 접미사가 지원 source 확장자인 경우에만 확장자를 치환한다. `.helpers`, `.composition.fixtures` 같은 basename은 보존하며, 원래 경로와 directory index 탐색도 유지한다.
 - strings, comments와 template text 안의 가짜 syntax를 dependency나 export로 세지 않는다.
 - 정규식 리터럴 본문은 문자열이 아니다. `/`는 직전 유의미 토큰이 없을 때, `)`·`]`·`}`를 제외한 구두점일 때, 또는 피연산자 자리를 여는 키워드(`return`, `typeof`, `case`, `do`, `else`, `in`, `of`, `new`, `delete`, `void`, `throw`, `instanceof`, `yield`, `await`)일 때 정규식을 연다. 단 `<`에 바로 붙은 `/`(`</tag>` 닫는 태그)와 피연산자에 붙은 후위 `!`·`++`·`--` 뒤의 `/`는 정규식을 열지 않는다. lexer가 식별자로 읽지 않는 ASCII 밖 식별자 문자(`\p{ID_Continue}`) 뒤의 `/`와, `.` 뒤에 와서 속성 이름이 된 키워드 뒤의 `/`도 나눗셈이다. 본문은 이스케이프와 문자 클래스를 추적해 닫는 `/`와 플래그까지 `regex` 토큰 하나로 소비하고, 같은 줄에서 닫히지 않으면(이스케이프 뒤 줄바꿈 포함) 구두점 `/`로 되돌린다. 이를 구분하지 않으면 `/["']/`의 따옴표가 가짜 문자열을 열어 뒤따르는 case 선언과 import를 삼킨다. 반대로 닫는 태그나 후위 연산자 뒤의 나눗셈을 정규식으로 읽으면 같은 줄의 구분자와 따옴표를 삼킨다.
@@ -106,6 +108,10 @@
 - 정적 parameterized row와 suite multiplier는 exact count에 들어가고, 동적 table·alias·알 수 없는 문법은 indeterminate다.
 - 주석의 `filid:contract` marker만 contract group id가 되고, 문자열 안의 같은 글자는 아니다.
 - Node 20과 repository dependency만으로 이 판독이 돌아간다 — 외부 parser를 쓰지 않는다.
+
+### AC-facts-declarations — Source precedes declaration fallback
+
+- 상대 참조와 별칭 참조는 구현 source 후보를 우선하며 선언 후보를 fallback으로 사용한다. 리터럴 경로 우선과 미해석 참조 보존은 유지한다.
 
 ### AC-facts-containment — 밖을 읽거나 쓰지 않는다
 

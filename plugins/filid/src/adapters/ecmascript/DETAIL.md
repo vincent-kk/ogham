@@ -18,6 +18,7 @@
 
 ## API Contracts
 
+- 선언 확장자 `.d.ts`, `.d.mts`, `.d.cts`도 이 adapter의 규약 상수가 소유한다. 추출기는 source 파일과 source index 다음에 선언 파일과 선언 index를 시도하여 구현 우선 순서를 유지한다.
 - 확장자·entry 이름·framework 이름의 유일한 출처는 이 adapter다. 추출 프로그램과 별도 상수를 두면 발견과 내용 판독의 대상이 갈라진다.
 - entry descriptor는 호출자가 변형할 수 있는 복사본으로 반환한다. 공유하면 스캐너의 정렬·필터가 다음 호출을 오염시킨다.
 
