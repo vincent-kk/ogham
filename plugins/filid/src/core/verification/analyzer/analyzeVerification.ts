@@ -1,5 +1,6 @@
 import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
+import { compareByBytes } from '../../../lib/compareByBytes.js';
 import type {
   AnalyzeVerificationInput,
   VerificationFileAnalysis,
@@ -7,7 +8,6 @@ import type {
 } from '../../../types/verification.js';
 import { resolveContractGroups } from '../contracts/resolveContractGroups.js';
 import { evaluateVerificationPolicy } from '../policy/evaluateVerificationPolicy.js';
-import { compareByBytes } from '../../../lib/compareByBytes.js';
 
 /**
  * Judge the discovered verification files against the per-file policy.
@@ -68,7 +68,12 @@ export async function analyzeVerification(
     input.projectRoot,
     resolveContractGroups(input.detailDocuments ?? []),
   );
-  return analysis.certainty === 'exact' && input.discoveryCertainty
-    ? { ...analysis, certainty: input.discoveryCertainty }
-    : analysis;
+  return {
+    ...analysis,
+    discoveryCertainty: input.discoveryCertainty ?? 'exact',
+    certainty:
+      analysis.certainty === 'exact'
+        ? (input.discoveryCertainty ?? analysis.certainty)
+        : analysis.certainty,
+  };
 }

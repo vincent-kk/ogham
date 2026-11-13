@@ -5,6 +5,7 @@ import type {
 } from '../../../../types/rules.js';
 import type { VerificationRuleId } from '../../../../types/verification.js';
 
+/** @param ruleId Verification policy to evaluate. @returns File findings and independent discovery uncertainty. */
 export function checkVerificationPolicy(
   ruleId: VerificationRuleId,
 ): Rule['check'] {
@@ -26,15 +27,18 @@ export function checkVerificationPolicy(
     const findings = verification.violations.filter(
       (violation) => violation.ruleId === ruleId,
     );
-    if (findings.length > 0) return findings;
-    if (verification.certainty === 'exact') return [];
+    const certainty =
+      verification.discoveryCertainty ??
+      (findings.length > 0 ? 'exact' : verification.certainty);
+    if (certainty === 'exact') return findings;
     return [
+      ...findings,
       {
         ruleId,
         severity: 'warning',
-        message: `Verification evidence is ${verification.certainty}, so the ${ruleId} policy cannot be proven.`,
+        message: `Verification evidence is ${certainty}, so the ${ruleId} policy cannot be proven.`,
         path: context.snapshot!.projectRoot,
-        certainty: verification.certainty,
+        certainty,
         suggestion:
           'Call fractal_inspect action "verification" to see which files are not exact; each count reason names the line filid could not count.',
       },

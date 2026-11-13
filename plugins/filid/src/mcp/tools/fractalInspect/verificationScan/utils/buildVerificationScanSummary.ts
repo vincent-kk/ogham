@@ -6,10 +6,8 @@ import {
 } from '../../../../../constants/verificationThresholds.js';
 import type { AnalysisCertainty } from '../../../../../types/fractal.js';
 import type { VerificationScanSummary } from '../../../../../types/report.js';
-import type {
-  VerificationFileAnalysis,
-  VerificationViolation,
-} from '../../../../../types/verification.js';
+import type { RuleViolation } from '../../../../../types/rules.js';
+import type { VerificationFileAnalysis } from '../../../../../types/verification.js';
 
 import { summarizeVerificationRole } from './summarizeVerificationRole.js';
 
@@ -27,9 +25,11 @@ export function buildVerificationScanSummary(
   projectRoot: string,
   snapshotHash: string,
   files: readonly VerificationFileAnalysis[],
-  violations: readonly VerificationViolation[],
+  violations: readonly RuleViolation[],
   certainty: AnalysisCertainty,
 ): VerificationScanSummary {
+  const actual = violations.filter((violation) => !violation.exemptedBy);
+  const exemptedCount = violations.length - actual.length;
   return {
     projectRoot,
     snapshotHash,
@@ -44,10 +44,11 @@ export function buildVerificationScanSummary(
       VERIFICATION_ROLES.TEST_RECORD,
       TEST_RECORD_CASE_CAP,
     ),
-    fragmentationCount: violations.filter(
+    fragmentationCount: actual.filter(
       (violation) => violation.ruleId === BUILTIN_RULE_IDS.SPEC_FRAGMENTATION,
     ).length,
-    violationCount: violations.length,
+    violationCount: actual.length,
+    ...(exemptedCount > 0 ? { exemptedCount } : {}),
     certainty,
   };
 }
