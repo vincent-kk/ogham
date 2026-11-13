@@ -11,6 +11,9 @@ export const SOURCE_EXTENSIONS = [
   '.tsx',
 ] as const;
 
+/** Declaration fallback extensions, tried only after source files and source indexes. */
+export const DECLARATION_EXTENSIONS = ['.d.ts', '.d.mts', '.d.cts'] as const;
+
 export const MODULE_ENTRY_BASENAMES = ['index'] as const;
 export const EXECUTABLE_ENTRY_BASENAMES = ['main'] as const;
 
