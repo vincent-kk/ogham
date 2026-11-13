@@ -8,6 +8,7 @@ import type {
 } from '../../../../types/report.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
+import { resolveVerificationCertainty } from '../../utils/resolveVerificationCertainty.js';
 import { resolveVerificationScanStatus } from '../../utils/resolveVerificationScanStatus.js';
 import { selectVerificationEvidence } from '../../utils/selectVerificationEvidence.js';
 
@@ -35,16 +36,9 @@ export async function handleVerificationScan(
     maxDepth: context.maxDepth,
     scopes: [RULE_SCOPES.VERIFICATION],
   });
-  const certainties = report.result.violations.map(
-    (finding) => finding.certainty,
+  const projectCertainty = resolveVerificationCertainty(
+    report.result.violations,
   );
-  const projectCertainty = certainties.includes(
-    ANALYSIS_CERTAINTIES.UNSUPPORTED,
-  )
-    ? ANALYSIS_CERTAINTIES.UNSUPPORTED
-    : certainties.includes(ANALYSIS_CERTAINTIES.INDETERMINATE)
-      ? ANALYSIS_CERTAINTIES.INDETERMINATE
-      : ANALYSIS_CERTAINTIES.EXACT;
   const selection = selectVerificationEvidence(
     context.snapshot.projectRoot,
     { ...context.snapshot.verification, violations: report.result.violations },
