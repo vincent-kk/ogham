@@ -2,6 +2,7 @@ import { BUILTIN_RULE_IDS } from '../../../../constants/builtinRuleIds.js';
 import { toProjectRelativePath } from '../../../../lib/toProjectRelativePath.js';
 import type { RuleContext, RuleViolation } from '../../../../types/rules.js';
 
+/** @param context Snapshot-backed rule context. @returns Representative cycles and graph uncertainty. */
 export function checkDependencyCycles(context: RuleContext): RuleViolation[] {
   const snapshot = context.snapshot;
   if (!snapshot)
@@ -22,6 +23,7 @@ export function checkDependencyCycles(context: RuleContext): RuleViolation[] {
     severity: 'error' as const,
     message: `Dependency cycle: ${cycle.map((path) => toProjectRelativePath(snapshot.projectRoot, path)).join(' -> ')}`,
     path: cycle[0] ?? snapshot.projectRoot,
+    memberPaths: cycle.filter((path, index) => cycle.indexOf(path) === index),
     certainty: 'exact' as const,
     suggestion:
       'Break the cycle: move what both sides share into a unit they both import, or invert one edge behind an interface.',
