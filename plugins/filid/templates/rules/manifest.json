@@ -9,7 +9,7 @@
       "title": "Fractal Boundaries",
       "description": "Node classification, fractal ownership, entry-point surfaces, level legibility, organ access, exemptions, and the acyclic dependency graph.",
       "grounding": "This rule rests on properties every codebase has: directories contain files, and files reference one another.",
-      "templateHash": "d22fba3dca5a3d673be1530957ba6de3ec5a1fc07afb0006729e013311210f19"
+      "templateHash": "52c892825b70a7458c2f86a721e883748bbd28bcb1a5633e54c57bc8d82f0b7c"
     },
     {
       "id": "filid_module-documents",
