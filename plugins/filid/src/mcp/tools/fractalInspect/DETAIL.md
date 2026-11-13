@@ -23,7 +23,9 @@
 ### AC-fractal-inspect-config-exemption — 상태 판정에서 면제 제외
 
 - 면제 finding만 있으면 OK이고 실제 위반이 함께 있으면 VIOLATIONS이다.
-- unsupported와 indeterminate 판정은 면제 finding보다 우선한다.
+- unsupported와 indeterminate 판정은 면제 finding보다 우선한다. 면제 finding에는 확실성이 없으며 면제가 아닌 finding의 확실성만 판정한다.
+- verification 액션은 validate와 같은 `validateStructure` 평가를 verification 스코프로 호출한다. 일치 범위는 verification finding과 그 확실성이며 진단은 액션별 기존 범위로 판단한다.
+- 끈 규칙의 finding과 개수 불확실성은 두 액션에서 제외한다. 설정이 없어도 계약 선언 증거가 없는 exact-count spec의 실제 finding은 verification을 indeterminate로 만든다.
 - `scan`의 status와 summary `violationCount`도 면제 finding을 세지 않아 `validate`와 같은 판정을 낸다.
 
 ## Last Updated
