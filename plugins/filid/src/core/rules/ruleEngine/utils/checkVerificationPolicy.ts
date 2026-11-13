@@ -27,10 +27,8 @@ export function checkVerificationPolicy(
     const findings = verification.violations.filter(
       (violation) => violation.ruleId === ruleId,
     );
-    const certainty =
-      verification.discoveryCertainty ??
-      (findings.length > 0 ? 'exact' : verification.certainty);
-    if (certainty === 'exact') return findings;
+    const certainty = verification.discoveryCertainty;
+    if (certainty === undefined || certainty === 'exact') return findings;
     return [
       ...findings,
       {

@@ -155,7 +155,7 @@ describe('verification config: regressions', () => {
       certainty: 'exact',
     });
     expect(scan.data?.files).toEqual(verification.files);
-    expect(verification).toHaveProperty('discoveryCertainty', 'exact');
+    expect(verification).not.toHaveProperty('discoveryCertainty');
   });
   it('does not invent spec root uncertainty from test-record counts', async () => {
     const { validate } = await inspect();
@@ -294,11 +294,12 @@ describe('verification config: regressions', () => {
         'spec-contract-link',
       ].map((id) => [id, { exempt: ['/project/*.unit'] }]),
     );
-    const { validate, scan } = await inspect(
+    const { validate, scan, verification } = await inspect(
       overrides,
       records,
       'indeterminate',
     );
+    expect(verification).toHaveProperty('discoveryCertainty', 'indeterminate');
     expect([validate.status, scan.status]).toEqual([
       'indeterminate',
       'indeterminate',
@@ -386,7 +387,11 @@ describe('verification config: controls', () => {
         ...BASE_RECORDS,
         '/project/other.unit': {
           role: 'test-record',
-          cases: { certainty: 'unsupported', knownLowerBound: 0, reasons: ['unsupported count'] },
+          cases: {
+            certainty: 'unsupported',
+            knownLowerBound: 0,
+            reasons: ['unsupported count'],
+          },
         },
       },
     );

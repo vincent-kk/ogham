@@ -70,7 +70,9 @@ export async function analyzeVerification(
   );
   return {
     ...analysis,
-    discoveryCertainty: input.discoveryCertainty ?? 'exact',
+    ...(input.discoveryCertainty && input.discoveryCertainty !== 'exact'
+      ? { discoveryCertainty: input.discoveryCertainty }
+      : {}),
     certainty:
       analysis.certainty === 'exact'
         ? (input.discoveryCertainty ?? analysis.certainty)
