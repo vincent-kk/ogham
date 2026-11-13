@@ -9,7 +9,7 @@
 - allowed-peer basename은 제한된 glob wildcard를 허용한다. 정확 이름은 직접 조회하고 동적 이름은 basename만 비교하며 path·adapter 범위는 유지한다.
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로 평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag, verification을 지원한다.
-- verification 규칙은 파일별 policy finding을 보존하고 탐색 확실성이 exact가 아니면 파일 finding 유무와 무관하게 루트 증명 불가 finding을 더한다. 탐색 확실성 필드가 없으면 기존 aggregate certainty fallback을 유지한다. 파일 개수 불확실성은 개수 상한 규칙만 보고하며 spec 연결·분절로 전파하지 않는다.
+- verification 규칙은 파일별 policy finding을 보존하고 탐색 확실성이 exact가 아니면 파일 finding 유무와 무관하게 루트 증명 불가 finding을 더한다. 탐색 확실성 필드가 없으면 exact 탐색이며 루트 finding을 추가하지 않는다. 개수 집계로 fallback하지 않는다. 파일 개수 불확실성은 개수 상한 규칙만 보고하며 spec 연결·분절로 전파하지 않는다.
 - validate와 verification 액션은 같은 규칙 평가 결과를 사용한다. 규칙 끄기는 그 규칙의 확정 위반과 개수 불확실성을 함께 제외하며, 예외 finding은 확실성을 싣지 않는다.
 - rule exception과 indeterminate/unsupported evidence를 PASS로 숨기지 않는다.
 - config 면제는 일치한 패턴을 `exemptedBy`에 담은 info finding을 남긴다. 면제 finding만 반환한 평가 단위는 passed·failed 대신 skipped로 집계하고, severity override는 면제 finding의 info 수준을 바꾸지 않는다.

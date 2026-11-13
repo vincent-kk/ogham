@@ -42,7 +42,7 @@ export interface VerificationProjectAnalysis {
   files: VerificationFileAnalysis[];
   violations: VerificationViolation[];
   certainty: AnalysisCertainty;
-  /** Discovery confidence before combining per-file counts; absent on legacy policy-only values. */
+  /** Non-exact discovery confidence before combining per-file counts; absence means exact discovery. */
   discoveryCertainty?: AnalysisCertainty;
 }
 
