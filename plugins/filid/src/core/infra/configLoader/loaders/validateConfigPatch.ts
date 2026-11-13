@@ -45,13 +45,12 @@ export function validateConfigPatch(patchJson: string): ConfigPatchValidation {
   const noop = (): void => {};
   const { sanitized } = parseWithAllowlistWarn(parsed, strict.error, noop);
   const retry = FilidConfigFileSchema.safeParse(sanitized);
-  if (retry.success) {
+  if (retry.success)
     return {
       valid: false,
       errors,
       suggestion: JSON.stringify(retry.data, null, 2),
     };
-  }
 
   return { valid: false, errors };
 }

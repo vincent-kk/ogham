@@ -11,6 +11,7 @@ import type {
 } from '../../../../../types/toolEnvelope.js';
 import { resolveFractalScanCertainty } from '../../../utils/resolveFractalScanCertainty.js';
 import { resolveFractalScanStatus } from '../../../utils/resolveFractalScanStatus.js';
+import { resolveVerificationCertainty } from '../../../utils/resolveVerificationCertainty.js';
 import { scopeDiagnosticsToPaths } from '../../../utils/scopeDiagnosticsToPaths.js';
 
 import { buildFractalScanFullData } from './buildFractalScanFullData.js';
@@ -36,7 +37,11 @@ export function buildScanResult(
   diagnostics: ToolDiagnostic[],
   nameFilter?: string,
 ): ToolPayload<FractalScanSummary, FractalScanData> {
-  const certainty = resolveFractalScanCertainty(snapshot, diagnostics);
+  const certainty = resolveFractalScanCertainty(
+    snapshot,
+    diagnostics,
+    resolveVerificationCertainty(validation.result.violations),
+  );
   const violationCount = countUnexemptedViolations(
     validation.result.violations,
   );

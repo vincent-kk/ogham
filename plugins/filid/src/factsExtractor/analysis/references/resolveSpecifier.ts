@@ -1,7 +1,10 @@
 import { statSync } from 'node:fs';
 import { dirname, extname, join, resolve } from 'node:path';
 
-import { SOURCE_EXTENSIONS } from '../../../adapters/ecmascript/structure/ecmascriptConventions.js';
+import {
+  DECLARATION_EXTENSIONS,
+  SOURCE_EXTENSIONS,
+} from '../../../adapters/ecmascript/structure/ecmascriptConventions.js';
 import type { ResolutionAlias } from '../../../types/adapters.js';
 
 /**
@@ -9,7 +12,8 @@ import type { ResolutionAlias } from '../../../types/adapters.js';
  *
  * Only a trailing supported source extension is swapped, so dotted basenames
  * such as `feature.helpers` keep their name; the literal path and a directory
- * index are tried as well.
+ * index precede declaration-file and declaration-index fallbacks. Alias targets
+ * use the same candidate order.
  * @param sourceFile - File that holds the specifier
  * @param specifier - Raw specifier text
  * @param aliases - Validated project substitutions; exact matches precede the longest wildcard prefix.
@@ -24,17 +28,21 @@ export function resolveSpecifier(
   projectRoot: string = dirname(sourceFile),
 ): string | null {
   let unresolved: string;
-  if (specifier.startsWith('.') || specifier.startsWith('/')) {
+  if (specifier.startsWith('.') || specifier.startsWith('/'))
     unresolved = resolve(dirname(sourceFile), specifier);
-  } else {
-    const exact = aliases.find((alias) =>
-      alias.from === specifier && !alias.from.endsWith('*'),
+  else {
+    const exact = aliases.find(
+      (alias) => alias.from === specifier && !alias.from.endsWith('*'),
     );
-    const alias = exact ?? aliases
-      .filter((candidate) =>
-        candidate.from.endsWith('*') && specifier.startsWith(candidate.from.slice(0, -1)),
-      )
-      .sort((left, right) => right.from.length - left.from.length)[0];
+    const alias =
+      exact ??
+      aliases
+        .filter(
+          (candidate) =>
+            candidate.from.endsWith('*') &&
+            specifier.startsWith(candidate.from.slice(0, -1)),
+        )
+        .sort((left, right) => right.from.length - left.from.length)[0];
     if (!alias) return null;
     const replaced = alias.from.endsWith('*')
       ? alias.to.slice(0, -1) + specifier.slice(alias.from.length - 1)
@@ -49,6 +57,10 @@ export function resolveSpecifier(
     unresolved,
     ...SOURCE_EXTENSIONS.map((candidate) => base + candidate),
     ...SOURCE_EXTENSIONS.map((candidate) =>
+      join(unresolved, `index${candidate}`),
+    ),
+    ...DECLARATION_EXTENSIONS.map((candidate) => base + candidate),
+    ...DECLARATION_EXTENSIONS.map((candidate) =>
       join(unresolved, `index${candidate}`),
     ),
   ];

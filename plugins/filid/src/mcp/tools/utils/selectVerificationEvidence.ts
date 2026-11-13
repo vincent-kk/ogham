@@ -1,17 +1,15 @@
 import { pathForCompare, portableResolve } from '@ogham/cross-platform';
 
-import type {
-  VerificationFileAnalysis,
-  VerificationProjectAnalysis,
-  VerificationViolation,
-} from '../../../types/verification.js';
+import type { VerificationScanData } from '../../../types/report.js';
+import type { RuleViolation } from '../../../types/rules.js';
+import type { VerificationFileAnalysis } from '../../../types/verification.js';
 
 /** Verification analyses and unresolved requested paths selected for one scan. */
 export interface VerificationEvidenceSelection {
   /** Verification files that match the requested scope. */
   files: VerificationFileAnalysis[];
   /** Verification violations that match the requested scope. */
-  violations: VerificationViolation[];
+  violations: RuleViolation[];
   /** Requested paths that have no verification analysis. */
   missingPaths: string[];
 }
@@ -25,7 +23,7 @@ export interface VerificationEvidenceSelection {
  */
 export function selectVerificationEvidence(
   projectRoot: string,
-  analysis: VerificationProjectAnalysis,
+  analysis: VerificationScanData,
   filePaths?: string[],
 ): VerificationEvidenceSelection {
   if (!filePaths)

@@ -9,6 +9,8 @@
 - allowed-peer basename은 제한된 glob wildcard를 허용한다. 정확 이름은 직접 조회하고 동적 이름은 basename만 비교하며 path·adapter 범위는 유지한다.
 - node-level rule과 project-level rule을 각각 한 번의 적절한 granularity로 평가한다.
 - scope filter는 documents, nodes, entry-points, boundaries, dag, verification을 지원한다.
+- verification 규칙은 파일별 policy finding을 보존하고 탐색 확실성이 exact가 아니면 파일 finding 유무와 무관하게 루트 증명 불가 finding을 더한다. 탐색 확실성 필드가 없으면 exact 탐색이며 루트 finding을 추가하지 않는다. 개수 집계로 fallback하지 않는다. 파일 개수 불확실성은 개수 상한 규칙만 보고하며 spec 연결·분절로 전파하지 않는다.
+- validate와 verification 액션은 같은 규칙 평가 결과를 사용한다. 규칙 끄기는 그 규칙의 확정 위반과 개수 불확실성을 함께 제외하며, 예외 finding은 확실성을 싣지 않는다.
 - rule exception과 indeterminate/unsupported evidence를 PASS로 숨기지 않는다.
 - config 면제는 일치한 패턴을 `exemptedBy`에 담은 info finding을 남긴다. 면제 finding만 반환한 평가 단위는 passed·failed 대신 skipped로 집계하고, severity override는 면제 finding의 info 수준을 바꾸지 않는다.
 - violation `message`에 적는 경로는 project root 기준 POSIX 상대 경로다(root 자신은 `.`). `path` 필드는 절대 경로 그대로다. message는 review 후보로 hash되므로 저장소 위치에 따라 달라지면 안 된다. root는 `RuleContext.tree.root`나 snapshot의 `projectRoot`에서 읽는다(둘은 같은 값이다).
@@ -24,6 +26,7 @@
   | subtree 밖          | organ 구체 파일 직접 | 위반 — 선언된 면책이 있으면 통과 |
 
 - **소비자가 검증 파일이면 boundary를 적용하지 않는다.** 검증은 계약을 확인하는 행위이고, 내부 단위를 검사하려면 내부에 닿아야 한다. 이를 위해 진입점을 넓히면 소비자가 테스트뿐인 공개 심볼이 생겨 공개 계약이 오염된다 (`seiri_public-contract` §1). 판정 근거는 adapter 발견 파일과 선언된 검증 organ 아래 스캔 파일을 합친 `snapshot.verificationPaths`이며, core는 파일명 패턴을 알지 못한다.
+- 하위 프랙탈은 조상 프랙탈이 직접 소유한 진입점이 아닌 파일(루트 파일과 organ 파일)을 직접 참조할 수 있다. 조상 진입점과 다른 프랙탈의 내부 참조는 위반이며 이 허용은 의존 그래프의 간선이나 순환 판정을 바꾸지 않는다.
 - 대상이 fractal 내부 파일일 때도 같은 면책을 조회한다. 진입점을 경유할 수 **없는** 정당한 소비자가 존재하기 때문이다 — 표준 사례는 훅 번들이며, 배럴을 import하면 번들러가 배럴이 재노출하는 모듈 전체를 끌어온다. 면책이 없으면 기존 진입점 규칙 그대로 위반이다.
 - 면책은 소유 프랙탈 DETAIL.md의 `## Boundary Exemptions` 선언에서 온다 (`## Organ Exemptions`는 legacy 별칭으로 계속 인정한다). 선언된 `targetPath`가 대상 경로를 담고, `Direct import`가 allowed이며, consumer glob이 소비 파일에 매치하고, `Reason`이 비어 있지 않을 때만 통과시킨다.
 - 모든 violation은 `suggestion`을 채운다. `evaluateRule`은 rule 실행이 던졌을 때 재시도와 보고를 안내하고, snapshot 부재로 인한 indeterminate finding(`external-import-boundary`, `checkDependencyCycles`, `checkPureFunctionIsolation`, `checkVerificationPolicy`, `checkLegacyCriteriaLedger`)은 각자 필요한 `fractal_inspect` action을 안내한다. cycle과 graph 불확실성, entry-point surface의 세 상태(enumerated indeterminate·unsupported·opaque)도 각자 다음 행동을 담는다.
@@ -82,7 +85,10 @@
 ### AC-rules-config-exemption — 면제의 가시성과 skipped 집계
 
 - 정확 경로 일치를 glob보다 먼저 선택하고 일치한 원본 config 패턴을 `exemptedBy`에 기록한다.
-- 면제는 rule ID·패턴·노드 경로·면제 제거 suggestion을 갖춘 info finding 한 건을 반환하며 내부 검사를 실행하지 않는다.
+- 평가 노드가 일치하면 rule ID·패턴·노드 경로·면제 제거 suggestion을 갖춘 info finding 한 건을 반환하며 내부 검사를 실행하지 않는다.
+- 프로젝트 규칙의 평가 노드가 일치하지 않으면 내부 검사를 한 번 실행하고 finding마다 예외를 판정한다. 비어 있지 않은 `memberPaths`는 중복 없는 절대 경로 전체가 일치해야 하며, 없거나 비어 있으면 `path`를 쓴다. `exemptedBy`는 finding의 `path`에 일치한 원본 패턴이다.
+- 예외 finding은 원래 `path`와 기존 예외 message·suggestion 형식, `severity: info`를 갖고 `certainty`를 싣지 않는다. 심각도 변경 바깥에서 한 번 적용되며 node 규칙의 동작은 유지한다.
+- 루트 확실성 finding은 루트 예외로만 제외된다. 예외가 아닌 indeterminate·unsupported 증거는 PASS로 승격하지 않는다.
 - 비어 있지 않은 finding 전체가 면제이면 skipped만 증가하고 finding은 결과에 남는다.
 
 ## Last Updated

@@ -60,9 +60,7 @@ export function checkExternalImportBoundary(context: {
 }): RuleViolation[] {
   const violations: RuleViolation[] = [];
   const { dependencyGraph } = context.snapshot;
-  const verificationPaths = new Set(
-    context.snapshot.verificationPaths,
-  );
+  const verificationPaths = new Set(context.snapshot.verificationPaths);
 
   for (const edge of dependencyGraph.edges) {
     const sourceNode = [...context.snapshot.tree.nodes.values()].find((node) =>
@@ -106,10 +104,15 @@ export function checkExternalImportBoundary(context: {
         evidence.resolvedPath,
       );
       const parentBarrelBypass =
-        !sameOwner && isPathWithin(targetNode.path, sourceNode.path);
+        !sameOwner &&
+        targetIsEntryPoint &&
+        isPathWithin(targetNode.path, sourceNode.path);
       const localBarrelImport =
         sameOwner && targetIsEntryPoint && !sourceIsEntryPoint;
-      const externalInternalImport = !sameOwner && !targetIsEntryPoint;
+      const externalInternalImport =
+        !sameOwner &&
+        !targetIsEntryPoint &&
+        !isPathWithin(targetNode.path, sourceNode.path);
       if (!parentBarrelBypass && !localBarrelImport && !externalInternalImport)
         continue;
       if (

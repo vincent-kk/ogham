@@ -34,7 +34,7 @@ export function applyOverrides(
     let check = rule.check;
     if (newSeverity !== rule.severity)
       check = remapSeverity(check, newSeverity);
-    if (hasExempt) check = wrapExempt(check, override.exempt!, rule.id);
+    if (hasExempt) check = wrapExempt(check, override.exempt!, rule.id, rule.granularity);
     return { ...rule, enabled: newEnabled, severity: newSeverity, check };
   });
 }

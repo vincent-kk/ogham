@@ -25,6 +25,8 @@ When the shape is yours to decide: a directory that others call by name while it
 
 Every fractal and hybrid has an adapter-reported module, executable, framework or manifest entry point — a package manifest that declares the public surface IS the boundary; it states a surface, it does not classify — and organs and pure-function nodes need none. An enumerated surface declares its exports by name, and widening it is a contract change; an opaque or unsupported framework surface keeps its uncertainty instead of passing. Sibling fractals import the sibling's entry point — never an internal file, and never a shared parent barrel that re-exports the sibling — while inside one fractal, files import concrete internal peers directly, not their own local entry point. No unit uses its own fractal's entry point or any ancestor's entry point. An ancestor's entry point is a window for units outside the lineage: it re-exposes the unit's siblings, so using it from inside sees a sibling through the parent's facade. This holds for verification code too; the verification exemption in §5 covers placement, not this rule.
 
+A descendant fractal may directly import any non-entry-point file the ancestor fractal itself owns, including its root files and organ files; ancestor entry points and another fractal's internals remain forbidden. This boundary allowance does not change dependency-edge collection or cycle policy.
+
 A published subpath is an address for outside consumers, not a unit of ownership. When in-package consumers need more than the public gets, separate the published facade from the fractal's entry point — never lift the implementation out to keep the surface small.
 
 ## 4. A fractal root holds documents and entry points, not code

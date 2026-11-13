@@ -17,7 +17,7 @@ import type {
   ProjectSnapshot,
 } from './fractal.js';
 import type { PlanValidationResult, RestructurePlan } from './restructure.js';
-import type { RuleEvaluationResult } from './rules.js';
+import type { RuleEvaluationResult, RuleViolation } from './rules.js';
 import type { RuleScope } from './rules.js';
 import type { ScanOptions } from './scan.js';
 import type { ToolDiagnostic, ToolStatus } from './toolEnvelope.js';
@@ -169,10 +169,19 @@ export interface VerificationScanSummary {
   testRecord: VerificationRoleSummary;
   fragmentationCount: number;
   violationCount: number;
+  /** Config-exempt findings, omitted when zero to preserve existing summaries. */
+  exemptedCount?: number;
   certainty: AnalysisCertainty;
 }
 
-export type VerificationScanData = VerificationProjectAnalysis;
+/** Evaluated verification findings, including config-exempt info, with original file evidence. */
+export type VerificationScanData = Omit<
+  VerificationProjectAnalysis,
+  'violations'
+> & {
+  /** Findings from the shared rule evaluation rather than raw policy analysis. */
+  violations: RuleViolation[];
+};
 
 export interface StructureValidateSummary {
   projectRoot: string;

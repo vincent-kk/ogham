@@ -39,7 +39,7 @@ const DETAIL =
 
 /**
  * Fractals `domain/c` and `domain/d` that import each other's entry point, and
- * `domain/c/peek.ts`, which reaches past `domain/d`'s entry point: a cycle and
+ * `domain/c/peek.ts`, which reaches past `domain/b`'s entry point: a cycle and
  * a boundary violation that exist before any plan.
  */
 const PREEXISTING_FILES: Readonly<Record<string, string>> = {
@@ -48,12 +48,12 @@ const PREEXISTING_FILES: Readonly<Record<string, string>> = {
   'domain/c/index.ts':
     "export { d } from '../d/index.js';\nexport { peek } from './peek.js';\nexport const c = 1;\n",
   'domain/c/peek.ts':
-    "import { inner } from '../d/inner.js';\n\nexport const peek = inner;\n",
+    "import { inner } from '../b/inner.js';\n\nexport const peek = inner;\n",
   'domain/d/INTENT.md': FIXTURE_INTENT,
   'domain/d/DETAIL.md': DETAIL,
   'domain/d/index.ts':
     "export { c } from '../c/index.js';\nexport const d = 2;\n",
-  'domain/d/inner.ts': 'export const inner = 3;\n',
+  'domain/b/inner.ts': 'export const inner = 3;\n',
 };
 
 /** Temporary project removed after each case. */

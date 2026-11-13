@@ -46,6 +46,8 @@ export interface RuleViolation {
   certainty?: AnalysisCertainty;
   /** File the offending import resolves to; set by import-boundary rules on every violation except the certainty warning. */
   importedPath?: string;
+  /** Unique absolute member paths; a grouped finding is exempt only when every member matches. */
+  memberPaths?: string[];
   /** Matching config exemption pattern; its presence counts the evaluation as skipped. */
   exemptedBy?: string;
 }
@@ -91,6 +93,13 @@ export type { BuiltinRuleId } from '../constants/builtinRuleIds.js';
 export interface RuleOverride {
   enabled?: boolean;
   severity?: RuleSeverity;
-  /** Paths (glob or literal) exempt from this rule. Patterns are matched against `FractalNode.path`. */
+  /**
+   * Literal paths or portable globs exempt from this rule, exact matches first.
+   * A matching node short-circuits evaluation. Project rules also match each
+   * finding: every nonempty member path must match, otherwise its path is used.
+   * Exempt findings retain that path and its matching original pattern, carry
+   * info severity without certainty, and remain outside severity remapping.
+   * Root uncertainty requires a root exemption; node rules keep node matching.
+   */
   exempt?: string[];
 }

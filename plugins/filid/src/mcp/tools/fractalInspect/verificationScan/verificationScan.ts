@@ -1,11 +1,14 @@
 import { ANALYSIS_CERTAINTIES } from '../../../../constants/analysisCertainties.js';
 import { VERIFICATION_SCAN_DETAILS } from '../../../../constants/mcpContracts.js';
+import { RULE_SCOPES } from '../../../../constants/ruleScopes.js';
+import { validateStructure } from '../../../../core/index.js';
 import type {
   VerificationScanData,
   VerificationScanSummary,
 } from '../../../../types/report.js';
 import type { ToolPayload } from '../../../../types/toolEnvelope.js';
 import { createToolSnapshot } from '../../utils/createToolSnapshot.js';
+import { resolveVerificationCertainty } from '../../utils/resolveVerificationCertainty.js';
 import { resolveVerificationScanStatus } from '../../utils/resolveVerificationScanStatus.js';
 import { selectVerificationEvidence } from '../../utils/selectVerificationEvidence.js';
 
@@ -29,9 +32,16 @@ export async function handleVerificationScan(
   input: VerificationScanInput,
 ): Promise<ToolPayload<VerificationScanSummary, VerificationScanData>> {
   const context = await createToolSnapshot(input.path);
+  const report = validateStructure(context.snapshot, context.rules, {
+    maxDepth: context.maxDepth,
+    scopes: [RULE_SCOPES.VERIFICATION],
+  });
+  const projectCertainty = resolveVerificationCertainty(
+    report.result.violations,
+  );
   const selection = selectVerificationEvidence(
     context.snapshot.projectRoot,
-    context.snapshot.verification,
+    { ...context.snapshot.verification, violations: report.result.violations },
     input.filePaths,
   );
   const diagnostics = buildVerificationDiagnostics(
@@ -41,7 +51,7 @@ export async function handleVerificationScan(
   const certainty =
     selection.missingPaths.length > 0
       ? ANALYSIS_CERTAINTIES.INDETERMINATE
-      : context.snapshot.verification.certainty;
+      : projectCertainty;
   const summary = buildVerificationScanSummary(
     context.snapshot.projectRoot,
     context.snapshot.snapshotHash,
@@ -54,7 +64,7 @@ export async function handleVerificationScan(
     projectRoot: context.snapshot.projectRoot,
     status: resolveVerificationScanStatus(
       certainty,
-      selection.violations.length,
+      summary.violationCount,
       diagnostics,
     ),
     summary,

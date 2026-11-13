@@ -42,6 +42,8 @@ export interface VerificationProjectAnalysis {
   files: VerificationFileAnalysis[];
   violations: VerificationViolation[];
   certainty: AnalysisCertainty;
+  /** Non-exact discovery confidence before combining per-file counts; absence means exact discovery. */
+  discoveryCertainty?: AnalysisCertainty;
 }
 
 export interface DetailContractDocument {

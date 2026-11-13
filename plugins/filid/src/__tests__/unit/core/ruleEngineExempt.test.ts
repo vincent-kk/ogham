@@ -176,7 +176,7 @@ describe('rule-engine exempt', () => {
       expect(resolveProjectValidationStatus(mixed, [])).toBe(
         TOOL_STATUSES.VIOLATIONS,
       );
-      for (const input of [report, mixed]) {
+      for (const input of [report, mixed])
         expect(
           resolveProjectValidationStatus(input, [
             {
@@ -187,7 +187,7 @@ describe('rule-engine exempt', () => {
             },
           ]),
         ).toBe(TOOL_STATUSES.INDETERMINATE);
-      }
+
       expect(
         resolveProjectValidationStatus(
           {

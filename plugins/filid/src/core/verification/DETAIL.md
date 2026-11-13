@@ -12,6 +12,8 @@
 - 같은 최고 confidence의 adapter가 한 파일을 주장하면 `ambiguous-adapter-claim` 진단을 남기고 해당 파일을 policy 분석에서 제외한다.
 - snapshot이 제공한 discovery 결과는 절대 portable path로 정규화해 한 번만 소비하며, 동일 adapter의 중복 path는 한 claim으로 취급한다.
 - discovery 실패나 adapter 경합으로 일부 파일을 판정하지 못하면 project certainty는 `indeterminate`이며 빈 exact 분석으로 축소하지 않는다.
+- 분석 결과는 개수와 합치기 전 탐색 확실성이 exact가 아닐 때만 선택 필드 `discoveryCertainty`로 보존한다. 필드 부재는 exact 탐색이며 기존 `certainty` 집계 의미와 값은 유지한다. exact 탐색에는 필드를 추가하지 않아 같은 증거의 snapshot hash를 유지한다.
+- 원본 policy 분석은 설정을 적용하지 않는다. validate와 verification 액션은 같은 규칙 평가를 통해 켜진 규칙의 예외가 아닌 finding 확실성만 판정에 쓴다. 끈 개수 규칙의 불확실성은 다른 spec 규칙에 전파하지 않으며 탐색 불확실성은 별도로 남는다.
 - violation `message`에 적는 경로는 project root 기준 POSIX 상대 경로다. `path`와 `suggestion`은 그대로다.
 - `VerificationViolation.suggestion`은 필수다. count non-exact, cap 초과(spec·test 역할별로 다른 문장), group 미표시·미선언·분할 모두 다음 행동을 채운다.
 

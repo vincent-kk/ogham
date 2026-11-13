@@ -54,9 +54,9 @@ export function checkZeroPeerFile(
           )
         )
           continue;
-        if (isDynamicGlob(entry.basename)) {
+        if (isDynamicGlob(entry.basename))
           try { allowedPatterns.push(globToRegExp(entry.basename)); } catch { /* Invalid config patterns do not allow peers. */ }
-        } else allowed.add(entry.basename);
+        else allowed.add(entry.basename);
       }
 
     const disallowed = peerFiles.filter(
