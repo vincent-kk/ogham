@@ -28,9 +28,9 @@ export function resolveSpecifier(
   projectRoot: string = dirname(sourceFile),
 ): string | null {
   let unresolved: string;
-  if (specifier.startsWith('.') || specifier.startsWith('/')) {
+  if (specifier.startsWith('.') || specifier.startsWith('/'))
     unresolved = resolve(dirname(sourceFile), specifier);
-  } else {
+  else {
     const exact = aliases.find(
       (alias) => alias.from === specifier && !alias.from.endsWith('*'),
     );

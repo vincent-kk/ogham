@@ -22,7 +22,7 @@ export function normalizeConfigLayer(
   layer = migrated.config;
 
   const rules = layer.rules;
-  if (rules && typeof rules === 'object' && !Array.isArray(rules)) {
+  if (rules && typeof rules === 'object' && !Array.isArray(rules))
     layer = { ...layer, rules: Object.fromEntries(
       Object.entries(rules).map(([id, value]) => [
         id,
@@ -33,7 +33,7 @@ export function normalizeConfigLayer(
             : value,
       ]),
     ) };
-  }
+
   const structure = layer.structure;
   if (structure && typeof structure === 'object' && !Array.isArray(structure)) {
     const fields = structure as Record<string, unknown>;
