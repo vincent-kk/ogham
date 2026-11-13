@@ -11,12 +11,14 @@
 - `paths` 투영에 `nameFilter`가 있으면 diagnostics도 살아남은 node 범위로 좁히고 제외 건수를 summary에 보고한다. `summary`(detail 생략 포함)와 `full`에서는 nameFilter를 적용하지 않고 전체 diagnostics를 유지한다.
 - `maxDepth`는 config의 max-depth **규칙 임계값**을 덮어쓸 뿐 탐색 한계가 아니다. tree는 언제나 완전 탐색하므로 이 값을 낮추면 노드 수는 그대로인 채 depth 규칙 위반만 늘어난다. root 밖 path는 허용하지 않는다.
 - 문서 계약 finding을 옮긴 diagnostic은 판독 가능한 위반 증거이므로 certainty를 낮추지 않는다. 그 밖의 unsupported 또는 ambiguous adapter evidence는 diagnostics와 status에 보존한다.
+- scan의 verification 확실성은 이미 수행한 설정 적용 규칙 평가에서 면제가 아닌 verification finding으로 계산한다. 보존된 탐색 불확실성의 루트 finding도 포함하며 파일 개수의 원본 aggregate certainty를 다시 읽지 않는다. verification 액션과 같은 공유 계산을 사용하고 의존 그래프·진단 판정은 유지한다.
 - scan은 project source와 config를 변경하지 않는다.
 
 ## API Contracts
 
 - 반환은 공통 envelope를 사용하며 별도 scan-specific report file 형식을 만들지 않는다.
 - summary는 전체 tree를 설명하며 좁힌 projection과 같은 집합이라고 해석하지 않는다.
+- `full`의 `snapshot.verification`은 설정을 적용하기 전의 원본 증거이며 면제 파일의 warning과 개수 확실성도 보존한다. 함께 반환하는 `validation`이 설정·면제를 적용한 판정이므로 status와 summary는 그 평가를 따른다.
 
 ## Acceptance Criteria
 
