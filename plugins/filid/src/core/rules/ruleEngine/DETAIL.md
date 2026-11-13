@@ -82,7 +82,10 @@
 ### AC-rules-config-exemption — 면제의 가시성과 skipped 집계
 
 - 정확 경로 일치를 glob보다 먼저 선택하고 일치한 원본 config 패턴을 `exemptedBy`에 기록한다.
-- 면제는 rule ID·패턴·노드 경로·면제 제거 suggestion을 갖춘 info finding 한 건을 반환하며 내부 검사를 실행하지 않는다.
+- 평가 노드가 일치하면 rule ID·패턴·노드 경로·면제 제거 suggestion을 갖춘 info finding 한 건을 반환하며 내부 검사를 실행하지 않는다.
+- 프로젝트 규칙의 평가 노드가 일치하지 않으면 내부 검사를 한 번 실행하고 finding마다 예외를 판정한다. 비어 있지 않은 `memberPaths`는 중복 없는 절대 경로 전체가 일치해야 하며, 없거나 비어 있으면 `path`를 쓴다. `exemptedBy`는 finding의 `path`에 일치한 원본 패턴이다.
+- 예외 finding은 원래 `path`와 기존 예외 message·suggestion 형식, `severity: info`를 갖고 `certainty`를 싣지 않는다. 심각도 변경 바깥에서 한 번 적용되며 node 규칙의 동작은 유지한다.
+- 루트 확실성 finding은 루트 예외로만 제외된다. 예외가 아닌 indeterminate·unsupported 증거는 PASS로 승격하지 않는다.
 - 비어 있지 않은 finding 전체가 면제이면 skipped만 증가하고 finding은 결과에 남는다.
 
 ## Last Updated
