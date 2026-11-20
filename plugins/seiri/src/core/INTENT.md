@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Own configuration, deployed-rule state, actor-scoped participation, and task ledgers. Repository tests and policy determine correctness; core stores context and observed evidence.
+Own configuration, deployed-rule state, actor-scoped participation, and task ledgers. 로컬 지침 묶음과 그 연결도 소유합니다. Repository tests and policy determine correctness; core stores context and observed evidence.
 
 ## Conventions
 

@@ -1,6 +1,10 @@
-import { lstatSync, readdirSync, rmSync } from 'node:fs';
+import { lstatSync, rmSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform';
+import {
+  listDirectoryIfExistsSync,
+  portableJoin,
+  removeFileIfExistsSync,
+} from '@ogham/cross-platform';
 
 import { GATES_LOCK_DIR } from '../../../../constants/files.js';
 import { IDLE_STATE_TTL } from '../../../../constants/retention.js';
@@ -19,29 +23,23 @@ export function sweepStaleTasks(projectRoot: string, now: number): void {
   try {
     const tasksDir = resolveTasksDir(projectRoot);
     if (!lstatSync(tasksDir).isDirectory()) return;
-    for (const entry of readdirSync(tasksDir, { withFileTypes: true }))
+    for (const entry of listDirectoryIfExistsSync(tasksDir))
       try {
-        const path = portableJoin(tasksDir, entry.name);
-        if (entry.isDirectory()) {
+        const path = portableJoin(tasksDir, `./${entry}`);
+        const stat = lstatSync(path, { throwIfNoEntry: false });
+        if (stat?.isDirectory()) {
           if (now - newestMtime(path) <= IDLE_STATE_TTL) continue;
-          withGatesLock(
-            path,
-            () => {
-              const newest = newestMtime(
-                path,
-                [portableJoin(path, GATES_LOCK_DIR)],
-                false,
-              );
-              if (now - newest > IDLE_STATE_TTL)
-                rmSync(path, { recursive: true, force: true });
-            },
-            true,
-          );
-        } else {
-          const stat = lstatSync(path, { throwIfNoEntry: false });
-          if (stat && now - stat.mtimeMs > IDLE_STATE_TTL)
-            rmSync(path, { force: true });
-        }
+          withGatesLock(path, () => {
+            const newest = newestMtime(
+              path,
+              [portableJoin(path, GATES_LOCK_DIR)],
+              false,
+            );
+            if (now - newest > IDLE_STATE_TTL)
+              rmSync(path, { recursive: true, force: true });
+          });
+        } else if (stat && now - stat.mtimeMs > IDLE_STATE_TTL)
+          removeFileIfExistsSync(path);
       } catch {
         // A failed entry must not prevent cleanup of the remaining tasks.
       }

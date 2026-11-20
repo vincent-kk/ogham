@@ -17,6 +17,7 @@ import { WORKFLOW_ADAPTER } from '../shared/workflowAdapter.js';
 import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 
 import { renderSessionStart } from './render/renderSessionStart.js';
+import { compactDirectiveLines } from './utils/compactDirectiveLines.js';
 
 /** Native session resets that suspend an existing binding; `compact` is intentionally absent. */
 const NATIVE_BOUNDARY_SOURCES = ['startup', 'resume', 'clear', 'fork'];
@@ -26,7 +27,8 @@ const NATIVE_BOUNDARY_SOURCES = ['startup', 'resume', 'clear', 'fork'];
  * continuous, so this actor's own active binding, when one exists, is read
  * back in and appended to the render instead. In standard/strict, report
  * which rules are active, where the dial sits, and the fixed election and
- * chain (and, at strict, posture) lines — regardless of whether rule
+ * chain (and, at strict, posture) lines, plus bound directives for main-actor
+ * compaction. Election and chain do not depend on whether rule
  * status can be read.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  */
@@ -64,6 +66,16 @@ export function processSessionStart(
     posture,
     binding,
   });
+
+  if (input.source === 'compact' && identity && input.agent_id === undefined) {
+    const directives = compactDirectiveLines(
+      identity,
+      adapter.name,
+      lines,
+      now,
+    );
+    lines.splice(binding ? -1 : lines.length, 0, ...directives);
+  }
 
   if (lines.length === 0) return EMPTY_RESULT;
   return {

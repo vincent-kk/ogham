@@ -3,7 +3,6 @@ import {
   lutimesSync,
   mkdirSync,
   mkdtempSync,
-  readdirSync,
   rmSync,
   symlinkSync,
   utimesSync,
@@ -12,20 +11,11 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import * as filesystem from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import * as locks from '../../utils/acquireLockDir.js';
 import { sweepStaleActors } from '../index.js';
 import { sweepActorGroup } from '../workflow/sweepStaleActors/utils/sweepActorGroup.js';
-
-vi.mock('node:fs', async (importOriginal) => {
-  const actual = await importOriginal<typeof import('node:fs')>();
-  return {
-    ...actual,
-    readdirSync: vi.fn(actual.readdirSync),
-    rmSync: vi.fn(actual.rmSync),
-  };
-});
 
 describe('actor sweep races and failures', () => {
   let root: string;
@@ -53,15 +43,17 @@ describe('actor sweep races and failures', () => {
     rmSync(root, { recursive: true, force: true });
   });
 
-  it('ignores a member that disappears after the directory scan', async () => {
+  it('ignores a member that disappears after the directory scan', () => {
     const path = member('a.json');
     const marker = member('a.json.revoked');
-    const actual = await vi.importActual<typeof import('node:fs')>('node:fs');
-    vi.mocked(readdirSync).mockImplementationOnce((...args) => {
-      const names = actual.readdirSync(...args);
-      rmSync(marker);
-      return names;
-    });
+    const list = filesystem.listDirectoryIfExistsSync;
+    vi.spyOn(filesystem, 'listDirectoryIfExistsSync').mockImplementationOnce(
+      (directory) => {
+        const names = list(directory);
+        rmSync(marker);
+        return names;
+      },
+    );
     sweepStaleActors(root, 1_700_000_000_000);
     expect(existsSync(path)).toBe(false);
   });
@@ -69,11 +61,13 @@ describe('actor sweep races and failures', () => {
   it('continues after one group cannot acquire its lock', () => {
     const first = member('a.json');
     const second = member('b.json');
-    const acquire = locks.acquireLockDir;
-    vi.spyOn(locks, 'acquireLockDir').mockImplementation((lock) => {
-      if (lock.endsWith('a.json.lock')) throw new Error('unavailable');
-      return acquire(lock);
-    });
+    const acquire = filesystem.withFileLockSync;
+    vi.spyOn(filesystem, 'withFileLockSync').mockImplementation(
+      (target, operation, options) => {
+        if (target.endsWith('a.json')) throw new Error('unavailable');
+        return acquire(target, operation, options);
+      },
+    );
     expect(() => sweepStaleActors(root, 1_700_000_000_000)).not.toThrow();
     expect([first, second].map(existsSync)).toEqual([true, false]);
   });
@@ -82,28 +76,30 @@ describe('actor sweep races and failures', () => {
     const marker = member('a.json.revoked');
     const temporary = member('a.json.tmp');
     const state = member('a.json');
-    vi.mocked(rmSync).mockClear();
+    const removal = vi.spyOn(filesystem, 'removeFileIfExistsSync');
     sweepActorGroup(
       dir,
       'a.json',
       ['a.json.revoked', 'a.json.tmp', 'a.json'],
       1_700_000_000_000,
     );
-    expect(vi.mocked(rmSync).mock.calls.map(([path]) => path)).toEqual([
+    expect(removal.mock.calls.map(([path]) => path)).toEqual([
       state,
       marker,
       temporary,
     ]);
   });
 
-  it('preserves quarantine markers when state removal fails', async () => {
+  it('preserves quarantine markers when state removal fails', () => {
     const marker = member('a.json.revoked');
     const state = member('a.json');
-    const actual = await vi.importActual<typeof import('node:fs')>('node:fs');
-    vi.mocked(rmSync).mockImplementation((path, options) => {
-      if (path === state) throw new Error('unlink failed');
-      actual.rmSync(path, options);
-    });
+    const remove = filesystem.removeFileIfExistsSync;
+    vi.spyOn(filesystem, 'removeFileIfExistsSync').mockImplementation(
+      (path) => {
+        if (path === state) throw new Error('unlink failed');
+        return remove(path);
+      },
+    );
     expect(() =>
       sweepActorGroup(
         dir,

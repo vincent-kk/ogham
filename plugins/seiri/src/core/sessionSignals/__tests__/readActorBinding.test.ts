@@ -10,9 +10,11 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
+import { IDLE_STATE_TTL } from '../../../constants/retention.js';
 import type {
   WorkflowIdentity,
   WorkflowRequest,
+  WorkflowState,
 } from '../../../types/workflow.js';
 import { completeInvocation } from '../workflow/completeInvocation.js';
 import { observeBoundary } from '../workflow/observeBoundary.js';
@@ -62,7 +64,7 @@ it('returns undefined for a suspended binding', () => {
 it('returns undefined once the actor TTL has expired', () => {
   const { id, path } = fixture();
   const stale = JSON.parse(readFileSync(path, 'utf8'));
-  stale.lastObservedAt -= 8 * 24 * 60 * 60 * 1000;
+  stale.lastObservedAt -= IDLE_STATE_TTL + 1;
   writeFileSync(path, JSON.stringify(stale));
   expect(readActorBinding(id, NOW)).toBeUndefined();
 });
@@ -105,4 +107,12 @@ it('returns undefined while the actor lock is held', () => {
   const { id, path } = fixture();
   mkdirSync(`${path}.lock`);
   expect(readActorBinding(id, NOW)).toBeUndefined();
+});
+
+it('reads a binding unobserved for thirteen days', () => {
+  const { id, path } = fixture();
+  const state: WorkflowState = JSON.parse(readFileSync(path, 'utf8'));
+  state.lastObservedAt = NOW - 13 * 24 * 60 * 60 * 1000;
+  writeFileSync(path, JSON.stringify(state));
+  expect(readActorBinding(id, NOW)?.task).toBe('task-a');
 });

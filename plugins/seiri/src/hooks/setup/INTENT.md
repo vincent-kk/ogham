@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Suspend existing actor participation on native session startup, resume, clear, or fork; preserve it across compaction. In standard/strict, state the stable chain and an election line at each session start, resume, clear, fork, and compaction, alongside an active-rule-status summary the render composes independently of any binding. At compact, when this actor's own binding is active, its progress line is read back and appended last so the task stays visible right after compaction.
+Suspend existing actor participation on native session startup, resume, clear, or fork; preserve it across compaction. In standard/strict, state the stable chain and an election line at each session start, resume, clear, fork, and compaction, alongside an active-rule-status summary the render composes independently of any binding. At compact, when this actor's own binding is active, its progress line is read back and appended last so the task stays visible right after compaction. 메인 행위자의 로컬 지침 블록은 이 진행 줄 앞에 둡니다.
 
 ## Conventions
 

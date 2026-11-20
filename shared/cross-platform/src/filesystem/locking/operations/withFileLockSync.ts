@@ -10,6 +10,7 @@ import {
   DEFAULT_STALE_LOCK_MS,
   LOCK_POLL_MS,
 } from "../helpers/constants.js";
+import { isWindowsLockContention } from "../helpers/isWindowsLockContention.js";
 import { isStaleLock } from "../helpers/isStaleLock.js";
 import { quarantineLock } from "../helpers/quarantineLock.js";
 import { releaseOwnedLock } from "../helpers/releaseOwnedLock.js";
@@ -34,13 +35,19 @@ export function withFileLockSync<T>(
 
   ensureDirectorySync(portableDirname(lockPath));
 
-  while (!tryAcquireLock(lockPath, token)) {
-    if (isStaleLock(lockPath, staleMs)) {
-      quarantineLock(lockPath, "stale");
-      continue;
+  for (;;) {
+    try {
+      if (tryAcquireLock(lockPath, token)) break;
+      if (isStaleLock(lockPath, staleMs)) {
+        quarantineLock(lockPath, "stale");
+        continue;
+      }
+    } catch (error) {
+      if (!isWindowsLockContention(error)) throw error;
     }
-    if (Date.now() - startedAt >= timeoutMs) return { acquired: false };
-    waitForLock(Math.min(LOCK_POLL_MS, timeoutMs - (Date.now() - startedAt)));
+    const remaining = timeoutMs - (Date.now() - startedAt);
+    if (remaining <= 0) return { acquired: false };
+    waitForLock(Math.min(LOCK_POLL_MS, remaining));
   }
 
   try {

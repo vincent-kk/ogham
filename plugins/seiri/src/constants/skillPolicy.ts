@@ -57,11 +57,15 @@ export const VISIBLE_USER_STARTED_SKILLS = [
 ] as const;
 
 /**
- * User-only gates hidden from the model catalog with
+ * User-only skills hidden from the model catalog with
  * `disable-model-invocation: true` because running them requires an explicit
  * slash-command decision.
  */
-export const HIDDEN_USER_ONLY_SKILLS = ['scaffold-pr', 'setup'] as const;
+export const HIDDEN_USER_ONLY_SKILLS = [
+  'persist-directives',
+  'scaffold-pr',
+  'setup',
+] as const;
 
 /** Every skill invocable from the workflow catalog. */
 export const WORKFLOW_INVOCABLE_SKILLS = [

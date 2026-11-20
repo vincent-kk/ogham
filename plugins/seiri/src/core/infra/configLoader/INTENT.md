@@ -21,7 +21,7 @@
 
 ### Always do
 
-- 쓰기는 `writeAtomically` 경유 — 반쪽 파일을 남기지 않게.
+- 쓰기는 `writeFileAtomicallySync` 경유 — 반쪽 파일을 남기지 않게.
 - 새 설정 키 전에 "이 값의 진실을 누가 소유하는가"를 먼저 답할 것.
 
 ### Ask first

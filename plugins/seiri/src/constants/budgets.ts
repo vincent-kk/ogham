@@ -16,7 +16,7 @@ export const SKILL_MAX_BYTES = 4096;
  */
 export const RULE_MAX_LINES = 200;
 
-/** Skills that ship. The sixteenth is a deliberate budget decision. */
+/** Skills that ship. Shipping seventeen skills is a deliberate budget decision. */
 export const SHIPPED_SKILLS = [
   'architect',
   'clarify-request',
@@ -24,6 +24,7 @@ export const SHIPPED_SKILLS = [
   'explain',
   'finish',
   'implement',
+  'persist-directives',
   'receive-review',
   'request-review',
   'review-plan',

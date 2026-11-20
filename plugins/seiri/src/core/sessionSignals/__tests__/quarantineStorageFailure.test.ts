@@ -6,15 +6,16 @@ import { afterEach, expect, it, vi } from 'vitest';
 
 import type { WorkflowIdentity } from '../../../types/workflow.js';
 
-const { writeAtomicallyMock } = vi.hoisted(() => ({
-  writeAtomicallyMock: vi.fn(),
+const { writeFileAtomicallySyncMock } = vi.hoisted(() => ({
+  writeFileAtomicallySyncMock: vi.fn(),
 }));
 
-vi.mock('../../utils/writeAtomically.js', async (importOriginal) => {
-  const actual =
-    await importOriginal<typeof import('../../utils/writeAtomically.js')>();
-  writeAtomicallyMock.mockImplementation(actual.writeAtomically);
-  return { writeAtomically: writeAtomicallyMock };
+vi.mock('@ogham/cross-platform', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@ogham/cross-platform')>();
+  writeFileAtomicallySyncMock.mockImplementation(
+    actual.writeFileAtomicallySync,
+  );
+  return { ...actual, writeFileAtomicallySync: writeFileAtomicallySyncMock };
 });
 
 const { observeBoundary } = await import('../workflow/observeBoundary.js');
@@ -46,7 +47,7 @@ it('never deletes the quarantine marker ahead of a successful commit — it surv
   // Total storage failure: the state write throws, and so does any
   // attempt to re-write the marker in the catch branch — so the only way
   // the marker can still exist afterward is if it was never deleted.
-  writeAtomicallyMock.mockImplementation(() => {
+  writeFileAtomicallySyncMock.mockImplementation(() => {
     throw new Error('storage unavailable');
   });
 

@@ -18,9 +18,9 @@ A runtime request needs an explicit repository root and task name. An accepted M
 
 Every executed plan carries a ledger; activation and plan-less work need none. For an active task with a ledger, paired Bash calls matching CHECK record evidence against EXPECT. Other tasks stay untouched; unchanged evidence does not repeatedly inject a verdict. Reuse valid verification evidence and choose checks appropriate to behavior changes, refactors, or documents.
 
-Actor state expires after seven inactive days and invocation records after 24 hours. Missing host provenance or storage failures suppress assistance. A simultaneous failure to persist both revocation and its fallback marker cannot guarantee revocation survives storage recovery. Recorded native host identities and envelopes are covered; deliberately delayed native events crossing a new user turn remain an explicit acceptance limit.
+Actor state expires after 14 inactive days and invocation records after 24 hours. Missing host provenance or storage failures suppress assistance. A simultaneous failure to persist both revocation and its fallback marker cannot guarantee revocation survives storage recovery. Recorded native host identities and envelopes are covered; deliberately delayed native events crossing a new user turn remain an explicit acceptance limit.
 
-At MCP server startup, seiri removes `sessions` and `tasks` entries unmodified for more than 72 hours regardless of git tracking or ignore status. Startup cleanup is skipped when the host cannot resolve the workspace.
+At MCP server startup, seiri removes `sessions` and `tasks` entries unmodified for more than 14 days regardless of git tracking or ignore status. Startup cleanup is skipped when the host cannot resolve the workspace.
 
 ## Install
 
@@ -54,6 +54,7 @@ Invoked by you:
 | Skill                    | Use                                                        |
 | ------------------------ | ---------------------------------------------------------- |
 | `/seiri:setup`           | Choose which rules this repository uses                    |
+| `/seiri:persist-directives` | Restore registered local instructions after compaction |
 | `/seiri:architect`       | Preserve durable requirements, system views, and decisions |
 | `/seiri:clarify-request` | Clarify a request into an actionable, testable scope       |
 | `/seiri:scaffold-pr`     | Open an empty Draft PR before work starts                  |

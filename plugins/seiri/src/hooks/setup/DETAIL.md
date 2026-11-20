@@ -3,6 +3,7 @@
 ## Requirements
 
 - Session boundaries suspend existing participation; compact preserves it and, when this actor's own binding reads back `active`, appends its progress line last.
+- standard/strict의 `compact`에서 연결된 로컬 지침은 메인 행위자에게만 전달한다. 지침 블록은 규칙 요약 뒤, 진행 줄 앞에 두고 진행 줄이 없으면 마지막에 둔다. 지침을 준비하다 실패하면 그 블록만 생략한다.
 - Hooks never block a tool. Missing host provenance or storage failure yields no assistance beyond the render's own fallback.
 - off/advisory suppress new observations and injection; trusted boundaries still suspend existing participation.
 - Missing or unreadable rule status still yields the election and chain lines at standard/strict. Render tests pin the order and strict-only lines.
@@ -11,7 +12,7 @@
 
 - The processor accepts the native host payload and returns a nonblocking HookOutput. Empty additional context produces no stdout.
 - Shared normalization preserves Claude prompt_id, Codex turn_id, tool_use_id and independent child agent_id. No IDs come from model arguments.
-- The renderer is pure; the processor only assembles its inputs and writes the result.
+- The renderer is pure; the processor assembles the output and updates the directive injection timestamp.
 
 ## Acceptance Criteria
 

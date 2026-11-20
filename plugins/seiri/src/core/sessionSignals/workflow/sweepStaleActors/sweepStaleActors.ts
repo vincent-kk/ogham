@@ -1,6 +1,6 @@
-import { lstatSync, readdirSync } from 'node:fs';
+import { lstatSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform';
+import { listDirectoryIfExistsSync, portableJoin } from '@ogham/cross-platform';
 
 import { CONFIG_DIR, SESSIONS_DIR } from '../../../../constants/files.js';
 import { findRepoRoot } from '../../../utils/findRepoRoot.js';
@@ -19,7 +19,7 @@ export function sweepStaleActors(projectRoot: string, now: number): void {
     const dir = portableJoin(repoRoot, CONFIG_DIR, SESSIONS_DIR);
     if (!lstatSync(dir).isDirectory()) return;
     const groups = new Map<string, string[]>();
-    for (const name of readdirSync(dir)) {
+    for (const name of listDirectoryIfExistsSync(dir)) {
       const end = name.indexOf('.json');
       const key = end < 0 ? name : name.slice(0, end + 5);
       const members = groups.get(key) ?? [];

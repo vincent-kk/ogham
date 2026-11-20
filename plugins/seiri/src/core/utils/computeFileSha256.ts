@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+
+import { readFileIfExistsSync } from '@ogham/cross-platform';
 
 /**
  * SHA-256 hex digest of a file's raw bytes.
@@ -11,7 +12,10 @@ import { readFileSync } from 'node:fs';
  */
 export function computeFileSha256(path: string): string | null {
   try {
-    return createHash('sha256').update(readFileSync(path)).digest('hex');
+    const bytes = readFileIfExistsSync(path);
+    return bytes === null
+      ? null
+      : createHash('sha256').update(bytes).digest('hex');
   } catch {
     return null;
   }

@@ -101,11 +101,21 @@ export function createServer(): McpServer {
     ToolName.RUNTIME,
     {
       description:
-        'Seiri workflow participation and intervention dial. Call a participation action (step, start, resume, pause, finish) only from inside the seiri skill that owns it, after invoking that skill; the skill states when and how. dial reads or moves the intervention valve.',
+        'Seiri workflow participation, intervention dial, and local directive sets. Call a participation action (step, start, resume, pause, finish) only from inside the seiri skill that owns it, after invoking that skill; the skill states when and how. dial reads or moves the intervention valve.',
       inputSchema: {
         action: z
-          .enum(['step', 'start', 'resume', 'pause', 'finish', 'dial'])
-          .describe('Participation transition, or dial.'),
+          .enum([
+            'step',
+            'start',
+            'resume',
+            'pause',
+            'finish',
+            'dial',
+            'directives',
+          ])
+          .describe(
+            'Participation transition, dial control, or directive management.',
+          ),
         project_root: z
           .string()
           .describe(
@@ -115,7 +125,7 @@ export function createServer(): McpServer {
           .string()
           .optional()
           .describe(
-            'Kebab-case task name. Required for every action but dial.',
+            'Kebab-case task name. Required for participation actions.',
           ),
         step: z
           .enum(WORKFLOW_SKILLS)
@@ -139,6 +149,20 @@ export function createServer(): McpServer {
           .enum(['off', 'advisory', 'standard', 'strict'])
           .nullish()
           .describe('Dial position for dial_op set.'),
+        directives_op: z
+          .enum(['bind', 'on', 'off', 'status', 'remove'])
+          .optional()
+          .describe(
+            'Required for directives. bind connects a set on native PostToolUse.',
+          ),
+        set: z
+          .string()
+          .optional()
+          .describe('Kebab-case directive set for directives.'),
+        scope: z
+          .enum(['session', 'all'])
+          .optional()
+          .describe('Audience for bind. Default: session.'),
       },
     },
     wrapHandler(handleRuntime),

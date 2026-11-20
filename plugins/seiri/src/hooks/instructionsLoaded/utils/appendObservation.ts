@@ -1,6 +1,11 @@
-import { appendFileSync, mkdirSync, statSync, truncateSync } from 'node:fs';
+import { appendFileSync, statSync, truncateSync } from 'node:fs';
 
-import { pluginCache, portableJoin } from '@ogham/cross-platform';
+import {
+  ensureDirectorySync,
+  pluginCache,
+  portableDirname,
+  portableJoin,
+} from '@ogham/cross-platform';
 
 import { OBSERVATION_LOG } from '../../../constants/files.js';
 import { PLUGIN_NAME } from '../../../constants/plugin.js';
@@ -29,7 +34,7 @@ export function observationLogPath(): string {
 export function appendObservation(record: Record<string, unknown>): void {
   try {
     const path = observationLogPath();
-    mkdirSync(pluginCache(PLUGIN_NAME), { recursive: true });
+    ensureDirectorySync(portableDirname(path));
 
     // Truncating rather than rotating: this log answers "is delivery
     // happening now", so a recent window is all it ever needs to hold.

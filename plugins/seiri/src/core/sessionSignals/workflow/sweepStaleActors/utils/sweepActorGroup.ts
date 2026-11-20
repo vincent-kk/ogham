@@ -1,9 +1,12 @@
-import { lstatSync, rmSync, rmdirSync } from 'node:fs';
+import { lstatSync, rmSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform';
+import {
+  portableJoin,
+  removeFileIfExistsSync,
+  withFileLockSync,
+} from '@ogham/cross-platform';
 
 import { IDLE_STATE_TTL } from '../../../../../constants/retention.js';
-import { acquireLockDir } from '../../../../utils/acquireLockDir.js';
 
 /**
  * Delete a stale group, serializing actor members with their owner's lock.
@@ -19,30 +22,29 @@ export function sweepActorGroup(
   members: string[],
   now: number,
 ): void {
-  if (!members.every((name) => isStale(portableJoin(dir, name), now))) return;
+  if (!members.every((name) => isStale(portableJoin(dir, `./${name}`), now)))
+    return;
   if (!key.endsWith('.json')) {
     for (const name of members)
-      rmSync(portableJoin(dir, name), { recursive: true, force: true });
+      removeSweepEntry(portableJoin(dir, `./${name}`));
     return;
   }
   const lockName = `${key}.lock`;
-  const lock = portableJoin(dir, lockName);
-  if (!acquireLockDir(lock)) return;
-  try {
-    const contents = members
-      .filter((name) => name !== lockName)
-      .sort((a, b) => Number(b === key) - Number(a === key));
-    if (!contents.every((name) => isStale(portableJoin(dir, name), now)))
-      return;
-    for (const name of contents)
-      rmSync(portableJoin(dir, name), { recursive: true, force: true });
-  } finally {
-    try {
-      rmdirSync(lock);
-    } catch {
-      // Another stale-lock reclaimer may already have removed the directory.
-    }
-  }
+  withFileLockSync(
+    portableJoin(dir, `./${key}`),
+    () => {
+      const contents = members
+        .filter((name) => name !== lockName)
+        .sort((a, b) => Number(b === key) - Number(a === key));
+      if (
+        !contents.every((name) => isStale(portableJoin(dir, `./${name}`), now))
+      )
+        return;
+      for (const name of contents)
+        removeSweepEntry(portableJoin(dir, `./${name}`));
+    },
+    { timeoutMs: 500, staleMs: 5_000 },
+  );
 }
 
 /**
@@ -54,4 +56,15 @@ export function sweepActorGroup(
 function isStale(path: string, now: number): boolean {
   const stat = lstatSync(path, { throwIfNoEntry: false });
   return !stat || now - stat.mtimeMs > IDLE_STATE_TTL;
+}
+
+/**
+ * Remove an entry without following links; a directory includes its descendants.
+ * @param path Absolute stale group member to remove.
+ * @returns Nothing.
+ */
+function removeSweepEntry(path: string): void {
+  if (lstatSync(path, { throwIfNoEntry: false })?.isDirectory())
+    rmSync(path, { recursive: true, force: true });
+  else removeFileIfExistsSync(path);
 }

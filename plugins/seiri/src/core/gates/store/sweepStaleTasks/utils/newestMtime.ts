@@ -1,6 +1,6 @@
-import { lstatSync, readdirSync } from 'node:fs';
+import { lstatSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform';
+import { listDirectoryIfExistsSync, portableJoin } from '@ogham/cross-platform';
 
 /**
  * Inspect a tree's newest modification without following symbolic links.
@@ -21,17 +21,10 @@ export function newestMtime(
   if (!stat) return -Infinity;
   let newest = includeSelf ? stat.mtimeMs : -Infinity;
   if (!stat.isDirectory()) return newest;
-  let names;
-  try {
-    names = readdirSync(path);
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') return newest;
-    throw error;
-  }
-  for (const name of names)
+  for (const name of listDirectoryIfExistsSync(path))
     newest = Math.max(
       newest,
-      newestMtime(portableJoin(path, name), excludedPaths),
+      newestMtime(portableJoin(path, `./${name}`), excludedPaths),
     );
   return newest;
 }

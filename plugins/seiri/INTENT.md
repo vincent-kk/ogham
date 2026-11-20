@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Deploy selected code-authoring rules to the host's project rule channel and provide optional, task-scoped workflow assistance. The host loads deployed rules; hooks never duplicate their bodies, load a skill, or block a tool. SessionStart states the election, and UserPromptSubmit states a per-turn entry line while no task is active.
+Deploy selected code-authoring rules to the host's project rule channel and provide optional, task-scoped workflow assistance. The host loads deployed rules; hooks never duplicate their bodies, load a skill, or block a tool. SessionStart states the election, and UserPromptSubmit states a per-turn entry line while no task is active. 압축 뒤에는 사용자가 연결한 지침도 복원합니다.
 
 ## Structure
 

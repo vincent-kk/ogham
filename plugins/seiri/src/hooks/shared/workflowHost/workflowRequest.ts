@@ -1,14 +1,13 @@
-import { realpathSync } from 'node:fs';
-
 import { samePath } from '@ogham/cross-platform';
 
 import { parseWorkflowRequest } from '../../../core/sessionSignals/workflow/parseWorkflowRequest.js';
-import { findRepoRoot } from '../../../core/utils/findRepoRoot.js';
 import type {
   WorkflowHostAdapter,
   WorkflowRequest,
 } from '../../../types/workflow.js';
 import { WORKFLOW_ADAPTER } from '../workflowAdapter.js';
+
+import { resolveWorkflowRoot } from './resolveWorkflowRoot.js';
 
 /**
  * Restrict lifecycle effects to this plugin's two compiled tool addresses.
@@ -29,8 +28,8 @@ export function workflowRequest(
   if (!request) return undefined;
   try {
     return samePath(
-      findRepoRoot(realpathSync(cwd)),
-      findRepoRoot(realpathSync(request.project_root)),
+      resolveWorkflowRoot(cwd),
+      resolveWorkflowRoot(request.project_root),
     )
       ? request
       : undefined;

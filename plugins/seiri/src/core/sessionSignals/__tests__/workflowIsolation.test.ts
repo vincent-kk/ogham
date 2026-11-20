@@ -12,6 +12,7 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
+import { IDLE_STATE_TTL } from '../../../constants/retention.js';
 import type { WorkflowRequest } from '../../../types/workflow.js';
 import { completeInvocation } from '../workflow/completeInvocation.js';
 import { observeBoundary } from '../workflow/observeBoundary.js';
@@ -283,7 +284,7 @@ it('expires old actor state before removing its revocation marker', () => {
   seedActor(id, NOW);
   observeBoundary(id, true, NOW);
   const state = JSON.parse(readFileSync(path, 'utf8'));
-  state.lastObservedAt -= 8 * 24 * 60 * 60 * 1000;
+  state.lastObservedAt -= IDLE_STATE_TTL + 1;
   writeFileSync(path, JSON.stringify(state));
   writeFileSync(`${path}.revoked`, 'revoked');
   expect(withWorkflowState(id, false, NOW, () => 'effect')).toBeUndefined();

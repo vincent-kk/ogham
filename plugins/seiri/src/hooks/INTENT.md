@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Observe trusted host boundaries and paired invocations for explicitly participating tasks. standard/strict SessionStart states the stable chain, an election line, and a rule/dial/drift summary as advisory text, never a forced skill call; UserPromptSubmit reports task progress or a dial-specific entry line when no binding is active (none or paused). Hooks never block actions or inject rule bodies.
+Observe trusted host boundaries and paired invocations for explicitly participating tasks. standard/strict SessionStart states the stable chain, an election line, and a rule/dial/drift summary as advisory text, never a forced skill call; UserPromptSubmit reports task progress or a dial-specific entry line when no binding is active (none or paused). 압축 뒤에는 연결된 로컬 지침을 메인 행위자에게 복원하며 PostToolUse는 지침 연결을 확인합니다. Hooks never block actions or inject rule bodies.
 
 ## Structure
 
