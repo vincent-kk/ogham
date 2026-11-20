@@ -40,7 +40,7 @@
 ### AC-hooks-bundle-isolation — 번들 격리
 
 - 훅 번들에 검증 런타임·MCP SDK·glob 엔진이 포함되지 않는다.
-- setup과 post-tool-use는 두 호스트의 번들 실측값을 수용하는 최소 정수 KiB를 상한으로 둡니다. setup은 28KiB, post-tool-use는 27KiB이며 나머지 훅은 각각 16KiB입니다. 변경 시 상한과 사유 주석을 갱신하고 금지 의존 검사도 유지합니다.
+- setup과 post-tool-use는 두 호스트의 번들 실측값을 수용하는 최소 정수 KiB를 상한으로 둡니다. setup은 28KiB, post-tool-use는 28KiB이며 나머지 훅은 각각 16KiB입니다. 변경 시 상한과 사유 주석을 갱신하고 금지 의존 검사도 유지합니다.
 - 진입점에서 배럴 import 가 0건이다.
 - pre-tool-use·user-prompt-submit·post-tool-use·subagent-start 번들에는 `/Election/` 리터럴이 없다(선출 문구는 `hooks/setup/render/` 전용). post-tool-use 번들에는 `/A plan was produced/` 리터럴이 없다.
 

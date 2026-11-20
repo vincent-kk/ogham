@@ -6,7 +6,8 @@ import {
   portableJoin,
   writeFileAtomicallySync,
 } from '@ogham/cross-platform';
-import { afterEach, beforeEach, expect, it } from 'vitest';
+import * as filesystem from '@ogham/cross-platform';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 
 import { IDLE_STATE_TTL } from '../../../constants/retention.js';
 import type { DirectiveBinding } from '../../../types/directives.js';
@@ -23,9 +24,13 @@ beforeEach(() => {
   root = mkdtempSync(portableJoin(tmpdir(), 'seiri-directive-bindings-'));
   directory = portableJoin(root, '.seiri', 'directives', 'focus');
   ensureDirectorySync(directory);
+  writeFileAtomicallySync(portableJoin(directory, 'focus.md'), 'body');
   binding = { scope: 'all', enabled: true, root, boundAt: now };
 });
-afterEach(() => rmSync(root, { recursive: true, force: true }));
+afterEach(() => {
+  vi.restoreAllMocks();
+  rmSync(root, { recursive: true, force: true });
+});
 
 it('does not write when the binding is locked', () => {
   expect(updateDirectiveBinding(root, 'focus', () => binding)).toBe(true);
@@ -35,6 +40,25 @@ it('does not write when the binding is locked', () => {
   };
   expect(updateDirectiveBinding(root, 'focus', update)).toBe(false);
   expect(readDirectiveBindings(root)).toEqual({ focus: binding });
+});
+
+it('rejects a binding if the set is removed before acquiring its lock', () => {
+  const lock = filesystem.withFileLockSync;
+  vi.spyOn(filesystem, 'withFileLockSync').mockImplementationOnce(
+    (target, operation, options) => {
+      rmSync(directory, { recursive: true });
+      return lock(target, operation, options);
+    },
+  );
+
+  const updated = updateDirectiveBinding(root, 'focus', () => binding);
+
+  expect(
+    lstatSync(portableJoin(directory, 'binding.json'), {
+      throwIfNoEntry: false,
+    }),
+  ).toBeUndefined();
+  expect(updated).toBe(false);
 });
 
 it('finishes a locked removal without recreating the set or leaving a lock', () => {

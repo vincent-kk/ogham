@@ -65,8 +65,8 @@ const hookEntries = [
     entry: 'postToolUse',
     // Paired provenance, atomic actor state, gate judging and progress-line
     // rendering share this entry with directive bind, which uses shared
-    // canonical paths, locking, and atomic writes.
-    maxBytes: 27 * KILO_BYTE,
+    // canonical paths, locking, and rechecks set contents before writing.
+    maxBytes: 28 * KILO_BYTE,
     forbiddenContent: [/Election/, /A plan was produced/],
   },
   {

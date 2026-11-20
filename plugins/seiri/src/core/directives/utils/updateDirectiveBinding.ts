@@ -9,6 +9,7 @@ import { DIRECTIVE_BINDING_FILE } from '../../../constants/directives.js';
 import type { DirectiveBinding } from '../../../types/directives.js';
 
 import { directiveDirectory } from './directiveDirectory.js';
+import { listDirectiveFiles } from './listDirectiveFiles.js';
 import { readDirectiveBinding } from './readDirectiveBinding.js';
 
 /**
@@ -16,7 +17,7 @@ import { readDirectiveBinding } from './readDirectiveBinding.js';
  * @param root Real checkout root.
  * @param set Existing path-safe set name.
  * @param update Receives the current record and returns its replacement, the same record for no change, or undefined to remove it.
- * @returns Whether the mutation ran under the lock.
+ * @returns Whether the mutation ran under the lock without writing a binding for an empty set.
  */
 export function updateDirectiveBinding(
   root: string,
@@ -27,15 +28,19 @@ export function updateDirectiveBinding(
   if (!directory) return false;
   const path = portableJoin(directory, DIRECTIVE_BINDING_FILE);
   // The shared helper appends .lock to the target name.
-  return withFileLockSync(
+  const result = withFileLockSync(
     portableJoin(directory, 'binding'),
     () => {
       const current = readDirectiveBinding(path);
       const next = update(current);
       if (next === undefined) removeFileIfExistsSync(path);
-      else if (next !== current)
+      else if (next !== current) {
+        if (!listDirectiveFiles(directory).length) return false;
         writeFileAtomicallySync(path, JSON.stringify(next));
+      }
+      return true;
     },
     { timeoutMs: 500, staleMs: 5_000 },
-  ).acquired;
+  );
+  return result.acquired && result.value;
 }
