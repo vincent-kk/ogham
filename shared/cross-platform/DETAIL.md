@@ -14,7 +14,7 @@
   symlink 검사를 통과해야 한다.
 - 파일 교체는 sibling 임시 파일을 사용하고, 동시 변경 적용은 owner-token
   lock과 호출자 리비전 검사로 보호할 수 있어야 한다.
-- ENOENT만 정상적인 부재로 취급하고 그 밖의 파일 시스템 오류는 보존한다.
+- ENOENT만 정상적인 부재로 취급하고 그 밖의 파일 시스템 오류는 보존한다. 잠금 경합과 해제 오류는 아래 잠금 계약을 따른다.
 - 공식 Codex patch 입력은 모든 파일 연산을 보존하며 불완전한 parse를 성공으로 축소하지 않는다 — 첫 파일만 정규화하면 같은 patch의 뒤쪽 target이 경계 검사를 우회한다.
 
 ## API Contracts
@@ -179,6 +179,12 @@ config를 소유한 섹션마다 붙이고 배지는 prefix로 판정한다 — 
 operation을 호출하지 않고 `acquired: false`를 반환한다. stale lock은 고유
 quarantine 이름으로 atomic rename한 프로세스만 정리하며 owner token이
 일치하는 소유자만 live lock을 해제한다.
+
+Windows에서 잠금 획득 중 `EPERM`·`EACCES`·`EBUSY`가 발생하면 일시적
+경합으로 보고 기존 timeout 안에서 재시도한다. 잠금을 얻기 전에는 operation을
+실행하지 않는다. 해제 중 같은 오류가 나면 소유자 토큰을 다시 확인하며 최대
+두 차례 짧게 재시도한다. 끝내 해제하지 못하면 다음 호출의 stale 정리에 맡긴다.
+해제 오류는 이미 완료한 operation의 결과나 operation 자체의 예외를 덮어쓰지 않는다.
 
 `assertNoSymlinkDescendantsSync`는 신뢰 경계인 `root` 자체가 아니라
 `root`부터 `targetPath`까지 이미 존재하는 descendant segment를 검사한다.
