@@ -1,13 +1,8 @@
-import {
-  mkdirSync,
-  mkdtempSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import { canonicalizeTargetPathSync } from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { EMPTY_RESULT } from '../../../constants/plugin.js';
@@ -47,9 +42,9 @@ describe.each([CLAUDE_WORKFLOW_ADAPTER, CODEX_WORKFLOW_ADAPTER])(
     }
 
     beforeEach(() => {
-      root = realpathSync(
-        mkdtempSync(join(tmpdir(), 'seiri-hook-directive-bind-')),
-      );
+      const created = mkdtempSync(join(tmpdir(), 'seiri-hook-directive-bind-'));
+      // Match the hook's canonical root: on Windows it expands 8.3 short names.
+      root = canonicalizeTargetPathSync(created, created);
       mkdirSync(join(root, '.git'));
       writeConfig(root, 'project', { intervention: 'standard' });
       const directory = join(root, '.seiri', 'directives', 'focus');
