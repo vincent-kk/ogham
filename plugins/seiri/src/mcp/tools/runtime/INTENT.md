@@ -4,7 +4,7 @@ Tool name is `runtime`; the participation state machine it drives is `workflow` 
 
 ## Purpose
 
-Validate explicit optional session runtime requests: chain participation (`step`, `start`, `resume`, `pause`, `finish`) and the runtime dial valve (`dial`). Native hook provenance, not MCP arguments, authorizes actor state transitions; `dial` applies immediately, with no hook pair.
+Validate explicit optional session runtime requests: chain participation (`step`, `start`, `resume`, `pause`, `finish`) and the runtime dial valve (`dial`). Native hook provenance, not MCP arguments, authorizes actor state transitions; `dial` applies immediately, with no hook pair. `directives`는 로컬 지침 묶음을 관리하고 bind 커밋은 네이티브 훅에 맡깁니다.
 
 ## Conventions
 

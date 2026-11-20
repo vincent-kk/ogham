@@ -100,7 +100,7 @@ describe('sweepStaleTasks', () => {
     expect([old, fresh].map(existsSync)).toEqual([false, true]);
   });
 
-  it('keeps a task at exactly 72 hours', () => {
+  it('keeps a task at exactly 14 days', () => {
     file('plan.md', IDLE_STATE_TTL);
     sweepStaleTasks(root, NOW);
     expect(existsSync(task)).toBe(true);

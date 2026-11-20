@@ -55,6 +55,6 @@ Use this only when no other planning method applies:
 
 ## Rules
 
-- Let the selected method or repository choose the plan location; otherwise name the task in kebab-case (`^[a-z0-9]+(?:-[a-z0-9]+)*$`) and save to `.seiri/tasks/<name>/plan.md`, with the ledger's `Plan:` line pointing to it. Task directories idle for more than 72 hours are deleted at MCP server startup, so save a plan or ADR meant to outlive that elsewhere and point `Plan:` there.
+- Let the selected method or repository choose the plan location; otherwise name the task in kebab-case (`^[a-z0-9]+(?:-[a-z0-9]+)*$`) and save to `.seiri/tasks/<name>/plan.md`, with the ledger's `Plan:` line pointing to it. Task directories idle for more than 14 days are deleted at MCP server startup, so save a plan or ADR meant to outlive that elsewhere and point `Plan:` there.
 - Documents follow the session's response language; machine-read tokens, identifiers, paths, code, and commands stay verbatim.
 - Review before execution when unresolved risk warrants it — hand off to `/seiri:review-plan`. Reuse a valid review of the same plan; changed claims need only a scoped recheck.

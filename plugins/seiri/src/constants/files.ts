@@ -7,6 +7,9 @@ export const CONFIG_FILE = 'config.json';
 /** Session-independent task directories inside {@link CONFIG_DIR}. */
 export const TASKS_DIR = 'tasks';
 
+/** Local directive sets and their connections inside the seiri directory. */
+export const DIRECTIVES_DIR = 'directives';
+
 /** Human-authored implementation plan inside one task directory. */
 export const PLAN_FILE = 'plan.md';
 
@@ -41,7 +44,7 @@ export const IGNORE_FILE = '.gitignore';
 /**
  * Members of {@link CONFIG_DIR} that must never reach a commit.
  *
- * The runtime valve, retired signal-file names, and session/task
+ * The runtime valve, retired signal-file names, and session/task/directive
  * directories are session state or resumable local state; none belong in
  * a commit. `.seiri/.gitignore` lists every member and travels with the
  * directory rather than editing the root ignore file.
@@ -52,6 +55,7 @@ export const UNTRACKED_CONFIG_FILES = [
   SIGNALS_LOCK_DIR,
   `${SESSIONS_DIR}/`,
   `${TASKS_DIR}/`,
+  `${DIRECTIVES_DIR}/`,
 ] as const;
 
 /** Harness-owned directory that auto-loads instruction files. */

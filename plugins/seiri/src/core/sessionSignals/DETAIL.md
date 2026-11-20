@@ -12,8 +12,8 @@
 - 부모 handoff 조회는 다른 actor에 잠금이나 쓰기를 가하지 않는다. 구조·TTL·quarantine·잠금·active 조건을 통과한 스냅샷만 반환하며 실패를 활성 참여로 추정하지 않는다.
 - 상태 변경과 부수효과는 actor lock 내부에서 수행한다. lock 실패 시 무변경이며 actor→gate 순으로 잠근다. 두 파일 간 crash atomicity는 보장하지 않는다.
 - 실패한 경계는 고유 토큰의 revocation marker로 quarantine을 남기고, suspend 의도가 있을 때만 sticky suspend marker를 함께 남긴다. 둘 중 하나라도 있으면 관측·완료·전이·바인딩 조회를 거부하며 다음 boundary만 복구할 수 있다. 복구는 남은 suspend 의도를 먼저 적용하고 generation 경계로 오래된 호출을 폐기한다. 커밋 성공 후 자신이 본 토큰과 여전히 같은 marker만 지워 동시 실패의 철회를 지우지 않는다. 재실패하면 quarantine을 유지한다. 다만 토큰 read와 unlink 사이의 재기록은 지워질 수 있고, actor와 marker를 모두 쓸 수 없으면 복구 뒤 과거 상태가 살아날 수 있다. 정확한 파일 처리 순서는 withWorkflowState와 경합 테스트에서 확인한다.
-- actor는 7일 동안 관측되지 않으면 해당 actor 접근 시 트랜잭션 안에서 만료된다. invocation은 24시간 후 만료하며 명령·출력은 저장하지 않는다.
-- 별도로 MCP 서버 시작 시 `sweepStaleActors`가 72시간(`IDLE_STATE_TTL`) 넘게 수정되지 않은 actor 묶음(상태, lock, marker, 임시 파일)을 actor lock 아래에서 다시 확인하고 삭제한다. git 추적·ignore 여부는 보지 않는다. `.json`이 없는 이름은 lock 없이 자기 mtime으로 판정해 삭제하며, 디렉터리의 하위 항목은 보지 않는다.
+- actor는 14일 동안 관측되지 않으면 해당 actor 접근 시 트랜잭션 안에서 만료된다. invocation은 24시간 후 만료하며 명령·출력은 저장하지 않는다.
+- 별도로 MCP 서버 시작 시 `sweepStaleActors`가 14일(`IDLE_STATE_TTL`) 넘게 수정되지 않은 actor 묶음(상태, lock, marker, 임시 파일)을 actor lock 아래에서 다시 확인하고 삭제한다. git 추적·ignore 여부는 보지 않는다. `.json`이 없는 이름은 lock 없이 자기 mtime으로 판정해 삭제하며, 디렉터리의 하위 항목은 보지 않는다.
 - 사용자 소유 ignore 파일은 수정하지 않는다. sessions 경로 제외가 명시적으로 확인되지 않으면 자동 상태 생성을 생략한다.
 - 전이는 정확한 호출 ID·입력·actor·turn·generation에 대응하는 성공한 Post에서만 적용된다. `created`·`switched`는 generation을 올리고 진행 중 호출을 폐기하며, `step`·`resume`의 `updated`는 generation·invocations를 바꾸지 않는다. `pause`·`finish`의 `updated`는 `created`·`switched`와 같이 generation을 올리고 진행 중 호출을 폐기해 늦게 도착하는 결과를 무효화한다. 문서의 `paused`는 저장 상태 `suspended`(`types/workflow.ts`)를 가리킨다.
 - **활성 바인딩의 잔여 범위(명시적 수용).** standard/strict에서 활성 바인딩은 같은 host·native session·actor의 후속 사용자 턴 전체에 유지된다. 다른 task로의 `start`·`write-plan`·`execute` 교체나 `pause`/`finish` 전까지는, 무관한 질문이나 진입 스킬을 거치지 않는 작업에도 이전 task의 진행 줄이 표시되고 그 사이의 일치하는 Bash 증거·실패 힌트가 이 바인딩에 쌓인다. 이 범위는 같은 session 안에서만 허용되며 다른 session·agent·host로는 상속되지 않는다(actor 해시가 분리하고, SessionStart가 세션 경계에서 suspend한다).
@@ -42,7 +42,7 @@
 
 ### AC-workflow-retention — 유휴 actor 정리
 
-- 72시간 초과 묶음은 삭제되며 구성원 하나라도 72시간 이내이면 전체가 남는다. 정확히 72시간이면 남는다.
+- 14일 초과 묶음은 삭제되며 구성원 하나라도 14일 이내이면 전체가 남는다. 정확히 14일이면 남는다.
 - actor lock을 얻지 못하면 남는다.
 - 상태 파일을 marker·임시 파일보다 먼저 삭제하며, 상태 파일 삭제에 실패하면 quarantine marker를 남긴다.
 - 사라진 구성원은 건너뛰며 심볼릭 링크를 따라가지 않고 `.seiri/sessions` 밖은 건드리지 않는다.

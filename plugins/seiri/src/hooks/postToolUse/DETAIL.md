@@ -2,8 +2,9 @@
 
 ## Requirements
 
-- Only an exact paired invocation in the active actor/turn/generation can transition the runtime state machine or record the active task's Bash evidence. Skill loading has no effect.
+- Only an exact paired invocation in the active actor/turn/generation can transition the workflow lifecycle state machine or record the active task's Bash evidence. Skill loading has no effect.
 - `created` and `switched` transitions inject one progress-line-formatted acknowledgment naming the task, intent, and current step; `mismatch` injects one notice naming the bound task and the ways out: finish it, or enter the requested task through `write-plan` or `execute`. `rejected` injects nothing. `updated` injects nothing only for a same-task `step`; an explicit `resume`, `pause`, or `finish` acknowledges on `updated` in the prior control-verb ACK text; a request naming a different bound task yields the mismatch notice instead.
+- 지침 연결은 수명주기 호출 짝을 요구하지 않는다. standard/strict의 메인 행위자 PostToolUse에서 호스트 고유 runtime 도구 이름, `directives/bind` 입력, 오류 없는 응답의 accepted·op·set·scope 일치, 요청과 cwd의 저장소 실경로 일치를 검증한다. 기록이 커밋되면 묶음 이름과 범위, 파일 수를 한 줄로 ACK한다.
 - off/advisory suppress new observations and injection; trusted boundaries still suspend existing participation.
 
 ## API Contracts

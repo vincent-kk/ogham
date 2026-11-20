@@ -49,9 +49,9 @@ const hookEntries = [
     entry: 'setup',
     // One session-start read of rule status, dial and configLoader chains,
     // plus the fixed election/chain/posture render — strict's firm wording
-    // is the longest — and, after compaction, the active progress line.
-    // Runs at every SessionStart source.
-    maxBytes: 23 * KILO_BYTE,
+    // is the longest — and, after compaction, the active progress line and local directive injection.
+    // Compaction uses the shared filesystem lock and atomic write.
+    maxBytes: 27 * KILO_BYTE,
   },
   {
     name: 'user-prompt-submit',
@@ -63,8 +63,9 @@ const hookEntries = [
     name: 'post-tool-use',
     entry: 'postToolUse',
     // Paired provenance, atomic actor state, gate judging and progress-line
-    // rendering share this entry.
-    maxBytes: 22 * KILO_BYTE,
+    // rendering share this entry with directive bind, which uses shared
+    // canonical paths, locking, and atomic writes.
+    maxBytes: 28 * KILO_BYTE,
     forbiddenContent: [/Election/, /A plan was produced/],
   },
   {

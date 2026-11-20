@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- 훅은 비차단이며 규칙 본문은 주입하지 않습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift를 주입합니다(선출·posture·규칙 요약은 `hooks/setup/render/`; SessionStart의 체인 한 줄은 `WORKFLOW_CHAIN_LINE`(`constants/workflowChain.ts`)를 `renderPostureLines`로 얻고, 진행 줄·진행-줄 형식 ACK·subagent 줄은 `hooks/shared/progressLine/`의 concrete 파일에서 가져옵니다). 진입 `step`이나 `start`로 바인딩이 생기면 PostToolUse는 `created`·`switched`에서, UserPromptSubmit은 활성 바인딩이 있는 매 턴에, SubagentStart는 부모 main의 활성 바인딩이 있을 때 1회 진행 줄을 주입합니다. UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) standard/strict에 맞는 진입 줄을 주입합니다. off/advisory와 주입 대상이 없는 이벤트는 wire stdout까지 비웁니다.
+- 훅은 비차단이며 규칙 본문은 주입하지 않습니다. standard/strict의 SessionStart는 선출 문구·체인 한 줄·활성 규칙 요약·다이얼·drift 및 메인 세션 compact의 연결 지침 블록을 주입합니다(선출·posture·규칙 요약은 `hooks/setup/render/`; SessionStart의 체인 한 줄은 `WORKFLOW_CHAIN_LINE`(`constants/workflowChain.ts`)를 `renderPostureLines`로 얻고, 진행 줄·진행-줄 형식 ACK·subagent 줄은 `hooks/shared/progressLine/`의 concrete 파일에서 가져옵니다). 진입 `step`이나 `start`로 바인딩이 생기면 PostToolUse는 `created`·`switched`에서, UserPromptSubmit은 활성 바인딩이 있는 매 턴에, SubagentStart는 부모 main의 활성 바인딩이 있을 때 1회 진행 줄을 주입합니다. PostToolUse는 지침 연결을 커밋하면 연결 ACK를 냅니다. UserPromptSubmit은 활성 바인딩이 없으면(paused 포함) standard/strict에 맞는 진입 줄을 주입합니다. off/advisory와 주입 대상이 없는 이벤트는 wire stdout까지 비웁니다.
 - 예외는 fail-open으로 처리하고 logHookFailure로 진단합니다. stdin deadline은 외부 timeout보다 짧습니다. 타이머가 입력을 놓은 뒤 파싱·출력을 마치기 전에 호스트가 프로세스를 죽이지 않을 여유가 필요합니다.
 - off/advisory는 신규 관측·주입을 금지하지만 기존 참여의 신뢰되는 턴·세션 경계 철회는 허용합니다.
 - 훅은 concrete 내부 파일만 import하고 검증 런타임·MCP SDK·glob 엔진을 포함하지 않습니다. 공유 패키지는 공개 진입점으로 사용합니다.
@@ -16,7 +16,7 @@
 - strict의 선출 줄(`ELECTION_STRICT_LINE`)·posture 줄(`STRICT_POSTURE_LINE`)·진입 줄(`WORKFLOW_ENTRY_LINE_STRICT`)은 standard와 같은 선출 범주·참여 경계·비차단을 유지하되 어조만 지시형이다: 동작 변경은 크기와 무관하게 워크플로우를 거쳐야 하고, 소유 스킬을 호출하기 전의 편집은 이탈이므로 멈추고 호출한 뒤 계속하라고 명시한다. 문서·주석·포맷·읽기 전용 답변이 아무것도 선출하지 않는 것은 두 다이얼이 같다. UserPromptSubmit 번들의 `forbiddenContent`(`Election`) 때문에 진입 줄은 그 단어를 쓰지 않는다.
 - SubagentStart는 부모 binding을 상속하지 않고 자식 actor를 만들지 않습니다. 부모가 main actor이고 활성 바인딩이 있으면(`readActorBinding`, 무락·무쓰기) 진행 줄을 주입합니다. 참여한 적 없는 자식은 매번 첫 턴으로 간주되어 handoff 줄을 다시 받으며 진입 요청으로 참여할 수 있습니다. generation이 `0`보다 큰 재개 자식은 진행 줄 없이 binding을 suspend하고 anchor를 제거하며, generation 증가와 진행 중 호출 폐기로 늦은 결과를 무효화합니다.
 - PreToolUse의 진입 요청은 부재·만료·손상 actor를 payload의 native turn으로 seed합니다. 그 외에는 기존 anchor와 일치하는 runtime 참여 액션(`step`·`start`·`resume`·`pause`·`finish`; `dial`은 제외)이나 Bash invocation만 기록하며 권한 결정·입력수정을 하지 않습니다. 결과는 항상 `EMPTY_RESULT`입니다.
-- PostToolUse와 Claude Failure는 정확한 paired invocation의 현재 generation/actor/task에만 효과를 적용합니다. runtime의 `created`·`switched`는 진행 줄 형식 ACK, `mismatch`는 안내 문구를 내고, `rejected`는 무주입입니다. `updated`는 같은 task `step`이면 무주입이고, `resume`·`pause`·`finish`는 기존 control-verb ACK 문구로 응답합니다. Bash는 활성 task의 증거/실패 변화만 제공합니다.
+- PostToolUse와 Claude Failure의 수명주기 및 Bash 효과는 정확한 paired invocation의 현재 generation/actor/task에만 효과를 적용합니다. runtime의 `created`·`switched`는 진행 줄 형식 ACK, `mismatch`는 안내 문구를 내고, `rejected`는 무주입입니다. `updated`는 같은 task `step`이면 무주입이고, `resume`·`pause`·`finish`는 기존 control-verb ACK 문구로 응답합니다. Bash는 활성 task의 증거/실패 변화만 제공합니다.
 - 훅 밖 소비자는 공개 배럴을 사용할 수 있으나 executable entry는 concrete 구현을 사용합니다.
 
 ## Acceptance Criteria
@@ -38,7 +38,7 @@
 ### AC-hooks-bundle-isolation — 번들 격리
 
 - 훅 번들에 검증 런타임·MCP SDK·glob 엔진이 포함되지 않는다.
-- setup은 실측 크기 22.1KiB로 23KiB 상한을 유지하고, post-tool-use는 22KiB 상한, 나머지 훅은 16KiB 상한을 둡니다. 번들이 그 값을 넘으면 실측한 뒤 상한과 그 사유 주석을 손으로 갱신합니다. 금지 의존 검사는 그대로 적용합니다.
+- 공통 파일 조작을 사용하는 지침 주입 훅 setup은 27KiB, 연결 커밋 훅 post-tool-use는 28KiB, 나머지 훅은 16KiB 상한을 둡니다. 번들이 그 값을 넘으면 실측한 뒤 상한과 그 사유 주석을 손으로 갱신합니다. 금지 의존 검사는 그대로 적용합니다.
 - 진입점에서 배럴 import 가 0건이다.
 - pre-tool-use·user-prompt-submit·post-tool-use·subagent-start 번들에는 `/Election/` 리터럴이 없다(선출 문구는 `hooks/setup/render/` 전용). post-tool-use 번들에는 `/A plan was produced/` 리터럴이 없다.
 

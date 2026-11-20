@@ -60,7 +60,16 @@ it.each(['claude', 'codex'])(
         ? 'mcp__plugin_seiri_tools__runtime'
         : 'mcp__seiri__runtime',
     );
-    expect(Buffer.byteLength(source)).toBeLessThanOrEqual(22 * 1024);
+    expect(Buffer.byteLength(source)).toBeLessThanOrEqual(28 * 1024);
+  },
+);
+it.each(['claude', 'codex'])(
+  '%s setup bundle stays within its byte cap',
+  (host) => {
+    const source = readFileSync(
+      portableJoin(pluginRoot, 'bridge', host, 'setup.mjs'),
+    );
+    expect(source.byteLength).toBeLessThanOrEqual(27 * 1024);
   },
 );
 it.each(['claude', 'codex'])(

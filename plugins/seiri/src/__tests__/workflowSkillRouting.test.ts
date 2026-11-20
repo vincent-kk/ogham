@@ -64,11 +64,27 @@ describe('workflow skill routing contract', () => {
     }
   });
 
+  /** User-only skills that call runtime solely to manage directives. */
+  const directiveSkills = ['persist-directives'];
+
+  it('limits directive skills to the runtime directives action', () => {
+    for (const name of directiveSkills) {
+      const body = skill(name);
+      expect(body, name).toContain(
+        'mcp__plugin_seiri_tools__runtime({ action: "directives"',
+      );
+      expect(body, name).not.toContain('action: "step"');
+    }
+  });
+
   it('keeps the tool name out of skills whose job is not runtime control', () => {
     const others = readdirSync(skills, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
-      .filter((name) => !workflowSkills.includes(name));
+      .filter(
+        (name) =>
+          !workflowSkills.includes(name) && !directiveSkills.includes(name),
+      );
     for (const name of others) {
       const namesRuntime = skill(name).includes(
         'mcp__plugin_seiri_tools__runtime',

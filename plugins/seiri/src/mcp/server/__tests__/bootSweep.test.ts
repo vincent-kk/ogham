@@ -1,9 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { sweepStaleDirectives } from '../../../core/directives/index.js';
 import { sweepStaleTasks } from '../../../core/gates/index.js';
 import { sweepStaleActors } from '../../../core/sessionSignals/index.js';
 import { bootSweep } from '../lifecycle/bootSweep.js';
 
+vi.mock('../../../core/directives/index.js', () => ({
+  sweepStaleDirectives: vi.fn(),
+}));
 vi.mock('../../../core/gates/index.js', () => ({ sweepStaleTasks: vi.fn() }));
 vi.mock('../../../core/sessionSignals/index.js', () => ({
   sweepStaleActors: vi.fn(),
@@ -16,6 +20,7 @@ describe('bootSweep', () => {
     bootSweep('/repo', 123);
     expect(sweepStaleActors).toHaveBeenCalledExactlyOnceWith('/repo', 123);
     expect(sweepStaleTasks).toHaveBeenCalledExactlyOnceWith('/repo', 123);
+    expect(sweepStaleDirectives).toHaveBeenCalledExactlyOnceWith('/repo', 123);
     expect(
       vi.mocked(sweepStaleActors).mock.invocationCallOrder[0],
     ).toBeLessThan(vi.mocked(sweepStaleTasks).mock.invocationCallOrder[0]!);
@@ -27,12 +32,14 @@ describe('bootSweep', () => {
     });
     expect(() => bootSweep('/repo', 123)).not.toThrow();
     expect(sweepStaleTasks).toHaveBeenCalledExactlyOnceWith('/repo', 123);
+    expect(sweepStaleDirectives).toHaveBeenCalledExactlyOnceWith('/repo', 123);
   });
 
-  it('contains task cleanup failures', () => {
+  it('continues with directives when task cleanup throws', () => {
     vi.mocked(sweepStaleTasks).mockImplementation(() => {
       throw new Error('task failure');
     });
     expect(() => bootSweep('/repo', 123)).not.toThrow();
+    expect(sweepStaleDirectives).toHaveBeenCalledExactlyOnceWith('/repo', 123);
   });
 });

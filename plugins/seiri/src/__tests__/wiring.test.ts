@@ -217,8 +217,8 @@ describe('wiring', () => {
     expect(server).not.toContain("'config'");
     expect(server).not.toContain('config_op');
     expect(server).toContain('ToolName.RUNTIME');
-    expect(server).toContain(
-      ".enum(['step', 'start', 'resume', 'pause', 'finish', 'dial'])",
+    expect(server).toMatch(
+      /\.enum\(\[\s*'step',\s*'start',\s*'resume',\s*'pause',\s*'finish',\s*'dial',\s*'directives',?\s*\]\)/,
     );
     expect(server).toContain('dial_op: z');
   });

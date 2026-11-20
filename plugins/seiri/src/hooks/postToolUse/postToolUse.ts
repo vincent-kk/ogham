@@ -15,15 +15,16 @@ import { workflowIdentity } from '../shared/workflowHost/workflowIdentity.js';
 import { workflowRequest } from '../shared/workflowHost/workflowRequest.js';
 
 import { bashOutcome } from './utils/bashOutcome.js';
+import { commitDirectiveBinding } from './utils/commitDirectiveBinding.js';
 import { workflowAck } from './utils/workflowAck.js';
 
 /**
- * Apply only a paired result belonging to the current actor, task and turn.
+ * Apply a paired workflow result or a verified local directive bind.
  * @param input Hook payload for a successful or failed tool invocation.
  * @param adapter Host adapter fixed at build time; defaults to `WORKFLOW_ADAPTER`.
  * @param now Epoch ms read once at the calling hook's outermost handler.
  * @returns A fail-open hook result: the workflow acknowledgment or mismatch
- *   line, an injected gate verdict, or the empty result when nothing pairs.
+ *   line, a directive acknowledgment, an injected gate verdict, or the empty result.
  */
 export function processToolOutcome(
   input: PostToolUseInput | PostToolUseFailureInput,
@@ -32,6 +33,27 @@ export function processToolOutcome(
 ): HookOutput {
   const identity = workflowIdentity(input, adapter);
   if (!identity || !workflowEnabled(input.cwd)) return EMPTY_RESULT;
+  if (
+    input.hook_event_name === 'PostToolUse' &&
+    input.tool_name === adapter.runtimeTool &&
+    input.tool_input?.action === 'directives'
+  ) {
+    const additionalContext = commitDirectiveBinding(
+      input,
+      adapter,
+      identity,
+      now,
+    );
+    return additionalContext
+      ? {
+          continue: true,
+          hookSpecificOutput: {
+            hookEventName: input.hook_event_name,
+            additionalContext,
+          },
+        }
+      : EMPTY_RESULT;
+  }
   const request = workflowRequest(
     input.tool_name,
     input.tool_input,
