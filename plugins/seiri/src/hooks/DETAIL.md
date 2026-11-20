@@ -9,6 +9,8 @@
 - 호스트는 build 시 선택하고 compiler가 Codex 전용 runtime 경로를 가리킵니다. main actor의 turn은 Claude prompt_id 또는 Codex turn_id를 해시하고, native agent_id가 있는 자식의 turn은 두 호스트 모두 `JSON.stringify(['agent', agent_id])`를 해시해 부모 turn 변경과 독립적으로 유지합니다. 공통 tool_use_id 및 host/session/agent identity도 경계에서 정규화합니다. 누락한 identity나 vendor를 모델 인자·프롬프트·runtime 추론으로 보충하지 않습니다.
 - 실행 진입점과 정적 manifest 등록은 wiring 검사로 맞춥니다. dormant InstructionsLoaded는 빌드되지만 등록하지 않습니다.
 
+- 행위자와 요청의 실경로를 구한 뒤 실제 경로의 존재를 확인합니다. 공통 실경로 API는 누락된 경로도 정규화하므로 기존 거부 동작을 유지하기 위해 공통 API에 없는 존재 조회인 `node:fs`의 `existsSync`를 사용합니다.
+
 ## API Contracts
 
 - SessionStart는 startup/resume/clear/fork에서 기존 바인딩을 suspend하고(`observeBoundary(identity, false, now, { suspend: true })`) compact를 유지하며, standard/strict에서 선출·체인·규칙 요약·다이얼·drift를 주입합니다. 규칙 상태를 읽지 못해도 선출·체인 줄은 나옵니다. compact에서 이 actor 자신의 바인딩이 active로 읽히면(`readActorBinding`, 무락·무쓰기) 진행 줄을 마지막에 덧붙입니다.
@@ -38,7 +40,7 @@
 ### AC-hooks-bundle-isolation — 번들 격리
 
 - 훅 번들에 검증 런타임·MCP SDK·glob 엔진이 포함되지 않는다.
-- 공통 파일 조작을 사용하는 지침 주입 훅 setup은 27KiB, 연결 커밋 훅 post-tool-use는 28KiB, 나머지 훅은 16KiB 상한을 둡니다. 번들이 그 값을 넘으면 실측한 뒤 상한과 그 사유 주석을 손으로 갱신합니다. 금지 의존 검사는 그대로 적용합니다.
+- setup과 post-tool-use는 두 호스트의 번들 실측값을 수용하는 최소 정수 KiB를 상한으로 둡니다. setup은 28KiB, post-tool-use는 27KiB이며 나머지 훅은 각각 16KiB입니다. 변경 시 상한과 사유 주석을 갱신하고 금지 의존 검사도 유지합니다.
 - 진입점에서 배럴 import 가 0건이다.
 - pre-tool-use·user-prompt-submit·post-tool-use·subagent-start 번들에는 `/Election/` 리터럴이 없다(선출 문구는 `hooks/setup/render/` 전용). post-tool-use 번들에는 `/A plan was produced/` 리터럴이 없다.
 

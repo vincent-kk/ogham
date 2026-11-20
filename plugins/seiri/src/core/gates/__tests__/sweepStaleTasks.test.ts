@@ -11,10 +11,10 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import * as locks from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IDLE_STATE_TTL } from '../../../constants/retention.js';
-import * as locks from '../../utils/acquireLockDir.js';
 import { sweepStaleTasks } from '../index.js';
 
 /** Fixed clock for filesystem retention comparisons. */
@@ -84,7 +84,7 @@ describe('sweepStaleTasks', () => {
   it('keeps a task with a fresh gates lock without acquiring it', () => {
     mkdirSync(join(task, 'gates.lock'));
     utimesSync(task, OLD, OLD);
-    const acquire = vi.spyOn(locks, 'acquireLockDir');
+    const acquire = vi.spyOn(locks, 'withFileLockSync');
     sweepStaleTasks(root, NOW);
     expect(existsSync(task)).toBe(true);
     expect(acquire).not.toHaveBeenCalled();
@@ -138,18 +138,25 @@ describe('sweepStaleTasks', () => {
 
   it('requires the owning lock before deleting a task', () => {
     file('plan.md');
-    vi.spyOn(locks, 'acquireLockDir').mockReturnValue(false);
+    vi.spyOn(locks, 'withFileLockSync').mockReturnValue({ acquired: false });
     sweepStaleTasks(root, NOW);
     expect(existsSync(task)).toBe(true);
   });
 
   it('rechecks descendants after locking and releases the lock on veto', () => {
     const path = file('plan.md');
-    vi.spyOn(locks, 'acquireLockDir').mockImplementation((lock) => {
-      mkdirSync(lock);
-      utimesSync(path, new Date(NOW), new Date(NOW));
-      return true;
-    });
+    const lock = locks.withFileLockSync;
+    vi.spyOn(locks, 'withFileLockSync').mockImplementation(
+      (target, operation, options) =>
+        lock(
+          target,
+          () => {
+            utimesSync(path, new Date(NOW), new Date(NOW));
+            return operation();
+          },
+          options,
+        ),
+    );
     sweepStaleTasks(root, NOW);
     expect(existsSync(path)).toBe(true);
     expect(existsSync(join(task, 'gates.lock'))).toBe(false);
@@ -157,11 +164,18 @@ describe('sweepStaleTasks', () => {
 
   it('allows deletion when a child disappears before the recheck', () => {
     const path = file('plan.md');
-    vi.spyOn(locks, 'acquireLockDir').mockImplementation((lock) => {
-      mkdirSync(lock);
-      rmSync(path);
-      return true;
-    });
+    const lock = locks.withFileLockSync;
+    vi.spyOn(locks, 'withFileLockSync').mockImplementation(
+      (target, operation, options) =>
+        lock(
+          target,
+          () => {
+            rmSync(path);
+            return operation();
+          },
+          options,
+        ),
+    );
     sweepStaleTasks(root, NOW);
     expect(existsSync(task)).toBe(false);
   });

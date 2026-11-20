@@ -1,4 +1,4 @@
-import { writeAtomically } from '../../utils/writeAtomically.js';
+import { writeFileAtomicallySync } from '@ogham/cross-platform';
 
 /**
  * Persist exact ledger lines through an atomic replacement.
@@ -9,5 +9,5 @@ import { writeAtomically } from '../../utils/writeAtomically.js';
  */
 export function writeLedgerLines(path: string, lines: string[]): void {
   const content = lines.join('\n') + (lines.at(-1) === '' ? '' : '\n');
-  writeAtomically(path, content);
+  writeFileAtomicallySync(path, content);
 }

@@ -1,9 +1,8 @@
-import { portableJoin } from '@ogham/cross-platform';
+import { portableJoin, writeFileAtomicallySync } from '@ogham/cross-platform';
 
 import { RUNTIME_FILE } from '../../../../constants/files.js';
 import type { InterventionLevel } from '../../../../types/config.js';
 import { ensureSeiriDir } from '../../../utils/ensureSeiriDir.js';
-import { writeAtomically } from '../../../utils/writeAtomically.js';
 
 /**
  * Turn the session valve to `intervention` and return the path written.
@@ -20,6 +19,9 @@ export function writeRuntime(
   intervention: InterventionLevel,
 ): string {
   const path = portableJoin(ensureSeiriDir(projectRoot), RUNTIME_FILE);
-  writeAtomically(path, `${JSON.stringify({ intervention }, null, 2)}\n`);
+  writeFileAtomicallySync(
+    path,
+    `${JSON.stringify({ intervention }, null, 2)}\n`,
+  );
   return path;
 }

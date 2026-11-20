@@ -1,6 +1,9 @@
-import { mkdirSync, readFileSync } from 'node:fs';
-
-import { portableJoin } from '@ogham/cross-platform';
+import {
+  ensureDirectorySync,
+  portableJoin,
+  readUtf8FileIfExistsSync,
+  writeFileAtomicallySync,
+} from '@ogham/cross-platform';
 
 import {
   CONFIG_DIR,
@@ -9,7 +12,6 @@ import {
 } from '../../constants/files.js';
 
 import { findRepoRoot } from './findRepoRoot.js';
-import { writeAtomically } from './writeAtomically.js';
 
 const IGNORE_HEADER = '# Session-scoped seiri state — never committed.';
 
@@ -26,7 +28,7 @@ const IGNORE_HEADER = '# Session-scoped seiri state — never committed.';
  */
 export function ensureSeiriDir(projectRoot: string): string {
   const dir = portableJoin(findRepoRoot(projectRoot), CONFIG_DIR);
-  mkdirSync(dir, { recursive: true });
+  ensureDirectorySync(dir);
   syncIgnoreFile(portableJoin(dir, IGNORE_FILE));
   return dir;
 }
@@ -51,12 +53,12 @@ function syncIgnoreFile(path: string): void {
     (name) => !lines.includes(name),
   );
   if (existing !== undefined && missing.length === 0) return;
-  writeAtomically(path, `${[...lines, ...missing].join('\n')}\n`);
+  writeFileAtomicallySync(path, `${[...lines, ...missing].join('\n')}\n`);
 }
 
 function readIfPresent(path: string): string | undefined {
   try {
-    return readFileSync(path, 'utf8');
+    return readUtf8FileIfExistsSync(path) ?? undefined;
   } catch {
     return undefined;
   }

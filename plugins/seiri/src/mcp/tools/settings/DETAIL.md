@@ -14,6 +14,8 @@
 - `open` 대기는 `[1, MAX_WAIT_SECONDS]` 로 clamp 하고 `extra.signal` 을 전파한다.
 - 종료 상태는 토큰 없는 origin 만 반환하며 `OGHAM_NO_BROWSER` 에서는 탭을 열지 않는다.
 
+- UI 경로 탐색은 공통 API에 대응이 없는 `node:fs`의 `existsSync`를 사용합니다. 우선순위가 높은 위치에 읽기 실패가 발생하면 그 오류를 보고하기 위해 경로 선택과 읽기를 구분합니다.
+
 ## API Contracts
 
 pending 재호출은 같은 서버 세션의 대기를 잇는다. 브라우저와 헤드리스는 동일한 계획·적용 계약을 사용하고, 결과는 입력 action과 적용 여부를 구분한다. 구체 필드는 타입과 테스트에서 확인한다.

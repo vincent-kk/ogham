@@ -10,10 +10,10 @@ import {
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
+import * as locks from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IDLE_STATE_TTL } from '../../../constants/retention.js';
-import * as locks from '../../utils/acquireLockDir.js';
 import { sweepStaleActors } from '../index.js';
 
 /** Fixed wall time keeps the TTL boundary independent of execution speed. */
@@ -86,7 +86,7 @@ describe('sweepStaleActors', () => {
   it('skips a fresh lock without attempting acquisition', () => {
     const path = member('a.json');
     mkdirSync(join(dir, 'a.json.lock'));
-    const acquire = vi.spyOn(locks, 'acquireLockDir');
+    const acquire = vi.spyOn(locks, 'withFileLockSync');
     sweepStaleActors(root, NOW);
     expect(existsSync(path)).toBe(true);
     expect(acquire).not.toHaveBeenCalled();
@@ -137,18 +137,25 @@ describe('sweepStaleActors', () => {
 
   it('retains actors when the lock cannot be acquired', () => {
     const path = member('a.json');
-    vi.spyOn(locks, 'acquireLockDir').mockReturnValue(false);
+    vi.spyOn(locks, 'withFileLockSync').mockReturnValue({ acquired: false });
     sweepStaleActors(root, NOW);
     expect(existsSync(path)).toBe(true);
   });
 
   it('rechecks mtime under the lock and releases it when a member changed', () => {
     const path = member('a.json');
-    vi.spyOn(locks, 'acquireLockDir').mockImplementation((lock) => {
-      mkdirSync(lock);
-      utimesSync(path, new Date(NOW), new Date(NOW));
-      return true;
-    });
+    const lock = locks.withFileLockSync;
+    vi.spyOn(locks, 'withFileLockSync').mockImplementation(
+      (target, operation, options) =>
+        lock(
+          target,
+          () => {
+            utimesSync(path, new Date(NOW), new Date(NOW));
+            return operation();
+          },
+          options,
+        ),
+    );
     sweepStaleActors(root, NOW);
     expect(existsSync(path)).toBe(true);
     expect(existsSync(`${path}.lock`)).toBe(false);
@@ -157,11 +164,18 @@ describe('sweepStaleActors', () => {
   it('ignores a member that disappears before the locked recheck', () => {
     const path = member('a.json');
     const marker = member('a.json.revoked');
-    vi.spyOn(locks, 'acquireLockDir').mockImplementation((lock) => {
-      mkdirSync(lock);
-      rmSync(marker);
-      return true;
-    });
+    const lock = locks.withFileLockSync;
+    vi.spyOn(locks, 'withFileLockSync').mockImplementation(
+      (target, operation, options) =>
+        lock(
+          target,
+          () => {
+            rmSync(marker);
+            return operation();
+          },
+          options,
+        ),
+    );
     sweepStaleActors(root, NOW);
     expect([path, marker, `${path}.lock`].map(existsSync)).toEqual([
       false,

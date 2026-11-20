@@ -1,6 +1,10 @@
-import { readFileSync, readdirSync } from 'node:fs';
+import { lstatSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform';
+import {
+  listDirectoryIfExistsSync,
+  portableJoin,
+  readUtf8FileIfExistsSync,
+} from '@ogham/cross-platform';
 
 import { GATES_FILE } from '../../../constants/files.js';
 import type { TaskLedger } from '../../../types/gates.js';
@@ -19,20 +23,22 @@ export function listTaskLedgers(projectRoot: string): TaskLedger[] {
   const tasksDir = resolveTasksDir(projectRoot);
   let entries;
   try {
-    entries = readdirSync(tasksDir, { withFileTypes: true });
+    entries = listDirectoryIfExistsSync(tasksDir);
   } catch {
     return [];
   }
 
   const ledgers: TaskLedger[] = [];
   for (const entry of entries) {
-    if (!entry.isDirectory() || !isTaskName(entry.name)) continue;
-    const dir = portableJoin(tasksDir, entry.name);
+    if (!isTaskName(entry)) continue;
+    const dir = portableJoin(tasksDir, entry);
     const path = portableJoin(dir, GATES_FILE);
     try {
-      const text = readFileSync(path, 'utf8');
+      if (!lstatSync(dir, { throwIfNoEntry: false })?.isDirectory()) continue;
+      const text = readUtf8FileIfExistsSync(path);
+      if (text === null) continue;
       ledgers.push({
-        task: entry.name,
+        task: entry,
         dir,
         path,
         ledger: parseGatesLedger(text),

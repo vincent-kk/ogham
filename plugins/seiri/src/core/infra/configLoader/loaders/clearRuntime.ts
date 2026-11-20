@@ -1,4 +1,6 @@
-import { existsSync, rmSync } from 'node:fs';
+import { existsSync } from 'node:fs';
+
+import { removeFileIfExistsSync } from '@ogham/cross-platform';
 
 import { resolveRuntimePath } from '../utils/resolveRuntimePath.js';
 
@@ -12,6 +14,6 @@ import { resolveRuntimePath } from '../utils/resolveRuntimePath.js';
 export function clearRuntime(projectRoot: string): boolean {
   const path = resolveRuntimePath(projectRoot);
   if (!existsSync(path)) return false;
-  rmSync(path, { force: true });
+  removeFileIfExistsSync(path);
   return true;
 }

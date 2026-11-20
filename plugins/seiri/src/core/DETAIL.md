@@ -7,6 +7,8 @@
 - 각 상태의 진실은 그 상태를 담는 곳에 있다 — 규칙 배포는 파일시스템, 다이얼은 설정 파일, 세션 신호는 세션 파일, 작업 상태는 작업 원장, 지침 연결은 묶음의 연결 기록에 둔다. 사본을 만들지 않는다.
 - 훅 도달 코드는 이 계층의 배럴이 아니라 concrete 파일을 직접 import 한다(번들 크기 가드).
 
+- `findRepoRoot`는 파일과 디렉터리 형태의 Git 표시를 모두 찾아야 합니다. 공통 API에 범용 경로 존재 확인이 없어 `node:fs`의 `existsSync`를 유지합니다.
+
 ## API Contracts
 
 다이얼·배포·actor 참여·작업 증거·지침 연결은 각각 소유 저장소를 가지며 서로의 상태를 미러링하지 않는다. 공개 함수 목록은 진입점에서 확인한다.
@@ -20,7 +22,7 @@
 
 ### AC-core-atomic-writes — 원자적 쓰기
 
-- 상태 파일 쓰기가 `writeAtomically` 를 거친다.
+- 상태 파일 쓰기가 `writeFileAtomicallySync`를 거친다.
 - `.seiri/` 생성이 `ensureSeiriDir` 를 거쳐 `.gitignore` 를 동반한다.
 
 ## Boundary Exemptions

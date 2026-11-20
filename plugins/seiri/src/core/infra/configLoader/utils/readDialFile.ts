@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 
 import type { InterventionLevel } from '../../../../types/config.js';
 
@@ -24,12 +24,14 @@ export interface DialFileResult {
  * of quietly showing the fallback as if it had been chosen.
  */
 export function readDialFile(path: string): DialFileResult {
-  let raw: string;
+  let raw: string | null;
   try {
-    raw = readFileSync(path, 'utf8');
+    raw = readUtf8FileIfExistsSync(path);
   } catch {
     return { intervention: null };
   }
+
+  if (raw === null) return { intervention: null };
 
   let parsed: unknown;
   try {
