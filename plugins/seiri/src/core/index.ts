@@ -29,3 +29,5 @@ export {
   readTaskLedger,
   recordManualEvidence,
 } from './gates/index.js';
+export { ensureSeiriDir } from './utils/ensureSeiriDir.js';
+export { findRepoRoot } from './utils/findRepoRoot.js';

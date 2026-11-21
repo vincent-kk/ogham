@@ -10,10 +10,11 @@ import {
 import { tmpdir } from 'node:os';
 
 import { portableJoin } from '@ogham/cross-platform';
+import * as atomicWriter from '@ogham/cross-platform';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { IDLE_STATE_TTL } from '../../../constants/retention.js';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
-import * as atomicWriter from '../../../core/utils/writeAtomically.js';
 import { activateWorkflow } from '../../__tests__/helpers/workflowHarness.js';
 import { processUserPromptSubmit } from '../userPromptSubmit.js';
 
@@ -72,9 +73,11 @@ describe.each(['standard', 'strict'] as const)(
     });
 
     it('stays silent when actor and revocation writes fail', () => {
-      vi.spyOn(atomicWriter, 'writeAtomically').mockImplementation(() => {
-        throw new Error('storage unavailable');
-      });
+      vi.spyOn(atomicWriter, 'writeFileAtomicallySync').mockImplementation(
+        () => {
+          throw new Error('storage unavailable');
+        },
+      );
 
       expect(
         processUserPromptSubmit({
@@ -93,7 +96,7 @@ describe.each(['standard', 'strict'] as const)(
         if (state === 'corrupt') writeFileSync(statePath, '{');
         else {
           const actor = JSON.parse(readFileSync(statePath, 'utf8'));
-          actor.lastObservedAt = now - 8 * 24 * 60 * 60 * 1000;
+          actor.lastObservedAt = now - (IDLE_STATE_TTL + 1);
           writeFileSync(statePath, JSON.stringify(actor));
         }
 

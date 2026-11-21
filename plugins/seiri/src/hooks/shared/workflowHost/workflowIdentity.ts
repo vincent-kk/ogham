@@ -1,6 +1,3 @@
-import { realpathSync } from 'node:fs';
-
-import { findRepoRoot } from '../../../core/utils/findRepoRoot.js';
 import type { HookBaseInput } from '../../../types/hooks.js';
 import type {
   WorkflowHostAdapter,
@@ -8,6 +5,7 @@ import type {
 } from '../../../types/workflow.js';
 import { WORKFLOW_ADAPTER } from '../workflowAdapter.js';
 
+import { resolveWorkflowRoot } from './resolveWorkflowRoot.js';
 import { workflowHash } from './workflowHash.js';
 
 /**
@@ -25,7 +23,7 @@ export function workflowIdentity(
   if (!input.cwd || !input.session_id) return undefined;
   let root: string;
   try {
-    root = findRepoRoot(realpathSync(input.cwd));
+    root = resolveWorkflowRoot(input.cwd);
   } catch {
     return undefined;
   }

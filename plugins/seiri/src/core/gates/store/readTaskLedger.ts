@@ -1,6 +1,4 @@
-import { readFileSync } from 'node:fs';
-
-import { portableJoin } from '@ogham/cross-platform';
+import { portableJoin, readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 
 import { GATES_FILE } from '../../../constants/files.js';
 import type { TaskLedger } from '../../../types/gates.js';
@@ -24,11 +22,13 @@ export function readTaskLedger(
   const dir = portableJoin(resolveTasksDir(projectRoot), task);
   const path = portableJoin(dir, GATES_FILE);
   try {
+    const text = readUtf8FileIfExistsSync(path);
+    if (text === null) return undefined;
     return {
       task,
       dir,
       path,
-      ledger: parseGatesLedger(readFileSync(path, 'utf8')),
+      ledger: parseGatesLedger(text),
     };
   } catch {
     return undefined;

@@ -39,7 +39,8 @@ console.log('  Windows hook shim -> bridge/run-hook.cmd');
 const LIGHT_HOOK_BYTES = 16 * KILO_BYTE;
 
 // `name` is the bridge output basename, referenced by hooks.json and kept
-// stable. `entry` is the camelCase source directory. `forbiddenContent`
+// stable. Setup and post-tool-use use measured caps for both host builds.
+// `entry` is the camelCase source directory. `forbiddenContent`
 // lists render lines this hook never emits — tree-shaking regression
 // canaries: their presence means a constants file stopped shaking.
 const hookEntries = [
@@ -49,9 +50,9 @@ const hookEntries = [
     entry: 'setup',
     // One session-start read of rule status, dial and configLoader chains,
     // plus the fixed election/chain/posture render — strict's firm wording
-    // is the longest — and, after compaction, the active progress line.
-    // Runs at every SessionStart source.
-    maxBytes: 23 * KILO_BYTE,
+    // is the longest — and, after compaction, the active progress line and local directive injection.
+    // Compaction uses the shared filesystem lock and atomic write.
+    maxBytes: 28 * KILO_BYTE,
   },
   {
     name: 'user-prompt-submit',
@@ -63,8 +64,9 @@ const hookEntries = [
     name: 'post-tool-use',
     entry: 'postToolUse',
     // Paired provenance, atomic actor state, gate judging and progress-line
-    // rendering share this entry.
-    maxBytes: 22 * KILO_BYTE,
+    // rendering share this entry with directive bind, which uses shared
+    // canonical paths, locking, and rechecks set contents before writing.
+    maxBytes: 28 * KILO_BYTE,
     forbiddenContent: [/Election/, /A plan was produced/],
   },
   {

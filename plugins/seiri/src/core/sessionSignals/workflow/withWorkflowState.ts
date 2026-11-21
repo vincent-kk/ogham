@@ -1,19 +1,24 @@
-import { randomUUID } from 'node:crypto';
-import { existsSync, readFileSync, rmdirSync, unlinkSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 
-import { logHookFailure, portableJoin } from '@ogham/cross-platform';
+import {
+  logHookFailure,
+  portableJoin,
+  readUtf8FileIfExistsSync,
+  removeFileIfExistsSync,
+  withFileLockSync,
+  writeFileAtomicallySync,
+} from '@ogham/cross-platform';
 
 import { CONFIG_DIR, SESSIONS_DIR } from '../../../constants/files.js';
 import type {
   WorkflowIdentity,
   WorkflowState,
 } from '../../../types/workflow.js';
-import { acquireLockDir } from '../../utils/acquireLockDir.js';
 import { findRepoRoot } from '../../utils/findRepoRoot.js';
-import { writeAtomically } from '../../utils/writeAtomically.js';
 
 import { isActorFresh } from './isActorFresh.js';
 import { readState } from './readState.js';
+import { reportWorkflowFailure } from './withWorkflowState/reportWorkflowFailure.js';
 
 /** Incomplete invocations expire independently of actor activity. */
 const CALL_TTL = 24 * 60 * 60 * 1000;
@@ -38,15 +43,6 @@ interface WithWorkflowStateOptions<Failure> {
 }
 
 /**
- * Read a marker file's content, or `undefined` when it does not exist.
- * @param markerPath Marker file to read.
- * @returns The marker's current content, or `undefined` if it is absent.
- */
-function readMarkerToken(markerPath: string): string | undefined {
-  return existsSync(markerPath) ? readFileSync(markerPath, 'utf8') : undefined;
-}
-
-/**
  * Delete a marker only if its current content still matches the token this
  * transaction captured at lock-acquire time.
  * @param markerPath Marker file to conditionally delete.
@@ -56,12 +52,12 @@ function deleteMarkerIfUnchanged(
   markerPath: string,
   token: string | undefined,
 ): void {
-  if (token !== undefined && readMarkerToken(markerPath) === token)
-    unlinkSync(markerPath);
+  if (token !== undefined && readUtf8FileIfExistsSync(markerPath) === token)
+    removeFileIfExistsSync(markerPath);
 }
 
 /**
- * Run one optional actor transaction. Lock failure skips all effects.
+ * Run one optional actor transaction. A failed boundary may leave isolation markers.
  * @param identity Host-normalized actor identity.
  * @param create Directory preparer when an entry request may create
  *   metadata; `false` otherwise. Removes orphan quarantine markers under
@@ -86,86 +82,76 @@ export function withWorkflowState<T, Failure = undefined>(
     SESSIONS_DIR,
   );
   const path = portableJoin(dir, `${identity.actor}.json`);
-  const lock = `${path}.lock`;
   const revoked = `${path}.revoked`;
   const revokedSuspend = `${path}.revoked-suspend`;
-  let held = false;
-  try {
-    if (!existsSync(path) && !create) return undefined;
-    if (create && !create(identity.root)) return undefined;
-    held = acquireLockDir(lock);
-    if (!held) throw new Error('Actor lock unavailable');
-    if (create && !existsSync(path)) {
-      for (const marker of [revoked, revokedSuspend])
-        if (existsSync(marker)) unlinkSync(marker);
-    }
-    let state = existsSync(path) ? readState(path) : undefined;
-    if (state && !isActorFresh(state, now)) {
-      unlinkSync(path);
-      if (existsSync(revoked)) unlinkSync(revoked);
-      if (existsSync(revokedSuspend)) unlinkSync(revokedSuspend);
-      state = undefined;
-    }
-    const revokedToken = readMarkerToken(revoked);
-    const suspendToken = readMarkerToken(revokedSuspend);
-    if (
-      (revokedToken !== undefined || suspendToken !== undefined) &&
-      !recover
-    ) {
-      logHookFailure(
-        'seiri',
-        'workflow-state',
-        'Actor is quarantined; only its next boundary transaction may recover it.',
-      );
-      return undefined;
-    }
-    if (!state && !create) return undefined;
-    state ??= {
-      version: 1,
-      generation: 0,
-      lastObservedAt: now,
-      invocations: {},
-      seen: [],
-    };
-    if (recover && suspendToken !== undefined && state.binding)
-      state.binding.state = 'suspended';
-    for (const [key, invocation] of Object.entries(state.invocations))
-      if (!invocation || now - invocation.startedAt > CALL_TTL)
-        delete state.invocations[key];
-    const result = mutate(state);
-    state.lastObservedAt = now;
-    writeAtomically(path, JSON.stringify(state));
-    if (recover) {
-      deleteMarkerIfUnchanged(revoked, revokedToken);
-      deleteMarkerIfUnchanged(revokedSuspend, suspendToken);
-    }
-    return result;
-  } catch {
-    logHookFailure(
-      'seiri',
-      'workflow-state',
-      'Actor transaction skipped: lock or storage unavailable.',
-    );
-    if (revokeOnFailure && existsSync(path)) {
-      try {
-        writeAtomically(revoked, randomUUID());
-        if (recover?.suspend) writeAtomically(revokedSuspend, randomUUID());
-      } catch {
-        logHookFailure(
-          'seiri',
-          'workflow-state',
-          'Revocation could not be persisted; reset participation after storage recovers.',
-        );
-      }
-    }
+  const failure = () => {
+    reportWorkflowFailure(path, revokeOnFailure, recover?.suspend);
     return options.failureResult;
-  } finally {
-    if (held) {
-      try {
-        rmdirSync(lock);
-      } catch {
-        /* A later call handles an abandoned lock. */
-      }
-    }
+  };
+  try {
+    if (!create && !existsSync(path)) return undefined;
+    const prepareBeforeLock = create && !existsSync(dir);
+    if (prepareBeforeLock && !create(identity.root)) return undefined;
+    const locked = withFileLockSync(
+      path,
+      () => {
+        try {
+          if (create && !prepareBeforeLock && !create(identity.root))
+            return undefined;
+          if (create && !existsSync(path)) {
+            for (const marker of [revoked, revokedSuspend])
+              removeFileIfExistsSync(marker);
+          }
+          let state = existsSync(path) ? readState(path) : undefined;
+          if (state && !isActorFresh(state, now)) {
+            removeFileIfExistsSync(path);
+            removeFileIfExistsSync(revoked);
+            removeFileIfExistsSync(revokedSuspend);
+            state = undefined;
+          }
+          const revokedToken = readUtf8FileIfExistsSync(revoked) ?? undefined;
+          const suspendToken =
+            readUtf8FileIfExistsSync(revokedSuspend) ?? undefined;
+          if (
+            (revokedToken !== undefined || suspendToken !== undefined) &&
+            !recover
+          ) {
+            logHookFailure(
+              'seiri',
+              'workflow-state',
+              'Actor is quarantined; only its next boundary transaction may recover it.',
+            );
+            return undefined;
+          }
+          if (!state && !create) return undefined;
+          state ??= {
+            version: 1,
+            generation: 0,
+            lastObservedAt: now,
+            invocations: {},
+            seen: [],
+          };
+          if (recover && suspendToken !== undefined && state.binding)
+            state.binding.state = 'suspended';
+          for (const [key, invocation] of Object.entries(state.invocations))
+            if (!invocation || now - invocation.startedAt > CALL_TTL)
+              delete state.invocations[key];
+          const result = mutate(state);
+          state.lastObservedAt = now;
+          writeFileAtomicallySync(path, JSON.stringify(state));
+          if (recover) {
+            deleteMarkerIfUnchanged(revoked, revokedToken);
+            deleteMarkerIfUnchanged(revokedSuspend, suspendToken);
+          }
+          return result;
+        } catch {
+          return failure();
+        }
+      },
+      { timeoutMs: 500, staleMs: 5_000 },
+    );
+    return locked.acquired ? locked.value : failure();
+  } catch {
+    return failure();
   }
 }

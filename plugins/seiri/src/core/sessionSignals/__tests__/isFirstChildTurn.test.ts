@@ -10,6 +10,7 @@ import { tmpdir } from 'node:os';
 import { portableJoin } from '@ogham/cross-platform';
 import { afterEach, expect, it } from 'vitest';
 
+import { IDLE_STATE_TTL } from '../../../constants/retention.js';
 import type { WorkflowIdentity } from '../../../types/workflow.js';
 import { isFirstChildTurn } from '../workflow/isFirstChildTurn.js';
 import { observeBoundary } from '../workflow/observeBoundary.js';
@@ -49,7 +50,7 @@ it('is first once the actor TTL has expired, even at a later generation', () => 
   observeBoundary(id, true, NOW, { firstChild: true });
   const stale = JSON.parse(readFileSync(path, 'utf8'));
   expect(stale.generation).toBeGreaterThan(0);
-  stale.lastObservedAt -= 8 * 24 * 60 * 60 * 1000;
+  stale.lastObservedAt -= IDLE_STATE_TTL + 1;
   writeFileSync(path, JSON.stringify(stale));
   expect(isFirstChildTurn(id, NOW)).toBe(true);
 });

@@ -1,39 +1,25 @@
-import { existsSync, rmdirSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 
-import { portableJoin } from '@ogham/cross-platform';
-
-import { GATES_LOCK_DIR } from '../../../constants/files.js';
-import { acquireLockDir } from '../../utils/acquireLockDir.js';
+import {
+  portableBasename,
+  portableJoin,
+  withFileLockSync,
+} from '@ogham/cross-platform';
 
 /**
- * Run one task-ledger mutation under its lock directory. Fail-open unless
- * `requireLock` is set.
- *
- * @param taskDir Absolute directory that owns `gates.md` and the lock.
+ * Run one task-ledger mutation under its gates.lock directory.
+ * @param taskDir Absolute directory that owns the task ledger.
  * @param mutate Complete read-modify-write callback.
- * @param requireLock When `true`, throw instead of proceeding unserialised
- *   if the lock cannot be acquired within the timeout; pass `true` for
- *   writes that must not race. Defaults to `false` (fail-open).
  * @returns The callback result, unchanged.
+ * @throws If the task directory is absent or its lock remains held.
  */
-export function withGatesLock<T>(
-  taskDir: string,
-  mutate: () => T,
-  requireLock = false,
-): T {
-  if (!existsSync(taskDir)) return mutate();
-
-  const lockPath = portableJoin(taskDir, GATES_LOCK_DIR);
-  const held = acquireLockDir(lockPath);
-  if (!held && requireLock) throw new Error('Task ledger lock unavailable');
-  try {
-    return mutate();
-  } finally {
-    if (held)
-      try {
-        rmdirSync(lockPath);
-      } catch {
-        // A stale-lock reclaimer may already have removed this directory.
-      }
-  }
+export function withGatesLock<T>(taskDir: string, mutate: () => T): T {
+  if (!existsSync(taskDir))
+    throw new Error(`No ledger for task "${portableBasename(taskDir)}"`);
+  const result = withFileLockSync(portableJoin(taskDir, 'gates'), mutate, {
+    timeoutMs: 500,
+    staleMs: 5_000,
+  });
+  if (!result.acquired) throw new Error('Task ledger lock unavailable');
+  return result.value;
 }

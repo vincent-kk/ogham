@@ -1,28 +1,38 @@
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
-import { portableJoin } from '@ogham/cross-platform';
-import { afterEach, expect, it } from 'vitest';
+import { portableDirname, portableJoin } from '@ogham/cross-platform';
+import { afterEach, expect, it, vi } from 'vitest';
 
+import * as directiveStore from '../../../core/directives/utils/readDirectiveBindings.js';
+import { updateDirectiveBinding } from '../../../core/directives/utils/updateDirectiveBinding.js';
 import { writeConfig } from '../../../core/infra/configLoader/loaders/writeConfig.js';
+import * as ruleStatusStore from '../../../core/ruleDocs/status/buildRuleDocsStatus.js';
 import { completeInvocation } from '../../../core/sessionSignals/workflow/completeInvocation.js';
 import { observeBoundary } from '../../../core/sessionSignals/workflow/observeBoundary.js';
 import { observeInvocation } from '../../../core/sessionSignals/workflow/observeInvocation.js';
 import { readActorBinding } from '../../../core/sessionSignals/workflow/readActorBinding.js';
 import { transitionWorkflow } from '../../../core/sessionSignals/workflow/transitionWorkflow.js';
 import type { InterventionLevel } from '../../../types/config.js';
+import type { DirectiveScope } from '../../../types/directives.js';
+import type { SessionStartInput } from '../../../types/hooks.js';
 import type {
   WorkflowIdentity,
   WorkflowRequest,
 } from '../../../types/workflow.js';
 import { renderProgressLine } from '../../shared/progressLine/renderProgressLine.js';
 import { WORKFLOW_ADAPTER } from '../../shared/workflowAdapter.js';
+import { CODEX_WORKFLOW_ADAPTER } from '../../shared/workflowAdapters/codex.js';
 import { workflowIdentity } from '../../shared/workflowHost/workflowIdentity.js';
 import { processSessionStart } from '../setup.js';
 
 const NOW = 1_700_000_000_000;
 
 const roots: string[] = [];
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllEnvs();
+});
 afterEach(() =>
   roots
     .splice(0)
@@ -170,4 +180,192 @@ it('does not read the binding at a SessionStart with no source', () => {
     NOW,
   ).hookSpecificOutput?.additionalContext;
   expect(context ?? '').not.toContain('task-b');
+});
+
+/** Build a native compaction event for the main actor of a temporary checkout. */
+function compactInput(cwd: string): SessionStartInput {
+  return {
+    cwd,
+    session_id: 'session-a',
+    hook_event_name: 'SessionStart',
+    source: 'compact',
+  };
+}
+
+/** Register a local set for the given native session or its checkout. */
+function seedDirectives(
+  input: SessionStartInput,
+  scope: DirectiveScope,
+  set = 'focus',
+  content = 'Keep the investigation focused.',
+  adapter = WORKFLOW_ADAPTER,
+): string {
+  const identity = workflowIdentity(input, adapter)!;
+  const directory = portableJoin(identity.root, '.seiri', 'directives', set);
+  mkdirSync(directory, { recursive: true });
+  const file = portableJoin(directory, 'focus.md');
+  writeFileSync(file, content);
+  updateDirectiveBinding(identity.root, set, () => ({
+    enabled: true,
+    root: identity.root,
+    scope,
+    ...(scope === 'session' ? { actor: identity.actor } : {}),
+    boundAt: NOW - 1,
+  }));
+  return file;
+}
+
+/** Seed an active workflow so the test can verify progress placement. */
+function seedProgress(input: SessionStartInput): void {
+  const entry: WorkflowIdentity = {
+    ...workflowIdentity(input, WORKFLOW_ADAPTER)!,
+    turn: 'entry-turn',
+    call: 'entry-call',
+  };
+  const request: WorkflowRequest = {
+    action: 'step',
+    project_root: input.cwd,
+    task: 'task-a',
+    step: 'write-plan',
+    intent: 'change',
+  };
+  observeBoundary(entry, true, NOW);
+  observeInvocation(entry, 'hash', NOW, request);
+  completeInvocation(entry, 'hash', NOW, (state) =>
+    transitionWorkflow(state, request),
+  );
+}
+
+it('puts the directives after the rule summary and before the final progress line', () => {
+  const input = compactInput(seedRepo('standard'));
+  vi.stubEnv('CLAUDE_PLUGIN_ROOT', input.cwd);
+  vi.spyOn(ruleStatusStore, 'buildRuleDocsStatus').mockReturnValue([
+    {
+      id: 'naming',
+      title: 'Naming',
+      filename: 'naming.md',
+      description: '',
+      recommended: true,
+      target: '',
+      displayTarget: '',
+      source: 'current',
+      deployed: true,
+      active: true,
+      activeTarget: '',
+      activeDisplayTarget: '',
+      activeDeployedHash: 'hash',
+      activeInSync: true,
+      activeSource: 'current',
+      templateHash: 'hash',
+      deployedHash: 'hash',
+      inSync: true,
+    },
+  ]);
+  seedProgress(input);
+  seedDirectives(input, 'session');
+  const context =
+    processSessionStart(input, WORKFLOW_ADAPTER, NOW).hookSpecificOutput
+      ?.additionalContext ?? '';
+  expect(context).toMatch(
+    /Active rules:[\s\S]*Directives focus[\s\S]*Keep the investigation focused\./,
+  );
+  expect(
+    context.endsWith(renderProgressLine('task-a', 'change', 'write-plan')),
+  ).toBe(true);
+  const root = workflowIdentity(input, WORKFLOW_ADAPTER)!.root;
+  expect(directiveStore.readDirectiveBindings(root).focus?.lastInjectedAt).toBe(
+    NOW,
+  );
+});
+
+it('keeps compact silent at off even with a bound session', () => {
+  const input = compactInput(seedRepo('off'));
+  seedDirectives(input, 'session');
+  expect(processSessionStart(input, WORKFLOW_ADAPTER, NOW)).toEqual({
+    continue: true,
+  });
+});
+
+it('keeps session-scoped directives out of another session', () => {
+  const input = compactInput(seedRepo('standard'));
+  seedDirectives(input, 'session');
+  const context = processSessionStart(
+    { ...input, session_id: 'other' },
+    WORKFLOW_ADAPTER,
+    NOW,
+  ).hookSpecificOutput?.additionalContext;
+  expect(context).not.toContain('Directives focus');
+});
+
+it('shares all-scoped directives with every main session in the checkout', () => {
+  const input = compactInput(seedRepo('strict'));
+  seedDirectives(input, 'all');
+  const context = processSessionStart(
+    { ...input, session_id: 'other' },
+    WORKFLOW_ADAPTER,
+    NOW,
+  ).hookSpecificOutput?.additionalContext;
+  expect(context).toContain('Keep the investigation focused.');
+});
+
+it.each([{ agent_id: 'child' }, { source: 'startup' }, { source: 'resume' }])(
+  'omits directives outside main-actor compaction (%j)',
+  (changes) => {
+    const input = compactInput(seedRepo('standard'));
+    seedDirectives(input, 'all');
+    const context = processSessionStart(
+      { ...input, ...changes },
+      WORKFLOW_ADAPTER,
+      NOW,
+    ).hookSpecificOutput?.additionalContext;
+    expect(context).not.toContain('Directives focus');
+  },
+);
+
+it('preserves election and progress when the directive store throws', () => {
+  const input = compactInput(seedRepo('standard'));
+  seedProgress(input);
+  seedDirectives(input, 'session');
+  const read = vi
+    .spyOn(directiveStore, 'readDirectiveBindings')
+    .mockImplementation(() => {
+      throw new Error('Directive storage is inaccessible');
+    });
+  const context =
+    processSessionStart(input, WORKFLOW_ADAPTER, NOW).hookSpecificOutput
+      ?.additionalContext ?? '';
+  expect(read).toHaveBeenCalled();
+  expect(context).not.toContain('Directives focus');
+  expect(context).toContain('[seiri] Election:');
+  expect(
+    context.endsWith(renderProgressLine('task-a', 'change', 'write-plan')),
+  ).toBe(true);
+});
+
+it('uses pointers when two sets together exceed the Codex byte limit', () => {
+  const input = compactInput(seedRepo('standard'));
+  const first = seedDirectives(
+    input,
+    'session',
+    'first',
+    '한'.repeat(700),
+    CODEX_WORKFLOW_ADAPTER,
+  );
+  const second = seedDirectives(
+    input,
+    'session',
+    'second',
+    '글'.repeat(700),
+    CODEX_WORKFLOW_ADAPTER,
+  );
+  const context =
+    processSessionStart(input, CODEX_WORKFLOW_ADAPTER, NOW).hookSpecificOutput
+      ?.additionalContext ?? '';
+  expect(context.split('\n')).toContain(portableDirname(first));
+  expect(context.split('\n')).toContain(portableDirname(second));
+  expect(context).not.toContain(first);
+  expect(context).not.toContain(second);
+  expect(context).toMatch(/read.*except binding\.json before continuing/i);
+  expect(Buffer.byteLength(context)).toBeLessThanOrEqual(4000);
+  expect(context).not.toMatch(/[한글]/);
 });

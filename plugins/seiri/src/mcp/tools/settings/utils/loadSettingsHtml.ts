@@ -1,10 +1,11 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 import {
   pluginRoot,
   portableDirname,
   portableJoin,
+  readUtf8FileIfExistsSync,
 } from '@ogham/cross-platform';
 
 import { PUBLIC_DIR, SETTINGS_HTML } from '../../../../constants/files.js';
@@ -22,7 +23,12 @@ import { INJECTION_PREFIX } from '../../../../constants/plugin.js';
 let cached: string | null = null;
 
 export function loadSettingsHtml(): string {
-  if (cached === null) cached = readFileSync(resolveSettingsHtml(), 'utf8');
+  if (cached === null) {
+    const path = resolveSettingsHtml();
+    cached = readUtf8FileIfExistsSync(path);
+    if (cached === null)
+      throw new Error(`${INJECTION_PREFIX} settings asset not found: ${path}`);
+  }
   return cached;
 }
 

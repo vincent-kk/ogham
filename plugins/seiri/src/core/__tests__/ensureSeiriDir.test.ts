@@ -73,6 +73,7 @@ describe('ensureSeiriDir', () => {
       expect(lines).toContain(member);
     expect(lines).toContain('runtime.json');
     expect(lines).toContain('session-signals.json');
+    expect(lines).toContain('directives/');
   });
 
   it('does not rewrite an ignore file that already lists everything', () => {
