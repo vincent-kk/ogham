@@ -161,16 +161,16 @@ describe('workflow skill routing contract', () => {
       'trace-cause',
       'trace-structure',
       'verify',
-    ]) {
+    ])
       expect(skill(name), name).toMatch(
         /standalone[^\n]+(?:activate|activation)/i,
       );
-    }
-    for (const name of ['explain', 'trace-change']) {
+
+    for (const name of ['explain', 'trace-change'])
       expect(skill(name), name).not.toContain(
         'mcp__plugin_seiri_tools__runtime',
       );
-    }
+
   });
 
   it('hands off to the named next skill once its own work is done', () => {

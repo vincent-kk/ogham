@@ -36,7 +36,7 @@ const observed = JSON.parse(
 
 describe('recorded native workflow transport', () => {
   it('correlates every successful Post with its own actor, turn and input', () => {
-    for (const [scenario, events] of Object.entries(observed.scenarios)) {
+    for (const [scenario, events] of Object.entries(observed.scenarios))
       for (const [index, post] of events.entries()) {
         if (post.event !== 'PostToolUse') continue;
         const pre = events
@@ -59,7 +59,7 @@ describe('recorded native workflow transport', () => {
         ] as const)
           expect(post[key], `${scenario}: ${key}`).toEqual(pre?.[key]);
       }
-    }
+
   });
 
   it.each(['claude-main', 'codex-code'])(

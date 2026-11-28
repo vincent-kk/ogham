@@ -98,10 +98,10 @@ export function withWorkflowState<T, Failure = undefined>(
         try {
           if (create && !prepareBeforeLock && !create(identity.root))
             return undefined;
-          if (create && !existsSync(path)) {
+          if (create && !existsSync(path))
             for (const marker of [revoked, revokedSuspend])
               removeFileIfExistsSync(marker);
-          }
+
           let state = existsSync(path) ? readState(path) : undefined;
           if (state && !isActorFresh(state, now)) {
             removeFileIfExistsSync(path);

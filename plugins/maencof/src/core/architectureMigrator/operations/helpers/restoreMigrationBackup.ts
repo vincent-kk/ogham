@@ -18,12 +18,12 @@ export function restoreMigrationBackup(
   backupDir: string,
   backup: MigrationBackup,
 ): void {
-  for (const file of backup.files) {
+  for (const file of backup.files)
     if (file.copy) {
       mkdirSync(dirname(file.path), { recursive: true });
       copyFileSync(join(backupDir, file.copy), file.path);
     } else rmSync(file.path, { force: true });
-  }
+
   for (const dir of [...backup.createdDirectories].sort(
     (a, b) => b.length - a.length,
   ))

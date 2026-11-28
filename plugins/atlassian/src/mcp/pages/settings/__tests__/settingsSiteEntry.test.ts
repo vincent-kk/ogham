@@ -29,9 +29,9 @@ it("creates a cloud field and an accessible button that removes its row", () => 
   for (const match of html.matchAll(/<script src="\.\/(scripts\/[^"]+)"/g)) {
     if (match[1] === "scripts/json-import.js") continue;
     let source = readFileSync(join(root, match[1]), "utf8");
-    if (match[1] === "scripts/app.js") {
+    if (match[1] === "scripts/app.js")
       source = source.replace(/\}\)\(\);\s*$/, "createSiteEntry(7); })();");
-    }
+
     runInNewContext(source, context);
   }
   expect(setAttribute).toHaveBeenCalledWith(

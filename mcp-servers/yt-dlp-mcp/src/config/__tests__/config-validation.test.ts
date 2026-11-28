@@ -43,19 +43,19 @@ describe('loadConfig environment validation', () => {
       'YTDLP_MAX_TRANSCRIPT_LENGTH',
       'YTDLP_REQUEST_INTERVAL_MS',
       'YTDLP_SUBTITLE_INTERVAL_MS',
-    ]) {
+    ])
       expect(() => loadConfig({ [key]: 'invalid' }), key).toThrow(
         /configuration/i,
       );
-    }
+
   });
 
   it('rejects partial decimal integers instead of accepting their prefix', () => {
-    for (const value of ['3days', '3.5', '3e2', '0x10', '3 4']) {
+    for (const value of ['3days', '3.5', '3e2', '0x10', '3 4'])
       expect(() => loadConfig({ YTDLP_COOLDOWN_DAYS: value }), value).toThrow(
         /configuration/i,
       );
-    }
+
   });
 
   it('keeps defaults for absent and blank numeric and boolean inputs', () => {
@@ -109,11 +109,11 @@ describe('loadConfig environment validation', () => {
   });
 
   it('preserves complete signed decimal integers and leading zeros', () => {
-    for (const value of ['+03', '003']) {
+    for (const value of ['+03', '003'])
       expect(
         loadConfig({ YTDLP_COOLDOWN_DAYS: value }).binary.cooldownDays,
       ).toBe(3);
-    }
+
     expect(
       loadConfig({ YTDLP_REQUEST_INTERVAL_MS: '-0' }).extraction
         .requestIntervalMs,
@@ -131,10 +131,10 @@ describe('loadConfig environment validation', () => {
   });
 
   it('retains schema rejection for out-of-range and overflowing integers', () => {
-    for (const value of ['-1', '9'.repeat(400)]) {
+    for (const value of ['-1', '9'.repeat(400)])
       expect(() => loadConfig({ YTDLP_COOLDOWN_DAYS: value })).toThrow(
         /configuration/i,
       );
-    }
+
   });
 });
