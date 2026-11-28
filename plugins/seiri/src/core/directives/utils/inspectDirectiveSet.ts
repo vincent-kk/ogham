@@ -1,23 +1,20 @@
-import { portableJoin, readUtf8FileIfExistsSync } from '@ogham/cross-platform';
-
-import {
-  DIRECTIVE_INDEX_FILE,
-  DIRECTIVE_LOG_FILES,
-} from '../../../constants/directives.js';
+import { DIRECTIVE_INDEX_FILE } from '../../../constants/directives.js';
 import type { DirectiveInspection } from '../../../types/directives.js';
 
+import { countNotepadLines } from './countNotepadLines.js';
 import { directiveDirectory } from './directiveDirectory.js';
 import { findIndexViolations } from './inspection/findIndexViolations.js';
 import { findInvalidLogLines } from './inspection/findInvalidLogLines.js';
 import { findLimitViolations } from './inspection/findLimitViolations.js';
-import { readLogLines } from './inspection/readLogLines.js';
+import { readSetFile } from './inspection/readSetFile.js';
 import { listDirectiveFiles } from './listDirectiveFiles.js';
 
 /**
  * Check a directive set against the structured-set contract.
  * @param root Real checkout root.
  * @param set Kebab-case name of the set to inspect.
- * @returns The inspection, or undefined for a missing set. A set without an entry document is unstructured and reports no violations.
+ * @returns The inspection, or undefined for a missing set. A set without an entry document is unstructured and reports no violations; a file refused to the reader is an unreadable violation, and an unreadable entry document is the only violation of its set.
+ * @throws For read failures other than a missing file or denied access.
  */
 export function inspectDirectiveSet(
   root: string,
@@ -27,21 +24,29 @@ export function inspectDirectiveSet(
   if (!directory) return undefined;
   const files = listDirectiveFiles(directory);
   const names = files.map(({ name }) => name);
-  const notepadLines = names.includes(DIRECTIVE_LOG_FILES.notepad)
-    ? readLogLines(directory, DIRECTIVE_LOG_FILES.notepad).length
-    : 0;
-  const index = names.includes(DIRECTIVE_INDEX_FILE)
-    ? readUtf8FileIfExistsSync(
-        portableJoin(directory, `./${DIRECTIVE_INDEX_FILE}`),
-      )
-    : null;
-  if (index === null)
+  const notepadLines = countNotepadLines(root, set);
+  const entry = names.includes(DIRECTIVE_INDEX_FILE)
+    ? readSetFile(directory, DIRECTIVE_INDEX_FILE)
+    : { body: null };
+  if ('error' in entry && entry.error !== undefined)
+    return {
+      structured: true,
+      violations: [
+        {
+          file: DIRECTIVE_INDEX_FILE,
+          problem: 'unreadable',
+          detail: entry.error,
+        },
+      ],
+      notepadLines,
+    };
+  if (entry.body === null)
     return { structured: false, violations: [], notepadLines };
   return {
     structured: true,
     violations: [
       ...findLimitViolations(files),
-      ...findIndexViolations(names, index),
+      ...findIndexViolations(names, entry.body),
       ...findInvalidLogLines(directory, names),
     ],
     notepadLines,

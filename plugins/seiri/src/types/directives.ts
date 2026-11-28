@@ -38,9 +38,10 @@ export type DirectiveLog = 'notepad' | 'history';
 export interface DirectiveViolation {
   /** Path of the offending file, relative to the set. */
   file: string;
-  /** Kind of departure: size over its limit, a file the entry document never names, a markdown file it names that is absent, or a log line that is not a JSON object. */
-  problem: 'over_limit' | 'unlisted' | 'missing' | 'invalid_line';
-  /** Measured size and limit, the location of the mention, or the offending line number. */
+  /** Kind of departure: size over its limit, a file no code span of the entry document equals, a markdown file a code span names that is absent, a log line that is not a JSON object, or a file that could not be read because access was denied. */
+  problem:
+    'over_limit' | 'unlisted' | 'missing' | 'invalid_line' | 'unreadable';
+  /** Measured size and limit, the location of the mention, the offending line number, or the error code of a refused read. */
   detail: string;
 }
 

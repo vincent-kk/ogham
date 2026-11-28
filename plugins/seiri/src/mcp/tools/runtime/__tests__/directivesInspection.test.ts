@@ -77,3 +77,17 @@ it('reports an unstructured set as not structured with no violations', () => {
     handleRuntime({ ...request, directives_op: 'status' }, now),
   ).toMatchObject({ structured: false, violations: [], notepadLines: 2 });
 });
+
+it.each([
+  [2000, 'inline'],
+  [4000, 'inline'],
+  [4001, 'pointer'],
+])(
+  'estimates a %i-byte entry of 0xff bytes as %s from its file size',
+  (size, mode) => {
+    writeFileSync(join(directory, 'index.md'), Buffer.alloc(size, 0xff));
+    expect(
+      handleRuntime({ ...request, directives_op: 'bind' }, now),
+    ).toMatchObject({ status: 'accepted', estimatedMode: mode });
+  },
+);

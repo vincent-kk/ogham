@@ -46,7 +46,7 @@ it('reports an unstructured set without violations and counts its notepad lines'
 
 it('reports a conforming structured set as clean with a zero notepad count', () => {
   seedSet({
-    'index.md': 'See `principles.md` and `dashboard.md`. Logs: notepad.jsonl',
+    'index.md': 'See `principles.md` and `dashboard.md`. Logs: `notepad.jsonl`',
     'principles.md': 'x'.repeat(10000),
     'dashboard.md': 'y'.repeat(3000),
     'notepad.jsonl': '',
@@ -127,42 +127,9 @@ it('does not report a path outside the set that the entry points to', () => {
   expect(inspectDirectiveSet(root, 'flow')?.violations).toEqual([]);
 });
 
-it('reports a file as unlisted when the entry names only a longer file name that contains it', () => {
-  seedSet({ 'index.md': 'See `old-notes.md`.', 'notes.md': 'n' });
-  expect(inspectDirectiveSet(root, 'flow')?.violations).toEqual([
-    { file: 'notes.md', problem: 'unlisted', detail: 'not named in index.md' },
-    { file: 'old-notes.md', problem: 'missing', detail: 'named in index.md' },
-  ]);
-});
-
-it.each([
-  ['a longer non-ASCII name', '`새notes.md`'],
-  ['a name continued by non-ASCII text', 'notes.md한 is another file'],
-  ['a path beneath it', '`notes.md/child.md`'],
-  ['a name with a further extension', 'notes.md.bak is a backup'],
-])('does not take %s as naming the file', (_case, text) => {
-  seedSet({ 'index.md': text, 'notes.md': 'n' });
-  expect(
-    inspectDirectiveSet(root, 'flow')?.violations.filter(
-      ({ problem }) => problem === 'unlisted',
-    ),
-  ).toEqual([
-    { file: 'notes.md', problem: 'unlisted', detail: 'not named in index.md' },
-  ]);
-});
-
-it('takes a bare name that ends a sentence as naming the file', () => {
-  seedSet({
-    'index.md': 'See notes.md. Then stop at 노트.md.',
-    'notes.md': 'n',
-    '노트.md': 'k',
-  });
-  expect(inspectDirectiveSet(root, 'flow')?.violations).toEqual([]);
-});
-
 it('reports invalid_line with the line number for non-object log lines and skips blank lines', () => {
   seedSet({
-    'index.md': 'Logs notepad.jsonl history.jsonl',
+    'index.md': 'Logs `notepad.jsonl` `history.jsonl`',
     'notepad.jsonl': `${record('ok')}\n\nnot json\n[1,2]\n${record('fine')}\n`,
     'history.jsonl': `${record('ok')}\nnull\n`,
   });

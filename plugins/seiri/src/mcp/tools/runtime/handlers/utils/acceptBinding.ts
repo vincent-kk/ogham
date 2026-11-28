@@ -1,12 +1,7 @@
-import {
-  portableJoin,
-  readUtf8FileIfExistsSync,
-  resolveContainedPath,
-} from '@ogham/cross-platform';
+import { portableJoin, readUtf8FileIfExistsSync } from '@ogham/cross-platform';
 
 import {
   DIRECTIVES_CONTEXT_LIMIT,
-  DIRECTIVE_DOCUMENT_LIMITS,
   DIRECTIVE_INDEX_FILE,
 } from '../../../../../constants/directives.js';
 import { DIRECTIVES_DIR, IGNORE_FILE } from '../../../../../constants/files.js';
@@ -26,7 +21,7 @@ import type {
  * @param inspection Structural findings about the same set.
  * @param scope Requested audience.
  * @returns Acceptance or the effective low dial, plus a warning when needed.
- * A structured set is estimated inline when its entry document is within its limit; other sets are estimated by total size.
+ * A structured set is estimated inline unless the inspection found its entry document over its byte limit; other sets are estimated by total size.
  */
 export function acceptBinding(
   root: string,
@@ -56,21 +51,12 @@ export function acceptBinding(
       op: 'bind',
       dial,
     };
-  const index = summary.files.includes(DIRECTIVE_INDEX_FILE)
-    ? readUtf8FileIfExistsSync(
-        resolveContainedPath(
-          directory,
-          DIRECTIVES_DIR,
-          summary.set,
-          DIRECTIVE_INDEX_FILE,
-        ),
+  const fits = inspection.structured
+    ? !inspection.violations.some(
+        ({ file, problem }) =>
+          file === DIRECTIVE_INDEX_FILE && problem === 'over_limit',
       )
-    : undefined;
-  const fits =
-    typeof index === 'string'
-      ? Buffer.byteLength(index) <=
-        DIRECTIVE_DOCUMENT_LIMITS[DIRECTIVE_INDEX_FILE]
-      : summary.bytes <= Math.min(...Object.values(DIRECTIVES_CONTEXT_LIMIT));
+    : summary.bytes <= Math.min(...Object.values(DIRECTIVES_CONTEXT_LIMIT));
   const estimatedMode = fits ? 'inline' : 'pointer';
   return {
     ...summary,

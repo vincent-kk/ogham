@@ -19,6 +19,7 @@ import { ensureSeiriDir, findRepoRoot } from '../../../../core/index.js';
 import { loadIntervention } from '../../../../core/infra/configLoader/index.js';
 import type {
   DirectiveBinding,
+  DirectiveInspection,
   DirectiveLog,
   DirectiveOperation,
   DirectiveScope,
@@ -63,15 +64,14 @@ export function applyDirectives(
   lstatSync(canonicalRoot);
   const root = findRepoRoot(canonicalRoot);
   const summary = summarizeDirectiveSet(root, set);
-  const inspection = inspectDirectiveSet(root, set);
-  if (!summary || !inspection) throw new Error('Directive set does not exist');
+  if (!summary) throw new Error('Directive set does not exist');
 
   if (op === 'bind') {
     if (scope !== 'session' && scope !== 'all')
       throw new Error('Invalid directive scope');
     if (!summary.files.length)
       throw new Error('Cannot bind an empty directive set');
-    return acceptBinding(root, summary, inspection, scope);
+    return acceptBinding(root, summary, requireInspection(root, set), scope);
   }
 
   if (op === 'append') return appendRecord(root, set, log, text, now);
@@ -79,6 +79,7 @@ export function applyDirectives(
   if (op === 'status') {
     const bindings = readDirectiveBindings(root);
     const binding = Object.hasOwn(bindings, set) ? bindings[set] : undefined;
+    const inspection = requireInspection(root, set);
     const dial = loadIntervention(root).effective;
     return dial === 'off' || dial === 'advisory'
       ? { ...summary, ...inspection, status: 'dial_low', op, dial, binding }
@@ -102,4 +103,11 @@ export function applyDirectives(
   if (!updated)
     throw new Error('Directive set is unavailable or its binding lock is held');
   return { ...summary, status: 'ok', op, binding };
+}
+
+/** Inspect a set that exists, failing as the other operations do when it is gone. */
+function requireInspection(root: string, set: string): DirectiveInspection {
+  const inspection = inspectDirectiveSet(root, set);
+  if (!inspection) throw new Error('Directive set does not exist');
+  return inspection;
 }

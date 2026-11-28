@@ -1,5 +1,6 @@
 import {
   lstatSync,
+  mkdirSync,
   mkdtempSync,
   readFileSync,
   rmSync,
@@ -101,4 +102,9 @@ it('rejects a clock value that is not a finite number', () => {
     expect(() => appendDirectiveLog(root, 'flow', 'notepad', 'x', bad)).toThrow(
       RangeError,
     );
+});
+
+it('returns false instead of throwing when a directory sits at the target', () => {
+  mkdirSync(notepad);
+  expect(appendDirectiveLog(root, 'flow', 'notepad', 'x', now)).toBe(false);
 });

@@ -1,4 +1,5 @@
 export { appendDirectiveLog } from './utils/appendDirectiveLog.js';
+export { countNotepadLines } from './utils/countNotepadLines.js';
 export { inspectDirectiveSet } from './utils/inspectDirectiveSet.js';
 export { readDirectiveBindings } from './utils/readDirectiveBindings.js';
 export { renderDirectives } from './utils/renderDirectives.js';

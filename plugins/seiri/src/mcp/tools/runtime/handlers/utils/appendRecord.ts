@@ -1,6 +1,6 @@
 import {
   appendDirectiveLog,
-  inspectDirectiveSet,
+  countNotepadLines,
   summarizeDirectiveSet,
 } from '../../../../../core/directives/index.js';
 import type {
@@ -37,13 +37,12 @@ export function appendRecord(
   if (!appendDirectiveLog(root, set, log, text, now))
     throw new Error('Directive set is unavailable or its lock is held');
   const summary = summarizeDirectiveSet(root, set);
-  const inspection = inspectDirectiveSet(root, set);
-  if (!summary || !inspection) throw new Error('Directive set does not exist');
+  if (!summary) throw new Error('Directive set does not exist');
   return {
     ...summary,
     status: 'ok',
     op: 'append',
     log,
-    notepadLines: inspection.notepadLines,
+    notepadLines: countNotepadLines(root, set),
   };
 }

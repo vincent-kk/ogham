@@ -28,7 +28,7 @@ Use the absolute repository root. Store each set under `.seiri/directives/<set>/
 - Bind with `mcp__plugin_seiri_tools__runtime({ action: "directives", directives_op: "bind", project_root, set, scope })`. Repeat any ignore warning so the user knows whether the set could be committed.
 - On `dial_low`, tell the user the files are saved and the current dial prevents binding and injection after compaction. Ask them to raise the dial to at least `standard`, then rerun this skill with the set name. Leave the dial unchanged.
 - On `accepted`, check for the native `[seiri] Directives <set> bound (scope <scope>, <n> files)` acknowledgment. If there is no acknowledgment, report that the set did not bind.
-- After compaction the hook injects `index.md` whole and names the documents to read next. If `estimatedMode` is `pointer`, the entry is over its limit or the set is too large to inject: the hook will give the set directory instead and ask the session to read `index.md` first.
+- After compaction the hook injects `index.md` whole and names the documents to read next. When an entry is over its limit, or the bound sets together exceed the budget, it gives each set directory instead: read `index.md` there first, or every directive file where there is none. `estimatedMode` (`inline` or `pointer`) is only an estimate of which will happen.
 
 ## Maintain a set
 
