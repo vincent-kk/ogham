@@ -96,7 +96,7 @@ it.each(HOSTS)(
     const child = {
       ...entry(cwd, host),
       agent_id: 'child-a',
-    hook_event_name: 'SubagentStart' as const,
+      hook_event_name: 'SubagentStart' as const,
     };
     expect(
       processSubagentStart(child, host.adapter).hookSpecificOutput
