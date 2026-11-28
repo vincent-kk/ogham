@@ -20,6 +20,7 @@ import { handleRuntime } from '../runtime.js';
 let root: string;
 let directory: string;
 let request: RuntimeInput;
+const now = 0;
 
 beforeEach(() => {
   root = realpathSync(mkdtempSync(join(tmpdir(), 'seiri-runtime-directives-')));
@@ -33,7 +34,7 @@ beforeEach(() => {
 afterEach(() => rmSync(root, { recursive: true, force: true }));
 
 it('validates bind and gives the default scope and estimate without committing', () => {
-  expect(handleRuntime({ ...request, directives_op: 'bind' })).toEqual({
+  expect(handleRuntime({ ...request, directives_op: 'bind' }, now)).toEqual({
     status: 'accepted',
     op: 'bind',
     set: 'focus',
@@ -41,6 +42,9 @@ it('validates bind and gives the default scope and estimate without committing',
     files: ['focus.md'],
     bytes: 5,
     estimatedMode: 'inline',
+    structured: false,
+    violations: [],
+    notepadLines: 0,
   });
   expect(existsSync(join(directory, 'binding.json'))).toBe(false);
 });
@@ -48,9 +52,9 @@ it('validates bind and gives the default scope and estimate without committing',
 it('warns on bind while preserving a user-owned ignore file', () => {
   const ignore = join(root, '.seiri', '.gitignore');
   writeFileSync(ignore, '# owned by project\n');
-  writeFileSync(join(directory, 'focus.md'), 'x'.repeat(4001));
+  writeFileSync(join(directory, 'focus.md'), 'x'.repeat(9001));
   expect(
-    handleRuntime({ ...request, directives_op: 'bind', scope: 'all' }),
+    handleRuntime({ ...request, directives_op: 'bind', scope: 'all' }, now),
   ).toMatchObject({
     status: 'accepted',
     scope: 'all',
@@ -63,11 +67,13 @@ it('warns on bind while preserving a user-owned ignore file', () => {
 it('reports the effective low dial for bind and status', () => {
   writeConfig(root, 'project', { intervention: 'off' });
   for (const op of ['bind', 'status'] as const)
-    expect(handleRuntime({ ...request, directives_op: op })).toMatchObject({
-      op,
-      status: 'dial_low',
-      dial: 'off',
-    });
+    expect(handleRuntime({ ...request, directives_op: op }, now)).toMatchObject(
+      {
+        op,
+        status: 'dial_low',
+        dial: 'off',
+      },
+    );
   expect(existsSync(join(directory, 'binding.json'))).toBe(false);
 });
 
@@ -75,16 +81,24 @@ it('reports the stored binding, toggles its enabled flag and removes the set', (
   const binding = { scope: 'all', enabled: true, root, boundAt: 1 } as const;
   updateDirectiveBinding(root, 'focus', () => binding);
 
-  expect(handleRuntime({ ...request, directives_op: 'off' })).toMatchObject({
+  expect(
+    handleRuntime({ ...request, directives_op: 'off' }, now),
+  ).toMatchObject({
     binding: { ...binding, enabled: false },
   });
-  expect(handleRuntime({ ...request, directives_op: 'status' })).toMatchObject({
+  expect(
+    handleRuntime({ ...request, directives_op: 'status' }, now),
+  ).toMatchObject({
     binding: { ...binding, enabled: false },
   });
-  expect(handleRuntime({ ...request, directives_op: 'on' })).toMatchObject({
-    binding,
-  });
-  expect(handleRuntime({ ...request, directives_op: 'remove' })).toMatchObject({
+  expect(handleRuntime({ ...request, directives_op: 'on' }, now)).toMatchObject(
+    {
+      binding,
+    },
+  );
+  expect(
+    handleRuntime({ ...request, directives_op: 'remove' }, now),
+  ).toMatchObject({
     status: 'ok',
     op: 'remove',
   });
@@ -94,10 +108,10 @@ it('reports the stored binding, toggles its enabled flag and removes the set', (
 it('rejects bind when the set name is invalid, missing or empty', () => {
   for (const set of ['../focus', 'missing'])
     expect(() =>
-      handleRuntime({ ...request, directives_op: 'bind', set }),
+      handleRuntime({ ...request, directives_op: 'bind', set }, now),
     ).toThrow();
   rmSync(join(directory, 'focus.md'));
-  expect(() => handleRuntime({ ...request, directives_op: 'bind' })).toThrow(
-    /empty/i,
-  );
+  expect(() =>
+    handleRuntime({ ...request, directives_op: 'bind' }, now),
+  ).toThrow(/empty/i);
 });

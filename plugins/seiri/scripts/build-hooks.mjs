@@ -50,9 +50,10 @@ const hookEntries = [
     entry: 'setup',
     // One session-start read of rule status, dial and configLoader chains,
     // plus the fixed election/chain/posture render — strict's firm wording
-    // is the longest — and, after compaction, the active progress line and local directive injection.
+    // is the longest — and, after compaction, the active progress line and local directive injection,
+    // including structured directive rendering.
     // Compaction uses the shared filesystem lock and atomic write.
-    maxBytes: 28 * KILO_BYTE,
+    maxBytes: 30 * KILO_BYTE,
   },
   {
     name: 'user-prompt-submit',

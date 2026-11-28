@@ -14,6 +14,9 @@ import { renderDirectives } from '../utils/renderDirectives.js';
 import { selectDirectiveSets } from '../utils/selectDirectiveSets.js';
 import { summarizeDirectiveSet } from '../utils/summarizeDirectiveSet.js';
 
+const expectedPointerRead =
+  /^Read index\.md in each directory before continuing; where there is none, reread every file except binding\.json\.$/;
+
 let root: string;
 let directory: string;
 
@@ -121,7 +124,7 @@ it('renders both sets inline at the combined boundary and both as pointers below
     directory,
     '[seiri] Directives second',
     second,
-    expect.stringMatching(/read.*except binding\.json before continuing/i),
+    expect.stringMatching(expectedPointerRead),
   ]);
   expect(pointer).not.toMatch(/first 한 body|second body/);
   expect(
@@ -144,5 +147,5 @@ it('keeps pointer output within the Codex budget even when a set has many files'
   expect(Buffer.byteLength(lines.join('\n'))).toBeLessThanOrEqual(budget);
   expect(lines).toContain(directory);
   expect(lines.some((line) => files.includes(line))).toBe(false);
-  expect(lines.at(-1)).toMatch(/read.*except binding\.json before continuing/i);
+  expect(lines.at(-1)).toMatch(expectedPointerRead);
 });

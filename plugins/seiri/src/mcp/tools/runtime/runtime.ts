@@ -1,6 +1,8 @@
 import type {
+  DirectiveLog,
   DirectiveOperation,
   DirectiveScope,
+  DirectivesResult,
 } from '../../../types/directives.js';
 import type {
   WorkflowReply,
@@ -9,7 +11,6 @@ import type {
 
 import type { DialOp, DialResult } from './handlers/applyDial.js';
 import { applyDial } from './handlers/applyDial.js';
-import type { DirectivesResult } from './handlers/applyDirectives.js';
 import { applyDirectives } from './handlers/applyDirectives.js';
 import { handleWorkflow } from './handlers/handleWorkflow.js';
 
@@ -38,6 +39,10 @@ export interface RuntimeInput {
   set?: string;
   /** Audience for bind, defaulting to this session. */
   scope?: DirectiveScope;
+  /** Record that `append` extends. */
+  log?: DirectiveLog;
+  /** Entry content for `append`; nonblank, at most 1,000 characters. */
+  text?: string;
 }
 
 /** Result of participation, dial control, or a directive operation. */
@@ -46,10 +51,11 @@ export type RuntimeOutput = WorkflowReply | DialResult | DirectivesResult;
 /**
  * Dispatch one runtime tool call by its explicit action.
  * @param input Raw MCP tool call arguments.
+ * @param now Clock value in epoch milliseconds, stamped on appended directive entries.
  * @returns The dial's read or write result for `action: "dial"`; the result of {@link applyDirectives} for directive operations; otherwise the participation reply from {@link handleWorkflow}.
  * @throws When `dial_op: "set"` is missing a valid `intervention`, when a participation request fails validation, or when `project_root` is not absolute.
  */
-export function handleRuntime(input: RuntimeInput): RuntimeOutput {
+export function handleRuntime(input: RuntimeInput, now: number): RuntimeOutput {
   if (input.action === 'dial')
     return applyDial(
       input.project_root,
@@ -62,6 +68,9 @@ export function handleRuntime(input: RuntimeInput): RuntimeOutput {
       input.directives_op,
       input.set,
       input.scope,
+      input.log,
+      input.text,
+      now,
     );
   return handleWorkflow(input);
 }
