@@ -75,9 +75,13 @@ it.each([
   ).toEqual([unlisted('notes.md')]);
 });
 
-it('takes a table cell with an escaped pipe as naming the file with the pipe', () => {
-  expect(seed('| Plan | `plan\\|notes.md` |', ['plan|notes.md'])).toEqual([]);
-});
+// Windows forbids `|` in a file name, so the fixture cannot exist there.
+it.skipIf(process.platform === 'win32')(
+  'takes a table cell with an escaped pipe as naming the file with the pipe',
+  () => {
+    expect(seed('| Plan | `plan\\|notes.md` |', ['plan|notes.md'])).toEqual([]);
+  },
+);
 
 it('takes a span inside a fenced block as naming nothing', () => {
   expect(seed('```md\n`notes.md` and `gone.md`\n```\n', ['notes.md'])).toEqual([
