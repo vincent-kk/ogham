@@ -18,14 +18,14 @@ Write into a set only what this workflow needs. Knowledge that must outlive the 
 
 | File               | Read                                                          | Write                                            | Limit        |
 | ------------------ | ------------------------------------------------------------- | ------------------------------------------------ | ------------ |
-| `index.md`         | injected whole after every compaction                         | rewrite                                          | 4,000 bytes  |
+| `index.md`         | injected whole after a compaction, when it fits               | rewrite                                          | 4,000 bytes  |
 | `principles.md`    | after every compaction                                        | rewrite                                          | 10,000 bytes |
 | `dashboard.md`     | after every compaction                                        | rewrite                                          | 3,000 bytes  |
 | `notepad.jsonl`    | after every compaction while it has lines; at a retrospective | append, then cleared when the retrospective ends | none         |
 | `orchestration.md` | before dividing work or starting a stage                      | rewrite                                          | none         |
 | `history.jsonl`    | only when a past decision or event is in question             | append                                           | none         |
 
-- **`index.md`** is the entry: the goal, the few principles that decide most questions, the document table, and the maintenance rules. Nothing else. It is the only document injected after a compaction; the others are read.
+- **`index.md`** is the entry: the goal, the few principles that decide most questions, the document table, and the maintenance rules. Nothing else. It is the only document injected after a compaction, and only while it and the other bound sets fit the budget; the others are read.
 - **`principles.md`** holds what the agent judges by: the principles and prohibitions that did not fit the entry, and decisions that are not to be reopened. Every sentence is a rule in force.
 - **`orchestration.md`** holds how the work is divided and run: stages, who does what, which model and effort suit which kind of decision. It has no prescribed format.
 - **`dashboard.md`** holds the state of the work: in progress, next, blocked. State only, never rules.
@@ -34,13 +34,15 @@ Write into a set only what this workflow needs. Knowledge that must outlive the 
 
 A set holds only the documents it uses; `index.md` alone is a complete structured set. A set without `index.md` is valid too: it is unstructured, every file is injected or reread whole, and it suits a handful of short instructions.
 
-`rewrite` means the document is read whole and kept consistent, never appended to. `append` means lines are only ever added. For `notepad.jsonl` and `history.jsonl` the runtime's append operation writes the line as `{"at": "<UTC time>", "text": "<entry>"}` and stamps the time; it takes those two files only, and an entry of at most 1,000 characters.
+`rewrite` means the document is read whole and kept consistent, never appended to. `append` means lines are only ever added. For `notepad.jsonl` and `history.jsonl` the runtime's append operation writes the line as `{"at": "<UTC time>", "text": "<entry>"}` and stamps the time; it takes those two files only, and a nonblank entry of at most 1,000 characters (UTF-16 code units, so an emoji counts as two).
 
 ## Extension documents
 
 Add a document when a kind of content has no home in the table above, for example checklists of experience per stage. Name it for what it holds, and add a row to the `Documents` table in `index.md`: the file, when to read it, and whether it is `rewrite` or `append`. An extension document marked `append` is appended to with file tools, since the runtime appends only to the notepad and the history.
 
-The entry names a file by writing its exact path in a code span, as the table does; a mention in running text does not count. A file of the set that the entry does not name is reported as `unlisted`. A Markdown file the entry names that does not exist is reported as `missing`, except `principles.md`, `dashboard.md` and `orchestration.md`, which a set creates when it first needs them, and paths that lead outside the set.
+The entry names a file by writing its exact path in a code span, as the table does; a mention in running text does not count. A file of the set that the entry does not name is reported as `unlisted`. A Markdown file the entry names that does not exist is reported as `missing`, except `principles.md`, `dashboard.md` and `orchestration.md`, which a set creates when it first needs them, and paths that lead outside the set. `index.md` itself needs no row. Text inside a fenced code block names nothing.
+
+Two more violations exist: `invalid_line` for a line of `notepad.jsonl` or `history.jsonl` that is not a JSON object, and `unreadable` for `index.md` or one of those two records when the runtime is refused access to it.
 
 ## Limits
 
