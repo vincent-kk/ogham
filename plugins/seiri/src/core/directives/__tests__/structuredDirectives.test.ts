@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs';
+import { chmodSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 
 import {
@@ -91,3 +91,26 @@ it('renders mixed sets inline within the budget and as pointers when any entry i
   expect(pointer).toContain(plain.directory);
   expect(pointer).toContain('index.md exceeds 4000 bytes; split it.');
 });
+
+it.skipIf(process.platform === 'win32' || process.getuid?.() === 0)(
+  'renders a set whose entry document cannot be read as a pointer and keeps the other sets',
+  () => {
+    const broken = seedSet('broken', { 'index.md': 'secret body' });
+    const healthy = seedSet('flow', { 'index.md': 'entry body' });
+    chmodSync(portableJoin(broken.directory, 'index.md'), 0o000);
+    const lines = renderDirectives(
+      root,
+      [broken.summary, healthy.summary],
+      Infinity,
+    );
+    expect(lines).toEqual([
+      '[seiri] Directives broken',
+      broken.directory,
+      'index.md could not be read.',
+      '[seiri] Directives flow',
+      healthy.directory,
+      '--- index.md ---',
+      'entry body',
+    ]);
+  },
+);

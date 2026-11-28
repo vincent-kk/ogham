@@ -13,7 +13,7 @@ import { listDirectiveFiles } from './listDirectiveFiles.js';
  * Check a directive set against the structured-set contract.
  * @param root Real checkout root.
  * @param set Kebab-case name of the set to inspect.
- * @returns The inspection, or undefined for a missing set. A set without an entry document is unstructured and reports no violations; a file refused to the reader is an unreadable violation, and an unreadable entry document is the only violation of its set.
+ * @returns The inspection, or undefined for a missing set. A set without an entry document is unstructured and reports no violations; a file refused to the reader is an unreadable violation, and an unreadable entry document adds its unreadable violation to the size violations and skips the checks that need its text.
  * @throws For read failures other than a missing file or denied access.
  */
 export function inspectDirectiveSet(
@@ -25,6 +25,7 @@ export function inspectDirectiveSet(
   const files = listDirectiveFiles(directory);
   const names = files.map(({ name }) => name);
   const notepadLines = countNotepadLines(root, set);
+  const limits = findLimitViolations(files);
   const entry = names.includes(DIRECTIVE_INDEX_FILE)
     ? readSetFile(directory, DIRECTIVE_INDEX_FILE)
     : { body: null };
@@ -32,6 +33,7 @@ export function inspectDirectiveSet(
     return {
       structured: true,
       violations: [
+        ...limits,
         {
           file: DIRECTIVE_INDEX_FILE,
           problem: 'unreadable',
@@ -45,7 +47,7 @@ export function inspectDirectiveSet(
   return {
     structured: true,
     violations: [
-      ...findLimitViolations(files),
+      ...limits,
       ...findIndexViolations(names, entry.body),
       ...findInvalidLogLines(directory, names),
     ],

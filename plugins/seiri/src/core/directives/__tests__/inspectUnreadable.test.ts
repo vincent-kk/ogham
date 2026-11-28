@@ -68,5 +68,21 @@ describe.skipIf(process.platform === 'win32' || process.getuid?.() === 0)(
         notepadLines: 1,
       });
     });
+
+    it('keeps the size violation of an unreadable entry document', () => {
+      writeFileAtomicallySync(
+        portableJoin(directory, 'index.md'),
+        'x'.repeat(4001),
+      );
+      chmodSync(portableJoin(directory, 'index.md'), 0o000);
+      expect(inspectDirectiveSet(root, 'flow')?.violations).toEqual([
+        {
+          file: 'index.md',
+          problem: 'over_limit',
+          detail: '4001 bytes; limit 4000',
+        },
+        { file: 'index.md', problem: 'unreadable', detail: 'EACCES' },
+      ]);
+    });
   },
 );

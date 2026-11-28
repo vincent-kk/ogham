@@ -91,3 +91,48 @@ describe.skipIf(process.platform === 'win32' || process.getuid?.() === 0)(
     });
   },
 );
+
+describe('a set whose notepad path is a directory', () => {
+  beforeEach(() => mkdirSync(join(directory, 'notepad.jsonl')));
+
+  it('reports status and bind without throwing', () => {
+    expect(
+      handleRuntime({ ...request, directives_op: 'status' }, now),
+    ).toMatchObject({ status: 'ok', notepadLines: 0 });
+    expect(
+      handleRuntime({ ...request, directives_op: 'bind' }, now),
+    ).toMatchObject({ status: 'accepted', notepadLines: 0 });
+  });
+
+  it('appends one history line without throwing', () => {
+    expect(
+      handleRuntime(
+        { ...request, directives_op: 'append', log: 'history', text: 'h' },
+        now,
+      ),
+    ).toMatchObject({ status: 'ok', op: 'append' });
+    const lines = readFileSync(join(directory, 'history.jsonl'), 'utf8')
+      .split('\n')
+      .filter((line) => line.trim() !== '');
+    expect(lines).toHaveLength(2);
+  });
+});
+
+describe.skipIf(process.platform === 'win32' || process.getuid?.() === 0)(
+  'an unreadable entry document over its byte limit',
+  () => {
+    it('reports both violations on bind and estimates the pointer mode', () => {
+      writeFileSync(join(directory, 'index.md'), 'x'.repeat(4001));
+      chmodSync(join(directory, 'index.md'), 0o000);
+      expect(
+        handleRuntime({ ...request, directives_op: 'bind' }, now),
+      ).toMatchObject({
+        estimatedMode: 'pointer',
+        violations: [
+          { file: 'index.md', problem: 'over_limit' },
+          { file: 'index.md', problem: 'unreadable', detail: 'EACCES' },
+        ],
+      });
+    });
+  },
+);

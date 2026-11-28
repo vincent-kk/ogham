@@ -1,4 +1,10 @@
-import { chmodSync, mkdtempSync, rmSync } from 'node:fs';
+import {
+  chmodSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  symlinkSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 
 import {
@@ -39,6 +45,21 @@ it.skipIf(process.platform === 'win32' || process.getuid?.() === 0)(
     const notepad = portableJoin(directory, 'notepad.jsonl');
     writeFileAtomicallySync(notepad, '{"a":1}\n');
     chmodSync(notepad, 0o000);
+    expect(countNotepadLines(root, 'flow')).toBe(0);
+  },
+);
+
+it('returns zero when the notepad path is a directory', () => {
+  mkdirSync(portableJoin(directory, 'notepad.jsonl'));
+  expect(countNotepadLines(root, 'flow')).toBe(0);
+});
+
+it.skipIf(process.platform === 'win32')(
+  'returns zero when the notepad is a link to a file outside the set',
+  () => {
+    const outside = portableJoin(root, 'outside.jsonl');
+    writeFileAtomicallySync(outside, '{"a":1}\n{"b":2}\n');
+    symlinkSync(outside, portableJoin(directory, 'notepad.jsonl'));
     expect(countNotepadLines(root, 'flow')).toBe(0);
   },
 );

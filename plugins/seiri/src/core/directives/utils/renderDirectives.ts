@@ -18,6 +18,7 @@ import { listDirectiveFiles } from './listDirectiveFiles.js';
  * @param measure Host length metric, using characters when omitted.
  * @returns Inline bodies when they fit and no entry document is over its limit, or set directory paths and a read instruction.
  * A structured set (one with an entry document) inlines only that document and names the required documents to read.
+ * A set with a document that cannot be read is rendered as a pointer with a line naming that file, in both modes, and the other sets render normally.
  */
 export function renderDirectives(
   root: string,
@@ -39,15 +40,19 @@ export function renderDirectives(
       : files.filter((name) => sizes.has(name));
     if (!present.length) continue;
     const heading = `[seiri] Directives ${set}`;
+    const bodies = present.map((name) => readBody(directory, name));
+    const failed = present[bodies.indexOf(null)];
+    if (failed) {
+      const note = `${failed} could not be read.`;
+      inline.push(heading, directory, note);
+      pointer.push(heading, directory, note);
+      continue;
+    }
     inline.push(heading, ...(structured ? [directory] : []));
     pointer.push(heading, directory);
-    for (const name of present) {
-      const body = readUtf8FileIfExistsSync(
-        portableJoin(directory, `./${name}`),
-      );
-      if (body === null) return [];
-      inline.push(`--- ${name} ---`, body);
-    }
+    present.forEach((name, index) =>
+      inline.push(`--- ${name} ---`, bodies[index] ?? ''),
+    );
     if (!structured) continue;
     const reads = DIRECTIVE_REQUIRED_READS.filter((name) => sizes.get(name));
     if (reads.length)
@@ -66,4 +71,13 @@ export function renderDirectives(
     ...pointer,
     `Read ${DIRECTIVE_INDEX_FILE} in each directory before continuing; where there is none, reread every file except binding.json.`,
   ];
+}
+
+/** Read one document of a set, returning null when it is absent or its read fails. */
+function readBody(directory: string, name: string): string | null {
+  try {
+    return readUtf8FileIfExistsSync(portableJoin(directory, `./${name}`));
+  } catch {
+    return null;
+  }
 }
