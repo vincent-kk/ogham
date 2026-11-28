@@ -47,12 +47,16 @@ export const AUTO_CONDITIONAL_ASK_SKILLS = [
  * User-started skills kept in the model catalog so an explicit mention can
  * resolve to the skill. They do not join the standard workflow chain: the
  * user's request starts them, and they may ask freely once loaded.
+ * `persist-directives` is started by the user's request for a directive
+ * set; afterwards that set's own maintenance rules are the standing instruction
+ * under which the model reloads the skill to maintain it.
  */
 export const VISIBLE_USER_STARTED_SKILLS = [
   'architect',
   'clarify-request',
   'explain',
   'finish',
+  'persist-directives',
   'trace-change',
 ] as const;
 
@@ -61,11 +65,7 @@ export const VISIBLE_USER_STARTED_SKILLS = [
  * `disable-model-invocation: true` because running them requires an explicit
  * slash-command decision.
  */
-export const HIDDEN_USER_ONLY_SKILLS = [
-  'persist-directives',
-  'scaffold-pr',
-  'setup',
-] as const;
+export const HIDDEN_USER_ONLY_SKILLS = ['scaffold-pr', 'setup'] as const;
 
 /** Every skill invocable from the workflow catalog. */
 export const WORKFLOW_INVOCABLE_SKILLS = [

@@ -64,7 +64,7 @@ describe('workflow skill routing contract', () => {
     }
   });
 
-  /** User-only skills that call runtime solely to manage directives. */
+  /** Skills that call runtime solely to manage directives. */
   const directiveSkills = ['persist-directives'];
 
   it('limits directive skills to the runtime directives action', () => {
