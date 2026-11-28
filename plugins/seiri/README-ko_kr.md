@@ -51,25 +51,25 @@ MCP 서버 시작 시 14일 넘게 수정되지 않은 `sessions`·`tasks` 항�
 
 직접 호출하는 것:
 
-| 스킬                     | 용도                                             |
-| ------------------------ | ------------------------------------------------ |
-| `/seiri:setup`           | 이 저장소가 쓸 규칙 선택                         |
-| `/seiri:persist-directives` | 등록한 로컬 지침을 압축 뒤 다시 적용 |
-| `/seiri:architect`       | 요구사항·시스템 관점·결정을 지속 가능한 기록으로 |
-| `/seiri:clarify-request` | 요청을 실행 가능한 검증 범위로 명확화            |
-| `/seiri:scaffold-pr`     | 작업 시작 전에 빈 Draft PR 열기                  |
-| `/seiri:finish`          | 끝난 작업을 통합할지 결정                        |
-| `/seiri:explain`         | 개념과 관계 중심으로 코드 동작을 설명            |
-| `/seiri:trace-change`    | 코드 변경을 독자를 위한 계층으로 설명            |
+| 스킬                        | 용도                                                |
+| --------------------------- | --------------------------------------------------- |
+| `/seiri:setup`              | 이 저장소가 쓸 규칙 선택                            |
+| `/seiri:persist-directives` | 긴 워크플로의 작업 지침을 압축 너머로 유지하고 관리 |
+| `/seiri:architect`          | 요구사항·시스템 관점·결정을 지속 가능한 기록으로    |
+| `/seiri:clarify-request`    | 요청을 실행 가능한 검증 범위로 명확화               |
+| `/seiri:scaffold-pr`        | 작업 시작 전에 빈 Draft PR 열기                     |
+| `/seiri:finish`             | 끝난 작업을 통합할지 결정                           |
+| `/seiri:explain`            | 개념과 관계 중심으로 코드 동작을 설명               |
+| `/seiri:trace-change`       | 코드 변경을 독자를 위한 계층으로 설명               |
 
 적용 범위에 맞으면 호스트가 선택할 수 있는 것 — 고정 체인은 강제하지 않습니다:
 
 | 스킬                     | 용도                                  |
 | ------------------------ | ------------------------------------- |
-| `/seiri:write-plan`      | 지속적 계획이 필요한 큰 변경을 계획    |
+| `/seiri:write-plan`      | 지속적 계획이 필요한 큰 변경을 계획   |
 | `/seiri:review-plan`     | 실행 전에 계획의 주장을 검증          |
 | `/seiri:execute`         | 작성된 계획을 완료까지 수행           |
-| `/seiri:implement`       | 동작·리팩터링·문서별 검증으로 구현           |
+| `/seiri:implement`       | 동작·리팩터링·문서별 검증으로 구현    |
 | `/seiri:trace-structure` | 판단 전에 연결관계와 데이터 흐름 추적 |
 | `/seiri:trace-cause`     | 실패를 드러난 곳이 아니라 시작점까지  |
 | `/seiri:verify`          | 완료를 선언하기 전에 주장 검증        |
