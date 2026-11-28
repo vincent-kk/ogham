@@ -6,7 +6,7 @@
 - off/advisory는 참여 액션에서 disabled, 나머지는 accepted를 반환한다. 파일은 쓰지 않으며 accepted만으로 참여는 활성화되지 않는다. `dial`은 유효 다이얼 값과 무관하게 항상 동작한다.
 - 참여 수명주기 동작의 실제 효과는 native Pre/Post 짝의 검증 뒤 훅이 적용한다. 모델이 actor/turn/call ID를 전달할 수 없다.
 - `dial`(`dial_op`: get/set/clear, `intervention`)은 훅 짝 없이 gitignore된 런타임 밸브 파일(`RUNTIME_FILE`)을 즉시 조회·설정·해제한다. 밸브 설정은 비추적 상태가 커밋에 섞이지 않도록 설정 디렉터리의 ignore 파일을 생성하거나 seiri 소유 파일의 누락 항목을 보충할 수 있다. 사용자 소유 ignore 파일과 저장소 루트 ignore 파일은 바꾸지 않으며 참여 액션은 입력만 검증한다.
-- 입력 스키마는 평면 zod shape이다: `action`은 `step`·`start`·`resume`·`pause`·`finish`·`dial`·`directives` 일곱 값의 enum, `project_root`는 필수, `task`·`step`·`intent`·`dial_op`·`intervention` 및 지침의 `directives_op`·`set`·`scope`는 선택 필드다. 액션별 필수 필드는 핸들러가 강제한다.
+- 입력 스키마는 평면 zod shape이다: `action`은 `step`·`start`·`resume`·`pause`·`finish`·`dial`·`directives` 일곱 값의 enum, `project_root`는 필수, `task`·`step`·`intent`·`dial_op`·`intervention` 및 지침의 `directives_op`·`set`·`scope`·`log`·`text`는 선택 필드다. 액션별 필수 필드는 핸들러가 강제한다.
 
 ## API Contracts
 
@@ -15,7 +15,9 @@
 - `notice`는 참여 액션의 accepted 응답마다 붙는 스킬 호출 안내다. MCP 서버는 호출 주체가 스킬 안에 있는지 알 수 없으므로 매번 같은 조건문을 돌려준다: `step` 요청은 `seiri:<step>` 스킬을 이름으로 지목하고, 나머지 액션은 현재 단계의 seiri 스킬을 가리킨다. 이번 턴에 그 스킬을 호출하지 않았다면 다른 도구 이전에 Skill 도구로 호출하라는 문장이다. 훅의 ACK 매칭(`workflowAccepted`)은 action/task/step/intent만 비교하므로 `notice`에 영향받지 않는다.
 - 도구 설명문과 입력 스키마 설명은 최소로 유지한다: 참여 액션은 그 단계를 소유한 seiri 스킬을 호출한 뒤 그 스킬 안에서만 부른다는 진입 규칙, 필드별 필수 조건, `dial`과 `directives`의 역할만 적는다. 진입 스텝·전환·바인딩 규칙은 각 소유 스킬 본문과 `skills/execute/references/workflow-lifecycle.md`가 정본이며 설명문에 중복하지 않는다. 훅은 스킬 호출 여부와 무관하게 유효한 요청을 수락하므로, 상세 설명으로 스킬 호출 없는 runtime 진입의 지름길을 안내하지 않는다.
 - `applyDial`는 `dial` 액션을 처리해 `{ action: 'dial', op, changed, dial, posture }`를 반환한다. `dial_op: set`은 유효한 `intervention`을 요구한다.
-- `directives`의 `bind`는 유효하고 비어 있지 않은 묶음을 확인하고 연결을 수락한다. 실제 연결은 호출 세션을 식별하는 PostToolUse가 커밋하므로 ACK가 있어야 한다. 본문 바이트에 따른 렌더링 방식은 추정값이며, 실제 방식은 압축 시 기존 출력과 모든 묶음을 합쳐 정한다. off/advisory의 bind와 status에는 낮은 다이얼을 알린다. on·off·status·remove는 MCP에서 직접 적용하고 remove는 묶음도 삭제한다.
+- `directives`의 `bind`는 유효하고 비어 있지 않은 묶음을 확인하고 연결을 수락한다. 실제 연결은 호출 세션을 식별하는 PostToolUse가 커밋하므로 ACK가 있어야 한다. 본문 바이트에 따른 렌더링 방식은 추정값이며, 실제 방식은 압축 시 기존 출력과 모든 묶음을 합쳐 정한다. 구조화된 묶음의 추정은 진입 문서의 크기만 본다. off/advisory의 bind와 status에는 낮은 다이얼을 알린다. on·off·status·remove는 MCP에서 직접 적용하고 remove는 묶음도 삭제한다.
+- `bind`와 `status`의 응답은 묶음이 구조화되었는지, 구조 위반 목록, 메모장에 남은 줄 수를 함께 담는다. 위반은 요청을 거부하는 사유가 아니다. 에이전트가 회고 끝에 이 목록을 보고 문서를 고친다.
+- `directives`의 `append`는 `log`가 가리키는 메모장이나 이력에 `text` 한 줄을 덧붙인다. 입력 검증은 이 핸들러가 맡는다: `log`가 두 값 중 하나가 아니거나, 앞뒤 공백을 뺀 `text`가 비었거나, `text`가 1,000자를 넘으면 오류다. 메모는 짧게 적는 기록이므로 길이를 제한한다. 시각은 모델 인자가 아니라 서버가 호출 시점의 시계 값으로 넘긴다. 응답은 덧붙인 뒤의 묶음 요약과 메모장 줄 수다. 연결 여부나 다이얼과 무관하게 동작한다.
 
 ## Acceptance Criteria
 

@@ -39,11 +39,11 @@ export function loadForm(values: Record<string, string>, tab = "cloud") {
       return key ? fields[key] : null;
     },
     querySelectorAll(selector: string) {
-      if (selector === "#cloud-sites-container .site-entry") {
+      if (selector === "#cloud-sites-container .site-entry")
         return Object.keys(values)
           .filter((key) => /^cloud\.sites\.\d+\.base_url$/.test(key))
           .map((key) => ({ dataset: { siteIndex: key.split(".")[2] } }));
-      }
+
       return [];
     },
   };
@@ -65,9 +65,9 @@ export function loadForm(values: Record<string, string>, tab = "cloud") {
         `state.tab = ${JSON.stringify(tab)}; return { collectFormData, validateForm }; })();`,
       );
       api = runInNewContext(source, context);
-    } else {
+    } else
       runInNewContext(source, context);
-    }
+
   }
   if (!api) throw new Error("settings app was not loaded");
   return { api, errors };

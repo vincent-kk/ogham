@@ -1,10 +1,9 @@
 ---
 name: persist-directives
 user-invocable: true
-disable-model-invocation: true
-description: 'Register local instructions to restore after context compaction, reconnect a named set, or manage a registered set.'
+description: 'Keep working directives for a long workflow across context compactions: create or reconnect a directive set, maintain its documents, or manage its binding.'
 argument-hint: '[set | on SET | off SET | status SET | remove SET | instructions]'
-version: '0.1.0'
+version: '0.2.0'
 complexity: simple
 plugin: seiri
 ---
@@ -13,16 +12,30 @@ plugin: seiri
 
 <!-- ogham-mcp-tools:seiri -->
 
-Use the absolute repository root. Store each set under `.seiri/directives/<set>/`, using a kebab-case name that matches `^[a-z0-9]+(?:-[a-z0-9]+)*$`. Keep the directives in one or more UTF-8 text files. The runtime manages the binding record and lock.
+A directive set is the working knowledge one agent carries through a long workflow, across every compaction of its context. It belongs to that workflow: what must outlive it goes to the repository's own documents.
+
+Use the absolute repository root. Store each set under `.seiri/directives/<set>/`, using a kebab-case name that matches `^[a-z0-9]+(?:-[a-z0-9]+)*$`. The runtime manages the binding record and lock; the other files are yours and the user's to write.
+
+## Who starts what
+
+- Only on the user's request: create a set, restructure a set that has no `index.md`, `remove` a set, bind with scope `all`.
+- On your own, for a bound set that has an `index.md`: hold retrospectives, distill, split a document that outgrew its limit, add an extension document, fix reported violations. The set's maintenance rules are the standing instruction.
 
 ## Connect a set
 
-- If the argument is one existing set name, read its directive files into this session, skipping binding records, lock directories, temporary files, and symbolic links. Bind the set again.
-- Otherwise, write the user's instructions into a named set. When the user has supplied no directive text, draft it from the conversation and confirm it with the user before writing. Use `session` unless the user requests `all`, which covers every main session in this checkout.
+- If the argument is one existing set name, read its `index.md` and the documents that entry marks as read after compaction. In a set without `index.md`, read every directive file, skipping binding records, lock directories, temporary files, and symbolic links. Bind the set again.
+- Otherwise create the set: read [structure](references/structure.md) and write its documents from the user's instructions. When the user has supplied no directive text, draft it from the conversation and confirm it with the user before writing. Use `session` unless the user requests `all`, which covers every main session in this checkout.
 - Bind with `mcp__plugin_seiri_tools__runtime({ action: "directives", directives_op: "bind", project_root, set, scope })`. Repeat any ignore warning so the user knows whether the set could be committed.
 - On `dial_low`, tell the user the files are saved and the current dial prevents binding and injection after compaction. Ask them to raise the dial to at least `standard`, then rerun this skill with the set name. Leave the dial unchanged.
 - On `accepted`, check for the native `[seiri] Directives <set> bound (scope <scope>, <n> files)` acknowledgment. If there is no acknowledgment, report that the set did not bind.
-- If `estimatedMode` is `pointer`, explain that the set is estimated to exceed the context limit. After compaction the hook will provide the set directory path and ask the session to reread its files except `binding.json`.
+- After compaction the hook injects `index.md` whole and names the documents to read next. When an entry is over its limit, or the bound sets together exceed the budget, it gives each set directory instead: read `index.md` there first, or every directive file where there is none. `estimatedMode` (`inline` or `pointer`) is only an estimate of which will happen.
+
+## Maintain a set
+
+Read [maintenance](references/maintenance.md) before a retrospective or any edit to a set's documents, and [structure](references/structure.md) before adding or splitting a document.
+
+- Append to the notepad or the history with `directives_op: "append"`, adding `log` (`notepad` or `history`) and `text` to the same runtime call. The runtime stamps the time; never append to those files by hand.
+- End every retrospective with `directives_op: "status"`: fix each entry in `violations`, and empty the notepad once its `notepadLines` are distilled.
 
 ## Manage a set
 

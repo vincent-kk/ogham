@@ -31,11 +31,11 @@ const scenario = JSON.parse(
 let root: string;
 beforeEach(async () => {
   root = await mkdtemp(join(tmpdir(), 'insight-consolidation-'));
-  for (const doc of scenario.documents) {
+  for (const doc of scenario.documents)
     expect(
       (await handleMaencofCreate(root, { ...doc, content: doc.body })).success,
     ).toBe(true);
-  }
+
 });
 afterEach(async () => {
   await rm(root, { recursive: true, force: true });

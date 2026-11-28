@@ -122,14 +122,14 @@ async function paths() {
 
 it('repairs more than 200 scope-external references with stale graph and preserves targets', async () => {
   expect((await handleKgBuild(root, {})).success).toBe(true);
-  for (let i = 0; i < scenario.repeatedReferences; i++) {
+  for (let i = 0; i < scenario.repeatedReferences; i++)
     await handleMaencofCreate(root, {
       layer: 4,
       tags: ['review'],
       filename: `ref-${i}`,
       content: '[Locks](../02_Derived/pg-locks.md#Scope)',
     });
-  }
+
   const all = await paths();
   expect(all).toHaveLength(
     scenario.documents.length + scenario.repeatedReferences,
@@ -137,7 +137,7 @@ it('repairs more than 200 scope-external references with stale graph and preserv
   const before = await handleMaencofRead(root, {
     path: '02_Derived/pg-locks.md',
   });
-  for (const old of Object.keys(scenario.reviewedMoves)) {
+  for (const old of Object.keys(scenario.reviewedMoves))
     expect(
       (
         await handleMaencofMove(root, {
@@ -147,7 +147,7 @@ it('repairs more than 200 scope-external references with stale graph and preserv
         })
       ).path,
     ).toBe(scenario.reviewedMoves[old]);
-  }
+
   for (const source of all.filter((path) =>
     path.startsWith('04_Action/ref-'),
   )) {

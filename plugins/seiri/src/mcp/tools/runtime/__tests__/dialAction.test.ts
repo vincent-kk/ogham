@@ -30,11 +30,14 @@ describe('runtime dial action', () => {
   }
 
   function call(project_root: string, extra: Record<string, unknown> = {}) {
-    const result = handleRuntime({
-      action: 'dial',
-      project_root,
-      ...extra,
-    });
+    const result = handleRuntime(
+      {
+        action: 'dial',
+        project_root,
+        ...extra,
+      },
+      0,
+    );
     if (!('action' in result) || result.action !== 'dial')
       throw new Error('expected a dial result');
     return result;

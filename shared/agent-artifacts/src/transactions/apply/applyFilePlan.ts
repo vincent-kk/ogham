@@ -26,7 +26,7 @@ export function applyFilePlan(plan: FilePlan): ApplyFilePlanResult {
 
       const applied: string[] = [];
       const backupPaths: string[] = [];
-      for (const [index, change] of plan.changes.entries()) {
+      for (const [index, change] of plan.changes.entries())
         try {
           applyChange(change, backupPaths);
           applied.push(change.targetPath);
@@ -44,7 +44,7 @@ export function applyFilePlan(plan: FilePlan): ApplyFilePlanResult {
             backupPaths,
           };
         }
-      }
+
       return { status: "applied" as const, applied };
     },
     plan.lockOptions,

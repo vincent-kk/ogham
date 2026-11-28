@@ -63,7 +63,7 @@ it.each(['claude', 'codex'])(
   },
 );
 it.each([
-  ['setup', 28],
+  ['setup', 30],
   ['post-tool-use', 28],
   ['user-prompt-submit', 16],
   ['pre-tool-use', 16],

@@ -51,30 +51,30 @@ The two divide by layer. [filid](../filid) owns enforceable structural boundarie
 
 Invoked by you:
 
-| Skill                    | Use                                                        |
-| ------------------------ | ---------------------------------------------------------- |
-| `/seiri:setup`           | Choose which rules this repository uses                    |
-| `/seiri:persist-directives` | Restore registered local instructions after compaction |
-| `/seiri:architect`       | Preserve durable requirements, system views, and decisions |
-| `/seiri:clarify-request` | Clarify a request into an actionable, testable scope       |
-| `/seiri:scaffold-pr`     | Open an empty Draft PR before work starts                  |
-| `/seiri:finish`          | Decide whether finished work integrates                    |
-| `/seiri:explain`         | Explain how the code behaves through its concepts          |
-| `/seiri:trace-change`    | Explain a code change for a reader, layer by layer         |
+| Skill                       | Use                                                                      |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `/seiri:setup`              | Choose which rules this repository uses                                  |
+| `/seiri:persist-directives` | Keep and maintain a long workflow's working directives across compaction |
+| `/seiri:architect`          | Preserve durable requirements, system views, and decisions               |
+| `/seiri:clarify-request`    | Clarify a request into an actionable, testable scope                     |
+| `/seiri:scaffold-pr`        | Open an empty Draft PR before work starts                                |
+| `/seiri:finish`             | Decide whether finished work integrates                                  |
+| `/seiri:explain`            | Explain how the code behaves through its concepts                        |
+| `/seiri:trace-change`       | Explain a code change for a reader, layer by layer                       |
 
 Available for host selection when their scope fits; no fixed chain is enforced:
 
-| Skill                    | Use                                          |
-| ------------------------ | -------------------------------------------- |
-| `/seiri:write-plan`      | Plan substantial changes that need durable coordination  |
-| `/seiri:review-plan`     | Prove a plan's claims before executing it    |
-| `/seiri:execute`         | Carry a written plan to done                 |
-| `/seiri:implement`       | Choose behavior, refactor, or artifact verification                     |
-| `/seiri:trace-structure` | Map connections and data flow before judging |
-| `/seiri:trace-cause`     | Trace a failure to where it started          |
-| `/seiri:verify`          | Check a completion claim before it is made   |
-| `/seiri:request-review`  | Hand work to review with a fixed scope       |
-| `/seiri:receive-review`  | Fold review feedback back into the code      |
+| Skill                    | Use                                                     |
+| ------------------------ | ------------------------------------------------------- |
+| `/seiri:write-plan`      | Plan substantial changes that need durable coordination |
+| `/seiri:review-plan`     | Prove a plan's claims before executing it               |
+| `/seiri:execute`         | Carry a written plan to done                            |
+| `/seiri:implement`       | Choose behavior, refactor, or artifact verification     |
+| `/seiri:trace-structure` | Map connections and data flow before judging            |
+| `/seiri:trace-cause`     | Trace a failure to where it started                     |
+| `/seiri:verify`          | Check a completion claim before it is made              |
+| `/seiri:request-review`  | Hand work to review with a fixed scope                  |
+| `/seiri:receive-review`  | Fold review feedback back into the code                 |
 
 ## Local development distribution
 

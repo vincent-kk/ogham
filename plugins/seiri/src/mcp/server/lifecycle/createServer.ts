@@ -6,6 +6,7 @@ import { ToolName } from '../../../constants/toolNames.js';
 import { WORKFLOW_SKILLS } from '../../../constants/workflowChain.js';
 import { VERSION } from '../../../version.js';
 import { handleGates } from '../../tools/gates/index.js';
+import type { RuntimeInput } from '../../tools/runtime/index.js';
 import { handleRuntime } from '../../tools/runtime/index.js';
 import { handleSettings } from '../../tools/settings/index.js';
 import { wrapHandler } from '../serialization/wrapHandler.js';
@@ -150,10 +151,10 @@ export function createServer(): McpServer {
           .nullish()
           .describe('Dial position for dial_op set.'),
         directives_op: z
-          .enum(['bind', 'on', 'off', 'status', 'remove'])
+          .enum(['bind', 'on', 'off', 'status', 'remove', 'append'])
           .optional()
           .describe(
-            'Required for directives. bind connects a set on native PostToolUse.',
+            'Required for directives. bind connects a set on native PostToolUse; append adds one line to a log.',
           ),
         set: z
           .string()
@@ -163,9 +164,17 @@ export function createServer(): McpServer {
           .enum(['session', 'all'])
           .optional()
           .describe('Audience for bind. Default: session.'),
+        log: z
+          .enum(['notepad', 'history'])
+          .optional()
+          .describe('Record to extend for append.'),
+        text: z
+          .string()
+          .optional()
+          .describe('Entry for append; nonblank, at most 1000 characters.'),
       },
     },
-    wrapHandler(handleRuntime),
+    wrapHandler((input: RuntimeInput) => handleRuntime(input, Date.now())),
   );
   return server;
 }

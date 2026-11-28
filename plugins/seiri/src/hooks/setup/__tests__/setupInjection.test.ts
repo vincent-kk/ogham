@@ -348,14 +348,14 @@ it('uses pointers when two sets together exceed the Codex byte limit', () => {
     input,
     'session',
     'first',
-    '한'.repeat(700),
+    '한'.repeat(1600),
     CODEX_WORKFLOW_ADAPTER,
   );
   const second = seedDirectives(
     input,
     'session',
     'second',
-    '글'.repeat(700),
+    '글'.repeat(1600),
     CODEX_WORKFLOW_ADAPTER,
   );
   const context =
@@ -365,7 +365,9 @@ it('uses pointers when two sets together exceed the Codex byte limit', () => {
   expect(context.split('\n')).toContain(portableDirname(second));
   expect(context).not.toContain(first);
   expect(context).not.toContain(second);
-  expect(context).toMatch(/read.*except binding\.json before continuing/i);
-  expect(Buffer.byteLength(context)).toBeLessThanOrEqual(4000);
+  expect(context).toMatch(
+    /Read index\.md in each directory before continuing; where there is none, reread every file except binding\.json\./,
+  );
+  expect(Buffer.byteLength(context)).toBeLessThanOrEqual(9000);
   expect(context).not.toMatch(/[한글]/);
 });
